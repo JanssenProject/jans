@@ -29,22 +29,10 @@ ENV FQDN="https://demoexample.jans.io" \
     RUN_DCR_TEST=false \
     TEST_USERS_PREFIX_STRING="test_user" \
     THREAD_COUNT=200 \
-    COUCHBASE_URL="" \
-    COUCHBASE_PW="" \
     USER_NUMBER_STARTING_POINT=0 \
     USER_NUMBER_ENDING_POINT=50000000 \
-    LOAD_USERS_TO_COUCHBASE=false \
-    LOAD_USERS_TO_LDAP=false \
-    LOAD_USERS_TO_SPANNER=false \
     LOAD_USERS_TO_RDBMS=false \
     USER_SPLIT_PARALLEL_THREADS=20 \
-    GOOGLE_APPLICATION_CREDENTIALS=""\
-    GOOGLE_PROJECT_ID=""\
-    GOOGLE_SPANNER_INSTANCE_ID=""\
-    GOOGLE_SPANNER_DATABASE_ID=""\
-    LDAP_URL="opendj:1636" \
-    LDAP_PW="" \
-    LDAP_DN="cn=directory manager" \
     # pgsql or mysql
     RDBMS_TYPE="mysql" \
     RDBMS_DB="jans" \
@@ -73,7 +61,7 @@ RUN mkdir -p /root/.bzt/jmeter-taurus \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/loadtesting-jmeter" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.6" \
+    org.opencontainers.image.version="0.0.0-nightly" \
     org.opencontainers.image.title="Janssen Jmeter tests" \
     org.opencontainers.image.description="Janssen Jmeter and user loader image"
 

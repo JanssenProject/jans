@@ -74,7 +74,7 @@ class ScimEventHandler(ScimType):
         print "%d entries returned of %d" % (results.getEntriesCount(), results.getTotalEntriesCount())
         for user in results.getEntries():
             print "Flushing addresses for user %s" % user.getUid() 
-            user.setAttribute("jansAddres", None)
+            user.setAttribute("jansAddress", None)
         
         return True
 

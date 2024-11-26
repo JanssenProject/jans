@@ -5,7 +5,7 @@ if [ -z "$1" ]; then
     yaml="jans-mysql-compose.yml"
 else
 	case "$1" in
-		mysql|postgres|couchbase|spanner)
+		mysql|postgres)
 			yaml="jans-${1}-compose.yml"
 			;;
 		*)
@@ -23,7 +23,7 @@ if [ -z "$INSTALLED_JANSSEN_NAME" ]; then
 fi
 
 if [ -z "$JANSSEN_VERSION" ]; then
-    JANSSEN_VERSION="1.1.6_dev"
+    JANSSEN_VERSION="0.0.0-nightly"
 fi
 
 if [ -z "$JANSSEN_SERVICE_NAME" ]; then

@@ -17,7 +17,7 @@ userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
 dn: inum=XXXX.AAAA-2222,ou=people,o=jans
 birthdate: 20140210000000Z
 displayName: Test Aaaa 2222
-jansAddres: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":false}
+jansAddress: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":false}
 jansPhotos: {"value":"http://some.gif/AAAA-2222_thumb.gif","display":"AAAA-2222 thumbnail","type":"thumbnail","primary":false}
 jansPhotos: {"value":"http://some.gif/AAAA-2222.gif","display":"AAAA-2222","type":"photo","primary":true}
 jansExtId: 12000
@@ -92,7 +92,7 @@ userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
 dn: inum=XXXX.BBBB-2222,ou=people,o=jans
 birthdate: 20150214000000Z
 displayName: Test Bbbb 2222
-jansAddres: {"type":"home","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":true}
+jansAddress: {"type":"home","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":true}
 jansExtId: 22000
 givenName: Bbbb 2222
 inum: XXXX.BBBB-2222
@@ -165,7 +165,7 @@ userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
 dn: inum=XXXX.CCCC-2222,ou=people,o=jans
 birthdate: 20160119000000Z
 displayName: Test Cccc 2222
-jansAddres: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":true}
+jansAddress: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":true}
 jansExtId: 32000
 givenName: Cccc 2222
 inum: XXXX.CCCC-2222

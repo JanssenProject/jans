@@ -96,7 +96,7 @@ fn can_decode_claims_with_validation() {
                 "{}/.well-known/openid-configuration",
                 server.url()
             ),
-            token_metadata: None,
+            ..Default::default()
         },
         &HttpClient::new().expect("should create http client"),
     )
@@ -216,7 +216,7 @@ fn errors_on_unsupported_alg() {
                 "{}/.well-known/openid-configuration",
                 server.url()
             ),
-            token_metadata: None,
+            ..Default::default()
         },
         &HttpClient::new().expect("should create http client"),
     )
@@ -356,7 +356,7 @@ fn can_gracefully_handle_unsupported_algorithms_from_jwks() {
                 "{}/.well-known/openid-configuration",
                 server.url()
             ),
-            token_metadata: None,
+            ..Default::default()
         },
         &HttpClient::new().expect("should create http client"),
     )

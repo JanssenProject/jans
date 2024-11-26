@@ -1,17 +1,66 @@
 {
     "Jans": {
         "commonTypes": {
+            "Context": {
+                "type": "Record",
+                "attributes": {
+                    "current_time": {
+                        "type": "EntityOrCommon",
+                        "name": "Long"
+                    },
+                    "device_health": {
+                        "type": "Set",
+                        "element": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        }
+                    },
+                    "fraud_indicators": {
+                        "type": "Set",
+                        "element": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        }
+                    },
+                    "geolocation": {
+                        "type": "Set",
+                        "element": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        }
+                    },
+                    "network": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
+                    },
+                    "network_type": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
+                    },
+                    "operating_system": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
+                    },
+                    "user_agent": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
+                    }
+                }
+            },
             "Url": {
                 "type": "Record",
                 "attributes": {
                     "host": {
-                        "type": "String"
+                        "type": "EntityOrCommon",
+                        "name": "String"
                     },
                     "path": {
-                        "type": "String"
+                        "type": "EntityOrCommon",
+                        "name": "String"
                     },
                     "protocol": {
-                        "type": "String"
+                        "type": "EntityOrCommon",
+                        "name": "String"
                     }
                 }
             },
@@ -19,241 +68,70 @@
                 "type": "Record",
                 "attributes": {
                     "domain": {
-                        "type": "String"
+                        "type": "EntityOrCommon",
+                        "name": "String"
                     },
-                    "id": {
-                        "type": "String"
-                    }
-                }
-            },
-            "Context": {
-                "type": "Record",
-                "attributes": {
-                    "current_time": {
-                        "type": "Long"
-                    },
-                    "device_health": {
-                        "type": "Set",
-                        "element": {
-                            "type": "String"
-                        }
-                    },
-                    "fraud_indicators": {
-                        "type": "Set",
-                        "element": {
-                            "type": "String"
-                        }
-                    },
-                    "geolocation": {
-                        "type": "Set",
-                        "element": {
-                            "type": "String"
-                        }
-                    },
-                    "network": {
-                        "type": "Extension",
-                        "name": "ipaddr"
-                    },
-                    "network_type": {
-                        "type": "String"
-                    },
-                    "operating_system": {
-                        "type": "String"
-                    },
-                    "user_agent": {
-                        "type": "String"
+                    "uid": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
                     }
                 }
             }
         },
         "entityTypes": {
-            "User": {
-                "memberOfTypes": [
-                    "Role"
-                ],
-                "shape": {
-                    "type": "Record",
-                    "attributes": {
-                        "email": {
-                            "type": "email_address"
-                        },
-                        "phone_number": {
-                            "type": "String"
-                        },
-                        "role": {
-                            "type": "Set",
-                            "element": {
-                                "type": "String"
-                            }
-                        },
-                        "sub": {
-                            "type": "String"
-                        },
-                        "username": {
-                            "type": "String"
-                        }
-                    }
-                }
-            },
-            "TrustedIssuer": {
-                "shape": {
-                    "type": "Record",
-                    "attributes": {
-                        "issuer_entity_id": {
-                            "type": "Url"
-                        }
-                    }
-                }
-            },
-            "Workload": {
-                "shape": {
-                    "type": "Record",
-                    "attributes": {
-                        "client_id": {
-                            "type": "String"
-                        },
-                        "iss": {
-                            "type": "Entity",
-                            "name": "TrustedIssuer"
-                        },
-                        "name": {
-                            "type": "String"
-                        },
-                        "rp_id": {
-                            "type": "String"
-                        },
-                        "spiffe_id": {
-                            "type": "String"
-                        }
-                    }
-                }
-            },
-            "Userinfo_token": {
-                "shape": {
-                    "type": "Record",
-                    "attributes": {
-                        "aud": {
-                            "type": "String"
-                        },
-                        "birthdate": {
-                            "type": "String"
-                        },
-                        "email": {
-                            "type": "email_address"
-                        },
-                        "exp": {
-                            "type": "Long"
-                        },
-                        "iat": {
-                            "type": "Long"
-                        },
-                        "iss": {
-                            "type": "Entity",
-                            "name": "TrustedIssuer"
-                        },
-                        "jti": {
-                            "type": "String"
-                        },
-                        "name": {
-                            "type": "String"
-                        },
-                        "phone_number": {
-                            "type": "String"
-                        },
-                        "role": {
-                            "type": "Set",
-                            "element": {
-                                "type": "String"
-                            }
-                        },
-                        "sub": {
-                            "type": "String"
-                        }
-                    }
-                }
-            },
             "Access_token": {
                 "shape": {
                     "type": "Record",
                     "attributes": {
                         "aud": {
-                            "type": "String"
+                            "type": "EntityOrCommon",
+                            "name": "String"
                         },
                         "exp": {
-                            "type": "Long"
+                            "type": "EntityOrCommon",
+                            "name": "Long"
                         },
                         "iat": {
-                            "type": "Long"
+                            "type": "EntityOrCommon",
+                            "name": "Long"
                         },
                         "iss": {
-                            "type": "Entity",
+                            "type": "EntityOrCommon",
                             "name": "TrustedIssuer"
                         },
                         "jti": {
-                            "type": "String"
+                            "type": "EntityOrCommon",
+                            "name": "String"
                         },
                         "nbf": {
-                            "type": "Long"
+                            "type": "EntityOrCommon",
+                            "name": "Long"
                         },
                         "scope": {
-                            "type": "String"
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            }
                         }
                     }
                 }
             },
-            "Role": {},
-            "id_token": {
+            "Application": {
                 "shape": {
                     "type": "Record",
                     "attributes": {
-                        "acr": {
-                            "type": "Set",
-                            "element": {
-                                "type": "String"
-                            }
-                        },
-                        "amr": {
-                            "type": "String"
-                        },
-                        "aud": {
-                            "type": "String"
-                        },
-                        "azp": {
-                            "type": "String"
-                        },
-                        "birthdate": {
-                            "type": "String"
-                        },
-                        "email": {
-                            "type": "email_address"
-                        },
-                        "exp": {
-                            "type": "Long"
-                        },
-                        "iat": {
-                            "type": "Long"
-                        },
-                        "iss": {
-                            "type": "Entity",
-                            "name": "TrustedIssuer"
-                        },
-                        "jti": {
-                            "type": "String"
+                        "app_id": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
                         },
                         "name": {
-                            "type": "String"
+                            "type": "EntityOrCommon",
+                            "name": "String"
                         },
-                        "phone_number": {
-                            "type": "String"
-                        },
-                        "role": {
-                            "type": "Set",
-                            "element": {
-                                "type": "String"
-                            }
-                        },
-                        "sub": {
-                            "type": "String"
+                        "url": {
+                            "type": "EntityOrCommon",
+                            "name": "Url"
                         }
                     }
                 }
@@ -265,40 +143,240 @@
                         "accept": {
                             "type": "Set",
                             "element": {
-                                "type": "String"
+                                "type": "EntityOrCommon",
+                                "name": "String"
                             }
                         },
                         "header": {
                             "type": "Set",
                             "element": {
-                                "type": "String"
+                                "type": "EntityOrCommon",
+                                "name": "String"
                             }
                         },
                         "url": {
-                            "type": "Url"
+                            "type": "EntityOrCommon",
+                            "name": "Url"
                         }
                     }
                 }
             },
-            "Application": {
+            "Role": {},
+            "TrustedIssuer": {
                 "shape": {
                     "type": "Record",
                     "attributes": {
-                        "app_id": {
-                            "type": "String"
+                        "issuer_entity_id": {
+                            "type": "EntityOrCommon",
+                            "name": "Url"
+                        }
+                    }
+                }
+            },
+            "User": {
+                "memberOfTypes": [
+                    "Role"
+                ],
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "email": {
+                            "type": "EntityOrCommon",
+                            "name": "email_address"
+                        },
+                        "phone_number": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "role": {
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            }
+                        },
+                        "sub": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "username": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        }
+                    }
+                }
+            },
+            "Userinfo_token": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "aud": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "birthdate": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "email": {
+                            "type": "EntityOrCommon",
+                            "name": "email_address",
+                            "required": false
+                        },
+                        "exp": {
+                            "type": "EntityOrCommon",
+                            "name": "Long",
+                            "required": false
+                        },
+                        "iat": {
+                            "type": "EntityOrCommon",
+                            "name": "Long",
+                            "required": false
+                        },
+                        "iss": {
+                            "type": "EntityOrCommon",
+                            "name": "TrustedIssuer"
+                        },
+                        "jti": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
                         },
                         "name": {
-                            "type": "String"
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
                         },
-                        "url": {
-                            "type": "Url"
+                        "phone_number": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "role": {
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            },
+                            "required": false
+                        },
+                        "sub": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        }
+                    }
+                }
+            },
+            "Workload": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "client_id": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "iss": {
+                            "type": "EntityOrCommon",
+                            "name": "TrustedIssuer"
+                        },
+                        "name": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "rp_id": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "spiffe_id": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        }
+                    }
+                }
+            },
+            "id_token": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "acr": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "amr": {
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            }
+                        },
+                        "aud": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "azp": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "birthdate": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "email": {
+                            "type": "EntityOrCommon",
+                            "name": "email_address",
+                            "required": false
+                        },
+                        "exp": {
+                            "type": "EntityOrCommon",
+                            "name": "Long"
+                        },
+                        "iat": {
+                            "type": "EntityOrCommon",
+                            "name": "Long"
+                        },
+                        "iss": {
+                            "type": "EntityOrCommon",
+                            "name": "TrustedIssuer"
+                        },
+                        "jti": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "name": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "phone_number": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "role": {
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            },
+                            "required": false
+                        },
+                        "sub": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
                         }
                     }
                 }
             }
         },
         "actions": {
-            "Share": {
+            "Compare": {
                 "appliesTo": {
                     "resourceTypes": [
                         "Application"
@@ -306,6 +384,47 @@
                     "principalTypes": [
                         "User",
                         "Role",
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "DELETE": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "HTTP_Request"
+                    ],
+                    "principalTypes": [
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Execute": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Role",
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "GET": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "HTTP_Request"
+                    ],
+                    "principalTypes": [
                         "Workload"
                     ],
                     "context": {
@@ -326,7 +445,7 @@
                     }
                 }
             },
-            "Compare": {
+            "Monitor": {
                 "appliesTo": {
                     "resourceTypes": [
                         "Application"
@@ -367,21 +486,6 @@
                     }
                 }
             },
-            "Execute": {
-                "appliesTo": {
-                    "resourceTypes": [
-                        "Application"
-                    ],
-                    "principalTypes": [
-                        "User",
-                        "Role",
-                        "Workload"
-                    ],
-                    "context": {
-                        "type": "Context"
-                    }
-                }
-            },
             "Read": {
                 "appliesTo": {
                     "resourceTypes": [
@@ -397,12 +501,14 @@
                     }
                 }
             },
-            "DELETE": {
+            "Search": {
                 "appliesTo": {
                     "resourceTypes": [
-                        "HTTP_Request"
+                        "Application"
                     ],
                     "principalTypes": [
+                        "User",
+                        "Role",
                         "Workload"
                     ],
                     "context": {
@@ -410,7 +516,7 @@
                     }
                 }
             },
-            "Search": {
+            "Share": {
                 "appliesTo": {
                     "resourceTypes": [
                         "Application"
@@ -441,34 +547,6 @@
                 }
             },
             "Write": {
-                "appliesTo": {
-                    "resourceTypes": [
-                        "Application"
-                    ],
-                    "principalTypes": [
-                        "User",
-                        "Role",
-                        "Workload"
-                    ],
-                    "context": {
-                        "type": "Context"
-                    }
-                }
-            },
-            "GET": {
-                "appliesTo": {
-                    "resourceTypes": [
-                        "HTTP_Request"
-                    ],
-                    "principalTypes": [
-                        "Workload"
-                    ],
-                    "context": {
-                        "type": "Context"
-                    }
-                }
-            },
-            "Monitor": {
                 "appliesTo": {
                     "resourceTypes": [
                         "Application"

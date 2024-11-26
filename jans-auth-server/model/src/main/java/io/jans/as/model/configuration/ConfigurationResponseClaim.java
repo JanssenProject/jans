@@ -19,6 +19,7 @@ public final class ConfigurationResponseClaim {
     public static final String AUTHORIZATION_ENDPOINT = "authorization_endpoint";
     public static final String AUTHORIZATION_CHALLENGE_ENDPOINT = "authorization_challenge_endpoint";
     public static final String STATUS_LIST_ENDPOINT = "status_list_endpoint";
+    public static final String ACCESS_EVALUATION_V1_ENDPOINT = "access_evaluation_v1_endpoint";
     public static final String TOKEN_ENDPOINT = "token_endpoint";
     public static final String REVOCATION_ENDPOINT = "revocation_endpoint";
     public static final String SESSION_REVOCATION_ENDPOINT = "session_revocation_endpoint";

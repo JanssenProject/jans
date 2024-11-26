@@ -21,7 +21,8 @@ class DisabledLoggingConfig:
 
 @final
 class PolicyStoreSource:
-    def __init__(self, json: Optional[str] = None, yaml: Optional[str] = None) -> None: ...
+    def __init__(self, json: Optional[str] = None,
+                 yaml: Optional[str] = None) -> None: ...
 
 
 @final
@@ -85,7 +86,10 @@ class Request:
     resource: ResourceData
     context: Dict[str, Any]
 
-    def __init__(self, access_token: str,
+    def __init__(self,
+                 access_token: str,
+                 id_token: str,
+                 userinfo_token: str,
                  action: str,
                  resource: ResourceData,
                  context: Dict[str, Any]) -> None: ...
@@ -107,11 +111,9 @@ class ResourceData:
 class AuthorizeResult:
     def is_allowed(self) -> bool: ...
 
-    def workload(self) -> AuthorizeResultResponse: ...
+    def workload(self) -> AuthorizeResultResponse | None: ...
 
-    def person(self) -> AuthorizeResultResponse: ...
-
-    def role(self) -> AuthorizeResultResponse | None: ...
+    def person(self) -> AuthorizeResultResponse | None: ...
 
 
 @final

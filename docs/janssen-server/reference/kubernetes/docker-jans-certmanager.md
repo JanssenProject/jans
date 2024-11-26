@@ -50,27 +50,14 @@ The following environment variables are supported by the container:
 - `CN_SECRET_GOOGLE_SECRET_VERSION_ID`: Google Secret Manager version ID (default to `latest`).
 - `CN_SECRET_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Google Secret Manager name (default to `jans`).
 - `CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Google Secret Manager (default to `secret`).
-- `CN_PERSISTENCE_TYPE`: Persistence backend being used (one of `sql`, `couchbase`, `spanner`, or `hybrid`; default to `sql`).
+- `CN_PERSISTENCE_TYPE`: Persistence backend being used (one of `sql` or `hybrid`; default to `sql`).
 - `CN_HYBRID_MAPPING`: Specify data mapping for each persistence (default to `"{}"`). Note this environment only takes effect when `CN_PERSISTENCE_TYPE` is set to `hybrid`. See [hybrid mapping](#hybrid-mapping) section for details.
-- `CN_COUCHBASE_URL`: Address of Couchbase server (default to `localhost`).
-- `CN_COUCHBASE_USER`: Username of Couchbase server (default to `admin`).
-- `CN_COUCHBASE_CERT_FILE`: Couchbase root certificate location (default to `/etc/certs/couchbase.crt`).
-- `CN_COUCHBASE_PASSWORD_FILE`: Path to file contains Couchbase password (default to `/etc/jans/conf/couchbase_password`).
-- `CN_COUCHBASE_CONN_TIMEOUT`: Connect timeout used when a bucket is opened (default to `10000` milliseconds).
-- `CN_COUCHBASE_CONN_MAX_WAIT`: Maximum time to wait before retrying connection (default to `20000` milliseconds).
-- `CN_COUCHBASE_SCAN_CONSISTENCY`: Default scan consistency; one of `not_bounded`, `request_plus`, or `statement_plus` (default to `not_bounded`).
-- `CN_COUCHBASE_BUCKET_PREFIX`: Prefix for Couchbase buckets (default to `jans`).
-- `CN_COUCHBASE_TRUSTSTORE_ENABLE`: Enable truststore for encrypted Couchbase connection (default to `true`).
-- `CN_COUCHBASE_KEEPALIVE_INTERVAL`: Keep-alive interval for Couchbase connection (default to `30000` milliseconds).
-- `CN_COUCHBASE_KEEPALIVE_TIMEOUT`: Keep-alive timeout for Couchbase connection (default to `2500` milliseconds).
 - `CN_CONTAINER_METADATA`: The name of scheduler to pull container metadata (one of `docker` or `kubernetes`; default to `docker`).
 - `GOOGLE_APPLICATION_CREDENTIALS`: Optional JSON file (contains Google credentials) that can be injected into container for authentication. Refer to https://cloud.google.com/docs/authentication/provide-credentials-adc#how-to for supported credentials.
 - `GOOGLE_PROJECT_ID`: ID of Google project.
 - `CN_GOOGLE_SECRET_VERSION_ID`: Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
 - `CN_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
 - `CN_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to `secret`.
-- `CN_GOOGLE_SPANNER_INSTANCE_ID`: Google Spanner instance ID.
-- `CN_GOOGLE_SPANNER_DATABASE_ID`: Google Spanner database ID.
 - `CN_SQL_DB_HOST`: Hostname of the SQL database (default to `localhost`).
 - `CN_SQL_DB_PORT`: Port of the SQL database (default to `3306` for MySQL).
 - `CN_SQL_DB_NAME`: SQL database name (default to `jans`).
@@ -199,7 +186,7 @@ spec:
         spec:
           containers:
             - name: auth-key-rotation
-              image: ghcr.io/janssenproject/jans/certmanager:1.1.6_dev
+              image: ghcr.io/janssenproject/jans/certmanager:0.0.0-nightly
               resources:
                 requests:
                   memory: "300Mi"
@@ -224,12 +211,12 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
 
     ```
     {
-        "default": "<couchbase|spanner|sql>",
-        "user": "<couchbase|spanner|sql>",
-        "site": "<couchbase|spanner|sql>",
-        "cache": "<couchbase|spanner|sql>",
-        "token": "<couchbase|spanner|sql>",
-        "session": "<couchbase|spanner|sql>",
+        "default": "<sql>",
+        "user": "<sql>",
+        "site": "<sql>",
+        "cache": "<sql>",
+        "token": "<sql>",
+        "session": "<sql>",
     }
     ```
 
@@ -238,10 +225,10 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
     ```
     {
         "default": "sql",
-        "user": "spanner",
+        "user": "sql",
         "site": "sql",
         "cache": "sql",
-        "token": "couchbase",
-        "session": "spanner",
+        "token": "sql",
+        "session": "sql",
     }
     ```

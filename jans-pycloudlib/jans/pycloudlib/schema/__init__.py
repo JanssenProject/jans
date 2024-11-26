@@ -34,7 +34,6 @@ DEFAULT_SCOPES = (
 )
 
 OPTIONAL_SCOPES = (
-    "couchbase",
     "redis",
     "sql",
 )
@@ -99,33 +98,6 @@ class SecretSchema(Schema):
         dump_default="",
         metadata={
             "description": "Password for SQL (RDBMS) user",
-        },
-    )
-
-    # previously couchbase_pw
-    couchbase_password = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Password for Couchbase user",
-        },
-    )
-
-    # previously couchbase_superuser_pw
-    couchbase_superuser_password = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Password for Couchbase superuser",
-        },
-    )
-
-    couchbase_cert = CertKey(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Couchbase certificate",
-            "example": "-----BEGIN CERTIFICATE-----\nMIIDITCCAgmgAwIBAgIIF/+iXc7yIcVvg==\n-----END CERTIFICATE-----\n",
         },
     )
 

@@ -35,7 +35,7 @@ spec:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
       {{- end }}
       {{- if .Values.customAnnotations.pod }}
-      {{ toYaml .Values.customAnnotations.pod | indent 4 }}              
+      {{ toYaml .Values.customAnnotations.pod | indent 4 }}
       {{- end }}
       {{- end }}
     spec:
@@ -76,7 +76,7 @@ spec:
               {{- end }}
               python3 /scripts/tls_generator.py &
               /app/bin/entrypoint.sh
-          {{- end}}    
+          {{- end}}
         {{- end}}
         ports:
         - name: {{ .Values.service.name }}
@@ -113,11 +113,6 @@ spec:
             mountPath: /scripts/updatelbip.py
             subPath: updatelbip.py
         {{- end }}
-        {{- if .Values.saml.enabled }}
-          - name: kc-db-pass
-            mountPath: {{ .Values.kcDbPasswordFile }}
-            subPath: kc_db_password
-        {{- end }}
         livenessProbe:
 {{- toYaml .Values.livenessProbe | nindent 10 }}
         readinessProbe:
@@ -148,10 +143,4 @@ spec:
         - name: {{ include "janssen-all-in-one.fullname" . }}-updatelbip
           configMap:
             name: {{ .Release.Name }}-updatelbip
-      {{- end }}
-
-      {{- if .Values.saml.enabled }}
-        - name: kc-db-pass
-          secret:
-            secretName: {{ .Release.Name }}-kc-db-pass
       {{- end }}

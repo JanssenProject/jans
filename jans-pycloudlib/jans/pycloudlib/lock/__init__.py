@@ -18,7 +18,6 @@ from functools import cached_property
 
 import backoff
 
-from jans.pycloudlib.lock.couchbase_lock import CouchbaseLock
 from jans.pycloudlib.lock.sql_lock import SqlLock
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.persistence.utils import PersistenceMapper
@@ -32,13 +31,12 @@ logger = logging.getLogger(__name__)
 
 _DATETIME_FMT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
-LockAdapter = _t.Union[SqlLock, CouchbaseLock]
+LockAdapter = _t.Union[SqlLock]
 """Lock adapter type.
 
 Currently supports the following classes:
 
 * [SqlLock][jans.pycloudlib.lock.sql_lock.SqlLock]
-* [CouchbaseLock][jans.pycloudlib.lock.couchbase_lock.CouchbaseLock]
 """
 
 
@@ -249,15 +247,11 @@ class LockRecord(BaseLockRecord):
         Supported lock adapter name:
 
         - `sql`: returns an instance of [SqlLock][jans.pycloudlib.lock.sql_lock.SqlLock]
-        - `couchbase`: returns and instance of [CouchbaseLock][jans.pycloudlib.lock.couchbase_lock.CouchbaseLock]
         """
         _adapter = os.environ.get("CN_OCI_LOCK_ADAPTER") or PersistenceMapper().mapping["default"]
 
         if _adapter == "sql":
             return SqlLock()
-
-        if _adapter == "couchbase":
-            return CouchbaseLock()
 
         # unsupported adapter
         raise ValueError(f"Unsupported lock adapter {_adapter!r}")
@@ -439,5 +433,4 @@ class FakeLockRecord(BaseLockRecord):
 __all__ = [
     "LockManager",
     "SqlLock",
-    "CouchbaseLock",
 ]

@@ -119,6 +119,17 @@ jansScopeTyp: openid
 objectClass: top
 objectClass: jansScope
 
+dn: inum=6D93,ou=scopes,o=jans
+description: Access Evaluation
+displayName: access_evaluation
+inum: 6D93
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansDefScope: false
+jansId: access_evaluation
+jansScopeTyp: oauth
+objectClass: top
+objectClass: jansScope
+
 dn: inum=6D91,ou=scopes,o=jans
 description: Introspection
 displayName: introspection

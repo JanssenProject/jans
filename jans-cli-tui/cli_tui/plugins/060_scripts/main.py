@@ -1,5 +1,6 @@
 import asyncio
 from functools import partial
+from typing import Any, Optional
 
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.eventloop import get_event_loop
@@ -15,7 +16,7 @@ from prompt_toolkit.widgets import (
     Button,
     Dialog
 )
-from typing import Any, Optional
+from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.buffer import Buffer
 from utils.static import DialogResult
 from wui_components.jans_vetrical_nav import JansVerticalNav
@@ -89,6 +90,7 @@ class Plugin():
             self,
             start_index: Optional[int] = 0,
             pattern: Optional[str] = '',
+            focus_container: Optional[bool] = True
         ) -> None:
         """Get the current Scripts from server
 
@@ -109,22 +111,23 @@ class Plugin():
             self.app.start_progressing()
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
-            self.users = response.json()
+            self.data = response.json()
 
-            if not self.users.get('entries'):
+            if not self.data.get('entries'):
                 self.app.show_message(_("Not found"), _(
                     "No script found for this search."), tobefocused=self.app.center_container)
                 return
 
-            self.data = response.json()
-            self.scripts_update_list(pattern)
-            self.app.layout.focus(self.scripts_list_container)
+            self.scripts_update_list(pattern, focus_container=focus_container)
+            if focus_container:
+                self.app.layout.focus(self.scripts_list_container)
 
         asyncio.ensure_future(coroutine())
 
     def scripts_update_list(
             self,
             pattern: Optional[str] = '',
+            focus_container: Optional[bool] = True
         ) -> None:
         """Updates Scripts data from server
 
@@ -181,7 +184,8 @@ class Plugin():
             self.scripts_listbox,
             VSplit(buttons, padding=5, align=HorizontalAlign.CENTER),
         ], height=D())
-        self.app.layout.focus(self.scripts_listbox)
+        if focus_container:
+            self.app.layout.focus(self.scripts_listbox)
         get_app().invalidate()
 
     def get_help(self, **kwargs: Any):
@@ -226,8 +230,7 @@ class Plugin():
         """
 
         async def coroutine():
-            operation_id = 'put-config-scripts' if dialog.new_data.get(
-                'baseDn') else 'post-config-scripts'
+            operation_id = 'put-config-scripts' if dialog.new_data.get('baseDn') else 'post-config-scripts'
             cli_args = {'operation_id': operation_id, 'data': dialog.new_data}
             self.app.start_progressing()
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
@@ -236,8 +239,18 @@ class Plugin():
                 self.app.show_message(
                     _('Error'), response.text + '\n' + response.reason)
             else:
+                data = response.json()
                 dialog.future.set_result(DialogResult.OK)
-                self.get_scripts()
+                focus_container = True
+                if data.get('locationType') == 'file':
+                    self.app.show_message(
+                        _(common_strings.warning),
+                        HTML(_("It is your responsibility to upload script to the location\n<b>{}</b>").format(data['locationPath'])),
+                        tobefocused=self.app.center_container
+                        )
+                    focus_container = False
+
+                self.get_scripts(focus_container=focus_container)
                 await retrieve_enabled_scripts()
 
         asyncio.ensure_future(coroutine())

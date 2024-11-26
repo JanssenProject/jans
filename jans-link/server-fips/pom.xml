@@ -6,10 +6,18 @@
 	<name>jans link server (FIPS)</name>
 	<packaging>war</packaging>
 
+	<distributionManagement>
+ 		<repository>
+ 		<id>github</id>
+ 		<name>Github Packages</name>
+ 		<url>https://maven.pkg.github.com/JanssenProject/jans</url>
+ 		</repository>
+   	</distributionManagement>
+
 	<parent>
 		<artifactId>jans-link-server-parent</artifactId>
 		<groupId>io.jans</groupId>
-		<version>1.1.6-SNAPSHOT</version>
+		<version>0.0.0-nightly</version>
 	</parent>
 
 	<prerequisites>

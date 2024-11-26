@@ -19,6 +19,43 @@ tags:
     description: Janssen Authorization Server is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens. Server currently implements all required aspects of the OpenID Connect stack, including an OAuth 2.0 authorization server, Simple Web Discovery, Dynamic Client Registration, JSON Web Tokens, JSON Web Keys, and User Info Endpoint.
 
 paths:
+  /evaluation:
+    post:
+      tags:
+        - Access Evaluation
+      summary: Access Evaluation AuthZEN
+      description: Evaluates whether a subject is authorized to perform a specific action on a resource.
+      operationId: post_access_evaluation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subject:
+                  $ref: '#/components/schemas/Subject'
+                action:
+                  $ref: '#/components/schemas/Action'
+                resource:
+                  $ref: '#/components/schemas/Resource'
+                context:
+                  $ref: '#/components/schemas/Context'
+              required:
+                - subject
+                - action
+                - resource
+      responses:
+        200:
+          description: Access evaluation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvaluationResponse'
+        400:
+          description: Invalid request
+        500:
+          description: Internal server error
   /authorize-challenge:
     post:
       tags:
@@ -4759,6 +4796,64 @@ components:
           type: string
         y:
           type: string
+    Subject:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the subject (e.g., user, service)
+        id:
+          type: string
+          description: Unique identifier of the subject
+        properties:
+          type: object
+          additionalProperties: true
+          description: Additional attributes of the subject
+      required:
+        - type
+        - id
+    Action:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the action (e.g., read, write)
+        properties:
+          type: object
+          additionalProperties: true
+          description: Additional attributes of the action
+      required:
+        - name
+    Resource:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the resource (e.g., document, database)
+        id:
+          type: string
+          description: Unique identifier of the resource
+        properties:
+          type: object
+          additionalProperties: true
+          description: Additional attributes of the resource
+      required:
+        - type
+        - id
+    Context:
+      type: object
+      additionalProperties: true
+      description: Environmental or contextual attributes for the request
+    EvaluationResponse:
+      type: object
+      properties:
+        decision:
+          type: boolean
+          description: Result of the access evaluation (true for allow, false for deny)
+        context:
+          $ref: '#/components/schemas/Context'
+      required:
+        - decision
   securitySchemes:
     bearer:
       type: http
