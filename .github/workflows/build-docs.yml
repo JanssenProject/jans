@@ -211,6 +211,7 @@ jobs:
           cd ${LATEST}
           if [[ "${LATEST}" == "nightly" ]]; then
            egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/0.0.0-nightly/g"
+           egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/v0.0.0-nightly/nightly/g"
           else
            egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/${LATEST:1}/g"
           fi

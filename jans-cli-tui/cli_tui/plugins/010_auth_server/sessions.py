@@ -50,8 +50,8 @@ class Sessions(DialogUtils):
         self.search_date_before_widget = DateSelectWidget(app=common_data.app)
 
         username_title = _("Username")
-        date_after_title = _("Date After")
-        date_before_title = _("Date Before")
+        date_after_title = _("Expires After")
+        date_before_title = _("Expires Before")
         search_title = _("Search")
 
         self.main_container = HSplit([
@@ -136,14 +136,14 @@ class Sessions(DialogUtils):
 
         if date_after:
             date_after = date_after.replace(microsecond=0)
-            search_arg_lists.append(f'creationDate>{date_after}')
+            search_arg_lists.append(f'expirationDate>{date_after}')
 
         if date_before:
             date_before = date_before.replace(microsecond=0)
-            search_arg_lists.append(f'creationDate<{date_before}')
+            search_arg_lists.append(f'expirationDate<{date_before}')
 
         if search_arg_lists:
-            endpoint_args += ',fieldValuePair:' + ','.join(search_arg_lists)
+            endpoint_args += ',fieldValuePair:' + '\,'.join(search_arg_lists)
 
 
         async def search_sessions_coroutine():
@@ -155,7 +155,7 @@ class Sessions(DialogUtils):
             common_data.app.stop_progressing()
 
             if response.status_code not in (200, 201):
-                common_data.app.show_message(_(common_strings.error), str(response), tobefocused=self.search_text_area.me)
+                common_data.app.show_message(_(common_strings.error), str(response) + ':' + response.text, tobefocused=self.main_container)
                 return
 
             data = response.json()
