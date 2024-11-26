@@ -177,7 +177,7 @@ public class FileConfiguration {
             return sb.toString();
         }
 
-        return null;
+        return "";
     }
 
     public String getString(String key, String defaultValue) {
