@@ -1,6 +1,6 @@
 use super::{
-    BootstrapConfig, JwtConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig,
-    PolicyStoreSource,
+    authorization_config::AuthorizationConfig, BootstrapConfig, JwtConfig, LogConfig,
+    LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use crate::common::policy_store::PolicyStore;
 use jsonwebtoken::Algorithm;
@@ -231,12 +231,34 @@ pub enum FeatureToggle {
     Enabled,
 }
 
-#[derive(Default, Debug, PartialEq, Deserialize)]
+impl FeatureToggle {
+    pub fn is_enabled(&self) -> bool {
+        match self {
+            Self::Enabled => true,
+            Self::Disabled => false,
+        }
+    }
+}
+
+#[derive(Default, Clone, Copy, Debug, PartialEq, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
+/// Operator that define boolean operator `AND` or `OR`.
 pub enum WorkloadBoolOp {
     #[default]
+    /// Variant boolean `AND` operator.
     And,
+    /// Variant boolean `OR` operator.
     Or,
+}
+
+impl WorkloadBoolOp {
+    /// execute boolean operator for boolean parameters
+    pub(crate) fn calc(&self, rhd: bool, lhd: bool) -> bool {
+        match self {
+            WorkloadBoolOp::And => rhd && lhd,
+            WorkloadBoolOp::Or => rhd || lhd,
+        }
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -313,11 +335,18 @@ impl BootstrapConfig {
             },
         };
 
+        let authorization_config = AuthorizationConfig {
+            use_user_principal: raw.user_authz.is_enabled(),
+            use_workload_principal: raw.workload_authz.is_enabled(),
+            user_workload_operator: raw.usr_workload_bool_op,
+        };
+
         Ok(Self {
             application_name: raw.application_name.clone(),
             log_config,
             policy_store_config,
             jwt_config,
+            authorization_config,
         })
     }
 }

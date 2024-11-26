@@ -7,17 +7,20 @@
 //! Module for bootstrap configuration types
 //! to configure [`Cedarling`](crate::Cedarling)
 
+pub(crate) mod authorization_config;
 pub(crate) mod jwt_config;
 pub(crate) mod log_config;
 pub(crate) mod policy_store_config;
 
 use std::{fs, io, path::Path};
 
+pub use authorization_config::AuthorizationConfig;
 // reimport to useful import values in root module
 pub use jwt_config::*;
 pub use log_config::*;
 pub use policy_store_config::*;
 mod decode;
+pub use decode::WorkloadBoolOp;
 
 /// Bootstrap configuration
 /// properties for configuration [`Cedarling`](crate::Cedarling) application.
@@ -32,6 +35,8 @@ pub struct BootstrapConfig {
     pub policy_store_config: PolicyStoreConfig,
     /// A set of properties used to configure JWT in the `Cedarling` application.
     pub jwt_config: JwtConfig,
+    /// A set of properties used to configure authorization workflow in the `Cedarling` application.
+    pub authorization_config: AuthorizationConfig,
 }
 
 impl BootstrapConfig {
@@ -105,6 +110,7 @@ pub enum BootstrapConfigLoadingError {
 
 #[cfg(test)]
 mod test {
+    use super::*;
     use crate::bootstrap_config::decode::BootstrapConfigRaw;
     use std::{collections::HashSet, path::Path};
 
@@ -132,6 +138,11 @@ mod test {
             jwt_config: crate::JwtConfig::Enabled {
                 signature_algorithms: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
             },
+            authorization_config: AuthorizationConfig {
+                use_user_principal: true,
+                use_workload_principal: true,
+                user_workload_operator: WorkloadBoolOp::And,
+            },
         };
 
         assert_eq!(deserialized, expected);
@@ -156,6 +167,11 @@ mod test {
             },
             jwt_config: crate::JwtConfig::Enabled {
                 signature_algorithms: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
+            },
+            authorization_config: AuthorizationConfig {
+                use_user_principal: true,
+                use_workload_principal: true,
+                user_workload_operator: WorkloadBoolOp::And,
             },
         };
 
