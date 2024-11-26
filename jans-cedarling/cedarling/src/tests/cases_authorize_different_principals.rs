@@ -207,7 +207,7 @@ fn success_test_for_principal_person_role() {
     assert!(result.is_allowed(), "request result should be allowed");
 }
 
-/// Check if action executes for next principals: Person AND Role
+/// Check if action executes for next principals: Workload AND Person (Role)
 #[test]
 fn success_test_for_principal_workload_role() {
     let cedarling = get_cedarling_with_authorization_conf(
@@ -249,6 +249,141 @@ fn success_test_for_principal_workload_role() {
     );
 
     assert!(result.is_allowed(), "request result should be allowed");
+}
+
+/// Check if action executes for next principals: Workload (true) OR Person (false)
+/// is used operator OR
+#[test]
+fn success_test_for_principal_workload_true_or_user_false() {
+    let cedarling = get_cedarling_with_authorization_conf(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        crate::AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: true,
+            user_workload_operator: WorkloadBoolOp::Or,
+        },
+    );
+
+    let mut request = AuthRequestBase.clone();
+    request.action = "Jans::Action::\"UpdateForWorkload\"".to_string();
+
+    let result = cedarling
+        .authorize(request)
+        .expect("request should be parsed without errors");
+
+    cmp_decision!(
+        result.workload,
+        Decision::Allow,
+        "request result should be allowed for workload"
+    );
+    cmp_policy!(
+        result.workload,
+        vec!["1"],
+        "reason of permit workload should be '1'"
+    );
+
+    cmp_decision!(
+        result.person,
+        Decision::Deny,
+        "request result should be allowed for person"
+    );
+    cmp_policy!(
+        result.person,
+        Vec::new() as Vec<String>,
+        "reason of permit person should be empty"
+    );
+
+    assert!(result.is_allowed(), "request result should be allowed");
+}
+
+/// Check if action executes for next principals: Workload (false) OR Person (true)
+/// is used operator OR
+#[test]
+fn success_test_for_principal_workload_false_or_user_true() {
+    let cedarling = get_cedarling_with_authorization_conf(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        crate::AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: true,
+            user_workload_operator: WorkloadBoolOp::Or,
+        },
+    );
+
+    let mut request = AuthRequestBase.clone();
+    request.action = "Jans::Action::\"UpdateForUser\"".to_string();
+
+    let result = cedarling
+        .authorize(request)
+        .expect("request should be parsed without errors");
+
+    cmp_decision!(
+        result.workload,
+        Decision::Deny,
+        "request result should be not allowed for workload"
+    );
+    cmp_policy!(
+        result.workload,
+        Vec::new() as Vec<String>,
+        "reason of permit workload should be empty"
+    );
+
+    cmp_decision!(
+        result.person,
+        Decision::Allow,
+        "request result should be allowed for person"
+    );
+    cmp_policy!(
+        result.person,
+        vec!["2"],
+        "reason of permit person should be '2'"
+    );
+
+    assert!(result.is_allowed(), "request result should be allowed");
+}
+
+/// Check if action executes for next principals: Workload (false) OR Person (false)
+/// is used operator OR
+#[test]
+fn success_test_for_principal_workload_false_or_user_false() {
+    let cedarling = get_cedarling_with_authorization_conf(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        crate::AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: true,
+            user_workload_operator: WorkloadBoolOp::Or,
+        },
+    );
+
+    let mut request = AuthRequestBase.clone();
+    request.action = "Jans::Action::\"AlwaysDeny\"".to_string();
+
+    let result = cedarling
+        .authorize(request)
+        .expect("request should be parsed without errors");
+
+    cmp_decision!(
+        result.workload,
+        Decision::Deny,
+        "request result should be not allowed for workload"
+    );
+    cmp_policy!(
+        result.workload,
+        Vec::new() as Vec<String>,
+        "reason of permit workload should be empty"
+    );
+
+    cmp_decision!(
+        result.person,
+        Decision::Deny,
+        "request result should be not allowed for person"
+    );
+    cmp_policy!(
+        result.person,
+        Vec::new() as Vec<String>,
+        "reason of permit person should be empty"
+    );
+
+    assert!(!result.is_allowed(), "request result should be not allowed");
 }
 
 /// Check if action executes when principal workload can't be applied

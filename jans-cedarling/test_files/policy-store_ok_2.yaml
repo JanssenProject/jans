@@ -102,4 +102,9 @@ policy_stores:
           resource: [Issue],
           context: {}
         };
+        action "AlwaysDeny" appliesTo {
+          principal:  [Workload,User],
+          resource: [Issue],
+          context: {}
+        };
         }
