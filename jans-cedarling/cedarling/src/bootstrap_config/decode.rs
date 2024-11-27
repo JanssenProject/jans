@@ -1,6 +1,6 @@
 use super::{
-    BootstrapConfig, JwtConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig,
-    PolicyStoreSource,
+    authorization_config::AuthorizationConfig, BootstrapConfig, JwtConfig, LogConfig,
+    LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use crate::common::policy_store::PolicyStore;
 use jsonwebtoken::Algorithm;
@@ -8,7 +8,8 @@ use serde::{Deserialize, Deserializer};
 use std::{collections::HashSet, path::Path};
 
 #[derive(Deserialize, PartialEq, Debug)]
-#[allow(dead_code)]
+/// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
+/// from [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
 pub struct BootstrapConfigRaw {
     ///  Human friendly identifier for the application
     #[serde(rename = "CEDARLING_APPLICATION_NAME")]
@@ -28,7 +29,7 @@ pub struct BootstrapConfigRaw {
 
     /// How the Logs will be presented.
     #[serde(rename = "CEDARLING_LOG_TYPE", default)]
-    pub log_type: LogType,
+    pub log_type: LoggerType,
 
     /// If `log_type` is set to [`LogType::Memory`], this is the TTL (time to live) of
     /// log entities in seconds.
@@ -199,44 +200,135 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_AUDIT_TELEMETRY_INTERVAL", default)]
     pub audit_health_telemetry_interval: u64,
 
-    // Controls whether Cedarling should listen for updates from the Lock Server.
+    /// Controls whether Cedarling should listen for updates from the Lock Server.
     #[serde(rename = "CEDARLING_LISTEN_SSE", default)]
     pub listen_sse: FeatureToggle,
 }
 
+/// TrustMode can be `Strict` or `None`
 #[derive(Default, Debug, PartialEq, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum TrustMode {
+    /// `Strict` level of validation
     #[default]
     Strict,
+    /// Disable validation.
     None,
 }
 
+impl TrustMode {
+    /// Parse `TrustMode` from string.
+    /// If string is `Strict` return `Strict` variant otherwise `None` variant.
+    pub fn from_str(s: &str) -> Self {
+        match s {
+            "Strict" => TrustMode::Strict,
+            _ => TrustMode::None,
+        }
+    }
+}
+
+/// Type of logger
 #[derive(Debug, PartialEq, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
-pub enum LogType {
+pub enum LoggerType {
+    /// Disabled logger
     #[default]
     Off,
+    /// Logger that collect messages in memory.
+    /// Log entities available using trait [`LogStorage`](crate::LogStorage)
     Memory,
+    /// Logger that print logs to stdout
     #[serde(rename = "std_out")]
     StdOut,
+    /// Logger send log messages to `Lock` server
     Lock,
 }
 
+impl LoggerType {
+    /// Parse string to `LoggerType` enum.
+    pub fn from_str(v: &str) -> Self {
+        match v {
+            "memory" => Self::Memory,
+            "std_out" => Self::StdOut,
+            "lock" => Self::Lock,
+            _ => Self::Off,
+        }
+    }
+}
+
+/// Enum varians that represent if feature is enabled or disabled
 #[derive(Debug, PartialEq, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum FeatureToggle {
+    /// Represent as disabled.
     #[default]
     Disabled,
+    /// Represent as enabled.
     Enabled,
 }
 
-#[derive(Default, Debug, PartialEq, Deserialize)]
+impl FeatureToggle {
+    /// Parse bool to `FeatureToggle`.
+    pub fn from_bool(v: bool) -> Self {
+        match v {
+            true => Self::Enabled,
+            false => Self::Disabled,
+        }
+    }
+
+    /// Return true if is enabled.
+    pub fn is_enabled(&self) -> bool {
+        match self {
+            Self::Enabled => true,
+            Self::Disabled => false,
+        }
+    }
+}
+
+impl Into<FeatureToggle> for bool {
+    fn into(self) -> FeatureToggle {
+        FeatureToggle::from_bool(self)
+    }
+}
+
+#[derive(Default, Clone, Copy, Debug, PartialEq, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
+/// Operator that define boolean operator `AND` or `OR`.
 pub enum WorkloadBoolOp {
     #[default]
+    /// Variant boolean `AND` operator.
     And,
+    /// Variant boolean `OR` operator.
     Or,
+}
+
+impl WorkloadBoolOp {
+    /// Parse [`WorkloadBoolOp`] from string.
+    pub fn from_str(v: &str) -> Result<Self, ParseWorkloadBoolOpError> {
+        Ok(match v {
+            "AND" => Self::And,
+            "OR" => Self::Or,
+            _ => {
+                return Err(ParseWorkloadBoolOpError {
+                    payload: v.to_string(),
+                })
+            },
+        })
+    }
+
+    /// execute boolean operator for boolean parameters
+    pub(crate) fn calc(&self, rhd: bool, lhd: bool) -> bool {
+        match self {
+            WorkloadBoolOp::And => rhd && lhd,
+            WorkloadBoolOp::Or => rhd || lhd,
+        }
+    }
+}
+
+#[derive(Default, Debug, derive_more::Display, derive_more::Error)]
+#[display("Could not parce `WorkloadBoolOp` with payload {payload}, should be `AND` or `OR`")]
+pub struct ParseWorkloadBoolOpError {
+    payload: String,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -260,12 +352,12 @@ impl BootstrapConfig {
     pub fn from_raw_config(raw: &BootstrapConfigRaw) -> Result<Self, Box<dyn std::error::Error>> {
         // Decode LogCofig
         let log_type = match raw.log_type {
-            LogType::Off => LogTypeConfig::Off,
-            LogType::Memory => LogTypeConfig::Memory(MemoryLogConfig {
+            LoggerType::Off => LogTypeConfig::Off,
+            LoggerType::Memory => LogTypeConfig::Memory(MemoryLogConfig {
                 log_ttl: raw.log_ttl.ok_or(BootstrapDecodingError::MissingLogTTL)?,
             }),
-            LogType::StdOut => LogTypeConfig::StdOut,
-            LogType::Lock => LogTypeConfig::Lock,
+            LoggerType::StdOut => LogTypeConfig::StdOut,
+            LoggerType::Lock => LogTypeConfig::Lock,
         };
         let log_config = LogConfig { log_type };
 
@@ -313,11 +405,18 @@ impl BootstrapConfig {
             },
         };
 
+        let authorization_config = AuthorizationConfig {
+            use_user_principal: raw.user_authz.is_enabled(),
+            use_workload_principal: raw.workload_authz.is_enabled(),
+            user_workload_operator: raw.usr_workload_bool_op,
+        };
+
         Ok(Self {
             application_name: raw.application_name.clone(),
             log_config,
             policy_store_config,
             jwt_config,
+            authorization_config,
         })
     }
 }
