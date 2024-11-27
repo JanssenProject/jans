@@ -127,10 +127,10 @@ pub struct BootstrapConfig {
     pub log_ttl: Option<u64>,
 
     /// When enabled, Cedar engine authorization is queried for a User principal.
-    pub user_authz: bool,
+    pub user_authz: String,
 
     /// When enabled, Cedar engine authorization is queried for a Workload principal.
-    pub workload_authz: bool,
+    pub workload_authz: String,
 
     /// Specifies what boolean operation to use for the `USER` and `WORKLOAD` when
     /// making authz (authorization) decisions.
@@ -152,7 +152,7 @@ pub struct BootstrapConfig {
     /// Whether to check the signature of all JWT tokens.
     ///
     /// This requires that an `iss` (Issuer) claim is present on each token.
-    pub jwt_sig_validation: bool,
+    pub jwt_sig_validation: String,
 
     /// Whether to check the status of the JWT. On startup.
     ///
@@ -161,56 +161,56 @@ pub struct BootstrapConfig {
     /// cache it. See the [`IETF Draft`] for more info.
     ///
     /// [`IETF Draft`]: https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/
-    pub jwt_status_validation: bool,
+    pub jwt_status_validation: String,
 
     /// Cedarling will only accept tokens signed with these algorithms.
     pub jwt_signature_algorithms_supported: Vec<String>,
 
     /// When enabled, the `iss` (Issuer) claim must be present in the Access Token and
     /// the scheme must be `https`.
-    pub at_iss_validation: bool,
+    pub at_iss_validation: String,
 
     /// When enabled, the `jti` (JWT ID) claim must be present in the Access Token.
-    pub at_jti_validation: bool,
+    pub at_jti_validation: String,
 
     /// When enabled, the `nbf` (Not Before) claim must be present in the Access Token
     /// and Cedarling will verify that the current date is after the `nbf`.
-    pub at_nbf_validation: bool,
+    pub at_nbf_validation: String,
 
     /// When enabled, the `exp` (Expiration) claim must be present in the Access Token
     /// and not past the date specified.
-    pub at_exp_validation: bool,
+    pub at_exp_validation: String,
 
     /// When enabled, the `iss` (Issuer) claim must be present in the ID Token and
     /// the scheme must be https.
-    pub idt_iss_validation: bool,
+    pub idt_iss_validation: String,
 
     /// When enabled, the `sub` (Subject) claim must be present in the ID Token.
-    pub idt_sub_validation: bool,
+    pub idt_sub_validation: String,
 
     /// When enabled, the `exp` (Expiration) claim must be present in the ID Token
     /// and not past the date specified.
-    pub idt_exp_validation: bool,
+    pub idt_exp_validation: String,
 
     /// When enabled, the `iat` (Issued at) claim must be present in the ID Token.
-    pub idt_iat_validation: bool,
+    pub idt_iat_validation: String,
 
     /// When enabled, the `aud` ( Audience) claim must be present in the ID Token.
-    pub idt_aud_validation: bool,
+    pub idt_aud_validation: String,
 
     /// When enabled, the `iss` (Issuer) claim must be present in the Userinfo Token and
     /// the scheme must be https.
-    pub userinfo_iss_validation: bool,
+    pub userinfo_iss_validation: String,
 
     /// When enabled, the `sub` (Subject) claim must be present in the Userinfo Token.
-    pub userinfo_sub_validation: bool,
+    pub userinfo_sub_validation: String,
 
     /// When enabled, the `aud` (Audience) claim must be present in the Userinfo Token.
-    pub userinfo_aud_validation: bool,
+    pub userinfo_aud_validation: String,
 
     /// When enabled, the `exp` (Expiration) claim must be present in the Userinfo Token
     /// and not past the date specified.
-    pub userinfo_exp_validation: bool,
+    pub userinfo_exp_validation: String,
 
     /// Varying levels of validations based on the preference of the developer.
     ///
@@ -226,7 +226,7 @@ pub struct BootstrapConfig {
 
     /// If Enabled, the Cedarling will connect to the Lock Master for policies,
     /// and subscribe for SSE events.
-    pub lock: bool,
+    pub lock: String,
 
     /// URI where Cedarling can get JSON file with all required metadata about
     /// Lock Master, i.e. .well-known/lock-master-configuration.
@@ -235,7 +235,7 @@ pub struct BootstrapConfig {
     pub lock_master_configuration_uri: Option<String>,
 
     /// Controls whether Cedarling should listen for SSE config updates.
-    pub dynamic_configuration: bool,
+    pub dynamic_configuration: String,
 
     /// SSA for DCR in a Lock Master deployment. The Cedarling will validate this
     /// SSA JWT prior to DCR.
@@ -251,7 +251,7 @@ pub struct BootstrapConfig {
     pub audit_health_telemetry_interval: u64,
 
     // Controls whether Cedarling should listen for updates from the Lock Server.
-    pub listen_sse: bool,
+    pub listen_sse: String,
 }
 
 #[pymethods]
@@ -263,37 +263,37 @@ impl BootstrapConfig {
         policy_store_uri = None,
         log_type = "memory".to_string(),
         log_ttl = Some(60),
-        user_authz = true,
-        workload_authz = true,
+        user_authz = "enabled".to_string(),
+        workload_authz = "enabled".to_string(),
         usr_workload_bool_op = "AND".to_string(),
         local_jwks = None,
         local_policy_store = None,
         policy_store_local_fn = None,
-        jwt_sig_validation = true,
-        jwt_status_validation = false,
+        jwt_sig_validation = "enabled".to_string(),
+        jwt_status_validation = "disabled".to_string(),
         jwt_signature_algorithms_supported = vec!["RS256".to_string()],
-        at_iss_validation = true,
-        at_jti_validation = true,
-        at_nbf_validation = true,
-        at_exp_validation = true,
-        idt_iss_validation = true,
-        idt_sub_validation = true,
-        idt_exp_validation = true,
-        idt_iat_validation = true,
-        idt_aud_validation = true,
-        userinfo_iss_validation = true,
-        userinfo_sub_validation = true,
-        userinfo_aud_validation = true,
-        userinfo_exp_validation = true,
+        at_iss_validation = "enabled".to_string(),
+        at_jti_validation = "enabled".to_string(),
+        at_nbf_validation = "enabled".to_string(),
+        at_exp_validation = "enabled".to_string(),
+        idt_iss_validation = "enabled".to_string(),
+        idt_sub_validation = "enabled".to_string(),
+        idt_exp_validation = "enabled".to_string(),
+        idt_iat_validation = "enabled".to_string(),
+        idt_aud_validation = "enabled".to_string(),
+        userinfo_iss_validation = "enabled".to_string(),
+        userinfo_sub_validation = "enabled".to_string(),
+        userinfo_aud_validation = "enabled".to_string(),
+        userinfo_exp_validation = "enabled".to_string(),
         id_token_trust_mode = "none".to_string(),
-        lock = false,
+        lock = "disabled".to_string(),
         lock_master_configuration_uri = None,
-        dynamic_configuration = false,
+        dynamic_configuration = "disabled".to_string(),
         lock_ssa_jwt = None,
         audit_log_interval = 0,
         audit_health_interval = 0,
         audit_health_telemetry_interval = 0,
-        listen_sse = false
+        listen_sse = "disabled".to_string()
     ))]
     pub fn new(
         application_name: String,
@@ -301,37 +301,37 @@ impl BootstrapConfig {
         policy_store_uri: Option<String>,
         log_type: String,
         log_ttl: Option<u64>,
-        user_authz: bool,
-        workload_authz: bool,
+        user_authz: String,
+        workload_authz: String,
         usr_workload_bool_op: String,
         local_jwks: Option<String>,
         local_policy_store: Option<String>,
         policy_store_local_fn: Option<String>,
-        jwt_sig_validation: bool,
-        jwt_status_validation: bool,
+        jwt_sig_validation: String,
+        jwt_status_validation: String,
         jwt_signature_algorithms_supported: Vec<String>,
-        at_iss_validation: bool,
-        at_jti_validation: bool,
-        at_nbf_validation: bool,
-        at_exp_validation: bool,
-        idt_iss_validation: bool,
-        idt_sub_validation: bool,
-        idt_exp_validation: bool,
-        idt_iat_validation: bool,
-        idt_aud_validation: bool,
-        userinfo_iss_validation: bool,
-        userinfo_sub_validation: bool,
-        userinfo_aud_validation: bool,
-        userinfo_exp_validation: bool,
+        at_iss_validation: String,
+        at_jti_validation: String,
+        at_nbf_validation: String,
+        at_exp_validation: String,
+        idt_iss_validation: String,
+        idt_sub_validation: String,
+        idt_exp_validation: String,
+        idt_iat_validation: String,
+        idt_aud_validation: String,
+        userinfo_iss_validation: String,
+        userinfo_sub_validation: String,
+        userinfo_aud_validation: String,
+        userinfo_exp_validation: String,
         id_token_trust_mode: String,
-        lock: bool,
+        lock: String,
         lock_master_configuration_uri: Option<String>,
-        dynamic_configuration: bool,
+        dynamic_configuration: String,
         lock_ssa_jwt: Option<String>,
         audit_log_interval: u64,
         audit_health_interval: u64,
         audit_health_telemetry_interval: u64,
-        listen_sse: bool,
+        listen_sse: String,
     ) -> PyResult<Self> {
         Ok(Self {
             application_name,
@@ -374,25 +374,25 @@ impl BootstrapConfig {
     }
 
     pub fn disable_all_jwt_validation(&mut self) {
-        self.jwt_sig_validation = false;
-        self.jwt_status_validation = false;
+        self.jwt_sig_validation = "disabled".to_string();
+        self.jwt_status_validation = "disabled".to_string();
 
-        self.at_iss_validation = false;
-        self.at_jti_validation = false;
-        self.at_nbf_validation = false;
-        self.at_exp_validation = false;
+        self.at_iss_validation = "disabled".to_string();
+        self.at_jti_validation = "disabled".to_string();
+        self.at_nbf_validation = "disabled".to_string();
+        self.at_exp_validation = "disabled".to_string();
 
-        self.idt_iss_validation = false;
-        self.idt_sub_validation = false;
-        self.idt_exp_validation = false;
-        self.idt_iat_validation = false;
-        self.idt_aud_validation = false;
+        self.idt_iss_validation = "disabled".to_string();
+        self.idt_sub_validation = "disabled".to_string();
+        self.idt_exp_validation = "disabled".to_string();
+        self.idt_iat_validation = "disabled".to_string();
+        self.idt_aud_validation = "disabled".to_string();
         self.id_token_trust_mode = "none".to_string();
 
-        self.userinfo_iss_validation = false;
-        self.userinfo_aud_validation = false;
-        self.userinfo_sub_validation = false;
-        self.userinfo_exp_validation = false;
+        self.userinfo_iss_validation = "disabled".to_string();
+        self.userinfo_aud_validation = "disabled".to_string();
+        self.userinfo_sub_validation = "disabled".to_string();
+        self.userinfo_exp_validation = "disabled".to_string();
     }
 }
 
@@ -413,8 +413,8 @@ impl TryFrom<BootstrapConfig> for cedarling::BootstrapConfig {
             policy_store_id: value.policy_store_id,
             log_type: LoggerType::from_str(value.log_type.as_str()).unwrap_or_default(),
             log_ttl: value.log_ttl,
-            user_authz: value.user_authz.into(),
-            workload_authz: value.workload_authz.into(),
+            user_authz: value.user_authz.try_into().unwrap_or_default(),
+            workload_authz: value.workload_authz.try_into().unwrap_or_default(),
             usr_workload_bool_op: WorkloadBoolOp::from_str(value.usr_workload_bool_op.as_str())
                 .map_err(|err| {
                     PyValueError::new_err(format!(
@@ -435,32 +435,86 @@ impl TryFrom<BootstrapConfig> for cedarling::BootstrapConfig {
                 None
             },
             policy_store_local_fn: value.policy_store_local_fn,
-            jwt_sig_validation: value.jwt_sig_validation.into(),
-            jwt_status_validation: value.jwt_status_validation.into(),
+            jwt_sig_validation: value
+                .jwt_sig_validation
+                .try_into()
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
+            jwt_status_validation: value
+                .jwt_status_validation
+                .try_into()
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
             jwt_signature_algorithms_supported: signature_algorithms,
-            at_iss_validation: value.at_iss_validation.into(),
-            at_jti_validation: value.at_jti_validation.into(),
-            at_nbf_validation: value.at_nbf_validation.into(),
-            at_exp_validation: value.at_exp_validation.into(),
-            idt_iss_validation: value.idt_iss_validation.into(),
-            idt_sub_validation: value.idt_sub_validation.into(),
-            idt_exp_validation: value.idt_exp_validation.into(),
-            idt_iat_validation: value.idt_iat_validation.into(),
-            idt_aud_validation: value.idt_aud_validation.into(),
-            userinfo_iss_validation: value.userinfo_iss_validation.into(),
-            userinfo_sub_validation: value.userinfo_sub_validation.into(),
-            userinfo_aud_validation: value.userinfo_aud_validation.into(),
-            userinfo_exp_validation: value.userinfo_exp_validation.into(),
+            at_iss_validation: value
+                .at_iss_validation
+                .try_into()
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
+            at_jti_validation: value
+                .at_jti_validation
+                .try_into()
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
+            at_nbf_validation: value
+                .at_nbf_validation
+                .try_into()
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
+            at_exp_validation: value
+                .at_exp_validation
+                .try_into()
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
+            idt_iss_validation: value
+                .idt_iss_validation
+                .try_into()
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
+            idt_sub_validation: value
+                .idt_sub_validation
+                .try_into()
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
+            idt_exp_validation: value
+                .idt_exp_validation
+                .try_into()
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
+            idt_iat_validation: value
+                .idt_iat_validation
+                .try_into()
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
+            idt_aud_validation: value
+                .idt_aud_validation
+                .try_into()
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
+            userinfo_iss_validation: value
+                .userinfo_iss_validation
+                .try_into()
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
+            userinfo_sub_validation: value
+                .userinfo_sub_validation
+                .try_into()
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
+            userinfo_aud_validation: value
+                .userinfo_aud_validation
+                .try_into()
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
+            userinfo_exp_validation: value
+                .userinfo_exp_validation
+                .try_into()
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
             id_token_trust_mode: TrustMode::from_str(value.id_token_trust_mode.as_str())
                 .unwrap_or_default(),
-            lock: value.lock.into(),
+            lock: value
+                .lock
+                .try_into()
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
             lock_master_configuration_uri: value.lock_master_configuration_uri,
-            dynamic_configuration: value.dynamic_configuration.into(),
+            dynamic_configuration: value
+                .dynamic_configuration
+                .try_into()
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
             lock_ssa_jwt: value.lock_ssa_jwt,
             audit_log_interval: value.audit_log_interval,
             audit_health_interval: value.audit_health_interval,
             audit_health_telemetry_interval: value.audit_health_telemetry_interval,
-            listen_sse: value.listen_sse.into(),
+            listen_sse: value
+                .listen_sse
+                .try_into()
+                .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
         };
 
         Self::from_raw_config(&raw_config).map_err(|err| {

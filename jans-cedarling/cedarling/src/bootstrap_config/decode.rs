@@ -273,6 +273,32 @@ pub enum FeatureToggle {
     Enabled,
 }
 
+impl TryFrom<String> for FeatureToggle {
+    type Error = ParseFeatureToggleError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        let s = s.to_lowercase();
+        match s.as_str() {
+            "enabled" => Ok(FeatureToggle::Enabled),
+            "disabled" => Ok(FeatureToggle::Disabled),
+            _ => Err(ParseFeatureToggleError { value: s }),
+        }
+    }
+}
+
+impl FromStr for FeatureToggle {
+    type Err = ParseFeatureToggleError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.to_lowercase();
+        match s.as_str() {
+            "enabled" => Ok(FeatureToggle::Enabled),
+            "disabled" => Ok(FeatureToggle::Disabled),
+            _ => Err(ParseFeatureToggleError { value: s }),
+        }
+    }
+}
+
 impl FeatureToggle {
     /// Parse bool to `FeatureToggle`.
     pub fn from_bool(v: bool) -> Self {
@@ -348,6 +374,12 @@ pub struct ParseTrustModeError {
 #[display("Invalid `LoggerType`: {logger_type}. should be `memory`, `std_out`, `lock`, or `off`")]
 pub struct ParseLoggerTypeError {
     logger_type: String,
+}
+
+#[derive(Default, Debug, derive_more::Display, derive_more::Error)]
+#[display("Invalid `FeatureToggle`: {value}. should be `enabled`, or `disabled`")]
+pub struct ParseFeatureToggleError {
+    value: String,
 }
 
 #[derive(Debug, thiserror::Error)]

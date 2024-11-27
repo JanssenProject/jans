@@ -13,31 +13,31 @@ class BootstrapConfig:
     local_jwks: str | None
     local_policy_store: str | None
     policy_store_local_fn: str | None
-    jwt_sig_validation: bool
-    jwt_status_validation: bool
+    jwt_sig_validation: str
+    jwt_status_validation: str
     jwt_signature_algorithms_supported: List[str]
-    at_iss_validation: bool
-    at_jti_validation: bool
-    at_nbf_validation: bool
-    at_exp_validation: bool
-    idt_iss_validation: bool
-    idt_sub_validation: bool
-    idt_exp_validation: bool
-    idt_iat_validation: bool
-    idt_aud_validation: bool
-    userinfo_iss_validation: bool
-    userinfo_sub_validation: bool
-    userinfo_aud_validation: bool
-    userinfo_exp_validation: bool
+    at_iss_validation: str
+    at_jti_validation: str
+    at_nbf_validation: str
+    at_exp_validation: str
+    idt_iss_validation: str
+    idt_sub_validation: str
+    idt_exp_validation: str
+    idt_iat_validation: str
+    idt_aud_validation: str
+    userinfo_iss_validation: str
+    userinfo_sub_validation: str
+    userinfo_aud_validation: str
+    userinfo_exp_validation: str
     id_token_trust_mode: str | None
-    lock: bool
+    lock: str
     lock_master_configuration_uri: str | None
-    dynamic_configuration: bool
+    dynamic_configuration: str
     lock_ssa_jwt: str | None
     audit_log_interval: int
     audit_health_interval: int
     audit_health_telemetry_interval: int
-    listen_sse: bool
+    listen_sse: str
 
     def __init__(
         self,
@@ -46,37 +46,37 @@ class BootstrapConfig:
         policy_store_uri: str | None = None,
         log_type: str = 'none',
         log_ttl: int | None = 60,
-        user_authz: bool = True,
-        workload_authz: bool = True,
+        user_authz: str = 'enabled',
+        workload_authz: str = 'enabled',
         usr_workload_bool_op: str = "AND",
         local_jwks: str | None = None,
         local_policy_store: str | None = None,
         policy_store_local_fn: str | None = None,
-        jwt_sig_validation: bool = True,
-        jwt_status_validation: bool = False,
+        jwt_sig_validation: str = 'enabled',
+        jwt_status_validation: str = 'enabled',
         jwt_signature_algorithms_supported: List[str] = ["RS256"],
-        at_iss_validation: bool = True,
-        at_jti_validation: bool = True,
-        at_nbf_validation: bool = True,
-        at_exp_validation: bool = True,
-        idt_iss_validation: bool = True,
-        idt_sub_validation: bool = True,
-        idt_exp_validation: bool = True,
-        idt_iat_validation: bool = True,
-        idt_aud_validation: bool = True,
-        userinfo_iss_validation: bool = True,
-        userinfo_sub_validation: bool = True,
-        userinfo_aud_validation: bool = True,
-        userinfo_exp_validation: bool = True,
+        at_iss_validation: str = 'enabled',
+        at_jti_validation: str = 'enabled',
+        at_nbf_validation: str = 'enabled',
+        at_exp_validation: str = 'enabled',
+        idt_iss_validation: str = 'enabled',
+        idt_sub_validation: str = 'enabled',
+        idt_exp_validation: str = 'enabled',
+        idt_iat_validation: str = 'enabled',
+        idt_aud_validation: str = 'enabled',
+        userinfo_iss_validation: str = 'enabled',
+        userinfo_sub_validation: str = 'enabled',
+        userinfo_aud_validation: str = 'enabled',
+        userinfo_exp_validation: str = 'enabled',
         id_token_trust_mode: str | None = "none",
-        lock: bool = True,
+        lock: str = 'disabled',
         lock_master_configuration_uri: str | None = None,
-        dynamic_configuration: bool = False,
+        dynamic_configuration: str = 'disabled',
         lock_ssa_jwt: str | None = None,
         audit_log_interval: int = 0,
         audit_health_interval: int = 0,
         audit_health_telemetry_interval: int = 0,
-        listen_sse: bool = False,
+        listen_sse: str = 'disabled',
     ) -> None: ...
 
     def disable_all_jwt_validation(self) -> None: ...
