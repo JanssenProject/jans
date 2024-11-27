@@ -299,7 +299,6 @@ fn add_entities_to_context(
     });
     let context = merge_json_values(entities_context, request_context)?;
 
-    println!("WORKLOAD: {:?}", entities_data.access_token_entities.workload_entity);
     let context: cedar_policy::Context =
         cedar_policy::Context::from_json_value(context, Some((schema, action)))?;
 
