@@ -11,12 +11,14 @@
 use std::collections::HashSet;
 use std::fmt::Display;
 
+use std::hash::Hash;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use uuid7::uuid7;
 use uuid7::Uuid;
 
 use crate::common::app_types::{self, ApplicationName};
+use crate::common::policy_store::PoliciesContainer;
 
 /// LogEntry is a struct that encapsulates all relevant data for logging events.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -195,18 +197,54 @@ impl From<&cedar_policy::AuthorizationError> for PolicyEvaluationError {
 pub struct Diagnostics {
     /// `PolicyId`s of the policies that contributed to the decision.
     /// If no policies applied to the request, this set will be empty.
-    pub reason: HashSet<String>,
+    pub reason: HashSet<PolicyInfo>,
     /// Errors that occurred during authorization. The errors should be
     /// treated as unordered, since policies may be evaluated in any order.
     pub errors: Vec<PolicyEvaluationError>,
 }
 
-#[doc(hidden)]
-impl From<&cedar_policy::Diagnostics> for Diagnostics {
-    fn from(value: &cedar_policy::Diagnostics) -> Self {
-        Self {
-            reason: HashSet::from_iter(value.reason().map(|policy_id| policy_id.to_string())),
-            errors: value.errors().map(|err| err.into()).collect(),
-        }
+/// Policy diagnostic info
+#[derive(Debug, Default, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct PolicyInfo {
+    pub id: String,
+    pub description: Option<String>,
+}
+
+impl Hash for PolicyInfo {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
     }
 }
+
+impl Diagnostics {
+    /// Create new [`Diagnostics`] info structure for logging based on [`cedar_policy::Diagnostics`]
+    pub(crate) fn new(
+        cedar_diagnostic: &cedar_policy::Diagnostics,
+        policies: &PoliciesContainer,
+    ) -> Self {
+        let errors = cedar_diagnostic.errors().map(|err| err.into()).collect();
+
+        let reason = HashSet::from_iter(cedar_diagnostic.reason().map(|policy_id| {
+            let id = policy_id.to_string();
+
+            PolicyInfo {
+                description: policies
+                    .get_policy_description(id.as_str())
+                    .map(|v| v.to_string()),
+                id: policy_id.to_string(),
+            }
+        }));
+
+        Self { reason, errors }
+    }
+}
+
+// #[doc(hidden)]
+// impl From<&cedar_policy::Diagnostics> for Diagnostics {
+//     fn from(value: &cedar_policy::Diagnostics) -> Self {
+//         Self {
+//             reason: HashSet::from_iter(value.reason().map(|policy_id| policy_id.to_string())),
+//             errors: value.errors().map(|err| err.into()).collect(),
+//         }
+//     }
+// }

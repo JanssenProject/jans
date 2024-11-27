@@ -17,7 +17,8 @@ use crate::common::app_types;
 use crate::common::policy_store::PolicyStore;
 use crate::jwt;
 use crate::log::{
-    AuthorizationLogInfo, LogEntry, LogType, Logger, PersonAuthorizeInfo, WorkloadAuthorizeInfo,
+    AuthorizationLogInfo, Diagnostics, LogEntry, LogType, Logger, PersonAuthorizeInfo,
+    WorkloadAuthorizeInfo,
 };
 
 mod authorize_result;
@@ -153,14 +154,20 @@ impl Authz {
 
                 person_authorize_info: result.person.as_ref().map(|response| PersonAuthorizeInfo {
                     person_principal: principal_user_entity_uid.to_string(),
-                    person_diagnostics: response.diagnostics().into(),
+                    person_diagnostics: Diagnostics::new(
+                        response.diagnostics(),
+                        &self.config.policy_store.policies,
+                    ),
                     person_decision: response.decision().into(),
                 }),
 
                 workload_authorize_info: result.workload.as_ref().map(|response| {
                     WorkloadAuthorizeInfo {
                         workload_principal: principal_workload_uid.to_string(),
-                        workload_diagnostics: response.diagnostics().into(),
+                        workload_diagnostics: Diagnostics::new(
+                            response.diagnostics(),
+                            &self.config.policy_store.policies,
+                        ),
                         workload_decision: response.decision().into(),
                     }
                 }),
@@ -189,7 +196,7 @@ impl Authz {
 
         let response = self.authorizer.is_authorized(
             &request_principal_workload,
-            &self.config.policy_store.policies,
+            self.config.policy_store.policies.get_set(),
             parameters.entities,
         );
 
