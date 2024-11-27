@@ -5,7 +5,7 @@ use super::{
 use crate::common::policy_store::PolicyStore;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer};
-use std::{collections::HashSet, path::Path};
+use std::{collections::HashSet, path::Path, str::FromStr};
 
 #[derive(Deserialize, PartialEq, Debug)]
 /// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
@@ -216,13 +216,15 @@ pub enum TrustMode {
     None,
 }
 
-impl TrustMode {
-    /// Parse `TrustMode` from string.
-    /// If string is `Strict` return `Strict` variant otherwise `None` variant.
-    pub fn from_str(s: &str) -> Self {
-        match s {
-            "Strict" => TrustMode::Strict,
-            _ => TrustMode::None,
+impl FromStr for TrustMode {
+    type Err = ParseTrustModeError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.to_lowercase();
+        match s.as_str() {
+            "strict" => Ok(TrustMode::Strict),
+            "none" => Ok(TrustMode::None),
+            _ => Err(ParseTrustModeError { trust_mode: s }),
         }
     }
 }
@@ -244,14 +246,18 @@ pub enum LoggerType {
     Lock,
 }
 
-impl LoggerType {
+impl FromStr for LoggerType {
+    type Err = ParseLoggerTypeError;
+
     /// Parse string to `LoggerType` enum.
-    pub fn from_str(v: &str) -> Self {
-        match v {
-            "memory" => Self::Memory,
-            "std_out" => Self::StdOut,
-            "lock" => Self::Lock,
-            _ => Self::Off,
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.to_lowercase();
+        match s.as_str() {
+            "memory" => Ok(Self::Memory),
+            "std_out" => Ok(Self::StdOut),
+            "lock" => Ok(Self::Lock),
+            "off" => Ok(Self::Off),
+            _ => Err(Self::Err { logger_type: s }),
         }
     }
 }
@@ -285,9 +291,9 @@ impl FeatureToggle {
     }
 }
 
-impl Into<FeatureToggle> for bool {
-    fn into(self) -> FeatureToggle {
-        FeatureToggle::from_bool(self)
+impl From<bool> for FeatureToggle {
+    fn from(val: bool) -> Self {
+        FeatureToggle::from_bool(val)
     }
 }
 
@@ -302,20 +308,21 @@ pub enum WorkloadBoolOp {
     Or,
 }
 
-impl WorkloadBoolOp {
+impl FromStr for WorkloadBoolOp {
+    type Err = ParseWorkloadBoolOpError;
+
     /// Parse [`WorkloadBoolOp`] from string.
-    pub fn from_str(v: &str) -> Result<Self, ParseWorkloadBoolOpError> {
-        Ok(match v {
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.to_uppercase();
+        Ok(match s.as_str() {
             "AND" => Self::And,
             "OR" => Self::Or,
-            _ => {
-                return Err(ParseWorkloadBoolOpError {
-                    payload: v.to_string(),
-                })
-            },
+            _ => return Err(ParseWorkloadBoolOpError { payload: s }),
         })
     }
+}
 
+impl WorkloadBoolOp {
     /// execute boolean operator for boolean parameters
     pub(crate) fn calc(&self, rhd: bool, lhd: bool) -> bool {
         match self {
@@ -329,6 +336,18 @@ impl WorkloadBoolOp {
 #[display("Could not parce `WorkloadBoolOp` with payload {payload}, should be `AND` or `OR`")]
 pub struct ParseWorkloadBoolOpError {
     payload: String,
+}
+
+#[derive(Default, Debug, derive_more::Display, derive_more::Error)]
+#[display("Invalid `TrustMode`: {trust_mode}. should be `strict` or `none`")]
+pub struct ParseTrustModeError {
+    trust_mode: String,
+}
+
+#[derive(Default, Debug, derive_more::Display, derive_more::Error)]
+#[display("Invalid `LoggerType`: {logger_type}. should be `memory`, `std_out`, `lock`, or `off`")]
+pub struct ParseLoggerTypeError {
+    logger_type: String,
 }
 
 #[derive(Debug, thiserror::Error)]

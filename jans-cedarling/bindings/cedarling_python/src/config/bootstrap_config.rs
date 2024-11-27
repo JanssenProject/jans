@@ -373,7 +373,7 @@ impl BootstrapConfig {
         })
     }
 
-    pub fn disable_all_jwt_validation(&mut self) -> () {
+    pub fn disable_all_jwt_validation(&mut self) {
         self.jwt_sig_validation = false;
         self.jwt_status_validation = false;
 
@@ -411,7 +411,7 @@ impl TryFrom<BootstrapConfig> for cedarling::BootstrapConfig {
             application_name: value.application_name,
             policy_store_uri: value.policy_store_uri,
             policy_store_id: value.policy_store_id,
-            log_type: LoggerType::from_str(value.log_type.as_str()),
+            log_type: LoggerType::from_str(value.log_type.as_str()).unwrap_or_default(),
             log_ttl: value.log_ttl,
             user_authz: value.user_authz.into(),
             workload_authz: value.workload_authz.into(),
@@ -451,7 +451,8 @@ impl TryFrom<BootstrapConfig> for cedarling::BootstrapConfig {
             userinfo_sub_validation: value.userinfo_sub_validation.into(),
             userinfo_aud_validation: value.userinfo_aud_validation.into(),
             userinfo_exp_validation: value.userinfo_exp_validation.into(),
-            id_token_trust_mode: TrustMode::from_str(value.id_token_trust_mode.as_str()),
+            id_token_trust_mode: TrustMode::from_str(value.id_token_trust_mode.as_str())
+                .unwrap_or_default(),
             lock: value.lock.into(),
             lock_master_configuration_uri: value.lock_master_configuration_uri,
             dynamic_configuration: value.dynamic_configuration.into(),
