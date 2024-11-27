@@ -87,6 +87,11 @@ inputs, and lastly, releasing the flow as an Agama project.
     A newly created flow file has one block in it by default.
 
     ![](../../../assets/agama-lab-flow-passwd-1.png)
+    
+
+    **todo**
+    Click on the right side od the
+    click on the next node connection and drag that and drop and  will open next node pop-up.
 
     Clicking on the block will allow you to add further blocks using :material-plus-circle: or to edit the existing
     block using :material-pencil:.
@@ -115,26 +120,29 @@ inputs, and lastly, releasing the flow as an Agama project.
     To perform authentication we will also need a bean instance of `CdiUtil` class. This bean instance  
     takes `AuthenticationService` instance that we created in the previous step as an argument.
 
-    _Click the `New Authentication Service` block and then click on :material-plus-circle:. Then click `Call`_
+    After the `AuthenticationService` create new  `Call` node 
+    
 
-    ![](../../../assets/agama-lab-flow-passwd-create-cdiutil.png)
+    ![](../../../assets/agama-create-cdiutil.png)
 
     _Click on the newly created `Call` block and by clicking :material-pencil: open the configuration page.
     Input values as shown below in the configuration screen_
 
     ![](../../../assets/agama-lab-flow-passwd-edit-cdiutil.png)
 
-4. Create Assignment(s) block
+4. Create Assignment block
 
     Next, we need to create an empty variable that the flow will use in the future to store authentication results.
+     
+    Drag the end point of `New Cdiutil Object` block then select `Assignment`
 
-    _Click on `New CdiUtil Object` and then click :material-plus-circle:. Select `Assignment(s)`_
+    ![](../../../assets/agama-create-assignment.png)
 
-    ![](../../../assets/agama-lab-flow-passwd-create-assignment.png)
-
-    _Click on the newly created `Assign` block. Click :material-pencil:.
+    _Click on the newly created `Assignment` block. Click :material-pencil:.
     Input values as shown below in the configuration screen_
 
+
+    **Todo** 
     ![](../../../assets/agama-lab-flow-passwd-edit-assignment.png)
 
 5. Create [repeat]() block
@@ -144,9 +152,9 @@ inputs, and lastly, releasing the flow as an Agama project.
     Repeat block creates a loop to iterate over certain steps(blocks). We will create a repeat loop that allows
     3 retries if the authentication fails.
 
-    _Click on the `Result Object` block and then click :material-plus-circle:. Select `Repeat`._
+      Drag the end point of `Result Object` block then select `Repeat`
 
-    ![](../../../assets/agama-lab-flow-passwd-create-repeat.png)
+    ![](../../../assets/agama-create-repeat.png)
 
     _Click on the newly created `Repeat` block. Click :material-pencil:.
     Input values as shown below in the configuration screen_
