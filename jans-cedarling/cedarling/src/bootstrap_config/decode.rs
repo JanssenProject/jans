@@ -6,8 +6,9 @@ use crate::common::policy_store::PolicyStore;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer};
 use std::{collections::HashSet, path::Path, str::FromStr};
+use typed_builder::TypedBuilder;
 
-#[derive(Deserialize, PartialEq, Debug)]
+#[derive(Deserialize, PartialEq, Debug, TypedBuilder)]
 /// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
 /// from [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
 pub struct BootstrapConfigRaw {

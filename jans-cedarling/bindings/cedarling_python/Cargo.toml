@@ -8,7 +8,7 @@ name = "cedarling_python"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.22.5", features = ["extension-module"] }
+pyo3 = { version = "0.22.5", features = ["extension-module", "gil-refs"] }
 cedarling = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

@@ -8,8 +8,9 @@
 use cedarling::bindings::PolicyStore;
 use cedarling::{BootstrapConfigRaw, LoggerType, TrustMode, WorkloadBoolOp};
 use jsonwebtoken::Algorithm;
-use pyo3::exceptions::PyValueError;
+use pyo3::exceptions::{PyKeyError, PyValueError};
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 use std::collections::HashSet;
 use std::str::FromStr;
 
@@ -257,86 +258,68 @@ pub struct BootstrapConfig {
 #[pymethods]
 impl BootstrapConfig {
     #[new]
-    #[pyo3(signature = (
-        application_name,
-        policy_store_id,
-        policy_store_uri = None,
-        log_type = "memory".to_string(),
-        log_ttl = Some(60),
-        user_authz = "enabled".to_string(),
-        workload_authz = "enabled".to_string(),
-        usr_workload_bool_op = "AND".to_string(),
-        local_jwks = None,
-        local_policy_store = None,
-        policy_store_local_fn = None,
-        jwt_sig_validation = "enabled".to_string(),
-        jwt_status_validation = "disabled".to_string(),
-        jwt_signature_algorithms_supported = vec!["RS256".to_string()],
-        at_iss_validation = "enabled".to_string(),
-        at_jti_validation = "enabled".to_string(),
-        at_nbf_validation = "enabled".to_string(),
-        at_exp_validation = "enabled".to_string(),
-        idt_iss_validation = "enabled".to_string(),
-        idt_sub_validation = "enabled".to_string(),
-        idt_exp_validation = "enabled".to_string(),
-        idt_iat_validation = "enabled".to_string(),
-        idt_aud_validation = "enabled".to_string(),
-        userinfo_iss_validation = "enabled".to_string(),
-        userinfo_sub_validation = "enabled".to_string(),
-        userinfo_aud_validation = "enabled".to_string(),
-        userinfo_exp_validation = "enabled".to_string(),
-        id_token_trust_mode = "none".to_string(),
-        lock = "disabled".to_string(),
-        lock_master_configuration_uri = None,
-        dynamic_configuration = "disabled".to_string(),
-        lock_ssa_jwt = None,
-        audit_log_interval = 0,
-        audit_health_interval = 0,
-        audit_health_telemetry_interval = 0,
-        listen_sse = "disabled".to_string()
-    ))]
-    pub fn new(
-        application_name: String,
-        policy_store_id: String,
-        policy_store_uri: Option<String>,
-        log_type: String,
-        log_ttl: Option<u64>,
-        user_authz: String,
-        workload_authz: String,
-        usr_workload_bool_op: String,
-        local_jwks: Option<String>,
-        local_policy_store: Option<String>,
-        policy_store_local_fn: Option<String>,
-        jwt_sig_validation: String,
-        jwt_status_validation: String,
-        jwt_signature_algorithms_supported: Vec<String>,
-        at_iss_validation: String,
-        at_jti_validation: String,
-        at_nbf_validation: String,
-        at_exp_validation: String,
-        idt_iss_validation: String,
-        idt_sub_validation: String,
-        idt_exp_validation: String,
-        idt_iat_validation: String,
-        idt_aud_validation: String,
-        userinfo_iss_validation: String,
-        userinfo_sub_validation: String,
-        userinfo_aud_validation: String,
-        userinfo_exp_validation: String,
-        id_token_trust_mode: String,
-        lock: String,
-        lock_master_configuration_uri: Option<String>,
-        dynamic_configuration: String,
-        lock_ssa_jwt: Option<String>,
-        audit_log_interval: u64,
-        audit_health_interval: u64,
-        audit_health_telemetry_interval: u64,
-        listen_sse: String,
-    ) -> PyResult<Self> {
+    pub fn new(options: &Bound<'_, PyDict>) -> PyResult<Self> {
+        let app_name = get_required(options, "application_name")?;
+        let policy_store_id = get_required(options, "policy_store_id")?;
+        let policy_store_uri = get_optional(options, "policy_store_uri")?;
+        let log_type = get_with_default(options, "log_type", "memory".to_string())?;
+        let log_ttl = get_with_default(options, "log_ttl", Some(60))?;
+        let user_authz = get_with_default(options, "user_authz", "enabled".to_string())?;
+        let workload_authz = get_with_default(options, "workload_authz", "enabled".to_string())?;
+        let usr_workload_bool_op =
+            get_with_default(options, "usr_workload_bool_op", "AND".to_string())?;
+        let local_jwks = get_optional(options, "local_jwks")?;
+        let local_policy_store = get_optional(options, "local_policy_store")?;
+        let policy_store_local_fn = get_optional(options, "policy_store_local_fn")?;
+        let jwt_sig_validation =
+            get_with_default(options, "jwt_sig_validation", "enabled".to_string())?;
+        let jwt_status_validation =
+            get_with_default(options, "jwt_status_validation", "enabled".to_string())?;
+        let jwt_signature_algorithms_supported =
+            get_with_default(options, "jwt_signature_algorithms_supported", Vec::new())?;
+        let at_iss_validation =
+            get_with_default(options, "at_iss_validation", "enabled".to_string())?;
+        let at_jti_validation =
+            get_with_default(options, "at_jti_validation", "enabled".to_string())?;
+        let at_nbf_validation =
+            get_with_default(options, "at_nbf_validation", "enabled".to_string())?;
+        let at_exp_validation =
+            get_with_default(options, "at_exp_validation", "enabled".to_string())?;
+        let idt_iss_validation =
+            get_with_default(options, "idt_iss_validation", "enabled".to_string())?;
+        let idt_sub_validation =
+            get_with_default(options, "idt_sub_validation", "enabled".to_string())?;
+        let idt_exp_validation =
+            get_with_default(options, "idt_exp_validation", "enabled".to_string())?;
+        let idt_iat_validation =
+            get_with_default(options, "idt_iat_validation", "enabled".to_string())?;
+        let idt_aud_validation =
+            get_with_default(options, "idt_aud_validation", "enabled".to_string())?;
+        let userinfo_iss_validation =
+            get_with_default(options, "userinfo_iss_validation", "enabled".to_string())?;
+        let userinfo_sub_validation =
+            get_with_default(options, "userinfo_sub_validation", "enabled".to_string())?;
+        let userinfo_aud_validation =
+            get_with_default(options, "userinfo_aud_validation", "enabled".to_string())?;
+        let userinfo_exp_validation =
+            get_with_default(options, "userinfo_exp_validation", "enabled".to_string())?;
+        let id_token_trust_mode =
+            get_with_default(options, "id_token_trust_mode", "strict".to_string())?;
+        let lock = get_with_default(options, "lock", "disabled".to_string())?;
+        let lock_master_configuration_uri = get_optional(options, "lock_master_configuration_uri")?;
+        let dynamic_configuration =
+            get_with_default(options, "dynamic_configuration", "disabled".to_string())?;
+        let lock_ssa_jwt = get_optional(options, "lock_ssa_jwt")?;
+        let audit_log_interval = get_with_default(options, "audit_log_interval", 0)?;
+        let audit_health_interval = get_with_default(options, "audit_health_interval", 0)?;
+        let audit_health_telemetry_interval =
+            get_with_default(options, "audit_health_telemetry_interval", 0)?;
+        let listen_sse = get_with_default(options, "listen_sse", "disabled".to_string())?;
+
         Ok(Self {
-            application_name,
-            policy_store_uri,
+            application_name: app_name,
             policy_store_id,
+            policy_store_uri,
             log_type,
             log_ttl,
             user_authz,
@@ -394,6 +377,35 @@ impl BootstrapConfig {
         self.userinfo_sub_validation = "disabled".to_string();
         self.userinfo_exp_validation = "disabled".to_string();
     }
+}
+
+fn get_required<'py, T>(options: &Bound<'py, PyDict>, key: &str) -> PyResult<T>
+where
+    T: FromPyObject<'py>,
+{
+    options
+        .get_item(key)?
+        .ok_or_else(|| PyKeyError::new_err(format!("Missing required config: `{}`", key)))?
+        .extract()
+}
+
+fn get_optional<'py, T>(options: &Bound<'py, PyDict>, key: &str) -> PyResult<Option<T>>
+where
+    T: FromPyObject<'py>,
+{
+    // let opt = options.get_item(key)?;
+    options.get_item(key)?.map(|x| x.extract()).transpose()
+}
+
+fn get_with_default<'py, T>(options: &Bound<'py, PyDict>, key: &str, default: T) -> PyResult<T>
+where
+    T: FromPyObject<'py> + Clone,
+{
+    Ok(options
+        .get_item(key)?
+        .map(|x| x.extract())
+        .transpose()?
+        .unwrap_or(default))
 }
 
 impl TryFrom<BootstrapConfig> for cedarling::BootstrapConfig {
