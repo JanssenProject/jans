@@ -30,7 +30,7 @@ Once you supply your files, color values, and footer text, click on `Save` and s
 
 With "Primary buttons" we refer to the vast majority of buttons that trigger some action such as saving, updating or accepting - whether in the user pages or the admin UI itself. "Cancel" covers undo, close or cancel, while "Misc" is for anything not fitting any of the previous usages.
 
-You can choose "Use defaults" if you feel comfortable with the [Bootstrap-like](https://getbootstrap.com/docs/4.4/components/buttons/) colors offered in Jans Casa.
+You can choose "Use defaults" if you feel comfortable with the [Bootstrap-like](https://getbootstrap.com/docs/5.0/components/buttons/) colors offered in Jans Casa.
 
 ## Using the external assets directory
 
@@ -41,12 +41,11 @@ You can choose "Use defaults" if you feel comfortable with the [Bootstrap-like](
 
 Casa's UI design is driven by one CSS stylesheet and a few images. Specifically, Casa leverages the following UI frameworks:
 
-* [ZK](http://books.zkoss.org/zk-mvvm-book/9.0/)
-* [Bootstrap 4.4](https://getbootstrap.com/docs/4.4/getting-started/introduction/#quick-start)
+* [ZK](http://books.zkoss.org/zk-mvvm-book/10.0/)
 * [Tachyons 4.11](http://tachyons.io)
 * [Font Awesome 5.12](https://fontawesome.com)
 
-Particularly, ZK's default theme CSS file was disabled to offer a higher degree of flexibility in design. This enables Bootstrap and Tachyons to claim control over style rules applied to HTML markup.
+Particularly, ZK's default theme CSS file was disabled to offer a higher degree of flexibility in design. This enables Tachyons to claim control over style rules applied to HTML markup.
 
 ### External assets directory
 
@@ -72,7 +71,7 @@ $ chown -R jetty:jetty /opt/jans/jetty/jans-casa/static/
 In the admin console, navigate to `Custom branding` > `Use Casa external assets directory`. From that point on, your installation is reading relevant files from the `static` directory.
 
 !!! Note  
-    In CSS, the rules' order of appearance is important. Keep in mind that for all Casa pages, Bootstrap is loaded first, then style.css, and finally tachyons.css. This means rules for Tachyons have higher priority overall unless `!important` is used.  
+    In CSS, the rules' order of appearance is important. For all Casa pages, style.css is loaded first, then tachyons.css. This means rules for Tachyons have higher priority unless `!important` is used.  
     
 The main stylesheet (`style.css`) is located at `/opt/jans/jetty/jans-casa/static/styles/gluu` if you have followed the instructions above.
 
@@ -82,7 +81,7 @@ Here are some tips for applying your customizations:
 
 - Inspect the DOM tree generated for application pages and determine the CSS selectors you need to edit or things you have to add in order to alter the appearance. Use your web browser's facilities to inspect web page composition: this is usually part of any browser's developer toolbar. Moreover, they allow you to change styles on the fly so you can play a lot before applying the real changes.
 
-- Don't override rules that are already defined in Bootstrap or Tachyons CSS files. Conversely, ZK rules (which are prefixed with `z-`) are safe to be re-defined since ZK CSS isn't included (and `style.css` actually already redefines some). 
+- Don't override rules that are already defined in Tachyons. Conversely, ZK rules (which are prefixed with `z-`) are safe to be re-defined since ZK CSS isn't included.
 
 - In most circumstances, your work will come down to editing existing rules in `style.css`. HTML markup will show rules (in the `class` attribute) prefixed with `cust-` that are apparently not defined anywhere. These rules are intended to give admins the opportunity to add their design tastes. The following is a list of custom selectors you can add to `style.css`. Names are in general self-explanatory, the images below help clarify more.
 

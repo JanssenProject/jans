@@ -51,7 +51,7 @@ Then call the `main` macro and supply your markup, like this:
 <@com.main>
 ```
 
-The above will generate a page incorporating the required CSS files and will render the header and footer appropriately while leaving your content in the center of the page. The _casa_ project makes heavy use of Bootstrap and Tachyons CSS frameworks. You may like to use those for building templates instead of incorporating yet another styling framework.
+The above will generate a page incorporating the required CSS files and will render the header and footer appropriately while leaving your content in the center of the page. The _casa_ project makes heavy use the Tachyons CSS. You may like to use those for building templates instead of incorporating yet another styling framework.
 
 It is highly recommended to include the following near the bottom of your markup (still inside the `main` call block): 
 
