@@ -1,0 +1,82 @@
+cedar_version: v4.0.0
+policy_stores:
+  a1bf93115de86de760ee0bea1d529b521489e5a11747:
+    cedar_version: v4.0.0
+    name: Jans
+    description: A test policy store where everything is fine.
+    policies:
+      1:
+        description: simple policy example for principal workload
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal is Jans::Workload,
+                action in [Jans::Action::"Update"],
+                resource is Jans::Issue
+            )when{
+                principal.org_id == resource.org_id &&
+                context.access_token.aud == "client123" && 
+                context.access_token.aud == context.id_token.aud &&
+                context.id_token.sub == "some_sub" &&
+                principal.client_id == "some_client_id" &&
+                principal.client_id == context.userinfo_token.client_id
+            };
+    schema:
+      encoding: none
+      content_type: cedar
+      body: |-
+        namespace Jans {
+          type Url = {"host": String, "path": String, "protocol": String};
+          entity Issue = {"country": String, "org_id": String};
+          entity Role;
+          entity TrustedIssuer = { issuer_entity_id: Url };
+          entity User in [Role] = {
+            "country": String,
+            "email": String,
+            "sub": String,
+            "username": String
+          };
+          entity Workload = {
+            "client_id": String,
+            "iss": TrustedIssuer,
+            "name": String,
+            "org_id": String
+          };
+          entity Access_token = {
+            "aud": String, 
+            "exp": Long,
+            "iat": Long,
+            "iss": TrustedIssuer,
+            "jti": String
+          };
+          entity id_token = {
+            "acr": String, 
+            "amr": String,
+            "aud": String,
+            "exp": Long,
+            "iat": Long,
+            "iss": TrustedIssuer,
+            "jti": String,
+            "sub": String
+          };
+          entity Userinfo_token = {
+            "iss": String,
+            "jti": String,
+            "client_id": String
+          };
+          type Context = {
+            user: User,
+            workload: Workload,
+            access_token: Access_token,
+            id_token: id_token,
+            userinfo_token: Userinfo_token,
+          };
+          action "Update" appliesTo {
+            principal: [Workload, User, Role],
+            resource: [Issue],
+            context: Context
+          };
+        }
