@@ -23,7 +23,7 @@
             <label class="focused-label-big">Enter code</label>
         </div>
         <div class="flex justify-end mt2">
-            <input type="submit" class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white btn cust-primary-button"
+            <input type="submit" class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white cust-primary-button"
                 value="Login">
         </div>        
     </form>
