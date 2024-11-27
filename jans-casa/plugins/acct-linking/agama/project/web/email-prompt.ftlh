@@ -10,8 +10,8 @@
                 <label class="focused-label-big">Your e-mail</label>
             </div>
             <div class="flex justify-end mt2">
-                <input type="submit" class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white btn cust-primary-button"
-                    value="Continue">
+                <input class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white cust-primary-button"
+                    type="submit" value="Continue">
             </div>
         </form>
     </section>

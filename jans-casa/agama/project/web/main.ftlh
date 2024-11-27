@@ -21,7 +21,7 @@
             </div>
             <div class="mt5">
                 <input type="submit" value="Login"
-                    class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success text-white hover-bg-success hover-text-white cust-primary-button">
+                    class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white cust-primary-button">
             </div>
 
             <input name="device" type="hidden">

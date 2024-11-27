@@ -80,7 +80,7 @@
 <form method="post" enctype="application/x-www-form-urlencoded">
     <div class="flex flex-column items-center pt3 mt2">
         <span class="f7">Stuck or changed your mind?</span>
-        <button class="pa0 bw0 br0 blue hover-dark-blue underline-hover bg-transparent btn cust-link-button f7-cust"
+        <button class="f7-cust pa0 bw0 br0 blue hover-dark-blue underline-hover bg-transparent cust-link-button"
                 type="submit" id="skipped" name="skipped" value="">
             Use a different authentication method
         </button>
