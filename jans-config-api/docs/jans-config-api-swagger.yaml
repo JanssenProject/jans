@@ -9273,17 +9273,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanEdit:
-          type: boolean
         userCanEdit:
           type: boolean
-        userCanView:
+        adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
+        userCanView:
           type: boolean
         userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string

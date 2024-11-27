@@ -6,29 +6,20 @@
 
 package io.jans.configapi.test.auth;
 
-import io.jans.as.common.model.registration.Client;
-
-import static io.restassured.RestAssured.given;
 import io.jans.configapi.ConfigServerBaseTest;
-import io.jans.model.net.HttpServiceResponse;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
 
-import org.json.JSONObject;
 import static org.testng.Assert.*;
 
-import java.util.Map;
-
-import org.apache.http.entity.ContentType;
-import org.json.JSONObject;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-public class ClientResourceTest extends ConfigServerBaseTest {
+public class ClientResourceTest extends BaseTest {
 
     private String clientId;
 
@@ -39,15 +30,14 @@ public class ClientResourceTest extends ConfigServerBaseTest {
                 openidClientsUrl);
         Builder request = getResteasyService().getClientBuilder(issuer + openidClientsUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
-        request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
         log.error("Response for getAllClient -  response:{}", response);
-
     }
 
-    @Parameters({ "issuer", "openidClientsUrl", "openid_client2" })
+    @Parameters({ "issuer", "openidClientsUrl", "openid_client_1" })
     @Test
     public void postClient(final String issuer, final String openidClientsUrl, final String json) {
         log.error("\n\n\n postClient2 - accessToken:{}, issuer:{}, openidClientsUrl:{}, json:{}", accessToken, issuer,

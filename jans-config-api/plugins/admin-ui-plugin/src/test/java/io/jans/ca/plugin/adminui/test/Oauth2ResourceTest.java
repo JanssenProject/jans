@@ -29,7 +29,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 
-public class ClientResourceTest extends ConfigServerBaseTest{
+public class Oauth2ResourceTest extends ConfigServerBaseTest{
 
     private String clientId;
     
@@ -47,25 +47,5 @@ public class ClientResourceTest extends ConfigServerBaseTest{
 
     }
 
-    @Parameters({"issuer", "openidClientsUrl", "openid_client2"})
-    @Test
-    public void postClient2(final String issuer, final String openidClientsUrl, final String json) {
-        log.error("\n\n\n postClient2 - accessToken:{}, issuer:{}, openidClientsUrl:{}, json:{}", accessToken, issuer, openidClientsUrl, json);
-
-        Builder request = getResteasyService().getClientBuilder(issuer+openidClientsUrl);
-        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
-        request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
-        //String jsonStr = decodeFileValue(json);
-        //log.error("\n\n\n postClient2 - jsonStr:{}", jsonStr);
-        Response response = request.post(Entity.entity(json, MediaType.APPLICATION_JSON));
-        log.error("post client -  response:{}", response);
-
-        if (response.getStatus() == 201) {
-            log.trace("Response for Access Token -  response.getEntity():{}, response.getClass():{}", response.getEntity(), response.getClass());
-        }
-      
-
-        
-        assertEquals(response.getStatus(), Status.CREATED.getStatusCode());
-    }
+  
 }

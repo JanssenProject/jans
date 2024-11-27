@@ -6,8 +6,7 @@
 
 package io.jans.configapi.test.health;
 
-import static io.restassured.RestAssured.given;
-import io.jans.configapi.BaseTest;
+import io.jans.configapi.ConfigServerBaseTest;
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;

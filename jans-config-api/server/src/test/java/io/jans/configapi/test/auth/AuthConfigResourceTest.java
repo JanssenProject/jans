@@ -6,11 +6,18 @@
 
 package io.jans.configapi.test.auth;
 
-import static io.restassured.RestAssured.given;
+import jakarta.ws.rs.HttpMethod;
 import io.jans.configapi.ConfigServerBaseTest;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
+
 import org.testng.annotations.Parameters;
 
 
@@ -18,20 +25,30 @@ public class AuthConfigResourceTest extends ConfigServerBaseTest{
 
     @Parameters({"issuer", "authConfigurationUrl"})
     @Test
-    public void getAuthAppConfigurationProperty(final String issuer, final String authConfigurationUrl) {
+    public void getAuthConfigurationProperty(final String issuer, final String authConfigurationUrl) {
         log.error("accessToken:{}, issuer:{}, authConfigurationUrl:{}", accessToken, issuer, authConfigurationUrl);
-            given().when().contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", AUTHORIZATION_TYPE + " "+ accessToken, null)
-                .get(issuer+authConfigurationUrl).then().statusCode(200);
+
+            Builder request = getResteasyService().getClientBuilder(issuer + authConfigurationUrl);
+            request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
+            request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+
+            Response response = request.get();
+            assertEquals(response.getStatus(), Status.OK.getStatusCode());
+            log.error("Response for getDefaultAuthenticationMethod -  response:{}", response);
     }
     
-    @Parameters({"issuer", "authConfigurationUrl"})
+    @Parameters({"issuer", "authConfigurationUrl", "auth_config_patch_1"})
     @Test
-    public void patchAppConfigurationProperty(final String issuer, final String authConfigurationUrl) {
-        log.error("accessToken:{}, issuer:{}, authConfigurationUrl:{}", accessToken, issuer, authConfigurationUrl);
-        given().when().contentType(MediaType.APPLICATION_JSON)
-            .header("Authorization", AUTHORIZATION_TYPE + " "+ accessToken, null)
-                .body("[ {\"op\":\"replace\", \"path\": \"/loggingLevel\", \"value\": \"DEBUG\" } ]")
-                .patch(issuer+authConfigurationUrl).then().statusCode(200);
+    public void patchAuthConfigurationProperty(final String issuer, final String authConfigurationUrl, final String json) {
+        log.error("getApiConfigtion() - accessToken:{}, issuer:{}, authConfigurationUrl:{}, json:{}", accessToken, issuer,
+                authConfigurationUrl, json);
+        Builder request = getResteasyService().getClientBuilder(issuer + authConfigurationUrl);
+        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON_PATCH_JSON);
+
+        Response response = request.method(HttpMethod.PATCH, Entity.entity(json, MediaType.APPLICATION_JSON));
+
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
+        log.error("Response for getApiConfigtion -  response:{}", response);
     }
 }

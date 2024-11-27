@@ -6,24 +6,33 @@
 
 package io.jans.configapi.test.auth;
 
-import static io.restassured.RestAssured.given;
 import io.jans.configapi.ConfigServerBaseTest;
+import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
+
 import org.testng.annotations.Parameters;
 
-public class AgamaDeploymentsResourceTest extends ConfigServerBaseTest{
+public class AgamaDeploymentsResourceTest extends ConfigServerBaseTest {
 
-    @Parameters({"issuer", "agamaDeploymentUrl"})
+    @Parameters({ "issuer", "agamaDeploymentUrl" })
     @Test
     public void getDeployments(final String issuer, final String agamaDeploymentUrl) {
         log.error("accessToken:{}, issuer:{}, agamaDeploymentUrl:{}", accessToken, issuer, agamaDeploymentUrl);
-            given().when().contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", AUTHORIZATION_TYPE + " "+ accessToken, null)
-                .get(issuer+agamaDeploymentUrl).then().statusCode(200);
+
+        Builder request = getResteasyService().getClientBuilder(issuer + agamaDeploymentUrl);
+        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
+
+        Response response = request.get();
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
+        log.error("Response for getDefaultAuthenticationMethod -  response:{}", response);
+
     }
-    
-	
-	
+
 }

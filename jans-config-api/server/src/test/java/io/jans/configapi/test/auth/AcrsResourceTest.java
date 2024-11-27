@@ -6,11 +6,17 @@
 
 package io.jans.configapi.test.auth;
 
-import static io.restassured.RestAssured.given;
 import io.jans.configapi.ConfigServerBaseTest;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
+
 import org.testng.annotations.Parameters;
 
 public class AcrsResourceTest extends ConfigServerBaseTest{
@@ -19,21 +25,29 @@ public class AcrsResourceTest extends ConfigServerBaseTest{
     @Test
     public void getDefaultAuthenticationMethod(final String issuer, final String acrsUrl) {
         log.error("accessToken:{}, issuer:{}, acrsUrl:{}", accessToken, issuer, acrsUrl);
-            given().when().contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization",AUTHORIZATION_TYPE + " "+ accessToken, null)
-                .get(issuer+acrsUrl).then().statusCode(200);
+        Builder request = getResteasyService().getClientBuilder(issuer + acrsUrl);
+        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
+
+        Response response = request.get();
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
+        log.error("Response for getDefaultAuthenticationMethod -  response:{}", response);
     }
     
 	
-	@Parameters({"issuer", "acrsUrl", "default_acr1"})
+	@Parameters({"issuer", "acrsUrl", "default_acr_1"})
     @Test
     public void postClient(final String issuer, final String acrsUrl, final String json) {
         log.error("accessToken:{}, issuer:{}, acrsUrl:{}, json:{}", accessToken, issuer, acrsUrl, json);
-        log.info("Creating client using json string");
 
-         given().when().contentType(MediaType.APPLICATION_JSON)
-            .header("Authorization", AUTHORIZATION_TYPE + " "+ accessToken, null)
-                .body(json)
-                .put(issuer+acrsUrl).then().statusCode(200);
+        Builder request = getResteasyService().getClientBuilder(issuer + acrsUrl);
+        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+
+        Response response = request.post(Entity.entity(json, MediaType.APPLICATION_JSON));
+
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
+        log.error("Response for getApiConfigtion -  response:{}", response);
+ 
     }
 }
