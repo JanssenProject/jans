@@ -19,7 +19,7 @@ import org.testng.annotations.Test;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-public class ClientResourceTest extends BaseTest {
+public class ClientResourceTest extends ConfigServerBaseTest {
 
     private String clientId;
 

@@ -101,4 +101,22 @@ import jakarta.ws.rs.core.Response.Status;
 public class AdminUIBaseTest extends BaseTest{
 
     //AdminUI specific code
+    
+    @BeforeMethod
+    public void getAccessToken() throws Exception {
+        log.error("getAccessToken - propertiesMap:{}", propertiesMap);
+
+        String tokenUrl = propertiesMap.get("authzurl");
+        String strGrantType = propertiesMap.get("tokenGrantType");
+        String clientId = propertiesMap.get("clientId");
+        String clientSecret = propertiesMap.get("clientSecret");
+        String scopes = propertiesMap.get("test.scopes");
+        String authStr = clientId + ':' + clientSecret;
+
+        GrantType grantType = GrantType.fromString(strGrantType);
+        this.accessToken = getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
+        log.error("accessToken:{}", accessToken);
+    }
+    
+    
 }

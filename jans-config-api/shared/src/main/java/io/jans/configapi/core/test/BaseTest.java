@@ -203,6 +203,7 @@ public class BaseTest {
         return null;
     }
 
+    //TO-DO - check if needed
     protected HttpService getHttpService() {
         return this.httpService;
     }

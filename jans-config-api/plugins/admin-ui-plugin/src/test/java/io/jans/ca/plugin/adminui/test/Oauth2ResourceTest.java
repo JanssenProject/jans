@@ -29,21 +29,21 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 
-public class Oauth2ResourceTest extends ConfigServerBaseTest{
+public class OAuth2ResourceTest extends ConfigServerBaseTest{
 
     private String clientId;
     
     
     @Parameters({"issuer", "openidClientsUrl"})
     @Test
-    public void getAllClient(final String issuer, final String openidClientsUrl) {
-        log.error("getAllClient() - accessToken:{}, issuer:{}, openidClientsUrl:{}", accessToken, issuer, openidClientsUrl);
+    public void getOAuth2Data(final String issuer, final String openidClientsUrl) {
+        log.error("getOAuth2Data() - accessToken:{}, issuer:{}, openidClientsUrl:{}", accessToken, issuer, openidClientsUrl);
         Builder request = getResteasyService().getClientBuilder(issuer+openidClientsUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
         
         Response response = request.get();
-        log.error("Response for Access Token -  response:{}", response);
+        log.error("Response for getOAuth2Data -  response:{}", response);
 
     }
 
