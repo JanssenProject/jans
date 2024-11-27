@@ -9273,11 +9273,11 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanView:
-          type: boolean
         userCanView:
           type: boolean
         userCanEdit:
+          type: boolean
+        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
@@ -11256,14 +11256,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:

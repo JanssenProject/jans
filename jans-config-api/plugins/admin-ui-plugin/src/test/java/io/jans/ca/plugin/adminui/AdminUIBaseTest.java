@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.core.test;
+package io.jans.ca.plugin.adminui;
 
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
