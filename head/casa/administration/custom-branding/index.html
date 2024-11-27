@@ -8706,7 +8706,7 @@
 <p><img alt="quick design glance" src="../../../assets/casa/admin-console/custom-branding.png" /></p>
 <p>Once you supply your files, color values, and footer text, click on <code>Save</code> and see the changes take immediately by navigating to a different page or opening a new browser tab. Repeat the process till you get the combination that best matches your organization's look and feel.</p>
 <p>With "Primary buttons" we refer to the vast majority of buttons that trigger some action such as saving, updating or accepting - whether in the user pages or the admin UI itself. "Cancel" covers undo, close or cancel, while "Misc" is for anything not fitting any of the previous usages.</p>
-<p>You can choose "Use defaults" if you feel comfortable with the <a href="https://getbootstrap.com/docs/4.4/components/buttons/">Bootstrap-like</a> colors offered in Jans Casa.</p>
+<p>You can choose "Use defaults" if you feel comfortable with the <a href="https://getbootstrap.com/docs/5.0/components/buttons/">Bootstrap-like</a> colors offered in Jans Casa.</p>
 <h2 id="using-the-external-assets-directory">Using the external assets directory<a class="headerlink" href="#using-the-external-assets-directory" title="Permanent link">#</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -8715,12 +8715,11 @@
 <h3 id="background">Background<a class="headerlink" href="#background" title="Permanent link">#</a></h3>
 <p>Casa's UI design is driven by one CSS stylesheet and a few images. Specifically, Casa leverages the following UI frameworks:</p>
 <ul>
-<li><a href="http://books.zkoss.org/zk-mvvm-book/9.0/">ZK</a></li>
-<li><a href="https://getbootstrap.com/docs/4.4/getting-started/introduction/#quick-start">Bootstrap 4.4</a></li>
+<li><a href="http://books.zkoss.org/zk-mvvm-book/10.0/">ZK</a></li>
 <li><a href="http://tachyons.io">Tachyons 4.11</a></li>
 <li><a href="https://fontawesome.com">Font Awesome 5.12</a></li>
 </ul>
-<p>Particularly, ZK's default theme CSS file was disabled to offer a higher degree of flexibility in design. This enables Bootstrap and Tachyons to claim control over style rules applied to HTML markup.</p>
+<p>Particularly, ZK's default theme CSS file was disabled to offer a higher degree of flexibility in design. This enables Tachyons to claim control over style rules applied to HTML markup.</p>
 <h3 id="external-assets-directory">External assets directory<a class="headerlink" href="#external-assets-directory" title="Permanent link">#</a></h3>
 <p>In the <code>/opt/jans/jetty/casa/static</code> folder, you can place your own version of the main stylesheet and images Casa uses. No other stylesheet should be overriden.</p>
 <p>To start, log in to the Janssen Server and do the following:</p>
@@ -8735,7 +8734,7 @@ jar -xf ../webapps/jans-casa.war images styles/gluu/style.css
 <p>In the admin console, navigate to <code>Custom branding</code> &gt; <code>Use Casa external assets directory</code>. From that point on, your installation is reading relevant files from the <code>static</code> directory.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>In CSS, the rules' order of appearance is important. Keep in mind that for all Casa pages, Bootstrap is loaded first, then style.css, and finally tachyons.css. This means rules for Tachyons have higher priority overall unless <code>!important</code> is used.  </p>
+<p>In CSS, the rules' order of appearance is important. For all Casa pages, style.css is loaded first, then tachyons.css. This means rules for Tachyons have higher priority unless <code>!important</code> is used.  </p>
 </div>
 <p>The main stylesheet (<code>style.css</code>) is located at <code>/opt/jans/jetty/jans-casa/static/styles/gluu</code> if you have followed the instructions above.</p>
 <p>Here are some tips for applying your customizations:</p>
@@ -8747,7 +8746,7 @@ jar -xf ../webapps/jans-casa.war images styles/gluu/style.css
 <p>Inspect the DOM tree generated for application pages and determine the CSS selectors you need to edit or things you have to add in order to alter the appearance. Use your web browser's facilities to inspect web page composition: this is usually part of any browser's developer toolbar. Moreover, they allow you to change styles on the fly so you can play a lot before applying the real changes.</p>
 </li>
 <li>
-<p>Don't override rules that are already defined in Bootstrap or Tachyons CSS files. Conversely, ZK rules (which are prefixed with <code>z-</code>) are safe to be re-defined since ZK CSS isn't included (and <code>style.css</code> actually already redefines some). </p>
+<p>Don't override rules that are already defined in Tachyons. Conversely, ZK rules (which are prefixed with <code>z-</code>) are safe to be re-defined since ZK CSS isn't included.</p>
 </li>
 <li>
 <p>In most circumstances, your work will come down to editing existing rules in <code>style.css</code>. HTML markup will show rules (in the <code>class</code> attribute) prefixed with <code>cust-</code> that are apparently not defined anywhere. These rules are intended to give admins the opportunity to add their design tastes. The following is a list of custom selectors you can add to <code>style.css</code>. Names are in general self-explanatory, the images below help clarify more.</p>
@@ -8793,7 +8792,7 @@ jar -xf ../webapps/jans-casa.war images styles/gluu/style.css
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-29T15:56:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-29</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-27T17:24:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-27</span>
       
         <br>
         Created:
