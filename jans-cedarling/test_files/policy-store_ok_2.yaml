@@ -72,39 +72,46 @@ policy_stores:
         entity Access_token = {"aud": String,"iss": String, "jti": String, "client_id": String,"org_id": String};
         entity Userinfo_token  = {"iss": String, "jti": String, "client_id": String};
         entity Empty;
+        type Context = {
+          user: User,
+          workload: Workload,
+          access_token: Access_token,
+          id_token: id_token,
+          userinfo_token: Userinfo_token,
+        };
         action "Update" appliesTo {
           principal: [Workload, User],
           resource: [Issue],
-          context: {}
+          context: Context
         };
         action "UpdateForWorkload" appliesTo {
           principal: [Workload,User],
           resource: [Issue],
-          context: {}
+          context: Context
         };
         action "UpdateForUser" appliesTo {
           principal: [Workload,User],
           resource: [Issue],
-          context: {}
+          context: Context
         };
         action "UpdateForUserAndRole" appliesTo {
           principal: [Workload,User],
           resource: [Issue],
-          context: {}
+          context: Context
         };
         action "UpdateForWorkloadAndRole" appliesTo {
           principal: [Workload,User],
           resource: [Issue],
-          context: {}
+          context: Context
         };
         action "NoApplies" appliesTo {
           principal: [Empty],
           resource: [Issue],
-          context: {}
+          context: Context
         };
         action "AlwaysDeny" appliesTo {
           principal:  [Workload,User],
           resource: [Issue],
-          context: {}
+          context: Context
         };
         }

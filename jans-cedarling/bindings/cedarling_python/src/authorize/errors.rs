@@ -100,6 +100,13 @@ create_exception!(
     "Error encountered while collecting all entities"
 );
 
+create_exception!(
+    authorize_errors,
+    AddEntitiesIntoContextError,
+    AuthorizeError,
+    "Error encountered while adding entities into context"
+);
+
 #[pyclass]
 #[derive()]
 pub struct ErrorPayload(CedarlingAuthorizeError);
@@ -149,7 +156,8 @@ errors_functions! {
     CreateContext => CreateContextError,
     CreateRequestWorkloadEntity => CreateRequestWorkloadEntityError,
     CreateRequestUserEntity => CreateRequestUserEntityError,
-    Entities => EntitiesError
+    Entities => EntitiesError,
+    AddEntitiesIntoContext => AddEntitiesIntoContextError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {

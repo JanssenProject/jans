@@ -56,7 +56,7 @@ lazy_static! {
     .expect("Request should be deserialized from json");
 }
 
-/// Check if action executes for next principals: Workload, User, Role
+/// Check if action executes for next principals: Workload, User
 #[test]
 fn success_test_for_all_principals() {
     let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));

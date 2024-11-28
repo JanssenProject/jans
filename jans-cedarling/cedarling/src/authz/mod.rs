@@ -22,6 +22,7 @@ use crate::log::{
 };
 
 mod authorize_result;
+mod merge_json;
 
 mod entities;
 pub(crate) mod request;
@@ -37,7 +38,9 @@ use entities::{
     create_userinfo_token_entity, AccessTokenEntitiesError, RoleEntityError,
 };
 use entities::{create_resource_entity, AccessTokenEntities};
+use merge_json::{merge_json_values, MergeError};
 use request::Request;
+use serde_json::{json, Value};
 use token_data::{AccessTokenData, IdTokenData, UserInfoTokenData};
 
 /// Configuration to Authz to initialize service without errors
@@ -68,6 +71,7 @@ impl Authz {
                 Some(config.application_name.clone()),
                 LogType::System,
             )
+            .set_cedar_version()
             .set_message("Cedarling Authz initialized successfully".to_string()),
         );
 
@@ -87,12 +91,6 @@ impl Authz {
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
             .map_err(AuthorizeError::Action)?;
 
-        // Parse context.
-        let context: cedar_policy::Context = cedar_policy::Context::from_json_value(
-            request.context.clone(),
-            Some((&schema.schema, &action)),
-        )?;
-
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
         let entities_data: AuthorizeEntitiesData = self.authorize_entities_data(&request)?;
 
@@ -100,6 +98,13 @@ impl Authz {
         let principal_workload_uid = entities_data.access_token_entities.workload_entity.uid();
         let resource_uid = entities_data.resource_entity.uid();
         let principal_user_entity_uid = entities_data.user_entity.uid();
+
+        let context = add_entities_to_context(
+            request.context.clone(),
+            &entities_data,
+            &schema.schema,
+            &action,
+        )?;
 
         // Convert [`AuthorizeEntitiesData`] to  [`cedar_policy::Entities`] structure,
         // hold all entities that will be used on authorize check.
@@ -224,7 +229,6 @@ impl Authz {
 
         let role_entities = create_role_entities(policy_store, &decode_result, trusted_issuer)?;
 
-        // Populate the `AuthorizeEntitiesData` structure using the builder pattern
         let data = AuthorizeEntitiesData::builder()
             // Populate the structure with entities derived from the access token
             .access_token_entities(create_access_token_entities(
@@ -263,6 +267,43 @@ impl Authz {
 
         Ok(data.build())
     }
+}
+
+/// Constructs the authorization context by adding the built entities from the tokens
+fn add_entities_to_context(
+    request_context: Value,
+    entities_data: &AuthorizeEntitiesData,
+    schema: &cedar_policy::Schema,
+    action: &cedar_policy::EntityUid,
+) -> Result<cedar_policy::Context, AuthorizeError> {
+    let entities_context = json!({
+        "user": {"__entity": {
+            "type": entities_data.user_entity.uid().type_name().to_string(),
+            "id": entities_data.user_entity.uid().id().escaped(),
+        }},
+        "workload": {"__entity": {
+            "type": entities_data.access_token_entities.workload_entity.uid().type_name().to_string(),
+            "id": entities_data.access_token_entities.workload_entity.uid().id().escaped(),
+        }},
+        "access_token": {"__entity": {
+            "type": entities_data.access_token_entities.access_token_entity.uid().type_name().to_string(),
+            "id": entities_data.access_token_entities.access_token_entity.uid().id().escaped(),
+        }},
+        "id_token": {"__entity": {
+            "type": entities_data.id_token_entity.uid().type_name().to_string(),
+            "id": entities_data.id_token_entity.uid().id().escaped(),
+        }},
+        "userinfo_token": {"__entity": {
+            "type": entities_data.userinfo_token.uid().type_name().to_string(),
+            "id": entities_data.userinfo_token.uid().id().escaped(),
+        }},
+    });
+    let context = merge_json_values(entities_context, request_context)?;
+
+    let context: cedar_policy::Context =
+        cedar_policy::Context::from_json_value(context, Some((schema, action)))?;
+
+    Ok(context)
 }
 
 /// Helper struct to hold named parameters for [`Authz::execute_authorize`] method.
@@ -350,4 +391,7 @@ pub enum AuthorizeError {
     /// Error encountered while collecting all entities
     #[error("could not collect all entities: {0}")]
     Entities(#[from] cedar_policy::entities_errors::EntitiesError),
+    /// Error encountered while validating context according to the schema
+    #[error("could not add entities into context")]
+    AddEntitiesIntoContext(#[from] MergeError),
 }
