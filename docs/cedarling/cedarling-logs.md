@@ -37,10 +37,11 @@ logs and can stream to a database or S3 bucket. The Cedarling decision logs prov
 evidence of usage of the domain's externalized policies. The logs are also useful for forensic
 analysis to show everything the attacker attempted, both allowed and denied.
 
-## Example of log
+## Sample logs
 
 The JSON in this document is formatted for readability but is not prettified in the actual implementation.  
-The result of the authorization is quite extensive because we log all `cedar-policy` entity information for forensic analysis. We cannot truncate the data, as it may contain critical information.
+
+### Startup Message
 
 ```json
 {
@@ -58,6 +59,13 @@ The result of the authorization is quite extensive because we log all `cedar-pol
     "msg": "Cedarling Authz initialized successfully",
     "application_id": "TestApp"
 }      
+```
+
+### Decision Log Sample
+
+The result of the authorization is quite extensive because we log all `cedar-policy` entity information for forensic analysis. We cannot truncate the data, as it may contain critical information.
+
+```json
 {
     "id": "01937015-4649-7aad-8df8-4976e4bd8565",
     "time": 1732752262,
