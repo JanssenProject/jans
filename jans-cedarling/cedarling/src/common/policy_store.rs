@@ -465,7 +465,7 @@ impl<'de> serde::Deserialize<'de> for PoliciesContainer {
         let results: Vec<Result<cedar_policy::Policy, D::Error>> = policies
             .iter()
             .map(|(id, policy_raw)| {
-                parse_single_policy::<D>(&id, policy_raw).map_err(|err| {
+                parse_single_policy::<D>(id, policy_raw).map_err(|err| {
                     serde::de::Error::custom(format!(
                         "unable to decode policy with id: {id}, error: {err}"
                     ))
