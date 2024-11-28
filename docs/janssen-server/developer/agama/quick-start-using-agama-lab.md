@@ -40,31 +40,31 @@ inputs, and lastly, releasing the flow as an Agama project.
 
 1. Go to [Agama Lab](https://cloud.gluu.org/agama-lab) login page.
 
-    ![](../../../assets/agama-lab-login.png)
+    ![](../../../assets/agama-loginpage.png)
 
 2. Authenticate on the GitHub authentication page.
 
-    ![](../../../assets/agama-lab-GH-login.png)
+    ![](../../../assets/agama-lab-git-login.png)
 
-3. Input the name of the repository where Agama Lab should release the project artifacts. Click `Next`
-
-    ![](../../../assets/agama-lab-add-gh-repo.png)
+3. Click on `Change Repository`, go to  `your repositories` > select your repositories name. Click `Select`
+   
+    ![](../../../assets/agama-lab-add-git-repo.png)
 
 4. Project listing page will be shown. All the existing projects for your GitHub user are listed here. Projects can be
    created, edited, and deleted from the project listing page.
 
-    ![](../../../assets/agama-lab-project-page.png)
+    ![](../../../assets/agamalab-project-page.png)
 
 #### Create A New Project
 
 1. To create a new project, click on the `New Project` button on the project listing page above.
    Enter the name and the description for the new project and click the `Create` button.
 
-    ![](../../../assets/agama-lab-new-proj.png)
+    ![](../../../assets/agamalab-new-proj.png)
 
 2. This will create a new project and it'll be listed on the project listing page.
 
-    ![](../../../assets/agama-lab-project-listing.png)
+    ![](../../../assets/agamalab-project-listing.png)
 
 
 #### Create The Authentication Flow
@@ -78,21 +78,19 @@ inputs, and lastly, releasing the flow as an Agama project.
 
     _Right-click on `code` and then select `New` > `Flow File`_
 
-    ![](../../../assets/agama-lab-new-flow.png)
+    ![](../../../assets/agamalab-new-flow.png)
 
     _Give name and description for the flow file and then click `Create`_
 
-    ![](../../../assets/agama-lab-new-flow-name.png)
+    ![](../../../assets/agamalab-new-flow-name.png)
 
     A newly created flow file has one block in it by default.
 
-    ![](../../../assets/agama-lab-flow-passwd-1.png)
+    ![](../../../assets/agamalab-flow-passwd-1.png)
     
 
-
-
     Clicking on the block will allow you to add further blocks using :material-plus-circle: or to edit the existing
-    block using :material-pencil:.
+    block using :material-pencil:
 
 2. Create _AuthenticationService_ Call block
 
@@ -111,7 +109,7 @@ inputs, and lastly, releasing the flow as an Agama project.
     This will create a new instance of `AuthenticationService` class. This
     instance will be used to authenticate the user. The new instance will be stored in a variable called `authService`.
    
-    ![](../../../assets/agama-lab-flow-passwd-edit-call.png)
+    ![](../../../assets/agamalab-flow-passwd-edit-call.png)
 
 3.  Create _CdiUtil_ Call block
 
@@ -126,7 +124,7 @@ inputs, and lastly, releasing the flow as an Agama project.
     _Click on the newly created `Call` block and by clicking :material-pencil: open the configuration page.
     Input values as shown below in the configuration screen_
 
-    ![](../../../assets/agama-lab-flow-passwd-edit-cdiutil.png)
+    ![](../../../assets/agamalab-flow-passwd-edit-cdiutil.png)
 
 4. Create Assignment block
 
@@ -139,9 +137,7 @@ inputs, and lastly, releasing the flow as an Agama project.
     _Click on the newly created `Assignment` block. Click :material-pencil:.
     Input values as shown below in the configuration screen_
 
-
-    **Todo** 
-    ![](../../../assets/agama-lab-flow-passwd-edit-assignment.png)
+    ![](../../../assets/agamalab-flow-passwd-edit-assignment.png)
 
 5. Create Repeat block
 
@@ -157,7 +153,7 @@ inputs, and lastly, releasing the flow as an Agama project.
     _Click on the newly created `Repeat` block. Click :material-pencil:.
     Input values as shown below in the configuration screen_
 
-    ![](../../../assets/agama-lab-flow-passwd-edit-repeat.png)
+    ![](../../../assets/agamalab-flow-passwd-edit-repeat.png)
 
 6. Create An RRF block
 
@@ -171,7 +167,7 @@ inputs, and lastly, releasing the flow as an Agama project.
     _Click on the newly created `RRF` block. Click :material-pencil:. Input values as shown below in the configuration
     screen_
 
-    ![](../../../assets/agama-lab-flow-passwd-edit-rrf.png)
+    ![](../../../assets/agamalab-flow-passwd-edit-rrf.png)
     
     **todo**
     Since we have checked the `In Repeat Block` at the time of adding the `RRF` block, the `RRF` block
