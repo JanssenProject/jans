@@ -71,6 +71,7 @@ impl Authz {
                 Some(config.application_name.clone()),
                 LogType::System,
             )
+            .set_cedar_version()
             .set_message("Cedarling Authz initialized successfully".to_string()),
         );
 

@@ -57,7 +57,9 @@ The JSON in this document is formatted for readability but is not prettified in 
     "log_kind": "System",
     "pdp_id": "75f0dc93-0a90-4076-95fa-dc16d3f00375",
     "msg": "Cedarling Authz initialized successfully",
-    "application_id": "TestApp"
+    "application_id": "TestApp",
+    "cedar_lang_version": "4.1.0",
+    "cedar_sdk_version": "4.2.2"
 }      
 ```
 
