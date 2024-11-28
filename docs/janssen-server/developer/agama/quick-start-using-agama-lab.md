@@ -89,9 +89,7 @@ inputs, and lastly, releasing the flow as an Agama project.
     ![](../../../assets/agama-lab-flow-passwd-1.png)
     
 
-    **todo**
-    Click on the right side od the
-    click on the next node connection and drag that and drop and  will open next node pop-up.
+
 
     Clicking on the block will allow you to add further blocks using :material-plus-circle: or to edit the existing
     block using :material-pencil:.
@@ -145,14 +143,14 @@ inputs, and lastly, releasing the flow as an Agama project.
     **Todo** 
     ![](../../../assets/agama-lab-flow-passwd-edit-assignment.png)
 
-5. Create [repeat]() block
+5. Create Repeat block
 
     `Repeat` block represents the [Repeat](../../../agama/language-reference.md#repeat) instruction of Agama DSL.
 
     Repeat block creates a loop to iterate over certain steps(blocks). We will create a repeat loop that allows
     3 retries if the authentication fails.
 
-      Drag the end point of `Result Object` block then select `Repeat`
+    Drag the end point of `Result Object` block then select `Repeat`
 
     ![](../../../assets/agama-create-repeat.png)
 
@@ -166,15 +164,16 @@ inputs, and lastly, releasing the flow as an Agama project.
     `RRF` block represents the [RRF](../../../agama/language-reference.md#rrf)
    instruction of Agama DSL.
 
-    _Click on the `Repeat` block. Click :material-plus-circle:. Check the `In Repeat Block` and then click on `RRF`._
+    Drag the end point of `Retry Authentication ` block then select `RRF`
 
-    ![](../../../assets/agama-lab-flow-passwd-check-repeat.png)
+    ![](../../../assets/check-repeat.png)
 
-    _Click on the newly created `Repeat` block. Click :material-pencil:. Input values as shown below in the configuration
+    _Click on the newly created `RRF` block. Click :material-pencil:. Input values as shown below in the configuration
     screen_
 
     ![](../../../assets/agama-lab-flow-passwd-edit-rrf.png)
-
+    
+    **todo**
     Since we have checked the `In Repeat Block` at the time of adding the `RRF` block, the `RRF` block
     as well as all the blocks that we add to the `RRF` block iterated blocks.
 
@@ -185,9 +184,9 @@ inputs, and lastly, releasing the flow as an Agama project.
     Create a `Call` block to process the username and password received from the user (in RRF) and
     validate them. The result of validation should be stored in a variable.
 
-    _Click on the `RRF` block. Click :material-plus-circle:. Click on `Call`._
+    Drag the end point of `RRF` block then select `Call`
 
-    ![](../../../assets/agama-lab-flow-passwd-create-cdiutil-instance.png)
+    ![](../../../assets/agama-lab-create-cdiutil-instance.png)
 
     _Click on the newly created `Call` block. Click :material-pencil:. Input values as shown below in the configuration
     screen_
@@ -197,15 +196,16 @@ inputs, and lastly, releasing the flow as an Agama project.
 8. Create An Assignment block
 
     In case of authentication failure, we want to show the username to the user while reentering the
-    password on the web page. For this, we will save the username in a variable using the `Assignment(s)` block.
+    password on the web page. For this, we will save the username in a variable using the `Assignment` block.
 
-    _Click on the `Call` block. Click :material-plus-circle:. Click on `Assignment(s)`._
+    Drag the end point of `Validate Credentials` block then select `Assignment`
 
-    ![](../../../assets/agama-lab-flow-passwd-create-assignment-uid.png)
+    ![](../../../assets/agama-lab-create-assignment-uid.png)
 
     _Click on the newly created `Call` block. Click :material-pencil:.
     Input values as shown below in the configuration screen_
 
+    **todo**  
     ![](../../../assets/agama-lab-flow-passwd-edit-assignment-uid.png)
 
 9. Create A Conditional When block
@@ -217,17 +217,18 @@ inputs, and lastly, releasing the flow as an Agama project.
     Create a conditional check using the `When` block to check if the authentication (validated in
     `validate credentials` block) has been successful.
 
-    _Click on `Assignment(s)` block. Click :material-plus-circle:. Click on `When`._
+    Drag the end point of `Assignment` block then select `When`
 
-    ![](../../../assets/agama-lab-flow-passwd-create-when.png)
+    ![](../../../assets/agama-lab-flow-password-create-when.png)
 
     _Click on the newly created `When` block. Click :material-pencil:.
     Input values as shown below in the configuration screen_
 
-    ![](../../../assets/agama-lab-flow-passwd-edit-when.png)
+    ![](../../../assets/agama-lab-flow-password-edit-when.png)
 
 10. Create [finish]() blocks
 
+     ***todo***
      The `Finish` block represents the [Flow finish](../../../agama/language-reference.md#flow-finish) instruction of Agama DSL.
 
      If the authentication was successful then the flow should finish and return the
@@ -238,7 +239,6 @@ inputs, and lastly, releasing the flow as an Agama project.
      `Finish`_
 
      ![](../../../assets/agama-lab-flow-passwd-create-finish.png)
-
      _Click on the newly created `Finish` block. Click :material-pencil:.
      Input values as shown below in the configuration screen_
 
@@ -308,52 +308,62 @@ Use the steps below to create the page.
 
     _Click `Edit HTML`. This opens a text editor. Remove existing code in the editor and paste the code shown below._
 
-    ```html
-    <!doctype html>
-    <html xmlns="http://www.w3.org/1999/xhtml">
-       <head>
-         <title> Jans Agama Basic Auth flow </title>
-       </head>
-       <body>
-   
-         <h2>Welcome</h2>
-         <hr />
-         
-         [#if !(success!true)]
-           <p class="fs-6 text-danger mb-3">${msgs["login.errorMessage"]}</p>
-         [/#if]
-           
-         <hr />
-         <form method="post" enctype="application/x-www-form-urlencoded">
-           
-           <div>
-               Username: <input type="text" class="form-control" name="username" id="username" value="${uid!}" required>
-           </div>
-           
-           <div>
-               Password: <input type="password" class="form-control" id="password" name="password">
-           </div>
-           
-           <div>
-               <input type="submit" class="btn btn-success px-4" value="Login">
-           </div>
-         </form>
-       </body>
-       <style>
-           input {
-               border: 1px solid #000000;
-           }
-       </style>
-    </html>
-    ```
+```html
+    <!DOCTYPE html>
+<html lang="en">
+    <head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Username_Password_Form
+	</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2/dist/tailwind.min.css" type="text/css">
+  </head>
+  <body>
+	<div class="md:h-screen bg-white relative flex flex-col justify-center items-center">
+	  <div class="md:border md:border-gray-300 bg-white md:shadow-lg shadow-none rounded p-10 align-middle">
+		<div class="flex flex-col items-center space-y-3">
+		  <div class="flex">
+			<img src="https://gluu.org/wp-content/uploads/2020/12/logo.png" id="i4xwu">
+		  </div>
+		  <span class="text-2xl font-semi-bold leading-normal">Form</span>
+		  <p class="leading-normal">Enter your Username and Password
+		  </p>
+		</div>
+		<form method="post" class="my-8">
+		  <div class="relative mb-2">
+			<label for="username" class="label mt-2 ml-1 leading-tighter text-gray-600 text-base cursor-text">
+			  Username
+			</label>
+			<input type="text" id="username" name="username" autofocus="" required="" class="w-full rounded px-3 border border-gray-300 pt-2 pb-2 focus:border-green-700">
+		  </div>
+		  <div class="relative mb-2">
+			<label for="password" class="label mt-2 ml-1 leading-tighter text-gray-600 text-base cursor-text">
+			  Password
+			</label>
+			<input type="password" id="password" name="password" autofocus="" required="" class="w-full rounded px-3 border border-gray-300 pt-2 pb-2 focus:border-green-700">
+		  </div>
+		  <div class="space-y-9">
+			<div class="text-sm flex justify-center items-center">
+			  <button type="submit" class="py-2 px-6 rounded text-white btn bg-green-500 hover:bg-green-600">
+				Submit
+			  </button>
+			</div>
+		  </div>
+		</form>
+	  </div>
+	</div>
+  </body>
+</html>
+```
 
-    _Click `Save changes`_
+_Click `Save changes`_
 
-    ![](../../../assets/agama-lab-flow-passwd-save-template.png)
+![](../../../assets/agama-lab-flow-save-template.png)
 
-    _This will render the page in the visual editor_.
+_This will render the page in the visual editor_.
 
-    ![](../../../assets/agama-lab-flow-passwd-render-template.png)
+![](../../../assets/agama-lab-flow-render-template.png)
 
 ### Release The Project
 
@@ -385,13 +395,17 @@ Please ensure that Agama engine and scripts are [enabled](../agama/engine-bridge
 Server deployment
 
 1. Download the `.gama` file from the GitHub repository
+   
+
 2. Open [TUI](../../config-guide/config-tools/jans-tui/README.md) using following commands on Janssen Server
 
      ```bash title="Command"
      jans tui
      ```
-
+    
 3. Navigate to `Auth Server` > `Agama` > `Upload Project`. Select the `.gama` file to upload.
+
+    ![image](../../../assets/upload-gama-file.png)
 
 ## Test
 
