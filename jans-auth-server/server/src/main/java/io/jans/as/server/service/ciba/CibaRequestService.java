@@ -16,7 +16,7 @@ import io.jans.as.server.model.ldap.CIBARequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.CacheService;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 
 import jakarta.ejb.Stateless;

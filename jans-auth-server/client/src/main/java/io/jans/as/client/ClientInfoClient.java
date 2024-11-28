@@ -8,7 +8,7 @@ package io.jans.as.client;
 
 import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.common.AuthorizationMethod;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;

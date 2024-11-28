@@ -7,7 +7,7 @@
 package io.jans.as.client.ciba.ping;
 
 import io.jans.as.client.BaseRequest;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.json.JSONException;
 import org.json.JSONObject;

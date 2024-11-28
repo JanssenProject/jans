@@ -41,7 +41,7 @@ import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.json.JSONException;
 import org.json.JSONObject;

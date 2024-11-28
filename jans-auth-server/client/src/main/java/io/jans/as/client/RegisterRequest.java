@@ -22,7 +22,7 @@ import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterRequestParam;
 import io.jans.orm.model.base.LocalizedString;
 import jakarta.ws.rs.core.MediaType;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
