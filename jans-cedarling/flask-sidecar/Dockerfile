@@ -32,8 +32,6 @@ RUN adduser -s /bin/sh -D -G root -u 1000 web
 
 WORKDIR /api
 
-# Setting up proper permissions:
-RUN chown -R 1000:1000 /api
 
 RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans /tmp/jans \
         && cd /tmp/jans \
@@ -43,11 +41,12 @@ RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject
         && cd jans-cedarling/bindings/cedarling_python \
         && maturin build \
         && cp -r ../../flask-sidecar/* /api \
-        && chown -R 1000:1000 /api \
         && version=$(sed -n 's/.*version = "\(.*\)"/\1/p' pyproject.toml) \
         && mv ../../target/wheels/cedarling_python-"$version"-cp312-cp312-manylinux_2_34_x86_64.whl /api/cedarling_python.whl \
         && rm -rf /tmp/jans
 
+# Setting up proper permissions:
+RUN chown -R 1000:1000 /api
 
 # Project initialization:
 RUN poetry add /api/cedarling_python.whl \
