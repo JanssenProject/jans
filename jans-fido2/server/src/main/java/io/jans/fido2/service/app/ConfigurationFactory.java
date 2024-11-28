@@ -18,7 +18,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import io.jans.exception.ConfigurationException;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Conf;

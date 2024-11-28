@@ -20,7 +20,7 @@ import io.jans.service.message.model.config.MessageConfiguration;
 import io.jans.service.message.model.config.MessageProviderType;
 import io.jans.service.message.model.config.NullMessageConfiguration;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import jakarta.enterprise.context.ApplicationScoped;
