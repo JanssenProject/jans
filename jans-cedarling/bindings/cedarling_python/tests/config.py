@@ -21,26 +21,26 @@ def sample_bootstrap_config():
     # NOTE yaml is only used for test fixtures. Real imports use json.
     policy_store_location = join(TEST_FILES_PATH, "policy-store_ok.yaml")
 
-    bootstrap_config = BootstrapConfig(
-        application_name="TestApp",
-        policy_store_id="asdasd123123",
-        policy_store_local_fn=policy_store_location,
-        jwt_sig_validation=False,
-        jwt_status_validation=False,
-        at_iss_validation=False,
-        at_jti_validation=False,
-        at_nbf_validation=False,
-        idt_iss_validation=False,
-        idt_sub_validation=False,
-        idt_exp_validation=False,
-        idt_iat_validation=False,
-        idt_aud_validation=False,
-        id_token_trust_mode="none",
-        userinfo_iss_validation=False,
-        userinfo_aud_validation=False,
-        userinfo_sub_validation=False,
-        userinfo_exp_validation=False,
-        log_type="std_out"
-    )
+    bootstrap_config = BootstrapConfig({
+        "application_name":"TestApp",
+        "policy_store_id":"asdasd123123",
+        "policy_store_local_fn":policy_store_location,
+        "jwt_sig_validation":"disabled",
+        "jwt_status_validation":"disabled",
+        "at_iss_validation":"disabled",
+        "at_jti_validation":"disabled",
+        "at_nbf_validation":"disabled",
+        "idt_iss_validation":"disabled",
+        "idt_sub_validation":"disabled",
+        "idt_exp_validation":"disabled",
+        "idt_iat_validation":"disabled",
+        "idt_aud_validation":"disabled",
+        "id_token_trust_mode":"none",
+        "userinfo_iss_validation":"disabled",
+        "userinfo_aud_validation":"disabled",
+        "userinfo_sub_validation":"disabled",
+        "userinfo_exp_validation":"disabled",
+        "log_type":"std_out"
+    })
 
     return bootstrap_config
