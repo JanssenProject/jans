@@ -27,7 +27,7 @@ public class AcrsResourceTest extends ConfigServerBaseTest{
         log.error("accessToken:{}, issuer:{}, acrsUrl:{}", accessToken, issuer, acrsUrl);
         Builder request = getResteasyService().getClientBuilder(issuer + acrsUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
-        request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
@@ -44,7 +44,7 @@ public class AcrsResourceTest extends ConfigServerBaseTest{
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
-        Response response = request.post(Entity.entity(json, MediaType.APPLICATION_JSON));
+        Response response = request.put(Entity.entity(json, MediaType.APPLICATION_JSON));
 
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
         log.error("Response for getApiConfigtion -  response:{}", response);

@@ -10,14 +10,13 @@ import io.jans.configapi.ConfigServerBaseTest;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
-
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import static org.testng.Assert.*;
-
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
+
 
 public class ClientResourceTest extends ConfigServerBaseTest {
 

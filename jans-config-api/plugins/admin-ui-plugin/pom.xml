@@ -99,9 +99,6 @@
             <testResource>
                 <directory>src/test/resources</directory>
                 <filtering>true</filtering>
-                <includes>
-                    <include>*.*</include>
-                </includes>
             </testResource>
         </testResources>
         <plugins>

@@ -5,13 +5,26 @@
     <parameter name="propertiesFile" value="target/test-classes/config-api-test.properties" />
 	
 	<listeners>
-        <listener class-name="io.jans.configapi.listener.AlterSuiteListener" />
-        <listener class-name="io.jans.configapi.listener.SkipTestsListener" />
+        <listener class-name="io.jans.configapi.core.test.listener.AlterSuiteListener" />
+        <listener class-name="io.jans.configapi.core.test.listener.SkipTestsListener" />
     </listeners>
-  
-    <test name="Openid Client" enabled="true">
+	
+	    <test name="OAuth2" enabled="true">
         <classes>
-             <class name="io.jans.configapi.test.auth.ClientResourceTest" />
+             <class name="io.jans.ca.plugin.adminui.test.OAuth2ResourceTest" />
+        </classes>
+    </test>
+
+  
+    <test name="Logging" enabled="true">
+        <classes>
+             <class name="io.jans.ca.plugin.adminui.test.AuditLoggingResourceTest" />
+        </classes>
+    </test>
+	
+	<test name="License" enabled="true">
+        <classes>
+             <class name="io.jans.ca.plugin.adminui.test.LicenseResourceTest" />
         </classes>
     </test>
 

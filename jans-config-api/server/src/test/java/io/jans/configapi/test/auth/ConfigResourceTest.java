@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.rest.resource;
+package io.jans.configapi.test.auth;
 
 import static org.testng.Assert.assertEquals;
 
@@ -34,7 +34,7 @@ public class ConfigResourceTest extends ConfigServerBaseTest {
                 apiConfigtionUrl);
         Builder request = getResteasyService().getClientBuilder(issuer + apiConfigtionUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
-        request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
@@ -61,7 +61,7 @@ public class ConfigResourceTest extends ConfigServerBaseTest {
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON_PATCH_JSON);
 
-        Response response = request.method(HttpMethod.PATCH, Entity.entity(json, MediaType.APPLICATION_JSON));
+        Response response = request.method(HttpMethod.PATCH, Entity.entity(json, MediaType.APPLICATION_JSON_PATCH_JSON));
 
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
         log.error("Response for getApiConfigtion -  response:{}", response);
