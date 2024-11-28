@@ -14,40 +14,43 @@ if policy_store_location is None:
     policy_store_location = DEFAULT_POLICY_STORE_PATH
 
 # Initialize a BootstrapConfig instance with the default configuration
-bootstrap_config = BootstrapConfig({"application_name": "TestApp", "policy_store_id": "asdasd123123", "policy_store_local_fn": policy_store_location})
+bootstrap_config = BootstrapConfig(
+    {"application_name": "TestApp", "policy_store_id": "asdasd123123", "policy_store_local_fn": policy_store_location})
 
 # By default, JWT validation is enabled for security.
-# If you wish to disable all JWT validation checks, 
+# If you wish to disable all JWT validation checks,
 # use the `disable_all_jwt_validation` method:
 bootstrap_config.disable_all_jwt_validation()
 
-# Alternatively, you can disable specific JWT validation settings when 
+# Alternatively, you can disable specific JWT validation settings when
 # initializing the config:
 bootstrap_config = BootstrapConfig({
-    "application_name":"TestApp",
-    "policy_store_id":"asdasd123123",
-    "policy_store_local_fn":policy_store_location,
-    "jwt_sig_validation":"disabled",
-    "jwt_status_validation":"disabled",
-    "at_iss_validation":"disabled",
-    "at_jti_validation":"disabled",
-    "at_nbf_validation":"disabled",
-    "idt_iss_validation":"disabled",
-    "idt_sub_validation":"disabled",
-    "idt_exp_validation":"disabled",
-    "idt_iat_validation":"disabled",
-    "idt_aud_validation":"disabled",
-    "id_token_trust_mode":"none",
-    "userinfo_iss_validation":"disabled",
-    "userinfo_aud_validation":"disabled",
-    "userinfo_sub_validation":"disabled",
-    "userinfo_exp_validation":"disabled",
+    "application_name": "TestApp",
+    "policy_store_id": "asdasd123123",
+    "policy_store_local_fn": policy_store_location,
+    "jwt_sig_validation": "disabled",
+    "jwt_status_validation": "disabled",
+    "at_iss_validation": "disabled",
+    "at_jti_validation": "disabled",
+    "at_nbf_validation": "disabled",
+    "idt_iss_validation": "disabled",
+    "idt_sub_validation": "disabled",
+    "idt_exp_validation": "disabled",
+    "idt_iat_validation": "disabled",
+    "idt_aud_validation": "disabled",
+    "id_token_trust_mode": "none",
+    "userinfo_iss_validation": "disabled",
+    "userinfo_aud_validation": "disabled",
+    "userinfo_sub_validation": "disabled",
+    "userinfo_exp_validation": "disabled",
+    "log_type": "std_out"
 })
 
 # initialize cedarling instance
 # all values in the bootstrap_config is parsed and validated at this step.
 instance = Cedarling(bootstrap_config)
 
+# Getting logs from memory available only when `"log_type": "memory"`
 # returns a list of all active log ids
 # active_log_ids = instance.get_log_ids()
 
