@@ -39,8 +39,8 @@ analysis to show everything the attacker attempted, both allowed and denied.
 
 ## Example of log
 
-Json formatted is pretty prettified.
-Result of authorize is pretty bit because we log all `cedar-policy` entities information for forensic analysis and we can't cut data because it can be crucial.
+The JSON in this document is formatted for readability but is not prettified in the actual implementation.  
+The result of the authorization is quite extensive because we log all `cedar-policy` entity information for forensic analysis. We cannot truncate the data, as it may contain critical information.
 
 ```json
 {
