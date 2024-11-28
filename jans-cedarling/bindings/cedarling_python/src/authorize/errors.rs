@@ -109,6 +109,13 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
+    AddEntitiesIntoContextError,
+    AuthorizeError,
+    "Error encountered while adding entities into context"
+);
+
+create_exception!(
+    authorize_errors,
     EntitiesToJsonError,
     AuthorizeError,
     "Error encountered while parsing all entities to json for logging"
@@ -165,6 +172,7 @@ errors_functions! {
     CreateRequestUserEntity => CreateRequestUserEntityError,
     CreateRequestRoleEntity => CreateRequestRoleEntityError,
     Entities => EntitiesError,
+    AddEntitiesIntoContext => AddEntitiesIntoContextError,
     EntitiesToJson => EntitiesToJsonError
 }
 
