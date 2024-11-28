@@ -9,7 +9,7 @@ package io.jans.as.client.client;
 import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.register.RegisterRequestParam;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 

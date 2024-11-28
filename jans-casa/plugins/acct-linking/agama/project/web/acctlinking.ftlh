@@ -21,7 +21,7 @@
             </div>
             <div class="mt4 flex justify-between items-center">
                 <input type="submit" value="Login"
-                    class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white btn cust-primary-button">
+                    class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white cust-primary-button">
 
                 <#if providers?size gt 0>
                     <p class="f7 lh-title tc w4 ma0">OR use an external service to sign in:</p>

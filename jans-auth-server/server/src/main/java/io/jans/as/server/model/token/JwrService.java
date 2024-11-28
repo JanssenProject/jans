@@ -28,7 +28,7 @@ import io.jans.as.server.model.common.IAuthorizationGrant;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.SectorIdentifierService;
 import io.jans.as.server.service.ServerCryptoProvider;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;

@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static io.jans.as.model.config.Constants.*;
-import static org.apache.commons.lang.BooleanUtils.isTrue;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -16,7 +16,7 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import jakarta.persistence.Transient;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Maps;
 
