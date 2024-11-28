@@ -8,7 +8,7 @@ package io.jans.as.client;
 
 import io.jans.as.model.common.TokenTypeHint;
 import io.jans.as.model.token.TokenRevocationRequestParam;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import jakarta.ws.rs.HttpMethod;

@@ -18,7 +18,7 @@ import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.UserService;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 
 import jakarta.inject.Inject;

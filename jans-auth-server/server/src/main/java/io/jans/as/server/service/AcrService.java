@@ -17,7 +17,7 @@ import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.python.google.common.collect.Lists;
 import org.slf4j.Logger;
 

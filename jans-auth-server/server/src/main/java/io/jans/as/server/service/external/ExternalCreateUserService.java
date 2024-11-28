@@ -10,7 +10,7 @@ import io.jans.service.custom.script.ExternalScriptService;
 import jakarta.ejb.DependsOn;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Set;
 

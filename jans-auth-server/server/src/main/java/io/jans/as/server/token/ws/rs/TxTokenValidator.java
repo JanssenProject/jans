@@ -137,7 +137,7 @@ public class TxTokenValidator {
     }
 
     protected AuthorizationGrant getIdTokenGrant(String idTokenHint) {
-        if (org.apache.commons.lang.StringUtils.isBlank(idTokenHint)) {
+        if (org.apache.commons.lang3.StringUtils.isBlank(idTokenHint)) {
             return null;
         }
 

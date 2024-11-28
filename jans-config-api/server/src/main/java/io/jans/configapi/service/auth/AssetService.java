@@ -47,7 +47,7 @@ import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 @ApplicationScoped

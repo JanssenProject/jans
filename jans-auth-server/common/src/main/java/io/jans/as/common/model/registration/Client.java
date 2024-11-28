@@ -18,7 +18,7 @@ import io.jans.orm.annotation.*;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.orm.model.base.DeletableEntity;
 import io.jans.orm.model.base.LocalizedString;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.*;
