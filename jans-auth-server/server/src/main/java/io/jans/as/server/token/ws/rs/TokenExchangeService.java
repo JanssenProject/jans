@@ -19,8 +19,8 @@ import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,7 +32,7 @@ import java.util.function.Function;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.jans.as.model.config.Constants.OPENID;
 import static io.jans.as.model.config.Constants.TOKEN_TYPE_ACCESS_TOKEN;
-import static org.apache.commons.lang.BooleanUtils.isTrue;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Z

@@ -26,7 +26,7 @@ import io.jans.util.StringHelper;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import java.util.Date;
 import java.util.List;
 
 import static io.jans.as.model.util.Util.escapeLog;
-import static org.apache.commons.lang.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
 /**
  * Component to hold in memory authorization grant objects.

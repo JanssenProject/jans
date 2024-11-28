@@ -41,7 +41,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import io.jans.scim.model.exception.SCIMException;
 import io.jans.scim.model.fido2.Fido2DeviceData;

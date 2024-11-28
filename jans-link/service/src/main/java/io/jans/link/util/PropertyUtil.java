@@ -9,7 +9,7 @@ package io.jans.link.util;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
 import io.jans.model.SimpleProperty;

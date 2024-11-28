@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 @Path(Constants.CONFIG_USER)
 @Produces(MediaType.APPLICATION_JSON)

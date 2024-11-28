@@ -358,6 +358,14 @@ for the client with the matching client name.
 
 ![image](../../../assets/tui-add-client-screen.png)
 
+* If you are editing a client, you will have **Active Tokens** where you can search
+and delete tokens related to the edited client as shown image below.
+
+![Search Client Tokens](../../../assets/tui-openid-client-search-tokens.png)
+
+To view client details in json format, press key **v** on keyboard, to delete
+press **delete** (or **d**) key.
+
 ### Delete Screen
 
 * To delete the client, bring the control to the Specific `Client` row and press the `Delete` key.

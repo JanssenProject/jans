@@ -17,13 +17,12 @@ import java.io.Serializable;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SerializationUtils;
+import org.slf4j.Logger;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.SerializationUtils;
-import org.slf4j.Logger;
 
 /**
  * Service class to serialize/deserialize object to file
@@ -31,7 +30,6 @@ import org.slf4j.Logger;
  * @author Yuriy Movchan Date: 01/27/2014
  */
 @ApplicationScoped
-@Named
 public class ObjectSerializationService {
 
 	@Inject

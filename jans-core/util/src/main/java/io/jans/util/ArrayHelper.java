@@ -13,7 +13,7 @@ import java.util.Arrays;
  * Utility methods to help work with arrays
  *
  * @author Yuriy Movchan Date: 10.21.2010
- * @see org.apache.commons.lang.ArrayUtils
+ * @see org.apache.commons.lang3.ArrayUtils
  */
 public final class ArrayHelper {
 

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 

@@ -7,7 +7,7 @@
 package io.jans.as.model.configuration;
 
 import io.jans.util.exception.ConfigurationException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Javier Rojas Blum

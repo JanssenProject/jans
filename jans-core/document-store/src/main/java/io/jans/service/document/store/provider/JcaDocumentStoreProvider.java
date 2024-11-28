@@ -32,7 +32,7 @@ import javax.jcr.nodetype.NodeType;
 import javax.jcr.version.VersionException;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.rmi.repository.URLRemoteRepository;

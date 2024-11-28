@@ -590,6 +590,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "When true, clients with the same Sector ID also share the same Subject ID", defaultValue = "false")
     private Boolean shareSubjectIdBetweenClientsWithSameSectorId = false;
 
+    @DocProperty(description = "Use openidSubAttribute value of user as local account id for algorithmic pairwise look up", defaultValue = "false")
+    private Boolean useOpenidSubAttributeValueForPairwiseLocalAccountId = false;
+
     @DocProperty(description = "Web Key Storage Type")
     private WebKeyStorage webKeysStorage;
 
@@ -943,6 +946,16 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Lock message Pub configuration", defaultValue = "false")
     private LockMessageConfig lockMessageConfig;
+
+    public Boolean getUseOpenidSubAttributeValueForPairwiseLocalAccountId() {
+        if (useOpenidSubAttributeValueForPairwiseLocalAccountId == null) useOpenidSubAttributeValueForPairwiseLocalAccountId = false;
+        return useOpenidSubAttributeValueForPairwiseLocalAccountId;
+    }
+
+    public AppConfiguration setUseOpenidSubAttributeValueForPairwiseLocalAccountId(Boolean useOpenidSubAttributeValueForPairwiseLocalAccountId) {
+        this.useOpenidSubAttributeValueForPairwiseLocalAccountId = useOpenidSubAttributeValueForPairwiseLocalAccountId;
+        return this;
+    }
 
     public int getArchivedJwkLifetimeInSeconds() {
         return archivedJwkLifetimeInSeconds;
