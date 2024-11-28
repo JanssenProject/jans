@@ -262,12 +262,7 @@ impl Authz {
     }
 }
 
-/// Adds the following entities onto the context:
-///   - Jans::User
-///   - Jans::Workload
-///   - Jans::Access_token
-///   - Jans::id_token
-///   - Jans::Userinfo_token
+/// Constructs the authorization context by adding the built entities from the tokens
 fn add_entities_to_context(
     request_context: Value,
     entities_data: &AuthorizeEntitiesData,
