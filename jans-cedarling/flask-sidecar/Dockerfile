@@ -1,11 +1,8 @@
-FROM python:3.10.14-alpine3.19
+FROM rust:alpine3.19
+
 # ===============
 # Alpine packages
 # ===============
-
-RUN apk update \
-    && apk add --no-cache musl-dev g++ cargo \
-    bash openssl unzip wget git
 
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
@@ -20,8 +17,14 @@ ENV PYTHONFAULTHANDLER=1 \
   POETRY_CACHE_DIR='/var/cache/pypoetry' \
   PATH="$PATH:/root/.poetry/bin"
 
+
+RUN apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
+RUN mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MANAGED.disabled
+RUN python3 -m ensurepip
+RUN pip3 install "poetry==$POETRY_VERSION" maturin[patchelf]
+RUN apk add --no-cache \
+        git
 # System deps:
-RUN pip install "poetry==$POETRY_VERSION" maturin patchelf
 ENV JANS_SOURCE_VERSION=871c36da8a2550ee2febd7c0d72c521898b226c3
 
 COPY docker-entrypoint.sh /
@@ -31,7 +34,6 @@ RUN chmod +x /docker-entrypoint.sh
 RUN adduser -s /bin/sh -D -G root -u 1000 web
 
 WORKDIR /api
-
 
 RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans /tmp/jans \
         && cd /tmp/jans \
@@ -72,7 +74,7 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cedarling-flask-
 USER 1000
 
 # Set env with user being web created above
-ENV HOME /home/web
+ENV HOME=/home/web
 
 ENV APP_MODE=${APP_MODE:-production}
 
