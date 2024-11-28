@@ -104,6 +104,8 @@ pub struct AuthorizationLogInfo {
     pub resource: String,
     /// cedar-policy context
     pub context: serde_json::Value,
+    /// cedar-policy entities json presentation for forensic analysis
+    pub entities: serde_json::Value,
 
     // We use actually same structures but with different unique field names.
     // It allow deserialize json to flatten structure.

@@ -113,6 +113,7 @@ mod tests {
             person_authorize_info: Default::default(),
             workload_authorize_info: Default::default(),
             authorized: true,
+            entities: serde_json::json!({}),
         });
         let entry2 = LogEntry::new_with_data(
             app_types::PdpID::new(),

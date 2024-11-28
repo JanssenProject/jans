@@ -20,6 +20,7 @@ use crate::log::{
     AuthorizationLogInfo, Diagnostics, LogEntry, LogType, Logger, PersonAuthorizeInfo,
     WorkloadAuthorizeInfo,
 };
+use std::io::Cursor;
 
 mod authorize_result;
 
@@ -139,6 +140,14 @@ impl Authz {
             person: person_result,
         };
 
+        // getting entities as json
+        let mut entities_raw_json = Vec::new();
+        let cursor = Cursor::new(&mut entities_raw_json);
+
+        entities.write_to_json(cursor)?;
+        let entities_json: serde_json::Value = serde_json::from_slice(entities_raw_json.as_slice())
+            .map_err(AuthorizeError::EntitiesToJson)?;
+
         // Log all result information about both authorize checks.
         // Where principal is `"Jans::Workload"` and where principal is `"Jans::User"`.
         self.config.log_service.as_ref().log(
@@ -151,6 +160,7 @@ impl Authz {
                 action: request.action,
                 context: request.context,
                 resource: resource_uid.to_string(),
+                entities: entities_json,
 
                 person_authorize_info: result.person.as_ref().map(|response| PersonAuthorizeInfo {
                     person_principal: principal_user_entity_uid.to_string(),
@@ -357,6 +367,9 @@ pub enum AuthorizeError {
     /// Error encountered while collecting all entities
     #[error("could not collect all entities: {0}")]
     Entities(#[from] cedar_policy::entities_errors::EntitiesError),
+    /// Error encountered while parsing all entities to json for logging
+    #[error("could convert entities to json: {0}")]
+    EntitiesToJson(serde_json::Error),
 }
 
 #[derive(Debug, derive_more::Error, derive_more::Display)]
