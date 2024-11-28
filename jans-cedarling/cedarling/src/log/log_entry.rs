@@ -240,13 +240,3 @@ impl Diagnostics {
         Self { reason, errors }
     }
 }
-
-// #[doc(hidden)]
-// impl From<&cedar_policy::Diagnostics> for Diagnostics {
-//     fn from(value: &cedar_policy::Diagnostics) -> Self {
-//         Self {
-//             reason: HashSet::from_iter(value.reason().map(|policy_id| policy_id.to_string())),
-//             errors: value.errors().map(|err| err.into()).collect(),
-//         }
-//     }
-// }
