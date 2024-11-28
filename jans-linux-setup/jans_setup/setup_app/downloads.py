@@ -8,7 +8,7 @@ import importlib.util
 
 from setup_app.utils import base
 
-def download_jans_acrhieve():
+def download_jans_archive():
 
     if not base.argsp.force_download and os.path.exists(base.current_app.jans_zip):
         return
@@ -88,7 +88,7 @@ def download_all():
 
 
 def download_apps():
-    download_jans_acrhieve()
+    download_jans_archive()
     download_sqlalchemy()
     download_cryptography()
     download_pyjwt()

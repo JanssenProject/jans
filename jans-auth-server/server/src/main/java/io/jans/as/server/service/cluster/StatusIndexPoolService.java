@@ -10,6 +10,7 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.service.token.StatusListIndexService;
 import io.jans.model.token.StatusIndexPool;
+import io.jans.model.tokenstatus.StatusList;
 import io.jans.model.tokenstatus.TokenStatus;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
@@ -21,8 +22,10 @@ import io.jans.service.cdi.util.CdiUtil;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -169,17 +172,23 @@ public class StatusIndexPoolService {
         entryManager.merge(pool);
     }
 
-    public StatusIndexPool updateWithLock(StatusIndexPool pool) {
-        log.debug("Attempt to update pool {} with lock {}...", pool.getId(), LOCK_KEY);
+    public StatusIndexPool updateWithLock(String poolDn, List<Integer> indexes, TokenStatus status) throws IOException {
+        log.debug("Attempt to update pool {} with lock {}...", poolDn, LOCK_KEY);
 
         int attempt = 1;
         do {
-            StatusIndexPool loadedPool = getPoolByDn(pool.getDn());
+            StatusIndexPool loadedPool = getPoolByDn(poolDn);
+
+            int bitSize = appConfiguration.getStatusListBitSize();
+            StatusList statusList = StringUtils.isNotBlank(loadedPool.getData()) ? StatusList.fromEncoded(loadedPool.getData(), bitSize) : new StatusList(bitSize);
+            for (Integer index : indexes) {
+                statusList.set(index, status.getValue());
+            }
 
             loadedPool.setLockKey(LOCK_KEY);
-            loadedPool.setData(pool.getData());
+            loadedPool.setData(statusList.getLst());
             loadedPool.setLastUpdate(new Date());
-            loadedPool.setExpirationDate(pool.getExpirationDate());
+            loadedPool.setExpirationDate(loadedPool.getExpirationDate());
 
             update(loadedPool);
 
@@ -188,7 +197,7 @@ public class StatusIndexPoolService {
 
             // if lock is ours do data update and release lock
             if (LOCK_KEY.equals(loadedPool.getLockKey())) {
-                log.debug("Updated pool {} with lock with attempt {}", loadedPool.getId(), LOCK_KEY, attempt);
+                log.debug("Updated pool {} with lock with attempt {}, lockKey: {}", loadedPool.getId(), attempt, LOCK_KEY);
                 return loadedPool;
             } else {
                 log.debug("Failed to update pool {} with lock {} with attempt {}", loadedPool.getId(), LOCK_KEY, attempt);
@@ -197,7 +206,7 @@ public class StatusIndexPoolService {
             attempt++;
         } while (attempt < ATTEMPT_LIMIT);
 
-        log.error("Unable to update pool {} with lock {} with attempt {}", pool.getId(), LOCK_KEY, attempt);
+        log.error("Unable to update pool {} with lock {} with attempt {}", poolDn, LOCK_KEY, attempt);
 
         return null;
     }
