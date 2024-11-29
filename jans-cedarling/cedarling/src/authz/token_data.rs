@@ -109,7 +109,7 @@ pub(crate) struct Payload<'a> {
     value: &'a serde_json::Value,
 }
 
-impl<'a> Payload<'a> {
+impl Payload<'_> {
     /// Get key value of payload
     pub fn get_key(&self) -> &str {
         &self.key

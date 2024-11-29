@@ -111,6 +111,8 @@ mod tests {
             auth_info: None,
             msg: "Test message".to_string(),
             error_msg: None,
+            cedar_lang_version: None,
+            cedar_sdk_version: None,
         };
 
         // Serialize the log entry to JSON
