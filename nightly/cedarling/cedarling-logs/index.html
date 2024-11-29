@@ -7333,6 +7333,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#startup-message" class="md-nav__link">
+    Startup Message
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -8489,6 +8496,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#startup-message" class="md-nav__link">
+    Startup Message
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -8553,15 +8567,15 @@
 
 <h1 id="cedarling-logs">Cedarling Logs<a class="headerlink" href="#cedarling-logs" title="Permanent link">#</a></h1>
 <h2 id="cedarling-audit-logs">Cedarling Audit Logs<a class="headerlink" href="#cedarling-audit-logs" title="Permanent link">#</a></h2>
-<p>The Cedarling logs contains a record of all a Cedarling's decisions and token validations. 
+<p>The Cedarling logs contains a record of all a Cedarling's decisions and token validations.
 Cedarling has four logging options, which are configurable via the <code>CEDARLING_LOG_TYPE</code>
-bootstrap property: </p>
+bootstrap property:</p>
 <ul>
 <li><code>off</code> - no logging</li>
-<li><code>memory</code> - logs stored in Cedarling in-memory KV store, fetched by client via logging interface. This 
+<li><code>memory</code> - logs stored in Cedarling in-memory KV store, fetched by client via logging interface. This
   is ideal for batching logs without impeding authz performance</li>
 <li><code>std_out</code> - write logs synchronously to std_out</li>
-<li><code>lock</code> - periodically POST logs to Jans Lock Server <code>/audit</code> endpoint for central archiving. </li>
+<li><code>lock</code> - periodically POST logs to Jans Lock Server <code>/audit</code> endpoint for central archiving.</li>
 </ul>
 <p>There are three different log records produced by the Cedarling:</p>
 <ul>
@@ -8570,17 +8584,29 @@ bootstrap property: </p>
 <li><code>Metric</code>- Performance and usage data</li>
 </ul>
 <h2 id="jans-lock-server">Jans Lock Server<a class="headerlink" href="#jans-lock-server" title="Permanent link">#</a></h2>
-<p>In enterprise deployments, <a href="../janssen-server/lock/">Janssen Lock Server</a> collects Cedarling 
-logs and can stream to a database or S3 bucket. The Cedarling decision logs provide compliance 
-evidence of usage of the domain's externalized policies. The logs are also useful for forensic 
+<p>In enterprise deployments, <a href="../janssen-server/lock/">Janssen Lock Server</a> collects Cedarling
+logs and can stream to a database or S3 bucket. The Cedarling decision logs provide compliance
+evidence of usage of the domain's externalized policies. The logs are also useful for forensic
 analysis to show everything the attacker attempted, both allowed and denied.</p>
+<h2 id="startup-message">Startup Message<a class="headerlink" href="#startup-message" title="Permanent link">#</a></h2>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;01937359-8968-766e-bc4a-82df4aa1f4bf&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1732807068</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;log_kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;System&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;pdp_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;b862f21f-bcb1-4618-995d-ba7041e9bd16&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;msg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cedarling Authz initialized successfully&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;application_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestApp&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;cedar_lang_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4.1.0&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;cedar_sdk_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4.2.2&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-08T06:55:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-28T16:25:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-28</span>
       
         <br>
         Created:
