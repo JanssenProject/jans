@@ -1,4 +1,3 @@
-from cedarling_python import MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
 from cedarling_python import Cedarling
 from config import sample_bootstrap_config
 
@@ -10,7 +9,7 @@ def test_invalid_log_config(sample_bootstrap_config):
     config = sample_bootstrap_config
     try:
         # when we set invalid log configuration it should raise ValueError
-        config.log_config = "String"
+        config.log_type = "String"
     except TypeError:
         pass
 
@@ -18,8 +17,8 @@ def test_invalid_log_config(sample_bootstrap_config):
 def test_memory_logger(sample_bootstrap_config):
     # map fixture to variable with shorter name for readability
     config = sample_bootstrap_config
-    log_config = MemoryLogConfig(log_ttl=100)
-    config.log_config = log_config
+
+    config.log_type = "memory"
 
     # on initialize Cedarling we should have logs
     cedarling = Cedarling(config)
@@ -43,7 +42,8 @@ def test_memory_logger(sample_bootstrap_config):
 def test_off_logger(sample_bootstrap_config):
     # map fixture to variable with shorter name for readability
     config = sample_bootstrap_config
-    config.log_config = DisabledLoggingConfig()
+
+    config.log_type = "off"
 
     cedarling = Cedarling(config)
 
@@ -55,7 +55,7 @@ def test_off_logger(sample_bootstrap_config):
 def test_stdout_logger(sample_bootstrap_config):
     # Map fixture to variable with shorter name for readability
     config = sample_bootstrap_config
-    config.log_config = StdOutLogConfig()
+    config.log_type = "std_out"
 
     cedarling = Cedarling(config)
 

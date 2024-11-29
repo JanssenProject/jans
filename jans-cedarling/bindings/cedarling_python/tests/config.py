@@ -1,6 +1,5 @@
 from os.path import join
-from cedarling_python import MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
-from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig, JwtConfig
+from cedarling_python import BootstrapConfig
 import pytest
 
 ROOT_FOLDER_PATH = "../../"
@@ -17,27 +16,31 @@ def sample_bootstrap_config():
     Fixture with correct data of BootstrapConfig.
     You can change some part in the specific test case.
     '''
-    # log_config = MemoryLogConfig(log_ttl=100)
-    log_config = StdOutLogConfig()
-    # log_config = DisabledLoggingConfig()
 
     # Create policy source configuration
     # NOTE yaml is only used for test fixtures. Real imports use json.
-    with open(join(TEST_FILES_PATH, "policy-store_ok.yaml"),
-              mode="r", encoding="utf8") as f:
-        policy_raw = f.read()
-    policy_source = PolicyStoreSource(yaml=policy_raw)
+    policy_store_location = join(TEST_FILES_PATH, "policy-store_ok.yaml")
 
-    policy_store_config = PolicyStoreConfig(
-        source=policy_source)
+    bootstrap_config = BootstrapConfig({
+        "application_name":"TestApp",
+        "policy_store_id":"asdasd123123",
+        "policy_store_local_fn":policy_store_location,
+        "jwt_sig_validation":"disabled",
+        "jwt_status_validation":"disabled",
+        "at_iss_validation":"disabled",
+        "at_jti_validation":"disabled",
+        "at_nbf_validation":"disabled",
+        "idt_iss_validation":"disabled",
+        "idt_sub_validation":"disabled",
+        "idt_exp_validation":"disabled",
+        "idt_iat_validation":"disabled",
+        "idt_aud_validation":"disabled",
+        "id_token_trust_mode":"none",
+        "userinfo_iss_validation":"disabled",
+        "userinfo_aud_validation":"disabled",
+        "userinfo_sub_validation":"disabled",
+        "userinfo_exp_validation":"disabled",
+        "log_type":"std_out"
+    })
 
-    jwt_config = JwtConfig(enabled=False)
-
-    # collect all in the BootstrapConfig
-    bootstrap_config = BootstrapConfig(
-        application_name="example_app_name",
-        log_config=log_config,
-        policy_store_config=policy_store_config,
-        jwt_config=jwt_config
-    )
     return bootstrap_config

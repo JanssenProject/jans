@@ -6,10 +6,11 @@
  */
 
 use cedarling::{
-    BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogTypeConfig, PolicyStoreConfig,
-    PolicyStoreSource, Request, ResourceData,
+    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogTypeConfig,
+    PolicyStoreConfig, PolicyStoreSource, Request, ResourceData, WorkloadBoolOp,
 };
-use std::collections::HashMap;
+use jsonwebtoken::Algorithm;
+use std::collections::{HashMap, HashSet};
 
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../test_files/policy-store_with_trusted_issuers_ok.yaml");
@@ -19,7 +20,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // using specific algorithms: `HS256` and `RS256`. Only tokens signed with these algorithms
     // will be accepted; others will be marked as invalid during validation.
     let jwt_config = JwtConfig::Enabled {
-        signature_algorithms: vec!["HS256".to_string(), "RS256".to_string()],
+        signature_algorithms: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
     };
 
     // You must change this with your own tokens
@@ -39,6 +40,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
         },
         jwt_config,
+        authorization_config: AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: true,
+            user_workload_operator: WorkloadBoolOp::And,
+        },
     })?;
 
     // Perform an authorization request to Cedarling.

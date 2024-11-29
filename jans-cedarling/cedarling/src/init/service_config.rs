@@ -5,7 +5,8 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::jwt_algorithm::parse_jwt_algorithms;
+use std::collections::HashSet;
+
 use super::policy_store::{load_policy_store, PolicyStoreLoadError};
 use crate::common::policy_store::PolicyStore;
 use crate::jwt::TrustedIssuerAndOpenIdConfig;
@@ -16,7 +17,7 @@ use bootstrap_config::BootstrapConfig;
 #[derive(typed_builder::TypedBuilder, Clone)]
 pub(crate) struct ServiceConfig {
     pub policy_store: PolicyStore,
-    pub jwt_algorithms: Vec<jwt::Algorithm>,
+    pub jwt_algorithms: HashSet<jwt::Algorithm>,
     pub trusted_issuers_and_openid: Vec<TrustedIssuerAndOpenIdConfig>,
 }
 
@@ -51,7 +52,10 @@ impl ServiceConfig {
             .collect::<Result<Vec<_>, _>>()?;
 
         let builder = ServiceConfig::builder()
-            .jwt_algorithms(parse_jwt_algorithms(bootstrap)?)
+            .jwt_algorithms(match &bootstrap.jwt_config {
+                crate::JwtConfig::Disabled => HashSet::new(),
+                crate::JwtConfig::Enabled { signature_algorithms, .. } => signature_algorithms.clone(),
+            })
             .policy_store(policy_store)
             .trusted_issuers_and_openid(trusted_issuers_and_openid);
 
