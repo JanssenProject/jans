@@ -30,8 +30,8 @@ public class OAuth2ResourceTest extends AdminUIBaseTest{
     /**
      *  Testing oauth2 GET configuration endpoint
      */	 
-    @Parameters({"issuer", "adminUIConfigURL"})
-    @Test
+    @Parameters({"test.issuer", "adminUIConfigURL"})
+   @Test
     public void getOAuth2Data(final String issuer, final String adminUIConfigURL) {
         log.error("getOAuth2Data() - accessToken:{}, issuer:{}, adminUIConfigURL:{}", accessToken, issuer, adminUIConfigURL);
         Builder request = getResteasyService().getClientBuilder(issuer+adminUIConfigURL);
@@ -46,7 +46,7 @@ public class OAuth2ResourceTest extends AdminUIBaseTest{
    /**
      *  Testing api-protection-token GET endpoint
      */	 
-    @Parameters({"issuer", "apiProtectionTokenURL"})
+    @Parameters({"test.issuer", "apiProtectionTokenURL", "ujwt"})
     @Test
     public void getApiProtectionTokenData(final String issuer, final String apiProtectionTokenURL, final String ujwt) {
         log.error("getApiProtectionTokenData() - accessToken:{}, issuer:{}, apiProtectionTokenURL:{}, ujwt:{}", accessToken, issuer, apiProtectionTokenURL, ujwt);

@@ -13,6 +13,7 @@ import io.jans.as.model.util.Util;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.core.test.service.HttpService;
 import io.jans.configapi.core.test.service.ResteasyService;
+import io.jans.configapi.core.test.service.TokenService;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import java.nio.file.Files;
@@ -103,15 +104,16 @@ public class BaseTest {
     private static final String FILE_PREFIX = "file:";
     private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
     private static final String NEW_LINE = System.getProperty("line.separator");
-
     protected static final String CONTENT_TYPE = "Content-Type";
     protected static final String AUTHORIZATION = "Authorization";
     protected static final String AUTHORIZATION_TYPE = "Bearer";
+
     protected Logger log = LogManager.getLogger(getClass());
     protected Base64 base64;
     protected static Map<String, String> propertiesMap = null;
     protected ResteasyService resteasyService = new ResteasyService();;
     protected HttpService httpService = new HttpService();
+	protected TokenService tokenService = new TokenService();
     protected String accessToken;
 
     @BeforeSuite
@@ -153,63 +155,22 @@ public class BaseTest {
         this.accessToken = getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
         log.error("accessToken:{}", accessToken);
     }
-
-    public String getToken(final String tokenUrl, final String clientId, final String clientSecret, GrantType grantType,
+    
+    protected String getToken(final String tokenUrl, final String clientId, final String clientSecret, GrantType grantType,
             final String scopes) {
-        log.info("Request for token tokenUrl:{}, clientId:{}, grantType:{}, scopes:{}", tokenUrl, clientId, grantType,
-                scopes);
-        String accessToken = null;
-        TokenResponse tokenResponse = this.requestAccessToken(tokenUrl, clientId, clientSecret, grantType, scopes);
-        if (tokenResponse != null) {
-            accessToken = tokenResponse.getAccessToken();
-            log.trace("accessToken:{}, ", accessToken);
-        }
-
-        return accessToken;
+        return getTokenService().getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
     }
-
-    public TokenResponse requestAccessToken(final String tokenUrl, final String clientId, final String clientSecret,
-            GrantType grantType, final String scope) {
-        log.info("Request for access token tokenUrl:{}, clientId:{},scope:{}", tokenUrl, clientId, scope);
-        Response response = null;
-        try {
-            if (grantType == null) {
-                grantType = GrantType.CLIENT_CREDENTIALS;
-            }
-            TokenRequest tokenRequest = new TokenRequest(grantType);
-            tokenRequest.setScope(scope);
-            tokenRequest.setAuthUsername(clientId);
-            tokenRequest.setAuthPassword(clientSecret);
-            Builder request = resteasyService.getClientBuilder(tokenUrl);
-            request.header(AUTHORIZATION, "Basic " + tokenRequest.getEncodedCredentials());
-            request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
-            final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>(
-                    tokenRequest.getParameters());
-            response = request.post(Entity.form(multivaluedHashMap));
-            log.trace("Response for Access Token -  response:{}", response);
-            if (response.getStatus() == 200) {
-                String entity = response.readEntity(String.class);
-                TokenResponse tokenResponse = new TokenResponse();
-                tokenResponse.setEntity(entity);
-                tokenResponse.injectDataFromJson(entity);
-                return tokenResponse;
-            }
-        } finally {
-
-            if (response != null) {
-                response.close();
-            }
-        }
-        return null;
-    }
-
-    //TO-DO - check if needed
+   
     protected HttpService getHttpService() {
         return this.httpService;
     }
 
     protected ResteasyService getResteasyService() {
         return this.resteasyService;
+    }
+	
+	protected TokenService getTokenService() {
+        return this.tokenService;
     }
 
     protected String getCredentials(final String clientId, final String clientSecret)

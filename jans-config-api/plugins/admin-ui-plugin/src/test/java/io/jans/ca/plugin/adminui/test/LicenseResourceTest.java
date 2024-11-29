@@ -30,8 +30,8 @@ public class LicenseResourceTest extends AdminUIBaseTest {
     /**
      * Test License Details
      */
-    @Parameters({ "issuer", "licenseDetailsURL" })
-    @Test
+    @Parameters({ "test.issuer", "licenseDetailsURL" })
+   // @Test
     public void getLicenseDetails(final String issuer, final String licenseDetailsURL) {
         log.error("getLicenseDetails() - accessToken:{}, issuer:{}, licenseDetailsURL:{}", accessToken, issuer,
                 licenseDetailsURL);

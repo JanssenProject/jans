@@ -2,20 +2,20 @@
 
 <suite name="Config-API" parallel="false">
 
-    <parameter name="propertiesFile" value="target/test-classes/config-api-test.properties" />
+    <parameter name="propertiesFile" value="target/test-classes/test.properties" />
 	
 	<listeners>
         <listener class-name="io.jans.configapi.core.test.listener.AlterSuiteListener" />
         <listener class-name="io.jans.configapi.core.test.listener.SkipTestsListener" />
     </listeners>
   
-    <test name="Acrs " enabled="true">
+    <test name="Acrs" enabled="true">
         <classes>
             <class name="io.jans.configapi.test.auth.AcrsResourceTest" />
         </classes>
     </test>
 	
-	    <test name="Agama Deployments" enabled="true">
+	<test name="Agama Deployments" enabled="true">
         <classes>
              <class name="io.jans.configapi.test.auth.AgamaDeploymentsResourceTest" />
         </classes>
@@ -33,7 +33,7 @@
         </classes>
     </test>
 
-	<test name="Config " enabled="true">
+	<test name="Config" enabled="true">
         <classes>
             <class name="io.jans.configapi.test.auth.ConfigResourceTest" />
         </classes>
