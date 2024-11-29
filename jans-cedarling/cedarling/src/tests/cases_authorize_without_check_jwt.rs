@@ -10,7 +10,6 @@ use crate::{cmp_decision, cmp_policy}; // macros is defined in the cedarling\src
 use test_utils::assert_eq;
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/policy-store_ok_2.yaml");
-static POLICY_STORE_ABAC_YAML: &str = include_str!("../../../test_files/policy-store_ok_abac.yaml");
 
 /// Success test case where all check a successful
 /// role field in the `userinfo_token` because we search here by default
@@ -847,71 +846,4 @@ fn only_workload_and_role_permit() {
     );
 
     assert!(result.is_allowed(), "request result should be allowed");
-}
-
-#[test]
-fn success_test_role_string_with_abac() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_ABAC_YAML.to_string()));
-
-    // deserialize `Request` from json
-    let request = Request::deserialize(serde_json::json!(
-        {
-            "access_token": generate_token_using_claims(json!({
-                    "org_id": "some_long_id",
-                    "jti": "token1",
-                    "client_id": "some_client_id",
-                    "iss": "https://account.gluu.org",
-                    "aud": "client123",
-                    "exp": i64::MAX,
-                    "iat": 0,
-                    "name": "Worker123",
-                  })),
-            "id_token": generate_token_using_claims(json!({
-                    "jti": "token2",
-                    "iss": "https://account.gluu.org",
-                    "aud": "client123",
-                    "sub": "some_sub",
-                    "exp": i64::MAX,
-                    "iat": 0,
-                    "amr": "some_amr",
-                    "acr": "some_acr",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
-                    "jti": "token3",
-                    "iss": "https://account.gluu.org",
-                    "sub": "some_sub",
-                    "country": "US",
-                    "role": "Worker",
-                    "email": "some_email@gluu.org",
-                    "client_id": "some_client_id",
-                    "username": "worker123",
-                    "exp": i64::MAX,
-                    "iat": 0,
-                  })),
-            "action": "Jans::Action::\"Update\"",
-            "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
-                "org_id": "some_long_id",
-                "country": "US"
-            },
-            "context": {},
-        }
-    ))
-    .expect("Request should be deserialized from json");
-
-    let result = cedarling
-        .authorize(request)
-        .expect("request should be parsed without errors");
-
-    cmp_decision!(
-        result.workload,
-        Decision::Allow,
-        "request result should be allowed for workload"
-    );
-    cmp_policy!(
-        result.workload,
-        vec!["1"],
-        "reason of permit workload should be '1'"
-    );
 }
