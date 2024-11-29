@@ -18,7 +18,7 @@ const STORAGE_JSON_PARSE_EXPECT_MESSAGE: &str =
 
 /// A logger that store logs in-memory.
 pub(crate) struct MemoryLogger {
-    storage: Mutex<SparKV>,
+    storage: Mutex<SparKV<String>>,
     log_level: LogLevel,
 }
 
@@ -54,7 +54,7 @@ impl LogWriter for MemoryLogger {
             .storage
             .lock()
             .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
-            .set(entry.get_request_id().to_string().as_str(), &json_string);
+            .set(&entry.get_request_id().to_string(), json_string);
 
         if let Err(err) = result {
             // log error to stderr

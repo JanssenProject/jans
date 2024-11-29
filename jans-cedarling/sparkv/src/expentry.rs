@@ -16,15 +16,15 @@ pub struct ExpEntry {
 }
 
 impl ExpEntry {
-    pub fn new(key: &str, expiration: Duration) -> Self {
+    pub fn new<S : AsRef<str>>(key: S, expiration: Duration) -> Self {
         let expired_at: DateTime<Utc> = Utc::now() + expiration;
         Self {
-            key: String::from(key),
+            key: key.as_ref().into(),
             expired_at,
         }
     }
 
-    pub fn from_kv_entry(kv_entry: &KvEntry) -> Self {
+    pub fn from_kv_entry<T>(kv_entry: &KvEntry<T>) -> Self {
         Self {
             key: kv_entry.key.clone(),
             expired_at: kv_entry.expired_at,
