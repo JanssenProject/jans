@@ -149,6 +149,6 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
 #[derive(thiserror::Error, Debug)]
 pub enum ParseAlgorithmError {
     /// Config contains an unimplemented algorithm
-    #[error("algorithim is not yet implemented: {0}")]
+    #[error("algorithm is not yet implemented: {0}")]
     UnimplementedAlgorithm(String),
 }

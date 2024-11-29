@@ -1,0 +1,18 @@
+# frozen_string_literal: true
+
+require "bundler/gem_tasks"
+require "rspec/core/rake_task"
+
+RSpec::Core::RakeTask.new(:spec)
+
+# Use local cargo build rather than the rb-sys build, which as of 11-Nov-2024
+# always rebuilds entirely from scratch.
+desc 'compile with cargo'
+task :compile do |t|
+  # ensure that dylib is copied to a path where ruby will find it
+  ENV['CEDARLING_RUBY_PATH_DYLIB'] = 'yes'
+  sh 'cargo build --package cedarling_ruby'
+end
+
+task spec: :compile
+task default: :spec
