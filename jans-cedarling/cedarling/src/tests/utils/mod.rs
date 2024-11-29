@@ -12,5 +12,5 @@ pub use serde_json::json;
 
 pub mod cedarling_util;
 pub mod token_claims;
-pub use cedarling_util::get_cedarling;
+pub use cedarling_util::{get_cedarling, get_cedarling_with_authorization_conf};
 pub use token_claims::generate_token_using_claims;

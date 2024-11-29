@@ -9,6 +9,8 @@ pub mod error;
 pub mod key_service;
 
 pub mod open_id_storage;
+use std::collections::HashSet;
+
 use crate::common::policy_store::TrustedIssuer;
 pub use error::JwtDecodingError;
 use jsonwebtoken as jwt;
@@ -27,7 +29,7 @@ pub enum DecodingStrategy {
     /// Decoding strategy that performs validation using a key service and supported algorithms.
     WithValidation {
         key_service: KeyService,
-        supported_algs: Vec<jwt::Algorithm>,
+        supported_algs: HashSet<jwt::Algorithm>,
     },
 }
 
@@ -45,7 +47,7 @@ impl DecodingStrategy {
     /// # Errors
     /// Returns an error if the specified algorithm is unrecognized or the key service initialization fails.
     pub fn new_with_validation(
-        config_algs: Vec<jwt::Algorithm>,
+        config_algs: HashSet<jwt::Algorithm>,
         trusted_idps: Vec<TrustedIssuer>,
     ) -> Result<Self, JwtDecodingError> {
         // initialize the key service with OpenID configuration endpoints
@@ -106,7 +108,7 @@ impl DecodingStrategy {
 /// Returns an error if the token uses an unsupported algorithm or if validation fails.
 fn decode_and_validate_jwt<T: DeserializeOwned>(
     jwt: &str,
-    supported_algs: &[jwt::Algorithm],
+    supported_algs: &HashSet<jwt::Algorithm>,
     key_service: &KeyService,
 ) -> Result<T, JwtDecodingError> {
     let header = jwt::decode_header(jwt).map_err(JwtDecodingError::Parsing)?;
@@ -149,34 +151,4 @@ pub enum ParseAlgorithmError {
     /// Config contains an unimplemented algorithm
     #[error("algorithim is not yet implemented: {0}")]
     UnimplementedAlgorithm(String),
-}
-
-/// Converts a string representation of an algorithm to a `jwt::Algorithm` enum.
-///
-/// This function maps algorithm names (e.g., "HS256", "RS256") to corresponding
-/// `jwt::Algorithm` enum values. Returns an error if the algorithm is unsupported.
-///
-/// # Arguments
-/// * `algorithm` - The string representing the algorithm to convert.
-///
-/// # Errors
-/// Returns an error if the algorithm is not implemented.
-pub fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, ParseAlgorithmError> {
-    match algorithm {
-        "HS256" => Ok(jwt::Algorithm::HS256),
-        "HS384" => Ok(jwt::Algorithm::HS384),
-        "HS512" => Ok(jwt::Algorithm::HS512),
-        "ES256" => Ok(jwt::Algorithm::ES256),
-        "ES384" => Ok(jwt::Algorithm::ES384),
-        "RS256" => Ok(jwt::Algorithm::RS256),
-        "RS384" => Ok(jwt::Algorithm::RS384),
-        "RS512" => Ok(jwt::Algorithm::RS512),
-        "PS256" => Ok(jwt::Algorithm::PS256),
-        "PS384" => Ok(jwt::Algorithm::PS384),
-        "PS512" => Ok(jwt::Algorithm::PS512),
-        "EdDSA" => Ok(jwt::Algorithm::EdDSA),
-        _ => Err(ParseAlgorithmError::UnimplementedAlgorithm(
-            algorithm.into(),
-        )),
-    }
 }
