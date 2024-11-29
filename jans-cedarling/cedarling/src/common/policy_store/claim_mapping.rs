@@ -57,10 +57,10 @@ impl ClaimMapping {
             ClaimMapping::Regex(regexp_mapping) => regexp_mapping.apply_mapping(value),
             ClaimMapping::Json { r#type: _ } => {
                 // convert JSON object to HashMap or return empty HashMap
-                return value
+                value
                     .as_object()
                     .map(|v| HashMap::from_iter(v.to_owned()))
-                    .unwrap_or_default();
+                    .unwrap_or_default()
             },
         }
     }
