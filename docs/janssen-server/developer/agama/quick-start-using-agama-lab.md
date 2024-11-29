@@ -28,9 +28,7 @@ This guide covers these steps in the following sections.
 - Janssen Server instance
 - A public GitHub repository with at least one prior commit
 
-## Create
- Agama Project
-
+## Create Agama Project
 
 We will use [Agama Lab](https://cloud.gluu.org/agama-lab/) to create a simple username-password based user
 authentication flow. This involves defining the authentication steps, designing the user interface to capture user
@@ -54,8 +52,7 @@ inputs, and lastly, releasing the flow as an Agama project.
     ![](../../../assets/agama-lab-add-git-repo.png)
 
 
-4. Projec
-t listing page will be shown. All the existing projects for your GitHub user are listed here. Projects can be
+4. Project listing page will be shown. All the existing projects for your GitHub user are listed here. Projects can be
    created, edited, and deleted from the project listing page.
 
     ![](../../../assets/agamalab-project-page.png)
