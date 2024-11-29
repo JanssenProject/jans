@@ -10,7 +10,7 @@
                 <h4>${labels.usr.logout.title}</h4>
             </div>
             <div class="pa3">
-                <a href="./" class="${css.primaryButton}">${labels.usr.logout.back_home}</a>
+                <a href="./" class="link ${css.primaryButton}">${labels.usr.logout.back_home}</a>
             </div>
         </div>
     </h:div>

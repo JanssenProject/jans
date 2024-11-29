@@ -17,8 +17,7 @@ use crate::common::app_types;
 use crate::common::policy_store::PolicyStore;
 use crate::jwt;
 use crate::log::{
-    AuthorizationLogInfo, LogEntry, LogType, Logger, PersonAuthorizeInfo, RoleAuthorizeInfo,
-    WorkloadAuthorizeInfo,
+    AuthorizationLogInfo, LogEntry, LogType, Logger, PersonAuthorizeInfo, WorkloadAuthorizeInfo,
 };
 
 mod authorize_result;
@@ -67,6 +66,7 @@ impl Authz {
                 Some(config.application_name.clone()),
                 LogType::System,
             )
+            .set_cedar_version()
             .set_message("Cedarling Authz initialized successfully".to_string()),
         );
 
@@ -99,11 +99,6 @@ impl Authz {
         let principal_workload_uid = entities_data.access_token_entities.workload_entity.uid();
         let resource_uid = entities_data.resource_entity.uid();
         let principal_user_entity_uid = entities_data.user_entity.uid();
-        let principal_role_entity_uids = entities_data
-            .role_entities
-            .iter()
-            .map(|e| e.uid())
-            .collect::<Vec<_>>();
 
         // Convert [`AuthorizeEntitiesData`] to  [`cedar_policy::Entities`] structure,
         // hold all entities that will be used on authorize check.
@@ -139,62 +134,9 @@ impl Authz {
                 Err(err) => return Err(AuthorizeError::CreateRequestUserEntity(err)),
             };
 
-        // role result for logging
-        let mut role_authorize_log_results: Vec<RoleAuthorizeInfo> = Vec::new();
-
-        // Check authorize for each principal `"Jans::Role"` from cedar-policy schema.
-        // Return last used or None if vector empty
-        let role_result = if !principal_role_entity_uids.is_empty() {
-            let mut result = None;
-
-            // iterate over list of role uids
-            for role_uid in principal_role_entity_uids {
-                let tmp_result = match self.execute_authorize(ExecuteAuthorizeParameters {
-                    entities: &entities,
-                    principal: role_uid.clone(),
-                    action: action.clone(),
-                    resource: resource_uid.clone(),
-                    context: context.clone(),
-                }) {
-                    Ok(resp) => resp,
-                    // if invalid principal than we no need result
-                    Err(RequestValidationError::InvalidPrincipalType(_)) => {
-                        result = None;
-                        break;
-                    },
-                    Err(err) => {
-                        return Err(AuthorizeError::CreateRequestRoleEntity(
-                            CreateRequestRoleError {
-                                uid: role_uid.clone(),
-                                err,
-                            },
-                        ));
-                    },
-                };
-
-                let decision = tmp_result.decision();
-
-                role_authorize_log_results.push(RoleAuthorizeInfo {
-                    role_principal: role_uid.to_string(),
-                    role_decision: decision.into(),
-                    role_diagnostics: tmp_result.diagnostics().into(),
-                });
-                result = Some(tmp_result);
-
-                // if succeed then we no need iterate to next
-                if decision == cedar_policy::Decision::Allow {
-                    break;
-                }
-            }
-            result
-        } else {
-            None
-        };
-
         let result = AuthorizeResult {
             workload: workload_result,
             person: person_result,
-            role: role_result,
         };
 
         // Log all result information about both authorize checks.
@@ -223,8 +165,6 @@ impl Authz {
                         workload_decision: response.decision().into(),
                     }
                 }),
-
-                role_authorize_info: role_authorize_log_results,
 
                 authorized: result.is_allowed(),
             })

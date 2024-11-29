@@ -49,8 +49,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.slf4j.Logger;
@@ -64,7 +64,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import static io.jans.as.server.service.AcrService.isAgama;
-import static org.apache.commons.lang.BooleanUtils.isTrue;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy

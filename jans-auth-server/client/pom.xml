@@ -208,8 +208,8 @@
 			<artifactId>commons-codec</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
 		</dependency>
         <dependency>
             <groupId>commons-cli</groupId>
@@ -255,6 +255,15 @@
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>htmlunit3-driver</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-lang3</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>org.htmlunit</groupId>
+		    <artifactId>htmlunit</artifactId>
+		    <version>4.6.0</version>
 		</dependency>
         <dependency>
             <groupId>io.jans</groupId>

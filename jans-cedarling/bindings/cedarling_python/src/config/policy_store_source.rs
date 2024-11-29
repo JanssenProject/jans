@@ -30,13 +30,12 @@ impl PolicyStoreSource {
     #[pyo3(signature = (json=None, yaml=None))]
     // signature will be extended when will be extended rust `PolicyStoreSource` enum
     fn new(json: Option<String>, yaml: Option<String>) -> PyResult<Self> {
-        let inner =
-        if let Some(json_val) = json {
+        let inner = if let Some(json_val) = json {
             cedarling::PolicyStoreSource::Json(json_val)
         } else if let Some(yaml_val) = yaml {
             cedarling::PolicyStoreSource::Yaml(yaml_val)
         } else {
-            return Err(PyValueError::new_err("value not specified"))
+            return Err(PyValueError::new_err("value not specified"));
         };
 
         Ok(Self { inner })

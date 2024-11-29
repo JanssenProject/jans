@@ -41,7 +41,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 import org.apache.commons.exec.CommandLine;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -212,12 +212,12 @@ public class StatusCheckerTimer {
         return appVersion;
     }
 
-    public Map<String, String> getServiceStatus(String serviceName) {
+    public JsonNode getServiceStatus(String serviceName) {
         if (log.isInfoEnabled()) {
             log.info("Getting status for serviceName:{}", escapeLog(serviceName));
         }
 
-        Map<String, String> serviceStatus = null;
+        JsonNode serviceStatus = null;
         ObjectMapper mapper = new ObjectMapper();
         if (!isLinux()) {
             return serviceStatus;
@@ -242,7 +242,7 @@ public class StatusCheckerTimer {
             log.info("resultOutput:{}", resultOutput);
 
             if (StringUtils.isNotBlank(resultOutput)) {
-                serviceStatus = mapper.readValue(resultOutput, Map.class);
+                serviceStatus = mapper.readValue(resultOutput, JsonNode.class);
             }
 
         } catch (UnsupportedEncodingException uex) {

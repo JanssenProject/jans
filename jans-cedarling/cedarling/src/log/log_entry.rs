@@ -40,6 +40,12 @@ pub struct LogEntry {
     /// error message
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error_msg: Option<String>,
+    /// cedar-policy language  version
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cedar_lang_version: Option<semver::Version>,
+    /// cedar-policy sdk  version
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cedar_sdk_version: Option<semver::Version>,
 }
 
 impl LogEntry {
@@ -65,6 +71,8 @@ impl LogEntry {
             auth_info: None,
             msg: String::new(),
             error_msg: None,
+            cedar_lang_version: None,
+            cedar_sdk_version: None,
         }
     }
 
@@ -78,9 +86,14 @@ impl LogEntry {
         self
     }
 
-    #[allow(dead_code)]
     pub(crate) fn set_auth_info(mut self, auth_info: AuthorizationLogInfo) -> Self {
         self.auth_info = Some(auth_info);
+        self
+    }
+
+    pub(crate) fn set_cedar_version(mut self) -> Self {
+        self.cedar_lang_version = Some(cedar_policy::get_lang_version());
+        self.cedar_sdk_version = Some(cedar_policy::get_sdk_version());
         self
     }
 }
@@ -111,9 +124,6 @@ pub struct AuthorizationLogInfo {
     /// Workload authorize info
     #[serde(flatten)]
     pub workload_authorize_info: Option<WorkloadAuthorizeInfo>,
-    /// Role authorize info
-    /// can be many results because can be many roles.
-    pub role_authorize_info: Vec<RoleAuthorizeInfo>,
 
     /// is authorized
     pub authorized: bool,
@@ -139,17 +149,6 @@ pub struct WorkloadAuthorizeInfo {
     pub workload_diagnostics: Diagnostics,
     /// cedar-policy workload decision
     pub workload_decision: Decision,
-}
-
-/// Workload authorize info
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-pub struct RoleAuthorizeInfo {
-    /// cedar-policy `role` principal
-    pub role_principal: String,
-    /// cedar-policy `role` diagnostics information
-    pub role_diagnostics: Diagnostics,
-    /// cedar-policy role decision
-    pub role_decision: Decision,
 }
 
 /// Cedar-policy decision of the authorization

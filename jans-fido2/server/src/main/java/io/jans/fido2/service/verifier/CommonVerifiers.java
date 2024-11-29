@@ -26,7 +26,7 @@ import io.jans.fido2.model.conf.RequestedParty;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;

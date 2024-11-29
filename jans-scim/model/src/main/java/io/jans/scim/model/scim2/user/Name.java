@@ -6,7 +6,7 @@
 
 package io.jans.scim.model.scim2.user;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import io.jans.scim.model.scim2.annotations.Attribute;
 import io.jans.scim.model.scim2.annotations.StoreReference;
 

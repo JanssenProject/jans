@@ -1,0 +1,31 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns:ca="client/attribute" xmlns="native">
+        
+    <h:title self="@define(title)">${zkService.appName} - ${labels.email2fa.method_label}</h:title>
+    
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.emailotp.vm.EmailOtpVM')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul" />        
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.email2fa.method_title}</h2>
+                    <p class="ma0">${labels.email2fa.summary}</p>                    
+                </div>
+
+                <div class="${css.panel}">
+                    <ul>
+                        <h:li forEach="${vm.emails}">${each}</h:li>
+                    </ul>
+                </div>
+                
+            </section>
+        </div>
+
+    </z:div>
+
+</zk:zk>

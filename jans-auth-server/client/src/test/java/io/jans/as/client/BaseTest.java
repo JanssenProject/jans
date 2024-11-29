@@ -31,7 +31,7 @@ import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.DateUtil;
 import io.jans.util.StringHelper;
 import io.jans.util.security.SecurityProviderUtility;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
@@ -537,6 +537,7 @@ public abstract class BaseTest {
         HtmlUnitDriver currentDriver;
         if (useNewDriver) {
             currentDriver = new HtmlUnitDriver(true);
+            currentDriver.getWebClient().getOptions().setThrowExceptionOnScriptError(false);
         } else {
             startSelenium();
             currentDriver = driver;

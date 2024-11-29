@@ -10,7 +10,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.operation.SearchException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.DependsOn;

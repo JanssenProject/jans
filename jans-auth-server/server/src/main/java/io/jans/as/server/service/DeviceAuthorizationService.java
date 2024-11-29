@@ -15,7 +15,7 @@ import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.model.common.DeviceAuthorizationStatus;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.service.CacheService;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import jakarta.ejb.Stateless;

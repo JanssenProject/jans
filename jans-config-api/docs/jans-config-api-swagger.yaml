@@ -171,7 +171,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/JsonNode'
               examples:
                 Response json example:
                   description: Response json example
@@ -4615,6 +4615,7 @@ paths:
                   - uma_rpt_policy
                   - uma_rpt_claims
                   - uma_claims_gathering
+                  - access_evaluation
                   - consent_gathering
                   - dynamic_scope
                   - spontaneous_scope
@@ -9270,19 +9271,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanEdit:
+        adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
+        adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
+        userCanView:
+          type: boolean
         whitePagesCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -9365,6 +9366,10 @@ components:
         mtlsParEndpoint:
           type: string
         mtlsDeviceAuthzEndpoint:
+          type: string
+        accessEvaluationAllowBasicClientAuthorization:
+          type: boolean
+        accessEvaluationScriptName:
           type: string
         requireRequestObjectEncryption:
           type: boolean
@@ -10097,6 +10102,7 @@ components:
             - METRIC
             - STAT
             - PAR
+            - ACCESS_EVALUATION
             - SSA
         httpLoggingEnabled:
           type: boolean
@@ -10908,10 +10914,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -11201,6 +11207,7 @@ components:
           - uma_rpt_policy
           - uma_rpt_claims
           - uma_claims_gathering
+          - access_evaluation
           - consent_gathering
           - dynamic_scope
           - spontaneous_scope
@@ -11249,14 +11256,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -11685,10 +11692,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

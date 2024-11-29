@@ -40,7 +40,19 @@ policy_stores:
           content_type: cedar
           body: |-
             permit(
-                principal == Jans::Role::"Admin",
+                principal in Jans::Role::"Admin",
+                action in [Jans::Action::"Update",Jans::Action::"UpdateForRole",Jans::Action::"UpdateForUserAndRole",Jans::Action::"UpdateForWorkloadAndRole"],
+                resource is Jans::Issue
+            );
+      4:
+        description: simple policy example for principal role, forbid for Guest
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            forbid(
+                principal in Jans::Role::"Guest",
                 action in [Jans::Action::"Update",Jans::Action::"UpdateForRole",Jans::Action::"UpdateForUserAndRole",Jans::Action::"UpdateForWorkloadAndRole"],
                 resource is Jans::Issue
             );

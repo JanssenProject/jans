@@ -22,7 +22,7 @@ import io.jans.as.server.uma.service.UmaPermissionService;
 import io.jans.as.server.uma.service.UmaSessionService;
 import io.jans.as.server.uma.service.UmaValidationService;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import jakarta.inject.Inject;

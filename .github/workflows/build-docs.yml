@@ -104,8 +104,8 @@ jobs:
         if: >-
           github.event_name == 'release' &&
           github.event.action == 'published' &&
-          startsWith(github.event.release.name, 'v') &&
-          !github.event.release.draft
+          (!github.event.release.draft) &&
+          (startsWith(github.event.release.name, 'v') || github.event.release.name == 'nightly')
         env:
           VERSION: ${{ github.event.release.tag_name }}
         run: |
@@ -158,8 +158,8 @@ jobs:
         if: >-
           github.event_name == 'release' &&
           github.event.action == 'published' &&
-          startsWith(github.event.release.name, 'v') &&
-          !github.event.release.draft
+          (!github.event.release.draft) &&
+          (startsWith(github.event.release.name, 'v') || github.event.release.name == 'nightly')
         env:
           VERSION: ${{ github.event.release.tag_name }}
         run: |
@@ -173,9 +173,12 @@ jobs:
           TAGS=$(gh release list -L 1000 -R ${{ github.repository }} | grep -o '^\v.*'| grep -v Draft | cut -f 1 | sed '/-/!{s/$/_/}' | sort -V | sed 's/_$//')
           LATEST=$(echo "${TAGS}" | tail -1)
           STABLE=$(echo "${TAGS}" | grep -v -- "nightly" | tail -1)
+          if [[ ${{ github.event.release.tag_name }} == 'nightly' ]]; then
+            LATEST='nightly'
+          fi
           echo "Latest is $LATEST and Stable is $STABLE"
           # remove below two lines after first release
-          LATEST="nightly"
+          #LATEST="head"
           #STABLE="head"
           mike alias -u head main
           mike alias -u "${STABLE}" stable
@@ -206,7 +209,12 @@ jobs:
 
           echo "Replacing release number markers with actual release number"
           cd ${LATEST}
-          egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/${LATEST:1}/g"
+          if [[ "${LATEST}" == "nightly" ]]; then
+           egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/0.0.0-nightly/g"
+           egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/v0.0.0-nightly/nightly/g"
+          else
+           egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/${LATEST:1}/g"
+          fi
           git add . && git update-index --refresh
           cd ..
           for folder in */; do

@@ -1,0 +1,41 @@
+Flow io.jans.casa.authn.emailotp
+    Basepath ""
+    Configs conf
+    Inputs userData withEscape
+
+mairmaid = Call io.jans.casa.emailotp.MailMan#new 
+emails = Call mairmaid emailsOf userData.inum
+
+When emails.length is 1
+    email = emails[0]
+Otherwise
+    obj = { }
+    obj.emails = Call mairmaid mask emails
+    obj = RRF "otp-email-prompt.ftlh" obj
+    i = Call java.lang.Integer#parseInt obj.emailIdx
+    email = emails[i] 
+    
+obj = { matches: true, expired: false, escape: withEscape }
+xander = Call io.jans.casa.emailotp.Sender#new conf email
+Call xander send
+
+Repeat 3 times max
+    data = RRF "otp-email.ftlh" obj
+    
+    When data.skipped is ""
+        Finish false
+    
+    When data.resend is ""
+        obj = { matches: true, expired: false, escape: withEscape }
+        Call xander send
+    Otherwise
+        obj.matches = Call xander matches data.passcode
+        
+        When obj.matches is true
+            When xander.outOfTimeWindow is false
+                Finish true
+                
+            obj.expired = true        
+
+obj = { success: false, message: "Too many attempts for e-mail OTP validation" }
+Finish obj

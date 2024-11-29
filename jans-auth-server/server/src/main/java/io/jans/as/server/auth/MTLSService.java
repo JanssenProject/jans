@@ -25,8 +25,8 @@ import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalDynamicClientRegistrationService;
 import io.jans.as.server.service.external.context.DynamicClientRegistrationContext;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
