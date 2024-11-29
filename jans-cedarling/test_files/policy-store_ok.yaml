@@ -48,16 +48,9 @@ policy_stores:
           entity Workload = {"client_id": String, "iss": TrustedIssuer, "name": String, "org_id": String};
           entity id_token = {"acr": String, "amr": String, "aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String, "sub": String};
           entity Userinfo_token  = {"iss": String, "jti": String, "client_id": String};
-          type Context = {
-            user: User,
-            workload: Workload,
-            access_token: Access_token,
-            id_token: id_token,
-            userinfo_token: Userinfo_token,
-          };
           action "Update" appliesTo {
             principal: [Workload, User, Role],
             resource: [Issue],
-            context: Context
+            context: {}
           };
         }
