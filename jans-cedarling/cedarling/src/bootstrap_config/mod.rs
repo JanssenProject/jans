@@ -94,9 +94,9 @@ pub enum BootstrapConfigLoadingError {
         "Unsupported bootstrap config file format for: {0}. Supported formats include: JSON, YAML"
     )]
     InvalidFileFormat(String),
-    #[error("Failed to read {0}: {1}")]
 
     /// Error returned when the file cannot be read.
+    #[error("Failed to read {0}: {1}")]
     ReadFile(String, io::Error),
 
     /// Error returned when parsing the file as JSON fails.
