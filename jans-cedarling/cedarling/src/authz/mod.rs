@@ -97,7 +97,7 @@ impl Authz {
         let resource_uid = entities_data.resource_entity.uid();
         let principal_user_entity_uid = entities_data.user_entity.uid();
 
-        let context = add_entities_to_context(
+        let context = build_context(
             request.context.clone(),
             &entities_data,
             &schema.schema,
@@ -264,7 +264,7 @@ impl Authz {
 }
 
 /// Constructs the authorization context by adding the built entities from the tokens
-fn add_entities_to_context(
+fn build_context(
     request_context: Value,
     entities_data: &AuthorizeEntitiesData,
     schema: &cedar_policy::Schema,
@@ -392,8 +392,8 @@ pub enum AuthorizeError {
     #[error("could not collect all entities: {0}")]
     Entities(#[from] cedar_policy::entities_errors::EntitiesError),
     /// Error encountered while validating context according to the schema
-    #[error("could not add entities into context")]
-    AddEntitiesIntoContext(#[from] MergeError),
+    #[error("could not build context")]
+    BuildContext(#[from] MergeError),
 }
 
 #[derive(Debug, derive_more::Error, derive_more::Display)]

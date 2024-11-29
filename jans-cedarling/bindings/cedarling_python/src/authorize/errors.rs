@@ -165,7 +165,7 @@ errors_functions! {
     CreateRequestUserEntity => CreateRequestUserEntityError,
     CreateRequestRoleEntity => CreateRequestRoleEntityError,
     Entities => EntitiesError,
-    AddEntitiesIntoContext => AddEntitiesIntoContextError
+    BuildContext => AddEntitiesIntoContextError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {
