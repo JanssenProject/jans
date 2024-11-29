@@ -124,7 +124,7 @@ jobs:
         cd jans/
         sed -i "s/%VERSION%/${{ steps.previoustag.outputs.version }}/g" checksum.sh
         sudo ./checksum.sh
-        ls /home/runner/work/jans/jans/jans/rpmbuild/RPMS/x86_64/
+
     - name: Upload binaries to release
       id: upload_binaries
       uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
