@@ -146,6 +146,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/nightly/casa/plugins/email-otp/</loc>
+         <lastmod>2024-11-29</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/nightly/casa/plugins/accts-linking/account-linking-index/</loc>
          <lastmod>2024-11-29</lastmod>
          <changefreq>daily</changefreq>
