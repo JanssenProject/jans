@@ -5,8 +5,11 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use jsonwebtoken::Algorithm;
+use std::collections::HashSet;
+
 /// A set of properties used to configure JWT in the `Cedarling` application.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum JwtConfig {
     /// `CEDARLING_JWT_VALIDATION` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.  
     /// Represent `Disabled` value.  
@@ -16,6 +19,6 @@ pub enum JwtConfig {
     /// Represent `Enabled` value
     Enabled {
         /// `CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
-        signature_algorithms: Vec<String>,
+        signature_algorithms: HashSet<Algorithm>,
     },
 }
