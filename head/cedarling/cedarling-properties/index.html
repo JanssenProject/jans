@@ -7309,9 +7309,107 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Properties
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Properties
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#user-workload-boolean-operation" class="md-nav__link">
+    User-Workload Boolean Operation
+  </a>
+  
+    <nav class="md-nav" aria-label="User-Workload Boolean Operation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-operations" class="md-nav__link">
+    Available Operations
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#id-token-trust-mode" class="md-nav__link">
+    ID Token Trust Mode
+  </a>
+  
+    <nav class="md-nav" aria-label="ID Token Trust Mode">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#none-mode" class="md-nav__link">
+    None Mode
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#strict-mode" class="md-nav__link">
+    Strict Mode
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loading-the-bootstrap-config" class="md-nav__link">
+    Loading The bootstrap config.
+  </a>
+  
+    <nav class="md-nav" aria-label="Loading The bootstrap config.">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#loading-from-json" class="md-nav__link">
+    Loading From JSON
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loading-from-yaml" class="md-nav__link">
+    Loading From YAML
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -7729,6 +7827,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_4_2_7">
@@ -7860,6 +7960,20 @@
     <li class="md-nav__item">
       <a href="../../casa/plugins/custom-branding/" class="md-nav__link">
         Custom Branding
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../casa/plugins/email-otp/" class="md-nav__link">
+        Email OTP
       </a>
     </li>
   
@@ -8431,6 +8545,88 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#user-workload-boolean-operation" class="md-nav__link">
+    User-Workload Boolean Operation
+  </a>
+  
+    <nav class="md-nav" aria-label="User-Workload Boolean Operation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-operations" class="md-nav__link">
+    Available Operations
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#id-token-trust-mode" class="md-nav__link">
+    ID Token Trust Mode
+  </a>
+  
+    <nav class="md-nav" aria-label="ID Token Trust Mode">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#none-mode" class="md-nav__link">
+    None Mode
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#strict-mode" class="md-nav__link">
+    Strict Mode
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loading-the-bootstrap-config" class="md-nav__link">
+    Loading The bootstrap config.
+  </a>
+  
+    <nav class="md-nav" aria-label="Loading The bootstrap config.">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#loading-from-json" class="md-nav__link">
+    Loading From JSON
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loading-from-yaml" class="md-nav__link">
+    Loading From YAML
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -8489,57 +8685,160 @@
 <h1 id="cedarling-properties">Cedarling Properties<a class="headerlink" href="#cedarling-properties" title="Permanent link">#</a></h1>
 <p>These Bootstrap Properties control default application level behavior.</p>
 <ul>
-<li>
-<p><strong><code>CEDARLING_APPLICATION_NAME</code></strong> : Human friendly identifier for this application</p>
-</li>
-<li>
-<p><strong><code>CEDARLING_POLICY_STORE_URI</code></strong> : Location of policy store JSON, used if policy store is not local, or retreived from Lock Server.</p>
-</li>
-<li>
-<p><strong><code>CEDARLING_JWT_VALIDATION</code></strong> : Enabled | Disabled </p>
-</li>
-<li>
-<p><strong><code>CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED</code></strong> : ....</p>
-</li>
-<li>
-<p><strong><code>CEDARLING_REQUIRE_AUD_VALIDATION</code></strong> : Enabled | Disabled. Controls if Cedarling will discard id_token without an access token with the corresponding client_id.</p>
-</li>
-<li>
-<p><strong><code>CEDARLING_ROLE_MAPPING</code></strong> : Default: <code>{"id_token": "role", "userinfo_token": "role"}</code> but the role may be sent as an access token, or with a different identifier. For example, for Ping Identity, you might see <code>{"userinfo_token": "memberOf"}</code>.</p>
-</li>
-<li>
-<p><strong><code>CEDARLING_LOG_LEVEL</code></strong> : Controls the verbosity of Cedar logging.</p>
-</li>
+<li><strong><code>CEDARLING_APPLICATION_NAME</code></strong> : Human friendly identifier for this application</li>
+<li><strong><code>CEDARLING_POLICY_STORE_URI</code></strong> : Location of policy store JSON, used if policy store is not local, or retreived from Lock Server.</li>
+<li><strong><code>CEDARLING_POLICY_STORE_ID</code></strong>: A unique identifier for the policy store.</li>
+<li><strong><code>CEDARLING_LOG_TYPE</code></strong> (<code>"off"</code> | <code>"memory"</code> | <code>"std_out"</code> | <code>"lock"</code>): Selects the logging method.</li>
+<li><strong><code>CEDARLING_LOG_TTL</code></strong> : If the <code>CEDARLING_LOG_TYPE</code> is set to <code>"memory"</code>, this will set the TTL (Time to Live) of log entities in seconds. Defaults to 60s.</li>
+<li><strong><code>CEDARLING_USER_AUTHZ</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When <code>enabled</code>, Cedar engine authorization is queried for a <em>User</em> principal.</li>
+<li><strong><code>CEDARLING_WORKLOAD_AUTHZ</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When <code>enabled</code>, Cedar engine authorization is queried for a <em>Workload</em> principal.</li>
+<li><strong><code>CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION</code></strong> (<code>"AND"</code> | <code>"OR"</code>): Specifies what boolean operation to use for the <code>USER</code> and <code>WORKLOAD</code> when making authz (authorization) decisions. See <a href="#user-workload-boolean-operation">User-Workload Boolean Operation</a></li>
+<li><strong><code>CEDARLING_LOCAL_JWKS</code></strong> : Path to a JWKS file with public keys.</li>
+<li><strong><code>CEDARLING_LOCAL_POLICY_STORE</code></strong> : JSON object containing a <a href="../cedarling-policy-store/">Policy Store</a>.</li>
+<li><strong><code>CEDARLING_POLICY_STORE_LOCAL_FN</code></strong> : Path to a JSON file containing a <a href="../cedarling-policy-store/">Policy Store</a>.</li>
+<li><strong><code>CEDARLING_JWT_SIG_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): Whether to enable the signature validation for Json Web Tokens (JWT). This requires an <code>iss</code> (Issuer) claim is present in the token.</li>
+<li><strong><code>CEDARLING_JWT_STATUS_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): Whether to check the status of JWTs. This requires an <code>iss</code> (Issuer) claim is present in the token.</li>
+<li><strong><code>CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED</code></strong>: Cedarling will only accept tokens signed with these algorithms.</li>
+<li><strong><code>CEDARLING_AT_ISS_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>iss</code> (Issuer) claim must be present in the Access Token and the scheme must be <code>https</code>.</li>
+<li><strong><code>CEDARLING_AT_JTI_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>jti</code> (JWT ID) claim must be present in the Access Token.</li>
+<li><strong><code>CEDARLING_AT_NBF_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>nbf</code> (Not Before) claim must be present in the Access Token and Cedarling will verify that the current date is after the <code>nbf</code>.</li>
+<li><strong><code>CEDARLING_AT_EXP_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>exp</code> (Expiration) claim must be present in the Access Token and not past the date specified.</li>
+<li><strong><code>CEDARLING_IDT_ISS_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>iss</code> (Issuer) claim must be present in the ID Token and the scheme must be <code>https</code>.</li>
+<li><strong><code>CEDARLING_IDT_SUB_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>sub</code> (Subject) claim must be present in the ID Token.</li>
+<li><strong><code>CEDARLING_IDT_EXP_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>exp</code> (Expiration) claim must be present in the ID Token and not past the date specified.</li>
+<li><strong><code>CEDARLING_IDT_IAT_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>iat</code> (Issued at) claim must be present in the ID Token.</li>
+<li><strong><code>CEDARLING_IDT_AUD_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>aud</code> ( Audience) claim must be present in the ID Token.</li>
+<li><strong><code>CEDARLING_USERINFO_ISS_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>iss</code> (Issuer) claim must be present in the Userinfo Token and the scheme must be https.</li>
+<li><strong><code>CEDARLING_USERINFO_SUB_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>sub</code> (Subject) claim must be present in the Userinfo Token.</li>
+<li><strong><code>CEDARLING_USERINFO_AUD_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>aud</code> (Audience) claim must be present in the Userinfo Token.</li>
+<li><strong><code>CEDARLING_USERINFO_EXP_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>exp</code> (Expiration) claim must be present in the Userinfo Token and not past the date specified.</li>
+<li><strong><code>CEDARLING_ID_TOKEN_TRUST_MODE</code></strong> (<code>"None"</code> | <code>"Strict"</code>): Varying levels of validations for JWTs. See <a href="#id-token-trust-mode">Validation Levels</a>.</li>
+<li><strong><code>CEDARLING_LOCK</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the Cedarling will connect to the Lock Master for policies, and subscribe for SSE events.</li>
+<li><strong><code>CEDARLING_LOCK_MASTER_CONFIGURATION_URI</code></strong>: URI where Cedarling can get JSON file with all required metadata about Lock Master, i.e. .well-known/lock-master-configuration. This is <strong><em>Required if <code>"LOCK"</code> == <code>"enabled"</code></em></strong>.</li>
+<li><strong><code>CEDARLING_DYNAMIC_CONFIGURATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): Controls whether Cedarling should listen for SSE config updates.</li>
+<li><strong><code>CEDARLING_LOCK_SSA_JWT</code></strong>: SSA for DCR in a Lock Master deployment. The Cedarling will validate this JWT prior to DCR.</li>
+<li><strong><code>CEDARLING_AUDIT_LOG_INTERVAL</code></strong>: How often to send log messages to Lock Master in seconds (set this to <code>0</code> to turn off trasmission).</li>
+<li><strong><code>CEDARLING_AUDIT_HEALTH_INTERVAL</code></strong>: How often to send health messages to Lock Master in seconds (set this to <code>0</code> to turn off trasmission).</li>
+<li><strong><code>CEDARLING_AUDIT_TELEMETRY_INTERVAL</code></strong>: How often to send telemetry messages to Lock Master in seconds (set this to <code>0</code> to turn off trasmission).</li>
+<li><strong><code>CEDARLING_LISTEN_SSE</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): Controls whether Cedarling should listen for updates from the Lock Server.</li>
 </ul>
-<p>The following bootstrap properties are only needed for enterprise deployments.</p>
+<h2 id="user-workload-boolean-operation">User-Workload Boolean Operation<a class="headerlink" href="#user-workload-boolean-operation" title="Permanent link">#</a></h2>
+<p>The <code>CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION</code> property specifies what boolean operation to use for the <code>USER</code> and <code>WORKLOAD</code> when making authz (authorization) decisions.</p>
+<h3 id="available-operations">Available Operations<a class="headerlink" href="#available-operations" title="Permanent link">#</a></h3>
 <ul>
-<li>
-<p><strong><code>CEDARLING_LOCK</code></strong> : Enabled | Disabled. If Enabled, the Cedarling will connect to the Lock Server for policies, and subscribe for SSE events. </p>
-</li>
-<li>
-<p><strong><code>CEDARLING_LOCK_MASTER_CONFIGURATION_URI</code></strong> : Required if <code>LOCK</code> == <code>Enabled</code>. URI where Cedarling can get JSON file with all required metadata about Lock Server, i.e. <code>.well-known/lock-server-configuration</code>.</p>
-</li>
-<li>
-<p><strong><code>CEDARLING_LOCK_SSA_JWT</code></strong> : SSA for DCR in a Lock Server deployment. The Cedarling will validate this SSA JWT prior to DCR.</p>
-</li>
-<li>
-<p><strong><code>CEDARLING_POLICY_STORE_ID</code></strong> : The identifier of the policy stored needed only for Lock Server deployments.</p>
-</li>
-<li>
-<p><strong><code>CEDARLING_AUDIT_LOG_INTERVAL</code></strong> : How often to send log messages to Lock Server (0 to turn off trasmission)</p>
-</li>
-<li>
-<p><strong><code>CEDARLING_AUDIT_HEALTH_INTERVAL</code></strong> : How often to send health messages to Lock Server (0 to turn off transmission)</p>
-</li>
-<li>
-<p><strong><code>CEDARLING_AUDIT_TELEMETRY_INTERVAL</code></strong> : How often to send telemetry messages to Lock Server (0 to turn off transmission)</p>
-</li>
-<li>
-<p><strong><code>CEDARLING_DYNAMIC_CONFIGURATION</code></strong> : Enabled | Disabled, controls whether Cedarling should listen for SSE config updates</p>
-</li>
-<li>
-<p><strong><code>CEDARLING_GET_TOKEN_STATUS_LIST_UPDATES</code></strong> :  Enabled | Disabled, controls whether Cedarling should listen for SSE OAuth Status List updates</p>
-</li>
+<li><strong>AND</strong>: authz will be successful if <code>USER</code> <strong>AND</strong> <code>WORKLOAD</code> is valid.</li>
+<li><strong>OR</strong>: authz will be successful if <code>USER</code> <strong>OR</strong> <code>WORKLOAD</code> is valid.</li>
+</ul>
+<h2 id="id-token-trust-mode">ID Token Trust Mode<a class="headerlink" href="#id-token-trust-mode" title="Permanent link">#</a></h2>
+<p>The level of validation for the ID Token JWT can be set to either <code>None</code> or <code>Strict</code>.</p>
+<h3 id="none-mode"><code>None</code> Mode<a class="headerlink" href="#none-mode" title="Permanent link">#</a></h3>
+<p>Setting the validation level to <code>None</code> will not check for the conditions outlined in <a href="#strict-mode">Strict Mode</a>.</p>
+<h3 id="strict-mode"><code>Strict</code> Mode<a class="headerlink" href="#strict-mode" title="Permanent link">#</a></h3>
+<p>Strict mode requires:</p>
+<ol>
+<li>The <code>id_token</code>'s <code>aud</code> matches the <code>access_token</code>'s <code>client_id</code>;</li>
+<li>if a Userinfo token is present, the <code>sub</code> matches the <code>id_token</code>, and that the <code>aud</code> matches the access token's <code>client_id</code>.</li>
+</ol>
+<h2 id="loading-the-bootstrap-config">Loading The bootstrap config.<a class="headerlink" href="#loading-the-bootstrap-config" title="Permanent link">#</a></h2>
+<p>There are multiple ways to load your bootstrap config:</p>
+<ul>
+<li><a href="#loading-from-json">From a JSON file</a></li>
+<li><a href="#loading-from-yaml">From a YAML file</a></li>
+</ul>
+<p>You can load from both file types using the following code snippet:</p>
+<div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">cedarling</span>::<span class="n">BootstrapConfig</span><span class="p">;</span><span class="w"></span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
+<span class="w">    </span><span class="n">BootstrapConfig</span>::<span class="n">load_from_file</span><span class="p">(</span><span class="s">&quot;./path/to/your/config.json&quot;</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w"></span>
+</code></pre></div>
+<h3 id="loading-from-json">Loading From JSON<a class="headerlink" href="#loading-from-json" title="Permanent link">#</a></h3>
+<p>Below is an example of a bootstrap config in JSON format.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_APPLICATION_NAME&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_POLICY_STORE_URI&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_POLICY_STORE_ID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_LOG_TYPE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;memory&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_LOG_TTL&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_USER_AUTHZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_WORKLOAD_AUTHZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AND&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_LOCAL_JWKS&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;../test_files/local_jwks.json&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_LOCAL_POLICY_STORE&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_POLICY_STORE_LOCAL_FN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;../test_files/policy-store_blobby.json&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_JWT_SIG_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_JWT_STATUS_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;HS256&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;RS256&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_AT_ISS_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_AT_JTI_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_AT_NBF_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_AT_EXP_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_IDT_ISS_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_IDT_SUB_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_IDT_EXP_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_IDT_IAT_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_IDT_AUD_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_USERINFO_ISS_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_USERINFO_SUB_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_USERINFO_AUD_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_USERINFO_EXP_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_ID_TOKEN_TRUST_MODE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Strict&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_LOCK&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_LOCK_MASTER_CONFIGURATION_URI&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_DYNAMIC_CONFIGURATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_LOCK_SSA_JWT&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_AUDIT_HEALTH_INTERVAL&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_AUDIT_TELEMETRY_INTERVAL&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_LISTEN_SSE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>Note that properties set to <code>"disabled"</code>, an empty string <code>""</code>, zero <code>0</code>, and <code>null</code> can be ommited since they are the defaults.</li>
+</ul>
+<h3 id="loading-from-yaml">Loading From YAML<a class="headerlink" href="#loading-from-yaml" title="Permanent link">#</a></h3>
+<p>Below is an example of a bootstrap config in YAML format.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">CEDARLING_APPLICATION_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">My App</span><span class="w"></span>
+<span class="nt">CEDARLING_POLICY_STORE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_POLICY_STORE_ID</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_LOG_TYPE</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;memory&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_LOG_TTL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60</span><span class="w"></span>
+<span class="nt">CEDARLING_USER_AUTHZ</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_WORKLOAD_AUTHZ</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;AND&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_LOCAL_JWKS</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../test_files/local_jwks.json&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_LOCAL_POLICY_STORE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w"></span>
+<span class="nt">CEDARLING_POLICY_STORE_LOCAL_FN</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../test_files/policy-store_blobby.json&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_JWT_SIG_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_JWT_STATUS_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;disabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;HS256&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;RS256&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_AT_ISS_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;disabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_AT_JTI_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;disabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_AT_NBF_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;disabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_AT_EXP_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_IDT_ISS_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_IDT_SUB_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_IDT_EXP_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_IDT_IAT_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_IDT_AUD_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_USERINFO_ISS_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_USERINFO_SUB_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_USERINFO_AUD_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_USERINFO_EXP_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_ID_TOKEN_TRUST_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;Strict&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_LOCK</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;disabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_LOCK_MASTER_CONFIGURATION_URI</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w"></span>
+<span class="nt">CEDARLING_DYNAMIC_CONFIGURATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;disabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_LOCK_SSA_JWT</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="nt">CEDARLING_AUDIT_HEALTH_INTERVAL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="nt">CEDARLING_AUDIT_TELEMETRY_INTERVAL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="nt">CEDARLING_LISTEN_SSE</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;disabled&#39;</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>Note that properties set to <code>'disabled'</code>, an empty string <code>''</code>, zero <code>0</code>, and <code>null</code> can be ommited since they are the defaults.</li>
 </ul>
 
   <hr>
@@ -8547,7 +8846,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-08T06:55:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-29T15:51:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-29</span>
       
         <br>
         Created:
