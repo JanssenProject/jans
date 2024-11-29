@@ -24,7 +24,7 @@ use crate::common::policy_store::PoliciesContainer;
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct LogEntry {
     /// unique identifier for this event
-    pub id: Uuid,
+    pub request_id: Uuid,
     /// Time of decision, in unix time
     pub time: u64,
     /// kind of log entry
@@ -65,7 +65,7 @@ impl LogEntry {
             // We use uuid v7 because it is generated based on the time and sortable.
             // and we need sortable ids to use it in the sparkv database.
             // Sparkv store data in BTree. So we need have correct order of ids.
-            id: uuid7(),
+            request_id: uuid7(),
             time: unix_time_sec,
             log_type: log_kind,
             pdp_id: pdp_id.0,

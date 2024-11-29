@@ -66,7 +66,7 @@ fn test_log_memory_logger() {
     };
     let strategy = LogStrategy::new(&config);
     let entry = LogEntry {
-        id: uuid7(),
+        request_id: uuid7(),
         time: SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .expect("Time went backwards")
@@ -118,12 +118,16 @@ fn test_log_memory_logger() {
     // check that we have two entries in the log database
     assert_eq!(strategy.get_log_ids().len(), 2);
     assert_eq!(
-        strategy.get_log_by_id(&entry1.id.to_string()).unwrap(),
+        strategy
+            .get_log_by_id(&entry1.request_id.to_string())
+            .unwrap(),
         entry1,
         "Failed to get log entry by id"
     );
     assert_eq!(
-        strategy.get_log_by_id(&entry2.id.to_string()).unwrap(),
+        strategy
+            .get_log_by_id(&entry2.request_id.to_string())
+            .unwrap(),
         entry2,
         "Failed to get log entry by id"
     );
@@ -145,7 +149,7 @@ fn test_log_memory_logger() {
 fn test_log_stdout_logger() {
     // Arrange
     let log_entry = LogEntry {
-        id: uuid7(),
+        request_id: uuid7(),
         time: SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .expect("Time went backwards")
@@ -202,11 +206,15 @@ fn test_log_storage_for_only_writer() {
     // we should not have any entries in the memory logger
     assert_eq!(strategy.get_log_ids().len(), 0);
     assert!(
-        strategy.get_log_by_id(&entry1.id.to_string()).is_none(),
+        strategy
+            .get_log_by_id(&entry1.request_id.to_string())
+            .is_none(),
         "We should not have entry1 entry in the memory logger"
     );
     assert!(
-        strategy.get_log_by_id(&entry2.id.to_string()).is_none(),
+        strategy
+            .get_log_by_id(&entry2.request_id.to_string())
+            .is_none(),
         "We should not have entry2 entry in the memory logger"
     );
 

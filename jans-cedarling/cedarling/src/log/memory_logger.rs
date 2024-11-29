@@ -42,7 +42,7 @@ impl LogWriter for MemoryLogger {
             .storage
             .lock()
             .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
-            .set(entry.id.to_string().as_str(), &json_string);
+            .set(entry.request_id.to_string().as_str(), &json_string);
 
         if let Err(err) = result {
             // log error to stderr
@@ -128,12 +128,16 @@ mod tests {
         // check that we have two entries in the log database
         assert_eq!(logger.get_log_ids().len(), 2);
         assert_eq!(
-            logger.get_log_by_id(&entry1.id.to_string()).unwrap(),
+            logger
+                .get_log_by_id(&entry1.request_id.to_string())
+                .unwrap(),
             entry1,
             "Failed to get log entry by id"
         );
         assert_eq!(
-            logger.get_log_by_id(&entry2.id.to_string()).unwrap(),
+            logger
+                .get_log_by_id(&entry2.request_id.to_string())
+                .unwrap(),
             entry2,
             "Failed to get log entry by id"
         );

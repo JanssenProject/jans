@@ -100,7 +100,7 @@ mod tests {
     fn write_log_ok() {
         // Create a log entry
         let log_entry = LogEntry {
-            id: uuid7(),
+            request_id: uuid7(),
             time: SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .expect("Time went backwards")
