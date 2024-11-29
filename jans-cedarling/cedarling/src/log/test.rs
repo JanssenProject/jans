@@ -71,7 +71,7 @@ fn test_log_memory_logger() {
             .duration_since(UNIX_EPOCH)
             .expect("Time went backwards")
             .as_secs(),
-        log_kind: LogType::Decision,
+        log_type: LogType::Decision,
         pdp_id: uuid7(),
         application_id: Some("test_app".to_string().into()),
         auth_info: None,
@@ -150,7 +150,7 @@ fn test_log_stdout_logger() {
             .duration_since(UNIX_EPOCH)
             .expect("Time went backwards")
             .as_secs(),
-        log_kind: LogType::Decision,
+        log_type: LogType::Decision,
         pdp_id: uuid7(),
         application_id: Some("test_app".to_string().into()),
         auth_info: None,

@@ -28,7 +28,7 @@ pub struct LogEntry {
     /// Time of decision, in unix time
     pub time: u64,
     /// kind of log entry
-    pub log_kind: LogType,
+    pub log_type: LogType,
     /// unique id of cedarling
     pub pdp_id: Uuid,
     /// message of the event
@@ -67,7 +67,7 @@ impl LogEntry {
             // Sparkv store data in BTree. So we need have correct order of ids.
             id: uuid7(),
             time: unix_time_sec,
-            log_kind,
+            log_type: log_kind,
             pdp_id: pdp_id.0,
             application_id,
             auth_info: None,
