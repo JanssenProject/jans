@@ -1,6 +1,6 @@
 [package]
 name = "cedarling"
-version = "1.1.6"
+version = "0.0.0-nightly"
 edition = "2021"
 
 [dependencies]
@@ -10,7 +10,7 @@ serde_yml = "0.0.12"
 thiserror = { workspace = true }
 sparkv = { workspace = true }
 uuid7 = { version = "1.1.0", features = ["serde", "uuid"] }
-cedar-policy = "4.0.0"
+cedar-policy = "4.2"
 base64 = "0.22.1"
 url = "2.5.2"
 lazy_static = "1.5.0"
@@ -18,7 +18,7 @@ jsonwebtoken = "9.3.0"
 reqwest = { version = "0.12.8", features = ["blocking", "json"] }
 bytes = "1.7.2"
 typed-builder = "0.20.0"
-semver = "1.0.23"
+semver = { version = "1.0.23", features = ["serde"] }
 derive_more = { version = "1.0.0", features = [
     "deref",
     "from",
@@ -26,6 +26,7 @@ derive_more = { version = "1.0.0", features = [
     "error",
 ] }
 time = { version = "0.3.36", features = ["wasm-bindgen"] }
+regex = "1.11.1"
 
 [dev-dependencies]
 # is used in testing

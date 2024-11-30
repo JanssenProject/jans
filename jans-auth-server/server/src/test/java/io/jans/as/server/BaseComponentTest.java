@@ -24,6 +24,7 @@ import io.jans.as.server.uma.service.UmaRptService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.CacheService;
 import io.jans.service.EncryptionService;
+import io.jans.service.UserAuthenticatorService;
 import io.jans.service.cdi.util.CdiUtil;
 
 /**
@@ -108,6 +109,10 @@ public abstract class BaseComponentTest extends BaseTest {
 
     public UserService getUserService() {
         return CdiUtil.bean(UserService.class);
+    }
+
+    public UserAuthenticatorService getUserAuthenticatorService() {
+        return CdiUtil.bean(UserAuthenticatorService.class);
     }
 
     public PersistenceEntryManager getPersistenceEntryManager() {

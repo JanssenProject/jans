@@ -28,7 +28,7 @@ mod validator;
 
 use crate::common::policy_store::TrustedIssuer;
 use crate::{IdTokenTrustMode, NewJwtConfig};
-use decoding_strategy::{open_id_storage::OpenIdStorage, DecodingArgs, DecodingStrategy};
+use decoding_strategy::{open_id_storage::OpenIdStorage, DecodingStrategy};
 use new_key_service::{NewKeyService, NewKeyServiceError};
 use serde::de::DeserializeOwned;
 use std::collections::HashSet;
@@ -37,7 +37,7 @@ use token::*;
 use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError, ProcessedJwt};
 
 pub use decoding_strategy::key_service::{HttpClient, KeyServiceError};
-pub use decoding_strategy::{string_to_alg, ParseAlgorithmError};
+pub use decoding_strategy::ParseAlgorithmError;
 pub use error::JwtServiceError;
 pub use jsonwebtoken::Algorithm;
 pub use jwt_service_config::*;
@@ -314,16 +314,10 @@ impl JwtService {
         }
     }
 
-    /// Decodes and validates both an `access_token` and an `id_token`.
-    ///
-    /// This method decodes both tokens, validates them according to the internal
-    /// `DecodingStrategy`, and enforces token relationships, ensuring that the
-    /// `id_token` is validated against claims from the `access_token`.
+    /// Decodes and validates an `access_token`, `id_token`, and `userinfo_token`.
     ///
     /// # Token Validation Rules:
-    /// - `access_token.iss` == `id_token.iss` == `userinfo_token.iss`
-    /// - `access_token.aud` == `id_token.aud` == `userinfo_token.aud`
-    /// - `id_token.sub` == `userinfo_token.sub`
+    /// - token signature must be valid
     /// - token must not be expired.
     /// - token must not be used before the `nbf` timestamp.
     ///
@@ -332,7 +326,7 @@ impl JwtService {
     /// `userinfo_token`.
     ///
     /// # Errors
-    /// Returns an error if decoding or validation of either token fails.
+    /// Returns an error if decoding or validation of either any token fails.
     pub fn decode_tokens<A, I, U>(
         &self,
         access_token: &str,
@@ -352,62 +346,20 @@ impl JwtService {
         let userinfo_token_claims = DecodingStrategy::extract_claims(userinfo_token)
             .map_err(JwtServiceError::InvalidUserinfoToken)?;
 
-        // Validate the `access_token`.
-        //
-        // - checks if `nbf` has passed
-        // - checks if token is not expired
-        //
-        // Context: This token is being used as proof of authentication (AuthN).
-        // Validating the  `aud` might not be needed because of this.
-        //
-        // TODO: validate the `iss` by checking if it's from a trusted issuer in the
-        // `policy_store.json`.
+        // Validate the access_token's signature and optionally, exp and nbf.
         let access_token = self
             .decoding_strategy
-            .decode::<AccessToken>(DecodingArgs {
-                jwt: access_token,
-                iss: None,
-                aud: None,
-                sub: None,
-                validate_nbf: true,
-                validate_exp: true,
-            })
+            .decode::<AccessToken>(access_token)
             .map_err(JwtServiceError::InvalidAccessToken)?;
 
-        // Validate the `id_token`
-        // - checks if id_token.iss == access_token.iss
-        // - checks if id_token.aud == access_token.aud
-        // - checks if `nbf` has passed
-        // - checks if token is not expired
-        let id_token = self
-            .decoding_strategy
-            .decode::<IdToken>(DecodingArgs {
-                jwt: id_token,
-                iss: Some(&access_token.iss),
-                aud: Some(&access_token.aud),
-                sub: None,
-                validate_nbf: true,
-                validate_exp: true,
-            })
+        // Validate the id_token's signature and optionally, exp and nbf.
+        self.decoding_strategy
+            .decode::<IdToken>(id_token)
             .map_err(JwtServiceError::InvalidIdToken)?;
 
-        // validate the `userinfo_token`.
-        // - checks if userinfo_token.iss == access_token.iss
-        // - checks if userinfo_token.aud == access_token.aud
-        // - checks if userinfo_token.sub == access_token.sub
+        // validate the userinfo_token's signature and optionally, exp and nbf.
         self.decoding_strategy
-            .decode::<UserInfoToken>(DecodingArgs {
-                jwt: userinfo_token,
-                // Getting next values from access token looks little strange for me
-                // TODO: add comment here why we are doing in this way
-                // We also need to check if `Userinfo token` not associated with a sub from the `id_token`
-                // https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#cedarling-token-validation
-                iss: Some(&access_token.iss),
-                aud: Some(&access_token.aud),
-                sub: Some(&id_token.sub),
-                validate_nbf: false, // userinfo tokens do not have a `nbf` claim
-                validate_exp: false, // userinfo tokens do not have an `exp` claim
-            })
+            .decode::<UserInfoToken>(userinfo_token)
             .map_err(JwtServiceError::InvalidUserinfoToken)?;
 
         // assume that all tokens has the same `iss` (issuer) so we get config only for one JWT token

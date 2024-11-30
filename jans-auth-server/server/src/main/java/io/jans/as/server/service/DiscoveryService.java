@@ -16,7 +16,7 @@ import io.jans.util.OxConstants;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -76,6 +76,8 @@ public class DiscoveryService {
 
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.STATUS_LIST))
             jsonObj.put(STATUS_LIST_ENDPOINT, getTokenStatusListEndpoint());
+        if (appConfiguration.isFeatureEnabled(FeatureFlagType.ACCESS_EVALUATION))
+            jsonObj.put(ACCESS_EVALUATION_V1_ENDPOINT, getAccessEvaluationV1Endpoint());
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_TOKEN))
             jsonObj.put(REVOCATION_ENDPOINT, appConfiguration.getTokenRevocationEndpoint());
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_SESSION))
@@ -241,6 +243,10 @@ public class DiscoveryService {
         return endpointUrl("/status_list");
     }
 
+    public String getAccessEvaluationV1Endpoint() {
+        return endpointUrl("/access/v1/evaluation");
+    }
+
 
     /**
      * @deprecated theses params:
@@ -294,6 +300,8 @@ public class DiscoveryService {
             aliases.put(TOKEN_ENDPOINT, appConfiguration.getMtlsTokenEndpoint());
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.STATUS_LIST) && StringUtils.isNotBlank(appConfiguration.getMtlsEndSessionEndpoint()))
             aliases.put(STATUS_LIST_ENDPOINT, endpointUrl(appConfiguration.getMtlsEndSessionEndpoint(), "/status_list"));
+        if (appConfiguration.isFeatureEnabled(FeatureFlagType.ACCESS_EVALUATION) && StringUtils.isNotBlank(appConfiguration.getMtlsEndSessionEndpoint()))
+            aliases.put(ACCESS_EVALUATION_V1_ENDPOINT, endpointUrl(appConfiguration.getMtlsEndSessionEndpoint(), "/access/v1/evaluation"));
         if (StringUtils.isNotBlank(appConfiguration.getMtlsJwksUri()))
             aliases.put(JWKS_URI, appConfiguration.getMtlsJwksUri());
         if (StringUtils.isNotBlank(appConfiguration.getMtlsCheckSessionIFrame()))

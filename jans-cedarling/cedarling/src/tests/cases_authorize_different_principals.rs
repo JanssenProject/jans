@@ -12,7 +12,7 @@
 //! because we have checked different scenarios in `cases_authorize_without_check_jwt.rs`
 
 use super::utils::*;
-use crate::{cmp_decision, cmp_policy}; // macros is defined in the cedarling\src\tests\utils\cedarling_util.rs
+use crate::{cmp_decision, cmp_policy, WorkloadBoolOp}; // macros is defined in the cedarling\src\tests\utils\cedarling_util.rs
 use lazy_static::lazy_static;
 use test_utils::assert_eq;
 
@@ -35,6 +35,7 @@ lazy_static! {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
@@ -55,7 +56,7 @@ lazy_static! {
     .expect("Request should be deserialized from json");
 }
 
-/// Check if action executes for next principals: Workload, User, Role
+/// Check if action executes for next principals: Workload, User
 #[test]
 fn success_test_for_all_principals() {
     let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
@@ -86,20 +87,8 @@ fn success_test_for_all_principals() {
 
     cmp_policy!(
         result.person,
-        vec!["2"],
+        vec!["2", "3"],
         "reason of permit person should be '2'"
-    );
-
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit role should be '3'"
     );
 
     assert!(result.is_allowed(), "request result should be allowed");
@@ -108,7 +97,14 @@ fn success_test_for_all_principals() {
 /// Check if action executes for next principals: Workload
 #[test]
 fn success_test_for_principal_workload() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+    let cedarling = get_cedarling_with_authorization_conf(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        crate::AuthorizationConfig {
+            use_user_principal: false,
+            use_workload_principal: true,
+            user_workload_operator: Default::default(),
+        },
+    );
 
     let mut request = AuthRequestBase.clone();
     request.action = "Jans::Action::\"UpdateForWorkload\"".to_string();
@@ -130,15 +126,20 @@ fn success_test_for_principal_workload() {
 
     assert!(result.person.is_none(), "result for person should be none");
 
-    assert!(result.role.is_none(), "result for role should be none");
-
     assert!(result.is_allowed(), "request result should be allowed");
 }
 
 /// Check if action executes for next principals: User
 #[test]
 fn success_test_for_principal_user() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+    let cedarling = get_cedarling_with_authorization_conf(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        crate::AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: false,
+            user_workload_operator: Default::default(),
+        },
+    );
 
     let mut request = AuthRequestBase.clone();
     request.action = "Jans::Action::\"UpdateForUser\"".to_string();
@@ -163,48 +164,21 @@ fn success_test_for_principal_user() {
         "result for workload should be none"
     );
 
-    assert!(result.role.is_none(), "result for role should be none");
-
     assert!(result.is_allowed(), "request result should be allowed");
 }
 
-/// Check if action executes for next principals: Role
-#[test]
-fn success_test_for_principal_role() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
-
-    let mut request = AuthRequestBase.clone();
-    request.action = "Jans::Action::\"UpdateForRole\"".to_string();
-
-    let result = cedarling
-        .authorize(request)
-        .expect("request should be parsed without errors");
-
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit person should be '3'"
-    );
-
-    assert!(
-        result.workload.is_none(),
-        "result for workload should be none"
-    );
-
-    assert!(result.person.is_none(), "result for person should be none");
-
-    assert!(result.is_allowed(), "request result should be allowed");
-}
-
-/// Check if action executes for next principals: Person AND Role
+/// Check if action executes for next principals: Person (only)
+/// check for user and role
 #[test]
 fn success_test_for_principal_person_role() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+    let cedarling = get_cedarling_with_authorization_conf(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        crate::AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: false,
+            user_workload_operator: Default::default(),
+        },
+    );
 
     let mut request = AuthRequestBase.clone();
     request.action = "Jans::Action::\"UpdateForUserAndRole\"".to_string();
@@ -212,26 +186,17 @@ fn success_test_for_principal_person_role() {
     let result = cedarling
         .authorize(request)
         .expect("request should be parsed without errors");
-    cmp_decision!(
-        result.person,
-        Decision::Allow,
-        "request result should be allowed for person"
-    );
+
     cmp_policy!(
         result.person,
-        vec!["2"],
+        vec!["2", "3"],
         "reason of permit person should be '2'"
     );
 
     cmp_decision!(
-        result.role,
+        result.person,
         Decision::Allow,
-        "request result should be allowed for role"
-    );
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit person should be '3'"
+        "request result should be allowed for person"
     );
 
     assert!(
@@ -242,10 +207,17 @@ fn success_test_for_principal_person_role() {
     assert!(result.is_allowed(), "request result should be allowed");
 }
 
-/// Check if action executes for next principals: Person AND Role
+/// Check if action executes for next principals: Workload AND Person (Role)
 #[test]
 fn success_test_for_principal_workload_role() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+    let cedarling = get_cedarling_with_authorization_conf(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        crate::AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: true,
+            user_workload_operator: WorkloadBoolOp::And,
+        },
+    );
 
     let mut request = AuthRequestBase.clone();
     request.action = "Jans::Action::\"UpdateForWorkloadAndRole\"".to_string();
@@ -266,41 +238,200 @@ fn success_test_for_principal_workload_role() {
     );
 
     cmp_decision!(
-        result.role,
+        result.person,
         Decision::Allow,
-        "request result should be allowed for role"
+        "request result should be allowed for person"
     );
     cmp_policy!(
-        result.role,
+        result.person,
         vec!["3"],
         "reason of permit person should be '3'"
     );
 
-    assert!(result.person.is_none(), "result for person should be none");
+    assert!(result.is_allowed(), "request result should be allowed");
+}
+
+/// Check if action executes for next principals: Workload (true) OR Person (false)
+/// is used operator OR
+#[test]
+fn success_test_for_principal_workload_true_or_user_false() {
+    let cedarling = get_cedarling_with_authorization_conf(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        crate::AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: true,
+            user_workload_operator: WorkloadBoolOp::Or,
+        },
+    );
+
+    let mut request = AuthRequestBase.clone();
+    request.action = "Jans::Action::\"UpdateForWorkload\"".to_string();
+
+    let result = cedarling
+        .authorize(request)
+        .expect("request should be parsed without errors");
+
+    cmp_decision!(
+        result.workload,
+        Decision::Allow,
+        "request result should be allowed for workload"
+    );
+    cmp_policy!(
+        result.workload,
+        vec!["1"],
+        "reason of permit workload should be '1'"
+    );
+
+    cmp_decision!(
+        result.person,
+        Decision::Deny,
+        "request result should be allowed for person"
+    );
+    cmp_policy!(
+        result.person,
+        Vec::new() as Vec<String>,
+        "reason of permit person should be empty"
+    );
 
     assert!(result.is_allowed(), "request result should be allowed");
 }
 
-/// Check if action executes when principal can't be applied
+/// Check if action executes for next principals: Workload (false) OR Person (true)
+/// is used operator OR
 #[test]
-fn test_where_principal_cant_be_applied() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+fn success_test_for_principal_workload_false_or_user_true() {
+    let cedarling = get_cedarling_with_authorization_conf(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        crate::AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: true,
+            user_workload_operator: WorkloadBoolOp::Or,
+        },
+    );
+
+    let mut request = AuthRequestBase.clone();
+    request.action = "Jans::Action::\"UpdateForUser\"".to_string();
+
+    let result = cedarling
+        .authorize(request)
+        .expect("request should be parsed without errors");
+
+    cmp_decision!(
+        result.workload,
+        Decision::Deny,
+        "request result should be not allowed for workload"
+    );
+    cmp_policy!(
+        result.workload,
+        Vec::new() as Vec<String>,
+        "reason of permit workload should be empty"
+    );
+
+    cmp_decision!(
+        result.person,
+        Decision::Allow,
+        "request result should be allowed for person"
+    );
+    cmp_policy!(
+        result.person,
+        vec!["2"],
+        "reason of permit person should be '2'"
+    );
+
+    assert!(result.is_allowed(), "request result should be allowed");
+}
+
+/// Check if action executes for next principals: Workload (false) OR Person (false)
+/// is used operator OR
+#[test]
+fn success_test_for_principal_workload_false_or_user_false() {
+    let cedarling = get_cedarling_with_authorization_conf(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        crate::AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: true,
+            user_workload_operator: WorkloadBoolOp::Or,
+        },
+    );
+
+    let mut request = AuthRequestBase.clone();
+    request.action = "Jans::Action::\"AlwaysDeny\"".to_string();
+
+    let result = cedarling
+        .authorize(request)
+        .expect("request should be parsed without errors");
+
+    cmp_decision!(
+        result.workload,
+        Decision::Deny,
+        "request result should be not allowed for workload"
+    );
+    cmp_policy!(
+        result.workload,
+        Vec::new() as Vec<String>,
+        "reason of permit workload should be empty"
+    );
+
+    cmp_decision!(
+        result.person,
+        Decision::Deny,
+        "request result should be not allowed for person"
+    );
+    cmp_policy!(
+        result.person,
+        Vec::new() as Vec<String>,
+        "reason of permit person should be empty"
+    );
+
+    assert!(!result.is_allowed(), "request result should be not allowed");
+}
+
+/// Check if action executes when principal workload can't be applied
+#[test]
+fn test_where_principal_workload_cant_be_applied() {
+    let cedarling = get_cedarling_with_authorization_conf(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        crate::AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: true,
+            user_workload_operator: Default::default(),
+        },
+    );
 
     let mut request = AuthRequestBase.clone();
     request.action = "Jans::Action::\"NoApplies\"".to_string();
 
     let result = cedarling
         .authorize(request)
-        .expect("request should be parsed without errors");
+        .expect_err("request should be parsed with error");
 
-    assert!(
-        result.workload.is_none(),
-        "result for workload should be none"
+    assert!(matches!(
+        result,
+        crate::AuthorizeError::CreateRequestWorkloadEntity(_)
+    ))
+}
+
+/// Check if action executes when principal user can't be applied
+#[test]
+fn test_where_principal_user_cant_be_applied() {
+    let cedarling = get_cedarling_with_authorization_conf(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        crate::AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: false,
+            user_workload_operator: Default::default(),
+        },
     );
 
-    assert!(result.person.is_none(), "result for person should be none");
+    let mut request = AuthRequestBase.clone();
+    request.action = "Jans::Action::\"NoApplies\"".to_string();
 
-    assert!(result.role.is_none(), "result for role should be none");
+    let result = cedarling
+        .authorize(request)
+        .expect_err("request should be parsed with error");
 
-    assert!(!result.is_allowed(), "request result should be not allowed");
+    assert!(matches!(
+        result,
+        crate::AuthorizeError::CreateRequestUserEntity(_)
+    ))
 }

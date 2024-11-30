@@ -15,7 +15,6 @@ One of the main target of ORM module is to provide simple lightweight layer to a
 
 Jans has next persistence modules out-of-the-box:
 
--  [Couchbase](./cb-config.md)
 -  [MySQL](./mysql-config.md)
 -  [PostgreSQL](./pgsql-config.md)
 -  [Hybrid](./pgsql-config.md). This is virtual DB layer which allows to combine few DB types based on record type.
@@ -33,7 +32,6 @@ persistence.type=sql
 Values for property `persistence.type` is set during the installation and based
 on choice of persistence(DB) type, it can be one of these supported values:
 
-- `couchbase`
 - `sql` 
 - `hybrid`. 
 
@@ -47,7 +45,6 @@ configuration properties will be available on Janssen Server instance under
 the directory `/etc/jans/conf/`. List of configuration files for these 
 persistence types are:
 
-- `jans-couchbase.properties`
 - `jans-sql.properties`
 - `jans-hybrid.properties`
 

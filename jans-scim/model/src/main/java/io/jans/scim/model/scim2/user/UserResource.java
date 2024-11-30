@@ -120,7 +120,7 @@ public class UserResource extends BaseScimResource {
     @Attribute(description = "Physical mailing addresses for this User.",
             multiValueClass = Address.class,
             type = AttributeDefinition.Type.COMPLEX)
-    @StoreReference(ref = "jansAddres")
+    @StoreReference(ref = "jansAddress")
     private List<Address> addresses;
 
     @Attribute(description = "A list of groups that the user belongs to, either thorough direct membership, nested groups, " +

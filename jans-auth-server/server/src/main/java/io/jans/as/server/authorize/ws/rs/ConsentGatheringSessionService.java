@@ -14,7 +14,7 @@ import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.CookieService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.orm.exception.EntryPersistenceException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import jakarta.ejb.Stateless;

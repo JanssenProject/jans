@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-core-parent</artifactId>
-		<version>1.1.6-SNAPSHOT</version>
+		<version>0.0.0-nightly</version>
 	</parent>
 
 	<dependencies>
@@ -50,8 +50,8 @@
 			<artifactId>commons-codec</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-configuration</groupId>
-			<artifactId>commons-configuration</artifactId>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-configuration2</artifactId>
 		</dependency>
 		<dependency>
 		    <groupId>org.apache.commons</groupId>

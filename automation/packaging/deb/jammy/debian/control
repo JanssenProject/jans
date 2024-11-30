@@ -9,5 +9,5 @@ Homepage: https://jans.io
 Package: jans
 Architecture: any
 Multi-Arch: foreign
-Depends: ${misc:Depends}, ${shlibs:Depends}, apache2, curl, wget, xz-utils, unzip, rsyslog, bzip2, python3-urllib3, python3-certifi, python3-ldap3, python3-requests, python3-ruamel.yaml, python3-pymysql, python3-cryptography, python3-distutils, python3-psycopg2, postgresql-contrib, postgresql
+Depends: ${misc:Depends}, ${shlibs:Depends}, apache2, curl, wget, xz-utils, unzip, rsyslog, bzip2, python3-urllib3, python3-certifi, python3-requests, python3-ruamel.yaml, python3-pymysql, python3-cryptography, python3-distutils, python3-psycopg2, postgresql-contrib, postgresql
 Description: Janssen enables organizations to build a scalable centralized authentication and authorization service using free open source software.

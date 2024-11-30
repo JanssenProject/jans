@@ -134,7 +134,7 @@ This example shows how to use ORM. It opens connection to MySQL DB and add user 
         newUser.setDn(String.format("inum=%s,ou=people,o=jans", System.currentTimeMillis()));
         newUser.setUserId("sample_user_" + System.currentTimeMillis());
         newUser.setUserPassword("test");
-        newUser.getCustomAttributes().add(new CustomObjectAttribute("jansAddres", Arrays.asList("London", "Texas", "New York")));
+        newUser.getCustomAttributes().add(new CustomObjectAttribute("jansAddress", Arrays.asList("London", "Texas", "New York")));
         newUser.getCustomAttributes().add(new CustomObjectAttribute("jansGuid", "test_value"));
         
         // Call ORM API to store entry

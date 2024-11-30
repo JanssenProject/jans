@@ -6,7 +6,7 @@
 
 package io.jans.as.client;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,6 +29,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String authorizationEndpoint;
     private String authorizationChallengeEndpoint;
     private String statusListEndpoint;
+    private String accessEvaluationV1Endpoint;
     private String tokenEndpoint;
     private String revocationEndpoint;
     private String sessionRevocationEndpoint;
@@ -257,6 +258,26 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      */
     public void setStatusListEndpoint(String statusListEndpoint) {
         this.statusListEndpoint = statusListEndpoint;
+    }
+
+
+    /**
+     * Gets access evaluation v1 endpoint
+     *
+     * @return access evaluation v1 endpoint
+     */
+    public String getAccessEvaluationV1Endpoint() {
+        return accessEvaluationV1Endpoint;
+    }
+
+    /**
+     * Sets access evaluation v1 endpoint
+     * @param accessEvaluationV1Endpoint access evaluation v1 endpoint
+     * @return response
+     */
+    public OpenIdConfigurationResponse setAccessEvaluationV1Endpoint(String accessEvaluationV1Endpoint) {
+        this.accessEvaluationV1Endpoint = accessEvaluationV1Endpoint;
+        return this;
     }
 
     /**
@@ -1329,6 +1350,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", authorizationEndpoint='" + authorizationEndpoint + '\'' +
                 ", authorizationChallengeEndpoint='" + authorizationChallengeEndpoint + '\'' +
                 ", statusListEndpoint='" + statusListEndpoint + '\'' +
+                ", accessEvaluationV1Endpoint='" + accessEvaluationV1Endpoint + '\'' +
                 ", tokenEndpoint='" + tokenEndpoint + '\'' +
                 ", revocationEndpoint='" + revocationEndpoint + '\'' +
                 ", userInfoEndpoint='" + userInfoEndpoint + '\'' +

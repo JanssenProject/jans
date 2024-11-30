@@ -5,7 +5,6 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::parse_option_hashmap;
 use super::parse_option_string;
 use super::AgamaPolicyStore;
 use super::ParsePolicySetMessage;
@@ -14,7 +13,6 @@ use crate::common::policy_store::parse_cedar_version;
 use base64::prelude::*;
 use serde::Deserialize;
 use serde_json::json;
-use std::collections::HashMap;
 use std::str::FromStr;
 use test_utils::assert_eq;
 
@@ -229,46 +227,4 @@ fn test_parse_option_string() {
     });
     let deserialized = serde_json::from_value::<Data>(json).expect("Should parse JSON");
     assert_eq!(deserialized.maybe_string, Some("some_string".to_string()));
-}
-
-#[test]
-fn test_parse_option_hashmap() {
-    #[derive(Deserialize)]
-    struct Data {
-        #[serde(deserialize_with = "parse_option_hashmap", default)]
-        maybe_hashmap: Option<HashMap<String, String>>,
-    }
-
-    // If key can not be found in the JSON, we expect it to be
-
-    // deserialized into None.
-    let json = json!({});
-    let deserialized = serde_json::from_value::<Data>(json).expect("Should parse JSON");
-    assert_eq!(deserialized.maybe_hashmap, None);
-
-    // If the value is an empty Object, we expect it to be
-    // deserialized into None.
-
-    let json = json!({
-        "maybe_hashmap": {}
-
-    });
-    let deserialized = serde_json::from_value::<Data>(json).expect("Should parse JSON");
-    assert_eq!(deserialized.maybe_hashmap, None);
-
-    // If the value is a non-empty String, we expect it to be
-    // deserialized into Some(String).
-    let json = json!({
-        "maybe_hashmap": { "some_key": "some_value" }
-
-    });
-    let deserialized = serde_json::from_value::<Data>(json).expect("Should parse JSON");
-
-    assert_eq!(
-        deserialized.maybe_hashmap,
-        Some(HashMap::from([(
-            "some_key".to_string(),
-            "some_value".to_string()
-        )]))
-    );
 }

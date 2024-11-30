@@ -1,15 +1,14 @@
 /*
- * This software is available under the Apache-2.0 license.
+* This software is available under the Apache-2.0 license.
 
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+* See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+*
+* Copyright (c) 2024, Gluu, Inc.
+*/
 
-use super::claim_mapping::ClaimMapping;
-use super::{parse_option_hashmap, parse_option_string};
+pub use super::claim_mapping::ClaimMappings;
+use super::parse_option_string;
 use serde::Deserialize;
-use std::collections::HashMap;
 
 /// Represents metadata related to access tokens issued by a trusted issuer.
 ///
@@ -29,8 +28,11 @@ pub struct AccessTokenEntityMetadata {
     pub entity_metadata: TokenEntityMetadata,
 }
 
-/// Metadata associated with a token entity, which includes user identification,
-/// role mappings, and claim mappings.
+///  Structure for storing mapping JWT claims to `cedar-policy` custom defined types in the `schema`.
+///
+/// An optional mapping of claims to their values. Each claim is represented
+/// by a key-value pair where the key is the claim name and the value is
+/// a `ClaimMapping` struct.
 #[derive(Debug, PartialEq, Clone, Default, Deserialize)]
 pub struct TokenEntityMetadata {
     /// An optional user identifier extracted from the token metadata.
@@ -42,8 +44,8 @@ pub struct TokenEntityMetadata {
     /// An optional mapping of claims to their values. Each claim is represented
     /// by a key-value pair where the key is the claim name and the value is
     /// a `ClaimMapping` struct.
-    #[serde(deserialize_with = "parse_option_hashmap", default)]
-    pub claim_mapping: Option<HashMap<String, ClaimMapping>>,
+    #[serde(default)]
+    pub claim_mapping: ClaimMappings,
 }
 
 #[cfg(test)]
@@ -51,7 +53,7 @@ mod test {
     use super::TokenEntityMetadata;
     use serde_json::json;
 
-     /// Test deserialization of `TokenEntityMetadata` from JSON.
+    /// Test deserialization of `TokenEntityMetadata` from JSON.
     #[test]
     fn can_parse_from_json() {
         // Test case: Parsing an empty JSON object
@@ -64,7 +66,7 @@ mod test {
             "Expected empty JSON to be parsed into default TokenEntityMetadata"
         );
 
-         // Test case: Parsing JSON with specified `user_id` and `role_mapping`
+        // Test case: Parsing JSON with specified `user_id` and `role_mapping`
         let json = json!({
             "user_id": "sub",
             "role_mapping": "",
@@ -77,12 +79,12 @@ mod test {
             TokenEntityMetadata { 
                 user_id: Some("sub".into()), 
                 role_mapping: None, 
-                claim_mapping: None 
+                claim_mapping: Default::default() 
             }, 
             "Expected JSON with user_id and empty role_mapping to be parsed into TokenEntityMetadata"
         );
     }
-    
+
     /// Test deserialization of `TokenEntityMetadata` from YAML.
     #[test]
     fn can_parse_from_yaml() {
@@ -95,7 +97,7 @@ mod test {
             TokenEntityMetadata::default(),
             "Expected empty YAML to be parsed into default TokenEntityMetadata"
         );
-        
+
         // Test case: Parsing YAML with specified `user_id` and `role_mapping`
         let yaml = "
             user_id: 'sub'
@@ -109,10 +111,9 @@ mod test {
             TokenEntityMetadata { 
                 user_id: Some("sub".into()), 
                 role_mapping: None, 
-                claim_mapping: None 
+                claim_mapping: Default::default()
             }, 
             "Expected YAML with user_id and empty role_mapping to be parsed into TokenEntityMetadata"
         );
     }
 }
-

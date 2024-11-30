@@ -240,6 +240,16 @@ public class SimpleUser extends BaseEntry implements Serializable {
         getCustomAttributes().add(attribute);
     }
 
+    public void removeAttributeValue(String name) {
+        for (Iterator<CustomObjectAttribute> it = getCustomAttributes().iterator(); it.hasNext(); ) {
+        	CustomObjectAttribute customObjectAttribute = it.next();
+            if (StringHelper.equalsIgnoreCase(name, customObjectAttribute.getName())) {
+            	customObjectAttribute.setValue(null);
+                break;
+            }
+        }
+    }
+
     public void removeAttribute(String name) {
         for (Iterator<CustomObjectAttribute> it = getCustomAttributes().iterator(); it.hasNext(); ) {
             if (StringHelper.equalsIgnoreCase(name, it.next().getName())) {

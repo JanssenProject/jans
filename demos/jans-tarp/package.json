@@ -1,6 +1,6 @@
 {
   "name": "jans-tarp",
-  "version": "1.1.6",
+  "version": "0.0.0-nightly",
   "description": "Relying Party tool in form of a Chrome Extension.",
   "main": "index.js",
   "license": "Apache",

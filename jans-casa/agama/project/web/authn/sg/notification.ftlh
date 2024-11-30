@@ -49,7 +49,7 @@ window.onload = (event) => {
        <p class="f6 mb4">
             Didn't receive a notification?&nbsp;
             <button type="submit" name="scan-QR"
-                class="pa0 bw0 br0 blue hover-dark-blue underline-hover bg-transparent btn cust-link-button f7-cust">Scan a QR code instead</button>
+                class="pa0 bw0 br0 blue hover-dark-blue underline-hover bg-transparent cust-link-button f7-cust">Scan a QR code instead</button>
        </p>
     </form>
         

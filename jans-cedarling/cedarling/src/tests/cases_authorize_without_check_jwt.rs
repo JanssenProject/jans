@@ -38,6 +38,7 @@ fn success_test_role_string() {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
@@ -79,23 +80,87 @@ fn success_test_role_string() {
 
     cmp_policy!(
         result.person,
-        vec!["2"],
-        "reason of permit person should be '2'"
-    );
-
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit role should be '3'"
+        vec!["2", "3"],
+        "reason of permit person should be '2','3'"
     );
 
     assert!(result.is_allowed(), "request result should be allowed");
+}
+
+/// forbid test case where all check of role is forbid
+/// role field in the `userinfo_token` because we search here by default
+/// role field is string and is "Guest".
+///
+/// we check here that field are parsed from JWT tokens
+/// and correctly executed using correct cedar-policy id
+#[test]
+fn forbid_test_role_guest() {
+    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+
+    // deserialize `Request` from json
+    let request = Request::deserialize(serde_json::json!(
+        {
+            "access_token": generate_token_using_claims(json!({
+                    "org_id": "some_long_id",
+                    "jti": "some_jti",
+                    "client_id": "some_client_id",
+                    "iss": "some_iss",
+                    "aud": "some_aud",
+                  })),
+            "id_token": generate_token_using_claims(json!({
+                    "jti": "some_jti",
+                    "iss": "some_iss",
+                    "aud": "some_aud",
+                    "sub": "some_sub",
+                  })),
+            "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
+                    "country": "US",
+                    "sub": "some_sub",
+                    "iss": "some_iss",
+                    "client_id": "some_client_id",
+                    "role": "Guest",
+                  })),
+            "action": "Jans::Action::\"Update\"",
+            "resource": {
+                "id": "random_id",
+                "type": "Jans::Issue",
+                "org_id": "some_long_id",
+                "country": "US"
+            },
+            "context": {},
+        }
+    ))
+    .expect("Request should be deserialized from json");
+
+    let result = cedarling
+        .authorize(request)
+        .expect("request should be parsed without errors");
+
+    cmp_decision!(
+        result.workload,
+        Decision::Allow,
+        "request result should be allowed for workload"
+    );
+    cmp_policy!(
+        result.workload,
+        vec!["1"],
+        "reason of permit workload should be '1'"
+    );
+
+    cmp_decision!(
+        result.person,
+        Decision::Deny,
+        "request result should be not allowed for person with role Guest"
+    );
+
+    cmp_policy!(
+        result.person,
+        vec!["4"],
+        "reason of permit person should be '2' and '4'"
+    );
+
+    assert!(!result.is_allowed(), "request result should be not allowed");
 }
 
 /// Success test case where all check a successful
@@ -125,6 +190,7 @@ fn success_test_role_array() {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
@@ -167,20 +233,8 @@ fn success_test_role_array() {
 
     cmp_policy!(
         result.person,
-        vec!["2"],
-        "reason of permit person should be '2'"
-    );
-
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit role should be '3'"
+        vec!["2", "3"],
+        "reason of permit person should be '2','3'"
     );
 
     assert!(result.is_allowed(), "request result should be allowed");
@@ -213,6 +267,7 @@ fn success_test_no_role() {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
@@ -260,8 +315,6 @@ fn success_test_no_role() {
         "reason of permit person should be '2'"
     );
 
-    assert!(result.role.is_none(), "result.role should be none");
-
     assert!(
         result.is_allowed(),
         "request result should be allowed, because workload and user allowed"
@@ -271,7 +324,7 @@ fn success_test_no_role() {
 /// Success test case where all check a successful
 ///
 /// we check here that field for `Jans::User` is present in `id_token`
-/// it is `country` field of `Jans::User`
+/// it is `country` field of `Jans::User` and role field is present
 #[test]
 fn success_test_user_data_in_id_token() {
     let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
@@ -294,10 +347,12 @@ fn success_test_user_data_in_id_token() {
                     "country": "US",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                     "sub": "some_sub",
                     "iss": "some_iss",
                     "client_id": "some_client_id",
                     "role": ["Admin"],
+                    "country": "US",
                   })),
             "action": "Jans::Action::\"Update\"",
             "resource": {
@@ -335,20 +390,8 @@ fn success_test_user_data_in_id_token() {
 
     cmp_policy!(
         result.person,
-        vec!["2"],
-        "reason of permit person should be '2'"
-    );
-
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit role should be '3'"
+        vec!["2", "3"],
+        "reason of permit person should be '2','3'"
     );
 
     assert!(result.is_allowed(), "request result should be allowed");
@@ -377,10 +420,12 @@ fn all_forbid() {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                   // country different from resource
                     "country": "UK",
                     "sub": "some_sub",
                     "iss": "some_iss",
+                    "jti": "some_jti",
                     "client_id": "some_client_id",
                     // role not Admin
                     "role": ["Guest"],
@@ -416,33 +461,21 @@ fn all_forbid() {
     cmp_decision!(
         result.person,
         Decision::Deny,
-        "request result should be forbidden for person"
+        "request result should be forbidden for person with role Guest"
     );
 
     cmp_policy!(
         result.person,
-        Vec::new() as Vec<String>,
+        vec!["4"],
         "reason of forbid person should empty, no forbid rule"
-    );
-
-    cmp_decision!(
-        result.role,
-        Decision::Deny,
-        "request result should be forbidden for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        Vec::new() as Vec<String>,
-        "reason of forbid role should be empty"
     );
 
     assert!(!result.is_allowed(), "request result should be not allowed");
 }
 
-// check only principal permit and other not
+// check only workload permit and other not
 #[test]
-fn only_principal_permit() {
+fn only_workload_permit() {
     let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
 
     // deserialize `Request` from json
@@ -462,6 +495,7 @@ fn only_principal_permit() {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                   // country different from resource
                     "country": "UK",
                     "sub": "some_sub",
@@ -512,20 +546,8 @@ fn only_principal_permit() {
 
     cmp_policy!(
         result.person,
-        Vec::new() as Vec<String>,
+        vec!["4"],
         "reason of forbid person should empty, no forbid rule"
-    );
-
-    cmp_decision!(
-        result.role,
-        Decision::Deny,
-        "request result should be forbidden for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        Vec::new() as Vec<String>,
-        "reason of forbid role should be empty"
     );
 
     assert!(!result.is_allowed(), "request result should be not allowed");
@@ -554,13 +576,14 @@ fn only_person_permit() {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                   // country different from resource
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
                     "client_id": "some_client_id",
-                    // role not Admin
-                    "role": ["Guest"],
+                    // role not present, commented line
+                    // "role": ["Guest"],
                   })),
             "action": "Jans::Action::\"Update\"",
             "resource": {
@@ -602,24 +625,12 @@ fn only_person_permit() {
         "reason of forbid person should '2'"
     );
 
-    cmp_decision!(
-        result.role,
-        Decision::Deny,
-        "request result should be forbidden for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        Vec::new() as Vec<String>,
-        "reason of forbid role should be empty"
-    );
-
     assert!(!result.is_allowed(), "request result should be not allowed");
 }
 
-// check only role permit and other not
+// check only user role permit and other not
 #[test]
-fn only_role_permit() {
+fn only_user_role_permit() {
     let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
 
     // deserialize `Request` from json
@@ -640,6 +651,7 @@ fn only_role_permit() {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                   // country different from resource
                     "country": "UK",
                     "sub": "some_sub",
@@ -677,26 +689,14 @@ fn only_role_permit() {
 
     cmp_decision!(
         result.person,
-        Decision::Deny,
+        Decision::Allow,
         "request result should be forbidden for person"
     );
 
     cmp_policy!(
         result.person,
-        Vec::new() as Vec<String>,
-        "reason of forbid person should empty, no forbid rule"
-    );
-
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be permit for role"
-    );
-
-    cmp_policy!(
-        result.role,
         vec!["3"],
-        "reason of permit role should be '3'"
+        "reason of forbid person '3', permit for role Admin"
     );
 
     assert!(!result.is_allowed(), "request result should be not allowed");
@@ -724,12 +724,13 @@ fn only_workload_and_person_permit() {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
                     "client_id": "some_client_id",
-                    // role not Admin
-                    "role": ["Guest"],
+                    // role vector is empty
+                    "role": [],
                   })),
             "action": "Jans::Action::\"Update\"",
             "resource": {
@@ -771,18 +772,6 @@ fn only_workload_and_person_permit() {
         "reason of permit person should '2'"
     );
 
-    cmp_decision!(
-        result.role,
-        Decision::Deny,
-        "request result should be forbidden for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        Vec::new() as Vec<String>,
-        "reason of forbid role should be empty"
-    );
-
     assert!(result.is_allowed(), "request result should be allowed");
 }
 
@@ -808,6 +797,7 @@ fn only_workload_and_role_permit() {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                   // country different from resource
                     "country": "UK",
                     "sub": "some_sub",
@@ -845,26 +835,14 @@ fn only_workload_and_role_permit() {
 
     cmp_decision!(
         result.person,
-        Decision::Deny,
+        Decision::Allow,
         "request result should be not allowed for person"
     );
 
     cmp_policy!(
         result.person,
-        Vec::new() as Vec<String>,
-        "reason of forbid person should be none"
-    );
-
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-
-    cmp_policy!(
-        result.role,
         vec!["3"],
-        "reason of permit role should be '3'"
+        "reason of forbid person should be none, but we have permit for role"
     );
 
     assert!(result.is_allowed(), "request result should be allowed");

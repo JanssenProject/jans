@@ -33,7 +33,7 @@ public class UserAuthenticatorService {
 	private static final UserAuthenticatorList EMPTY_USER_AUTHENTICATOR_LIST = new UserAuthenticatorList(Collections.emptyList());
 
 	public UserAuthenticatorList getUserAuthenticatorList(SimpleUser user) {
-		if ((user == null) || (user.getAuthenticator() == null)) {
+		if ((user == null) || (user.getAuthenticator() == null) || (user.getAuthenticator().getAuthenticators() == null)) {
 			return EMPTY_USER_AUTHENTICATOR_LIST;
 		}
 
@@ -94,6 +94,9 @@ public class UserAuthenticatorService {
 					break;
 				}
 			}
+			if (userAuthenticatorList.getAuthenticators().size() == 0) {
+				user.setAuthenticator(null);
+			}
 		}
 
 		List<String> externalUidList = new ArrayList<>();
@@ -113,7 +116,11 @@ public class UserAuthenticatorService {
 				}
 			}
 			
-			user.setExternalUid(externalUidList.toArray(EMPTY_STRING_ARRAY));
+			if (externalUidList.size() == 0) {
+				user.setExternalUid(null);
+			} else {
+				user.setExternalUid(externalUidList.toArray(EMPTY_STRING_ARRAY));
+			}
 		}
 	}
 
@@ -125,6 +132,9 @@ public class UserAuthenticatorService {
 				if (type.equals(authenticator.getType())) {
 					it.remove();
 				}
+			}
+			if (userAuthenticatorList.getAuthenticators().size() == 0) {
+				user.setAuthenticator(null);
 			}
 		}
 
@@ -143,7 +153,11 @@ public class UserAuthenticatorService {
 				}
 			}
 			
-			user.setExternalUid(externalUidList.toArray(EMPTY_STRING_ARRAY));
+			if (externalUidList.size() == 0) {
+				user.setExternalUid(null);
+			} else {
+				user.setExternalUid(externalUidList.toArray(EMPTY_STRING_ARRAY));
+			}
 		}
 	}
 

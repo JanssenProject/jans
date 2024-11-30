@@ -39,9 +39,16 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
+    CreateUserinfoTokenEntityError,
+    AuthorizeError,
+    "Error encountered while creating Userinfo_token entity"
+);
+
+create_exception!(
+    authorize_errors,
     CreateUserEntityError,
     AuthorizeError,
-    "Error encountered while creating id token entities"
+    "Error encountered while creating User entity"
 );
 
 create_exception!(
@@ -84,13 +91,6 @@ create_exception!(
     CreateRequestUserEntityError,
     AuthorizeError,
     "Error encountered while creating cedar_policy::Request for user entity principal"
-);
-
-create_exception!(
-    authorize_errors,
-    CreateRequestRoleEntityError,
-    AuthorizeError,
-    "Error encountered while creating cedar_policy::Request for role entity principal"
 );
 
 create_exception!(
@@ -141,6 +141,7 @@ errors_functions! {
     DecodeTokens => DecodeTokens,
     AccessTokenEntities => AccessTokenEntitiesError,
     CreateIdTokenEntity => CreateIdTokenEntityError,
+    CreateUserinfoTokenEntity => CreateUserinfoTokenEntityError,
     CreateUserEntity => CreateUserEntityError,
     ResourceEntity => ResourceEntityError,
     RoleEntity => RoleEntityError,
@@ -148,7 +149,6 @@ errors_functions! {
     CreateContext => CreateContextError,
     CreateRequestWorkloadEntity => CreateRequestWorkloadEntityError,
     CreateRequestUserEntity => CreateRequestUserEntityError,
-    CreateRequestRoleEntity => CreateRequestRoleEntityError,
     Entities => EntitiesError
 }
 

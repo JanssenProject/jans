@@ -75,9 +75,6 @@ Create optional scopes list
 {{- if eq .Values.configmap.cnCacheType "REDIS" }}
 {{ $newList = append $newList ("redis" | quote )  }}
 {{- end}}
-{{ if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
-{{ $newList = append $newList ("couchbase" | quote) }}
-{{- end}}
 {{ if eq .Values.global.cnPersistenceType "sql" }}
 {{ $newList = append $newList ("sql" | quote) }}
 {{- end }}

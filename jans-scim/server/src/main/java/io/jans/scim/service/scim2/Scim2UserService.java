@@ -25,7 +25,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -209,7 +209,7 @@ public class Scim2UserService implements Serializable {
 		person.setAttribute("jansPhoneValue", getComplexMultivaluedAsArray(res.getPhoneNumbers()));
 		person.setAttribute("jansImsValue", getComplexMultivaluedAsArray(res.getIms()));
 		person.setAttribute("jansPhotos", getComplexMultivaluedAsArray(res.getPhotos()));
-		person.setAttribute("jansAddres", getComplexMultivaluedAsArray(res.getAddresses()));
+		person.setAttribute("jansAddress", getComplexMultivaluedAsArray(res.getAddresses()));
 
 		// group membership changes MUST be applied via the "Group" Resource (Section
 		// 4.1.2 & 8.7.1 RFC 7643) only
@@ -353,7 +353,7 @@ public class Scim2UserService implements Serializable {
         res.setPhoneNumbers(getAttributeListValue(person, PhoneNumber.class, "jansPhoneValue"));
 		res.setIms(getAttributeListValue(person, InstantMessagingAddress.class, "jansImsValue"));
 		res.setPhotos(getAttributeListValue(person, Photo.class, "jansPhotos"));
-		res.setAddresses(getAttributeListValue(person, Address.class, "jansAddres"));
+		res.setAddresses(getAttributeListValue(person, Address.class, "jansAddress"));
 
 		List<String> listOfGroups = person.getMemberOf();
 		if (listOfGroups != null && listOfGroups.size() > 0) {

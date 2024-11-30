@@ -171,7 +171,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/JsonNode'
               examples:
                 Response json example:
                   description: Response json example
@@ -188,6 +188,9 @@ paths:
                     }
         "500":
           description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/data.readonly
   /api/v1/acrs:
     get:
       tags:
@@ -4612,6 +4615,7 @@ paths:
                   - uma_rpt_policy
                   - uma_rpt_claims
                   - uma_claims_gathering
+                  - access_evaluation
                   - consent_gathering
                   - dynamic_scope
                   - spontaneous_scope
@@ -7841,7 +7845,7 @@ paths:
         examples:
           Field value example:
             description: Field value example
-            value: "applicationType=web,persistClientAuthorizations=true"
+            value: "userDn=d5552516-4436-4908-ab36-3e9725246304,expirationDate>2025-09-25,expirationDate<2026-10-15"
       responses:
         "200":
           description: Ok
@@ -9267,19 +9271,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanView:
+        adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
-        userCanEdit:
+        adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
+        userCanView:
+          type: boolean
+        whitePagesCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -9362,6 +9366,10 @@ components:
         mtlsParEndpoint:
           type: string
         mtlsDeviceAuthzEndpoint:
+          type: string
+        accessEvaluationAllowBasicClientAuthorization:
+          type: boolean
+        accessEvaluationScriptName:
           type: string
         requireRequestObjectEncryption:
           type: boolean
@@ -10094,6 +10102,7 @@ components:
             - METRIC
             - STAT
             - PAR
+            - ACCESS_EVALUATION
             - SSA
         httpLoggingEnabled:
           type: boolean
@@ -10128,6 +10137,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10137,8 +10148,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10905,10 +10914,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -11198,6 +11207,7 @@ components:
           - uma_rpt_policy
           - uma_rpt_claims
           - uma_claims_gathering
+          - access_evaluation
           - consent_gathering
           - dynamic_scope
           - spontaneous_scope
@@ -12004,3 +12014,4 @@ components:
             https://jans.io/oauth/config/token.readonly: View Token details
             https://jans.io/oauth/config/token.write: Manage Token details
             https://jans.io/oauth/config/token.delete: Delete Token details
+            https://jans.io/oauth/config/data.readonly: View Config-API related data

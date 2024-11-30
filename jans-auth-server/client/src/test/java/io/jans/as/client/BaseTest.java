@@ -31,7 +31,7 @@ import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.DateUtil;
 import io.jans.util.StringHelper;
 import io.jans.util.security.SecurityProviderUtility;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
@@ -78,10 +78,6 @@ import java.util.Map.Entry;
 
 import static org.testng.Assert.*;
 
-/**
- * @author Javier Rojas Blum
- * @version August 26, 2021
- */
 public abstract class BaseTest {
 
     public static final boolean ENABLE_REDIRECT_TO_LOGIN_PAGE = StringHelper.toBoolean(System.getProperty("gluu.enable-redirect", "false"), false);
@@ -95,6 +91,7 @@ public abstract class BaseTest {
     protected String tokenEndpoint;
     protected String tokenRevocationEndpoint;
     protected String statusListEndpoint;
+    protected String accessEvaluationV1Endpoint;
     protected String userInfoEndpoint;
     protected String clientInfoEndpoint;
     protected String checkSessionIFrame;
@@ -311,6 +308,15 @@ public abstract class BaseTest {
 
     public void setStatusListEndpoint(String statusListEndpoint) {
         this.statusListEndpoint = statusListEndpoint;
+    }
+
+    public String getAccessEvaluationV1Endpoint() {
+        return accessEvaluationV1Endpoint;
+    }
+
+    public BaseTest setAccessEvaluationV1Endpoint(String accessEvaluationV1Endpoint) {
+        this.accessEvaluationV1Endpoint = accessEvaluationV1Endpoint;
+        return this;
     }
 
     public String getTokenEndpoint() {
@@ -531,6 +537,7 @@ public abstract class BaseTest {
         HtmlUnitDriver currentDriver;
         if (useNewDriver) {
             currentDriver = new HtmlUnitDriver(true);
+            currentDriver.getWebClient().getOptions().setThrowExceptionOnScriptError(false);
         } else {
             startSelenium();
             currentDriver = driver;
@@ -1015,6 +1022,7 @@ public abstract class BaseTest {
             authorizationEndpoint = response.getAuthorizationEndpoint();
             authorizationChallengeEndpoint = response.getAuthorizationChallengeEndpoint();
             statusListEndpoint = response.getStatusListEndpoint();
+            accessEvaluationV1Endpoint = response.getAccessEvaluationV1Endpoint();
             tokenEndpoint = response.getTokenEndpoint();
             tokenRevocationEndpoint = response.getRevocationEndpoint();
             userInfoEndpoint = response.getUserInfoEndpoint();
@@ -1040,6 +1048,7 @@ public abstract class BaseTest {
             authorizationEndpoint = context.getCurrentXmlTest().getParameter("authorizationEndpoint");
             authorizationChallengeEndpoint = context.getCurrentXmlTest().getParameter("authorizationChallengeEndpoint");
             statusListEndpoint = context.getCurrentXmlTest().getParameter("statusListEndpoint");
+            accessEvaluationV1Endpoint = context.getCurrentXmlTest().getParameter("accessEvaluationV1Endpoint");
             tokenEndpoint = context.getCurrentXmlTest().getParameter("tokenEndpoint");
             tokenRevocationEndpoint = context.getCurrentXmlTest().getParameter("tokenRevocationEndpoint");
             userInfoEndpoint = context.getCurrentXmlTest().getParameter("userInfoEndpoint");

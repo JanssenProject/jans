@@ -32,6 +32,10 @@ As a flow executes things can go wrong for reasons that developers cannot forese
 
 If a flow crashes, its parent flows (or flow) if they exist, crash as well. Trying to handle crashes involves a lot of planning and work which is too costly and will unlikely account for the so many things that might fail in a real setting. Thus, coding defensively is not recommended. While it is possible to deal with Java exceptions (product of `Call`s) and other abnormalities when `Trigger`ing flows, these features should be used sparingly.
 
+## Internationalization labels
+
+When using [localization and internationalization](./advanced-usages.md#localization-and-internationalization) use meaningful label keys and prefix all of them with the name of the project in question. If your project is called `magicAuthnJourneys`, then `magicAuthnJourneys.image.caption` and `magicAuthnJourneys.start_button_label` are good examples. This is a strategy that avoids possible name collisions in labels. 
+
 ## OOP prose warning
 
 Java support adds the ability to execute pieces of business logic required to build up a flow. These “pieces of logic” match well to Java methods, however situations like this must be avoided:

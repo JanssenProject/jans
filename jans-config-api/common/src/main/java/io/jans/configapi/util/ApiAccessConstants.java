@@ -97,6 +97,7 @@ public class ApiAccessConstants {
     public static final String CLIENT_AUTHORIZATIONS_DELETE_ACCESS = "https://jans.io/oauth/client/authorizations.delete";
 
     public static final String APP_VERSION_READ_ACCESS = "https://jans.io/oauth/config/app-version.readonly";
+    public static final String APP_DATA_READ_ACCESS = "https://jans.io/oauth/config/data.readonly";
     
     public static final String JANS_ASSET_READ_ACCESS  = "https://jans.io/oauth/config/jans_asset-read";
     public static final String JANS_ASSET_WRITE_ACCESS = "https://jans.io/oauth/config/jans_asset-write";

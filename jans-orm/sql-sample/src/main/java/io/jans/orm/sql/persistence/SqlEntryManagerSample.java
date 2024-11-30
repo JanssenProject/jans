@@ -25,10 +25,12 @@ public class SqlEntryManagerSample {
 
 
         boolean mysql = true;
-    		if (mysql) {
+    	if (mysql) {
             connectionProperties.put("sql#db.schema.name", "jansdb");
             connectionProperties.put("sql#connection.uri", "jdbc:mysql://localhost:3306/jansdb?profileSQL=true");
             connectionProperties.put("sql#connection.driver-property.serverTimezone", "GMT+2");
+
+            connectionProperties.put("sql#mysql.simple-json", "true");
         } else {
             connectionProperties.put("sql#db.schema.name", "public");
         	connectionProperties.put("sql#connection.uri", "jdbc:postgresql://localhost:5432/jansdb");

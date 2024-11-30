@@ -61,20 +61,20 @@ window.onload = (event) => {
 </script>
 
 <section class="pa4 shadow-4 bg-blank gray cust-section">
-    <h2 class="f3 dark-blue2">${msgs['casa.snd_step']}</h2>
+    <h2 class="f3 dark-blue2">2-step verification</h2>
 
     <div class="tc f7 mt2" id="status"></div>
     
     <div class="mw5 dark-red pv3 ph0 ma0 f7-cust" id="error"></div>
     
     <div class="tc green hover-green f7-cust pl3 dn" id="retry">
-        <a href="javascript:startAssertion()" class="btn-link link-secondary">${msgs['casa.fido2.retry_key']}</a>
+        <a href="javascript:startAssertion()" class="btn-link link-secondary">Retry security key</a>
     </div>
 
     <div class="flex flex-column items-center pa3">
-        <p class="f4 tc">${msgs['casa.securitykey.insert']}</p>
+        <p class="f4 tc">Insert your security key</p>
         <img class="w4" src="${webCtx.contextPath}/img/securitykey.jpg" />
-        <div class="db w5 tc f7-cust pv3">${msgs['casa.securitykey.tap']}</div>
+        <div class="db w5 tc f7-cust pv3">If your key has a button, tap it. Otherwise you can remove it and re-insert it</div>
     </div>
     
     <form method="post" enctype="application/x-www-form-urlencoded">

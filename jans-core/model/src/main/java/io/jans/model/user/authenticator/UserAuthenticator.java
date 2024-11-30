@@ -9,6 +9,7 @@ package io.jans.model.user.authenticator;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -92,6 +93,23 @@ public class UserAuthenticator implements Serializable {
 		}
 		
 		return this.custom.get(name);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(custom, id, type);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		UserAuthenticator other = (UserAuthenticator) obj;
+		return Objects.equals(custom, other.custom) && Objects.equals(id, other.id) && Objects.equals(type, other.type);
 	}
 
 	@Override

@@ -2851,6 +2851,29 @@
       ]
     },
     {
+      "path": "/jans-config-api/api/v1/health/service-status",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.90",
+              "name": "https://jans.io/oauth/config/data.readonly"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "path": "/jans-config-api/kc-link/kcLinkConfig",
       "conditions": [
         {

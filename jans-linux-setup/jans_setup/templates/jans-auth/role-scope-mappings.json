@@ -670,7 +670,10 @@
         "https://jans.io/oauth/jans-auth-server/config/adminui/webhook.delete",
         "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly",
         "https://jans.io/oauth/jans-auth-server/config/adminui/properties.write",
-        "https://jans.io/oauth/jans-auth-server/config/adminui/logging.write"
+        "https://jans.io/oauth/jans-auth-server/config/adminui/logging.write",
+        "https://jans.io/oauth/jans-auth-server/session.delete",
+        "revoke_session",
+        "https://jans.io/oauth/config/data.readonly"
       ]
     }
   ]

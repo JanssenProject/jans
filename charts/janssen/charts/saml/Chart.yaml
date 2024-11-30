@@ -1,6 +1,6 @@
 apiVersion: v2
 name: saml
-version: 1.1.6-dev
+version: 0.0.0-nightly
 kubeVersion: ">=v1.21.0-0"
 description: Jans SAML
 type: application
@@ -15,4 +15,4 @@ maintainers:
     email: support@jans.io
     url: https://github.com/moabu
 icon: https://github.com/JanssenProject/jans/raw/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
-appVersion: "1.1.6-dev"
+appVersion: "0.0.0-nightly"

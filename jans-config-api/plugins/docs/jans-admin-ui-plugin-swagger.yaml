@@ -10,19 +10,19 @@ info:
     url: https://github.com/JanssenProject/jans/blob/main/LICENSE
   version: 1.0.0
 servers:
-  - url: https://jans.io/
-    description: The Jans server
+- url: https://jans.io/
+  description: The Jans server
 tags:
-  - name: Admin UI - Role
-  - name: Admin UI - Permission
-  - name: Admin UI - Role-Permissions Mapping
-  - name: Admin UI - License
-  - name: Admin UI - Webhooks
+- name: Admin UI - Role
+- name: Admin UI - Permission
+- name: Admin UI - Role-Permissions Mapping
+- name: Admin UI - License
+- name: Admin UI - Webhooks
 paths:
   /admin-ui/adminUIPermissions:
     get:
       tags:
-        - Admin UI - Permission
+      - Admin UI - Permission
       summary: Get all admin ui permissions
       description: Get all admin ui permissions
       operationId: get-all-adminui-permissions
@@ -50,11 +50,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly
     put:
       tags:
-        - Admin UI - Permission
+      - Admin UI - Permission
       summary: Edit admin ui permissions
       description: Edit admin ui permissions
       operationId: edit-adminui-permission
@@ -88,11 +88,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write
     post:
       tags:
-        - Admin UI - Permission
+      - Admin UI - Permission
       summary: Add admin ui permissions
       description: Add admin ui permissions
       operationId: add-adminui-permission
@@ -126,12 +126,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write
   /admin-ui/adminUIRolePermissionsMapping:
     get:
       tags:
-        - Admin UI - Role-Permissions Mapping
+      - Admin UI - Role-Permissions Mapping
       summary: Get all admin ui role-permissions mapping
       description: Get all admin ui role-permissions mapping
       operationId: get-all-adminui-role-permissions
@@ -159,11 +159,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly
     put:
       tags:
-        - Admin UI - Role-Permissions Mapping
+      - Admin UI - Role-Permissions Mapping
       summary: Map permissions to role
       description: Map permissions to role
       operationId: map-permissions-to-role
@@ -197,11 +197,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
     post:
       tags:
-        - Admin UI - Role-Permissions Mapping
+      - Admin UI - Role-Permissions Mapping
       summary: Add role-permissions mapping
       description: Add role-permissions mapping
       operationId: add-role-permissions-mapping
@@ -235,12 +235,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
   /admin-ui/adminUIRoles:
     get:
       tags:
-        - Admin UI - Role
+      - Admin UI - Role
       summary: Get all admin ui roles
       description: Get all admin ui roles
       operationId: get-all-adminui-roles
@@ -268,11 +268,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly
     put:
       tags:
-        - Admin UI - Role
+      - Admin UI - Role
       summary: Edit admin ui role
       description: Edit admin ui role
       operationId: edit-adminui-role
@@ -306,11 +306,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
     post:
       tags:
-        - Admin UI - Role
+      - Admin UI - Role
       summary: Add admin ui role
       description: Add admin ui role
       operationId: add-adminui-role
@@ -344,22 +344,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
   /admin-ui/adminUIPermissions/{adminUIPermission}:
     get:
       tags:
-        - Admin UI - Permission
+      - Admin UI - Permission
       summary: Get admin ui permission by permission-name
       description: Get admin ui permission by permission-name
       operationId: get-adminui-permission
       parameters:
-        - name: adminUIPermission
-          in: path
-          description: Admin UI Permission
-          required: true
-          schema:
-            type: string
+      - name: adminUIPermission
+        in: path
+        description: Admin UI Permission
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           description: Ok
@@ -384,21 +384,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly
     delete:
       tags:
-        - Admin UI - Permission
+      - Admin UI - Permission
       summary: Delete admin ui permission by permission-name
       description: Delete admin ui permission by permission-name
       operationId: delete-adminui-permission
       parameters:
-        - name: adminUIPermission
-          in: path
-          description: Admin UI Permission
-          required: true
-          schema:
-            type: string
+      - name: adminUIPermission
+        in: path
+        description: Admin UI Permission
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           description: Ok
@@ -423,22 +423,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.delete
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.delete
   /admin-ui/adminUIRoles/{adminUIRole}:
     get:
       tags:
-        - Admin UI - Role
+      - Admin UI - Role
       summary: Get admin ui role details by role-name
       description: Get admin ui role details by role-name
       operationId: get-adminui-role
       parameters:
-        - name: adminUIRole
-          in: path
-          description: Admin UI role
-          required: true
-          schema:
-            type: string
+      - name: adminUIRole
+        in: path
+        description: Admin UI role
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           description: Ok
@@ -463,21 +463,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly
     delete:
       tags:
-        - Admin UI - Role
+      - Admin UI - Role
       summary: Delete admin ui role by role-name
       description: Delete admin ui role by role-name
       operationId: delete-adminui-role
       parameters:
-        - name: adminUIRole
-          in: path
-          description: Admin UI role
-          required: true
-          schema:
-            type: string
+      - name: adminUIRole
+        in: path
+        description: Admin UI role
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           description: Ok
@@ -502,12 +502,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.delete
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.delete
   /admin-ui/config:
     get:
       tags:
-        - Admin UI - Configuration
+      - Admin UI - Configuration
       summary: Get Admin UI editable configuration
       description: Get Admin UI editable configuration
       operationId: get-adminui-conf
@@ -535,11 +535,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly
     put:
       tags:
-        - Admin UI - Configuration
+      - Admin UI - Configuration
       summary: Edit Admin UI editable configuration
       description: Edit Admin UI editable configuration
       operationId: edit-adminui-conf
@@ -573,22 +573,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/properties.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/properties.write
   /admin-ui/adminUIRolePermissionsMapping/{adminUIRole}:
     get:
       tags:
-        - Admin UI - Role-Permissions Mapping
+      - Admin UI - Role-Permissions Mapping
       summary: Get admin ui role-permissions mapping by role-name
       description: Get admin ui role-permissions mapping by role-name
       operationId: get-adminui-role-permissions
       parameters:
-        - name: adminUIRole
-          in: path
-          description: Admin UI Role
-          required: true
-          schema:
-            type: string
+      - name: adminUIRole
+        in: path
+        description: Admin UI Role
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           description: Ok
@@ -613,21 +613,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly
     delete:
       tags:
-        - Admin UI - Role-Permissions Mapping
+      - Admin UI - Role-Permissions Mapping
       summary: Remove role-permissions mapping by role-name
       description: Remove role-permissions mapping by role-name
       operationId: remove-role-permissions-permission
       parameters:
-        - name: adminUIRole
-          in: path
-          description: role
-          required: true
-          schema:
-            type: string
+      - name: adminUIRole
+        in: path
+        description: role
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           description: Ok
@@ -652,12 +652,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.delete
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.delete
   /admin-ui/license/activate:
     post:
       tags:
-        - Admin UI - License
+      - Admin UI - License
       summary: Activate license using license-key
       description: Activate license using license-key
       operationId: activate-adminui-license
@@ -689,12 +689,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
   /admin-ui/license/details:
     get:
       tags:
-        - Admin UI - License
+      - Admin UI - License
       summary: Get admin ui license details
       description: Get admin ui license details
       operationId: get-adminui-license
@@ -720,12 +720,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
   /admin-ui/license/isActive:
     get:
       tags:
-        - Admin UI - License
+      - Admin UI - License
       summary: Check if admin-ui license is active
       description: Check if admin-ui license is active
       operationId: is-license-active
@@ -751,12 +751,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
   /admin-ui/license/isConfigValid:
     get:
       tags:
-        - Admin UI - License
+      - Admin UI - License
       summary: Is license configuration valid
       description: Is license configuration valid
       operationId: check-adminui-license-config
@@ -782,12 +782,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
   /admin-ui/license/retrieve:
     get:
       tags:
-        - Admin UI - License
+      - Admin UI - License
       summary: Retrieve license from SCAN
       description: Retrieve license from SCAN
       operationId: retrieve-license
@@ -813,12 +813,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
   /admin-ui/license/ssa:
     post:
       tags:
-        - Admin UI - License
+      - Admin UI - License
       summary: Save SSA in configuration
       description: Save SSA in configuration
       operationId: adminui-post-ssa
@@ -850,12 +850,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
   /admin-ui/license/trial:
     get:
       tags:
-        - Admin UI - License
+      - Admin UI - License
       summary: Generate trial license
       description: Generate trial license
       operationId: get-trial-license
@@ -881,59 +881,59 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
   /admin-ui/webhook:
     get:
       tags:
-        - Admin UI - Webhooks
+      - Admin UI - Webhooks
       summary: Gets list of webhooks
       description: Gets list of webhooks
       operationId: get-all-webhooks
       parameters:
-        - name: limit
-          in: query
-          description: Search size - max size of the results to return
-          schema:
-            type: integer
-            format: int32
-            default: 50
-        - name: pattern
-          in: query
-          description: Search pattern
-          schema:
-            type: string
-            default: ""
-        - name: startIndex
-          in: query
-          description: The 1-based index of the first query result
-          schema:
-            type: integer
-            format: int32
-            default: 0
-        - name: sortBy
-          in: query
-          description: Attribute whose value will be used to order the returned response
-          schema:
-            type: string
-            default: inum
-        - name: sortOrder
-          in: query
-          description: Order in which the sortBy param is applied. Allowed values are
-            "ascending" and "descending"
-          schema:
-            type: string
-            default: ascending
-        - name: fieldValuePair
-          in: query
-          description: Field and value pair for seraching
-          schema:
-            type: string
-            default: ""
-          examples:
-            Field value example:
-              description: Field value example
-              value: "scopeType=spontaneous,defaultScope=true"
+      - name: limit
+        in: query
+        description: Search size - max size of the results to return
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      - name: pattern
+        in: query
+        description: Search pattern
+        schema:
+          type: string
+          default: ""
+      - name: startIndex
+        in: query
+        description: The 1-based index of the first query result
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: sortBy
+        in: query
+        description: Attribute whose value will be used to order the returned response
+        schema:
+          type: string
+          default: inum
+      - name: sortOrder
+        in: query
+        description: Order in which the sortBy param is applied. Allowed values are
+          "ascending" and "descending"
+        schema:
+          type: string
+          default: ascending
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "scopeType=spontaneous,defaultScope=true"
       responses:
         "200":
           description: Ok
@@ -994,11 +994,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
     put:
       tags:
-        - Admin UI - Webhooks
+      - Admin UI - Webhooks
       summary: Update Webhook
       description: Update Webhook
       operationId: put-webhook
@@ -1070,11 +1070,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.write
     post:
       tags:
-        - Admin UI - Webhooks
+      - Admin UI - Webhooks
       summary: Create Webhook
       description: Create Webhook
       operationId: post-webhook
@@ -1146,22 +1146,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.write
   /admin-ui/webhook/{webhookId}:
     delete:
       tags:
-        - Admin UI - Webhooks
+      - Admin UI - Webhooks
       summary: Delete Webhook
       description: Delete Webhook
       operationId: delete-Webhook-by-inum
       parameters:
-        - name: webhookId
-          in: path
-          description: Webhook identifier
-          required: true
-          schema:
-            type: string
+      - name: webhookId
+        in: path
+        description: Webhook identifier
+        required: true
+        schema:
+          type: string
       responses:
         "204":
           description: No Content
@@ -1182,12 +1182,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.delete
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.delete
   /admin-ui/webhook/features:
     get:
       tags:
-        - Admin UI - Webhooks
+      - Admin UI - Webhooks
       summary: Gets list of Admin UI features
       description: Gets list of Admin UI features
       operationId: get-all-features
@@ -1289,22 +1289,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
   /admin-ui/webhook/features/{webhookId}:
     get:
       tags:
-        - Admin UI - Webhooks
+      - Admin UI - Webhooks
       summary: Gets list of Admin UI features mapped to webhookId
       description: Gets list of Admin UI features mapped to webhookId
       operationId: get-features-by-webhook-id
       parameters:
-        - name: webhookId
-          in: path
-          description: Webhook identifier
-          required: true
-          schema:
-            type: string
+      - name: webhookId
+        in: path
+        description: Webhook identifier
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           description: Ok
@@ -1338,22 +1338,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
   /admin-ui/webhook/{featureId}:
     get:
       tags:
-        - Admin UI - Webhooks
+      - Admin UI - Webhooks
       summary: Gets list of Admin UI Webhooks mapped to featureId
       description: Gets list of Admin UI Webhooks mapped to featureId
       operationId: get-webhooks-by-feature-id
       parameters:
-        - name: featureId
-          in: path
-          description: Feature identifier
-          required: true
-          schema:
-            type: string
+      - name: featureId
+        in: path
+        description: Feature identifier
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           description: Ok
@@ -1409,22 +1409,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
   /admin-ui/webhook/trigger/{featureId}:
     post:
       tags:
-        - Admin UI - Webhooks
+      - Admin UI - Webhooks
       summary: Trigger webhooks mapped to featureId
       description: Trigger webhooks mapped to featureId
       operationId: trigger-webhook
       parameters:
-        - name: featureId
-          in: path
-          description: Admin UI feature identifier
-          required: true
-          schema:
-            type: string
+      - name: featureId
+        in: path
+        description: Admin UI feature identifier
+        required: true
+        schema:
+          type: string
       requestBody:
         description: Webhook object
         content:
@@ -1487,8 +1487,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
       security:
-        - oauth2:
-            - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
 components:
   schemas:
     AdminPermission:
@@ -1628,6 +1628,8 @@ components:
           type: string
         customerLastName:
           type: string
+        licenseExpired:
+          type: boolean
     SSARequest:
       type: object
       properties:
@@ -1635,8 +1637,8 @@ components:
           type: string
     WebhookEntry:
       required:
-        - displayName
-        - url
+      - displayName
+      - url
       type: object
       properties:
         dn:
@@ -1696,11 +1698,11 @@ components:
         scopeType:
           type: string
           enum:
-            - openid
-            - dynamic
-            - uma
-            - spontaneous
-            - oauth
+          - openid
+          - dynamic
+          - uma
+          - spontaneous
+          - oauth
         claims:
           type: array
           items:
@@ -1724,10 +1726,10 @@ components:
         creatorType:
           type: string
           enum:
-            - none
-            - client
-            - user
-            - auto
+          - none
+          - client
+          - user
+          - auto
         creationDate:
           type: string
           format: date-time
@@ -1783,7 +1785,7 @@ components:
             type: object
     ShortCodeRequest:
       required:
-        - webhookId
+      - webhookId
       type: object
       properties:
         webhookId:

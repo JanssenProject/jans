@@ -4,11 +4,11 @@
 
 <section class="pa4 shadow-4 bg-blank gray cust-section">
 
-    <h2 class="f3 dark-blue2">${msgs['casa.snd_step']}</h2>
+    <h2 class="f3 dark-blue2">2-step verification</h2>
 
     <div class="flex flex-column justify-center items-center pa3">
         <img src="${webCtx.contextPath}/img/phone-ver.png" />
-        <span class="db w5 tc f7-cust pt2">${msgs['casa.sms.choose']}</span>
+        <span class="db w5 tc f7-cust pt2">Choose a number to send an SMS to:</span>
     </div>
 
     <form method="post" enctype="application/x-www-form-urlencoded">
@@ -25,8 +25,8 @@
         </ul>
 
         <div class="flex justify-end mt2">
-            <input type="submit" class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white btn cust-primary-button"
-                value="${msgs['casa.sms.send']}">
+            <input type="submit" class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white cust-primary-button"
+                value="Send">
         </div>        
     </form>
 

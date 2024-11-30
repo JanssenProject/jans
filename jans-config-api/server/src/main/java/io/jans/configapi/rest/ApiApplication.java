@@ -117,7 +117,8 @@ import org.slf4j.Logger;
         @OAuthScope(name = ApiAccessConstants.JANS_ASSET_DELETE_ACCESS, description = "Delete Jans Assets"),
         @OAuthScope(name = ApiAccessConstants.TOKEN_READ_ACCESS, description = "View Token details"),
         @OAuthScope(name = ApiAccessConstants.TOKEN_WRITE_ACCESS, description = "Manage Token details"),
-        @OAuthScope(name = ApiAccessConstants.TOKEN_DELETE_ACCESS, description = "Delete Token details")
+        @OAuthScope(name = ApiAccessConstants.TOKEN_DELETE_ACCESS, description = "Delete Token details"),
+        @OAuthScope(name = ApiAccessConstants.APP_DATA_READ_ACCESS, description = "View Config-API related data")
         }
 
 )))

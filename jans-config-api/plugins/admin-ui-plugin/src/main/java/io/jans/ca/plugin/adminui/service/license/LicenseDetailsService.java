@@ -136,10 +136,19 @@ public class LicenseDetailsService extends BaseService {
             ObjectMapper mapper = new ObjectMapper();
             if (response.getStatus() == 200) {
                 JsonObject entity = response.readEntity(JsonObject.class);
-                if (entity.getBoolean("license_active") && !entity.getBoolean("is_expired")) {
-                    return CommonUtils.createGenericResponse(true, 200, "Valid license present.",
-                            mapper.readTree(entity.getJsonArray("custom_fields").toString()));
+                Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "license_active", "is_expired");
+                if (genericResOptional.isPresent()) {
+                    return genericResOptional.get();
                 }
+                if (!entity.getBoolean("license_active")) {
+                    return CommonUtils.createGenericResponse(false, 404, ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
+                }
+                if (entity.getBoolean("is_expired")) {
+                    return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_IS_EXPIRED.getDescription());
+                }
+                return CommonUtils.createGenericResponse(true, 200, "Valid license present.",
+                        mapper.readTree(entity.getJsonArray("custom_fields").toString()));
+
             }
             //getting error
 
@@ -204,6 +213,10 @@ public class LicenseDetailsService extends BaseService {
             if (response.getStatus() == 200) {
                 JsonObject entity = response.readEntity(JsonObject.class);
                 JsonNode jsonNode = mapper.createObjectNode();
+                Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "licenseKey", "mauThreshold");
+                if (genericResOptional.isPresent()) {
+                    return genericResOptional.get();
+                }
                 ((ObjectNode) jsonNode).put("licenseKey", entity.getString("licenseKey"));
                 ((ObjectNode) jsonNode).put("mauThreshold", entity.getInt("mauThreshold"));
 
@@ -277,19 +290,22 @@ public class LicenseDetailsService extends BaseService {
             ObjectMapper mapper = new ObjectMapper();
             if (response.getStatus() == 200) {
                 JsonObject entity = response.readEntity(JsonObject.class);
-                if (entity.getString("license_key").equals(licenseRequest.getLicenseKey())) {
-                    //save license spring credentials
-                    AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-                    adminConf.getMainSettings().getLicenseConfig().setLicenseKey(licenseRequest.getLicenseKey());
-                    entryManager.merge(adminConf);
-                    //save in license configuration
-                    licenseConfiguration.setLicenseKey(licenseRequest.getLicenseKey());
-                    auiConfiguration.setLicenseConfiguration(licenseConfiguration);
-                    auiConfigurationService.setAuiConfiguration(auiConfiguration);
-
-                    return CommonUtils.createGenericResponse(true, 200, "License have been activated."
-                            , mapper.readTree(entity.getJsonArray("custom_fields").toString()));
+                Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "license_key");
+                if (genericResOptional.isPresent()) {
+                    return genericResOptional.get();
                 }
+                //save license spring credentials
+                AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+                adminConf.getMainSettings().getLicenseConfig().setLicenseKey(licenseRequest.getLicenseKey());
+                entryManager.merge(adminConf);
+                //save in license configuration
+                licenseConfiguration.setLicenseKey(licenseRequest.getLicenseKey());
+                auiConfiguration.setLicenseConfiguration(licenseConfiguration);
+                auiConfigurationService.setAuiConfiguration(auiConfiguration);
+
+                return CommonUtils.createGenericResponse(true, 200, "License have been activated."
+                        , mapper.readTree(entity.getJsonArray("custom_fields").toString()));
+
             }
             //getting error
             String jsonData = response.readEntity(String.class);
@@ -348,21 +364,23 @@ public class LicenseDetailsService extends BaseService {
             ObjectMapper objectMapper = new ObjectMapper();
             if (response.getStatus() == 200) {
                 JsonObject entity = response.readEntity(JsonObject.class);
-                if (!Strings.isNullOrEmpty(entity.getString("license"))) {
-                    //save license spring credentials
-                    AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-                    adminConf.getMainSettings().getLicenseConfig().setLicenseKey(entity.getString("license"));
-                    entryManager.merge(adminConf);
-                    //save in license configuration
-                    licenseConfiguration.setLicenseKey(entity.getString("license"));
-                    auiConfiguration.setLicenseConfiguration(licenseConfiguration);
-                    auiConfigurationService.setAuiConfiguration(auiConfiguration);
-
-                    JsonNode jsonNode = objectMapper.createObjectNode();
-                    ((ObjectNode) jsonNode).put("license-key", entity.getString("license"));
-
-                    return CommonUtils.createGenericResponse(true, 200, "Trial license generated.", jsonNode);
+                Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "license");
+                if (genericResOptional.isPresent()) {
+                    return genericResOptional.get();
                 }
+                //save license spring credentials
+                AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+                adminConf.getMainSettings().getLicenseConfig().setLicenseKey(entity.getString("license"));
+                entryManager.merge(adminConf);
+                //save in license configuration
+                licenseConfiguration.setLicenseKey(entity.getString("license"));
+                auiConfiguration.setLicenseConfiguration(licenseConfiguration);
+                auiConfigurationService.setAuiConfiguration(auiConfiguration);
+
+                JsonNode jsonNode = objectMapper.createObjectNode();
+                ((ObjectNode) jsonNode).put("license-key", entity.getString("license"));
+
+                return CommonUtils.createGenericResponse(true, 200, "Trial license generated.", jsonNode);
             }
             //getting error
 
@@ -418,7 +436,7 @@ public class LicenseDetailsService extends BaseService {
             log.info("license details request status code: {}", response.getStatus());
             if (response.getStatus() == 200) {
                 JsonObject entity = response.readEntity(JsonObject.class);
-                if (entity.getBoolean("license_active") && !entity.getBoolean("is_expired")) {
+                if (entity.getBoolean("license_active")) {
                     log.debug("Active license for admin-ui found : {}", entity.getJsonObject("product_details").getString("product_name"));
                     licenseResponse.setLicenseEnabled(true);
                     licenseResponse.setProductName(entity.getJsonObject("product_details").getString("product_name"));
@@ -428,19 +446,20 @@ public class LicenseDetailsService extends BaseService {
                     licenseResponse.setLicenseKey(entity.getString("license_key"));
                     licenseResponse.setValidityPeriod(entity.getString("validity_period"));
                     licenseResponse.setLicenseActive(entity.getBoolean("license_active"));
+                    licenseResponse.setLicenseExpired(entity.getBoolean("is_expired"));
 
                     JsonObject customer = entity.getJsonObject("customer");
-                    if(customer != null) {
-                        if(customer.get("company_name") != null) {
+                    if (customer != null) {
+                        if (customer.get("company_name") != null) {
                             licenseResponse.setCompanyName(customer.get("company_name").toString());
                         }
-                        if(customer.get("email") != null) {
+                        if (customer.get("email") != null) {
                             licenseResponse.setCustomerEmail(customer.get("email").toString());
                         }
-                        if(customer.get("first_name") != null) {
+                        if (customer.get("first_name") != null) {
                             licenseResponse.setCustomerFirstName(customer.get("first_name").toString());
                         }
-                        if(customer.get("last_name") != null) {
+                        if (customer.get("last_name") != null) {
                             licenseResponse.setCustomerLastName(customer.get("last_name").toString());
                         }
                     }
@@ -485,10 +504,10 @@ public class LicenseDetailsService extends BaseService {
     /**
      * The function saves the client information and license configuration in the persistence layer.
      *
-     * @param ssa The parameter "ssa" is a string that represents the SSA value. It is
-     * used to set the SSA value in the license configuration.
+     * @param ssa         The parameter "ssa" is a string that represents the SSA value. It is
+     *                    used to set the SSA value in the license configuration.
      * @param dcrResponse DCRResponse is an object that contains the response data from a Dynamic Client Registration (DCR)
-     * request. It has the following properties:
+     *                    request. It has the following properties:
      */
     private void saveCreateClientInPersistence(String ssa, DCRResponse dcrResponse) throws Exception {
         AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
@@ -504,7 +523,7 @@ public class LicenseDetailsService extends BaseService {
         AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
         LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
 
-        if(licenseConfiguration == null){
+        if (licenseConfiguration == null) {
             licenseConfiguration = new LicenseConfiguration();
         }
 
@@ -520,13 +539,13 @@ public class LicenseDetailsService extends BaseService {
     /**
      * The function generates a token using client credentials and returns the token response.
      *
-     * @param opHost The `opHost` parameter represents the hostname or URL of the authorization server. It is used to
-     * construct the URL for the token endpoint.
-     * @param clientId The `clientId` parameter is the unique identifier assigned to the client application by the
-     * authorization server. It is used to identify the client when making requests to the server.
+     * @param opHost       The `opHost` parameter represents the hostname or URL of the authorization server. It is used to
+     *                     construct the URL for the token endpoint.
+     * @param clientId     The `clientId` parameter is the unique identifier assigned to the client application by the
+     *                     authorization server. It is used to identify the client when making requests to the server.
      * @param clientSecret The `clientSecret` parameter is a secret key that is used to authenticate the client application
-     * when requesting an access token from the authorization server. It is typically provided by the authorization server
-     * when registering the client application.
+     *                     when requesting an access token from the authorization server. It is typically provided by the authorization server
+     *                     when registering the client application.
      * @return The method is returning a `io.jans.as.client.TokenResponse` object.
      */
     private io.jans.as.client.TokenResponse generateToken(String opHost, String clientId, String clientSecret) {
@@ -559,5 +578,18 @@ public class LicenseDetailsService extends BaseService {
             return Optional.of(CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_503));
         }
         return Optional.empty();
+    }
+
+    private Optional<GenericResponse> handleMissingFieldsInResponse(JsonObject entity, String format, String... args) {
+        StringBuffer missingFields = new StringBuffer("");
+        for (String arg : args) {
+            if (!entity.containsKey(arg)) {
+                missingFields.append(missingFields.length() > 0 ? ", " : "");
+                missingFields.append(arg);
+            }
+        }
+        return missingFields.length() > 0 ?
+                Optional.of(CommonUtils.createGenericResponse(false, 500, String.format(format, missingFields.toString()))) :
+                Optional.empty();
     }
 }

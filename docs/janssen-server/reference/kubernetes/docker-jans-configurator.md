@@ -98,14 +98,12 @@ For fresh installation, generate the initial configuration by creating `/path/to
 
     - `auth_sig_keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
     - `auth_enc_keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
-    - `optional_scopes`: list of optional scopes (as JSON string) that will be used (supported scopes are `couchbase`, `redis`, `sql`; default to empty list)
+    - `optional_scopes`: list of optional scopes (as JSON string) that will be used (supported scopes are `redis`, `sql`; default to empty list)
     - `init_keys_exp`: the initial keys expiration time in hours (default to `48`; extra 1 hour will be added for hard limit)
 
 2.  `_secret`:
 
     - `sql_password`: user's password to access SQL database (only used if `optional_scopes` list contains `sql` scope)
-    - `couchbase_password`: user's password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
-    - `couchbase_superuser_password`: superusers password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
     - `encoded_salt`: user-defined salt (24 characters length); if omitted, salt will be generated automatically
 
     Example of generating `encoded_salt` value:

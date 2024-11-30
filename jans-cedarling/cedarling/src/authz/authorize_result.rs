@@ -1,17 +1,33 @@
 use cedar_policy::Decision;
 
+use crate::bootstrap_config::WorkloadBoolOp;
+
 /// Result of authorization and evaluation cedar policy
 /// based on the [Request](crate::models::request::Request) and policy store
+#[derive(Debug, Clone)]
 pub struct AuthorizeResult {
+    user_workload_operator: WorkloadBoolOp,
+
     /// Result of authorization where principal is `Jans::Workload`
     pub workload: Option<cedar_policy::Response>,
     /// Result of authorization where principal is `Jans::User`
     pub person: Option<cedar_policy::Response>,
-    /// Result of authorization where principal is `Jans::Role`
-    pub role: Option<cedar_policy::Response>,
 }
 
 impl AuthorizeResult {
+    /// Builder function for AuthorizeResult
+    pub(crate) fn new(
+        user_workload_operator: WorkloadBoolOp,
+        workload: Option<cedar_policy::Response>,
+        person: Option<cedar_policy::Response>,
+    ) -> Self {
+        Self {
+            user_workload_operator,
+            workload,
+            person,
+        }
+    }
+
     /// Evaluates the authorization result to determine if the request is allowed.  
     ///  
     /// This function checks the decision based on the following rule:  
@@ -32,21 +48,12 @@ impl AuthorizeResult {
             .as_ref()
             .map(|response| response.decision() == Decision::Allow);
 
-        let role_allowed = self
-            .role
-            .as_ref()
-            .map(|response| response.decision() == Decision::Allow);
-
         // cover each possible case when any of value is Some or None
-        match (workload_allowed, person_allowed, role_allowed) {
-            (None, None, None) => false,
-            (None, None, Some(role)) => role,
-            (None, Some(person), None) => person,
-            (None, Some(person), Some(role)) => person || role,
-            (Some(workload), None, None) => workload,
-            (Some(workload), None, Some(role)) => workload && role,
-            (Some(workload), Some(person), None) => workload && person,
-            (Some(workload), Some(person), Some(role)) => workload && (person || role),
+        match (workload_allowed, person_allowed) {
+            (None, None) => false,
+            (None, Some(person)) => person,
+            (Some(workload), None) => workload,
+            (Some(workload), Some(person)) => self.user_workload_operator.calc(workload, person),
         }
     }
 }

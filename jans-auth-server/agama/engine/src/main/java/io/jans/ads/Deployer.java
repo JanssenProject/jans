@@ -2,17 +2,12 @@ package io.jans.ads;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jans.ads.model.Deployment;
-import io.jans.ads.model.DeploymentDetails;
-import io.jans.ads.model.ProjectMetadata;
-import io.jans.agama.dsl.TranspilationResult;
-import io.jans.agama.dsl.Transpiler;
-import io.jans.agama.dsl.TranspilerException;
+import io.jans.ads.model.*;
+import io.jans.agama.dsl.*;
 import io.jans.agama.dsl.error.SyntaxException;
 import io.jans.agama.engine.misc.FlowUtils;
-import io.jans.agama.engine.service.AgamaPersistenceService;
-import io.jans.agama.model.Flow;
-import io.jans.agama.model.FlowMetadata;
+import io.jans.agama.engine.service.*;
+import io.jans.agama.model.*;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 
@@ -24,14 +19,10 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
-import java.util.Base64.Decoder;
-import java.util.Base64.Encoder;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiPredicate;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.regex.*;
+import java.util.stream.*;
 
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.model.enums.CompressionMethod;
@@ -56,7 +47,7 @@ public class Deployer {
     private static final String[] ASSETS_SUBDIRS = { "ftl", "fl" };
     private static final String SCRIPTS_SUBDIR = "scripts";
     
-    private static final String[] TEMPLATES_EXTENSIONS = new String[] { "ftl", "ftlh" };
+    private static final String[] TEMPLATES_EXTENSIONS = new String[] { "ftl", "ftlh", "txt" };
     private static final String[] SCRIPTS_EXTENSIONS = new String[] { "java", "groovy" };
     private static final String FLOW_EXT = "flow";
 
@@ -80,6 +71,9 @@ public class Deployer {
     
     @Inject
     private AgamaPersistenceService aps;
+    
+    @Inject
+    private LabelsService lbls;
 
     private Base64.Encoder b64Encoder;
     private Base64.Decoder b64Decoder;
@@ -167,6 +161,7 @@ public class Deployer {
                     dd.setLibs(new ArrayList<>(libsPaths));
                     //Update binary in DB - not a gama file anymore!
                     dep.setAssets(new String(b64Encoder.encode(bytes), UTF_8));
+                    lbls.addLabels(prjBasepath);
                 }
             } catch (Exception e) {
                 String msg = e.getMessage();
@@ -438,9 +433,11 @@ public class Deployer {
                     if (b64EncodedAssets != null) {
                         extract(b64EncodedAssets, ASSETS_DIR);
                     }
-                    
+
                     logger.info("Assets of project {} were synced", name);
+                    lbls.addLabels(makeShortSafePath(prjId));
                     projectsFinishTimes.put(prjId, d.getFinishedAt().getTime());
+
                 } catch (Exception e) {
                     logger.error("Error syncing assets of project " + name, e);
                 }
@@ -458,17 +455,19 @@ public class Deployer {
             if (!actualPrjIds.contains(prjId)) {
                 //If a project has disappeared, do flows removal and directories removal
                 logger.info("Project with id {} has been removed recently. Removing references...", prjId);
+                Set<String> basePaths = projectsBasePaths.get(prjId);
 
                 try {
                     toRemove.addAll(projectsLibs.get(prjId));
 
                     projectsFinishTimes.remove(prjId);
-                    purge(projectsBasePaths.get(prjId), null);
+                    purge(basePaths, null);
                 } catch(IOException e) {
                     logger.error(e.getMessage());
                 }
 
                 removeFlows(projectsFlows.get(prjId));
+                lbls.removeLabels(basePaths.toArray(new String[0])[0]);
             }
         }
         

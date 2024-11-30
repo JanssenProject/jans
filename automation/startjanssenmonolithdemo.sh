@@ -71,7 +71,6 @@ if [[ "$JANS_BUILD_COMMIT" ]]; then
   # and use the respective image instead of the default image
   python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-mysql-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; del data['services']['jans']['image'] ; yaml.dump(data, compose)"
   python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-postgres-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; del data['services']['jans']['image'] ; yaml.dump(data, compose)"
-  python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-couchbase-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; del data['services']['jans']['image'] ; yaml.dump(data, compose)"
 fi
 # --
 if [[ "$IS_FQDN_REGISTERED" ]]; then
@@ -85,8 +84,6 @@ if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
   bash /tmp/jans/docker-jans-monolith/up.sh mysql
 elif [[ $JANS_PERSISTENCE == "PGSQL" ]]; then
   bash /tmp/jans/docker-jans-monolith/up.sh postgres
-elif [[ $JANS_PERSISTENCE == "COUCHBASE" ]]; then
-  bash /tmp/jans/docker-jans-monolith/up.sh couchbase
 fi
 echo "$EXT_IP $JANS_FQDN" | sudo tee -a /etc/hosts > /dev/null
 jans_status="unhealthy"

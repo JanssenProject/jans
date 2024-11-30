@@ -30,7 +30,7 @@ The below shows the structure of an Agama project:
 
 - `code` directory holds all flows part of the project. Every flow - implemented in Agama language - has to reside in a separate file with extension `flow` and with file name matching the qualified name of the flow in question. This directory can have nested folders if desired  
 - `lib` may contain source code files in languages other than Agama and binary libraries required by the project, if any. Every engine can make use of the contents of this folder as needed  
-- `web` is expected to hold all UI templates plus required web assets (stylesheets, images, etc.) that all flows in this project may use
+- `web` is expected to hold all UI templates plus required web assets (stylesheets, images, localization strings, etc.) that all flows in this project may use
 - `project.json` file contains metadata about this project. More on this later
 - `README.md` file may contain extra documentation in markdown format
 - `LICENSE` file may contain legal-related information

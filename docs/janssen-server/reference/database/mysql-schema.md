@@ -533,7 +533,7 @@ tags:
 | jansOTPCache                         | json         | YES  |     | None    | Stores a used OTP to prevent a hacker from using it again. Complementary to jansExtUid attribute         |
 | jansLastLogonTime                    | datetime(3)  | YES  |     | None    | Last logon time                                                                                          |
 | jansActive                           | smallint     | YES  |     | None    |                                                                                                          |
-| jansAddres                           | json         | YES  |     | None    |                                                                                                          |
+| jansAddress                          | json         | YES  |     | None    |                                                                                                          |
 | jansEmail                            | json         | YES  |     | None    |                                                                                                          |
 | jansEntitlements                     | json         | YES  |     | None    |                                                                                                          |
 | jansExtId                            | varchar(128) | YES  |     | None    |                                                                                                          |

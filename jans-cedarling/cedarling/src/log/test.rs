@@ -8,7 +8,7 @@ use std::{
 };
 
 use super::*;
-use crate::{log::stdout_logger::TestWriter, common::app_types};
+use crate::{common::app_types, log::stdout_logger::TestWriter};
 use interface::LogWriter;
 use nop_logger::NopLogger;
 use stdout_logger::StdOutLogger;
@@ -77,6 +77,8 @@ fn test_log_memory_logger() {
         auth_info: None,
         msg: "Test message".to_string(),
         error_msg: None,
+        cedar_lang_version: None,
+        cedar_sdk_version: None,
     };
 
     // Act
@@ -154,6 +156,8 @@ fn test_log_stdout_logger() {
         auth_info: None,
         msg: "Test message".to_string(),
         error_msg: None,
+        cedar_lang_version: None,
+        cedar_sdk_version: None,
     };
     // Serialize the log entry to JSON
     let json_str = serde_json::json!(&log_entry).to_string();

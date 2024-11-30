@@ -39,11 +39,15 @@ use log::LogEntry;
 pub use log::LogStorage;
 use log::LogType;
 
+#[cfg(test)]
+use authz::AuthorizeEntitiesData;
+
 #[doc(hidden)]
 pub mod bindings {
     pub use super::log::{
         AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
     };
+    pub use crate::common::policy_store::PolicyStore;
     pub use cedar_policy;
 }
 
@@ -97,6 +101,16 @@ impl Cedarling {
     /// makes authorization decision based on the [`Request`]
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
         self.authz.authorize(request)
+    }
+
+    /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.
+    #[doc(hidden)]
+    #[cfg(test)]
+    pub fn authorize_entities_data(
+        &self,
+        request: &Request,
+    ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
+        self.authz.authorize_entities_data(request)
     }
 }
 

@@ -46,7 +46,11 @@
             <class name="io.jans.as.client.ws.rs.AuthorizationChallengeHttpTest"/>
         </classes>
     </test>
-
+    <test name="Access Evaluation Endpoint HTTP Test test" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.AccessEvaluationHttpTest"/>
+        </classes>
+    </test>
     <test name="Native SSO Client test (HTTP)" enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.token.NativeSsoHttpTest"/>

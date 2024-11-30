@@ -143,7 +143,7 @@ public class ScimEventHandler implements ScimType {
         for (Object entry : res.getEntries()) {   
             ScimCustomPerson user = (ScimCustomPerson) entry;     
             scriptLogger.info("Flushing addresses for user {}", user.getUid());
-            user.setAttribute("jansAddres", "");
+            user.setAttribute("jansAddress", "");
         }
         return true;
     }

@@ -17,7 +17,7 @@ import io.jans.as.server.service.RequestParameterService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;

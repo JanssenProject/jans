@@ -43,6 +43,7 @@ The JSON Schema accepted by cedarling is defined as follows:
 - **trusted_issuers** : (*Object of {unique_id => IdentitySource}(#trusted-issuer-schema)*) List of metadata for Identity Sources.
 
 ### `schema`
+
 Either *String* or *Object*, where *Object* is preferred.
 
 Where *Object* - An object with `encoding`, `content_type` and `body` keys. For example:
@@ -54,7 +55,9 @@ Where *Object* - An object with `encoding`, `content_type` and `body` keys. For 
     "body": "namespace Jans {\ntype Url = {"host": String, "path": String, "protocol": String};..."
 }
 ```
+
   Where *String* - The schema in cedar-json format, encoded as Base64. For example:
+
 ``` json
 "schema": "cGVybWl0KAogICAgc..."
 ```
@@ -83,6 +86,7 @@ The `policies` field describes the Cedar policies that will be used in Cedarling
 - **policy_content** : (*String* | *Object*) The Cedar Policy. See [policy_content](#policy_content) below.
 
 ### `policy_content`
+
 Either *String* or *Object*, where *Object* is preferred.
 
 Where *Object* - An object with `encoding`, `content_type` and `body` keys. For example:
@@ -94,7 +98,9 @@ Where *Object* - An object with `encoding`, `content_type` and `body` keys. For 
     "body": "permit(\n    principal is Jans::User,\n    action in [Jans::Action::\"Update\"],\n    resource is Jans::Issue\n)when{\n    principal.country == resource.country\n};"
 }
 ```
+
   Where *String* - The policy in cedar format, encoded as Base64. For example:
+
 ``` json
 "policy_content": "cGVybWl0KAogICAgc..."
 ```
@@ -173,14 +179,14 @@ This record contains the information needed to validate tokens from this issuer:
 - **openid_configuration_endpoint** : (*String*) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at `/.well-known/openid-configuration`).
 - **identity_source** : (*Object*, *optional*) Metadata related to the tokens issued by this issuer.
 
-**Notes**: 
+**Notes**:
+
 - The `access_tokens`, `id_tokens`, `userinfo_tokens`, and `tx_tokens` fields will follow the [Token Metadata Schema](#token-metadata-schema).
 - The `access_tokens` will contain a `trusted` and `principal_identifier` field in addition to the fields from the `Token Metadata Schema`.
 
 ### Token Metadata Schema
 
 The Token Entity Metadata Schema defines how tokens are mapped, parsed, and transformed within Cedarling. It allows you to specify how to extract user IDs, roles, and other claims from a token using customizable parsers.
-
 
 ```json
 {
@@ -196,16 +202,81 @@ The Token Entity Metadata Schema defines how tokens are mapped, parsed, and tran
 }
 ```
 
-- **role_mapping**: (String, *Optional*) Indicates which field in the token should be used for role-based access control. If not needed, set to an empty string (`""`).
-- **claim_mapping:** Defines how to extract and transform specific claims from the token. Each claim can have its own parser (`regex` or `json`) and type (`Acme::Email`, `Acme::URI`, etc.).
+#### Role mapping
 
+- **role_mapping**: (String OR Array of String, *Optional*) Indicates which field in the token should be used for role-based access control. If not needed, set to an empty string (`""`).
 
-**Note**: You can include a `role_mapping` in each token but only the first one that get parsed will be recognized by Cedarling. Cedarling parses the `role_mapping`s for each token in this order:
+You can include a `role_mapping` in each token but only the first one that get parsed will be recognized by Cedarling. Cedarling parses the `role_mapping`s for each token in this order:
 
 1. `access_tokens`
 2. `id_tokens`
 3. `userinfo_tokens`
 4. `tx_tokens`
+
+#### Claim mapping
+
+- **claim_mapping:** Defines how to extract and transform specific claims from the token. Each claim can have its own parser (`regex` or `json`) and type (`Acme::email_address`, `Acme::Url`, etc.).
+
+In regex attribute mapping like `"UID": {"attr": "uid", "type":"String"},`, `type` field can contain possible variants:
+
+- `String` - to string without transformation,
+- `Number` -  parse string to float64 (JSON number) if error returns default value
+- `Boolean` - if string NOT empty map to true else false
+
+Note, use of regex **named capture groups** which is more readable by referring to parts of a regex match by descriptive names rather than numbers. For example, `(?P<name>...)` defines a named capture group where name is the identifier, and ... is the regex pattern for what you want to capture.
+
+When you use `(?x)` modifier in regexp, ensure that you escaped character `#` => `\#`.
+
+example of mapping `email_address` and `Url`:
+
+```json
+...
+  "claim_mapping": {
+    "email": {
+      "parser": "regex",
+      "type": "Test::email_address",
+      "regex_expression": "^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$",
+      "UID": {
+        "attr": "uid",
+        "type": "String"
+      },
+      "DOMAIN": {
+        "attr": "domain",
+        "type": "String"
+      }
+    },
+    "profile": {
+      "parser": "regex",
+      "type": "Test::Url",
+      "regex_expression": "(?x) ^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\\/\\/(?P<HOST>[^\\/:\\#?]+)(?::(?<PORT>\\d+))?(?P<PATH>\\/[^?\\#]*)?(?:\\?(?P<QUERY>[^\\#]*))?(?:(?P<FRAGMENT>.*))?",
+      "SCHEME": {
+        "attr": "scheme",
+        "type": "String"
+      },
+      "HOST": {
+        "attr": "host",
+        "type": "String"
+      },
+      "PORT": {
+        "attr": "port",
+        "type": "String"
+      },
+      "PATH": {
+        "attr": "path",
+        "type": "String"
+      },
+      "QUERY": {
+        "attr": "query",
+        "type": "String"
+      },
+      "FRAGMENT": {
+        "attr": "fragment",
+        "type": "String"
+      }
+    }
+  }
+...
+```
 
 ## Example Policy store
 
@@ -296,7 +367,7 @@ Mandatory entities is: `id_token`, `Role`, `User`, `Access_token`, `Workload`.
 - `Role` - define role of user.
   - Mapping defined in `Token Metadata Schema`.
   - Claim in JWT usually is string or array of string.
-  - If many roles present, the `cedarling` will try each to find first permit case.
+  - Each `Role` is parent for `User`. So to check role in policy use operator `in` to check hierarchy.
 
 - `User` - entity based on the `id`and `userinfo` JWT token fields.
   - If `id`and `userinfo` JWT token fields has different `sub` value, `userinfo` JWT token will be ignored.

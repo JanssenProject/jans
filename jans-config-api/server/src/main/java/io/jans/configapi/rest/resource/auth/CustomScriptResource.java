@@ -52,7 +52,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 @Path(ApiConstants.CONFIG + ApiConstants.SCRIPTS)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -480,7 +480,7 @@ public class CustomScriptResource extends ConfigBaseResource {
 
     private CustomScript updateFileTypeCustomScript(CustomScript customScript) {
         logger.info("Handling CustomScript if location type is File - customScript:{}", customScript);
-        // Handling for File type customScript
+        // Note File type customScript is intended only for dev
         if (customScript == null) {
             return customScript;
         }
@@ -491,10 +491,11 @@ public class CustomScriptResource extends ConfigBaseResource {
             if (StringUtils.isNotBlank(customScript.getLocationPath())) {
                 fileName = fileName + FilenameUtils.getName(customScript.getLocationPath());
                 customScript.setLocationPath(fileName);
+                customScript.setScript(null);
             }
         }
         
-        logger.info("Handling CustomScript if location type is File - customScript.getLocationType().getValue():{}, customScript.getLocationPath():{}", customScript.getLocationType().getValue(), customScript.getLocationPath());
+        logger.info("\n\n Handling CustomScript if location type is File - customScript.getLocationType().getValue():{}, customScript.getLocationPath():{}", customScript.getLocationType().getValue(), customScript.getLocationPath());
         return customScript;
     }
 

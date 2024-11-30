@@ -40,7 +40,19 @@ policy_stores:
           content_type: cedar
           body: |-
             permit(
-                principal == Jans::Role::"Admin",
+                principal in Jans::Role::"Admin",
+                action in [Jans::Action::"Update",Jans::Action::"UpdateForRole",Jans::Action::"UpdateForUserAndRole",Jans::Action::"UpdateForWorkloadAndRole"],
+                resource is Jans::Issue
+            );
+      4:
+        description: simple policy example for principal role, forbid for Guest
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            forbid(
+                principal in Jans::Role::"Guest",
                 action in [Jans::Action::"Update",Jans::Action::"UpdateForRole",Jans::Action::"UpdateForUserAndRole",Jans::Action::"UpdateForWorkloadAndRole"],
                 resource is Jans::Issue
             );
@@ -58,19 +70,20 @@ policy_stores:
         entity User in [Role] = {"country": String};
         entity Workload = {"org_id": String};
         entity Access_token = {"aud": String,"iss": String, "jti": String, "client_id": String,"org_id": String};
+        entity Userinfo_token  = {"iss": String, "jti": String, "client_id": String};
         entity Empty;
         action "Update" appliesTo {
-          principal: [Workload, User, Role],
+          principal: [Workload, User],
           resource: [Issue],
           context: {}
         };
         action "UpdateForWorkload" appliesTo {
-          principal: [Workload],
+          principal: [Workload, User],
           resource: [Issue],
           context: {}
         };
         action "UpdateForUser" appliesTo {
-          principal: [User],
+          principal: [Workload, User],
           resource: [Issue],
           context: {}
         };
@@ -80,17 +93,22 @@ policy_stores:
           context: {}
         };
         action "UpdateForUserAndRole" appliesTo {
-          principal: [User,Role],
+          principal: [Workload, User],
           resource: [Issue],
           context: {}
         };
         action "UpdateForWorkloadAndRole" appliesTo {
-          principal: [Workload,Role],
+          principal: [Workload, User],
           resource: [Issue],
           context: {}
         };
         action "NoApplies" appliesTo {
           principal: [Empty],
+          resource: [Issue],
+          context: {}
+        };
+        action "AlwaysDeny" appliesTo {
+          principal:  [Workload, User],
           resource: [Issue],
           context: {}
         };

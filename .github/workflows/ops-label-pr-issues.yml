@@ -19,8 +19,7 @@ permissions:
 
 jobs:
   label:
-    # This cannot run on forks as the user mo-auto does not have access to forks
-    if: github.repository == 'JanssenProject/jans'
+    if: github.repository == 'JanssenProject/jans' && startsWith(github.head_ref, 'dependabot/') != true
     name: label PR
     runs-on: ubuntu-latest
     steps:

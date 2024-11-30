@@ -1,10 +1,9 @@
-from functools import partial
-
-
-from pygments.lexers.python import PythonLexer
+import os
 import asyncio
+from functools import partial
 from typing import Optional, Sequence, Callable, Any
 
+from pygments.lexers.python import PythonLexer
 from pygments.lexers.jvm import JavaLexer
 
 from prompt_toolkit.layout.dimension import D
@@ -95,22 +94,23 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             data['moduleProperties'] = []
 
         for prop in data['moduleProperties'][:]:
-            if prop['value1'] == 'location_type':
+            if prop['value1'] in ('location_type', 'location_path'):
                 data['moduleProperties'].remove(prop)
 
-        data['moduleProperties'].append({'value1': 'location_type', 'value2': data['locationType']})
+        location_type = data.pop('locationType')
+        data['moduleProperties'].append({'value1': 'location_type', 'value2': location_type})
+
+        if location_type == 'file':
+            data['moduleProperties'].append({'value1': 'location_path', 'value2': data.pop('locationPath')})
 
         if self.data.get('baseDn'):
             data['baseDn'] = self.data['baseDn']
 
         self.new_data = data
-        close_me = True
 
         if self.save_handler:
-            close_me = self.save_handler(self)
+            self.save_handler(self)
 
-        if close_me:
-            self.future.set_result(DialogResult.ACCEPT)
 
     def cancel(self) -> None:
         """method to invoked when canceling changes in the dialog (Cancel button is pressed)
@@ -129,10 +129,18 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             script_types.append((scr_type, scr_name))
         script_types.sort()
 
+
+        file_name = ''
+        if self.data.get('locationType') == 'file':
+            for prop in self.data['moduleProperties'][:]:
+                if prop['value1'] == 'location_path':
+                    location_path = prop.get('value2', '')
+                    file_name = os.path.basename(location_path)
+
         self.location_widget = self.myparent.getTitledText(
-            _("          Path"), 
+            _("          File Name"), 
             name='locationPath', 
-            value=self.data.get('locationPath',''),
+            value=file_name,
             style='class:script-titledtext', 
             jans_help="locationPath"
             )
@@ -171,7 +179,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
 
         module_properties_data = []
         for prop in self.data.get('moduleProperties', []):
-            if prop['value1'] == 'location_type':
+            if prop['value1'] in ('location_type', 'location_path'):
                 continue
             module_properties_data.append([prop['value1'], prop.get('value2', '')])
 

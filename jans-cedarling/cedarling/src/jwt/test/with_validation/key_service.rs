@@ -14,6 +14,8 @@
 //! - Test expecting panic for not being able to fetch openid configuration on [`JwtService::new_with_config`] init
 //! - Test expecting panic for not being able to fetch JWKS [`JwtService::new_with_config`] init
 
+use std::collections::HashSet;
+
 use super::super::*;
 use crate::common::policy_store::TrustedIssuer;
 use crate::jwt::decoding_strategy::key_service::KeyService;
@@ -116,7 +118,7 @@ fn errors_when_no_key_found() {
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
     let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
+        supported_algs: HashSet::from([Algorithm::ES256]),
         trusted_idps: vec![trusted_idp],
     });
 
@@ -294,7 +296,7 @@ fn can_update_local_jwks() {
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
     let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256, Algorithm::HS256],
+        supported_algs: HashSet::from([Algorithm::ES256, Algorithm::HS256]),
         trusted_idps: vec![trusted_idp],
     });
 

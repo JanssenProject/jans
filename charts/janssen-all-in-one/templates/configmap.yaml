@@ -114,14 +114,6 @@ data:
   LB_ADDR: {{ .Values.configmap.lbAddr }}
   {{- end }}
   CN_PERSISTENCE_TYPE: {{ .Values.cnPersistenceType }}
-  {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
-  #  used only if CN_PERSISTENCE_TYPE is couchbase or hybrid
-  CN_COUCHBASE_URL: {{ .Values.configmap.cnCouchbaseUrl }}
-  CN_COUCHBASE_BUCKET_PREFIX: {{ .Values.configmap.cnCouchbaseBucketPrefix }}
-  CN_COUCHBASE_INDEX_NUM_REPLICA: {{ .Values.configmap.cnCouchbaseIndexNumReplica | quote }}
-  CN_COUCHBASE_USER: {{ .Values.configmap.cnCouchbaseUser }}
-  CN_COUCHBASE_SUPERUSER: {{ .Values.configmap.cnCouchbaseSuperUser }}
-  {{- end }}
   CN_KEY_ROTATION_FORCE: "false"
   CN_KEY_ROTATION_CHECK: "3600"
   CN_KEY_ROTATION_INTERVAL: "48"
@@ -140,9 +132,6 @@ data:
   CN_REDIS_USE_SSL: {{ .Values.configmap.cnRedisUseSsl | quote }}
   CN_REDIS_SSL_TRUSTSTORE: {{ .Values.configmap.cnRedisSslTruststore | quote }}
   CN_REDIS_SENTINEL_GROUP: {{ .Values.configmap.cnRedisSentinelGroup | quote }}
-  {{- end }}
-  {{- if .Values.istio.enabled }}
-  CN_COUCHBASE_TRUSTSTORE_ENABLE: "false"
   {{- end }}
   {{- if .Values.scim.enabled }}
   CN_SCIM_ENABLED: {{ .Values.scim.enabled | quote }}
@@ -188,8 +177,6 @@ data:
   }}
   {{- end }}
   CN_SQL_PASSWORD_FILE: {{ .Values.cnSqlPasswordFile }}
-  CN_COUCHBASE_PASSWORD_FILE: {{ .Values.cnCouchbasePasswordFile }}
-  CN_COUCHBASE_SUPERUSER_PASSWORD_FILE: {{ .Values.cnCouchbaseSuperuserPasswordFile }}
   CN_CONFIG_API_PLUGINS: {{ index .Values "config-api" "plugins" | quote }}
   CN_AIO_COMPONENTS: {{ include "janssen-all-in-one.aioComponents" . | fromJsonArray | join "," | quote}}
   {{- if .Values.saml.enabled }}

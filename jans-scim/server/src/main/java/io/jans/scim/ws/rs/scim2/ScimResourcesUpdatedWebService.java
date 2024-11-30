@@ -2,7 +2,7 @@ package io.jans.scim.ws.rs.scim2;
 
 //import io.jans.scim.ldap.service.IGroupService;
 //import io.jans.scim.model.GluuGroup;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import io.jans.model.attribute.AttributeDataType;
 import io.jans.scim.model.scim.ScimCustomPerson;
 //import io.jans.scim.model.scim2.group.GroupResource;

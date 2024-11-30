@@ -63,6 +63,7 @@ public class ExecutionContext {
     private String dpop;
     private String certAsPem;
     private String deviceSecret;
+    private String requestId;
 
     private String nonce;
     private String state;
@@ -88,6 +89,10 @@ public class ExecutionContext {
     public ExecutionContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         this.httpRequest = httpRequest;
         this.httpResponse = httpResponse;
+    }
+
+    public static ExecutionContext of(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        return new ExecutionContext(httpRequest, httpResponse);
     }
 
     public static ExecutionContext of(AuthzRequest authzRequest) {
@@ -154,6 +159,7 @@ public class ExecutionContext {
         executionContext.claimsAsString = context.claimsAsString;
         executionContext.userSessions = context.userSessions;
         executionContext.auditLog = context.auditLog;
+        executionContext.requestId = context.requestId;
 
         executionContext.attributes.clear();
         executionContext.attributes.putAll(context.attributes);
@@ -404,6 +410,15 @@ public class ExecutionContext {
 
     public void setScopes(Set<String> scopes) {
         this.scopes = scopes;
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public ExecutionContext setRequestId(String requestId) {
+        this.requestId = requestId;
+        return this;
     }
 
     public String getClaimsAsString() {

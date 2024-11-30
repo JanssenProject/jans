@@ -564,6 +564,20 @@ jansRevision: 11
 jansScr::%(authorization_challenge_authorizationchallenge)s
 jansScrTyp: authorization_challenge
 
+dn: inum=0300-BB00,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: Sample Demo of Access Evaluation Java Script
+displayName: demo_evaluation
+inum: 0300-BB00
+jansEnabled: true
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
+jansProgLng: java
+jansRevision: 11
+jansScr::%(access_evaluation_accessevaluation)s
+jansScrTyp: access_evaluation
+
 dn: inum=BADA-BADA,ou=scripts,o=jans
 objectClass: jansCustomScr
 objectClass: top

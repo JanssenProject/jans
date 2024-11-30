@@ -15,7 +15,7 @@ import io.jans.as.model.common.HasParamName;
 import io.jans.orm.annotation.AttributeEnum;
 import io.jans.orm.model.base.LocalizedString;
 import io.jans.util.OxConstants;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -128,7 +128,7 @@ public class Util {
     }
 
     public static void addToListIfHas(List<String> list, JSONObject jsonObj, String key) throws JSONException {
-        if (jsonObj != null && org.apache.commons.lang.StringUtils.isNotBlank(key) && jsonObj.has(key)) {
+        if (jsonObj != null && org.apache.commons.lang3.StringUtils.isNotBlank(key) && jsonObj.has(key)) {
             JSONArray array = jsonObj.getJSONArray(key);
             if (list != null && array != null) {
                 list.addAll(asList(array));
@@ -207,7 +207,7 @@ public class Util {
     public static boolean allNotBlank(String... strings) {
         if (strings != null && strings.length > 0) {
             for (String s : strings) {
-                if (org.apache.commons.lang.StringUtils.isBlank(s)) {
+                if (org.apache.commons.lang3.StringUtils.isBlank(s)) {
                     return false;
                 }
             }

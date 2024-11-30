@@ -18,7 +18,7 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/certmanager
   # -- Image  tag to use for deploying.
-  tag: 1.1.6_dev
+  tag: 0.0.0-nightly
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Auth server key rotation keys life in hours

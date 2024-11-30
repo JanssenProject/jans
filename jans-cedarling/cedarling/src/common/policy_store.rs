@@ -14,8 +14,8 @@ use super::cedar_schema::CedarSchema;
 use cedar_policy::PolicyId;
 use semver::Version;
 use serde::{Deserialize, Deserializer};
-use std::{collections::HashMap, fmt};
-use token_entity_metadata::{AccessTokenEntityMetadata, TokenEntityMetadata};
+use std::{collections::HashMap, fmt, sync::LazyLock};
+pub use token_entity_metadata::{AccessTokenEntityMetadata, ClaimMappings, TokenEntityMetadata};
 
 /// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
 #[derive(Debug, Clone, serde::Deserialize, PartialEq)]
@@ -36,6 +36,7 @@ pub struct PolicyStore {
     /// Name is also name of namespace in `cedar-policy`
     pub name: String,
 
+    /// Description comment to policy store
     #[serde(default)]
     pub description: Option<String>,
 
@@ -44,12 +45,12 @@ pub struct PolicyStore {
     pub cedar_version: Option<Version>,
 
     /// Cedar schema
-    #[serde(alias = "schema")]
-    pub cedar_schema: CedarSchema,
+    #[serde(alias = "cedar_schema")]
+    pub schema: CedarSchema,
 
     /// Cedar policy set
-    #[serde(alias = "policies", deserialize_with = "parse_cedar_policy")]
-    pub cedar_policies: cedar_policy::PolicySet,
+    #[serde(alias = "cedar_policies", deserialize_with = "parse_cedar_policy")]
+    pub policies: cedar_policy::PolicySet,
 
     /// An optional HashMap of trusted issuers.
     ///
@@ -59,7 +60,7 @@ pub struct PolicyStore {
 }
 
 impl PolicyStore {
-    pub fn namespace(&self) -> &str {
+    pub(crate) fn namespace(&self) -> &str {
         &self.name
     }
 }
@@ -68,7 +69,7 @@ impl PolicyStore {
 ///
 /// This struct includes the issuer's name, description, and the OpenID configuration endpoint
 /// for discovering issuer-related information.
-#[derive(Debug, Clone, Deserialize, PartialEq, Default)]
+#[derive(Debug, Clone, Deserialize, PartialEq)]
 pub struct TrustedIssuer {
     /// The name of the trusted issuer.
     pub name: String,
@@ -98,10 +99,31 @@ pub struct TrustedIssuer {
     pub tx_tokens: TokenEntityMetadata,
 }
 
-/// Structure define the source from which role mappings are retrieved.
+impl Default for TrustedIssuer {
+    fn default() -> Self {
+        Self {
+            name: "Jans".to_string(),
+            description: Default::default(),
+            openid_configuration_endpoint: Default::default(),
+            access_tokens: Default::default(),
+            id_tokens: Default::default(),
+            userinfo_tokens: Default::default(),
+            tx_tokens: Default::default(),
+        }
+    }
+}
+
+impl Default for &TrustedIssuer {
+    fn default() -> Self {
+        static DEFAULT: LazyLock<TrustedIssuer> = LazyLock::new(TrustedIssuer::default);
+        &DEFAULT
+    }
+}
+
+/// Structure define the source from where role mappings are retrieved.
 pub struct RoleMapping<'a> {
     pub kind: TokenKind,
-    pub role_mapping_field: &'a str,
+    pub mapping_field: &'a str,
 }
 
 // By default we will search role in the User token
@@ -109,7 +131,23 @@ impl Default for RoleMapping<'_> {
     fn default() -> Self {
         Self {
             kind: TokenKind::Userinfo,
-            role_mapping_field: "role",
+            mapping_field: "role",
+        }
+    }
+}
+
+/// Structure define the source from where user mappings are retrieved.
+pub struct UserMapping<'a> {
+    pub kind: TokenKind,
+    pub mapping_field: &'a str,
+}
+
+// By default we will search role in the User token
+impl Default for UserMapping<'_> {
+    fn default() -> Self {
+        Self {
+            kind: TokenKind::Userinfo,
+            mapping_field: "sub",
         }
     }
 }
@@ -128,33 +166,97 @@ impl TrustedIssuer {
         if let Some(role_mapping) = &self.access_tokens.entity_metadata.role_mapping {
             return Some(RoleMapping {
                 kind: TokenKind::Access,
-                role_mapping_field: role_mapping.as_str(),
+                mapping_field: role_mapping.as_str(),
             });
         }
 
         if let Some(role_mapping) = &self.id_tokens.role_mapping {
             return Some(RoleMapping {
                 kind: TokenKind::Id,
-                role_mapping_field: role_mapping.as_str(),
+                mapping_field: role_mapping.as_str(),
             });
         }
 
         if let Some(role_mapping) = &self.userinfo_tokens.role_mapping {
             return Some(RoleMapping {
                 kind: TokenKind::Userinfo,
-                role_mapping_field: role_mapping.as_str(),
+                mapping_field: role_mapping.as_str(),
             });
         }
 
         if let Some(role_mapping) = &self.tx_tokens.role_mapping {
             return Some(RoleMapping {
                 kind: TokenKind::Transaction,
-                role_mapping_field: role_mapping.as_str(),
+                mapping_field: role_mapping.as_str(),
             });
         }
 
         None
     }
+
+    /// Retrieves the available `user id` mapping from the token metadata.
+    ///
+    /// Checks each token metadata and returns the first one found with a `role_mapping` field.
+    ///
+    /// The checks happen in this order:
+    ///     1. access_token
+    ///     2. id_token
+    ///     3. userinfo_token
+    ///     4. tx_token
+    pub fn get_user_id_mapping(&self) -> Option<UserMapping> {
+        if let Some(user_mapping) = &self.access_tokens.entity_metadata.user_id {
+            return Some(UserMapping {
+                kind: TokenKind::Access,
+                mapping_field: user_mapping.as_str(),
+            });
+        }
+
+        if let Some(user_mapping) = &self.id_tokens.user_id {
+            return Some(UserMapping {
+                kind: TokenKind::Id,
+                mapping_field: user_mapping.as_str(),
+            });
+        }
+
+        if let Some(user_mapping) = &self.userinfo_tokens.user_id {
+            return Some(UserMapping {
+                kind: TokenKind::Userinfo,
+                mapping_field: user_mapping.as_str(),
+            });
+        }
+
+        if let Some(user_mapping) = &self.tx_tokens.user_id {
+            return Some(UserMapping {
+                kind: TokenKind::Transaction,
+                mapping_field: user_mapping.as_str(),
+            });
+        }
+
+        None
+    }
+
+    pub fn tokens_metadata(&self) -> TokensMetadata<'_> {
+        TokensMetadata {
+            access_tokens: &self.access_tokens,
+            id_tokens: &self.id_tokens,
+            userinfo_tokens: &self.userinfo_tokens,
+            tx_tokens: &self.tx_tokens,
+        }
+    }
+}
+
+// Hold reference to tokens metadata
+pub struct TokensMetadata<'a> {
+    /// Metadata for access tokens issued by the trusted issuer.
+    pub access_tokens: &'a AccessTokenEntityMetadata,
+
+    /// Metadata for ID tokens issued by the trusted issuer.
+    pub id_tokens: &'a TokenEntityMetadata,
+    /// Metadata for userinfo tokens issued by the trusted issuer.
+    pub userinfo_tokens: &'a TokenEntityMetadata,
+
+    /// Metadata for transaction tokens issued by the trusted issuer.
+    pub tx_tokens: &'a TokenEntityMetadata,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -419,24 +521,4 @@ where
     let value = Option::<String>::deserialize(deserializer)?;
 
     Ok(value.filter(|s| !s.is_empty()))
-}
-
-/// Custom parser for Option<HashMap<_, _>> which returns `None` if the HashMap is empty
-pub fn parse_option_hashmap<'de, D, K, V>(
-    deserializer: D,
-) -> Result<Option<HashMap<K, V>>, D::Error>
-where
-    D: Deserializer<'de>,
-    K: Eq + std::hash::Hash + Deserialize<'de>,
-    V: Deserialize<'de>,
-{
-    let option = Option::<HashMap<K, V>>::deserialize(deserializer)?;
-
-    match option {
-        Some(ref hashmap) => match hashmap.is_empty() {
-            true => Ok(None),
-            false => Ok(option),
-        },
-        None => Ok(None),
-    }
 }

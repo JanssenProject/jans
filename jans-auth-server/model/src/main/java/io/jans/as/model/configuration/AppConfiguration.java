@@ -146,6 +146,12 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Mutual TLS (mTLS) device authorization endpoint URL")
     private String mtlsDeviceAuthzEndpoint;
 
+    @DocProperty(description = "Allow basic client authorization for access evaluation endpoint.", defaultValue = "false")
+    private Boolean accessEvaluationAllowBasicClientAuthorization;
+
+    @DocProperty(description = "Access evaluation custom script name.")
+    private String accessEvaluationScriptName;
+
     @DocProperty(description = "Boolean value true encrypts request object", defaultValue = "false")
     private Boolean requireRequestObjectEncryption = false;
 
@@ -584,6 +590,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "When true, clients with the same Sector ID also share the same Subject ID", defaultValue = "false")
     private Boolean shareSubjectIdBetweenClientsWithSameSectorId = false;
 
+    @DocProperty(description = "Use openidSubAttribute value of user as local account id for algorithmic pairwise look up", defaultValue = "false")
+    private Boolean useOpenidSubAttributeValueForPairwiseLocalAccountId = false;
+
     @DocProperty(description = "Web Key Storage Type")
     private WebKeyStorage webKeysStorage;
 
@@ -934,9 +943,19 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Force Authentication Filtker to process OPTIONS request", defaultValue = "true")
     private Boolean skipAuthenticationFilterOptionsMethod = true;
-    
+
     @DocProperty(description = "Lock message Pub configuration", defaultValue = "false")
     private LockMessageConfig lockMessageConfig;
+
+    public Boolean getUseOpenidSubAttributeValueForPairwiseLocalAccountId() {
+        if (useOpenidSubAttributeValueForPairwiseLocalAccountId == null) useOpenidSubAttributeValueForPairwiseLocalAccountId = false;
+        return useOpenidSubAttributeValueForPairwiseLocalAccountId;
+    }
+
+    public AppConfiguration setUseOpenidSubAttributeValueForPairwiseLocalAccountId(Boolean useOpenidSubAttributeValueForPairwiseLocalAccountId) {
+        this.useOpenidSubAttributeValueForPairwiseLocalAccountId = useOpenidSubAttributeValueForPairwiseLocalAccountId;
+        return this;
+    }
 
     public int getArchivedJwkLifetimeInSeconds() {
         return archivedJwkLifetimeInSeconds;
@@ -3501,6 +3520,25 @@ public class AppConfiguration implements Configuration {
 
     public void setMtlsDeviceAuthzEndpoint(String mtlsDeviceAuthzEndpoint) {
         this.mtlsDeviceAuthzEndpoint = mtlsDeviceAuthzEndpoint;
+    }
+
+    public Boolean getAccessEvaluationAllowBasicClientAuthorization() {
+        return accessEvaluationAllowBasicClientAuthorization;
+    }
+
+    public AppConfiguration setAccessEvaluationAllowBasicClientAuthorization(Boolean accessEvaluationAllowBasicClientAuthorization) {
+        if (accessEvaluationAllowBasicClientAuthorization == null) accessEvaluationAllowBasicClientAuthorization = false;
+        this.accessEvaluationAllowBasicClientAuthorization = accessEvaluationAllowBasicClientAuthorization;
+        return this;
+    }
+
+    public String getAccessEvaluationScriptName() {
+        return accessEvaluationScriptName;
+    }
+
+    public AppConfiguration setAccessEvaluationScriptName(String accessEvaluationScriptName) {
+        this.accessEvaluationScriptName = accessEvaluationScriptName;
+        return this;
     }
 
     public List<String> getDpopSigningAlgValuesSupported() {

@@ -1,0 +1,165 @@
+---
+cedar_version: 4.2.2
+policy_stores:
+  71b8c1d2bea73899cf7e69eab8e0651dda2e857b2903:
+    name: Test
+    description: ''
+    policies:
+      922a050d9ff6f3268a5987ef85a0d8799154fbce0322:
+        description: '1'
+        creation_date: '2024-11-05T02:52:09.488528'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit
+            (
+             principal,
+             action,
+             resource
+            )
+            ;
+    trusted_issuers:
+      3e59e1d6f009a16d40a33b2f10fc259d05a1a5d9a922:
+        name: TestAgama
+        description: TestAgama trusted issuer
+        openid_configuration_endpoint: https://test-casa.gluu.info/.well-known/openid-configuration
+        access_tokens:
+          trusted: true
+          principal_identifier: jti
+          user_id: ''
+          role_mapping: ''
+          # claim_mapping: {}
+        id_tokens:
+          user_id: ''
+          role_mapping: ''
+        userinfo_tokens:
+          user_id: sub
+          role_mapping: role
+          claim_mapping:
+            email:
+              parser: regex
+              type: Test::email_address
+              regex_expression: "^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"
+              UID:
+                attr: uid
+                type: String
+              DOMAIN:
+                attr: domain
+                type: String
+            profile:
+              parser: regex
+              type: Test::Url
+              regex_expression: |-
+                  (?x) ^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?P<HOST>[^\/:\#?]+)(?::(?<PORT>\d+))?(?P<PATH>\/[^?\#]*)?(?:\?(?P<QUERY>[^\#]*))?(?:(?P<FRAGMENT>.*))?
+              SCHEME:
+                attr: scheme
+                type: String
+              HOST:
+                attr: host
+                type: String
+              PORT:
+                attr: port
+                type: String
+              PATH:
+                attr: path
+                type: String
+              QUERY:
+                attr: query
+                type: String
+              FRAGMENT:
+                attr: fragment
+                type: String
+          tx_tokens:
+            user_id: ''
+            role_mapping: ''
+            claim_mapping: ''
+    schema:
+      encoding: none
+      content_type: cedar
+      body: |-
+          namespace Test {
+          type Context = {"current_time": Long, "device_health": Set < String >, "fraud_indicators": Set < String >, "geolocation": Set < String >, "network": String, "network_type": String, "operating_system": String, "user_agent": String};
+          type email_address = {"domain": String, "uid": String};
+          type Url = {"host": String, "path": String, "protocol": String};
+          entity User in [Role] = {"email": email_address, "phone_number"?: String, "role": Set < String >, "sub": String, "username"?: String};
+          entity HTTP_Request = {"accept": Set < String >, "header": Set < String >, "url": Url};
+          entity Role;
+          entity Userinfo_token = {"aud": String, "birthdate"?: String, "email"?: email_address, "exp"?: Long, "iat"?: Long, "iss": TrustedIssuer, "jti": String, "name"?: String, "phone_number"?: String, "role"?: Set < String >, "sub": String};
+          entity TrustedIssuer = {"issuer_entity_id": Url};
+          entity Application = {"app_id": String, "name": String, "url": Url};
+          entity id_token = {"acr": String, "amr": Set<String>, "aud": String, "azp"?: String, "birthdate"?: String, "email"?: email_address, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String, "name"?: String, "phone_number"?: String, "role"?: Set < String >, "sub": String};
+          entity Access_token = {"aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String, "nbf": Long, "scope": Set<String>};
+          entity Workload = {"client_id": String, "iss": TrustedIssuer, "name"?: String, "rp_id"?: String, "spiffe_id"?: String};
+          action "Monitor" appliesTo {
+            principal: [User, Workload],
+            resource: [Application],
+            context: Context
+          };
+          action "Execute" appliesTo {
+            principal: [User, Workload],
+            resource: [Application],
+            context: Context
+          };
+          action "Compare" appliesTo {
+            principal: [User, Workload],
+            resource: [Application],
+            context: Context
+          };
+          action "Share" appliesTo {
+            principal: [User, Workload],
+            resource: [Application],
+            context: Context
+          };
+          action "Write" appliesTo {
+            principal: [User, Workload],
+            resource: [Application],
+            context: Context
+          };
+          action "PATCH" appliesTo {
+            principal: [Workload],
+            resource: [HTTP_Request],
+            context: Context
+          };
+          action "Read" appliesTo {
+            principal: [User, Workload],
+            resource: [Application],
+            context: Context
+          };
+          action "PUT" appliesTo {
+            principal: [Workload],
+            resource: [HTTP_Request],
+            context: Context
+          };
+          action "GET" appliesTo {
+            principal: [Workload],
+            resource: [HTTP_Request],
+            context: Context
+          };
+          action "DELETE" appliesTo {
+            principal: [Workload],
+            resource: [HTTP_Request],
+            context: Context
+          };
+          action "Tag" appliesTo {
+            principal: [User, Workload],
+            resource: [Application],
+            context: Context
+          };
+          action "HEAD" appliesTo {
+            principal: [Workload],
+            resource: [HTTP_Request],
+            context: Context
+          };
+          action "Search" appliesTo {
+            principal: [User, Workload],
+            resource: [Application],
+            context: Context
+          };
+          action "Test" appliesTo {
+            principal: [User, Workload],
+            resource: [Application],
+            context: Context
+          };
+          }
+

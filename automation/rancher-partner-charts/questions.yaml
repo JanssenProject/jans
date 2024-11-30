@@ -58,9 +58,8 @@ questions:
   type: enum
   group: "Persistence"
   label: Gluu Persistence backend
-  description: "Persistence backend to run Gluu with couchbase|sql|"
+  description: "Persistence backend to run Gluu with sql|hybrid"
   options:
-    - "couchbase"
     - "hybrid"
     - "sql"
 
@@ -131,70 +130,6 @@ questions:
   type: string
   label: SQL database name
   show_if: "global.cnPersistenceType=sql"
-#Couchbase
-- variable: config.configmap.cnCouchbaseCrt
-  default: ""
-  group: "Persistence"
-  description: "Couchbase certificate authority string. This must be encoded using base64. This can also be found in your couchbase UI Security > Root Certificate. In mTLS setups this is not required."
-  type: multiline
-  label: Couchbase certificate authority string
-  show_if: "global.cnPersistenceType=couchbase||global.cnPersistenceType=hybrid"
-- variable: config.configmap.cnCouchbaseUrl
-  default: "gluu.cbns.svc.cluster.local"
-  required: false
-  type: hostname
-  group: "Persistence"
-  label: Couchbase host uri
-  description: "Couchbase URL. Used only when global.cnPersistenceType is hybrid or couchbase. This should be in FQDN format for either remote or local Couchbase clusters. The address can be an internal address inside the kubernetes cluster"
-  show_if: "global.cnPersistenceType=couchbase||global.cnPersistenceType=hybrid"
-- variable: config.configmap.cnCouchbaseBucketPrefix
-  default: "gluu"
-  type: string
-  description: "The prefix of couchbase buckets. This helps with separation in between different environments and allows for the same couchbase cluster to be used by different setups of Gluu."
-  group: "Persistence"
-  required: true
-  label: The prefix of Couchbase buckets
-  show_if: "global.cnPersistenceType=couchbase||global.cnPersistenceType=hybrid"
-- variable: config.configmap.cnCouchbaseIndexNumReplica
-  default: 0
-  type: int
-  description: "The number of replicas per index created. Please note that the number of index nodes must be one greater than the number of index replicas. That means if your couchbase cluster only has 2 index nodes you cannot place the number of replicas to be higher than 1."
-  group: "Persistence"
-  required: true
-  label: The number of replicas per index created
-  show_if: "global.cnPersistenceType=couchbase||global.cnPersistenceType=hybrid"
-- variable: config.configmap.cnCouchbaseSuperUser
-  default: "admin"
-  group: "Persistence"
-  description: "he Couchbase super user (admin) user name. This user is used during initialization only."
-  type: string
-  label: The Couchbase super user (admin) user name.
-  valid_chars: "^[a-z]+$"
-  show_if: "global.cnPersistenceType=couchbase||global.cnPersistenceType=hybrid"
-- variable: config.configmap.cnCouchbaseSuperUserPassword
-  default: "Test1234#"
-  group: "Persistence"
-  description: "Couchbase password for the super user config.configmap.cnCouchbaseSuperUser  that is used during the initialization and upgrade process. The password must contain one digit, one uppercase letter, one lower case letter and one symbol"
-  type: password
-  label: Couchbase password for the super users
-
-  show_if: "global.cnPersistenceType=couchbase||global.cnPersistenceType=hybrid"
-- variable: config.configmap.cnCouchbaseUser
-  default: "gluu"
-  group: "Persistence"
-  description: "Couchbase restricted user, used in Gluu operations with Couchbase. Used only when global.cnPersistenceType is hybrid or couchbase."
-  type: string
-  label: Couchbase restricted username
-  valid_chars: "^[a-z]+$"
-  show_if: "global.cnPersistenceType=couchbase||global.cnPersistenceType=hybrid"
-- variable: config.configmap.cnCouchbasePassword
-  default: "Test1234#"
-  group: "Persistence"
-  description: "Couchbase password for the restricted user config.configmap.cnCouchbaseUser  that is often used inside the services. The password must contain one digit, one uppercase letter, one lower case letter and one symbol ."
-  type: password
-  label: Couchbase password for the restricted user
-  show_if: "global.cnPersistenceType=couchbase||global.cnPersistenceType=hybrid"
-
 # ===========
 # Cache group
 # ===========

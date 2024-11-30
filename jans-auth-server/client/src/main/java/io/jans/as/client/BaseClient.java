@@ -11,12 +11,6 @@ import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.common.HasParamName;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.util.Util;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Invocation.Builder;
@@ -25,6 +19,12 @@ import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.Form;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -148,6 +148,8 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
                 sb.append("\n");
                 if (request instanceof RegisterRequest && ((RegisterRequest) request).hasJwtRequestAsString()) {
                     sb.append(((RegisterRequest) request).getJwtRequestAsString());
+                } else if (request instanceof IsJsonRequest) {
+                    sb.append(((IsJsonRequest) request).asJson());
                 } else {
                     sb.append(request.getQueryString());
                 }

@@ -12,6 +12,8 @@ mod id_token;
 mod key_service;
 mod userinfo_token;
 
+use std::collections::HashSet;
+
 use super::*;
 use crate::common::policy_store::TrustedIssuer;
 use crate::jwt::{self, HttpClient, JwtService, JwtServiceError, TrustedIssuerAndOpenIdConfig};
@@ -104,7 +106,7 @@ fn can_decode_claims_with_validation() {
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
     let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256, Algorithm::HS256],
+        supported_algs: HashSet::from([Algorithm::ES256, Algorithm::HS256]),
         trusted_idps: vec![trusted_idp],
     });
 
@@ -224,7 +226,7 @@ fn errors_on_unsupported_alg() {
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
     let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::HS256],
+        supported_algs: HashSet::from([Algorithm::HS256]),
         trusted_idps: vec![trusted_idp],
     });
 
@@ -364,7 +366,7 @@ fn can_gracefully_handle_unsupported_algorithms_from_jwks() {
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
     let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::HS256],
+        supported_algs: HashSet::from([Algorithm::HS256]),
         trusted_idps: vec![trusted_idp],
     });
 

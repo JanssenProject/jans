@@ -5,6 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use crate::{AuthorizationConfig, WorkloadBoolOp};
 pub use crate::{
     BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogTypeConfig, PolicyStoreConfig,
     PolicyStoreSource,
@@ -21,6 +22,30 @@ pub fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
             source: policy_source,
         },
         jwt_config: JwtConfig::Disabled,
+        authorization_config: AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: true,
+            user_workload_operator: WorkloadBoolOp::And,
+        },
+    })
+    .expect("bootstrap config should initialize correctly")
+}
+
+/// create [`Cedarling`] from [`PolicyStoreSource`]
+pub fn get_cedarling_with_authorization_conf(
+    policy_source: PolicyStoreSource,
+    auth_conf: AuthorizationConfig,
+) -> Cedarling {
+    Cedarling::new(BootstrapConfig {
+        application_name: "test_app".to_string(),
+        log_config: LogConfig {
+            log_type: LogTypeConfig::StdOut,
+        },
+        policy_store_config: PolicyStoreConfig {
+            source: policy_source,
+        },
+        jwt_config: JwtConfig::Disabled,
+        authorization_config: auth_conf,
     })
     .expect("bootstrap config should initialize correctly")
 }
@@ -39,6 +64,7 @@ pub fn get_policy_id(resp: &Option<cedar_policy::Response>) -> Option<Vec<String
 ///
 /// It is designed to assert that the policy ID retrieved from a response
 /// matches a vector of policy IDs (converted to a specific format).
+/// Before checking it sort arrays to be consistent
 ///
 /// # Arguments
 ///
@@ -54,11 +80,19 @@ pub fn get_policy_id(resp: &Option<cedar_policy::Response>) -> Option<Vec<String
 #[macro_export]
 macro_rules! cmp_policy {
     ($resp:expr, $vec_policy_id:expr, $msg:expr) => {
-        assert_eq!(
-            crate::tests::utils::cedarling_util::get_policy_id(&$resp),
-            Some($vec_policy_id.iter().map(|v| v.to_string()).collect()),
-            $msg
-        )
+        let policy_ids_resp =
+            crate::tests::utils::cedarling_util::get_policy_id(&$resp).map(|mut v| {
+                v.sort();
+                v
+            });
+
+        let mut policy_ids_test = $vec_policy_id
+            .iter()
+            .map(|v| v.to_string())
+            .collect::<Vec<_>>();
+        policy_ids_test.sort();
+
+        assert_eq!(policy_ids_resp, Some(policy_ids_test), $msg)
     };
 }
 

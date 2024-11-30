@@ -88,47 +88,6 @@
                             "type": "string",
                             "pattern": "^[a-z]+$"
                         },
-                        "cnCouchbaseBucketPrefix": {
-                            "description": "The prefix of couchbase buckets. This helps with separation in between different environments and allows for the same couchbase cluster to be used by different setups of Janssen.",
-                            "type": "string",
-                            "pattern": "^[a-z]+$"
-                        },
-                        "cnCouchbaseCrt": {
-                            "description": "Couchbase certificate authority string. This must be encoded using base64. This can also be found in your couchbase UI Security > Root Certificate. In mTLS setups this is not required.",
-                            "type": "string",
-                            "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
-                        },
-                        "cnCouchbaseIndexNumReplica": {
-                            "description": "The number of replicas per index created. Please note that the number of index nodes must be one greater than the number of index replicas. That means if your couchbase cluster only has 2 index nodes you cannot place the number of replicas to be higher than 1.",
-                            "type": "integer"
-                        },
-                        "cnCouchbasePass": {
-                            "description": "Couchbase password for the restricted user config.configmap.cnCouchbaseUser  that is often used inside the services. The password must contain one digit, one uppercase letter, one lower case letter and one symbol ",
-                            "$ref": "#/definitions/password"
-                        },
-                        "cnCouchbaseSuperUser": {
-                            "description": "The Couchbase super user (admin) user name. This user is used during initialization only.",
-                            "type": "string",
-                            "pattern": "^[a-z]+$"
-                        },
-                        "cnCouchbaseSuperUserPass": {
-                            "description": "Couchbase password for the super user config.configmap.cnCouchbaseSuperUser  that is used during the initialization process. The password must contain one digit, one uppercase letter, one lower case letter and one symbol ",
-                            "$ref": "#/definitions/password"
-                        },
-                        "cnCouchbaseSuperUserPassFile": {
-                            "description": "The location of the Couchbase restricted user config.configmap.cnCouchbaseSuperUser password. The file path must end with couchbase_superuser_password.",
-                            "type": "string",
-                            "pattern": ".*couchbase_superuser_password\\b.*"
-                        },
-                        "cnCouchbaseUrl": {
-                            "description": "Couchbase URL. Used only when global.cnPersistenceType is hybrid or couchbase. This should be in FQDN format for either remote or local Couchbase clusters. The address can be an internal address inside the kubernetes cluster",
-                            "$ref": "#/definitions/fqdn-pattern"
-                        },
-                        "cnCouchbaseUser": {
-                            "description": "Couchbase restricted user. Used only when global.cnPersistenceType is hybrid or couchbase.",
-                            "type": "string",
-                            "pattern": "^[a-z]+$"
-                        },
                         "cnGoogleSecretManagerServiceAccount": {
                             "description": "Service account with roles roles/secretmanager.admin base64 encoded string. This is used often inside the services to reach the configuration layer. Used only when global.configAdapterName and global.configSecretAdapter is set to google.",
                             "type": "string",
@@ -410,9 +369,9 @@
                     }
                 },
                 "cnPersistenceType": {
-                    "description": "Persistence backend to run Janssen with couchbase|hybrid|sql.",
+                    "description": "Persistence backend to run Janssen with hybrid|sql.",
                     "type": "string",
-                    "pattern": "^(couchbase|hybrid|sql)$"
+                    "pattern": "^(hybrid|sql)$"
                 },
                 "cnDocumentStoreType": {
                     "description": "Document store type to use for shibboleth files  DB.",
@@ -775,16 +734,6 @@
                     "description": "The location of file contains password for the SQL user config.configmap.cnSqlDbUser. The file path must end with sql_password.",
                     "type": "string",
                     "pattern": ".*sql_password\\b.*"
-                },
-                "cnCouchbasePasswordFile": {
-                    "description": "The location of the Couchbase user config.configmap.cnCouchbaseUser password. The file path must end with couchbase_password.",
-                    "type": "string",
-                    "pattern": ".*couchbase_password\\b.*"
-                },
-                "cnCouchbaseSuperuserPasswordFile": {
-                    "description": "The location of the Couchbase restricted user config.configmap.cnCouchbaseSuperUser password. The file path must end with couchbase_superuser_password.",
-                    "type": "string",
-                    "pattern": ".*couchbase_superuser_password\\b.*"
                 }
             }
         },

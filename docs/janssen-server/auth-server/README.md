@@ -34,6 +34,7 @@ FAPI-CIBA OpenID Providers for the latest results.
 * [Draft - Financial-grade API: Client Initiated Backchannel Authentication Profile](https://bitbucket.org/openid/fapi/src/master/Financial_API_WD_CIBA.md)
 * [Draft -  OpenID Connect Native SSO for Mobile Apps 1.0](https://openid.net/specs/openid-connect-native-sso-1_0.html#name-authorization-request)
 * [Initiating User Registration via OpenID Connect 1.0](https://openid.net/specs/openid-connect-prompt-create-1_0.html)
+* [The AuthZEN Authorization API 1.0](https://openid.github.io/authzen/)
 
 ** OAuth **
 

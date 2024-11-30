@@ -101,7 +101,7 @@ To stop the containers.
 
 3. Use the CLI tools located under `/opt/jans/jans-cli/` to configure Gluu flex as needed. For example you can run the [TUI](https://docs.jans.io/head/admin/config-guide/config-tools/jans-tui/):
     ```bash
-    jans tui
+    python3 /opt/jans/jans-cli/config-cli-tui.py
     ```
 
 ## Access endpoints externally

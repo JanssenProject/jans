@@ -33,8 +33,8 @@ jobs:
         sudo cp gh_${VERSION}_linux_amd64/bin/gh /usr/local/bin/
         gh version
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        NIGHTLY_VERSION=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')
-        gh release delete v${NIGHTLY_VERSION}.nightly --cleanup-tag --yes || echo "v${NIGHTLY_VERSION}.nightly" does not exist
-        gh release delete v${NIGHTLY_VERSION}.nightly --cleanup-tag --yes || echo "v${NIGHTLY_VERSION}.nightly" does not exist
-        git push --delete origin v${NIGHTLY_VERSION}.nightly || echo "v${NIGHTLY_VERSION}.nightly" does not exist
-        gh release create v${NIGHTLY_VERSION}.nightly --generate-notes --prerelease --title "v${NIGHTLY_VERSION}.nightly"
+        NIGHTLY_VERSION="nightly"
+        gh release delete ${NIGHTLY_VERSION} --cleanup-tag --yes || echo "v${NIGHTLY_VERSION}" does not exist
+        gh release delete ${NIGHTLY_VERSION} --cleanup-tag --yes || echo "v${NIGHTLY_VERSION}" does not exist
+        git push --delete origin ${NIGHTLY_VERSION} || echo "v${NIGHTLY_VERSION}" does not exist
+        gh release create ${NIGHTLY_VERSION} --generate-notes --prerelease --title "${NIGHTLY_VERSION}"

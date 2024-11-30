@@ -73,11 +73,11 @@ And here the UI page contents:
 
 The data model (injected _map_) is attached some additional keys for convenience:
 
-- `webCtx`. It gives easy access to often needed bits like current path, locale, etc. This is a Java object you can inspect [here](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/engine/service/WebContext.java). Take a look at the getters; writing `${webCtx.contextPath}` in a template will insert the result of calling method `getContextPath` - normally the string `/jans-auth`.
+- `webCtx`. It gives easy access to often needed bits like current path, locale, etc. This is a Java object you can inspect [here](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/engine/service/WebContext.java). Take a look at the getters; writing `${webCtx.contextPath}` in a template will insert the result of calling method `getContextPath` - normally the string `/jans-auth`
 
-- `msgs`. It gives access to the localized messages of jans-auth application. Some developers might know this as the "internationalization labels" or "resource bundle" of an application. This is a collection of `.properties` files where common UI-related messages in different languages can be found. A message (label) is identified by a key, so in a template `${msgs.<KEY>}` could be used. As most keys in resource bundles have dot characters, the alternative notation `${webCtx["KEY"]}` works better for FreeMarker, for example `${msgs["login.errorMessage"]}`.
+- `cache`. Allows developers to retrieve values already stored in the Jans configured cache, e.g. `${cache.myKey}`. To avoid template errors in case of a cache miss, you can use Freemarker's safeguard [expressions](https://freemarker.apache.org/docs/dgui_template_exp.html#dgui_template_exp_missing). Note you cannot store/modify values in the cache from templates
 
-- `cache`. Allows developers to retrieve values already stored in the Jans configured cache, e.g. `${cache.myKey}`. To avoid template errors in case of a cache miss, you can use Freemarker's safeguard [expressions](https://freemarker.apache.org/docs/dgui_template_exp.html#dgui_template_exp_missing). Note you cannot store/modify values in the cache from templates.
+- `labels` and `msgs`. These give access to localized messages. They are useful when templates have to render different texts depening on user context, such as country and language. Learn more [here](./advanced-usages.md#localization-and-internationalization)
 
 ### Assets handling
 

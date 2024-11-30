@@ -165,12 +165,13 @@ public class ApiHealthCheck  {
     }
 
     @Operation(summary = "Fetch service status", description = "Fetch service status", operationId = "get-service-status", tags = {
-            "Health - Check" })
+            "Health - Check" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.APP_DATA_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class), examples = @ExampleObject(name = "Response json example", value = "example/health/service-status.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response json example", value = "example/health/service-status.json"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }, groupScopes = {}, superScopes = {})
+    @ProtectedApi(scopes = { ApiAccessConstants.APP_DATA_READ_ACCESS }, groupScopes = {}, superScopes = {ApiAccessConstants.SUPER_ADMIN_READ_ACCESS})
     @Path(ApiConstants.SERVICE_STATUS_PATH)
     public Response getServiceStatus(
             @Parameter(description = "Service name to check status") @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.JANS_SERVICE_NAME) String service) {
@@ -178,7 +179,7 @@ public class ApiHealthCheck  {
             logger.info("Fetch ServiceStatus info - service:{}", escapeLog(service));
         }
         
-        Map<String, String> serviceStatus = statusCheckerTimer.getServiceStatus(service);
+        JsonNode serviceStatus = statusCheckerTimer.getServiceStatus(service);
         logger.debug("serviceStatus:{}", serviceStatus);
         return Response.ok(serviceStatus).build();
     }

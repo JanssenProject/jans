@@ -114,14 +114,6 @@ data:
   LB_ADDR: {{ .Values.configmap.lbAddr }}
   {{- end }}
   CN_PERSISTENCE_TYPE: {{ .Values.global.cnPersistenceType }}
-  {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
-  #  used only if CN_PERSISTENCE_TYPE is couchbase or hybrid
-  CN_COUCHBASE_URL: {{ .Values.configmap.cnCouchbaseUrl }}
-  CN_COUCHBASE_BUCKET_PREFIX: {{ .Values.configmap.cnCouchbaseBucketPrefix }}
-  CN_COUCHBASE_INDEX_NUM_REPLICA: {{ .Values.configmap.cnCouchbaseIndexNumReplica | quote }}
-  CN_COUCHBASE_USER: {{ .Values.configmap.cnCouchbaseUser }}
-  CN_COUCHBASE_SUPERUSER: {{ .Values.configmap.cnCouchbaseSuperUser }}
-  {{- end }}
   CN_KEY_ROTATION_FORCE: "false"
   CN_KEY_ROTATION_CHECK: "3600"
   CN_KEY_ROTATION_INTERVAL: "48"
@@ -144,9 +136,6 @@ data:
   CN_REDIS_USE_SSL: {{ .Values.configmap.cnRedisUseSsl | quote }}
   CN_REDIS_SSL_TRUSTSTORE: {{ .Values.configmap.cnRedisSslTruststore | quote }}
   CN_REDIS_SENTINEL_GROUP: {{ .Values.configmap.cnRedisSentinelGroup | quote }}
-  {{- end }}
-  {{- if .Values.global.istio.enabled }}
-  CN_COUCHBASE_TRUSTSTORE_ENABLE: "false"
   {{- end }}
   {{- if .Values.global.scim.enabled }}
   CN_SCIM_ENABLED: {{ .Values.global.scim.enabled | quote }}
@@ -192,8 +181,6 @@ data:
   }}
   {{- end }}
   CN_SQL_PASSWORD_FILE: {{ .Values.global.cnSqlPasswordFile }}
-  CN_COUCHBASE_PASSWORD_FILE: {{ .Values.global.cnCouchbasePasswordFile }}
-  CN_COUCHBASE_SUPERUSER_PASSWORD_FILE: {{ .Values.global.cnCouchbaseSuperuserPasswordFile }}
   CN_CONFIG_API_PLUGINS: {{ index .Values "global" "config-api" "plugins" | quote  }}
   {{- if .Values.global.saml.enabled }}
   QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY: {{ .Values.configmap.quarkusTransactionEnableRecovery | quote }}

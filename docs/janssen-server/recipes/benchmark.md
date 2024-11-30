@@ -186,11 +186,8 @@ Loading users requires a hefty but temporary amount of resources. By default, th
     | ENV                              | Description                                                                                                   | Default                |
     |----------------------------------|---------------------------------------------------------------------------------------------------------------|------------------------|
     | `TEST_USERS_PREFIX_STRING`       | The user prefix string attached to the test users loaded                                                      | `test_user`            |
-    | `COUCHBASE_URL`                  | Couchbase URL if Couchbase is the persistence to load users in.                                               | ``                     |
-    | `COUCHBASE_PW`                   | Couchbase PW if Couchbase is the persistence to load users in.                                                | ``                     |
     | `USER_NUMBER_STARTING_POINT`     | The user number to start from . This is appended to the username i.e test_user0                               | `0`                    |
     | `USER_NUMBER_ENDING_POINT`       | The user number to end at.                                                                                    | `50000000`             |
-    | `LOAD_USERS_TO_COUCHBASE`        | Enable loading users to Couchbase persistence. `true` or `false` == ``                                        | `false`                |
     | `LOAD_USERS_TO_RDBMS`            | Enable loading users to RDBMS persistence. `true` or `false` == ``                                            | `false`                |
     | `USER_SPLIT_PARALLEL_THREADS`    | The number of parallel threads to break the total number users across. This number heavily effects vCPU usage. | `20`                   |
     | `RDBMS_TYPE`                     | RDBMS type if `mysql` or `pgsql` is the persistence to load users in.                                         | `mysql`                |

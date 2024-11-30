@@ -6,7 +6,7 @@
 
 <section class="pa4 shadow-4 bg-blank gray cust-section">
 
-    <h2 class="f3 dark-blue2">${msgs['casa.alternative']}</h2>
+    <h2 class="f3 dark-blue2">Try another way to sign in</h2>
 
     <#if message??>
         <p id="alert" class="w5 dark-red pv2 ph0 ma0 f7-cust">${message}</p>

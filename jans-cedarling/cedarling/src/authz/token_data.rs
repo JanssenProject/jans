@@ -24,28 +24,19 @@ pub(crate) struct UserInfoTokenData(TokenPayload);
 
 /// A container for storing token data or data attributes for the .
 /// Provides methods for retrieving payload from the token or attributes for the .
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, Default, serde::Deserialize, serde::Serialize)]
 pub(crate) struct TokenPayload {
     #[serde(flatten)]
     pub payload: HashMap<String, serde_json::Value>,
 }
 
 impl TokenPayload {
-    fn new(payload: HashMap<String, serde_json::Value>) -> Self {
+    pub fn new(payload: HashMap<String, serde_json::Value>) -> Self {
         Self { payload }
     }
 
-    /// Get the json value of a key in the payload.
-    pub fn get_json_value(&self, key: &str) -> Option<&serde_json::Value> {
-        self.payload.get(key)
-    }
-
-    /// Clone current value and merge with the given payload.
-    pub fn merge(&self, payload: &TokenPayload) -> Self {
-        let mut result = self.clone();
-        result.payload.extend(payload.payload.clone());
-
-        result
+    pub fn from_json_map(map: serde_json::Map<String, serde_json::Value>) -> Self {
+        Self::new(HashMap::from_iter(map))
     }
 
     /// Get [`Payload`] structure that contain key and [serde_json::Value] value.
@@ -108,7 +99,8 @@ impl GetTokenClaimValue {
     }
 }
 
-/// Structure that contains  information about  token claims
+/// Structure that contains  information about token claim, only about one attribute
+/// key and json value
 ///
 /// Wrapper to get more readable error messages when we get not correct type of  value from json.
 /// Is used in the [`TokenPayload::get_payload`] method
@@ -117,7 +109,17 @@ pub(crate) struct Payload<'a> {
     value: &'a serde_json::Value,
 }
 
-impl<'a> Payload<'a> {
+impl Payload<'_> {
+    /// Get key value of payload
+    pub fn get_key(&self) -> &str {
+        &self.key
+    }
+
+    /// Get value of payload
+    pub fn get_value(&self) -> &serde_json::Value {
+        self.value
+    }
+
     pub fn as_i64(&self) -> Result<i64, GetTokenClaimValue> {
         self.value
             .as_i64()
