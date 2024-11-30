@@ -68,12 +68,6 @@ pub enum NewJwtServiceError {
         "Validation failed: Userinfo token audience ({0}) does not match the access_token client_id ({1})."
     )]
     UserinfoAudienceMismatch(String, String),
-    #[error(
-        "CEDARLING_ID_TOKEN_TRUST_MODE is set to 'Strict' but an Access Token was not provided."
-    )]
-    MissingAccessTokenInStrictMode,
-    #[error("CEDARLING_ID_TOKEN_TRUST_MODE is set to 'Strict' but an ID Token was not provided.")]
-    MissingIdTokenInStrictMode,
     #[error("CEDARLING_ID_TOKEN_TRUST_MODE is set to 'Strict', but the {0} is missing a required claim: {1}")]
     MissingClaimsInStrictMode(&'static str, &'static str),
     #[error("Failed to deserialize from Value to String: {0}")]
@@ -190,19 +184,24 @@ impl NewJwtService {
         })
     }
 
-    pub fn process_tokens<'a>(
+    pub fn process_tokens<'a, A, I, U>(
         &'a self,
-        access_token: Option<&'a str>,
-        id_token: Option<&'a str>,
+        access_token: &'a str,
+        id_token: &'a str,
         userinfo_token: Option<&'a str>,
-    ) -> Result<ProcessJwtResult, NewJwtServiceError> {
-        let access_token = access_token
-            .map(|jwt| self.access_tkn_validator.process_jwt(jwt))
-            .transpose()
+    ) -> Result<DecodeTokensResult<A, I, U>, NewJwtServiceError>
+    where
+        A: DeserializeOwned,
+        I: DeserializeOwned,
+        U: DeserializeOwned,
+    {
+        let access_token = self
+            .access_tkn_validator
+            .process_jwt(access_token)
             .map_err(NewJwtServiceError::InvalidAccessToken)?;
-        let id_token = id_token
-            .map(|jwt| self.id_tkn_validator.process_jwt(jwt))
-            .transpose()
+        let id_token = self
+            .id_tkn_validator
+            .process_jwt(id_token)
             .map_err(NewJwtServiceError::InvalidIdToken)?;
         let userinfo_token = userinfo_token
             .map(|jwt| self.userinfo_tkn_validator.process_jwt(jwt))
@@ -212,23 +211,16 @@ impl NewJwtService {
         // Additional checks for STRICT MODE
         if self.id_token_trust_mode == IdTokenTrustMode::Strict {
             // Check if id_token.sub == access_token.client_id
-            let id_tkn_aud = id_token
-                .as_ref()
-                .ok_or(NewJwtServiceError::MissingIdTokenInStrictMode)?
-                .claims
-                .get("aud")
-                .ok_or(NewJwtServiceError::MissingClaimsInStrictMode(
-                    "id_token", "aud",
-                ))?;
-            let access_tkn_client_id = access_token
-                .as_ref()
-                .ok_or(NewJwtServiceError::MissingAccessTokenInStrictMode)?
-                .claims
-                .get("client_id")
-                .ok_or(NewJwtServiceError::MissingClaimsInStrictMode(
-                    "access_token",
-                    "client_id",
-                ))?;
+            let id_tkn_aud =
+                id_token
+                    .claims
+                    .get("aud")
+                    .ok_or(NewJwtServiceError::MissingClaimsInStrictMode(
+                        "id_token", "aud",
+                    ))?;
+            let access_tkn_client_id = access_token.claims.get("client_id").ok_or(
+                NewJwtServiceError::MissingClaimsInStrictMode("access_token", "client_id"),
+            )?;
             if id_tkn_aud != access_tkn_client_id {
                 Err(NewJwtServiceError::IdTokenAudienceMismatch(
                     serde_json::from_value::<String>(id_tkn_aud.clone())?,
@@ -240,14 +232,9 @@ impl NewJwtService {
             // 1. userinfo_token.sub == id_token.sub
             // 2. userinfo_token.aud == access_token.client_id
             if let Some(token) = &userinfo_token {
-                let id_tkn_sub = id_token
-                    .as_ref()
-                    .ok_or(NewJwtServiceError::MissingIdTokenInStrictMode)?
-                    .claims
-                    .get("sub")
-                    .ok_or(NewJwtServiceError::MissingClaimsInStrictMode(
-                        "ID Token", "sub",
-                    ))?;
+                let id_tkn_sub = id_token.claims.get("sub").ok_or(
+                    NewJwtServiceError::MissingClaimsInStrictMode("ID Token", "sub"),
+                )?;
                 let usrinfo_sub = token.claims.get("sub").ok_or(
                     NewJwtServiceError::MissingClaimsInStrictMode("Userinfo Token", "sub"),
                 )?;
@@ -270,10 +257,19 @@ impl NewJwtService {
             }
         }
 
-        Ok(ProcessJwtResult {
-            access_token,
-            id_token,
-            userinfo_token,
+        let userinfo_token = match userinfo_token {
+            Some(token) => token,
+            None => unimplemented!("Having no userinfo token is not yet supported."),
+        };
+
+        Ok(DecodeTokensResult {
+            access_token: serde_json::from_value::<A>(access_token.claims)?,
+            id_token: serde_json::from_value::<I>(id_token.claims)?,
+            userinfo_token: serde_json::from_value::<U>(userinfo_token.claims)?,
+            // we just assume that all the tokens have the same issuer so we get the
+            // issuer from the access token.
+            // this behavior might be changed in future
+            trusted_issuer: access_token.key_iss,
         })
     }
 }
@@ -405,6 +401,7 @@ mod new_test {
     use crate::TokenValidationConfig;
     use jsonwebtoken::Algorithm;
     use serde_json::json;
+    use serde_json::Value;
     use std::collections::HashSet;
 
     #[test]
@@ -458,7 +455,7 @@ mod new_test {
         .expect("Should create JwtService");
 
         jwt_service
-            .process_tokens(Some(&access_tkn), Some(&id_tkn), Some(&userinfo_tkn))
+            .process_tokens::<Value, Value, Value>(&access_tkn, &id_tkn, Some(&userinfo_tkn))
             .expect("Should process JWTs");
     }
 }

@@ -221,6 +221,16 @@ impl Authz {
                 &request.userinfo_token,
             )?;
 
+        // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
+        let _decode_result: DecodeTokensResult = self
+            .config
+            .new_jwt_service
+            .process_tokens::<AccessTokenData, IdTokenData, UserInfoTokenData>(
+                &request.access_token,
+                &request.id_token,
+                Some(&request.userinfo_token),
+            )?;
+
         let trusted_issuer = decode_result.trusted_issuer.unwrap_or_default();
         let tokens_metadata = trusted_issuer.tokens_metadata();
 
@@ -327,6 +337,9 @@ pub enum AuthorizeError {
     /// Error encountered while decoding JWT token data
     #[error(transparent)]
     DecodeTokens(#[from] jwt::JwtServiceError),
+    /// Error encountered while decoding JWT token data
+    #[error(transparent)]
+    NewDecodeTokens(#[from] jwt::NewJwtServiceError),
     /// Error encountered while creating access token entities
     #[error("{0}")]
     AccessTokenEntities(#[from] AccessTokenEntitiesError),
