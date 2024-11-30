@@ -91,6 +91,8 @@ pub enum NewJwtServiceInitError {
     KeyService(#[from] NewKeyServiceError),
     #[error("Encountered an unsupported algorithm in the config: {0}")]
     UnsupportedAlgorithm(String),
+    #[error(transparent)]
+    InitJwtValidator(#[from] JwtValidatorError),
 }
 
 pub struct NewJwtService {
@@ -113,20 +115,23 @@ impl NewJwtService {
         config: &NewJwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
     ) -> Result<Self, NewJwtServiceInitError> {
-        let key_service: Rc<_> = match (&config.jwks, &trusted_issuers) {
+        let key_service: Rc<_> = match (&config.jwt_sig_validation, &config.jwks, &trusted_issuers)
+        {
             // Case: no JWKS provided
-            (None, None) => Err(NewJwtServiceInitError::MissingJwksConfig)?,
+            (true, None, None) => Err(NewJwtServiceInitError::MissingJwksConfig)?,
             // Case: Trusted issuers provided
-            (None, Some(trusted_issuers)) => {
-                NewKeyService::new_from_trusted_issuers(trusted_issuers)
-                    .map_err(NewJwtServiceInitError::KeyService)?
-            },
+            (true, None, Some(issuers)) => Some(
+                NewKeyService::new_from_trusted_issuers(issuers)
+                    .map_err(NewJwtServiceInitError::KeyService)?,
+            ),
             // Case: Local JWKS provided
-            (Some(jwks), None) => {
-                NewKeyService::new_from_str(jwks).map_err(NewJwtServiceInitError::KeyService)?
-            },
+            (true, Some(jwks), None) => Some(
+                NewKeyService::new_from_str(jwks).map_err(NewJwtServiceInitError::KeyService)?,
+            ),
             // Case: Both a local JWKS and trusted issuers were provided
-            (Some(_), Some(_)) => Err(NewJwtServiceInitError::ConflictingJwksConfig)?,
+            (true, Some(_), Some(_)) => Err(NewJwtServiceInitError::ConflictingJwksConfig)?,
+            // Case: Signature validation is Off so no key service is needed.
+            _ => None,
         }
         .into();
 
@@ -148,7 +153,7 @@ impl NewJwtService {
                 validate_nbf: config.access_token_config.nbf_validation,
             },
             key_service.clone(),
-        );
+        )?;
 
         let id_tkn_validator = JwtValidator::new(
             JwtValidatorConfig {
@@ -161,7 +166,7 @@ impl NewJwtService {
                 validate_nbf: config.id_token_config.nbf_validation,
             },
             key_service.clone(),
-        );
+        )?;
 
         let userinfo_tkn_validator = JwtValidator::new(
             JwtValidatorConfig {
@@ -174,7 +179,7 @@ impl NewJwtService {
                 validate_nbf: config.userinfo_token_config.nbf_validation,
             },
             key_service.clone(),
-        );
+        )?;
 
         Ok(Self {
             access_tkn_validator,

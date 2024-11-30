@@ -20,7 +20,7 @@ pub type TokenClaims = Value;
 #[allow(dead_code)]
 pub struct JwtValidator {
     config: JwtValidatorConfig,
-    key_service: Rc<NewKeyService>,
+    key_service: Rc<Option<NewKeyService>>,
     validators: HashMap<Algorithm, Validation>,
 }
 
@@ -32,7 +32,14 @@ pub struct ProcessedJwt<'a> {
 
 #[allow(dead_code)]
 impl JwtValidator {
-    pub fn new(config: JwtValidatorConfig, key_service: Rc<NewKeyService>) -> Self {
+    pub fn new(
+        config: JwtValidatorConfig,
+        key_service: Rc<Option<NewKeyService>>,
+    ) -> Result<Self, JwtValidatorError> {
+        if *config.sig_validation && key_service.is_none() {
+            Err(JwtValidatorError::MissingKeyService)?;
+        }
+
         // we define all the signature validators at startup so we can reuse them.
         let validators = config
             .algs_supported
@@ -52,11 +59,11 @@ impl JwtValidator {
             })
             .collect::<HashMap<Algorithm, Validation>>();
 
-        Self {
+        Ok(Self {
             config,
             key_service,
             validators,
-        }
+        })
     }
 
     /// Decodes the JWT and optionally validates it depending on the config.
@@ -73,6 +80,12 @@ impl JwtValidator {
 
     /// Decodes and validates the JWT's signature and optionally, the `exp` and `nbf` claims.
     fn decode_and_validate_token(&self, jwt: &str) -> Result<ProcessedJwt, JwtValidatorError> {
+        let key_service = self
+            .key_service
+            .as_ref()
+            .as_ref()
+            .ok_or(JwtValidatorError::MissingKeyService)?;
+
         let header = decode_header(jwt).map_err(JwtValidatorError::DecodeHeader)?;
 
         // since we already initialized all the validators on startup, not finding one
@@ -82,8 +95,7 @@ impl JwtValidator {
         )?;
 
         let decoding_key = match header.kid {
-            Some(kid) => self
-                .key_service
+            Some(kid) => key_service
                 .get_key(&kid)
                 .ok_or(JwtValidatorError::MissingDecodingKey(kid))?,
             None => unimplemented!("Handling JWTs without `kid`s hasn't been implemented yet."),
@@ -158,6 +170,8 @@ fn decode(jwt: &str) -> Result<ProcessedJwt, JwtValidatorError> {
 #[derive(Debug, thiserror::Error)]
 #[allow(dead_code)]
 pub enum JwtValidatorError {
+    #[error("JWT signature validation is on but no key service was provided.")]
+    MissingKeyService,
     #[error("Invalid JWT format. The JWT must be in the shape: `header.payload.signature`")]
     InvalidShape,
     #[error("Failed to decode JWT Header: {0}")]

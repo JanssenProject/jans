@@ -62,8 +62,9 @@ fn can_decode_and_validate_jwt() {
             validate_exp: true,
             validate_nbf: true,
         },
-        key_service.into(),
-    );
+        Some(key_service).into(),
+    )
+    .expect("Should create validator");
 
     let result = validator
         .process_jwt(&token)
@@ -110,8 +111,9 @@ fn errors_on_expired_token() {
             validate_exp: true,
             validate_nbf: true,
         },
-        key_service.into(),
-    );
+        Some(key_service).into(),
+    )
+    .expect("Should create validator");
 
     let result = validator.process_jwt(&token);
 
@@ -154,8 +156,9 @@ fn errors_on_immature_token() {
             validate_exp: true,
             validate_nbf: true,
         },
-        key_service.into(),
-    );
+        Some(key_service).into(),
+    )
+    .expect("Should create validator");
 
     let result = validator.process_jwt(&token);
 
@@ -179,13 +182,15 @@ fn can_check_missing_claims() {
 
     // Prepare Key Service
     let jwks = generate_jwks(&vec![keys]);
-    let key_service: Rc<NewKeyService> = NewKeyService::new_from_str(
-        &json!({
-            "test_idp": jwks.keys,
-        })
-        .to_string(),
+    let key_service: Rc<Option<NewKeyService>> = Some(
+        NewKeyService::new_from_str(
+            &json!({
+                "test_idp": jwks.keys,
+            })
+            .to_string(),
+        )
+        .expect("Should create KeyService"),
     )
-    .expect("Should create KeyService")
     .into();
 
     // Base case where all required claims are present
@@ -200,7 +205,8 @@ fn can_check_missing_claims() {
             validate_nbf: true,
         },
         key_service.clone(),
-    );
+    )
+    .expect("Should create validator");
     let result = validator
         .process_jwt(&token)
         .expect("Should process JWT successfully");
@@ -224,7 +230,8 @@ fn can_check_missing_claims() {
             validate_nbf: true,
         },
         key_service.clone(),
-    );
+    )
+    .expect("Should create validator");
     let result = validator.process_jwt(&token);
     assert!(
         matches!(
