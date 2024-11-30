@@ -11,6 +11,11 @@ use std::collections::HashSet;
 /// The set of Bootstrap properties related to JWT validation.
 #[allow(dead_code)]
 pub struct NewJwtConfig {
+    /// A Json Web Key Store (JWKS) with public keys.
+    ///
+    /// If this is used, Cedarling will no longer try to fetch JWK Stores from
+    /// a trustede identity provider and stick to using the local JWKS.
+    pub jwks: Option<String>,
     /// Check the signature for all the Json Web Tokens.
     ///
     /// This Requires the `iss` claim to be present in all the tokens and
@@ -228,6 +233,7 @@ impl Default for NewJwtConfig {
     /// Cedarling will use the strictest validation options by default.
     fn default() -> Self {
         Self {
+            jwks: None,
             jwt_sig_validation: true,
             jwt_status_validation: true,
             id_token_trust_mode: IdTokenTrustMode::Strict,
@@ -244,6 +250,7 @@ impl NewJwtConfig {
     /// Creates a new `JwtConfig` instance with validation turned off for all tokens.
     pub fn new_without_validation() -> Self {
         Self {
+            jwks: None,
             jwt_sig_validation: false,
             jwt_status_validation: false,
             id_token_trust_mode: IdTokenTrustMode::None,
