@@ -5,7 +5,7 @@ use crate::jwt::validator::ProcessedJwt;
 use jsonwebtoken::Algorithm;
 use serde_json::json;
 use std::collections::HashSet;
-use std::rc::Rc;
+use std::sync::Arc;
 use test_utils::assert_eq;
 
 #[test]
@@ -182,7 +182,7 @@ fn can_check_missing_claims() {
 
     // Prepare Key Service
     let jwks = generate_jwks(&vec![keys]);
-    let key_service: Rc<Option<NewKeyService>> = Some(
+    let key_service: Arc<Option<NewKeyService>> = Some(
         NewKeyService::new_from_str(
             &json!({
                 "test_idp": jwks.keys,

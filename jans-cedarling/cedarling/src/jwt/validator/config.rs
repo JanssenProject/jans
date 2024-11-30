@@ -3,7 +3,7 @@ use crate::common::policy_store::TrustedIssuer;
 use jsonwebtoken::Algorithm;
 use std::{
     collections::{HashMap, HashSet},
-    rc::Rc,
+    sync::Arc,
 };
 
 /// Validation options related to JSON Web Tokens (JWT).
@@ -17,20 +17,20 @@ use std::{
 #[allow(dead_code)]
 pub struct JwtValidatorConfig {
     /// Validate the signature of the JWT.
-    pub sig_validation: Rc<bool>,
+    pub sig_validation: Arc<bool>,
     /// Validate the status of the JWT.
     ///
     /// The JWT status could be obatained from the `.well-known/openid-configuration` via
     /// the `status_list_endpoint`. See the [`IETF Draft`] for more info.
     ///
     /// [`IETF Draft`]: https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/
-    pub status_validation: Rc<bool>,
+    pub status_validation: Arc<bool>,
     /// List of trusted issuers used to check the JWT status.
-    pub trusted_issuers: Rc<Option<HashMap<IssuerId, TrustedIssuer>>>,
+    pub trusted_issuers: Arc<Option<HashMap<IssuerId, TrustedIssuer>>>,
     /// Algorithms supported as defined in the Bootstrap properties.
     ///
     /// Tokens not signed with an algorithm within this HashSet will immediately be invalid.
-    pub algs_supported: Rc<HashSet<Algorithm>>,
+    pub algs_supported: Arc<HashSet<Algorithm>>,
     /// Required claims that the JWTs are required to have.
     //
     /// Tokens with a missing required claim will immediately be invalid.
@@ -53,10 +53,10 @@ impl JwtValidatorConfig {
     /// Claims like `aud` (audience) and `sub` (subject) are not required for
     /// Access Tokens.
     fn access_token(
-        sig_validation: Rc<bool>,
-        status_validation: Rc<bool>,
-        trusted_issuers: Rc<Option<HashMap<IssuerId, TrustedIssuer>>>,
-        algs_supported: Rc<HashSet<Algorithm>>,
+        sig_validation: Arc<bool>,
+        status_validation: Arc<bool>,
+        trusted_issuers: Arc<Option<HashMap<IssuerId, TrustedIssuer>>>,
+        algs_supported: Arc<HashSet<Algorithm>>,
     ) -> Self {
         Self {
             sig_validation,
@@ -79,10 +79,10 @@ impl JwtValidatorConfig {
     ///
     /// `jti` (JWT ID) and `nbf` (not before) are not required for ID Tokens.
     fn id_token(
-        sig_validation: Rc<bool>,
-        status_validation: Rc<bool>,
-        trusted_issuers: Rc<Option<HashMap<IssuerId, TrustedIssuer>>>,
-        algs_supported: Rc<HashSet<Algorithm>>,
+        sig_validation: Arc<bool>,
+        status_validation: Arc<bool>,
+        trusted_issuers: Arc<Option<HashMap<IssuerId, TrustedIssuer>>>,
+        algs_supported: Arc<HashSet<Algorithm>>,
     ) -> Self {
         Self {
             sig_validation,
@@ -105,10 +105,10 @@ impl JwtValidatorConfig {
     ///
     /// `jti` (JWT ID) and `nbf` (not before) are not required for Userinfo Tokens.
     fn userinfo_token(
-        sig_validation: Rc<bool>,
-        status_validation: Rc<bool>,
-        trusted_issuers: Rc<Option<HashMap<IssuerId, TrustedIssuer>>>,
-        algs_supported: Rc<HashSet<Algorithm>>,
+        sig_validation: Arc<bool>,
+        status_validation: Arc<bool>,
+        trusted_issuers: Arc<Option<HashMap<IssuerId, TrustedIssuer>>>,
+        algs_supported: Arc<HashSet<Algorithm>>,
     ) -> Self {
         Self {
             sig_validation,

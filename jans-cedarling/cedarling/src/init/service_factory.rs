@@ -14,7 +14,7 @@ use crate::common::policy_store::PolicyStore;
 use crate::jwt::{JwtService, JwtServiceConfig, NewJwtService, NewJwtServiceInitError};
 
 use super::service_config::ServiceConfig;
-use crate::authz::{Authz, AuthzConfig};
+use crate::authz::{Authz, AuthzConfig, AuthzInitError};
 use crate::common::app_types;
 use crate::log;
 
@@ -109,22 +109,22 @@ impl<'a> ServiceFactory<'a> {
     }
 
     // get authz service
-    pub fn authz_service(&mut self) -> Arc<Authz> {
+    pub fn authz_service(&mut self) -> Result<Arc<Authz>, AuthzInitError> {
         if let Some(authz) = &self.container.authz_service {
-            authz.clone()
+            Ok(authz.clone())
         } else {
-            let _new_jwt_service = self.new_jwt_service();
             let config = AuthzConfig {
                 log_service: self.log_service(),
                 pdp_id: self.pdp_id(),
                 application_name: self.application_name(),
                 policy_store: self.policy_store(),
                 jwt_service: self.jwt_service(),
+                new_jwt_service: self.new_jwt_service()?,
                 authorization: self.bootstrap_config.authorization_config,
             };
             let service = Arc::new(Authz::new(config));
             self.container.authz_service = Some(service.clone());
-            service
+            Ok(service)
         }
     }
 }

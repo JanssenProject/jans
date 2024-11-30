@@ -47,6 +47,7 @@ pub(crate) struct AuthzConfig {
     pub application_name: app_types::ApplicationName,
     pub policy_store: PolicyStore,
     pub jwt_service: Arc<jwt::JwtService>,
+    pub new_jwt_service: Arc<jwt::NewJwtService>,
     pub authorization: AuthorizationConfig,
 }
 
@@ -310,6 +311,14 @@ impl AuthorizeEntitiesData {
     ) -> Result<cedar_policy::Entities, cedar_policy::entities_errors::EntitiesError> {
         Entities::from_entities(self.into_iter(), schema)
     }
+}
+
+/// Error type for Authorization Service
+#[derive(thiserror::Error, Debug)]
+pub enum AuthzInitError {
+    /// Error encountered while Initializing [`JwtService`]
+    #[error(transparent)]
+    JwtService(#[from] jwt::NewJwtServiceInitError),
 }
 
 /// Error type for Authorization Service

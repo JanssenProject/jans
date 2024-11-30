@@ -2,16 +2,15 @@ mod config;
 #[cfg(test)]
 mod test;
 
-use crate::common::policy_store::TrustedIssuer;
-
 use super::new_key_service::NewKeyService;
+use crate::common::policy_store::TrustedIssuer;
 use base64::prelude::*;
 pub use config::*;
 use jsonwebtoken::{self as jwt};
 use jsonwebtoken::{decode_header, Algorithm, Validation};
 use serde_json::Value;
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::sync::Arc;
 
 type IssuerId = String;
 pub type TokenClaims = Value;
@@ -20,7 +19,7 @@ pub type TokenClaims = Value;
 #[allow(dead_code)]
 pub struct JwtValidator {
     config: JwtValidatorConfig,
-    key_service: Rc<Option<NewKeyService>>,
+    key_service: Arc<Option<NewKeyService>>,
     validators: HashMap<Algorithm, Validation>,
 }
 
@@ -34,7 +33,7 @@ pub struct ProcessedJwt<'a> {
 impl JwtValidator {
     pub fn new(
         config: JwtValidatorConfig,
-        key_service: Rc<Option<NewKeyService>>,
+        key_service: Arc<Option<NewKeyService>>,
     ) -> Result<Self, JwtValidatorError> {
         if *config.sig_validation && key_service.is_none() {
             Err(JwtValidatorError::MissingKeyService)?;
