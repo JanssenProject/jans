@@ -31,7 +31,7 @@ use crate::{IdTokenTrustMode, NewJwtConfig};
 use decoding_strategy::{open_id_storage::OpenIdStorage, DecodingStrategy};
 use new_key_service::{NewKeyService, NewKeyServiceError};
 use serde::de::DeserializeOwned;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use token::*;
 use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError, ProcessedJwt};
@@ -109,69 +109,43 @@ pub struct ProcessJwtResult<'a> {
 
 #[allow(dead_code)]
 impl NewJwtService {
-    pub fn new_from_config(config: NewJwtConfig) -> Result<Self, NewJwtServiceError> {
-        // prepare shared configs
-        let sig_validation: Rc<_> = config.jwt_sig_validation.into();
-        let status_validation: Rc<_> = config.jwt_status_validation.into();
-        let trusted_issuers: Rc<_> = config.trusted_issuers.clone().into();
-        let algs_supported: Rc<HashSet<Algorithm>> = config.signature_algorithms_supported.into();
-
+    pub fn new_with_local_jwks(
+        config: NewJwtConfig,
+        local_jwks: &str,
+    ) -> Result<Self, NewJwtServiceError> {
         // prepare key service
-        let key_service: Rc<_> = match (&config.local_jwks, &config.trusted_issuers) {
-            // Case: no JWKS provided
-            (None, None) => Err(NewJwtServiceInitError::MissingJwksConfig)?,
-            // Case: Trusted issuers provided
-            (None, Some(trusted_issuers)) => {
-                NewKeyService::new_from_trusted_issuers(trusted_issuers)
-                    .map_err(NewJwtServiceInitError::KeyService)?
-            },
-            // Case: Local JWKS provided
-            (Some(jwks), None) => {
-                NewKeyService::new_from_str(jwks).map_err(NewJwtServiceInitError::KeyService)?
-            },
-            // Case: Both a local JWKS and trusted issuers were provided
-            (Some(_), Some(_)) => Err(NewJwtServiceInitError::ConflictingJwksConfig)?,
-        }
-        .into();
+        let key_service: Rc<_> = NewKeyService::new_from_str(local_jwks)
+            .map_err(NewJwtServiceInitError::KeyService)?
+            .into();
 
-        let access_tkn_validator = JwtValidator::new(
-            JwtValidatorConfig {
-                sig_validation: sig_validation.clone(),
-                status_validation: status_validation.clone(),
-                trusted_issuers: trusted_issuers.clone(),
-                algs_supported: algs_supported.clone(),
-                required_claims: config.access_token_config.required_claims(),
-                validate_exp: config.access_token_config.exp_validation,
-                validate_nbf: config.access_token_config.nbf_validation,
-            },
-            key_service.clone(),
-        );
+        // prepare shared config
+        let trusted_issuers: Rc<_> = None.into();
 
-        let id_tkn_validator = JwtValidator::new(
-            JwtValidatorConfig {
-                sig_validation: sig_validation.clone(),
-                status_validation: status_validation.clone(),
-                trusted_issuers: trusted_issuers.clone(),
-                algs_supported: algs_supported.clone(),
-                required_claims: config.id_token_config.required_claims(),
-                validate_exp: config.id_token_config.exp_validation,
-                validate_nbf: config.id_token_config.nbf_validation,
-            },
-            key_service.clone(),
-        );
+        let (access_tkn_validator, id_tkn_validator, userinfo_tkn_validator) =
+            build_validators(&config, key_service, trusted_issuers);
 
-        let userinfo_tkn_validator = JwtValidator::new(
-            JwtValidatorConfig {
-                sig_validation: sig_validation.clone(),
-                status_validation: status_validation.clone(),
-                trusted_issuers: trusted_issuers.clone(),
-                algs_supported: algs_supported.clone(),
-                required_claims: config.userinfo_token_config.required_claims(),
-                validate_exp: config.userinfo_token_config.exp_validation,
-                validate_nbf: config.userinfo_token_config.nbf_validation,
-            },
-            key_service.clone(),
-        );
+        Ok(Self {
+            access_tkn_validator,
+            id_tkn_validator,
+            userinfo_tkn_validator,
+            id_token_trust_mode: config.id_token_trust_mode,
+        })
+    }
+
+    pub fn new_with_trusted_issuers(
+        config: NewJwtConfig,
+        trusted_issuers: &HashMap<String, TrustedIssuer>,
+    ) -> Result<Self, NewJwtServiceError> {
+        // prepare key service
+        let key_service: Rc<_> = NewKeyService::new_from_trusted_issuers(trusted_issuers)
+            .map_err(NewJwtServiceInitError::KeyService)?
+            .into();
+
+        // prepare shared configs
+        let trusted_issuers: Rc<_> = Some(trusted_issuers.clone()).into();
+
+        let (access_tkn_validator, id_tkn_validator, userinfo_tkn_validator) =
+            build_validators(&config, key_service, trusted_issuers);
 
         Ok(Self {
             access_tkn_validator,
@@ -267,6 +241,64 @@ impl NewJwtService {
             userinfo_token,
         })
     }
+}
+
+/// Creates a [`JwtValidator`] for each kind of token.
+fn build_validators(
+    config: &NewJwtConfig,
+    key_service: Rc<NewKeyService>,
+    trusted_issuers: Rc<Option<HashMap<String, TrustedIssuer>>>,
+) -> (JwtValidator, JwtValidator, JwtValidator) {
+    // prepare shared configs
+    let sig_validation: Rc<_> = config.jwt_sig_validation.into();
+    let status_validation: Rc<_> = config.jwt_status_validation.into();
+    let algs_supported: Rc<HashSet<Algorithm>> =
+        config.signature_algorithms_supported.clone().into();
+
+    let access_tkn_validator = JwtValidator::new(
+        JwtValidatorConfig {
+            sig_validation: sig_validation.clone(),
+            status_validation: status_validation.clone(),
+            trusted_issuers: trusted_issuers.clone(),
+            algs_supported: algs_supported.clone(),
+            required_claims: config.access_token_config.required_claims(),
+            validate_exp: config.access_token_config.exp_validation,
+            validate_nbf: config.access_token_config.nbf_validation,
+        },
+        key_service.clone(),
+    );
+
+    let id_tkn_validator = JwtValidator::new(
+        JwtValidatorConfig {
+            sig_validation: sig_validation.clone(),
+            status_validation: status_validation.clone(),
+            trusted_issuers: trusted_issuers.clone(),
+            algs_supported: algs_supported.clone(),
+            required_claims: config.id_token_config.required_claims(),
+            validate_exp: config.id_token_config.exp_validation,
+            validate_nbf: config.id_token_config.nbf_validation,
+        },
+        key_service.clone(),
+    );
+
+    let userinfo_tkn_validator = JwtValidator::new(
+        JwtValidatorConfig {
+            sig_validation: sig_validation.clone(),
+            status_validation: status_validation.clone(),
+            trusted_issuers: trusted_issuers.clone(),
+            algs_supported: algs_supported.clone(),
+            required_claims: config.userinfo_token_config.required_claims(),
+            validate_exp: config.userinfo_token_config.exp_validation,
+            validate_nbf: config.userinfo_token_config.nbf_validation,
+        },
+        key_service.clone(),
+    );
+
+    (
+        access_tkn_validator,
+        id_tkn_validator,
+        userinfo_tkn_validator,
+    )
 }
 
 pub struct JwtService {
@@ -431,19 +463,20 @@ mod new_test {
             .expect("Should generate userinfo token");
 
         // Prepare JWKS
-        let local_jwks = Some(json!({"test_idp": generate_jwks(&vec![keys]).keys}).to_string());
+        let local_jwks = json!({"test_idp": generate_jwks(&vec![keys]).keys}).to_string();
 
-        let jwt_service = NewJwtService::new_from_config(NewJwtConfig {
-            local_jwks,
-            trusted_issuers: None,
-            jwt_sig_validation: true,
-            jwt_status_validation: false,
-            id_token_trust_mode: IdTokenTrustMode::Strict,
-            signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
-            access_token_config: TokenValidationConfig::access_token(),
-            id_token_config: TokenValidationConfig::id_token(),
-            userinfo_token_config: TokenValidationConfig::userinfo_token(),
-        })
+        let jwt_service = NewJwtService::new_with_local_jwks(
+            NewJwtConfig {
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                id_token_trust_mode: IdTokenTrustMode::Strict,
+                signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                access_token_config: TokenValidationConfig::access_token(),
+                id_token_config: TokenValidationConfig::id_token(),
+                userinfo_token_config: TokenValidationConfig::userinfo_token(),
+            },
+            &local_jwks,
+        )
         .expect("Should create JwtService");
 
         jwt_service

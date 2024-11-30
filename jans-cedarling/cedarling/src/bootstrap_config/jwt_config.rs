@@ -5,24 +5,12 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use crate::common::policy_store::TrustedIssuer;
 use jsonwebtoken::Algorithm;
-use std::collections::{HashMap, HashSet};
-type IssuerId = String;
+use std::collections::HashSet;
 
 /// The set of Bootstrap properties related to JWT validation.
 #[allow(dead_code)]
 pub struct NewJwtConfig {
-    /// Local Json Web Key Store (JWKS) with public keys.
-    pub local_jwks: Option<String>,
-    /// An optional mapping of trusted issuers containing OpenID configuration or
-    /// Identity Provider (IDP) information.
-    ///
-    /// Each entry in the map associates an `IssuerId` with a `TrustedIssuer` instance,
-    /// representing metadata for the corresponding issuer. This metadata may include
-    /// information retrieved from a `.well-known/openid-configuration` endpoint
-    /// for validating tokens and establishing trust with the issuer.
-    pub trusted_issuers: Option<HashMap<IssuerId, TrustedIssuer>>,
     /// Check the signature for all the Json Web Tokens.
     ///
     /// This Requires the `iss` claim to be present in all the tokens and
@@ -240,8 +228,6 @@ impl Default for NewJwtConfig {
     /// Cedarling will use the strictest validation options by default.
     fn default() -> Self {
         Self {
-            local_jwks: None,
-            trusted_issuers: None,
             jwt_sig_validation: true,
             jwt_status_validation: true,
             id_token_trust_mode: IdTokenTrustMode::Strict,
@@ -258,8 +244,6 @@ impl NewJwtConfig {
     /// Creates a new `JwtConfig` instance with validation turned off for all tokens.
     pub fn new_without_validation() -> Self {
         Self {
-            local_jwks: None,
-            trusted_issuers: None,
             jwt_sig_validation: false,
             jwt_status_validation: false,
             id_token_trust_mode: IdTokenTrustMode::None,
@@ -287,25 +271,6 @@ impl NewJwtConfig {
             Algorithm::PS512,
             Algorithm::EdDSA,
         ]);
-        self
-    }
-
-    /// Sets the local JSON Web Key Set (JWKS) to be used for JWT signature validation.
-    ///
-    /// The JWKS is a collection of public keys used to validate the signature of
-    /// incoming JWTs. This method sets the `local_jwks` field to a specific JWKS
-    /// in the form of a JSON string.
-    pub fn set_local_jwks(mut self, jwks: String) -> Self {
-        self.local_jwks = Some(jwks);
-        self
-    }
-
-    /// Sets the trusted issuers to be used for JWT signature validation.
-    pub fn set_trusted_issuers(
-        mut self,
-        trusted_issuers: HashMap<IssuerId, TrustedIssuer>,
-    ) -> Self {
-        self.trusted_issuers = Some(trusted_issuers);
         self
     }
 }
