@@ -49,7 +49,7 @@ Response:
 
 ## Managing User FIDO Devices
 
-  TUI privdes managing user FIDO devices, see [here](../usermgmt/usermgmt-cli-tui.md#manage-use-fido-devices).
+  TUI privdes managing user FIDO devices, see [here](../usermgmt/usermgmt-cli-tui.md#manage-user-fido-devices).
 
 
 ## References
