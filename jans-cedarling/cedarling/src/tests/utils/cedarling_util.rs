@@ -5,7 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use crate::{AuthorizationConfig, WorkloadBoolOp};
+use crate::{AuthorizationConfig, NewJwtConfig, WorkloadBoolOp};
 pub use crate::{
     BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogTypeConfig, PolicyStoreConfig,
     PolicyStoreSource,
@@ -22,6 +22,7 @@ pub fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
             source: policy_source,
         },
         jwt_config: JwtConfig::Disabled,
+        new_jwt_config: NewJwtConfig::new_without_validation(),
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
@@ -45,6 +46,7 @@ pub fn get_cedarling_with_authorization_conf(
             source: policy_source,
         },
         jwt_config: JwtConfig::Disabled,
+        new_jwt_config: NewJwtConfig::new_without_validation(),
         authorization_config: auth_conf,
     })
     .expect("bootstrap config should initialize correctly")

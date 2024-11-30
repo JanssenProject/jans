@@ -110,7 +110,7 @@ pub struct ProcessJwtResult<'a> {
 #[allow(dead_code)]
 impl NewJwtService {
     pub fn new(
-        config: NewJwtConfig,
+        config: &NewJwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
     ) -> Result<Self, NewJwtServiceInitError> {
         let key_service: Rc<_> = match (&config.jwks, &trusted_issuers) {
@@ -437,7 +437,7 @@ mod new_test {
         let local_jwks = json!({"test_idp": generate_jwks(&vec![keys]).keys}).to_string();
 
         let jwt_service = NewJwtService::new(
-            NewJwtConfig {
+            &NewJwtConfig {
                 jwks: Some(local_jwks),
                 jwt_sig_validation: true,
                 jwt_status_validation: false,

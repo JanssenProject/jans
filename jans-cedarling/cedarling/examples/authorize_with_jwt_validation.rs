@@ -6,8 +6,9 @@
  */
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource, Request, ResourceData, WorkloadBoolOp,
+    AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LogConfig,
+    LogTypeConfig, NewJwtConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
+    TokenValidationConfig, WorkloadBoolOp,
 };
 use jsonwebtoken::Algorithm;
 use std::collections::{HashMap, HashSet};
@@ -21,6 +22,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // will be accepted; others will be marked as invalid during validation.
     let jwt_config = JwtConfig::Enabled {
         signature_algorithms: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
+    };
+    let new_jwt_config = NewJwtConfig {
+        jwks: None,
+        jwt_sig_validation: true,
+        jwt_status_validation: false,
+        id_token_trust_mode: IdTokenTrustMode::None,
+        signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
+        access_token_config: TokenValidationConfig::access_token(),
+        id_token_config: TokenValidationConfig::id_token(),
+        userinfo_token_config: TokenValidationConfig::userinfo_token(),
     };
 
     // You must change this with your own tokens
@@ -40,6 +51,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
         },
         jwt_config,
+        new_jwt_config,
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,

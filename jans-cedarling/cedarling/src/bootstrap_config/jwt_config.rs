@@ -6,9 +6,11 @@
  */
 
 use jsonwebtoken::Algorithm;
-use std::collections::HashSet;
+use serde::Deserialize;
+use std::{collections::HashSet, str::FromStr};
 
 /// The set of Bootstrap properties related to JWT validation.
+#[derive(Debug, PartialEq)]
 #[allow(dead_code)]
 pub struct NewJwtConfig {
     /// A Json Web Key Store (JWKS) with public keys.
@@ -71,7 +73,7 @@ pub struct NewJwtConfig {
 ///
 /// The default configuration for Access Tokens, ID Tokens, and Userinfo Tokens
 /// can be easily instantiated via the provided methods.
-#[derive(Default)]
+#[derive(Debug, Default, PartialEq)]
 pub struct TokenValidationConfig {
     /// Requires the `iss` claim to be present in the JWT and the scheme
     /// must be `https`.
@@ -82,6 +84,8 @@ pub struct TokenValidationConfig {
     pub sub_validation: bool,
     /// Requires the `jti` claim to be present in the JWT.
     pub jti_validation: bool,
+    /// Requires the `iat` claim to be present in the JWT.
+    pub iat_validation: bool,
     /// Requires the `exp` claim to be present in the JWT and the current
     /// timestamp isn't past the specified timestamp in the token.
     pub exp_validation: bool,
@@ -106,6 +110,9 @@ impl TokenValidationConfig {
         if self.jti_validation {
             req_claims.insert("jti".into());
         }
+        if self.iat_validation {
+            req_claims.insert("iat".into());
+        }
         if self.exp_validation {
             req_claims.insert("exp".into());
         }
@@ -118,39 +125,36 @@ impl TokenValidationConfig {
     /// Returns a default configuration for validating Access Tokens.
     ///
     /// This configuration requires the following:
-    /// - `iss` (issuer) validation
-    /// - `jti` (JWT ID) validation
-    /// - `exp` (expiration) validation
-    ///
-    /// Claims like `aud` (audience) and `sub` (subject) are not required for
-    /// Access Tokens.
+    /// - `iss` (Issuer)
+    /// - `jti` (JWT ID)
+    /// - `exp` (Expiration)
     pub fn access_token() -> Self {
         Self {
             iss_validation: true,
-            aud_validation: false,
-            sub_validation: false,
             jti_validation: true,
             exp_validation: true,
             nbf_validation: false,
+            aud_validation: false,
+            sub_validation: false,
+            iat_validation: false,
         }
     }
 
     /// Returns a default configuration for validating ID Tokens.
     ///
     /// This configuration requires the following:
-    /// - `iss` (issuer) validation
-    /// - `aud` (audience) validation
-    /// - `sub` (subject) validation
-    /// - `exp` (expiration) validation
-    ///
-    /// `jti` (JWT ID) and `nbf` (not before) are not required for ID Tokens.
+    /// - `iss` (Issuer)
+    /// - `aud` (Audience)
+    /// - `sub` (Subject)
+    /// - `exp` (Expiration)
     pub fn id_token() -> Self {
         Self {
             iss_validation: true,
             aud_validation: true,
             sub_validation: true,
-            jti_validation: false,
             exp_validation: true,
+            iat_validation: false,
+            jti_validation: false,
             nbf_validation: false,
         }
     }
@@ -158,19 +162,18 @@ impl TokenValidationConfig {
     /// Returns a default configuration for validating Userinfo Tokens.
     ///
     /// This configuration requires the following:
-    /// - `iss` (issuer) validation
-    /// - `aud` (audience) validation
-    /// - `sub` (subject) validation
-    /// - `exp` (expiration) validation
-    ///
-    /// `jti` (JWT ID) and `nbf` (not before) are not required for Userinfo Tokens.
+    /// - `iss` (issuer)
+    /// - `aud` (audience)
+    /// - `sub` (subject)
+    /// - `exp` (expiration)
     pub fn userinfo_token() -> Self {
         Self {
             iss_validation: true,
             aud_validation: true,
             sub_validation: true,
-            jti_validation: false,
             exp_validation: true,
+            jti_validation: false,
+            iat_validation: false,
             nbf_validation: false,
         }
     }
@@ -213,7 +216,8 @@ impl TokenValidationConfig {
 }
 
 /// Defines the level of validation for ID tokens.
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq, Default, Deserialize, Copy)]
+#[serde(rename_all = "lowercase")]
 pub enum IdTokenTrustMode {
     /// No validation is performed on the ID token.
     None,
@@ -227,6 +231,26 @@ pub enum IdTokenTrustMode {
     ///   - Its `aud` must match the `access_token`'s `client_id`.
     #[default]
     Strict,
+}
+
+impl FromStr for IdTokenTrustMode {
+    type Err = IdTknTrustModeParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.to_lowercase();
+        match s.as_str() {
+            "strict" => Ok(IdTokenTrustMode::Strict),
+            "none" => Ok(IdTokenTrustMode::None),
+            _ => Err(IdTknTrustModeParseError { trust_mode: s }),
+        }
+    }
+}
+
+/// Error when parsing [`IdTokenTrustMode`]
+#[derive(Default, Debug, derive_more::Display, derive_more::Error)]
+#[display("Invalid `IdTokenTrustMode`: {trust_mode}. should be `strict` or `none`")]
+pub struct IdTknTrustModeParseError {
+    trust_mode: String,
 }
 
 impl Default for NewJwtConfig {

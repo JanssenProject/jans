@@ -20,7 +20,7 @@ pub use jwt_config::*;
 pub use log_config::*;
 pub use policy_store_config::*;
 mod decode;
-pub use decode::{BootstrapConfigRaw, FeatureToggle, LoggerType, TrustMode, WorkloadBoolOp};
+pub use decode::{BootstrapConfigRaw, FeatureToggle, LoggerType, WorkloadBoolOp};
 
 /// Bootstrap configuration
 /// properties for configuration [`Cedarling`](crate::Cedarling) application.
@@ -35,6 +35,8 @@ pub struct BootstrapConfig {
     pub policy_store_config: PolicyStoreConfig,
     /// A set of properties used to configure JWT in the `Cedarling` application.
     pub jwt_config: JwtConfig,
+    /// A set of properties used to configure JWT in the `Cedarling` application.
+    pub new_jwt_config: NewJwtConfig,
     /// A set of properties used to configure authorization workflow in the `Cedarling` application.
     pub authorization_config: AuthorizationConfig,
 }
@@ -138,6 +140,32 @@ mod test {
             jwt_config: crate::JwtConfig::Enabled {
                 signature_algorithms: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
             },
+            new_jwt_config: NewJwtConfig {
+                jwks: None,
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                id_token_trust_mode: IdTokenTrustMode::Strict,
+                signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
+                access_token_config: TokenValidationConfig {
+                    exp_validation: true,
+                    ..Default::default()
+                },
+                id_token_config: TokenValidationConfig {
+                    iss_validation: true,
+                    sub_validation: true,
+                    exp_validation: true,
+                    iat_validation: true,
+                    aud_validation: true,
+                    ..Default::default()
+                },
+                userinfo_token_config: TokenValidationConfig {
+                    iss_validation: true,
+                    sub_validation: true,
+                    aud_validation: true,
+                    exp_validation: true,
+                    ..Default::default()
+                },
+            },
             authorization_config: AuthorizationConfig {
                 use_user_principal: true,
                 use_workload_principal: true,
@@ -167,6 +195,32 @@ mod test {
             },
             jwt_config: crate::JwtConfig::Enabled {
                 signature_algorithms: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
+            },
+            new_jwt_config: NewJwtConfig {
+                jwks: None,
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                id_token_trust_mode: IdTokenTrustMode::Strict,
+                signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
+                access_token_config: TokenValidationConfig {
+                    exp_validation: true,
+                    ..Default::default()
+                },
+                id_token_config: TokenValidationConfig {
+                    iss_validation: true,
+                    sub_validation: true,
+                    exp_validation: true,
+                    iat_validation: true,
+                    aud_validation: true,
+                    ..Default::default()
+                },
+                userinfo_token_config: TokenValidationConfig {
+                    iss_validation: true,
+                    sub_validation: true,
+                    aud_validation: true,
+                    exp_validation: true,
+                    ..Default::default()
+                },
             },
             authorization_config: AuthorizationConfig {
                 use_user_principal: true,

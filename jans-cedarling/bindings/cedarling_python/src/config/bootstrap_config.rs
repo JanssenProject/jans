@@ -6,7 +6,7 @@
  */
 
 use cedarling::bindings::PolicyStore;
-use cedarling::{BootstrapConfigRaw, LoggerType, TrustMode, WorkloadBoolOp};
+use cedarling::{BootstrapConfigRaw, IdTokenTrustMode, LoggerType, WorkloadBoolOp};
 use jsonwebtoken::Algorithm;
 use pyo3::exceptions::{PyKeyError, PyValueError};
 use pyo3::prelude::*;
@@ -508,7 +508,7 @@ impl TryFrom<BootstrapConfig> for cedarling::BootstrapConfig {
                 .userinfo_exp_validation
                 .try_into()
                 .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
-            id_token_trust_mode: TrustMode::from_str(value.id_token_trust_mode.as_str())
+            id_token_trust_mode: IdTokenTrustMode::from_str(value.id_token_trust_mode.as_str())
                 .unwrap_or_default(),
             lock: value
                 .lock
