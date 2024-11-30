@@ -67,6 +67,25 @@ Let's add an user by selecting `Add Users` tab. Initially we can provide bellow 
 Finally `save` and exit. We will get an unique `inum`
 
 
+## Change User Password
+No chance to recover user password, but you can change.
+To change password of a user navigate/or search user and press key **p** when the target user is higlighted.
+In the figure below, passowrd of user **sakamura** is being changed.
+
+[Change User Password](../../assets/tui-user-change-password.png)
+
+Once you write new password (it will be displayed while you type), go to button `< Save >` and press Enter.
+
+## Manage FIDO Devices
+To view and manage users registered FIDO devices, first navigate/or search user and press key **f** on the keyboard.
+If user has any registered FIDO device, a popup will appears as in image below:
+
+[User FIDO Devices](../../assets/tui-ser-fido-device-list.png)
+
+You can veiw details of a device by pressing Enter. To delete a device press key **d**, you will be
+prompted for confirmation.
+
+
 ## This content is in progress
 
 The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
