@@ -287,7 +287,16 @@ public class Filter {
         }
 
         if (FilterType.SUBSTRING == this.type) {
-            sb.append(toStringAttributeName()).append(this.type.getSign());
+        	String sign = this.type.getSign();
+        	String attributeName = this.attributeName;
+        	String endSign = "";
+
+        	if (ArrayHelper.isNotEmpty(this.filters)) {
+        		attributeName = this.filters[0].toString();
+        		endSign = ")";
+    		}
+        	
+            sb.append(attributeName).append(endSign).append(sign);
             if (this.subInitial != null) {
                 sb.append(this.subInitial);
                 sb.append('*');

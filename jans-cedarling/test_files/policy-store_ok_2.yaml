@@ -73,17 +73,17 @@ policy_stores:
         entity Userinfo_token  = {"iss": String, "jti": String, "client_id": String};
         entity Empty;
         action "Update" appliesTo {
-          principal: [Workload, User, Role],
+          principal: [Workload, User],
           resource: [Issue],
           context: {}
         };
         action "UpdateForWorkload" appliesTo {
-          principal: [Workload],
+          principal: [Workload, User],
           resource: [Issue],
           context: {}
         };
         action "UpdateForUser" appliesTo {
-          principal: [User],
+          principal: [Workload, User],
           resource: [Issue],
           context: {}
         };
@@ -93,17 +93,22 @@ policy_stores:
           context: {}
         };
         action "UpdateForUserAndRole" appliesTo {
-          principal: [User,Role],
+          principal: [Workload, User],
           resource: [Issue],
           context: {}
         };
         action "UpdateForWorkloadAndRole" appliesTo {
-          principal: [Workload,Role],
+          principal: [Workload, User],
           resource: [Issue],
           context: {}
         };
         action "NoApplies" appliesTo {
           principal: [Empty],
+          resource: [Issue],
+          context: {}
+        };
+        action "AlwaysDeny" appliesTo {
+          principal:  [Workload, User],
           resource: [Issue],
           context: {}
         };
