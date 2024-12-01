@@ -11,8 +11,7 @@ use std::{collections::HashSet, str::FromStr};
 
 /// The set of Bootstrap properties related to JWT validation.
 #[derive(Debug, PartialEq)]
-#[allow(dead_code)]
-pub struct NewJwtConfig {
+pub struct JwtConfig {
     /// A Json Web Key Store (JWKS) with public keys.
     ///
     /// If this is used, Cedarling will no longer try to fetch JWK Stores from
@@ -93,7 +92,6 @@ pub struct TokenValidationConfig {
     pub nbf_validation: bool,
 }
 
-#[allow(dead_code)]
 impl TokenValidationConfig {
     /// Collects all the required claims into a HashSet.
     pub fn required_claims(&self) -> HashSet<Box<str>> {
@@ -177,42 +175,6 @@ impl TokenValidationConfig {
             nbf_validation: false,
         }
     }
-
-    /// Enables the validation of the `iss` claim (issuer).
-    fn validate_iss(mut self) -> Self {
-        self.iss_validation = true;
-        self
-    }
-
-    /// Enables the validation of the `aud` claim (audience).
-    fn validate_aud(mut self) -> Self {
-        self.aud_validation = true;
-        self
-    }
-
-    /// Enables the validation of the `sub` claim (subject).
-    fn validate_sub(mut self) -> Self {
-        self.sub_validation = true;
-        self
-    }
-
-    /// Enables the validation of the `jti` claim (JWT ID).
-    fn validate_jti(mut self) -> Self {
-        self.jti_validation = true;
-        self
-    }
-
-    /// Enables the validation of the `exp` claim (expiration).
-    fn validate_exp(mut self) -> Self {
-        self.exp_validation = true;
-        self
-    }
-
-    /// Enables the validation of the `nbf` claim (not before).
-    fn validate_nbf(mut self) -> Self {
-        self.nbf_validation = true;
-        self
-    }
 }
 
 /// Defines the level of validation for ID tokens.
@@ -253,7 +215,7 @@ pub struct IdTknTrustModeParseError {
     trust_mode: String,
 }
 
-impl Default for NewJwtConfig {
+impl Default for JwtConfig {
     /// Cedarling will use the strictest validation options by default.
     fn default() -> Self {
         Self {
@@ -269,8 +231,7 @@ impl Default for NewJwtConfig {
     }
 }
 
-#[allow(dead_code)]
-impl NewJwtConfig {
+impl JwtConfig {
     /// Creates a new `JwtConfig` instance with validation turned off for all tokens.
     pub fn new_without_validation() -> Self {
         Self {
@@ -304,19 +265,4 @@ impl NewJwtConfig {
         ]);
         self
     }
-}
-
-/// A set of properties used to configure JWT in the `Cedarling` application.
-#[derive(Debug, Clone, PartialEq)]
-pub enum JwtConfig {
-    /// `CEDARLING_JWT_VALIDATION` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.  
-    /// Represent `Disabled` value.  
-    /// Meaning no JWT validation and no controls if Cedarling will discard id_token without an access token with the corresponding client_id.
-    Disabled,
-    /// `CEDARLING_JWT_VALIDATION` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.  
-    /// Represent `Enabled` value
-    Enabled {
-        /// `CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
-        signature_algorithms: HashSet<Algorithm>,
-    },
 }

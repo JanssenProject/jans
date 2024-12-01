@@ -47,14 +47,12 @@ pub(crate) struct AuthzConfig {
     pub application_name: app_types::ApplicationName,
     pub policy_store: PolicyStore,
     pub jwt_service: Arc<jwt::JwtService>,
-    pub new_jwt_service: Arc<jwt::NewJwtService>,
     pub authorization: AuthorizationConfig,
 }
 
 /// Authorization Service
 /// The primary service of the Cedarling application responsible for evaluating authorization requests.
 /// It leverages other services as needed to complete its evaluations.
-#[allow(dead_code)]
 pub struct Authz {
     config: AuthzConfig,
     authorizer: cedar_policy::Authorizer,
@@ -214,13 +212,12 @@ impl Authz {
         // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
         let decode_result: DecodeTokensResult = self
             .config
-            .new_jwt_service
+            .jwt_service
             .process_tokens::<AccessTokenData, IdTokenData, UserInfoTokenData>(
                 &request.access_token,
                 &request.id_token,
                 Some(&request.userinfo_token),
             )?;
-
 
         let trusted_issuer = decode_result.trusted_issuer.unwrap_or_default();
         let tokens_metadata = trusted_issuer.tokens_metadata();
@@ -319,18 +316,15 @@ impl AuthorizeEntitiesData {
 pub enum AuthzInitError {
     /// Error encountered while Initializing [`JwtService`]
     #[error(transparent)]
-    JwtService(#[from] jwt::NewJwtServiceInitError),
+    JwtService(#[from] jwt::JwtServiceInitError),
 }
 
 /// Error type for Authorization Service
 #[derive(thiserror::Error, Debug)]
 pub enum AuthorizeError {
-    /// Error encountered while decoding JWT token data
+    /// Error encountered while processing JWT token data
     #[error(transparent)]
-    DecodeTokens(#[from] jwt::JwtServiceError),
-    /// Error encountered while decoding JWT token data
-    #[error(transparent)]
-    NewDecodeTokens(#[from] jwt::NewJwtServiceError),
+    ProcessTokens(#[from] jwt::JwtServiceError),
     /// Error encountered while creating access token entities
     #[error("{0}")]
     AccessTokenEntities(#[from] AccessTokenEntitiesError),

@@ -1,6 +1,6 @@
 use super::{
     authorization_config::AuthorizationConfig, BootstrapConfig, IdTokenTrustMode, JwtConfig,
-    LogConfig, LogTypeConfig, MemoryLogConfig, NewJwtConfig, PolicyStoreConfig, PolicyStoreSource,
+    LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
     TokenValidationConfig,
 };
 use crate::common::policy_store::PolicyStore;
@@ -251,9 +251,9 @@ pub enum FeatureToggle {
     Enabled,
 }
 
-impl Into<bool> for FeatureToggle {
-    fn into(self) -> bool {
-        match self {
+impl From<FeatureToggle> for bool {
+    fn from(value: FeatureToggle) -> bool {
+        match value {
             FeatureToggle::Disabled => false,
             FeatureToggle::Enabled => true,
         }
@@ -434,16 +434,8 @@ impl BootstrapConfig {
             (Some(_), Some(_)) => Err(BootstrapDecodingError::ConflictingPolicyStores)?,
         };
 
-        // Decode JWT Config
-        // TODO: update this once Jwt Service implements the new bootstrap properties
-        let jwt_config = match raw.jwt_sig_validation {
-            FeatureToggle::Disabled => JwtConfig::Disabled,
-            FeatureToggle::Enabled => JwtConfig::Enabled {
-                signature_algorithms: raw.jwt_signature_algorithms_supported.clone(),
-            },
-        };
-
-        let new_jwt_config = NewJwtConfig {
+        // JWT Config
+        let jwt_config = JwtConfig {
             jwks: None,
             jwt_sig_validation: raw.jwt_sig_validation.into(),
             jwt_status_validation: raw.jwt_status_validation.into(),
@@ -484,7 +476,6 @@ impl BootstrapConfig {
             log_config,
             policy_store_config,
             jwt_config,
-            new_jwt_config,
             authorization_config,
         })
     }

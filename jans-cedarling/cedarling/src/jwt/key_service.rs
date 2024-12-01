@@ -18,14 +18,11 @@ pub struct DecodingKeyWithIss<'a> {
 /// Manages Json Web Keys (JWK).
 // TODO: periodically update the key stores to ensure keys are valid.
 #[derive(Debug)]
-pub struct NewKeyService {
-    #[allow(dead_code)]
-    http_client: Option<HttpClient>,
+pub struct KeyService {
     key_stores: HashMap<TrustedIssuerId, JwkStore>,
 }
 
-#[allow(dead_code)]
-impl NewKeyService {
+impl KeyService {
     /// Loads JWK stores from a string.
     ///
     /// This enables loading keystores via a local JSON file.
@@ -48,19 +45,16 @@ impl NewKeyService {
     /// rotate the keys.
     ///
     /// [`RFC 7517`]: https://datatracker.ietf.org/doc/html/rfc7517
-    pub fn new_from_str(key_stores: &str) -> Result<Self, NewKeyServiceError> {
+    pub fn new_from_str(key_stores: &str) -> Result<Self, KeyServiceError> {
         let parsed_stores = serde_json::from_str::<HashMap<String, Value>>(key_stores)
-            .map_err(NewKeyServiceError::DecodeJwkStores)?;
+            .map_err(KeyServiceError::DecodeJwkStores)?;
         let mut key_stores = HashMap::new();
         for (iss_id, keys) in &parsed_stores {
             let iss_id = TrustedIssuerId::from(iss_id.as_str());
             let jwks = json!({"keys": keys});
             key_stores.insert(iss_id.clone(), JwkStore::new_from_jwks_value(iss_id, jwks)?);
         }
-        Ok(Self {
-            http_client: None,
-            key_stores,
-        })
+        Ok(Self { key_stores })
     }
 
     /// Loads key stores using a JSON string.
@@ -68,7 +62,7 @@ impl NewKeyService {
     /// Enables loading key stores from a local JSON file.
     pub fn new_from_trusted_issuers(
         trusted_issuers: &HashMap<String, TrustedIssuer>,
-    ) -> Result<Self, NewKeyServiceError> {
+    ) -> Result<Self, KeyServiceError> {
         let http_client = HttpClient::new(3, Duration::from_secs(3))?;
 
         let mut key_stores = HashMap::new();
@@ -80,10 +74,7 @@ impl NewKeyService {
             );
         }
 
-        Ok(Self {
-            http_client: Some(http_client),
-            key_stores,
-        })
+        Ok(Self { key_stores })
     }
 
     /// Gets the decoding key with the given key ID from the store with it's Trusted Issuer.
@@ -105,7 +96,8 @@ impl NewKeyService {
     /// Returns a Vec containing a reference to all of the keys.
     ///
     /// Useful if the keys from the JWKS do not have a `kid` (Key ID).
-    // TODO: we probably also need TrustedIssuer information from this
+    //  this is currently unused since we don't handle JWTs without `kid` yet.
+    #[allow(dead_code)]
     pub fn get_keys(&self) -> Vec<&DecodingKey> {
         // PERF: We can cache the returned Vec so it doesn't
         // get created every time this function is called.
@@ -118,7 +110,7 @@ impl NewKeyService {
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum NewKeyServiceError {
+pub enum KeyServiceError {
     #[error("Failed to decode JWK Stores from string: {0}")]
     DecodeJwkStores(#[source] serde_json::Error),
     #[error("Failed to make HTTP Request: {0}")]
@@ -131,7 +123,7 @@ pub enum NewKeyServiceError {
 mod test {
     use std::collections::HashMap;
 
-    use crate::{common::policy_store::TrustedIssuer, jwt::new_key_service::NewKeyService};
+    use crate::{common::policy_store::TrustedIssuer, jwt::key_service::KeyService};
     use mockito::Server;
     use serde_json::json;
 
@@ -158,7 +150,7 @@ mod test {
             }],
         });
 
-        let key_service = NewKeyService::new_from_str(&key_stores.to_string())
+        let key_service = KeyService::new_from_str(&key_stores.to_string())
             .expect("Should load KeyService from str");
 
         assert!(
@@ -248,7 +240,7 @@ mod test {
             .expect(1)
             .create();
 
-        let key_service = NewKeyService::new_from_trusted_issuers(&HashMap::from([
+        let key_service = KeyService::new_from_trusted_issuers(&HashMap::from([
             (
                 "first".to_string(),
                 TrustedIssuer {

@@ -35,8 +35,6 @@ pub struct BootstrapConfig {
     pub policy_store_config: PolicyStoreConfig,
     /// A set of properties used to configure JWT in the `Cedarling` application.
     pub jwt_config: JwtConfig,
-    /// A set of properties used to configure JWT in the `Cedarling` application.
-    pub new_jwt_config: NewJwtConfig,
     /// A set of properties used to configure authorization workflow in the `Cedarling` application.
     pub authorization_config: AuthorizationConfig,
 }
@@ -137,10 +135,7 @@ mod test {
                     Path::new("../test_files/policy-store_blobby.json").into(),
                 ),
             },
-            jwt_config: crate::JwtConfig::Enabled {
-                signature_algorithms: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
-            },
-            new_jwt_config: NewJwtConfig {
+            jwt_config: JwtConfig {
                 jwks: None,
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
@@ -193,10 +188,7 @@ mod test {
                     Path::new("../test_files/policy-store_blobby.json").into(),
                 ),
             },
-            jwt_config: crate::JwtConfig::Enabled {
-                signature_algorithms: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
-            },
-            new_jwt_config: NewJwtConfig {
+            jwt_config: JwtConfig {
                 jwks: None,
                 jwt_sig_validation: true,
                 jwt_status_validation: false,

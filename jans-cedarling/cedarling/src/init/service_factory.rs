@@ -11,7 +11,7 @@ use std::sync::Arc;
 
 use crate::bootstrap_config::BootstrapConfig;
 use crate::common::policy_store::PolicyStore;
-use crate::jwt::{JwtService, JwtServiceConfig, NewJwtService, NewJwtServiceInitError};
+use crate::jwt::{JwtService, JwtServiceInitError};
 
 use super::service_config::ServiceConfig;
 use crate::authz::{Authz, AuthzConfig, AuthzInitError};
@@ -33,7 +33,6 @@ pub(crate) struct ServiceFactory<'a> {
 #[derive(Clone, Default)]
 struct SingletonContainer {
     jwt_service: Option<Arc<JwtService>>,
-    new_jwt_service: Option<Arc<NewJwtService>>,
     authz_service: Option<Arc<Authz>>,
 }
 
@@ -75,35 +74,14 @@ impl<'a> ServiceFactory<'a> {
     }
 
     // get jwt service
-    pub fn jwt_service(&mut self) -> Arc<JwtService> {
+    pub fn jwt_service(&mut self) -> Result<Arc<JwtService>, JwtServiceInitError> {
         if let Some(jwt_service) = &self.container.jwt_service {
-            jwt_service.clone()
-        } else {
-            let config = match self.bootstrap_config.jwt_config {
-                crate::JwtConfig::Disabled => JwtServiceConfig::WithoutValidation {
-                    trusted_idps: self.service_config.trusted_issuers_and_openid.clone(),
-                },
-                crate::JwtConfig::Enabled { .. } => JwtServiceConfig::WithValidation {
-                    supported_algs: self.service_config.jwt_algorithms.clone(),
-                    trusted_idps: self.service_config.trusted_issuers_and_openid.clone(),
-                },
-            };
-
-            let service = Arc::new(JwtService::new_with_config(config));
-            self.container.jwt_service = Some(service.clone());
-            service
-        }
-    }
-
-    // get jwt service
-    pub fn new_jwt_service(&mut self) -> Result<Arc<NewJwtService>, NewJwtServiceInitError> {
-        if let Some(jwt_service) = &self.container.new_jwt_service {
             Ok(jwt_service.clone())
         } else {
-            let config = &self.bootstrap_config.new_jwt_config;
+            let config = &self.bootstrap_config.jwt_config;
             let trusted_issuers = self.policy_store().trusted_issuers;
-            let service = Arc::new(NewJwtService::new(config, trusted_issuers)?);
-            self.container.new_jwt_service = Some(service.clone());
+            let service = Arc::new(JwtService::new(config, trusted_issuers)?);
+            self.container.jwt_service = Some(service.clone());
             Ok(service)
         }
     }
@@ -118,8 +96,7 @@ impl<'a> ServiceFactory<'a> {
                 pdp_id: self.pdp_id(),
                 application_name: self.application_name(),
                 policy_store: self.policy_store(),
-                jwt_service: self.jwt_service(),
-                new_jwt_service: self.new_jwt_service()?,
+                jwt_service: self.jwt_service()?,
                 authorization: self.bootstrap_config.authorization_config,
             };
             let service = Arc::new(Authz::new(config));

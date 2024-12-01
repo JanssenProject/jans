@@ -176,6 +176,8 @@ impl JwkStore {
     }
 
     /// Returns a &Vec of all the keys without a `kid` (Key ID).
+    //  currently unused but we might need this when we try to implement support for
+    //  keys without a `kid` claim.
     #[allow(dead_code)]
     pub fn get_keys_without_id(&self) -> Vec<&DecodingKey> {
         self.keys_without_id.iter().collect()

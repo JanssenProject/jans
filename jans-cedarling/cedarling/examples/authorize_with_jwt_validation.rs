@@ -7,7 +7,7 @@
 
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LogConfig,
-    LogTypeConfig, NewJwtConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
+    LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
     TokenValidationConfig, WorkloadBoolOp,
 };
 use jsonwebtoken::Algorithm;
@@ -20,10 +20,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Configure JWT validation settings. Enable the JwtService to validate JWT tokens
     // using specific algorithms: `HS256` and `RS256`. Only tokens signed with these algorithms
     // will be accepted; others will be marked as invalid during validation.
-    let jwt_config = JwtConfig::Enabled {
-        signature_algorithms: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
-    };
-    let new_jwt_config = NewJwtConfig {
+    let jwt_config = JwtConfig {
         jwks: None,
         jwt_sig_validation: true,
         jwt_status_validation: false,
@@ -51,7 +48,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
         },
         jwt_config,
-        new_jwt_config,
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,

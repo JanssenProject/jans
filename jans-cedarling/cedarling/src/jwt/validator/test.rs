@@ -1,6 +1,6 @@
 use super::super::test_utils::*;
 use super::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
-use crate::jwt::new_key_service::NewKeyService;
+use crate::jwt::key_service::KeyService;
 use crate::jwt::validator::ProcessedJwt;
 use jsonwebtoken::Algorithm;
 use serde_json::json;
@@ -58,7 +58,7 @@ fn can_decode_and_validate_jwt() {
 
     // Prepare Key Service
     let jwks = generate_jwks(&vec![keys]);
-    let key_service = NewKeyService::new_from_str(
+    let key_service = KeyService::new_from_str(
         &json!({
             "test_idp": jwks.keys,
         })
@@ -108,7 +108,7 @@ fn errors_on_invalid_iss_scheme() {
 
     // Prepare Key Service
     let jwks = generate_jwks(&vec![keys]);
-    let key_service = NewKeyService::new_from_str(
+    let key_service = KeyService::new_from_str(
         &json!({
             "test_idp": jwks.keys,
         })
@@ -153,7 +153,7 @@ fn errors_on_expired_token() {
 
     // Prepare Key Service
     let jwks = generate_jwks(&vec![keys]);
-    let key_service = NewKeyService::new_from_str(
+    let key_service = KeyService::new_from_str(
         &json!({
             "test_idp": jwks.keys,
         })
@@ -198,7 +198,7 @@ fn errors_on_immature_token() {
 
     // Prepare Key Service
     let jwks = generate_jwks(&vec![keys]);
-    let key_service = NewKeyService::new_from_str(
+    let key_service = KeyService::new_from_str(
         &json!({
             "test_idp": jwks.keys,
         })
@@ -242,8 +242,8 @@ fn can_check_missing_claims() {
 
     // Prepare Key Service
     let jwks = generate_jwks(&vec![keys]);
-    let key_service: Arc<Option<NewKeyService>> = Some(
-        NewKeyService::new_from_str(
+    let key_service: Arc<Option<KeyService>> = Some(
+        KeyService::new_from_str(
             &json!({
                 "test_idp": jwks.keys,
             })

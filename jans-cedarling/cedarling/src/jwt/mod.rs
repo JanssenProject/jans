@@ -13,36 +13,25 @@
 //! - Validating the signatures of JWTs to ensure their integrity and authenticity.
 //! - Verifying the validity of JWTs based on claims such as expiration time and audience.
 
-mod error;
 mod http_client;
 mod issuer;
 mod issuers_store;
 mod jwk_store;
-mod jwt_service_config;
-mod new_key_service;
-#[cfg(test)]
-mod test;
+mod key_service;
 #[cfg(test)]
 mod test_utils;
 mod token;
 mod validator;
 
 use crate::common::policy_store::TrustedIssuer;
-use crate::{IdTokenTrustMode, NewJwtConfig};
-use decoding_strategy::{open_id_storage::OpenIdStorage, DecodingStrategy};
-use new_key_service::{NewKeyService, NewKeyServiceError};
+use crate::{IdTokenTrustMode, JwtConfig};
+use key_service::{KeyService, KeyServiceError};
 use serde::de::DeserializeOwned;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
-use token::*;
-use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError, ProcessedJwt};
+use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
 
-pub use decoding_strategy::key_service::{HttpClient, KeyServiceError};
-pub use decoding_strategy::ParseAlgorithmError;
-pub use error::JwtServiceError;
 pub use jsonwebtoken::Algorithm;
-pub use jwt_service_config::*;
-pub(crate) mod decoding_strategy;
 
 /// Type alias for Trusted Issuers' ID.
 type TrustedIssuerId = Arc<str>;
@@ -51,10 +40,7 @@ type TrustedIssuerId = Arc<str>;
 type KeyId = Box<str>;
 
 #[derive(Debug, thiserror::Error)]
-#[allow(dead_code)]
-pub enum NewJwtServiceError {
-    #[error("Failed to initialize JWT Service")]
-    Init(#[from] NewJwtServiceInitError),
+pub enum JwtServiceError {
     #[error("Invalid Access Token")]
     InvalidAccessToken(#[source] JwtValidatorError),
     #[error("Invalid ID Token")]
@@ -76,56 +62,46 @@ pub enum NewJwtServiceError {
 }
 
 #[derive(Debug, thiserror::Error)]
-#[allow(dead_code)]
-pub enum NewJwtServiceInitError {
+pub enum JwtServiceInitError {
     #[error("Failed to initialize Key Service for JwtService due to a conflictig config: both a local JWKS and trusted issuers was provided.")]
     ConflictingJwksConfig,
     #[error("Failed to initialize Key Service for JwtService due to a missing config: no local JWKS or trusted issuers was provided.")]
     MissingJwksConfig,
     #[error("Failed to initialize Key Service for JwtService: {0}")]
-    KeyService(#[from] NewKeyServiceError),
+    KeyService(#[from] KeyServiceError),
     #[error("Encountered an unsupported algorithm in the config: {0}")]
     UnsupportedAlgorithm(String),
     #[error(transparent)]
     InitJwtValidator(#[from] JwtValidatorError),
 }
 
-pub struct NewJwtService {
+pub struct JwtService {
     access_tkn_validator: JwtValidator,
     id_tkn_validator: JwtValidator,
     userinfo_tkn_validator: JwtValidator,
     id_token_trust_mode: IdTokenTrustMode,
 }
 
-#[allow(dead_code)]
-pub struct ProcessJwtResult<'a> {
-    pub access_token: Option<ProcessedJwt<'a>>,
-    pub id_token: Option<ProcessedJwt<'a>>,
-    pub userinfo_token: Option<ProcessedJwt<'a>>,
-}
-
-#[allow(dead_code)]
-impl NewJwtService {
+impl JwtService {
     pub fn new(
-        config: &NewJwtConfig,
+        config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
-    ) -> Result<Self, NewJwtServiceInitError> {
+    ) -> Result<Self, JwtServiceInitError> {
         let key_service: Arc<_> =
             match (&config.jwt_sig_validation, &config.jwks, &trusted_issuers) {
                 // Case: no JWKS provided
-                (true, None, None) => Err(NewJwtServiceInitError::MissingJwksConfig)?,
+                (true, None, None) => Err(JwtServiceInitError::MissingJwksConfig)?,
                 // Case: Trusted issuers provided
                 (true, None, Some(issuers)) => Some(
-                    NewKeyService::new_from_trusted_issuers(issuers)
-                        .map_err(NewJwtServiceInitError::KeyService)?,
+                    KeyService::new_from_trusted_issuers(issuers)
+                        .map_err(JwtServiceInitError::KeyService)?,
                 ),
                 // Case: Local JWKS provided
-                (true, Some(jwks), None) => Some(
-                    NewKeyService::new_from_str(jwks)
-                        .map_err(NewJwtServiceInitError::KeyService)?,
-                ),
+                (true, Some(jwks), None) => {
+                    Some(KeyService::new_from_str(jwks).map_err(JwtServiceInitError::KeyService)?)
+                },
                 // Case: Both a local JWKS and trusted issuers were provided
-                (true, Some(_), Some(_)) => Err(NewJwtServiceInitError::ConflictingJwksConfig)?,
+                (true, Some(_), Some(_)) => Err(JwtServiceInitError::ConflictingJwksConfig)?,
                 // Case: Signature validation is Off so no key service is needed.
                 _ => None,
             }
@@ -190,7 +166,7 @@ impl NewJwtService {
         access_token: &'a str,
         id_token: &'a str,
         userinfo_token: Option<&'a str>,
-    ) -> Result<DecodeTokensResult<A, I, U>, NewJwtServiceError>
+    ) -> Result<DecodeTokensResult<A, I, U>, JwtServiceError>
     where
         A: DeserializeOwned,
         I: DeserializeOwned,
@@ -199,15 +175,15 @@ impl NewJwtService {
         let access_token = self
             .access_tkn_validator
             .process_jwt(access_token)
-            .map_err(NewJwtServiceError::InvalidAccessToken)?;
+            .map_err(JwtServiceError::InvalidAccessToken)?;
         let id_token = self
             .id_tkn_validator
             .process_jwt(id_token)
-            .map_err(NewJwtServiceError::InvalidIdToken)?;
+            .map_err(JwtServiceError::InvalidIdToken)?;
         let userinfo_token = userinfo_token
             .map(|jwt| self.userinfo_tkn_validator.process_jwt(jwt))
             .transpose()
-            .map_err(NewJwtServiceError::InvalidUserinfoToken)?;
+            .map_err(JwtServiceError::InvalidUserinfoToken)?;
 
         // Additional checks for STRICT MODE
         if self.id_token_trust_mode == IdTokenTrustMode::Strict {
@@ -216,14 +192,14 @@ impl NewJwtService {
                 id_token
                     .claims
                     .get("aud")
-                    .ok_or(NewJwtServiceError::MissingClaimsInStrictMode(
+                    .ok_or(JwtServiceError::MissingClaimsInStrictMode(
                         "id_token", "aud",
                     ))?;
             let access_tkn_client_id = access_token.claims.get("client_id").ok_or(
-                NewJwtServiceError::MissingClaimsInStrictMode("access_token", "client_id"),
+                JwtServiceError::MissingClaimsInStrictMode("access_token", "client_id"),
             )?;
             if id_tkn_aud != access_tkn_client_id {
-                Err(NewJwtServiceError::IdTokenAudienceMismatch(
+                Err(JwtServiceError::IdTokenAudienceMismatch(
                     serde_json::from_value::<String>(id_tkn_aud.clone())?,
                     serde_json::from_value::<String>(access_tkn_client_id.clone())?,
                 ))?
@@ -234,23 +210,33 @@ impl NewJwtService {
             // 2. userinfo_token.aud == access_token.client_id
             if let Some(token) = &userinfo_token {
                 let id_tkn_sub = id_token.claims.get("sub").ok_or(
-                    NewJwtServiceError::MissingClaimsInStrictMode("ID Token", "sub"),
+                    JwtServiceError::MissingClaimsInStrictMode("ID Token", "sub"),
                 )?;
-                let usrinfo_sub = token.claims.get("sub").ok_or(
-                    NewJwtServiceError::MissingClaimsInStrictMode("Userinfo Token", "sub"),
-                )?;
+                let usrinfo_sub =
+                    token
+                        .claims
+                        .get("sub")
+                        .ok_or(JwtServiceError::MissingClaimsInStrictMode(
+                            "Userinfo Token",
+                            "sub",
+                        ))?;
                 if usrinfo_sub != id_tkn_sub {
-                    Err(NewJwtServiceError::UserinfoSubMismatch(
+                    Err(JwtServiceError::UserinfoSubMismatch(
                         serde_json::from_value::<String>(usrinfo_sub.clone())?,
                         serde_json::from_value::<String>(id_tkn_sub.clone())?,
                     ))?
                 }
 
-                let usrinfo_aud = token.claims.get("aud").ok_or(
-                    NewJwtServiceError::MissingClaimsInStrictMode("Userinfo Token", "aud"),
-                )?;
+                let usrinfo_aud =
+                    token
+                        .claims
+                        .get("aud")
+                        .ok_or(JwtServiceError::MissingClaimsInStrictMode(
+                            "Userinfo Token",
+                            "aud",
+                        ))?;
                 if usrinfo_aud != access_tkn_client_id {
-                    Err(NewJwtServiceError::UserinfoAudienceMismatch(
+                    Err(JwtServiceError::UserinfoAudienceMismatch(
                         serde_json::from_value::<String>(usrinfo_aud.clone())?,
                         serde_json::from_value::<String>(access_tkn_client_id.clone())?,
                     ))?
@@ -277,130 +263,20 @@ impl NewJwtService {
     }
 }
 
-pub struct JwtService {
-    decoding_strategy: DecodingStrategy,
-    open_id_storage: OpenIdStorage,
-}
-
-/// A service for handling JSON Web Tokens (JWT).
-///
-/// The `JwtService` struct provides functionality to decode and optionally validate
-/// JWTs based on a specified decoding strategy. It can be configured to either
-/// perform validation or to decode without validation, depending on the provided
-/// configuration. It is an internal module used by other components of the library.
-impl JwtService {
-    /// Initializes a new `JwtService` instance based on the provided configuration.
-    pub(crate) fn new_with_config(config: JwtServiceConfig) -> Self {
-        match config {
-            JwtServiceConfig::WithoutValidation { trusted_idps } => {
-                let decoding_strategy = DecodingStrategy::new_without_validation();
-                Self {
-                    decoding_strategy,
-                    open_id_storage: OpenIdStorage::new(trusted_idps),
-                }
-            },
-            JwtServiceConfig::WithValidation {
-                supported_algs,
-                trusted_idps,
-            } => {
-                let decoding_strategy = DecodingStrategy::new_with_validation(
-                    supported_algs,
-                    // TODO: found the way to use `OpenIdStorage` in the decoding strategy.
-                    // Or use more suitable structure
-                    trusted_idps
-                        .iter()
-                        .map(|v| v.trusted_issuer.clone())
-                        .collect(),
-                )
-                // TODO: remove expect here and all data should be already in the `JwtServiceConfig`
-                .expect("could not initialize decoding strategy with validation");
-                Self {
-                    decoding_strategy,
-                    open_id_storage: OpenIdStorage::new(trusted_idps),
-                }
-            },
-        }
-    }
-
-    /// Decodes and validates an `access_token`, `id_token`, and `userinfo_token`.
-    ///
-    /// # Token Validation Rules:
-    /// - token signature must be valid
-    /// - token must not be expired.
-    /// - token must not be used before the `nbf` timestamp.
-    ///
-    /// # Returns
-    /// A tuple containing the decoded claims for the `access_token`, `id_token`, and
-    /// `userinfo_token`.
-    ///
-    /// # Errors
-    /// Returns an error if decoding or validation of either any token fails.
-    pub fn decode_tokens<A, I, U>(
-        &self,
-        access_token: &str,
-        id_token: &str,
-        userinfo_token: &str,
-    ) -> Result<DecodeTokensResult<A, I, U>, JwtServiceError>
-    where
-        A: DeserializeOwned,
-        I: DeserializeOwned,
-        U: DeserializeOwned,
-    {
-        // extract claims without validation
-        let access_token_claims = DecodingStrategy::extract_claims(access_token)
-            .map_err(JwtServiceError::InvalidAccessToken)?;
-        let id_token_claims =
-            DecodingStrategy::extract_claims(id_token).map_err(JwtServiceError::InvalidIdToken)?;
-        let userinfo_token_claims = DecodingStrategy::extract_claims(userinfo_token)
-            .map_err(JwtServiceError::InvalidUserinfoToken)?;
-
-        // Validate the access_token's signature and optionally, exp and nbf.
-        let access_token = self
-            .decoding_strategy
-            .decode::<AccessToken>(access_token)
-            .map_err(JwtServiceError::InvalidAccessToken)?;
-
-        // Validate the id_token's signature and optionally, exp and nbf.
-        self.decoding_strategy
-            .decode::<IdToken>(id_token)
-            .map_err(JwtServiceError::InvalidIdToken)?;
-
-        // validate the userinfo_token's signature and optionally, exp and nbf.
-        self.decoding_strategy
-            .decode::<UserInfoToken>(userinfo_token)
-            .map_err(JwtServiceError::InvalidUserinfoToken)?;
-
-        // assume that all tokens has the same `iss` (issuer) so we get config only for one JWT token
-        // this behavior can be changed in future
-        let trusted_issuer = self
-            .open_id_storage
-            .get(access_token.iss.as_str())
-            .map(|config| &config.trusted_issuer);
-
-        Ok(DecodeTokensResult {
-            access_token: access_token_claims,
-            id_token: id_token_claims,
-            userinfo_token: userinfo_token_claims,
-            trusted_issuer,
-        })
-    }
-}
-
 #[derive(Debug)]
 pub struct DecodeTokensResult<'a, A, I, U> {
     pub access_token: A,
     pub id_token: I,
     pub userinfo_token: U,
-
     pub trusted_issuer: Option<&'a TrustedIssuer>,
 }
 
 #[cfg(test)]
 mod new_test {
     use super::test_utils::*;
-    use super::NewJwtService;
+    use super::JwtService;
     use crate::IdTokenTrustMode;
-    use crate::NewJwtConfig;
+    use crate::JwtConfig;
     use crate::TokenValidationConfig;
     use jsonwebtoken::Algorithm;
     use serde_json::json;
@@ -442,8 +318,8 @@ mod new_test {
         // Prepare JWKS
         let local_jwks = json!({"test_idp": generate_jwks(&vec![keys]).keys}).to_string();
 
-        let jwt_service = NewJwtService::new(
-            &NewJwtConfig {
+        let jwt_service = JwtService::new(
+            &JwtConfig {
                 jwks: Some(local_jwks),
                 jwt_sig_validation: true,
                 jwt_status_validation: false,

@@ -67,7 +67,6 @@ pub enum InitCedarlingError {
 #[derive(Clone)]
 pub struct Cedarling {
     log: log::Logger,
-    #[allow(dead_code)]
     authz: Arc<Authz>,
 }
 

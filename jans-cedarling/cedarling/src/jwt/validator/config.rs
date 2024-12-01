@@ -14,7 +14,6 @@ use std::{
 /// The default configuration for Access Tokens, ID Tokens, and Userinfo Tokens
 /// can be easily instantiated via the provided methods.
 #[derive(Default)]
-#[allow(dead_code)]
 pub struct JwtValidatorConfig {
     /// Validate the signature of the JWT.
     pub sig_validation: Arc<bool>,
@@ -24,6 +23,7 @@ pub struct JwtValidatorConfig {
     /// the `status_list_endpoint`. See the [`IETF Draft`] for more info.
     ///
     /// [`IETF Draft`]: https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/
+    #[allow(dead_code)]
     pub status_validation: Arc<bool>,
     /// List of trusted issuers used to check the JWT status.
     pub trusted_issuers: Arc<Option<HashMap<IssuerId, TrustedIssuer>>>,
@@ -43,32 +43,6 @@ pub struct JwtValidatorConfig {
 
 #[allow(dead_code)]
 impl JwtValidatorConfig {
-    /// Returns a default configuration for validating Access Tokens.
-    ///
-    /// This configuration requires and validates following claims:
-    /// - `iss` (issuer)
-    /// - `jti` (JWT ID)
-    /// - `exp` (expiration)
-    ///
-    /// Claims like `aud` (audience) and `sub` (subject) are not required for
-    /// Access Tokens.
-    fn access_token(
-        sig_validation: Arc<bool>,
-        status_validation: Arc<bool>,
-        trusted_issuers: Arc<Option<HashMap<IssuerId, TrustedIssuer>>>,
-        algs_supported: Arc<HashSet<Algorithm>>,
-    ) -> Self {
-        Self {
-            sig_validation,
-            status_validation,
-            trusted_issuers,
-            algs_supported,
-            required_claims: HashSet::from(["iss", "jti", "exp"].map(|x| x.into())),
-            validate_exp: true,
-            validate_nbf: true,
-        }
-    }
-
     /// Returns a default configuration for validating ID Tokens.
     ///
     /// This configuration requires and validates following claims:

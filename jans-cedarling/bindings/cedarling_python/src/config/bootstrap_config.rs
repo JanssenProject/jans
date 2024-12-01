@@ -17,7 +17,7 @@ use std::str::FromStr;
 /// BootstrapConfig
 /// ===================
 ///
-/// A Python wrapper for the Rust `NewBootstrapConfig` struct.
+/// A Python wrapper for the Rust `BootstrapConfig` struct.
 /// Configures the application, including authorization, logging, JWT validation, and policy store settings.
 ///
 /// Attributes
@@ -65,7 +65,7 @@ use std::str::FromStr;
 /// from cedarling import BootstrapConfig
 ///
 /// # Example configuration
-/// bootstrap_config = NewBootstrapConfig(
+/// bootstrap_config = BootstrapConfig(
 ///     application_name="MyApp",
 ///     policy_store_uri=None,
 ///     policy_store_id="policy123",

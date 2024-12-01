@@ -3,7 +3,7 @@ mod config;
 mod test;
 
 use super::issuers_store::TrustedIssuersStore;
-use super::new_key_service::NewKeyService;
+use super::key_service::KeyService;
 use crate::common::policy_store::TrustedIssuer;
 use base64::prelude::*;
 pub use config::*;
@@ -18,10 +18,9 @@ type IssuerId = String;
 pub type TokenClaims = Value;
 
 /// Validates Json Web Tokens.
-#[allow(dead_code)]
 pub struct JwtValidator {
     config: JwtValidatorConfig,
-    key_service: Arc<Option<NewKeyService>>,
+    key_service: Arc<Option<KeyService>>,
     validators: HashMap<Algorithm, Validation>,
     iss_store: TrustedIssuersStore,
 }
@@ -32,11 +31,10 @@ pub struct ProcessedJwt<'a> {
     pub trusted_iss: Option<&'a TrustedIssuer>,
 }
 
-#[allow(dead_code)]
 impl JwtValidator {
     pub fn new(
         config: JwtValidatorConfig,
-        key_service: Arc<Option<NewKeyService>>,
+        key_service: Arc<Option<KeyService>>,
     ) -> Result<Self, JwtValidatorError> {
         if *config.sig_validation && key_service.is_none() {
             Err(JwtValidatorError::MissingKeyService)?;
@@ -194,7 +192,6 @@ impl JwtValidator {
 }
 
 #[derive(Debug, thiserror::Error)]
-#[allow(dead_code)]
 pub enum JwtValidatorError {
     #[error("JWT signature validation is on but no key service was provided.")]
     MissingKeyService,

@@ -25,7 +25,7 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    NewDecodeTokens,
+    ProcessTokens,
     AuthorizeError,
     "Error encountered while processing JWT token data"
 );
@@ -145,8 +145,7 @@ macro_rules! errors_functions {
 // This function is used to convert `cedarling::AuthorizeError` to a Python exception.
 // For each possible case of `AuthorizeError`, we have created a corresponding Python exception that inherits from `cedarling::AuthorizeError`.
 errors_functions! {
-    DecodeTokens => DecodeTokens,
-    NewDecodeTokens => NewDecodeTokens,
+    ProcessTokens => ProcessTokens,
     AccessTokenEntities => AccessTokenEntitiesError,
     CreateIdTokenEntity => CreateIdTokenEntityError,
     CreateUserinfoTokenEntity => CreateUserinfoTokenEntityError,
