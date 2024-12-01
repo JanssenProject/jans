@@ -6,6 +6,7 @@
  */
 
 use reqwest::blocking::Client;
+use serde::Deserialize;
 use std::{thread::sleep, time::Duration};
 
 /// A wrapper around `reqwest::blocking::Client` providing HTTP request functionality
@@ -16,6 +17,7 @@ use std::{thread::sleep, time::Duration};
 /// if an error occurs.
 #[derive(Debug)]
 pub struct HttpClient {
+    #[cfg(not(target_arch = "wasm32"))]
     client: reqwest::blocking::Client,
     max_retries: u32,
     retry_delay: Duration,
@@ -38,7 +40,8 @@ impl HttpClient {
     ///
     /// This method will attempt to fetch the resource up to 3 times, with an increasing delay
     /// between each attempt.
-    pub fn get(&self, uri: &str) -> Result<reqwest::blocking::Response, HttpClientError> {
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
         // Fetch the JWKS from the jwks_uri
         let mut attempts = 0;
         let response = loop {
@@ -60,9 +63,42 @@ impl HttpClient {
             }
         };
 
-        response
+        let response = response
             .error_for_status()
-            .map_err(HttpClientError::HttpStatus)
+            .map_err(HttpClientError::HttpStatus)?;
+
+        Ok(Response {
+            text: response
+                .text()
+                .map_err(HttpClientError::DecodeResponseUtf8)?,
+        })
+    }
+
+    /// Sends a GET request to the specified URI with retry logic.
+    ///
+    /// This method will attempt to fetch the resource up to 3 times, with an increasing delay
+    /// between each attempt.
+    #[cfg(target_arch = "wasm32")]
+    pub fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
+        todo!()
+    }
+}
+
+#[derive(Debug)]
+pub struct Response {
+    text: String,
+}
+
+impl Response {
+    pub fn text(&self) -> &str {
+        &self.text
+    }
+
+    pub fn json<'a, T>(&'a self) -> Result<T, serde_json::Error>
+    where
+        T: Deserialize<'a>,
+    {
+        serde_json::from_str::<'a, T>(&self.text)
     }
 }
 
@@ -75,10 +111,12 @@ pub enum HttpClientError {
     /// Indicates an HTTP error response received from an endpoint.
     #[error("Received error HTTP status: {0}")]
     HttpStatus(#[source] reqwest::Error),
-
     /// Indicates a failure to reach the endpoint after 3 attempts.
     #[error("Could not reach endpoint after trying 3 times: {0}")]
     MaxHttpRetriesReached(#[source] reqwest::Error),
+    /// Indicates a failure decode the response body to UTF-8
+    #[error("Failed to decode the server's response to UTF-8: {0}")]
+    DecodeResponseUtf8(#[source] reqwest::Error),
 }
 
 #[cfg(test)]

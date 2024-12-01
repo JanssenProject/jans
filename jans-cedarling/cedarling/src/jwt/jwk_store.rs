@@ -155,15 +155,19 @@ impl JwkStore {
         http_client: &HttpClient,
     ) -> Result<Self, JwkStoreError> {
         // fetch openid configuration
-        let response = http_client.get(&issuer.openid_configuration_endpoint)?;
+        let response = http_client
+            .get(&issuer.openid_configuration_endpoint)
+            .map_err(JwkStoreError::FetchOpenIdConfig)?;
         let openid_config = response
             .json::<OpenIdConfig>()
-            .map_err(JwkStoreError::FetchOpenIdConfig)?;
+            .map_err(JwkStoreError::DeserializeOpenIdConfig)?;
 
         // fetch jwks
-        let response = http_client.get(&openid_config.jwks_uri)?;
+        let response = http_client
+            .get(&openid_config.jwks_uri)
+            .map_err(JwkStoreError::FetchJwks)?;
 
-        let jwks = response.text().map_err(JwkStoreError::FetchJwks)?;
+        let jwks = response.text();
 
         let mut store = Self::new_from_jwks_str(store_id, &jwks)?;
         store.issuer = Some(openid_config.issuer.into());
@@ -203,12 +207,12 @@ impl JwkStore {
 
 #[derive(thiserror::Error, Debug)]
 pub enum JwkStoreError {
-    #[error("Failed to fetch OpenIdConfig remote server: {0}")]
-    FetchOpenIdConfig(#[source] reqwest::Error),
+    #[error("Failed to fetch OpenIdConfig: {0}")]
+    FetchOpenIdConfig(#[source] HttpClientError),
+    #[error("Failed to deserialize OpenIdConfig: {0}")]
+    DeserializeOpenIdConfig(#[source] serde_json::Error),
     #[error("Failed to fetch JWKS from remote server: {0}")]
-    FetchJwks(#[source] reqwest::Error),
-    #[error("Failed to make HTTP Request: {0}")]
-    Http(#[from] HttpClientError),
+    FetchJwks(#[source] HttpClientError),
     #[error("Failed to create Decoding Key from JWK: {0}")]
     CreateDecodingKey(#[from] jsonwebtoken::errors::Error),
     #[error("Failed to decode JWK: {0}")]
