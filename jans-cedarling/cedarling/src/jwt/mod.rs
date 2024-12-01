@@ -164,7 +164,7 @@ impl JwtService {
         access_token: &'a str,
         id_token: &'a str,
         userinfo_token: Option<&'a str>,
-    ) -> Result<ProcessTokensResult<A, I, U>, JwtProcessingError>
+    ) -> Result<ProcessTokensResult<'a, A, I, U>, JwtProcessingError>
     where
         A: DeserializeOwned,
         I: DeserializeOwned,
