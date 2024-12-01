@@ -166,7 +166,7 @@ impl JwtService {
         access_token: &'a str,
         id_token: &'a str,
         userinfo_token: Option<&'a str>,
-    ) -> Result<DecodeTokensResult<A, I, U>, JwtProcessingError>
+    ) -> Result<ProcessTokensResult<A, I, U>, JwtProcessingError>
     where
         A: DeserializeOwned,
         I: DeserializeOwned,
@@ -241,7 +241,7 @@ impl JwtService {
 
         println!("ISS: {:?}", access_token.trusted_iss);
 
-        Ok(DecodeTokensResult {
+        Ok(ProcessTokensResult {
             access_token: serde_json::from_value::<A>(access_token.claims)?,
             id_token: serde_json::from_value::<I>(id_token.claims)?,
             userinfo_token: serde_json::from_value::<U>(userinfo_token.claims)?,
@@ -254,7 +254,7 @@ impl JwtService {
 }
 
 #[derive(Debug)]
-pub struct DecodeTokensResult<'a, A, I, U> {
+pub struct ProcessTokensResult<'a, A, I, U> {
     pub access_token: A,
     pub id_token: I,
     pub userinfo_token: U,

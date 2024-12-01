@@ -30,7 +30,7 @@ mod token_data;
 pub use authorize_result::AuthorizeResult;
 use cedar_policy::{Entities, Entity, EntityUid, Response};
 use entities::CedarPolicyCreateTypeError;
-use entities::DecodeTokensResult;
+use entities::ProcessTokensResult;
 use entities::ResourceEntityError;
 use entities::{
     create_access_token_entities, create_id_token_entity, create_role_entities, create_user_entity,
@@ -210,7 +210,7 @@ impl Authz {
         let policy_store = &self.config.policy_store;
 
         // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
-        let decode_result: DecodeTokensResult = self
+        let decode_result: ProcessTokensResult = self
             .config
             .jwt_service
             .process_tokens::<AccessTokenData, IdTokenData, UserInfoTokenData>(
