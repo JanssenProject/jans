@@ -14,13 +14,11 @@
 //! - Verifying the validity of JWTs based on claims such as expiration time and audience.
 
 mod http_client;
-mod issuer;
 mod issuers_store;
 mod jwk_store;
 mod key_service;
 #[cfg(test)]
 mod test_utils;
-mod token;
 mod validator;
 
 use crate::common::policy_store::TrustedIssuer;
