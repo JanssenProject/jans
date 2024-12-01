@@ -17,6 +17,7 @@ pub struct DecodingKeyWithIss<'a> {
 
 /// Manages Json Web Keys (JWK).
 // TODO: periodically update the key stores to ensure keys are valid.
+#[derive(Debug)]
 pub struct NewKeyService {
     #[allow(dead_code)]
     http_client: Option<HttpClient>,

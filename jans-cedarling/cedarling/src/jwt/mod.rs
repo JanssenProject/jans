@@ -16,6 +16,7 @@
 mod error;
 mod http_client;
 mod issuer;
+mod issuers_store;
 mod jwk_store;
 mod jwt_service_config;
 mod new_key_service;
@@ -262,6 +263,8 @@ impl NewJwtService {
             None => unimplemented!("Having no userinfo token is not yet supported."),
         };
 
+        println!("ISS: {:?}", access_token.trusted_iss);
+
         Ok(DecodeTokensResult {
             access_token: serde_json::from_value::<A>(access_token.claims)?,
             id_token: serde_json::from_value::<I>(id_token.claims)?,
@@ -269,7 +272,7 @@ impl NewJwtService {
             // we just assume that all the tokens have the same issuer so we get the
             // issuer from the access token.
             // this behavior might be changed in future
-            trusted_issuer: access_token.key_iss,
+            trusted_issuer: access_token.trusted_iss,
         })
     }
 }

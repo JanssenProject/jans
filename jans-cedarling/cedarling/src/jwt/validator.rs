@@ -2,6 +2,7 @@ mod config;
 #[cfg(test)]
 mod test;
 
+use super::issuers_store::TrustedIssuersStore;
 use super::new_key_service::NewKeyService;
 use crate::common::policy_store::TrustedIssuer;
 use base64::prelude::*;
@@ -11,6 +12,7 @@ use jsonwebtoken::{decode_header, Algorithm, Validation};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::sync::Arc;
+use url::Url;
 
 type IssuerId = String;
 pub type TokenClaims = Value;
@@ -21,12 +23,13 @@ pub struct JwtValidator {
     config: JwtValidatorConfig,
     key_service: Arc<Option<NewKeyService>>,
     validators: HashMap<Algorithm, Validation>,
+    iss_store: TrustedIssuersStore,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct ProcessedJwt<'a> {
     pub claims: TokenClaims,
-    pub key_iss: Option<&'a TrustedIssuer>,
+    pub trusted_iss: Option<&'a TrustedIssuer>,
 }
 
 #[allow(dead_code)]
@@ -58,10 +61,13 @@ impl JwtValidator {
             })
             .collect::<HashMap<Algorithm, Validation>>();
 
+        let iss_store = TrustedIssuersStore::new(config.trusted_issuers.clone());
+
         Ok(Self {
             config,
             key_service,
             validators,
+            iss_store,
         })
     }
 
@@ -69,12 +75,56 @@ impl JwtValidator {
     pub fn process_jwt<'a>(&'a self, jwt: &'a str) -> Result<ProcessedJwt<'a>, JwtValidatorError> {
         let processed_jwt = match *self.config.sig_validation {
             true => self.decode_and_validate_token(jwt)?,
-            false => decode(jwt)?,
+            false => self.decode(jwt)?,
         };
 
         self.check_missing_claims(&processed_jwt.claims)?;
 
+        // Check if the `iss` claim's scheme is `https`
+        if self.config.required_claims.contains("iss") {
+            let iss = processed_jwt
+                .claims
+                .get("iss")
+                .map(|iss| serde_json::from_value::<String>(iss.clone()))
+                .transpose()?
+                .ok_or(JwtValidatorError::MissingClaims(vec!["iss".into()]))?;
+            let url = Url::parse(&iss)?;
+            if url.scheme() != "https" {
+                Err(JwtValidatorError::InvalidIssScheme(url.scheme().into()))?
+            }
+        }
+
         Ok(processed_jwt)
+    }
+
+    /// Decodes a JWT without validating the signature.
+    fn decode(&self, jwt: &str) -> Result<ProcessedJwt, JwtValidatorError> {
+        // Split the token into its three parts
+        let parts = jwt.split('.').collect::<Vec<&str>>();
+        if parts.len() != 3 {
+            return Err(JwtValidatorError::InvalidShape);
+        }
+
+        // Base64 decode the payload (the second part)
+        let decoded_payload = BASE64_STANDARD_NO_PAD
+            .decode(parts[1])
+            .map_err(|e| JwtValidatorError::DecodeJwt(e.to_string()))?;
+
+        // Deserialize the claims into a Value
+        let claims = serde_json::from_slice::<TokenClaims>(&decoded_payload)
+            .map_err(JwtValidatorError::DeserializeJwt)?;
+
+        // fetch the trusted issuer using the `iss` claim
+        let trusted_iss = claims
+            .get("iss")
+            .map(|x| serde_json::from_value::<String>(x.clone()))
+            .transpose()?
+            .and_then(|x| self.iss_store.get(&x));
+
+        Ok(ProcessedJwt {
+            claims,
+            trusted_iss,
+        })
     }
 
     /// Decodes and validates the JWT's signature and optionally, the `exp` and `nbf` claims.
@@ -122,7 +172,7 @@ impl JwtValidator {
 
         Ok(ProcessedJwt {
             claims: decode_result.claims,
-            key_iss: decoding_key.key_iss,
+            trusted_iss: decoding_key.key_iss,
         })
     }
 
@@ -141,29 +191,6 @@ impl JwtValidator {
 
         Ok(())
     }
-}
-
-/// Decodes a JWT without validating the signature.
-fn decode(jwt: &str) -> Result<ProcessedJwt, JwtValidatorError> {
-    // Split the token into its three parts
-    let parts = jwt.split('.').collect::<Vec<&str>>();
-    if parts.len() != 3 {
-        return Err(JwtValidatorError::InvalidShape);
-    }
-
-    // Base64 decode the payload (the second part)
-    let decoded_payload = BASE64_STANDARD_NO_PAD
-        .decode(parts[1])
-        .map_err(|e| JwtValidatorError::DecodeJwt(e.to_string()))?;
-
-    // Deserialize the claims into a Value
-    let claims = serde_json::from_slice::<TokenClaims>(&decoded_payload)
-        .map_err(JwtValidatorError::DeserializeJwt)?;
-
-    Ok(ProcessedJwt {
-        claims,
-        key_iss: None,
-    })
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -193,4 +220,10 @@ pub enum JwtValidatorError {
     Unexpected(#[source] jwt::errors::Error),
     #[error("Validation failed since the JWT is missing the following required claims: {0:#?}")]
     MissingClaims(Vec<Box<str>>),
+    #[error("Failed to parse URL: {0}")]
+    ParseUrl(#[from] url::ParseError),
+    #[error(
+        "The `iss` claim on the token has an invalid scheme: `{0}`. The scheme must be `https`"
+    )]
+    InvalidIssScheme(String),
 }
