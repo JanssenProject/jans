@@ -324,7 +324,7 @@ pub enum AuthzInitError {
 pub enum AuthorizeError {
     /// Error encountered while processing JWT token data
     #[error(transparent)]
-    ProcessTokens(#[from] jwt::JwtServiceError),
+    ProcessTokens(#[from] jwt::JwtProcessingError),
     /// Error encountered while creating access token entities
     #[error("{0}")]
     AccessTokenEntities(#[from] AccessTokenEntitiesError),

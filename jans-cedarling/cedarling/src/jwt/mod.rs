@@ -40,12 +40,12 @@ type TrustedIssuerId = Arc<str>;
 type KeyId = Box<str>;
 
 #[derive(Debug, thiserror::Error)]
-pub enum JwtServiceError {
-    #[error("Invalid Access Token")]
+pub enum JwtProcessingError {
+    #[error("Invalid Access token: {0}")]
     InvalidAccessToken(#[source] JwtValidatorError),
-    #[error("Invalid ID Token")]
+    #[error("Invalid ID token: {0}")]
     InvalidIdToken(#[source] JwtValidatorError),
-    #[error("Invalid Userinfo Token")]
+    #[error("Invalid Userinfo token: {0}")]
     InvalidUserinfoToken(#[source] JwtValidatorError),
     #[error("Validation failed: id_token audience does not match the access_token client_id. id_token.aud: {0:?}, access_token.client_id: {1:?}")]
     IdTokenAudienceMismatch(String, String),
@@ -67,11 +67,11 @@ pub enum JwtServiceInitError {
     ConflictingJwksConfig,
     #[error("Failed to initialize Key Service for JwtService due to a missing config: no local JWKS or trusted issuers was provided.")]
     MissingJwksConfig,
-    #[error("Failed to initialize Key Service for JwtService: {0}")]
+    #[error("Failed to initialize Key Service: {0}")]
     KeyService(#[from] KeyServiceError),
     #[error("Encountered an unsupported algorithm in the config: {0}")]
     UnsupportedAlgorithm(String),
-    #[error(transparent)]
+    #[error("Failed to initialize JwtValidator: {0}")]
     InitJwtValidator(#[from] JwtValidatorError),
 }
 
@@ -166,7 +166,7 @@ impl JwtService {
         access_token: &'a str,
         id_token: &'a str,
         userinfo_token: Option<&'a str>,
-    ) -> Result<DecodeTokensResult<A, I, U>, JwtServiceError>
+    ) -> Result<DecodeTokensResult<A, I, U>, JwtProcessingError>
     where
         A: DeserializeOwned,
         I: DeserializeOwned,
@@ -175,15 +175,15 @@ impl JwtService {
         let access_token = self
             .access_tkn_validator
             .process_jwt(access_token)
-            .map_err(JwtServiceError::InvalidAccessToken)?;
+            .map_err(JwtProcessingError::InvalidAccessToken)?;
         let id_token = self
             .id_tkn_validator
             .process_jwt(id_token)
-            .map_err(JwtServiceError::InvalidIdToken)?;
+            .map_err(JwtProcessingError::InvalidIdToken)?;
         let userinfo_token = userinfo_token
             .map(|jwt| self.userinfo_tkn_validator.process_jwt(jwt))
             .transpose()
-            .map_err(JwtServiceError::InvalidUserinfoToken)?;
+            .map_err(JwtProcessingError::InvalidUserinfoToken)?;
 
         // Additional checks for STRICT MODE
         if self.id_token_trust_mode == IdTokenTrustMode::Strict {
@@ -192,14 +192,14 @@ impl JwtService {
                 id_token
                     .claims
                     .get("aud")
-                    .ok_or(JwtServiceError::MissingClaimsInStrictMode(
+                    .ok_or(JwtProcessingError::MissingClaimsInStrictMode(
                         "id_token", "aud",
                     ))?;
             let access_tkn_client_id = access_token.claims.get("client_id").ok_or(
-                JwtServiceError::MissingClaimsInStrictMode("access_token", "client_id"),
+                JwtProcessingError::MissingClaimsInStrictMode("access_token", "client_id"),
             )?;
             if id_tkn_aud != access_tkn_client_id {
-                Err(JwtServiceError::IdTokenAudienceMismatch(
+                Err(JwtProcessingError::IdTokenAudienceMismatch(
                     serde_json::from_value::<String>(id_tkn_aud.clone())?,
                     serde_json::from_value::<String>(access_tkn_client_id.clone())?,
                 ))?
@@ -210,33 +210,23 @@ impl JwtService {
             // 2. userinfo_token.aud == access_token.client_id
             if let Some(token) = &userinfo_token {
                 let id_tkn_sub = id_token.claims.get("sub").ok_or(
-                    JwtServiceError::MissingClaimsInStrictMode("ID Token", "sub"),
+                    JwtProcessingError::MissingClaimsInStrictMode("ID Token", "sub"),
                 )?;
-                let usrinfo_sub =
-                    token
-                        .claims
-                        .get("sub")
-                        .ok_or(JwtServiceError::MissingClaimsInStrictMode(
-                            "Userinfo Token",
-                            "sub",
-                        ))?;
+                let usrinfo_sub = token.claims.get("sub").ok_or(
+                    JwtProcessingError::MissingClaimsInStrictMode("Userinfo Token", "sub"),
+                )?;
                 if usrinfo_sub != id_tkn_sub {
-                    Err(JwtServiceError::UserinfoSubMismatch(
+                    Err(JwtProcessingError::UserinfoSubMismatch(
                         serde_json::from_value::<String>(usrinfo_sub.clone())?,
                         serde_json::from_value::<String>(id_tkn_sub.clone())?,
                     ))?
                 }
 
-                let usrinfo_aud =
-                    token
-                        .claims
-                        .get("aud")
-                        .ok_or(JwtServiceError::MissingClaimsInStrictMode(
-                            "Userinfo Token",
-                            "aud",
-                        ))?;
+                let usrinfo_aud = token.claims.get("aud").ok_or(
+                    JwtProcessingError::MissingClaimsInStrictMode("Userinfo Token", "aud"),
+                )?;
                 if usrinfo_aud != access_tkn_client_id {
-                    Err(JwtServiceError::UserinfoAudienceMismatch(
+                    Err(JwtProcessingError::UserinfoAudienceMismatch(
                         serde_json::from_value::<String>(usrinfo_aud.clone())?,
                         serde_json::from_value::<String>(access_tkn_client_id.clone())?,
                     ))?
