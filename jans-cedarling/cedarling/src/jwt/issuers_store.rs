@@ -38,8 +38,6 @@ impl TrustedIssuersStore {
     }
 
     pub fn get(&self, iss_domain: &str) -> Option<&TrustedIssuer> {
-        println!("FINDING: {:?}", iss_domain);
-
         self.issuers.get(iss_domain)
     }
 }

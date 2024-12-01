@@ -239,8 +239,6 @@ impl JwtService {
             None => unimplemented!("Having no userinfo token is not yet supported."),
         };
 
-        println!("ISS: {:?}", access_token.trusted_iss);
-
         Ok(ProcessTokensResult {
             access_token: serde_json::from_value::<A>(access_token.claims)?,
             id_token: serde_json::from_value::<I>(id_token.claims)?,
