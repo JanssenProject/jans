@@ -5,82 +5,37 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use reqwest::blocking::Client;
-use serde::Deserialize;
-use std::{thread::sleep, time::Duration};
+#[cfg(not(target_arch = "wasm32"))]
+mod blocking;
+#[cfg(target_arch = "wasm32")]
+mod wasm;
 
-/// A wrapper around `reqwest::blocking::Client` providing HTTP request functionality
-/// with retry logic.
-///
-/// The `HttpClient` struct allows for sending GET requests with a retry mechanism
-/// that attempts to fetch the requested resource up to a maximum number of times
-/// if an error occurs.
-#[derive(Debug)]
+use serde::Deserialize;
+use std::time::Duration;
+
+trait HttpGet {
+    /// Sends a GET request to the specified URI
+    fn get(&self, uri: &str) -> Result<Response, HttpClientError>;
+}
+
 pub struct HttpClient {
-    #[cfg(not(target_arch = "wasm32"))]
-    client: reqwest::blocking::Client,
-    max_retries: u32,
-    retry_delay: Duration,
+    client: Box<dyn HttpGet>,
 }
 
 impl HttpClient {
     pub fn new(max_retries: u32, retry_delay: Duration) -> Result<Self, HttpClientError> {
-        let client = Client::builder()
-            .build()
-            .map_err(HttpClientError::Initialization)?;
+        #[cfg(not(target_arch = "wasm32"))]
+        let client = blocking::BlockingHttpClient::new(max_retries, retry_delay)?;
+        #[cfg(target_arch = "wasm32")]
+        let client = wasm::WasmHttpClient::new(max_retries, retry_delay)?;
 
         Ok(Self {
-            client,
-            max_retries,
-            retry_delay,
+            client: Box::new(client),
         })
     }
 
-    /// Sends a GET request to the specified URI with retry logic.
-    ///
-    /// This method will attempt to fetch the resource up to 3 times, with an increasing delay
-    /// between each attempt.
-    #[cfg(not(target_arch = "wasm32"))]
     pub fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
-        // Fetch the JWKS from the jwks_uri
-        let mut attempts = 0;
-        let response = loop {
-            match self.client.get(uri).send() {
-                // Exit loop on success
-                Ok(response) => break response,
-
-                Err(e) if attempts < self.max_retries => {
-                    attempts += 1;
-                    // TODO: pass this message to the logger
-                    eprintln!(
-                        "Request failed (attempt {} of {}): {}. Retrying...",
-                        attempts, self.max_retries, e
-                    );
-                    sleep(self.retry_delay * attempts);
-                },
-                // Exit if max retries exceeded
-                Err(e) => return Err(HttpClientError::MaxHttpRetriesReached(e)),
-            }
-        };
-
-        let response = response
-            .error_for_status()
-            .map_err(HttpClientError::HttpStatus)?;
-
-        Ok(Response {
-            text: response
-                .text()
-                .map_err(HttpClientError::DecodeResponseUtf8)?,
-        })
-    }
-
-    /// Sends a GET request to the specified URI with retry logic.
-    ///
-    /// This method will attempt to fetch the resource up to 3 times, with an increasing delay
-    /// between each attempt.
-    #[cfg(target_arch = "wasm32")]
-    pub fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
-        todo!()
+        self.client.get(uri)
     }
 }
 
@@ -121,9 +76,8 @@ pub enum HttpClientError {
 
 #[cfg(test)]
 mod test {
-    use crate::jwt::http_client::HttpClientError;
+    use crate::jwt::http_client::{HttpClient, HttpClientError};
 
-    use super::HttpClient;
     use mockito::Server;
     use serde_json::json;
     use std::time::Duration;
