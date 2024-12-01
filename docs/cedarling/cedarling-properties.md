@@ -140,7 +140,7 @@ Below is an example of a bootstrap config in JSON format.
 
 #### Local JWKS
 
-A local JWKS can be used by setting the `CEDARLING_LOCAL_JWKS` bootstrap property to a path to a local JSON file. When providing a local Json Web Key Store (JWKS), the file must follow the following shema:
+A local JWKS can be used by setting the `CEDARLING_LOCAL_JWKS` bootstrap property to a path to a local JSON file. When providing a local Json Web Key Store (JWKS), the file must follow the following schema:
 
 ```json
 {
@@ -149,7 +149,7 @@ A local JWKS can be used by setting the `CEDARLING_LOCAL_JWKS` bootstrap propert
 }
 ```
 
-- Where keys are `Trusted Issuer IDs` assinged to each key store
+- Where keys are `Trusted Issuer IDs` assigned to each key store
 - and the values contains the JSON Web Keys as defined in [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
 - The `trusted_issuers_id` is used to tag a JWKS with a unique identifier and enables using multiple key stores.
 
