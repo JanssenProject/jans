@@ -48,9 +48,6 @@ impl KeyService {
     /// - Where keys are `Trusted Issuer IDs` assinged to each key store
     /// - and the values contains the JSON Web Keys as defined in [`RFC 7517`].
     ///
-    /// This can only be used if the trusted issuer where the keys are from do not
-    /// rotate the keys.
-    ///
     /// [`RFC 7517`]: https://datatracker.ietf.org/doc/html/rfc7517
     pub fn new_from_str(key_stores: &str) -> Result<Self, KeyServiceError> {
         let parsed_stores = serde_json::from_str::<HashMap<String, Value>>(key_stores)
