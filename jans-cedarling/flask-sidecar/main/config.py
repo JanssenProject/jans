@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from main.logger import logger
 
 def get_instance_path(parent_dir=""):
     parent_dir = parent_dir or Path.home()
@@ -18,6 +19,12 @@ class BaseConfig:
     API_SPEC_OPTIONS = {
         "x-internal-id": "1",
     }
+    CEDARLING_BOOTSTRAP_CONFIG_FILE = os.getenv("CEDARLING_BOOSTRAP_CONFIG_FILE", None)
+    if CEDARLING_BOOTSTRAP_CONFIG_FILE is None:
+        logger.warning("Cedarling bootstrap file not found")
+        exit()
+    with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
+        CEDARLING_BOOTSTRAP_CONFIG = f.read()
 
 class TestingConfig(BaseConfig):
     TESTING = True

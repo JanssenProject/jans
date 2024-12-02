@@ -1,8 +1,6 @@
 from flask_smorest import Api, Blueprint
 from flask_cors import CORS 
-
-api = Api()
-cors = CORS(expose_headers="X-Pagination")
+from main.base.cedarling.cedarling import CedarlingInstance
 
 class BlueprintApi(Blueprint):
     def __init__(self, *args, **kwargs):
@@ -14,3 +12,6 @@ class BlueprintApi(Blueprint):
             return data
         return None
 
+api = Api()
+cors = CORS(expose_headers="X-Pagination")
+cedarling = CedarlingInstance()

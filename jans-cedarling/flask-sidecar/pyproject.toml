@@ -14,6 +14,8 @@ pyyaml = "^6.0.2"
 maturin = "^1.7.4"
 flask-cors = "^5.0.0"
 python-dotenv = "^1.0.1"
+structlog = "^24.4.0"
+python-json-logger = "^2.0.7"
 
 
 [build-system]

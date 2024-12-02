@@ -72,7 +72,8 @@ RUN poetry add /api/cedarling_python-$(cat /api/cedarling_version)-cp310-cp310-m
 
 
 ENV FLASK_APP=main.core:app \
-    GUNICORN_LOG_LEVEL=${GUNICORN_LOG_LEVEL:-debug}
+    GUNICORN_LOG_LEVEL=${GUNICORN_LOG_LEVEL:-debug} \
+    CEDARLING_BOOTSTRAP_CONFIG_FILE=${CEDARLING_BOOTSTRAP_CONFIG_FILE}
 
 EXPOSE 5000
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cedarling-flask-sidecar" \

@@ -8,5 +8,11 @@ services:
     environment:
       - FLASK_APP=main.core:app
       - APP_MODE=${APP_MODE:-development}
+      - CEDARLING_BOOTSTRAP_CONFIG_FILE=/run/secrets/cedarling_bootstrap_config_file
     volumes:
       - ./:/api
+    secrets:
+      - cedarling_bootstrap_config_file
+secrets:
+  cedarling_bootstrap_config_file:
+    file: ./secrets/bootstrap.json
