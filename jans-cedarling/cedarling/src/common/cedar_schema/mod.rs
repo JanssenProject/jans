@@ -258,7 +258,7 @@ mod deserialize {
 
         // In fact this fails because of limitations in cedar_policy::Policy::from_json
         // see PolicyContentType
-        #[allow(dead_code)]
+        #[test]
         fn test_both_ok() {
             static POLICY_STORE_RAW: &str =
                 include_str!("../../../../test_files/policy-store_blobby.json");

@@ -6,7 +6,7 @@
  */
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogTypeConfig,
+    AuthorizationConfig, BootstrapConfig, Cedarling, LogConfig, LogTypeConfig, JwtConfig,
     PolicyStoreConfig, PolicyStoreSource, Request, ResourceData, WorkloadBoolOp,
 };
 use std::collections::HashMap;
@@ -22,7 +22,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
         },
-        jwt_config: JwtConfig::Disabled,
+        jwt_config: JwtConfig::new_without_validation(),
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
