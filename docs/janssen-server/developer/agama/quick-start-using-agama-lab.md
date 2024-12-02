@@ -423,9 +423,42 @@ Server deployment
      jans tui
      ```
     
-3. Navigate to `Auth Server` > `Agama` > `Upload Project`. Select the `.gama` file to upload.
+3. Navigate to `Auth Server` > `Agama` > `Add a New Project` >`Upload Project`. Select the `.gama` file to upload.
 
     ![image](../../../assets/upload-gama-file.png)
+
+4. Also can add a Community Project.
+
+    ![image](../../../assets/select-community-agamaproject.png)
+
+5. Navigate to `Auth Server` > `Agama` > `Add a New Project` > `Add a Community Project`. Select the `Agama` project.
+
+    ![image](../../../assets/select-agama-project.png)
+
+
+## Testing using Jans Tarp
+
+* Setup Jans-Tarp. [Instructions](https://github.com/JanssenProject/jans/tree/main/demos/jans-tarp)
+* Configuration to run Agama flow
+* Add Your `server host`, `client expiry date`, `scopes` and click on Register client. It will register new OP Client on your Auth server.
+
+
+![image](../../../assets/tarp-client-reg.png)
+
+* Add `Acr values` and `Scope` and click on Trigger Auth Code flow
+ 
+![image](../../../assets/authentication-flow-input.png)
+
+
+* It will trigger agama flow and show login screen to you. You can use TUI to add testing user.
+
+![image](../../../assets/agama-login.png)
+
+* After successful auth, it will show you below screen
+
+![image](../../../assets/successful-tarp-auth-screen.png)
+
+
 
 ## Test
 
