@@ -30,8 +30,8 @@ use create::{build_entity_uid, create_entity, parse_namespace_and_typename, Enti
 use super::request::ResourceData;
 use super::token_data::TokenPayload;
 
-pub(crate) type DecodeTokensResult<'a> =
-    jwt::DecodeTokensResult<'a, AccessTokenData, IdTokenData, UserInfoTokenData>;
+pub(crate) type ProcessTokensResult<'a> =
+    jwt::ProcessTokensResult<'a, AccessTokenData, IdTokenData, UserInfoTokenData>;
 
 /// Access token entities
 pub struct AccessTokenEntities {
@@ -117,7 +117,7 @@ pub fn create_id_token_entity(
 /// Create user entity
 pub fn create_user_entity(
     policy_store: &PolicyStore,
-    tokens: &DecodeTokensResult,
+    tokens: &ProcessTokensResult,
     parents: HashSet<EntityUid>,
     trusted_issuer: &TrustedIssuer,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
@@ -211,7 +211,7 @@ pub enum RoleEntityError {
 /// Create `Role` entity from based on `TrustedIssuer` or default value of `RoleMapping`
 pub fn create_role_entities(
     policy_store: &PolicyStore,
-    tokens: &DecodeTokensResult,
+    tokens: &ProcessTokensResult,
     trusted_issuer: &TrustedIssuer,
 ) -> Result<Vec<cedar_policy::Entity>, RoleEntityError> {
     // get role mapping or default value
