@@ -7393,6 +7393,19 @@
     Loading From JSON
   </a>
   
+    <nav class="md-nav" aria-label="Loading From JSON">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-jwks" class="md-nav__link">
+    Local JWKS
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -8611,6 +8624,19 @@
     Loading From JSON
   </a>
   
+    <nav class="md-nav" aria-label="Loading From JSON">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-jwks" class="md-nav__link">
+    Local JWKS
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -8797,6 +8823,18 @@
 <ul>
 <li>Note that properties set to <code>"disabled"</code>, an empty string <code>""</code>, zero <code>0</code>, and <code>null</code> can be ommited since they are the defaults.</li>
 </ul>
+<h4 id="local-jwks">Local JWKS<a class="headerlink" href="#local-jwks" title="Permanent link">#</a></h4>
+<p>A local JWKS can be used by setting the <code>CEDARLING_LOCAL_JWKS</code> bootstrap property to a path to a local JSON file. When providing a local Json Web Key Store (JWKS), the file must follow the following schema:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;trusted_issuer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;another_trusted_issuer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>Where keys are <code>Trusted Issuer IDs</code> assigned to each key store</li>
+<li>and the values contains the JSON Web Keys as defined in <a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517</a>.</li>
+<li>The <code>trusted_issuers_id</code> is used to tag a JWKS with a unique identifier and enables using multiple key stores.</li>
+</ul>
 <h3 id="loading-from-yaml">Loading From YAML<a class="headerlink" href="#loading-from-yaml" title="Permanent link">#</a></h3>
 <p>Below is an example of a bootstrap config in YAML format.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">CEDARLING_APPLICATION_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">My App</span><span class="w"></span>
@@ -8846,7 +8884,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-29T15:51:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-29</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-02T15:32:07+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-02</span>
       
         <br>
         Created:
