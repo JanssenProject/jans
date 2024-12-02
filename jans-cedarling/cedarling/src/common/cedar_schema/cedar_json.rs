@@ -36,7 +36,6 @@ pub enum GetCedarTypeError {
 /// Enum to get info about type based on name.
 /// Is used as a result in [`CedarSchemaJson::find_type`]
 pub enum SchemaDefinedType<'a> {
-    #[allow(dead_code)]
     Entity(&'a CedarSchemaEntityShape),
     CommonType(&'a CedarSchemaRecord),
 }
