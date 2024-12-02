@@ -21,26 +21,26 @@ npm install cedarling_wasm
 Then, import and initialize `cedarling` in your JavaScript code:
 
 ```js
-import * as cedarling from "cedarling_wasm";
-cedarling.init();
+import { Cedarling } from "cedarling_wasm";
+
+let cedarling = Cedarling.new({
+  "application_name": "TestApp",
+  "policy_store_id": "asdasd123123",
+});
+
+cedarling.authorize();
 ```
 
 You can now use cedarling's WASM functionality directly in your application.
 
 ## Running the example
 
-A sample project demonstrating usage is available in the `example/` directory.
+A sample project demonstrating the usage is available in the `example/` directory.
 
 To run the example:
 
-1. Install the required packages:
-
 ```sh
+cd ./example
 npm install
-```
-
-2. Start the example application:
-
-```sh
 npm run start
 ```
