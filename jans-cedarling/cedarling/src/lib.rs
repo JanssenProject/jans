@@ -47,6 +47,7 @@ pub mod bindings {
     pub use super::log::{
         AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
     };
+    pub use crate::common::policy_store::PolicyStore;
     pub use cedar_policy;
 }
 

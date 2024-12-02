@@ -846,7 +846,7 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
 	}
 
     private com.unboundid.ldap.sdk.Filter toLdapFilter(Filter genericFilter) throws SearchException {
-        return LDAP_FILTER_CONVERTER.convertToLdapFilter(genericFilter);
+        return LDAP_FILTER_CONVERTER.convertToLdapFilter(filterProcessor.excludeLowerFilter(genericFilter));
     }
 
     private com.unboundid.ldap.sdk.SearchScope toLdapSearchScope(SearchScope scope) throws SearchScopeException {

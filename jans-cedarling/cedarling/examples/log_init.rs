@@ -6,8 +6,8 @@
  */
 
 use cedarling::{
-    BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig,
-    PolicyStoreConfig, PolicyStoreSource,
+    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogStorage,
+    LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, WorkloadBoolOp,
 };
 use std::env;
 
@@ -47,6 +47,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
         },
         jwt_config: JwtConfig::Disabled,
+        authorization_config: AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: true,
+            user_workload_operator: WorkloadBoolOp::And,
+        },
     })?;
 
     println!("Stage 1:");
