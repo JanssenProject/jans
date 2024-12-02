@@ -64,386 +64,50 @@ Please see [here](https://docs.jans.io/v1.0.14/admin/scim/logs/) besides
 To know more about OAuth protection mode please visit [here](https://docs.jans.io/v1.0.14/admin/scim/oauth-protection/).
 The SCIM API endpoints are by default protected by (Bearer) OAuth 2.0 tokens. Depending on the operation, these tokens must have certain scopes for the operations to be authorized. We need a client to get Bearer token. 
 ### Get SCIM Client
-Let's obtain the credentials of this client first. In TUI, navigate to `Auth Server > Clients`. In the search field type SCIM (uppercase). Highlight the row that matches a client named "SCIM Client" and press Enter. To see in `JSON` formate please press `d`.
 
-From the "Basic" section, grab the "client id" and "client secret". This secret is encrypted, to decrypt it, in a terminal run `/opt/jans/bin/encode.py -D ENCRYPTED-SECRET-HERE`.
+
+You can refer to [here](../../janssen-server/config-guide/scim-config/user-config.md#get-scim-client) for this topic
+
 
 
 ### Get Access token
 
-Let's get a token, 
-```
-curl -k -u 'CLIENT_ID:DECRYPTED_CLIENT_SECRET' -k -d grant_type=client_credentials -d scope='https://jans.io/scim/users.read https://jans.io/scim/users write' https://<jans-server>/jans-auth/restv1/token > /tmp/token.json
-```
-In response `token.json` we will get `access_token`
-```
-{
-"access_token":"11a76589-7955-4247-9ca5-f3ad7884305...",
-"scope":"https://jans.io/scim/users.read",
-"token_type":"Bearer",
-"expires_in":299
-}
-```
+You can refer to [here](../../janssen-server/config-guide/scim-config/user-config.md#get-access-token) for this topic
 
 ### Retrive existing User 
 
-To get an existing user 
-
-```
-curl -k -G -H 'Authorization: Bearer ACCESS_TOKEN' --data-urlencode 'filter=displayName co "Admin"' https://<jans-server>/jans-scim/restv1/v2/Users > /tmp/user.json
-```
-In response `user.json` we will get 
-```
-{
-  "schemas": [
-    "urn:ietf:params:scim:api:messages:2.0:ListResponse"
-  ],
-  "totalResults": 1,
-  "startIndex": 1,
-  "itemsPerPage": 1,
-  "Resources": [
-    {
-      "schemas": [
-        "urn:ietf:params:scim:schemas:core:2.0:User"
-      ],
-      "id": "5fdbb720-a1fd-477f-af92-b7c054f02c98",
-      "meta": {
-        "resourceType": "User",
-        "created": "2023-06-12T14:54:09.531Z",
-        "location": "https://raju.jans13.me/jans-scim/restv1/v2/Users/5fdbb720-a1fd-477f-af92-b7c054f02c98"
-      },
-      "userName": "admin",
-      "name": {
-        "familyName": "...",
-        "givenName": "...",
-        "middleName": "...",
-        "formatted": "..."
-      },
-      "displayName": "Admin",
-      "active": true,
-      "emails": [
-        {
-          "value": "example@gluu.org",
-          "primary": false
-        }
-      ],
-      "groups": [
-        {
-          "value": "60B7",
-          "display": "Jannsen Manager Group",
-          "type": "direct",
-          "$ref": "https://raju.jans13.me/jans-scim/restv1/v2/Groups/60B7"
-        }
-      ]
-    }
-  ]
-}
-```
-
+You can refer to [here](../../janssen-server/config-guide/scim-config/user-config.md#retrive-existing-user) for this topic
 
 ## Creating Resource 
 ### Create an User
-Let's start creating a dummy user. A client sends a POST request containing a "User" to the "/Users" endpoint. 
-```
-POST /Users  HTTP/1.1
-Host: example.com
-Accept: application/scim+json
-Content-Type: application/scim+json
-Authorization: Bearer h480djs93hd8..
-Content-Length: ...
 
-{
-  "schemas": [
-    "urn:ietf:params:scim:schemas:core:2.0:User"
-  ],
-  "userName": "bjensen",
-  "externalId": "bjensen",
-  "name": {
-    "formatted": "Ms. Barbara J Jensen III",
-    "familyName": "Jensen",
-    "givenName": "Barbara"
-  }
-}
-```
-Open a text editor and copy paste the json body, name as `input.json`.
-Hit on your terminal with bellow command.
-```
-curl -k -H 'Authorization: Bearer ACCESS_TOKEN' -H 'Content-Type: application/scim+json' -d @input.json -o output.json https://<jans-server>/jans-scim/restv1/v2/Users
-```
-response looks like 
-```
-{
-    "schemas": [
-        "urn:ietf:params:scim:schemas:core:2.0:User"
-    ],
-    "id": "e3009115-b890-4d8b-bd63-bbfef34aa583",
-    "externalId": "bjensen",
-    "meta": {
-        "resourceType": "User",
-        "created": "2023-06-26T19:43:32.945Z",
-        "lastModified": "2023-06-26T19:43:32.945Z",
-        "location": "https://raju.jans13.me/jans-scim/restv1/v2/Users/e3009115-b890-4d8b-bd63-bbfef34aa583"
-    },
-    "userName": "bjensen",
-    "name": {
-        "familyName": "Jensen",
-        "givenName": "Barbara",
-        "formatted": "Ms. Barbara J Jensen III"
-    }
-}
-```
-
-This new user has been given an `id`. If possible, inspect your `ou=people` branch and find the entry whose `inum` matches the `id` given. An easier option would be to via **Jans TUI** and go to `Users` and search "bjensen" to see the recently created user.
+You can refer to [here](../../janssen-server/config-guide/scim-config/user-config.md#create-an-user) for this topic
 
 ### Updating a User(PUT)
 
-Overwrite your `input.json` with the following. Replace content in angle brackets accordingly:
-
-```
-{
-  "schemas": [
-    "urn:ietf:params:scim:schemas:core:2.0:User"
-  ],
-  "id": "e3009115-b890-4d8b-bd63-bbfef34aa583",
-  "userName": "bjensen",
-  "externalId": "bjensen",
-  "name": {
-    "formatted": "Ms. Barbara J Jensen III",
-    "familyName": "Jensen",
-    "givenName": "Barbara"
-  },
-  "displayName": "Jensen Barbara",
-  "emails": [
-    {
-      "value": "jensen@example.com",
-      "type": "work",
-      "primary": true
-    }
-  ]
-}
-```
-
-PUT with curl:
-
-```
-curl -k -X PUT -H 'Authorization: Bearer ACCESS_TOKEN' -H 'Content-Type: application/scim+json' -d @input.json -o output.json https://<jans-server>/jans-scim/restv1/v2/Users/<user-inum>
-```
-
-Response `(output.json)` will show the same contents of a full retrieval.
-
-Please verify changes were applied whether by inspecting LDAP or issuing a GET. If you have followed the steps properly, you should notice a new e-mail added and the change in `displayName` attribute
-
+You can refer to [here](../../janssen-server/config-guide/scim-config/user-config.md#updating-a-userput) for this topic
 
 ### Updating a User (PATCH)
 
-With patching, you can be very precise about the modifications you want to apply. Patching syntax follows JSON Patch spec (RFC 6902) closely. While it's not a must to read the RFC to learn how patch works, see section 3.5.2 of SCIM protocol (RFC 7644) to get the grasp.
 
-If you prefer reading code, [patch test cases](https://github.com/JanssenProject/jans/tree/main/jans-scim/client/src/test/java/io/jans/scim2/client/patch) found in the Java scim-client project are worth to look at.
+You can refer to [here](../../janssen-server/config-guide/scim-config/user-config.md#updating-a-user-patch) for this topic
 
-The following is a simple example that illustrates the kind of modifications developers can achieve via `PATCH`. Overwrite your `input.json` with the following:
-
-```
-{
-  "schemas": [
-    "urn:ietf:params:scim:api:messages:2.0:PatchOp"
-  ],
-  "Operations": [
-    {
-      "op": "replace",
-      "value": {
-        "name": {
-          "givenName": "Joey"
-        }
-      }
-    },
-    {
-      "op": "replace",
-      "path": "emails[type eq \"work\" or primary eq false].value",
-      "value": "jensen@example.com"
-    },
-    {
-      "op": "add",
-      "value": {
-        "name": {
-          "middleName": "Jhon"
-        }
-      }
-    },
-    {
-      "op": "add",
-      "value": {
-        "emails": [
-          {
-            "primary": true,
-            "value": "my@own.mail"
-          }
-        ],
-        "phoneNumbers": [
-          {
-            "type": "home",
-            "value": "5 123 8901"
-          },
-          {
-            "value": "5 123 8902"
-          }
-        ]
-      }
-    },
-    {
-      "op": "remove",
-      "path": "name.middleName"
-    },
-    {
-      "op": "remove",
-      "path": "phoneNumbers[value ew \"01\"].type"
-    }
-  ]
-}
-```
-
-A collection of modification are provided under "Operations". They are processed in order of appearance. Also, every operation has a type; patching supports add, remove and replace.
-
-The first operations states the following: replace the value of `givenName` subattribute (that belongs to complex attribute `name`) with the string "Joey".
-
-Operations are easier to understand when using a "path". The second operation replaces the value subattribute inside the complex multi-valued attribute emails. Inside the square brackets, we find a filter expression, so the replacement does not apply to all emails in the list but only to those matching the criterion.
-
-So the second operation can be read as "set the value of value subattribute to string `jensen@example.com` where the type subattribute of the `email` equals to string "work" or if primary attribute is false".
-
-The third operation is similar to the first. It sets the value of a subattribute which was unassigned (null). You could have used "replace" operation in this case and results would have been identical.
-
-The fourth operation is more interesting. It adds to the current list of emails a new one. It supplies a couple of subattributes for the email to include: primary and value. Additionally, we set the value of (previously unassigned) phoneNumbers multi-valued attribute passing a list of elements.
-
-In the fifth operation, we remove the `middleName` attribute that was set in operation three. Note how we make explicit the path of data to nullify: "name.middleName".
-
-The sixth operation allows us to remove a specific subattribute of `phoneNumbers`. The aim is to nullify the "type" of the item whose phone number value ends with "01". The remove operation can also be used to remove a complete item from a list, or empty the whole list by providing a suitable value for "path".
-
-Now let's see it in action:
-
-
-```
-curl -k -X PATCH -H 'Authorization: Bearer ACCESS_TOKEN' -H 'Content-Type: application/scim+json' -d @input.json -o output.json https://<jans-server>/jans-scim/restv1/v2/Users/<user-inum>
-```
-
-So far our resource look like this
-
-```
-{
-  "schemas": [
-    "urn:ietf:params:scim:schemas:core:2.0:User"
-  ],
-  "id": "e3009115-b890-4d8b-bd63-bbfef34aa583",
-  "externalId": "bjensen",
-  "meta": {
-    "resourceType": "User",
-    "created": "2023-06-26T19:43:32.945Z",
-    "lastModified": "2023-06-26T22:34:27.465Z",
-    "location": "https://raju.jans13.me/jans-scim/restv1/v2/Users/e3009115-b890-4d8b-bd63-bbfef34aa583"
-  },
-  "userName": "bjensen",
-  "name": {
-    "familyName": "Jensen",
-    "givenName": "Joey",
-    "formatted": "Ms. Barbara J Jensen III"
-  },
-  "displayName": "Jensen Barbara",
-  "active": false,
-  "emails": [
-    {
-      "value": "my@own.mail",
-      "primary": true
-    },
-    {
-      "value": "jensen@example.com",
-      "type": "work",
-      "primary": false
-    }
-  ],
-  "phoneNumbers": [
-    {
-      "value": "5 123 8901"
-    },
-    {
-      "value": "5 123 8902"
-    }
-  ]
-}
-```
-
-Note the primary subattribute accompanying `email` "my@own.mail" is false but when inserted we provided `true`. This is because the SCIM specification states that after modifications are applied to resources **(PUT or PATCH)**, there cannot be more than one item in a multi-valued attribute with primary value set as `true`.
-
-To see more sample `JSON` payloads, check the `.json` files used by the scim-client test cases referenced above.
 
 ### Deleting Users
 
-For deleting, the `DELETE `method of `HTTP` is used.
-
-No input file is used in this case. A delete request could be the following:
-
-```
-curl -k -X DELETE -H 'Authorization: Bearer ACCESS_TOKEN' https://<jans-server>/jans-scim/restv1/v2/Users/<user-inum>
-```
-
-Use the inum of our dummy user, **Jensen Barbara**.
-
-Check your LDAP or via Jans TUI to see that **Bjensen** is gone.
-
+You can refer to [here](../../janssen-server/config-guide/scim-config/user-config.md#deleting-users) for this topic
 
 ## How is SCIM data stored?
 
-SCIM [schema spec](https://datatracker.ietf.org/doc/html/rfc7643) does not use LDAP attribute names but a different naming convention for resource attributes (note this is not the case of custom attributes where the SCIM name used is that of the LDAP attribute).
-
-It is possible to determine if a given LDAP attribute is being mapped to a SCIM attribute. For that you need to check in Jans TUI `Auth-Server >> Attributes` and click on any attributes. Check `Include in SCIM Extension:` is `true` or `false`. Whenever you try to map any LDAP attribute to a SCIM attribute keep it's value `true`.  
-
+You can refer to [here](../../janssen-server/scim/monitoring.md#how-is-scim-data-stored) for this topic
 
 ## FIDO Devices
 
-A FIDO device represents a user credential stored in the Jans Server database that is compliant with the [FIDO](https://fidoalliance.org/) standard. These devices are used as a second factor in a setting of strong authentication.
-
-FIDO devices were superseded by [FIDO 2](#fido-2-devices) devices in Jans Server.
+You can refer to [here](../../janssen-server/fido/monitoring.md#fido-devices) for this topic.
 
 ## FIDO 2 devices
 
-FIDO 2 devices are credentials that adhere to the more current Fido 2.0 initiative (WebAuthn + CTAP). Examples of FIDO 2 devices are USB security keys and Super Gluu devices.
-
-The SCIM endpoints for FIDO 2 allow application developers to query, update and delete already existing devices. Addition of devices do not take place through the service since this process requires direct end-user interaction, ie. device enrolling.
-
-The schema attributes for a device of this kind can be found by hitting the URL  `https://<jans-server>/jans-scim/restv1/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:Fido2Device`
-
-To distinguish between regular FIDO2 and SuperGluu devices, note only SuperGluu entries have the attribute `deviceData` populated (i.e. not null)
-
-### Example: Querying Enrolled Devices
-
-Say we are interested in having a list of Super Gluu devices users have enrolled and whose operating system is iOS. We may issue a query like this:
-
-```
-curl -k -G -H 'Authorization: Bearer ACCESS_TOKEN' --data-urlencode 
-'filter=deviceData co "ios"' -d count=10 https://<jans-server>/jans-scim/restv1/v2/Fido2Devices
-```
-
-The response will be like:
-
-```
-{
-  "totalResults": ...,
-  "itemsPerPage": ...,
-  "startIndex": 1,
-  "schemas": [
-    "urn:ietf:params:scim:api:messages:2.0:ListResponse"
-  ],
-  "Resources": [
-    {
-      "id": "...",
-      "meta": {...},
-      "schemas": ["urn:ietf:params:scim:schemas:core:2.0:Fido2Device"],
-      "userId": "...",
-      ...
-      "deviceData": "{...}",
-      "displayName": ...,
-    },
-    ...
-  ]
-}
-```
+You can refer to [here](../../janssen-server/fido/monitoring.md#fido2-devices) for this topic.
 
 ## Potential performance issues with Group endpoints
 
