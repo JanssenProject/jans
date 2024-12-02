@@ -12,7 +12,7 @@ default = ["console_error_panic_hook"]
 
 [dependencies]
 wasm-bindgen = "0.2.84"
-# cedarling = { workspace = true }
+cedarling = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 
@@ -21,6 +21,7 @@ serde_json = { workspace = true }
 # all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
 # code size when deploying.
 console_error_panic_hook = { version = "0.1.7", optional = true }
+serde-wasm-bindgen = "0.6.5"
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.34"

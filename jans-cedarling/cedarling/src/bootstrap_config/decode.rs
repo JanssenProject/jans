@@ -12,7 +12,7 @@ use super::{
 };
 use crate::common::policy_store::PolicyStore;
 use jsonwebtoken::Algorithm;
-use serde::{Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer, Serialize};
 use std::{collections::HashSet, path::Path, str::FromStr};
 use typed_builder::TypedBuilder;
 
@@ -317,7 +317,7 @@ impl From<bool> for FeatureToggle {
     }
 }
 
-#[derive(Default, Clone, Copy, Debug, PartialEq, Deserialize)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "UPPERCASE")]
 /// Operator that define boolean operator `AND` or `OR`.
 pub enum WorkloadBoolOp {
