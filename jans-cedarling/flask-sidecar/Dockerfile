@@ -55,7 +55,7 @@ RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject
         && maturin build \
         && cp -r ../../flask-sidecar/* /api \
         && version=$(sed -n 's/.*version = "\(.*\)"/\1/p' pyproject.toml) \
-        && mv ../target/wheels/cedarling_python-"$version"-cp312-cp312-manylinux_2_34_x86_64.whl /api/cedarling_python.whl \
+        && mv ../../target/wheels/cedarling_python-"$version"-cp312-cp312-manylinux_2_34_x86_64.whl /api/cedarling_python.whl \
         && rm -rf /tmp/jans
 
 # Setting up proper permissions:

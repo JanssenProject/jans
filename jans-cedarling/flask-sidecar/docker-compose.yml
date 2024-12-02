@@ -9,4 +9,4 @@ services:
       - FLASK_APP=main.core:app
       - APP_MODE=${APP_MODE:-development}
     volumes:
-      - ./agama-lab-api:/api
+      - ./:/api
