@@ -4,14 +4,13 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.service.cluster.ClusterNodeManager;
 import io.jans.as.server.service.cluster.StatusIndexPoolService;
 import io.jans.model.token.StatusIndexPool;
-import io.jans.model.tokenstatus.StatusList;
 import io.jans.model.tokenstatus.TokenStatus;
 import io.jans.util.Pair;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,30 +49,10 @@ public class StatusListIndexService {
                 return; // invalid
             }
 
-            final int bitSize = appConfiguration.getStatusListBitSize();
-
-            // first load pool for indexes and update in-memory
-            Map<Integer, StatusIndexPool> pools = new HashMap<>();
-            for (Integer index : indexes) {
-                int poolId = index / appConfiguration.getStatusListIndexAllocationBlockSize();
-
-                StatusIndexPool indexHolder = pools.get(poolId);
-                if (indexHolder == null) {
-                    indexHolder = statusTokenPoolService.getPoolByIndex(index);
-                    log.debug("Found pool {} by index {}", indexHolder.getDn(), index);
-                    pools.put(indexHolder.getId(), indexHolder);
-                }
-
-                final String data = indexHolder.getData();
-
-                final StatusList statusList = StringUtils.isNotBlank(data) ? StatusList.fromEncoded(data, bitSize) : new StatusList(bitSize);
-                statusList.set(index, status.getValue());
-
-                indexHolder.setData(statusList.getLst());
-            }
-
-            for (StatusIndexPool pool : pools.values()) {
-                updateWithLockSilently(pool);
+            // first load pools for indexes
+            Collection<StatusIndexPool> pools = findPoolsByIndexes(indexes);
+            for (StatusIndexPool pool : pools) {
+                updateWithLockSilently(pool, indexes, status);
             }
 
             log.debug("Updated status list at index {} with status {} successfully.", indexes, status);
@@ -83,9 +62,24 @@ public class StatusListIndexService {
         }
     }
 
-    private void updateWithLockSilently(StatusIndexPool pool) {
+    private Collection<StatusIndexPool> findPoolsByIndexes(List<Integer> indexes) {
+        Map<Integer, StatusIndexPool> pools = new HashMap<>();
+        for (Integer index : indexes) {
+            int poolId = index / appConfiguration.getStatusListIndexAllocationBlockSize();
+
+            StatusIndexPool indexHolder = pools.get(poolId);
+            if (indexHolder == null) {
+                indexHolder = statusTokenPoolService.getPoolByIndex(index);
+                log.debug("Found pool {} by index {}", indexHolder.getDn(), index);
+                pools.put(indexHolder.getId(), indexHolder);
+            }
+        }
+        return pools.values();
+    }
+
+    private void updateWithLockSilently(StatusIndexPool pool, List<Integer> indexes, TokenStatus status) {
         try {
-            statusTokenPoolService.updateWithLock(pool);
+            statusTokenPoolService.updateWithLock(pool.getDn(), indexes, status);
         } catch (Exception e) {
             log.error("Failed to persist status index pool " + pool.getId(), e);
         }
