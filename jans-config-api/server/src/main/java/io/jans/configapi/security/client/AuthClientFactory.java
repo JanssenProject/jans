@@ -17,6 +17,7 @@ import io.jans.as.client.RevokeSessionResponse;
 import io.jans.as.client.RevokeSessionRequest;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
+import io.jans.configapi.core.util.Jackson;
 import io.jans.as.client.service.IntrospectionService;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.IntrospectionResponse;
@@ -24,7 +25,6 @@ import io.jans.as.model.jwk.JSONWebKeySet;
 
 import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
 
-import io.jans.configapi.core.util.Jackson;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
@@ -35,6 +35,8 @@ import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.Response;
+
+import java.util.List;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
@@ -84,6 +86,32 @@ public class AuthClientFactory {
         if (healthResponse.getStatus() == 200) {
             JsonNode jsonNode = healthResponse.readEntity(JsonNode.class);
             log.trace("Health Check Response is - jsonNode:{}", jsonNode);
+            return jsonNode;
+        }
+        return null;
+    }
+    
+    public static JsonNode getAllAgamaRepositories(String url) {
+        log.info("Get Agama Repositories - , url:{} ", url);
+        Builder clientRequest = getClientBuilder(url);
+        clientRequest.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        Response healthResponse = clientRequest.get();
+        if (healthResponse.getStatus() == 200) {
+            JsonNode jsonNode = healthResponse.readEntity(JsonNode.class);
+            log.trace("Agama Repositories response is - jsonNode:{}", jsonNode);
+            return jsonNode;
+        }
+        return null;
+    }
+    
+    public static JsonNode getAgamaProjectLatestRelease(String url) {
+        log.info("Get Agama Project Latest Release - , url:{} ", url);
+        Builder clientRequest = getClientBuilder(url);
+        clientRequest.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        Response healthResponse = clientRequest.get();
+        if (healthResponse.getStatus() == 200) {
+            JsonNode jsonNode = healthResponse.readEntity(JsonNode.class);
+            log.trace("Agama Agama Project Latest Release response is - jsonNode:{}", jsonNode);
             return jsonNode;
         }
         return null;
