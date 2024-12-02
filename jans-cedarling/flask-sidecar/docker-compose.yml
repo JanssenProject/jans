@@ -1,0 +1,12 @@
+services:
+  sidecar:
+    image: flask-sidecar
+    build: ./
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=main.core:app
+      - APP_MODE=${APP_MODE:-development}
+    volumes:
+      - ./agama-lab-api:/api

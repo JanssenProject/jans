@@ -1,8 +1,19 @@
-FROM rust:alpine3.19
+FROM python:3.10.14-alpine3.19 
 
 # ===============
 # Alpine packages
 # ===============
+
+RUN apk update \
+    && apk add --no-cache musl-dev g++ \
+    bash openssl-dev unzip wget git curl 
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup.sh
+RUN chmod 700 rustup.sh
+RUN ./rustup.sh -y
+
+ENV PATH="/root/.cargo/bin:${PATH}"
+RUN cargo --help
 
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
@@ -25,7 +36,7 @@ RUN pip3 install "poetry==$POETRY_VERSION" maturin[patchelf]
 RUN apk add --no-cache \
         git
 # System deps:
-ENV JANS_SOURCE_VERSION=871c36da8a2550ee2febd7c0d72c521898b226c3
+ENV JANS_SOURCE_VERSION=feat-jans-cedarling-sidecar
 
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
@@ -44,7 +55,7 @@ RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject
         && maturin build \
         && cp -r ../../flask-sidecar/* /api \
         && version=$(sed -n 's/.*version = "\(.*\)"/\1/p' pyproject.toml) \
-        && mv ../../target/wheels/cedarling_python-"$version"-cp312-cp312-manylinux_2_34_x86_64.whl /api/cedarling_python.whl \
+        && mv ../target/wheels/cedarling_python-"$version"-cp312-cp312-manylinux_2_34_x86_64.whl /api/cedarling_python.whl \
         && rm -rf /tmp/jans
 
 # Setting up proper permissions:
