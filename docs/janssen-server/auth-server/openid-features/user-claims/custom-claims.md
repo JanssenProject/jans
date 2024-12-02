@@ -18,9 +18,9 @@ Custom claims provide the flexibility to include application-specific or user-sp
 
 #### Step 1: Create a custom attribute
 
-Create a new custom attribute using 
-[Test User Interface](../../../config-guide/config-tools/jans-tui) or 
-[CURL commands](../../../config-guide/config-tools/jans-cli/README.md), 
+Create a new custom attribute using
+[Text User Interface](../../../config-guide/config-tools/jans-tui/README.md) or
+[CURL commands](../../../config-guide/config-tools/jans-cli/README.md),
 superb tools provided in Janssen. The attribute-name should be the claim-name.
 
 ![](../../../../assets/image-tui-add-attribute.png)
@@ -30,30 +30,30 @@ superb tools provided in Janssen. The attribute-name should be the claim-name.
 - Add a column to table `jansPerson` in MySQL. Command will be `ALTER TABLE jansPerson ADD COLUMN <claimName> <dataType>`;
 
 **Example**
+
 ```
 mysql> ALTER TABLE jansPerson ADD COLUMN newClaim VARCHAR(100);
 ```
 
 **Choose dataType according to the following table**
 
-|TUI dataType|SQL dataType|
-|---|---|
-|Text|VARCHAR() string value to be kept, SIZE is an integer for max string size|
-|Numeric|INT|
-|Boolean|SMALLINT|
-|Binary|BINARY|
-|Certificate|TEXT|
-|Date|DATETIME(3)|
-|Numeric|INT|
-|Multivalued|JSON|
+| TUI dataType | SQL dataType                                                              |
+| ------------ | ------------------------------------------------------------------------- |
+| Text         | VARCHAR() string value to be kept, SIZE is an integer for max string size |
+| Numeric      | INT                                                                       |
+| Boolean      | SMALLINT                                                                  |
+| Binary       | BINARY                                                                    |
+| Certificate  | TEXT                                                                      |
+| Date         | DATETIME(3)                                                               |
+| Numeric      | INT                                                                       |
+| Multivalued  | JSON                                                                      |
 
 ![](../../../../assets/image-tui-attribute-datatype.png)
 
-!!!warning 
-    If the attribute is Multivalued, dataType should be JSON regardless of what you will choose for Type in Janssen TUI.
+!!!warning
+If the attribute is Multivalued, dataType should be JSON regardless of what you will choose for Type in Janssen TUI.
 
 The above steps will create the custom user claim in the MySQL persistence.
-
 
 Once the user claim is added, it can be used in user management.
 
