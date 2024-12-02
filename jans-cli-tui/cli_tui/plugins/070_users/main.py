@@ -14,6 +14,7 @@ from prompt_toolkit.eventloop import get_event_loop
 
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from edit_user_dialog import EditUserDialog
+from fido_entries import FidoEntries
 from utils.utils import DialogUtils, get_help_with
 from utils.static import DialogResult
 from utils.multi_lang import _
@@ -39,7 +40,7 @@ class Plugin(DialogUtils):
         self.name = '[U]sers'
         self.users = {}
         self.widgets_ready = False
-        self.jans_help = get_help_with(f'<p>              {_("Change user password")}\n')
+        self.jans_help = get_help_with(f'<p>              {_("Change user password")}\n<f>              {_("User FIDO Devices")}\n')
 
     def process(self) -> None:
         pass
@@ -92,7 +93,8 @@ class Plugin(DialogUtils):
                 headerColor=cli_style.navbar_headcolor,
                 entriesColor=cli_style.navbar_entriescolor,
                 all_data=self.users['entries'],
-                jans_help = "Press p to change password"
+                jans_help = "Press <b>p</b> to change password, <b>f</b> to view fido devices",
+                custom_key_bindings = [('f', self.display_fido_devices)]
             )
 
         self.user_list_container = self.users_list_box
@@ -236,3 +238,7 @@ class Plugin(DialogUtils):
         """
         self.get_users(pattern=tbuffer.text)
 
+    def display_fido_devices(self, event) -> None:
+        selected_user = self.users_list_box.get_selection()
+        fido_entries = FidoEntries(selected_user)
+        fido_entries.get_user_fido_entries()
