@@ -29,9 +29,9 @@ test_cases_err = [
     ("policy-store_schema_err_base64.json",
      "unable to decode cedar policy schema base64"),
     ("policy-store_schema_err.yaml",
-     "Could not load policy: failed to parse the policy store from policy_store yaml: policy_stores.e8c39ee71792766d3b9b12846f0479419051bb5fafff: unable to parse cedar policy schema: error parsing schema: unexpected end of input at line 4 column 5"),
+     "Could not load policy: failed to parse the policy store from policy_store yaml: policy_stores.e8c39ee71792766d3b9b12846f0479419051bb5fafff: unable to parse cedar policy schema: error parsing schema: unexpected end of input at line 8 column 5"),
     ("policy-store_schema_err_cedar_mistake.yaml",
-     "Could not load policy: failed to parse the policy store from policy_store yaml: policy_stores.a1bf93115de86de760ee0bea1d529b521489e5a11747: unable to parse cedar policy schema: failed to resolve type: User_TypeNotExist at line 4 column 5"),
+     "Could not load policy: failed to parse the policy store from policy_store yaml: policy_stores.a1bf93115de86de760ee0bea1d529b521489e5a11747: unable to parse cedar policy schema: failed to resolve type: User_TypeNotExist at line 8 column 5"),
 ]
 
 
