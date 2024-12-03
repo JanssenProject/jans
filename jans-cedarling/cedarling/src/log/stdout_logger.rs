@@ -6,7 +6,6 @@
  */
 
 use super::interface::LogWriter;
-use super::LogEntry;
 use std::{
     io::Write,
     sync::{Arc, Mutex},
@@ -37,7 +36,7 @@ impl StdOutLogger {
 
 // Implementation of LogWriter
 impl LogWriter for StdOutLogger {
-    fn log(&self, entry: LogEntry) {
+    fn log_any<T: serde::Serialize>(&self, entry: T) {
         let json_str = serde_json::json!(&entry).to_string();
         // we can't handle error here or test it so we just panic if it happens.
         // we should have specific platform to get error
@@ -86,13 +85,10 @@ impl Write for TestWriter {
 
 #[cfg(test)]
 mod tests {
-    use super::super::LogType;
+    use super::super::{LogEntry, LogType};
 
     use super::*;
-    use std::{
-        io::Write,
-        time::{SystemTime, UNIX_EPOCH},
-    };
+    use std::io::Write;
 
     use uuid7::uuid7;
 
@@ -101,10 +97,7 @@ mod tests {
         // Create a log entry
         let log_entry = LogEntry {
             request_id: uuid7(),
-            time: SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .expect("Time went backwards")
-                .as_secs(),
+            timestamp: None,
             log_type: LogType::Decision,
             pdp_id: uuid7(),
             application_id: Some("test_app".to_string().into()),

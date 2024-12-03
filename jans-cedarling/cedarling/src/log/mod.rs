@@ -70,7 +70,7 @@ pub use interface::LogStorage;
 pub(crate) use log_strategy::LogStrategy;
 
 /// Type alias for logger that is used in application
-pub(crate) type Logger = Arc<dyn interface::Log>;
+pub(crate) type Logger = Arc<LogStrategy>;
 
 /// Initialize logger.
 /// entry point for initialize logger

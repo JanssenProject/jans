@@ -35,6 +35,7 @@ use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::ServiceFactory;
 
 use common::app_types;
+use log::interface::LogWriter;
 use log::LogEntry;
 pub use log::LogStorage;
 use log::LogType;

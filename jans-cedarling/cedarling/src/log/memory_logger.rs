@@ -5,7 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::interface::{LogStorage, LogWriter};
+use super::interface::{LogStorage, LogWriter, Loggable};
 use super::LogEntry;
 use crate::bootstrap_config::log_config::MemoryLogConfig;
 use sparkv::{Config as ConfigSparKV, SparKV};
@@ -35,19 +35,19 @@ impl MemoryLogger {
 
 // Implementation of LogWriter
 impl LogWriter for MemoryLogger {
-    fn log(&self, entry: LogEntry) {
+    fn log_any<T: Loggable>(&self, entry: T) {
         let json_string = serde_json::json!(entry).to_string();
 
         let result = self
             .storage
             .lock()
             .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
-            .set(entry.request_id.to_string().as_str(), &json_string);
+            .set(entry.request_id().to_string().as_str(), &json_string);
 
         if let Err(err) = result {
             // log error to stderr
             eprintln!("could not store LogEntry to memory: {err:?}");
-        };
+        }; 
     }
 }
 

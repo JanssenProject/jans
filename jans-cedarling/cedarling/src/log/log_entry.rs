@@ -12,7 +12,6 @@ use std::collections::HashSet;
 use std::fmt::Display;
 
 use std::hash::Hash;
-use std::time::{SystemTime, UNIX_EPOCH};
 
 use uuid7::uuid7;
 use uuid7::Uuid;
@@ -20,17 +19,26 @@ use uuid7::Uuid;
 use crate::common::app_types::{self, ApplicationName};
 use crate::common::policy_store::PoliciesContainer;
 
+use super::interface::Loggable;
+
+/// ISO-8601 time format for [`chrono`]
+/// example: 2024-11-27T10:10:50.654Z
+const ISO8601: &str = "%Y-%m-%dT%H:%M:%S%.3fZ";
+
 /// LogEntry is a struct that encapsulates all relevant data for logging events.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct LogEntry {
     /// unique identifier for this event
     pub request_id: Uuid,
-    /// Time of decision, in unix time
-    pub time: u64,
+    /// Time of decision, in ISO-8601 time format
+    /// This field is optional. Can be none if we can't have access to clock (WASM)
+    /// or it is not specified in context
+    pub timestamp: Option<String>,
     /// kind of log entry
     pub log_type: LogType,
     /// unique id of cedarling
     pub pdp_id: Uuid,
+
     /// message of the event
     pub msg: String,
     /// name of application from [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
@@ -56,17 +64,14 @@ impl LogEntry {
         application_id: Option<app_types::ApplicationName>,
         log_kind: LogType,
     ) -> LogEntry {
-        let unix_time_sec = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("Time went backwards")
-            .as_secs();
+        let local_time_string = chrono::Local::now().format(ISO8601).to_string();
 
         Self {
             // We use uuid v7 because it is generated based on the time and sortable.
             // and we need sortable ids to use it in the sparkv database.
             // Sparkv store data in BTree. So we need have correct order of ids.
             request_id: uuid7(),
-            time: unix_time_sec,
+            timestamp: Some(local_time_string),
             log_type: log_kind,
             pdp_id: pdp_id.0,
             application_id,
@@ -97,6 +102,12 @@ impl LogEntry {
         self.cedar_lang_version = Some(cedar_policy::get_lang_version());
         self.cedar_sdk_version = Some(cedar_policy::get_sdk_version());
         self
+    }
+}
+
+impl Loggable for LogEntry {
+    fn request_id(&self) -> Uuid {
+        self.request_id
     }
 }
 

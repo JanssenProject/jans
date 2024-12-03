@@ -26,6 +26,7 @@ derive_more = { version = "1.0.0", features = [
     "error",
 ] }
 regex = "1.11.1"
+chrono = "0.4.38"
 
 [dev-dependencies]
 # is used in testing

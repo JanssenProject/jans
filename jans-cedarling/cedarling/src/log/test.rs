@@ -27,7 +27,7 @@ fn test_new_log_strategy_off() {
     let strategy = LogStrategy::new(&config);
 
     // Assert
-    assert!(matches!(strategy, LogStrategy::OnlyWriter(_)));
+    assert!(matches!(strategy, LogStrategy::Off(_)));
 }
 
 #[test]
@@ -55,7 +55,7 @@ fn test_new_logstrategy_stdout() {
     let strategy = LogStrategy::new(&config);
 
     // Assert
-    assert!(matches!(strategy, LogStrategy::OnlyWriter(_)));
+    assert!(matches!(strategy, LogStrategy::StdOut(_)));
 }
 
 #[test]
@@ -67,10 +67,7 @@ fn test_log_memory_logger() {
     let strategy = LogStrategy::new(&config);
     let entry = LogEntry {
         request_id: uuid7(),
-        time: SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("Time went backwards")
-            .as_secs(),
+        timestamp: None,
         log_type: LogType::Decision,
         pdp_id: uuid7(),
         application_id: Some("test_app".to_string().into()),
@@ -150,10 +147,7 @@ fn test_log_stdout_logger() {
     // Arrange
     let log_entry = LogEntry {
         request_id: uuid7(),
-        time: SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("Time went backwards")
-            .as_secs(),
+        timestamp: None,
         log_type: LogType::Decision,
         pdp_id: uuid7(),
         application_id: Some("test_app".to_string().into()),
@@ -169,7 +163,7 @@ fn test_log_stdout_logger() {
     let test_writer = TestWriter::new();
     let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
     let logger = StdOutLogger::new_with(buffer);
-    let strategy = LogStrategy::OnlyWriter(Box::new(logger));
+    let strategy = LogStrategy::StdOut(logger);
 
     // Act
     strategy.log(log_entry);
@@ -181,7 +175,7 @@ fn test_log_stdout_logger() {
 
 #[test]
 fn test_log_storage_for_only_writer() {
-    let strategy = LogStrategy::OnlyWriter(Box::new(NopLogger));
+    let strategy = LogStrategy::Off(NopLogger);
 
     // make same test as for the memory logger
     // create log entries

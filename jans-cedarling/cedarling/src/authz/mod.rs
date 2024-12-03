@@ -17,6 +17,7 @@ use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types;
 use crate::common::policy_store::PolicyStore;
 use crate::jwt;
+use crate::log::interface::LogWriter;
 use crate::log::{
     AuthorizationLogInfo, Diagnostics, LogEntry, LogType, Logger, PersonAuthorizeInfo,
     WorkloadAuthorizeInfo,
