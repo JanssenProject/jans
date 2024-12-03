@@ -1,3 +1,7 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
 cedar_version: "4.0.0"
 policy_stores:
   873e650f3739e4800b48d7d6752f93619eee2bc7dad6:
