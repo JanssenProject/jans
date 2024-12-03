@@ -54,7 +54,7 @@ Example
 ```python
 from cedarling import BootstrapConfig
 # Example configuration
-bootstrap_config = NewBootstrapConfig({
+bootstrap_config = BootstrapConfig({
     "application_name": "MyApp",
     "policy_store_uri": None,
     "policy_store_id": "policy123",
