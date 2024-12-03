@@ -41,7 +41,6 @@ impl HttpGet for BlockingHttpClient {
     ///
     /// This method will attempt to fetch the resource up to 3 times, with an increasing delay
     /// between each attempt.
-    #[cfg(not(target_arch = "wasm32"))]
     fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
         // Fetch the JWKS from the jwks_uri
         let mut attempts = 0;

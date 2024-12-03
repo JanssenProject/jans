@@ -5,9 +5,9 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(target_family = "wasm"))]
 mod blocking;
-#[cfg(target_arch = "wasm32")]
+#[cfg(target_family = "wasm")]
 mod wasm;
 
 use serde::Deserialize;
@@ -24,9 +24,9 @@ pub struct HttpClient {
 
 impl HttpClient {
     pub fn new(max_retries: u32, retry_delay: Duration) -> Result<Self, HttpClientError> {
-        #[cfg(not(target_arch = "wasm32"))]
+        #[cfg(not(target_family = "wasm"))]
         let client = blocking::BlockingHttpClient::new(max_retries, retry_delay)?;
-        #[cfg(target_arch = "wasm32")]
+        #[cfg(target_family = "wasm")]
         let client = wasm::WasmHttpClient::new(max_retries, retry_delay)?;
 
         Ok(Self {
