@@ -2,7 +2,7 @@ import marshmallow as ma
 from marshmallow import EXCLUDE, RAISE, ValidationError, validate, validates_schema
 
 class BaseSchema(ma.Schema):
-    class Meta:
+    class Meta(ma.Schema.Meta):
         unknown = EXCLUDE 
         ordered = False
 
