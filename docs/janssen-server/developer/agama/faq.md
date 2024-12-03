@@ -99,7 +99,7 @@ More advanced bean lookup capabilities are provided by method `instance` of [thi
 
 ### How to implement localization?
 
-This topic is covered [here](./advanced-usages.md#localization).
+This topic is covered [here](./advanced-usages.md#localization-and-internationalization).
 
 ### How to modify the built-in error pages?
 
@@ -177,6 +177,20 @@ See the examples in the Looping section of the [language reference](../../../aga
 ### How to know the number of iterations carried out by a loop once it has finished?
 
 You can assign this value to a variable at the top of your loop declaration. See the examples in the Looping section of the [language reference](../../../agama/language-reference.md#looping).
+
+### How to access localization labels from Java code?
+
+In Freemarker, [localization](./advanced-usages.md#localization-and-internationalization) labels are accessed using the `${labels(key, ...)}` notation. The following would be a Java equivalent:
+
+```
+import io.jans.agama.engine.service.LabelsService;
+...
+
+lbls = io.jans.service.cdi.util.CdiUtil.bean(LabelsService.class);
+String label = lbls.get("<label key>", ... optional extra params);
+```
+
+Note the localization context (language, country, etc.) used in such a call is based on the HTTP request that is taking place when the code is invoked.
 
 ### Can Agama code be called from Java?
 
