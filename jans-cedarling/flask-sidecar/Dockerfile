@@ -1,4 +1,4 @@
-FROM python:3.10.14-alpine3.19 
+FROM python:3.10.14-alpine3.19
 
 # ===============
 # Alpine packages
@@ -6,15 +6,18 @@ FROM python:3.10.14-alpine3.19
 
 RUN apk update \
     && apk add --no-cache musl-dev g++ \
-    bash openssl-dev unzip wget git curl 
+    bash openssl-dev unzip wget git curl
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup.sh
-RUN chmod 700 rustup.sh
-RUN ./rustup.sh -y
+# ===============
+# Install Rust
+# ===============
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup.sh \
+    && chmod 700 rustup.sh \
+    && ./rustup.sh -y
 
-ENV PATH="/root/.cargo/bin:${PATH}"
-RUN cargo --help
-
+# ========================
+# Install Python3 & Poetry
+# ========================
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
   PYTHONHASHSEED=random \
@@ -26,16 +29,19 @@ ENV PYTHONFAULTHANDLER=1 \
   POETRY_NO_INTERACTION=1 \
   POETRY_VIRTUALENVS_CREATE=false \
   POETRY_CACHE_DIR='/var/cache/pypoetry' \
-  PATH="$PATH:/root/.poetry/bin"
+  PATH="$PATH:/root/.poetry/bin:/root/.cargo/bin"
 
+RUN apk add --update --no-cache python3 \
+    && ln -sf python3 /usr/bin/python \
+    && mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MANAGED.disabled \
+    && python3 -m ensurepip
 
-RUN apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
-RUN mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MANAGED.disabled
-RUN python3 -m ensurepip
-RUN pip3 install "poetry==$POETRY_VERSION" maturin[patchelf]
-RUN apk add --no-cache \
-        git
-# System deps:
+RUN pip3 install "poetry==$POETRY_VERSION" maturin[patchelf] gunicorn \
+    && rm -rf /var/cache/apk/* /root/.cache /root/.cargo/registry/index
+
+# ===============
+# Project setup
+# ===============
 ENV JANS_SOURCE_VERSION=feat-jans-cedarling-sidecar
 
 COPY docker-entrypoint.sh /
@@ -56,20 +62,18 @@ RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject
         && cp -r ../../flask-sidecar/* /api \
         && version=$(sed -n 's/.*version = "\(.*\)"/\1/p' pyproject.toml) \
         && echo "$version" > /api/cedarling_version \
-        && mv ../../target/wheels/cedarling_python-"$version"-cp310-cp310-musllinux_1_2_x86_64.whl /api/ \
+        && mv ../../target/wheels/cedarling_python-"${version}"-cp310-cp310-musllinux_1_2_x86_64.whl /api/ \
         && rm -rf /tmp/jans
 
 # Setting up proper permissions:
-RUN chown -R 1000:1000 /api
+RUN chmod -R g=u /api \
+    && chown -R 1000:1000 /api
 
 # Project initialization:
 RUN poetry add /api/cedarling_python-$(cat /api/cedarling_version)-cp310-cp310-musllinux_1_2_x86_64.whl \
     && poetry install --no-dev --no-root --no-interaction --no-ansi \
     # Cleaning poetry installation's cache for production:
     && rm -rf "$POETRY_CACHE_DIR"
-
-
-
 
 ENV FLASK_APP=main.core:app \
     GUNICORN_LOG_LEVEL=${GUNICORN_LOG_LEVEL:-debug} \
@@ -90,7 +94,6 @@ USER 1000
 ENV HOME=/home/web
 
 ENV APP_MODE=${APP_MODE:-production}
-
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
