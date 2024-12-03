@@ -5262,6 +5262,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#how-to-access-localization-labels-from-java-code" class="md-nav__link">
+    How to access localization labels from Java code?
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#can-agama-code-be-called-from-java" class="md-nav__link">
     Can Agama code be called from Java?
   </a>
@@ -8992,6 +8999,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#how-to-access-localization-labels-from-java-code" class="md-nav__link">
+    How to access localization labels from Java code?
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#can-agama-code-be-called-from-java" class="md-nav__link">
     Can Agama code be called from Java?
   </a>
@@ -9107,7 +9121,7 @@ ref = CdiUtil.bean(managedBean.class);
 <p>More advanced bean lookup capabilities are provided by method <code>instance</code> of <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/engine/service/ManagedBeanService.java">this</a> class where you can supply qualifiers.</p>
 <h2 id="templates">Templates<a class="headerlink" href="#templates" title="Permanent link">#</a></h2>
 <h3 id="how-to-implement-localization">How to implement localization?<a class="headerlink" href="#how-to-implement-localization" title="Permanent link">#</a></h3>
-<p>This topic is covered <a href="../advanced-usages/#localization">here</a>.</p>
+<p>This topic is covered <a href="../advanced-usages/#localization-and-internationalization">here</a>.</p>
 <h3 id="how-to-modify-the-built-in-error-pages">How to modify the built-in error pages?<a class="headerlink" href="#how-to-modify-the-built-in-error-pages" title="Permanent link">#</a></h3>
 <p>Agama features some error pages out-of-the-box. They can be customized by editing the corresponding files referenced in the <a href="../engine-bridge-config/#engine-configuration">configuration</a> doc page.  </p>
 <h3 id="is-javascript-supported">Is Javascript supported?<a class="headerlink" href="#is-javascript-supported" title="Permanent link">#</a></h3>
@@ -9147,6 +9161,15 @@ Call java.lang.String#join &quot;&quot; strings
 <p>See the examples in the Looping section of the <a href="../../../../agama/language-reference/#looping">language reference</a>.</p>
 <h3 id="how-to-know-the-number-of-iterations-carried-out-by-a-loop-once-it-has-finished">How to know the number of iterations carried out by a loop once it has finished?<a class="headerlink" href="#how-to-know-the-number-of-iterations-carried-out-by-a-loop-once-it-has-finished" title="Permanent link">#</a></h3>
 <p>You can assign this value to a variable at the top of your loop declaration. See the examples in the Looping section of the <a href="../../../../agama/language-reference/#looping">language reference</a>.</p>
+<h3 id="how-to-access-localization-labels-from-java-code">How to access localization labels from Java code?<a class="headerlink" href="#how-to-access-localization-labels-from-java-code" title="Permanent link">#</a></h3>
+<p>In Freemarker, <a href="../advanced-usages/#localization-and-internationalization">localization</a> labels are accessed using the <code>${labels(key, ...)}</code> notation. The following would be a Java equivalent:</p>
+<div class="highlight"><pre><span></span><code>import io.jans.agama.engine.service.LabelsService;
+...
+
+lbls = io.jans.service.cdi.util.CdiUtil.bean(LabelsService.class);
+String label = lbls.get(&quot;&lt;label key&gt;&quot;, ... optional extra params);
+</code></pre></div>
+<p>Note the localization context (language, country, etc.) used in such a call is based on the HTTP request that is taking place when the code is invoked.</p>
 <h3 id="can-agama-code-be-called-from-java">Can Agama code be called from Java?<a class="headerlink" href="#can-agama-code-be-called-from-java" title="Permanent link">#</a></h3>
 <p>No. These two languages are supposed to play roles that should not be mixed, check <a href="../agama-best-practices/#about-flow-design">here</a>.</p>
 
@@ -9155,7 +9178,7 @@ Call java.lang.String#join &quot;&quot; strings
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-03T10:12:46+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-03</span>
       
         <br>
         Created:
