@@ -53,6 +53,28 @@ When you are testing Janssen IdP with self-signed cert then follow below steps b
 
 ![self-signed cert risk](./docs/images/untrusted_cert_risk.png)
 
+## Testing using Jans Tarp
+
+* Setup Jans-Tarp. [Instructions](https://github.com/JanssenProject/jans/tree/main/demos/jans-tarp)
+* Configuration to run Agama flow
+* Add Your Jans Auth server host , Client expiry date, Scopes and click on `Register` client. It will register new OP Client on your Auth server.
+
+![image](./docs/images/tarp-client-reg.png)
+
+* Add `Acr values` and `Scopes ` click on Trigger Auth Code flow.
+
+![image](./docs/images/authentication-flow-input.png)
+
+* It will trigger agama flow and show login screen to you. You can use TUI to add testing user.
+
+![image](./docs/images/agamapw-login.png)
+
+* After successful auth, it will show you below screen
+
+![image](./docs/images/successful-tarp-auth-screen.png)
+
+
+
 ## Testing with Keycloak (installed on localhost)
 
 1. Login to KC admin console
