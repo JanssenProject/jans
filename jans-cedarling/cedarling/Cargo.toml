@@ -15,7 +15,7 @@ base64 = "0.22.1"
 url = "2.5.2"
 lazy_static = "1.5.0"
 jsonwebtoken = "9.3.0"
-reqwest = { version = "0.12.8", optional = true, features = ["blocking", "json"] }
+reqwest = { version = "0.12.8", features = ["blocking", "json"] }
 bytes = "1.7.2"
 typed-builder = "0.20.0"
 semver = { version = "1.0.23", features = ["serde"] }
