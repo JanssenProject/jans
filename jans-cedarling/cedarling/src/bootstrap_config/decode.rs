@@ -10,7 +10,6 @@ use super::{
     LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
     TokenValidationConfig,
 };
-use crate::common::policy_store::PolicyStore;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
 use std::{collections::HashSet, path::Path, str::FromStr};
@@ -72,7 +71,7 @@ pub struct BootstrapConfigRaw {
 
     /// JSON object with policy store
     #[serde(rename = "CEDARLING_LOCAL_POLICY_STORE", default)]
-    pub local_policy_store: Option<PolicyStore>,
+    pub local_policy_store: Option<String>,
 
     /// Path to a Policy Store JSON file
     #[serde(
@@ -408,19 +407,22 @@ impl BootstrapConfig {
 
         // Decode policy store
         let policy_store_config = match (
+            raw.local_policy_store.clone(),
             raw.policy_store_uri.clone(),
             raw.policy_store_local_fn.clone(),
         ) {
             // Case: no policy store provided
-            (None, None) => Err(BootstrapDecodingError::MissingPolicyStore)?,
-
+            (None, None, None) => Err(BootstrapDecodingError::MissingPolicyStore)?,
+            // Case: get the policy store from a JSON string
+            (Some(policy_store), None, None) => PolicyStoreConfig {
+                source: PolicyStoreSource::Json(policy_store),
+            },
             // Case: get the policy store from the lock master
-            (Some(policy_store_uri), None) => PolicyStoreConfig {
+            (None, Some(policy_store_uri), None) => PolicyStoreConfig {
                 source: PolicyStoreSource::LockMaster(policy_store_uri),
             },
-
             // Case: get the policy store from a local JSON file
-            (None, Some(raw_path)) => {
+            (None, None, Some(raw_path)) => {
                 let path = Path::new(&raw_path);
                 let file_ext = Path::new(&path)
                     .extension()
@@ -436,9 +438,8 @@ impl BootstrapConfig {
                 };
                 PolicyStoreConfig { source }
             },
-
             // Case: multiple polict stores were set
-            (Some(_), Some(_)) => Err(BootstrapDecodingError::ConflictingPolicyStores)?,
+            _ => Err(BootstrapDecodingError::ConflictingPolicyStores)?,
         };
 
         // JWT Config

@@ -434,18 +434,7 @@ impl TryFrom<BootstrapConfig> for cedarling::BootstrapConfig {
                     ))
                 })?,
             local_jwks: value.local_jwks,
-            local_policy_store: if let Some(policy_store_str) = value.local_policy_store {
-                let store: PolicyStore =
-                    serde_json::from_str(policy_store_str.as_str()).map_err(|err| {
-                        PyValueError::new_err(format!(
-                            "could not parse field local_policy_store as json to PolicyStore, {err}"
-                        ))
-                    })?;
-
-                Some(store)
-            } else {
-                None
-            },
+            local_policy_store: value.local_policy_store,
             policy_store_local_fn: value.policy_store_local_fn,
             jwt_sig_validation: value
                 .jwt_sig_validation
