@@ -48,6 +48,7 @@ public class SignatureVerifier {
             signatureChecker.initVerify(publicKey);
             signatureChecker.update(signatureBase);
             if (!signatureChecker.verify(signature)) {
+            	log.error("Unable to verify signature");
                 throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Unable to verify signature");
             }
         } catch (IllegalArgumentException | InvalidKeyException | SignatureException e) {
@@ -58,6 +59,7 @@ public class SignatureVerifier {
 
     public Signature getSignatureChecker(int signatureAlgorithm) {
         Provider provider = SecurityProviderUtility.getBCProvider();
+        log.debug("Signature checker : "+ signatureAlgorithm );
 
         // https://www.iana.org/assignments/cose/cose.xhtml#algorithms
         try {
