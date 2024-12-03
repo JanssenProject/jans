@@ -85,21 +85,18 @@ impl Write for TestWriter {
 
 #[cfg(test)]
 mod tests {
+    use crate::common::app_types::PdpID;
+
     use super::super::{LogEntry, LogType};
 
     use super::*;
     use std::io::Write;
 
-    use uuid7::uuid7;
-
     #[test]
     fn write_log_ok() {
         // Create a log entry
         let log_entry = LogEntry {
-            request_id: uuid7(),
-            timestamp: None,
-            log_type: LogType::Decision,
-            pdp_id: uuid7(),
+            base: crate::log::BaseLogEntry::new(PdpID::new(), LogType::Decision),
             application_id: Some("test_app".to_string().into()),
             auth_info: None,
             msg: "Test message".to_string(),

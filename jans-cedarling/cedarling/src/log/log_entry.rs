@@ -8,6 +8,7 @@
 //! # Log entry
 //! The module contains structs for logging events.
 
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fmt::Display;
 
@@ -28,16 +29,10 @@ const ISO8601: &str = "%Y-%m-%dT%H:%M:%S%.3fZ";
 /// LogEntry is a struct that encapsulates all relevant data for logging events.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct LogEntry {
-    /// unique identifier for this event
-    pub request_id: Uuid,
-    /// Time of decision, in ISO-8601 time format
-    /// This field is optional. Can be none if we can't have access to clock (WASM)
-    /// or it is not specified in context
-    pub timestamp: Option<String>,
-    /// kind of log entry
-    pub log_type: LogType,
-    /// unique id of cedarling
-    pub pdp_id: Uuid,
+    /// base information of entry
+    /// it is unwrap to flatten structure
+    #[serde(flatten)]
+    pub base: BaseLogEntry,
 
     /// message of the event
     pub msg: String,
@@ -62,18 +57,13 @@ impl LogEntry {
     pub(crate) fn new_with_data(
         pdp_id: app_types::PdpID,
         application_id: Option<app_types::ApplicationName>,
-        log_kind: LogType,
+        log_type: LogType,
     ) -> LogEntry {
-        let local_time_string = chrono::Local::now().format(ISO8601).to_string();
-
         Self {
+            base: BaseLogEntry::new(pdp_id, log_type),
             // We use uuid v7 because it is generated based on the time and sortable.
             // and we need sortable ids to use it in the sparkv database.
             // Sparkv store data in BTree. So we need have correct order of ids.
-            request_id: uuid7(),
-            timestamp: Some(local_time_string),
-            log_type: log_kind,
-            pdp_id: pdp_id.0,
             application_id,
             auth_info: None,
             msg: String::new(),
@@ -106,8 +96,8 @@ impl LogEntry {
 }
 
 impl Loggable for LogEntry {
-    fn request_id(&self) -> Uuid {
-        self.request_id
+    fn get_request_id(&self) -> Uuid {
+        self.base.get_request_id()
     }
 }
 
@@ -263,4 +253,122 @@ impl Diagnostics {
 
         Self { reason, errors }
     }
+}
+
+/// log entry for decision
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+struct DecisionLogEntry {
+    /// base information of entry
+    /// it is unwrap to flatten structure
+    #[serde(flatten)]
+    pub base: BaseLogEntry,
+
+    /// unique identifier for this event
+    pub request_id: Uuid,
+    /// Time of decision, in ISO-8601 time format
+    /// This field is optional. Can be none if we can't have access to clock (WASM)
+    /// or it is not specified in context
+    pub timestamp: Option<String>,
+    /// unique id of cedarling
+    pub pdp_id: Uuid,
+    /// id of policy store
+    pub policystore_id: String,
+    /// version of policy store
+    pub policystore_version: String,
+    /// describe what principal was active on authorization request
+    pub principal: PrincipalLogEntry,
+    /// A list of claims, specified by the CEDARLING_DECISION_LOG_USER_CLAIMS property, that must be present in the Cedar User entity
+    #[serde(rename = "User")]
+    pub user: HashMap<String, serde_json::Value>,
+    /// A list of claims, specified by the CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS property, that must be present in the Cedar Workload entity
+    #[serde(rename = "Workload")]
+    pub workload: HashMap<String, serde_json::Value>,
+    /// If this Cedarling has registered with a Lock Server, what is the client_id it received
+    pub lock_client_id: String,
+    /// action UID for request
+    pub action: String,
+    /// resource UID for request
+    pub resource: String,
+    /// decision for request
+    pub decision: Decision,
+    /// Dictionary with the token type and claims which should be included in the log
+    pub tokens: TokensInfo,
+    /// time in milliseconds spent for decision
+    pub decision_time_ms: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct BaseLogEntry {
+    /// unique identifier for this event
+    pub request_id: Uuid,
+    /// Time of decision, in ISO-8601 time format
+    /// This field is optional. Can be none if we can't have access to clock (WASM)
+    /// or it is not specified in context
+    pub timestamp: Option<String>,
+    /// kind of log entry
+    pub log_type: LogType,
+    /// unique id of cedarling
+    pub pdp_id: Uuid,
+}
+
+impl BaseLogEntry {
+    pub(crate) fn new(pdp_id: app_types::PdpID, log_type: LogType) -> Self {
+        let local_time_string = chrono::Local::now().format(ISO8601).to_string();
+
+        Self {
+            // We use uuid v7 because it is generated based on the time and sortable.
+            // and we need sortable ids to use it in the sparkv database.
+            // Sparkv store data in BTree. So we need have correct order of ids.
+            request_id: uuid7(),
+            timestamp: Some(local_time_string),
+            log_type,
+            pdp_id: pdp_id.0,
+        }
+    }
+}
+
+impl Loggable for BaseLogEntry {
+    fn get_request_id(&self) -> Uuid {
+        self.request_id
+    }
+}
+
+/// Describes what principal is was executed
+//
+// is used only for logging
+#[derive(Debug, Clone, PartialEq)]
+pub enum PrincipalLogEntry {
+    User,
+    Workload,
+    UserAndWorkload,
+}
+
+impl Display for PrincipalLogEntry {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str_val = match self {
+            PrincipalLogEntry::User => "User",
+            PrincipalLogEntry::Workload => "Workload",
+            PrincipalLogEntry::UserAndWorkload => "User and Workload",
+        };
+
+        f.write_str(str_val)
+    }
+}
+
+// implement Serialize for PrincipalLogEntry to use Display trait
+impl serde::Serialize for PrincipalLogEntry {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(self.to_string().as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+pub struct TokensInfo {
+    id_token: HashMap<String, serde_json::Value>,
+    #[serde(rename = "Userinfo")]
+    userinfo: HashMap<String, serde_json::Value>,
+    access: HashMap<String, serde_json::Value>,
 }

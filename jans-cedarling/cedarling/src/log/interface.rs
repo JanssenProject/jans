@@ -24,7 +24,7 @@ pub(crate) trait LogWriter {
 }
 
 pub(crate) trait Loggable: serde::Serialize {
-    fn request_id(&self) -> Uuid;
+    fn get_request_id(&self) -> Uuid;
 }
 
 /// Log Storage

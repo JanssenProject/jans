@@ -2,17 +2,13 @@
 //! Contains unit tests for the main code flow with the `LogStrategy``
 //! `LogStrategy` wraps all other logger implementations.
 
-use std::{
-    io::Write,
-    time::{SystemTime, UNIX_EPOCH},
-};
+use std::io::Write;
 
 use super::*;
 use crate::{common::app_types, log::stdout_logger::TestWriter};
-use interface::LogWriter;
+use interface::{LogWriter, Loggable};
 use nop_logger::NopLogger;
 use stdout_logger::StdOutLogger;
-use uuid7::uuid7;
 
 use crate::bootstrap_config::log_config;
 
@@ -66,10 +62,7 @@ fn test_log_memory_logger() {
     };
     let strategy = LogStrategy::new(&config);
     let entry = LogEntry {
-        request_id: uuid7(),
-        timestamp: None,
-        log_type: LogType::Decision,
-        pdp_id: uuid7(),
+        base: BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision),
         application_id: Some("test_app".to_string().into()),
         auth_info: None,
         msg: "Test message".to_string(),
@@ -116,14 +109,14 @@ fn test_log_memory_logger() {
     assert_eq!(strategy.get_log_ids().len(), 2);
     assert_eq!(
         strategy
-            .get_log_by_id(&entry1.request_id.to_string())
+            .get_log_by_id(&entry1.get_request_id().to_string())
             .unwrap(),
         entry1,
         "Failed to get log entry by id"
     );
     assert_eq!(
         strategy
-            .get_log_by_id(&entry2.request_id.to_string())
+            .get_log_by_id(&entry2.get_request_id().to_string())
             .unwrap(),
         entry2,
         "Failed to get log entry by id"
@@ -146,10 +139,7 @@ fn test_log_memory_logger() {
 fn test_log_stdout_logger() {
     // Arrange
     let log_entry = LogEntry {
-        request_id: uuid7(),
-        timestamp: None,
-        log_type: LogType::Decision,
-        pdp_id: uuid7(),
+        base: BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision),
         application_id: Some("test_app".to_string().into()),
         auth_info: None,
         msg: "Test message".to_string(),
@@ -201,13 +191,13 @@ fn test_log_storage_for_only_writer() {
     assert_eq!(strategy.get_log_ids().len(), 0);
     assert!(
         strategy
-            .get_log_by_id(&entry1.request_id.to_string())
+            .get_log_by_id(&entry1.get_request_id().to_string())
             .is_none(),
         "We should not have entry1 entry in the memory logger"
     );
     assert!(
         strategy
-            .get_log_by_id(&entry2.request_id.to_string())
+            .get_log_by_id(&entry2.get_request_id().to_string())
             .is_none(),
         "We should not have entry2 entry in the memory logger"
     );

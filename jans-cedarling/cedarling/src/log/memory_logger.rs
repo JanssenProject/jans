@@ -42,12 +42,12 @@ impl LogWriter for MemoryLogger {
             .storage
             .lock()
             .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
-            .set(entry.request_id().to_string().as_str(), &json_string);
+            .set(entry.get_request_id().to_string().as_str(), &json_string);
 
         if let Err(err) = result {
             // log error to stderr
             eprintln!("could not store LogEntry to memory: {err:?}");
-        }; 
+        };
     }
 }
 
@@ -129,14 +129,14 @@ mod tests {
         assert_eq!(logger.get_log_ids().len(), 2);
         assert_eq!(
             logger
-                .get_log_by_id(&entry1.request_id.to_string())
+                .get_log_by_id(&entry1.get_request_id().to_string())
                 .unwrap(),
             entry1,
             "Failed to get log entry by id"
         );
         assert_eq!(
             logger
-                .get_log_by_id(&entry2.request_id.to_string())
+                .get_log_by_id(&entry2.get_request_id().to_string())
                 .unwrap(),
             entry2,
             "Failed to get log entry by id"
