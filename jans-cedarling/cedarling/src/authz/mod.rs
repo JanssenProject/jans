@@ -30,7 +30,7 @@ mod token_data;
 pub use authorize_result::AuthorizeResult;
 use cedar_policy::{Entities, Entity, EntityUid, Response};
 use entities::CedarPolicyCreateTypeError;
-use entities::DecodeTokensResult;
+use entities::ProcessTokensResult;
 use entities::ResourceEntityError;
 use entities::{
     create_access_token_entities, create_id_token_entity, create_role_entities, create_user_entity,
@@ -53,7 +53,6 @@ pub(crate) struct AuthzConfig {
 /// Authorization Service
 /// The primary service of the Cedarling application responsible for evaluating authorization requests.
 /// It leverages other services as needed to complete its evaluations.
-#[allow(dead_code)]
 pub struct Authz {
     config: AuthzConfig,
     authorizer: cedar_policy::Authorizer,
@@ -211,13 +210,13 @@ impl Authz {
         let policy_store = &self.config.policy_store;
 
         // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
-        let decode_result: DecodeTokensResult = self
+        let decode_result: ProcessTokensResult = self
             .config
             .jwt_service
-            .decode_tokens::<AccessTokenData, IdTokenData, UserInfoTokenData>(
+            .process_tokens::<AccessTokenData, IdTokenData, UserInfoTokenData>(
                 &request.access_token,
                 &request.id_token,
-                &request.userinfo_token,
+                Some(&request.userinfo_token),
             )?;
 
         let trusted_issuer = decode_result.trusted_issuer.unwrap_or_default();
@@ -314,10 +313,18 @@ impl AuthorizeEntitiesData {
 
 /// Error type for Authorization Service
 #[derive(thiserror::Error, Debug)]
-pub enum AuthorizeError {
-    /// Error encountered while decoding JWT token data
+pub enum AuthzInitError {
+    /// Error encountered while Initializing [`JwtService`]
     #[error(transparent)]
-    DecodeTokens(#[from] jwt::JwtServiceError),
+    JwtService(#[from] jwt::JwtServiceInitError),
+}
+
+/// Error type for Authorization Service
+#[derive(thiserror::Error, Debug)]
+pub enum AuthorizeError {
+    /// Error encountered while processing JWT token data
+    #[error(transparent)]
+    ProcessTokens(#[from] jwt::JwtProcessingError),
     /// Error encountered while creating access token entities
     #[error("{0}")]
     AccessTokenEntities(#[from] AccessTokenEntitiesError),
