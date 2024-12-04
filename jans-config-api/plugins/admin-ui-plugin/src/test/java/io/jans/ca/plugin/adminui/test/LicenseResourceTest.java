@@ -30,12 +30,12 @@ public class LicenseResourceTest extends AdminUIBaseTest {
     /**
      * Test License Details
      */
-    @Parameters({ "test.issuer", "licenseDetailsURL" })
-   // @Test
-    public void getLicenseDetails(final String issuer, final String licenseDetailsURL) {
-        log.error("getLicenseDetails() - accessToken:{}, issuer:{}, licenseDetailsURL:{}", accessToken, issuer,
-                licenseDetailsURL);
-        Builder request = getResteasyService().getClientBuilder(issuer + licenseDetailsURL);
+    @Parameters({ "test.issuer", "checkActiveLicenseURL" })
+    @Test
+    public void getLicenseDetails(final String issuer, final String checkActiveLicenseURL) {
+        log.error("getLicenseDetails() - accessToken:{}, issuer:{}, checkActiveLicenseURL:{}", accessToken, issuer,
+                checkActiveLicenseURL);
+        Builder request = getResteasyService().getClientBuilder(issuer + checkActiveLicenseURL);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
