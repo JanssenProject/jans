@@ -107,7 +107,7 @@ jobs:
             DOCKER_FILE_LOCATION=./demos/benchmarking/docker-jans-loadtesting-jmeter
           fi
           if [[ "cedarling-flask-sidecar" =~ "${{ matrix.docker-images }}" ]]; then
-            DOCKER_FILE_LOCATION=./jans-cedarling/flask-sidecar/Dockerfile
+            DOCKER_FILE_LOCATION=./jans-cedarling/flask-sidecar
           fi          
           MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('$DOCKER_FILE_LOCATION') ; print(dfparser.labels['org.opencontainers.image.version'])")
           DOCKER_IMAGE=ghcr.io/$REPOSITORY/${{ matrix.docker-images }}
