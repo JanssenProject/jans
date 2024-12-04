@@ -132,9 +132,7 @@ pub enum HttpClientError {
 
 #[cfg(test)]
 mod test {
-    use crate::jwt::http_client::HttpClientError;
-
-    use super::HttpClient;
+    use crate::jwt::http_client::{HttpClient, HttpClientError};
     use mockito::Server;
     use serde_json::{json, Value};
     use test_utils::assert_eq;
@@ -157,8 +155,7 @@ mod test {
             .expect(1)
             .create();
 
-        let client =
-            HttpClient::new(3, Duration::from_millis(10)).expect("Should create HttpClient.");
+        let client = HttpClient::new(3, Duration::new(0, 10)).expect("Should create HttpClient.");
 
         let response = client
             .get(&format!(

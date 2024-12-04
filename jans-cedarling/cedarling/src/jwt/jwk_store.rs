@@ -236,11 +236,12 @@ mod test {
         common::policy_store::TrustedIssuer,
         jwt::{http_client::HttpClient, jwk_store::JwkStore},
     };
+    use tokio::time::Duration;
     use chrono::prelude::*;
     use jsonwebtoken::{jwk::JwkSet, DecodingKey};
     use mockito::Server;
     use serde_json::json;
-    use std::{collections::HashMap, time::Duration};
+    use std::collections::HashMap;
 
     #[test]
     fn can_load_from_jwkset() {

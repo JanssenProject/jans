@@ -13,7 +13,8 @@ use super::{
 use crate::common::policy_store::TrustedIssuer;
 use jsonwebtoken::DecodingKey;
 use serde_json::{json, Value};
-use std::{collections::HashMap, sync::Arc, time::Duration};
+use std::{collections::HashMap, sync::Arc};
+use tokio::time::Duration;
 
 pub struct DecodingKeyWithIss<'a> {
     /// The decoding key used to validate JWT signatures.
@@ -67,7 +68,7 @@ impl KeyService {
     pub fn new_from_trusted_issuers(
         trusted_issuers: &HashMap<String, TrustedIssuer>,
     ) -> Result<Self, KeyServiceError> {
-        let http_client = HttpClient::new(3, Duration::from_secs(3))?;
+        let http_client = HttpClient::new(3, Duration::new(3, 0))?;
 
         let mut key_stores = HashMap::new();
         for (iss_id, iss) in trusted_issuers.iter() {
