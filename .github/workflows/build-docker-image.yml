@@ -101,7 +101,7 @@ jobs:
           package-name: ${{ matrix.docker-images }}
           package-type: container
           min-versions-to-keep: 1
-          token: ${{ secrets.MOWORKFLOWTOKEN }}
+          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
           ignore-versions: '^(?!0.0.0-nightly)'
 
       - name: Prepare
