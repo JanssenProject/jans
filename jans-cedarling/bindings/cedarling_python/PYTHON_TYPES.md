@@ -7,46 +7,47 @@ Documentation was generated from python types.
 BootstrapConfig
 ===============
 
-Cedarling requires a BootstrapConfig at startup, which provides configuration details for authorization, logging, and policy store settings. This configuration can be supplied either through environment variables or as a dictionary.
+A Python wrapper for the Rust `cedarling::BootstrapConfig` struct.
+Configures the `Cedarling` application, including authorization, logging, and policy store settings.
 
-Configuration Fields
+Attributes
 ----------  
-- `application_name`: A human-friendly identifier for the application.
-- `policy_store_uri`: Optional URI of the policy store JSON file.
-- `policy_store_id`: An identifier for the policy store.
-- `log_type`: Log type, e.g., 'none', 'memory', 'std_out', or 'lock'.
-- `log_ttl`: (Optional) TTL (time to live) in seconds for log entities when `log_type` is 'memory'. The default is 60s.
-- `user_authz`: Enables querying Cedar engine authorization for a User principal.
-- `workload_authz`: Enables querying Cedar engine authorization for a Workload principal.
-- `usr_workload_bool_op`: Boolean operation ('AND' or 'OR') for combining `USER` and `WORKLOAD` authz results.
-- `local_jwks`: Path to a local file containing a JWKS.
-- `local_policy_store`: A JSON string containing a policy store.
-- `policy_store_local_fn`: Path to a policy store JSON file.
-- `jwt_sig_validation`: Validates JWT signatures if enabled.
-- `jwt_status_validation`: Validates JWT status on startup if enabled.
-- `jwt_signature_algorithms_supported`: A list of supported JWT signature algorithms.
-- `at_iss_validation`: When enabled, the `iss` (Issuer) claim must be present in the Access Token and the scheme must be `https`.
-- `at_jti_validation`: When enabled, the `jti` (JWT ID) claim must be present in the Access Token.
-- `at_nbf_validation`: When enabled, the `nbf` (Not Before) claim must be present in the Access Token.
-- `at_exp_validation`: When enabled, the `exp` (Expiration) claim must be present in the Access Token.
-- `idt_iss_validation`: When enabled, the `iss` (Issuer) claim must be present in the ID Token.
-- `idt_sub_validation`: When enabled, the `sub` (Subject) claim must be present in the ID Token.
-- `idt_exp_validation`: When enabled, the `exp` (Expiration) claim must be present in the ID Token.
-- `idt_iat_validation`: When enabled, the `iat` (Issued At) claim must be present in the ID Token.
-- `idt_aud_validation`: When enabled, the `aud` (Audience) claim must be present in the ID Token.
-- `userinfo_iss_validation`: When enabled, the `iss` (Issuer) claim must be present in the Userinfo Token.
-- `userinfo_sub_validation`: When enabled, the `sub` (Subject) claim must be present in the Userinfo Token.
-- `userinfo_aud_validation`: When enabled, the `aud` (Audience) claim must be present in the Userinfo Token.
-- `userinfo_exp_validation`: When enabled, the `exp` (Expiration) claim must be present in the Userinfo Token.
-- `id_token_trust_mode`: Trust mode for ID tokens, either 'None' or 'Strict'.
-- `lock`: Enables integration with Lock Master for policies and SSE events.
-- `lock_master_configuration_uri`: URI where Cedarling can get JSON file with all required metadata about Lock Master, i.e. .well-known/lock-master-configuration.
-- `dynamic_configuration`: Toggles listening for SSE config updates.
-- `lock_ssa_jwt`: SSA for DCR in a Lock Master deployment. Cedarling will validate this SSA JWT prior to DCR.
-- `audit_log_interval`: Interval (in seconds) for sending log messages to Lock Master (0 to disable).
-- `audit_health_interval`: Interval (in seconds) for sending health updates to Lock Master (0 to disable).
-- `audit_health_telemetry_interval`: Interval (in seconds) for sending telemetry updates to Lock Master (0 to disable).
-- `listen_sse`: Toggles listening for updates from the Lock Server.
+:param application_name: A human-friendly identifier for the application.
+:param policy_store_uri: Optional URI of the policy store JSON file.
+:param policy_store_id: An identifier for the policy store.
+:param log_type: Log type, e.g., 'none', 'memory', 'std_out', or 'lock'.
+:param log_ttl: (Optional) TTL (time to live) in seconds for log entities when `log_type` is 'memory'. The default is 60s.
+:param user_authz: Enables querying Cedar engine authorization for a User principal.
+:param workload_authz: Enables querying Cedar engine authorization for a Workload principal.
+:param usr_workload_bool_op: Boolean operation ('AND' or 'OR') for combining `USER` and `WORKLOAD` authz results.
+:param local_jwks: Path to a local file containing a JWKS.
+:param local_policy_store: A JSON string containing a policy store.
+:param policy_store_local_fn: Path to a policy store JSON file.
+:param jwt_sig_validation: Validates JWT signatures if enabled.
+:param jwt_status_validation: Validates JWT status on startup if enabled.
+:param jwt_signature_algorithms_supported: A list of supported JWT signature algorithms.
+:param at_iss_validation: When enabled, the `iss` (Issuer) claim must be present in the Access Token and thescheme must be `https`.
+:param at_jti_validation: When enabled, the `jti` (JWT ID) claim must be present in the Access Token.
+:param at_nbf_validation: When enabled, the `nbf` (Not Before) claim must be present in the Access Token.
+:param at_exp_validation: When enabled, the `exp` (Expiration) claim must be present in the Access Token.
+:param idt_iss_validation: When enabled, the `iss` (Issuer) claim must be present in the ID Token.
+:param idt_sub_validation: When enabled, the `sub` (Subject) claim must be present in the ID Token.
+:param idt_exp_validation: When enabled, the `exp` (Expiration) claim must be present in the ID Token.
+:param idt_iat_validation: When enabled, the `iat` (Issued At) claim must be present in the ID Token.
+:param idt_aud_validation: When enabled, the `aud` (Audience) claim must be present in the ID Token.
+:param userinfo_iss_validation: When enabled, the `iss` (Issuer) claim must be present in the Userinfo Token.
+:param userinfo_sub_validation: When enabled, the `sub` (Subject) claim must be present in the Userinfo Token.
+:param userinfo_aud_validation: When enabled, the `aud` (Audience) claim must be present in the Userinfo Token.
+:param userinfo_exp_validation: When enabled, the `exp` (Expiration) claim must be present in the Userinfo Token.
+:param id_token_trust_mode: Trust mode for ID tokens, either 'None' or 'Strict'.
+:param lock: Enables integration with Lock Master for policies and SSE events.
+:param lock_master_configuration_uri: URI where Cedarling can get JSON file with all required metadata about Lock Master, i.e. .well-known/lock-master-configuration.
+:param dynamic_configuration: Toggles listening for SSE config updates.
+:param lock_ssa_jwt: SSA for DCR in a Lock Master deployment. Cedarling will validate this SSA JWT prior to DCR.
+:param audit_log_interval: Interval (in seconds) for sending log messages to Lock Master (0 to disable).
+:param audit_health_interval: Interval (in seconds) for sending health updates to Lock Master (0 to disable).
+:param audit_health_telemetry_interval: Interval (in seconds) for sending telemetry updates to Lock Master (0 to disable).
+:param listen_sse: Toggles listening for updates from the Lock Server.
 
 Example
 -------
