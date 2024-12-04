@@ -80,7 +80,8 @@
         <module>plugins/client-authorizations</module>
         <module>plugins/custom-branding</module>
         <module>plugins/strong-authn-settings</module>
-        <!--module>plugins/email_2fa_core</module-->
+        <module>plugins/email_2fa</module>
+        <module>plugins/email_2fa/agama</module>
         <module>plugins/bioid</module>
     </modules>
 

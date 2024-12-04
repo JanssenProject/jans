@@ -25,6 +25,13 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
+    ProcessTokens,
+    AuthorizeError,
+    "Error encountered while processing JWT token data"
+);
+
+create_exception!(
+    authorize_errors,
     AccessTokenEntitiesError,
     AuthorizeError,
     "Error encountered while creating access token entities"
@@ -95,13 +102,6 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    CreateRequestRoleEntityError,
-    AuthorizeError,
-    "Error encountered while creating cedar_policy::Request for role entity principal"
-);
-
-create_exception!(
-    authorize_errors,
     EntitiesError,
     AuthorizeError,
     "Error encountered while collecting all entities"
@@ -145,7 +145,7 @@ macro_rules! errors_functions {
 // This function is used to convert `cedarling::AuthorizeError` to a Python exception.
 // For each possible case of `AuthorizeError`, we have created a corresponding Python exception that inherits from `cedarling::AuthorizeError`.
 errors_functions! {
-    DecodeTokens => DecodeTokens,
+    ProcessTokens => ProcessTokens,
     AccessTokenEntities => AccessTokenEntitiesError,
     CreateIdTokenEntity => CreateIdTokenEntityError,
     CreateUserinfoTokenEntity => CreateUserinfoTokenEntityError,
@@ -156,7 +156,6 @@ errors_functions! {
     CreateContext => CreateContextError,
     CreateRequestWorkloadEntity => CreateRequestWorkloadEntityError,
     CreateRequestUserEntity => CreateRequestUserEntityError,
-    CreateRequestRoleEntity => CreateRequestRoleEntityError,
     Entities => EntitiesError
 }
 

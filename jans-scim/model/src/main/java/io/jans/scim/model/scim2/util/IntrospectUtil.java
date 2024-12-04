@@ -6,7 +6,7 @@
 
 package io.jans.scim.model.scim2.util;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import io.jans.scim.model.scim2.AttributeDefinition;

@@ -13,7 +13,7 @@ import io.jans.orm.annotation.*;
 import io.jans.orm.model.base.Deletable;
 import jakarta.inject.Named;
 import jakarta.persistence.Transient;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
@@ -21,7 +21,7 @@ import java.util.*;
 
 import static io.jans.as.model.util.StringUtils.implode;
 import static io.jans.as.model.util.StringUtils.spaceSeparatedToList;
-import static org.apache.commons.lang.BooleanUtils.isTrue;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -4,109 +4,6 @@
 This document describes the Cedarling Python bindings types.
 Documentation was generated from python types.
 
-MemoryLogConfig
-===============
-
-A Python wrapper for the Rust `cedarling::LogTypeConfig`, used to configure memory-based logging.
-
-Attributes
-----------  
-:param log_ttl: Optional TTL for log entries (in seconds), default is `60`.
-
-Example
--------
-```
-# Initialize with default TTL
-config = MemoryLogConfig()              
-# Initialize with custom TTL
-config = MemoryLogConfig(log_ttl=120)   
-print(config.log_ttl)                    # Accessing TTL
-config.log_ttl = 300                     # Updating TTL
-```
-___
-
-DisabledLoggingConfig
-======================
-
-A Python wrapper for the Rust `cedarling::LogTypeConfig` struct.
-This class configures logging to be disabled, meaning no log entries are captured.
-
-Attributes
-----------
-- `None`: This class has no attributes.
-
-Example
--------
-```
-# Disable logging
-config = DisabledLoggingConfig()
-```
-___
-
-StdOutLogConfig
-================
-
-A Python wrapper for the Rust `cedarling::LogTypeConfig` struct.
-Represents the configuration for logging to the standard output stream.
-
-Attributes
-----------
-This configuration is constant and cannot be modified.
-
-Example
--------
-```
-# Create an instance for logging to standard output
-config = StdOutLogConfig()
-```
-___
-
-PolicyStoreSource
-=================
-
-A Python wrapper for the Rust `cedarling::PolicyStoreSource` struct.
-This class specifies the source for reading policy data, currently supporting
-JSON strings.
-
-Attributes
-----------  
-:param json: Optional JSON string for policy data.
-
-Example
--------
-```
-# Initialize with a JSON string
-config = PolicyStoreSource(json='{...}')
-```
-___
-
-PolicyStoreConfig
-=================
-
-A Python wrapper for the Rust `cedarling::PolicyStoreConfig` struct.
-Configures how and where policies are loaded, specifying the source and optional store ID.
-
-Attributes
-----------  
-:param source: Optional `PolicyStoreSource` for the policy location.  
-:param store_id: Optional store ID; assumes one store if not provided.
-
-Example
--------
-```
-# Create a PolicyStoreConfig with a source and store_id
-source = PolicyStoreSource(json='{...')
-config = PolicyStoreConfig(source=source, store_id="store1")
-
-# Create without store_id
-config_without_store_id = PolicyStoreConfig(source=source)
-
-# Access attributes
-print(config.source)
-print(config.store_id)
-```
-___
-
 BootstrapConfig
 ===============
 
@@ -115,24 +12,84 @@ Configures the `Cedarling` application, including authorization, logging, and po
 
 Attributes
 ----------  
-:param application_name: The name of this application.  
-:param authz_config: An `AuthzConfig` object for authorization settings.  
-:param log_config: A logging configuration (can be `DisabledLoggingConfig`, `MemoryLogConfig`, or `StdOutLogConfig`).  
-:param policy_store_config: A `PolicyStoreConfig` object for the policy store configuration.  
-:param jwt_config: A `JwtConfig` object for JWT validation settings.
+:param application_name: A human-friendly identifier for the application.
+:param policy_store_uri: Optional URI of the policy store JSON file.
+:param policy_store_id: An identifier for the policy store.
+:param log_type: Log type, e.g., 'none', 'memory', 'std_out', or 'lock'.
+:param log_ttl: (Optional) TTL (time to live) in seconds for log entities when `log_type` is 'memory'. The default is 60s.
+:param user_authz: Enables querying Cedar engine authorization for a User principal.
+:param workload_authz: Enables querying Cedar engine authorization for a Workload principal.
+:param usr_workload_bool_op: Boolean operation ('AND' or 'OR') for combining `USER` and `WORKLOAD` authz results.
+:param local_jwks: Path to a local file containing a JWKS.
+:param local_policy_store: A JSON string containing a policy store.
+:param policy_store_local_fn: Path to a policy store JSON file.
+:param jwt_sig_validation: Validates JWT signatures if enabled.
+:param jwt_status_validation: Validates JWT status on startup if enabled.
+:param jwt_signature_algorithms_supported: A list of supported JWT signature algorithms.
+:param at_iss_validation: When enabled, the `iss` (Issuer) claim must be present in the Access Token and thescheme must be `https`.
+:param at_jti_validation: When enabled, the `jti` (JWT ID) claim must be present in the Access Token.
+:param at_nbf_validation: When enabled, the `nbf` (Not Before) claim must be present in the Access Token.
+:param at_exp_validation: When enabled, the `exp` (Expiration) claim must be present in the Access Token.
+:param idt_iss_validation: When enabled, the `iss` (Issuer) claim must be present in the ID Token.
+:param idt_sub_validation: When enabled, the `sub` (Subject) claim must be present in the ID Token.
+:param idt_exp_validation: When enabled, the `exp` (Expiration) claim must be present in the ID Token.
+:param idt_iat_validation: When enabled, the `iat` (Issued At) claim must be present in the ID Token.
+:param idt_aud_validation: When enabled, the `aud` (Audience) claim must be present in the ID Token.
+:param userinfo_iss_validation: When enabled, the `iss` (Issuer) claim must be present in the Userinfo Token.
+:param userinfo_sub_validation: When enabled, the `sub` (Subject) claim must be present in the Userinfo Token.
+:param userinfo_aud_validation: When enabled, the `aud` (Audience) claim must be present in the Userinfo Token.
+:param userinfo_exp_validation: When enabled, the `exp` (Expiration) claim must be present in the Userinfo Token.
+:param id_token_trust_mode: Trust mode for ID tokens, either 'None' or 'Strict'.
+:param lock: Enables integration with Lock Master for policies and SSE events.
+:param lock_master_configuration_uri: URI where Cedarling can get JSON file with all required metadata about Lock Master, i.e. .well-known/lock-master-configuration.
+:param dynamic_configuration: Toggles listening for SSE config updates.
+:param lock_ssa_jwt: SSA for DCR in a Lock Master deployment. Cedarling will validate this SSA JWT prior to DCR.
+:param audit_log_interval: Interval (in seconds) for sending log messages to Lock Master (0 to disable).
+:param audit_health_interval: Interval (in seconds) for sending health updates to Lock Master (0 to disable).
+:param audit_health_telemetry_interval: Interval (in seconds) for sending telemetry updates to Lock Master (0 to disable).
+:param listen_sse: Toggles listening for updates from the Lock Server.
 
 Example
 -------
-```
-from cedarling import BootstrapConfig, AuthzConfig, MemoryLogConfig, PolicyStoreConfig
-
-# Create a BootstrapConfig with memory logging
-authz = AuthzConfig(application_name="MyApp")
-log_config = MemoryLogConfig(log_ttl=300)
-policy_store = PolicyStoreConfig(source=PolicyStoreSource(json='{...}'))
-jwt_config = JwtConfig(enabled=False)
-
-bootstrap_config = BootstrapConfig(application_name="MyApp",authz_config=authz, log_config=log_config, policy_store_config=policy_store, jwt_config=jwt_config)
+```python
+from cedarling import BootstrapConfig
+# Example configuration
+bootstrap_config = BootstrapConfig({
+    "application_name": "MyApp",
+    "policy_store_uri": None,
+    "policy_store_id": "policy123",
+    "log_type": "memory",
+    "log_ttl": 86400,
+    "user_authz": "enabled",
+    "workload_authz": "enabled",
+    "usr_workload_bool_op": "AND",
+    "local_jwks": "./path/to/your_jwks.json",
+    "local_policy_store": None,
+    "policy_store_local_fn": "./path/to/your_policy_store.json",
+    "jwt_sig_validation": "enabled",
+    "jwt_status_validation": "disabled",
+    "at_iss_validation": "enabled",
+    "at_jti_validation": "enabled",
+    "at_nbf_validation": "disabled",
+    "idt_iss_validation": "enabled",
+    "idt_sub_validation": "enabled",
+    "idt_exp_validation": "enabled",
+    "idt_iat_validation": "enabled",
+    "idt_aud_validation": "enabled",
+    "userinfo_iss_validation": "enabled",
+    "userinfo_sub_validation": "enabled",
+    "userinfo_aud_validation": "enabled",
+    "userinfo_exp_validation": "enabled",
+    "id_token_trust_mode": "Strict",
+    "lock": "disabled",
+    "lock_master_configuration_uri": None,
+    "dynamic_configuration": "disabled",
+    "lock_ssa_jwt": None,
+    "audit_log_interval": 0,
+    "audit_health_interval": 0,
+    "audit_health_telemetry_interval": 0,
+    "listen_sse": "disabled",
+})
 ```
 ___
 

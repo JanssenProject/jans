@@ -8,7 +8,7 @@ package io.jans.service.metric;
 
 import com.codahale.metrics.*;
 import com.codahale.metrics.Timer;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import io.jans.model.ApplicationType;
 import io.jans.model.metric.MetricType;
 import io.jans.model.metric.counter.CounterMetricData;

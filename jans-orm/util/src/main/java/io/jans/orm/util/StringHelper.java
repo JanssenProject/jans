@@ -423,10 +423,4 @@ public final class StringHelper {
 		return result;
 	}
 
-	public static String escapeSql(Object str) {
-		String result = org.apache.commons.lang.StringEscapeUtils.escapeSql(String.valueOf(str));
-		
-		return result;
-	}
-
 }
