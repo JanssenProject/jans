@@ -6,7 +6,7 @@
  */
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, LogConfig, LogTypeConfig, JwtConfig,
+    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogTypeConfig,
     PolicyStoreConfig, PolicyStoreSource, Request, ResourceData, WorkloadBoolOp,
 };
 use std::collections::HashMap;
@@ -18,8 +18,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
             log_type: LogTypeConfig::StdOut,
-            decision_log_user_claims: Default::default(),
-            decision_log_workload_claims: Default::default(),
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
@@ -29,6 +27,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::And,
+            decision_log_user_claims: vec![],
+            decision_log_workload_claims: Default::default(),
         },
     })?;
 

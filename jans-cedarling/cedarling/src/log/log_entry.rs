@@ -284,7 +284,7 @@ pub struct DecisionLogEntry<'a> {
     /// decision for request
     pub decision: Decision,
     /// Dictionary with the token type and claims which should be included in the log
-    pub tokens: TokensInfo,
+    pub tokens: LogTokensInfo<'a>,
     /// time in milliseconds spent for decision
     pub decision_time_ms: u128,
 }
@@ -385,11 +385,9 @@ impl serde::Serialize for PrincipalLogEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
-pub struct TokensInfo {
-    id_token: HashMap<String, serde_json::Value>,
+pub struct LogTokensInfo<'a> {
+    pub id_token: HashMap<&'a str, &'a serde_json::Value>,
     #[serde(rename = "Userinfo")]
-    userinfo: HashMap<String, serde_json::Value>,
-    access: HashMap<String, serde_json::Value>,
+    pub userinfo: HashMap<&'a str, &'a serde_json::Value>,
+    pub access: HashMap<&'a str, &'a serde_json::Value>,
 }
-
-

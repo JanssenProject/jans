@@ -113,7 +113,7 @@ impl Cedarling {
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
-        self.authz.authorize_entities_data(request)
+        self.authz.authorize_entities_data(request, tokens)
     }
 }
 

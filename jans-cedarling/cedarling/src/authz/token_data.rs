@@ -49,6 +49,20 @@ impl TokenPayload {
             })
             .ok_or(GetTokenClaimValue::KeyNotFound(key.to_string()))
     }
+
+    /// get tokens info claim for [`LogTokensInfo`] structure
+    /// we have no bootstrap property to define that claims should be in result,
+    /// so hardcoded only 'jti' but it can be changed in future
+    pub(crate) fn get_log_tokens_info<'a>(&'a self) -> HashMap<&'a str, &'a serde_json::Value> {
+        const TOKEN_CLAIMS: [&str; 1] = ["jti"];
+
+        HashMap::from_iter(
+            TOKEN_CLAIMS
+                .iter()
+                .map(|&claim| self.payload.get(claim).map(|value| (claim, value)))
+                .flatten(),
+        )
+    }
 }
 
 impl From<HashMap<String, serde_json::Value>> for TokenPayload {

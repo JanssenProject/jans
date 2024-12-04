@@ -19,8 +19,7 @@ use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt;
 use crate::log::interface::LogWriter;
 use crate::log::{
-    AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, LogEntry, LogType, Logger,
-    PersonAuthorizeInfo, PrincipalLogEntry, WorkloadAuthorizeInfo,
+    AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, LogEntry, LogTokensInfo, LogType, Logger, PersonAuthorizeInfo, PrincipalLogEntry, WorkloadAuthorizeInfo
 };
 use std::io::Cursor;
 
@@ -83,6 +82,19 @@ impl Authz {
         }
     }
 
+    // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
+    pub (crate) fn decode_tokens<'a>(&'a self, request: &'a Request) -> Result<ProcessTokensResult<'a>, AuthorizeError> {
+            // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
+        Ok(self
+            .config
+            .jwt_service
+            .process_tokens::<AccessTokenData, IdTokenData, UserInfoTokenData>(
+                &request.access_token,
+                &request.id_token,
+                Some(&request.userinfo_token),
+        )?)
+    }
+
     /// Evaluate Authorization Request
     /// - evaluate if authorization is granted for *person*
     /// - evaluate if authorization is granted for *workload*
@@ -90,6 +102,9 @@ impl Authz {
         let start_time = Instant::now();
 
         let schema = &self.config.policy_store.schema;
+
+        let tokens = self.decode_tokens(&request)?;
+
 
         // Parse action UID.
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
@@ -102,7 +117,7 @@ impl Authz {
         )?;
 
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
-        let entities_data: AuthorizeEntitiesData = self.authorize_entities_data(&request)?;
+        let entities_data: AuthorizeEntitiesData = self.authorize_entities_data(&request,&tokens)?;
 
         // Get entity UIDs what we will be used on authorize check
         let principal_workload_uid = entities_data.access_token_entities.workload_entity.uid();
@@ -176,7 +191,7 @@ impl Authz {
             )
             .set_auth_info(AuthorizationLogInfo {
                 action: request.action.clone(),
-                context: request.context,
+                context: request.context.clone(),
                 resource: resource_uid.to_string(),
                 entities: entities_json,
 
@@ -214,10 +229,14 @@ impl Authz {
             user: get_entity_claims( &self.config.authorization.decision_log_user_claims.as_slice(),&entities,principal_user_entity_uid),
             workload: get_entity_claims( &self.config.authorization.decision_log_workload_claims.as_slice(),&entities,principal_workload_uid),
             lock_client_id: None,
-            action: request.action,
+            action: request.action.clone(),
             resource: resource_uid.to_string(),
             decision: result.decision().into(),
-            tokens: todo!(),
+            tokens: LogTokensInfo{
+                access: tokens.access_token.get_log_tokens_info(),
+                id_token: tokens.id_token.get_log_tokens_info(),
+                userinfo: tokens.userinfo_token.get_log_tokens_info(),
+            },
             decision_time_ms: elapsed_ms,
         });
 
@@ -251,47 +270,38 @@ impl Authz {
     pub fn authorize_entities_data(
         &self,
         request: &Request,
+        tokens: &ProcessTokensResult,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         let policy_store = &self.config.policy_store;
 
-        // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
-        let decode_result: ProcessTokensResult = self
-            .config
-            .jwt_service
-            .process_tokens::<AccessTokenData, IdTokenData, UserInfoTokenData>(
-                &request.access_token,
-                &request.id_token,
-                Some(&request.userinfo_token),
-            )?;
-
-        let trusted_issuer = decode_result.trusted_issuer.unwrap_or_default();
+        let trusted_issuer = tokens.trusted_issuer.unwrap_or_default();
         let tokens_metadata = trusted_issuer.tokens_metadata();
 
-        let role_entities = create_role_entities(policy_store, &decode_result, trusted_issuer)?;
+        let role_entities = create_role_entities(policy_store, &tokens, trusted_issuer)?;
 
         // Populate the `AuthorizeEntitiesData` structure using the builder pattern
         let data = AuthorizeEntitiesData::builder()
             // Populate the structure with entities derived from the access token
             .access_token_entities(create_access_token_entities(
                 policy_store,
-                &decode_result.access_token,
+                &tokens.access_token,
                 tokens_metadata.access_tokens
             )?)
             // Add an entity created from the ID token
             .id_token_entity(
-                create_id_token_entity(policy_store, &decode_result.id_token, &tokens_metadata.id_tokens.claim_mapping)
+                create_id_token_entity(policy_store, &tokens.id_token, &tokens_metadata.id_tokens.claim_mapping)
                     .map_err(AuthorizeError::CreateIdTokenEntity)?,
             )
             // Add an entity created from the userinfo token
             .userinfo_token(
-                create_userinfo_token_entity(policy_store, &decode_result.userinfo_token, &tokens_metadata.userinfo_tokens.claim_mapping)
+                create_userinfo_token_entity(policy_store, &tokens.userinfo_token, &tokens_metadata.userinfo_tokens.claim_mapping)
                 .map_err(AuthorizeError::CreateUserinfoTokenEntity)?
             )
             // Add an entity created from the userinfo token
             .user_entity(
                 create_user_entity(
                     policy_store,
-                    &decode_result,
+                    &tokens,
                     // parents for Jans::User entity
                     HashSet::from_iter(role_entities.iter().map(|e|e.uid())),
                     trusted_issuer
