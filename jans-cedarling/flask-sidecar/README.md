@@ -17,11 +17,19 @@ To run the API:
     ```
 - Navigate to `jans/jans-cedarling/flask-sidecar/main`
 - Run `poetry install` to install dependencies
-- Run `poetry run flask run` to run the API on port 5000
+- Run `poetry run flask run` to run the API on `http://127.0.0.1:5000` 
 
 ## Tests
 
 Not yet implemented
+
+## Docker Instructions
+
+- Clone the [Janssen](https://github.com/JanssenProject/jans) repository
+- Navigate to `jans/jans-cedarling/flask-sidecar/`
+- Modify the `secrets/bootstrap.json` file to your specifications. Configuration values are described [here](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/cedarling_python.pyi).
+- Run `docker compose up`
+- The service is running on `http://0.0.0.0:5000`. OpenAPI documentation is available at `/swagger-ui`
 
 ## OpenAPI
 
