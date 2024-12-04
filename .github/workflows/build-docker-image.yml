@@ -97,6 +97,7 @@ jobs:
           sudo apt-get update
 
       - uses: actions/delete-package-versions@v5
+        continue-on-error: true
         with:
           package-name: jans/${{ matrix.docker-images }}
           package-type: container
