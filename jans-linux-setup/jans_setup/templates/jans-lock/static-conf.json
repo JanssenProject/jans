@@ -6,6 +6,7 @@
         "attributes":"ou=attributes,o=jans",
         "tokens":"ou=tokens,o=jans",
         "sessions":"ou=sessions,o=jans",
-        "metric":"ou=statistic,o=metric"
+        "metric":"ou=statistic,o=metric",
+        "stat": "ou=lock,ou=stat,o=jans"
     }
 }

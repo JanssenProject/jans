@@ -46,6 +46,14 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "OpenID issuer URL")
     @Schema(description = "OpenID issuer URL")
     private String openIdIssuer;
+    
+    @DocProperty(description = "Active stat enabled")
+    @Schema(description = "Active stat enabled")
+    private boolean statEnabled;
+
+    @DocProperty(description = "Statistical data capture time interval")
+    @Schema(description = "Statistical data capture time interval")
+    private int statTimerIntervalInSeconds;
 
     @DocProperty(description = "List of token channel names", defaultValue = "jans_token")
     @Schema(description = "List of token channel names")
@@ -159,7 +167,23 @@ public class AppConfiguration implements Configuration {
         this.openIdIssuer = openIdIssuer;
     }
 
-    public List<String> getTokenChannels() {
+    public boolean isStatEnabled() {
+		return statEnabled;
+	}
+
+	public void setStatEnabled(boolean statEnabled) {
+		this.statEnabled = statEnabled;
+	}
+
+	public int getStatTimerIntervalInSeconds() {
+		return statTimerIntervalInSeconds;
+	}
+
+	public void setStatTimerIntervalInSeconds(int statTimerIntervalInSeconds) {
+		this.statTimerIntervalInSeconds = statTimerIntervalInSeconds;
+	}
+
+	public List<String> getTokenChannels() {
         return tokenChannels;
     }
 
@@ -336,18 +360,20 @@ public class AppConfiguration implements Configuration {
     }
 
     @Override
-    public String toString() {
-        return "AppConfiguration [baseDN=" + baseDN + ", baseEndpoint=" + baseEndpoint + ", openIdIssuer="
-                + openIdIssuer + ", tokenChannels=" + tokenChannels + ", clientId=" + clientId + ", tokenUrl="
-                + tokenUrl + ", groupScopeEnabled=" + groupScopeEnabled+ ", endpointGroups=" + endpointGroups + ", endpointDetails=" + endpointDetails
-                + ", disableJdkLogger=" + disableJdkLogger + ", loggingLevel=" + loggingLevel + ", loggingLayout="
-                + loggingLayout + ", externalLoggerConfiguration=" + externalLoggerConfiguration + ", metricChannel="
-                + metricChannel + ", metricReporterInterval=" + metricReporterInterval + ", metricReporterKeepDataDays="
-                + metricReporterKeepDataDays + ", metricReporterEnabled=" + metricReporterEnabled
-                + ", cleanServiceInterval=" + cleanServiceInterval + ", opaConfiguration=" + opaConfiguration
-                + ", pdpType=" + pdpType + ", policiesJsonUrisAuthorizationToken=" + policiesJsonUrisAuthorizationToken
-                + ", policiesJsonUris=" + policiesJsonUris + ", policiesZipUrisAuthorizationToken="
-                + policiesZipUrisAuthorizationToken + ", policiesZipUris=" + policiesZipUris + "]";
-    }
+	public String toString() {
+		return "AppConfiguration [baseDN=" + baseDN + ", baseEndpoint=" + baseEndpoint + ", openIdIssuer="
+				+ openIdIssuer + ", statEnabled=" + statEnabled + ", statTimerIntervalInSeconds="
+				+ statTimerIntervalInSeconds + ", tokenChannels=" + tokenChannels + ", clientId=" + clientId
+				+ ", clientPassword=" + clientPassword + ", tokenUrl=" + tokenUrl + ", groupScopeEnabled="
+				+ groupScopeEnabled + ", endpointGroups=" + endpointGroups + ", endpointDetails=" + endpointDetails
+				+ ", disableJdkLogger=" + disableJdkLogger + ", loggingLevel=" + loggingLevel + ", loggingLayout="
+				+ loggingLayout + ", externalLoggerConfiguration=" + externalLoggerConfiguration + ", metricChannel="
+				+ metricChannel + ", metricReporterInterval=" + metricReporterInterval + ", metricReporterKeepDataDays="
+				+ metricReporterKeepDataDays + ", metricReporterEnabled=" + metricReporterEnabled
+				+ ", cleanServiceInterval=" + cleanServiceInterval + ", opaConfiguration=" + opaConfiguration
+				+ ", pdpType=" + pdpType + ", policiesJsonUrisAuthorizationToken=" + policiesJsonUrisAuthorizationToken
+				+ ", policiesJsonUris=" + policiesJsonUris + ", policiesZipUrisAuthorizationToken="
+				+ policiesZipUrisAuthorizationToken + ", policiesZipUris=" + policiesZipUris + "]";
+	}
 
 }
