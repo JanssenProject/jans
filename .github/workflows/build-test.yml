@@ -37,7 +37,9 @@ on:
         description: 'Service'
         required: true
         default: "jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 jans-scim jans-keycloak-link jans-config-api jans-keycloak-integration jans-casa"
-
+concurrency:
+  group: run-once
+  cancel-in-progress: false
 jobs:
   cleanup:
     if: github.event_name == 'push' && github.event.ref == 'refs/heads/main'
