@@ -31,6 +31,7 @@
             <artifactId>commons-collections</artifactId>
             <version>3.2.2</version>
         </dependency>
+		
         <!-- Testing -->
         <dependency>
             <groupId>io.rest-assured</groupId>
@@ -42,36 +43,6 @@
 			<artifactId>testng</artifactId>
 		    <scope>test</scope>
 		</dependency>
-       <!-- <dependency>
-            <groupId>com.intuit.karate</groupId>
-            <artifactId>karate-junit5</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.intuit.karate</groupId>
-            <artifactId>karate-apache</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.masterthought</groupId>
-            <artifactId>cucumber-reporting</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>-->
-        <!-- API, java.xml.bind module -->
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
@@ -95,6 +66,11 @@
 
     <build>
         <finalName>admin-ui-plugin</finalName>
+        
+       <filters>
+			<filter>../../profiles/${cfg}/config-build.properties</filter>
+			<filter>../../profiles/${cfg}/config-api-test.properties</filter>
+		</filters>
 
         <testResources>
             <testResource>

@@ -200,33 +200,6 @@
 		    <scope>test</scope>
 		</dependency>
 
-		    
-		<!--<dependency>
-			<groupId>com.intuit.karate</groupId>
-			<artifactId>karate-junit5</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.intuit.karate</groupId>
-			<artifactId>karate-apache</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.masterthought</groupId>
-			<artifactId>cucumber-reporting</artifactId>
-			<scope>test</scope>
-		</dependency>-->
-
 		<!-- Others -->
 		<dependency>
 			<groupId>commons-beanutils</groupId>

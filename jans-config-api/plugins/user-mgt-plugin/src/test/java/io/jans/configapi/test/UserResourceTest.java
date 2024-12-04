@@ -19,19 +19,19 @@ import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Parameters;
 
-public class Fido2ResourceTest extends ConfigServerBaseTest{
+public class UserResourceTest extends ConfigServerBaseTest{
 
-    @Parameters({"issuer", "fido2Url"})
+    @Parameters({"issuer", "userUrl"})
     @Test
-    public void getFido2Configuration(final String issuer, final String fido2Url) {
-        log.error("getFido2Configuration() - accessToken:{}, issuer:{}, fido2Url:{}", accessToken, issuer, fido2Url);
-        Builder request = getResteasyService().getClientBuilder(issuer + fido2Url);
+    public void getUserResourceData(final String issuer, final String userUrl) {
+        log.error("getUserResourceData() - accessToken:{}, issuer:{}, userUrl:{}", accessToken, issuer, userUrl);
+        Builder request = getResteasyService().getClientBuilder(issuer + userUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.error("getFido2Configuration() - Response for getDefaultAuthenticationMethod -  response:{}", response);
+        log.error("Response for getUserResourceData() -  response:{}", response);
     }
     
 	

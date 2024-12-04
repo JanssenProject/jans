@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="Config-API-Fido2-Plugin" parallel="false">
+<suite name="Config-API-User-Mgt-Plugin" parallel="false">
 
     <parameter name="propertiesFile" value="target/test-classes/test.properties" />
 	
@@ -9,9 +9,9 @@
         <listener class-name="io.jans.configapi.core.test.listener.SkipTestsListener" />
     </listeners>
   
-    <test name="Fido2" enabled="true">
+    <test name="User-Mgt-Plugin" enabled="true">
         <classes>
-            <class name="io.jans.configapi.test.Fido2ResourceTest" />
+            <class name="io.jans.configapi.test.UserResourceTest" />
         </classes>
     </test>
 	

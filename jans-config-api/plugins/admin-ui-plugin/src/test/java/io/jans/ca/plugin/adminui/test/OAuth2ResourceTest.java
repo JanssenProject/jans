@@ -49,13 +49,13 @@ public class OAuth2ResourceTest extends AdminUIBaseTest{
     @Parameters({"test.issuer", "apiProtectionTokenURL", "ujwt"})
     @Test
     public void getApiProtectionTokenData(final String issuer, final String apiProtectionTokenURL, final String ujwt) {
-        log.error("getApiProtectionTokenData() - accessToken:{}, issuer:{}, apiProtectionTokenURL:{}, ujwt:{}", accessToken, issuer, apiProtectionTokenURL, ujwt);
+        log.error("\n\n getApiProtectionTokenData() - accessToken:{}, issuer:{}, apiProtectionTokenURL:{}, ujwt:{}", accessToken, issuer, apiProtectionTokenURL, ujwt);
         Builder request = getResteasyService().getClientBuilder(issuer+apiProtectionTokenURL);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
         request.property("ujwt", ujwt);
         Response response = request.get();
-        log.error("Response for getApiProtectionTokenData() -  response:{}", response);
+        log.error("\n\n Response for getApiProtectionTokenData() -  response:{}", response);
     }
 
   
