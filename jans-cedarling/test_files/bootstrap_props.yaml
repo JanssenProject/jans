@@ -1,3 +1,7 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
 CEDARLING_APPLICATION_NAME: My App
 CEDARLING_POLICY_STORE_URI: ''
 CEDARLING_POLICY_STORE_ID: '840da5d85403f35ea76519ed1a18a33989f855bf1cf8'
