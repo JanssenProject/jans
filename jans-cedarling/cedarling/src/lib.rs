@@ -28,8 +28,8 @@ mod tests;
 use std::sync::Arc;
 
 pub use authz::request::{Request, ResourceData};
-use authz::Authz;
 pub use authz::{AuthorizeError, AuthorizeResult};
+use authz::{Authz, AuthzInitError};
 pub use bootstrap_config::*;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::ServiceFactory;
@@ -58,6 +58,9 @@ pub enum InitCedarlingError {
     /// Error while preparing config for internal services
     #[error(transparent)]
     ServiceConfig(#[from] ServiceConfigError),
+    /// Error while initializeing AuthZ module
+    #[error(transparent)]
+    AuthzInit(#[from] AuthzInitError),
 }
 
 /// The instance of the Cedarling application.
@@ -65,7 +68,6 @@ pub enum InitCedarlingError {
 #[derive(Clone)]
 pub struct Cedarling {
     log: log::Logger,
-    #[allow(dead_code)]
     authz: Arc<Authz>,
 }
 
@@ -94,7 +96,7 @@ impl Cedarling {
 
         Ok(Cedarling {
             log,
-            authz: service_factory.authz_service(),
+            authz: service_factory.authz_service()?,
         })
     }
 

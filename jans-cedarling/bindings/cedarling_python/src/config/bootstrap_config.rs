@@ -6,7 +6,7 @@
  */
 
 use cedarling::bindings::PolicyStore;
-use cedarling::{BootstrapConfigRaw, LoggerType, TrustMode, WorkloadBoolOp};
+use cedarling::{BootstrapConfigRaw, IdTokenTrustMode, LoggerType, WorkloadBoolOp};
 use jsonwebtoken::Algorithm;
 use pyo3::exceptions::{PyKeyError, PyValueError};
 use pyo3::prelude::*;
@@ -17,7 +17,7 @@ use std::str::FromStr;
 /// BootstrapConfig
 /// ===================
 ///
-/// A Python wrapper for the Rust `NewBootstrapConfig` struct.
+/// A Python wrapper for the Rust `BootstrapConfig` struct.
 /// Configures the application, including authorization, logging, JWT validation, and policy store settings.
 ///
 /// Attributes
@@ -65,7 +65,7 @@ use std::str::FromStr;
 /// from cedarling import BootstrapConfig
 ///
 /// # Example configuration
-/// bootstrap_config = NewBootstrapConfig(
+/// bootstrap_config = BootstrapConfig(
 ///     application_name="MyApp",
 ///     policy_store_uri=None,
 ///     policy_store_id="policy123",
@@ -522,7 +522,7 @@ impl TryFrom<BootstrapConfig> for cedarling::BootstrapConfig {
                 .userinfo_exp_validation
                 .try_into()
                 .map_err(|e| PyValueError::new_err(format!("{}", e)))?,
-            id_token_trust_mode: TrustMode::from_str(value.id_token_trust_mode.as_str())
+            id_token_trust_mode: IdTokenTrustMode::from_str(value.id_token_trust_mode.as_str())
                 .unwrap_or_default(),
             lock: value
                 .lock

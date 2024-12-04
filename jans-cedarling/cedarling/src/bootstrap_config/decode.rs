@@ -1,6 +1,14 @@
+/*
+ * This software is available under the Apache-2.0 license.
+ * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+ *
+ * Copyright (c) 2024, Gluu, Inc.
+ */
+
 use super::{
-    authorization_config::AuthorizationConfig, BootstrapConfig, JwtConfig, LogConfig,
-    LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
+    authorization_config::AuthorizationConfig, BootstrapConfig, IdTokenTrustMode, JwtConfig,
+    LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
+    TokenValidationConfig,
 };
 use crate::common::policy_store::PolicyStore;
 use jsonwebtoken::Algorithm;
@@ -170,7 +178,7 @@ pub struct BootstrapConfigRaw {
     ///     2. if a Userinfo token is present, the sub matches the id_token, and that
     ///         the aud matches the access token client_id.
     #[serde(rename = "CEDARLING_ID_TOKEN_TRUST_MODE", default)]
-    pub id_token_trust_mode: TrustMode,
+    pub id_token_trust_mode: IdTokenTrustMode,
 
     /// If Enabled, the Cedarling will connect to the Lock Master for policies,
     /// and subscribe for SSE events.
@@ -214,30 +222,6 @@ pub struct BootstrapConfigRaw {
     pub listen_sse: FeatureToggle,
 }
 
-/// TrustMode can be `Strict` or `None`
-#[derive(Default, Debug, PartialEq, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum TrustMode {
-    /// `Strict` level of validation
-    #[default]
-    Strict,
-    /// Disable validation.
-    None,
-}
-
-impl FromStr for TrustMode {
-    type Err = ParseTrustModeError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let s = s.to_lowercase();
-        match s.as_str() {
-            "strict" => Ok(TrustMode::Strict),
-            "none" => Ok(TrustMode::None),
-            _ => Err(ParseTrustModeError { trust_mode: s }),
-        }
-    }
-}
-
 /// Type of logger
 #[derive(Debug, PartialEq, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
@@ -272,7 +256,7 @@ impl FromStr for LoggerType {
 }
 
 /// Enum varians that represent if feature is enabled or disabled
-#[derive(Debug, PartialEq, Deserialize, Default)]
+#[derive(Debug, PartialEq, Deserialize, Default, Copy, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum FeatureToggle {
     /// Represent as disabled.
@@ -280,6 +264,15 @@ pub enum FeatureToggle {
     Disabled,
     /// Represent as enabled.
     Enabled,
+}
+
+impl From<FeatureToggle> for bool {
+    fn from(value: FeatureToggle) -> bool {
+        match value {
+            FeatureToggle::Disabled => false,
+            FeatureToggle::Enabled => true,
+        }
+    }
 }
 
 impl TryFrom<String> for FeatureToggle {
@@ -456,12 +449,34 @@ impl BootstrapConfig {
             (Some(_), Some(_)) => Err(BootstrapDecodingError::ConflictingPolicyStores)?,
         };
 
-        // Decode JWT Config
-        // TODO: update this once Jwt Service implements the new bootstrap properties
-        let jwt_config = match raw.jwt_sig_validation {
-            FeatureToggle::Disabled => JwtConfig::Disabled,
-            FeatureToggle::Enabled => JwtConfig::Enabled {
-                signature_algorithms: raw.jwt_signature_algorithms_supported.clone(),
+        // JWT Config
+        let jwt_config = JwtConfig {
+            jwks: None,
+            jwt_sig_validation: raw.jwt_sig_validation.into(),
+            jwt_status_validation: raw.jwt_status_validation.into(),
+            id_token_trust_mode: raw.id_token_trust_mode,
+            signature_algorithms_supported: raw.jwt_signature_algorithms_supported.clone(),
+            access_token_config: TokenValidationConfig {
+                iss_validation: raw.at_iss_validation.into(),
+                jti_validation: raw.at_jti_validation.into(),
+                nbf_validation: raw.at_nbf_validation.into(),
+                exp_validation: raw.at_exp_validation.into(),
+                ..Default::default()
+            },
+            id_token_config: TokenValidationConfig {
+                iss_validation: raw.idt_iss_validation.into(),
+                aud_validation: raw.idt_aud_validation.into(),
+                sub_validation: raw.idt_sub_validation.into(),
+                exp_validation: raw.idt_exp_validation.into(),
+                iat_validation: raw.idt_iat_validation.into(),
+                ..Default::default()
+            },
+            userinfo_token_config: TokenValidationConfig {
+                iss_validation: raw.userinfo_iss_validation.into(),
+                aud_validation: raw.userinfo_aud_validation.into(),
+                sub_validation: raw.userinfo_sub_validation.into(),
+                exp_validation: raw.userinfo_exp_validation.into(),
+                ..Default::default()
             },
         };
 
