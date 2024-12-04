@@ -17,6 +17,7 @@ use std::hash::Hash;
 use uuid7::uuid7;
 use uuid7::Uuid;
 
+use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types::{self, ApplicationName};
 use crate::common::policy_store::PoliciesContainer;
 
@@ -257,24 +258,15 @@ impl Diagnostics {
 
 /// log entry for decision
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
-struct DecisionLogEntry {
+pub struct DecisionLogEntry<'a> {
     /// base information of entry
     /// it is unwrap to flatten structure
     #[serde(flatten)]
     pub base: BaseLogEntry,
-
-    /// unique identifier for this event
-    pub request_id: Uuid,
-    /// Time of decision, in ISO-8601 time format
-    /// This field is optional. Can be none if we can't have access to clock (WASM)
-    /// or it is not specified in context
-    pub timestamp: Option<String>,
-    /// unique id of cedarling
-    pub pdp_id: Uuid,
     /// id of policy store
-    pub policystore_id: String,
+    pub policystore_id: &'a str,
     /// version of policy store
-    pub policystore_version: String,
+    pub policystore_version: &'a str,
     /// describe what principal was active on authorization request
     pub principal: PrincipalLogEntry,
     /// A list of claims, specified by the CEDARLING_DECISION_LOG_USER_CLAIMS property, that must be present in the Cedar User entity
@@ -284,7 +276,7 @@ struct DecisionLogEntry {
     #[serde(rename = "Workload")]
     pub workload: HashMap<String, serde_json::Value>,
     /// If this Cedarling has registered with a Lock Server, what is the client_id it received
-    pub lock_client_id: String,
+    pub lock_client_id: Option<String>,
     /// action UID for request
     pub action: String,
     /// resource UID for request
@@ -294,7 +286,13 @@ struct DecisionLogEntry {
     /// Dictionary with the token type and claims which should be included in the log
     pub tokens: TokensInfo,
     /// time in milliseconds spent for decision
-    pub decision_time_ms: u64,
+    pub decision_time_ms: u128,
+}
+
+impl Loggable for &DecisionLogEntry<'_> {
+    fn get_request_id(&self) -> Uuid {
+        self.base.get_request_id()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -341,14 +339,35 @@ pub enum PrincipalLogEntry {
     User,
     Workload,
     UserAndWorkload,
+    UserORWorkload,
+    // corner case, should never happen
+    None,
+}
+
+impl PrincipalLogEntry {
+    pub(crate) fn new(conf: &AuthorizationConfig) -> Self {
+        match (
+            conf.use_user_principal,
+            conf.use_workload_principal,
+            conf.user_workload_operator,
+        ) {
+            (true, true, crate::WorkloadBoolOp::And) => Self::UserAndWorkload,
+            (true, true, crate::WorkloadBoolOp::Or) => Self::UserORWorkload,
+            (true, false, _) => Self::User,
+            (false, true, _) => Self::Workload,
+            (false, false, _) => Self::None,
+        }
+    }
 }
 
 impl Display for PrincipalLogEntry {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str_val = match self {
-            PrincipalLogEntry::User => "User",
-            PrincipalLogEntry::Workload => "Workload",
-            PrincipalLogEntry::UserAndWorkload => "User and Workload",
+            Self::User => "User",
+            Self::Workload => "Workload",
+            Self::UserAndWorkload => "User & Workload",
+            Self::UserORWorkload => "User | Workload",
+            Self::None => "none",
         };
 
         f.write_str(str_val)
@@ -372,3 +391,5 @@ pub struct TokensInfo {
     userinfo: HashMap<String, serde_json::Value>,
     access: HashMap<String, serde_json::Value>,
 }
+
+

@@ -35,6 +35,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
             log_type: LogTypeConfig::StdOut,
+            decision_log_user_claims: Default::default(),
+            decision_log_workload_claims: Default::default(),
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),

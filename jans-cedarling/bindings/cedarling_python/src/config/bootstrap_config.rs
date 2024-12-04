@@ -121,6 +121,12 @@ pub struct BootstrapConfig {
     /// Could be set to: 'off' | 'memory' | 'std_out' | 'lock'
     pub log_type: String,
 
+    /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
+    pub decision_log_user_claims: Vec<String>,
+
+    /// List of claims to map from user entity, such as ["client_id", "rp_id", ...]
+    pub decision_log_workload_claims: Vec<String>,
+
     /// If `log_type` is set to [`LogType::Memory`], this is the TTL (time to live) of
     /// log entities in seconds.
     ///
@@ -264,6 +270,10 @@ impl BootstrapConfig {
         let policy_store_uri = get_optional(options, "policy_store_uri")?;
         let log_type = get_with_default(options, "log_type", "memory".to_string())?;
         let log_ttl = get_with_default(options, "log_ttl", Some(60))?;
+        let decision_log_user_claims =
+            get_with_default(options, "decision_log_user_claims", Vec::default())?;
+        let decision_log_workload_claims =
+            get_with_default(options, "decision_log_workload_claims", Vec::default())?;
         let user_authz = get_with_default(options, "user_authz", "enabled".to_string())?;
         let workload_authz = get_with_default(options, "workload_authz", "enabled".to_string())?;
         let usr_workload_bool_op =
@@ -322,6 +332,8 @@ impl BootstrapConfig {
             policy_store_uri,
             log_type,
             log_ttl,
+            decision_log_user_claims,
+            decision_log_workload_claims,
             user_authz,
             workload_authz,
             usr_workload_bool_op,
@@ -424,6 +436,8 @@ impl TryFrom<BootstrapConfig> for cedarling::BootstrapConfig {
             policy_store_uri: value.policy_store_uri,
             policy_store_id: value.policy_store_id,
             log_type: LoggerType::from_str(value.log_type.as_str()).unwrap_or_default(),
+            decision_log_user_claims: value.decision_log_user_claims,
+            decision_log_workload_claims: value.decision_log_workload_claims,
             log_ttl: value.log_ttl,
             user_authz: value.user_authz.try_into().unwrap_or_default(),
             workload_authz: value.workload_authz.try_into().unwrap_or_default(),

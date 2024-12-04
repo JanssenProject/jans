@@ -9,18 +9,18 @@
 //! - evaluate if authorization is granted for *user*
 //! - evaluate if authorization is granted for *client* / *workload *
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 use std::sync::Arc;
 
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types;
-use crate::common::policy_store::PolicyStore;
+use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt;
 use crate::log::interface::LogWriter;
 use crate::log::{
-    AuthorizationLogInfo, Diagnostics, LogEntry, LogType, Logger, PersonAuthorizeInfo,
-    WorkloadAuthorizeInfo,
+    AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, LogEntry, LogType, Logger,
+    PersonAuthorizeInfo, PrincipalLogEntry, WorkloadAuthorizeInfo,
 };
 use std::io::Cursor;
 
@@ -41,6 +41,7 @@ use entities::{
 };
 use entities::{create_resource_entity, AccessTokenEntities};
 use request::Request;
+use std::time::Instant;
 use token_data::{AccessTokenData, IdTokenData, UserInfoTokenData};
 
 /// Configuration to Authz to initialize service without errors
@@ -48,10 +49,12 @@ pub(crate) struct AuthzConfig {
     pub log_service: Logger,
     pub pdp_id: app_types::PdpID,
     pub application_name: app_types::ApplicationName,
-    pub policy_store: PolicyStore,
+    pub policy_store: PolicyStoreWithID,
     pub jwt_service: Arc<jwt::JwtService>,
     pub authorization: AuthorizationConfig,
 }
+
+
 
 /// Authorization Service
 /// The primary service of the Cedarling application responsible for evaluating authorization requests.
@@ -85,6 +88,8 @@ impl Authz {
     /// - evaluate if authorization is granted for *person*
     /// - evaluate if authorization is granted for *workload*
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
+        let start_time = Instant::now();
+
         let schema = &self.config.policy_store.schema;
 
         // Parse action UID.
@@ -148,6 +153,11 @@ impl Authz {
             person_result,
         );
 
+        // measure time how long request executes
+        let elapsed_ms = start_time.elapsed().as_millis();
+
+        // FROM THIS POINT WE ONLY MAKE LOGS
+
         // getting entities as json
         let mut entities_raw_json = Vec::new();
         let cursor = Cursor::new(&mut entities_raw_json);
@@ -156,6 +166,7 @@ impl Authz {
         let entities_json: serde_json::Value = serde_json::from_slice(entities_raw_json.as_slice())
             .map_err(AuthorizeError::EntitiesToJson)?;
 
+        // DEBUG LOG
         // Log all result information about both authorize checks.
         // Where principal is `"Jans::Workload"` and where principal is `"Jans::User"`.
         self.config.log_service.as_ref().log(
@@ -165,7 +176,7 @@ impl Authz {
                 LogType::Decision,
             )
             .set_auth_info(AuthorizationLogInfo {
-                action: request.action,
+                action: request.action.clone(),
                 context: request.context,
                 resource: resource_uid.to_string(),
                 entities: entities_json,
@@ -194,6 +205,22 @@ impl Authz {
             })
             .set_message("Result of authorize.".to_string()),
         );
+
+        // Decision log
+        self.config.log_service.as_ref().log_any(&DecisionLogEntry {
+            base: BaseLogEntry::new(self.config.pdp_id, LogType::Decision),
+            policystore_id: &self.config.policy_store.id.as_str(),
+            policystore_version: self.config.policy_store.get_store_version(),
+            principal: PrincipalLogEntry::new(&self.config.authorization),
+            user: get_entity_claims( &self.config.authorization.decision_log_user_claims.as_slice(),&entities,principal_user_entity_uid),
+            workload: get_entity_claims( &self.config.authorization.decision_log_workload_claims.as_slice(),&entities,principal_workload_uid),
+            lock_client_id: None,
+            action: request.action,
+            resource: resource_uid.to_string(),
+            decision: result.decision().into(),
+            tokens: todo!(),
+            decision_time_ms: elapsed_ms,
+        });
 
         Ok(result)
     }
@@ -382,3 +409,50 @@ pub struct CreateRequestRoleError {
     /// Role ID [`EntityUid`] value used for authorization request
     uid: EntityUid,
 }
+
+
+
+/// Get entity claims from list in config
+// 
+// To get claims we convert entity to json, because no other way to get introspection
+fn get_entity_claims(decision_log_claims: &[String], entities: &Entities,principal_user_entity_uid: EntityUid) -> HashMap<String, serde_json::Value> {
+    HashMap::from_iter(  decision_log_claims
+        .iter()
+        .filter_map(|claim_key| {
+            entities
+                .get(&principal_user_entity_uid)
+                // convert entity to json and result to option
+                .map(|entity| entity.to_json_value().ok())
+                .flatten()
+                // JSON structure of entity:
+                // {
+                //     "uid": {
+                //         "type": "Jans::User",
+                //         "id": "..."
+                //     },
+                //     "attrs": {
+                //         ...
+                //     },
+                //     "parents": [
+                //         {
+                //             "type": "Jans::Role",
+                //             "id": "SomeID"
+                //         }
+                //     ]
+                // },
+                .map(|json_value| 
+                    // get `attrs` attribute
+                    json_value.get("attrs")
+                    .map(|attrs_value| 
+                        // get claim key value
+                        attrs_value.get(claim_key)
+                        .map(|claim_value| claim_value.to_owned())
+                    )
+                )
+                .flatten()
+                .flatten()
+                // convert to (String, Value) tuple
+                .map(|attr_json| (claim_key.clone(),attr_json.clone()))
+        }))
+}
+

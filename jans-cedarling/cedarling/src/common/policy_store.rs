@@ -33,6 +33,9 @@ pub struct AgamaPolicyStore {
 /// which are parsed during deserialization.
 #[derive(Debug, Clone, serde::Deserialize, PartialEq)]
 pub struct PolicyStore {
+    /// version of policy store
+    pub version: Option<String>,
+
     /// Name is also name of namespace in `cedar-policy`
     pub name: String,
 
@@ -63,6 +66,23 @@ impl PolicyStore {
     pub(crate) fn namespace(&self) -> &str {
         &self.name
     }
+
+    pub(crate) fn get_store_version(&self) -> &str {
+        self.version
+            .as_ref()
+            .map(|v| v.as_str())
+            .unwrap_or("undefined")
+    }
+}
+
+/// Wrapper around [`PolicyStore`] to have access to it and ID of policy store
+#[derive(Clone, derive_more::Deref)]
+pub struct PolicyStoreWithID {
+    /// ID of policy store
+    pub id: String,
+    /// Policy store value
+    #[deref]
+    pub store: PolicyStore,
 }
 
 /// Represents a trusted issuer that can provide JWTs.

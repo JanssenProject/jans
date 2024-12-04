@@ -6,8 +6,7 @@
  */
 
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
-use crate::common::policy_store::AgamaPolicyStore;
-use crate::common::policy_store::PolicyStore;
+use crate::common::policy_store::{AgamaPolicyStore, PolicyStoreWithID};
 use std::path::Path;
 use std::{fs, io};
 
@@ -31,20 +30,26 @@ pub enum PolicyStoreLoadError {
 // extract the first 'policy_stores' entry.
 fn extract_first_policy_store(
     agama_policy_store: &AgamaPolicyStore,
-) -> Result<PolicyStore, PolicyStoreLoadError> {
+) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     if agama_policy_store.policy_stores.len() != 1 {
         return Err(PolicyStoreLoadError::InvalidStore(format!(
             "expected exactly one 'policy_stores' entry, but found {:?}",
             agama_policy_store.policy_stores.len()
         )));
     }
+
     // extract exactly the first policy store in the struct
-    let mut policy_stores = agama_policy_store
+    let policy_store_option = agama_policy_store
         .policy_stores
-        .values()
+        .iter()
         .take(1)
-        .collect::<Vec<_>>();
-    match policy_stores.pop() {
+        .map(|(k, v)| PolicyStoreWithID {
+            id: k.to_owned(),
+            store: v.to_owned(),
+        })
+        .next();
+
+    match policy_store_option {
         Some(policy_store) => Ok(policy_store.clone()),
         None => Err(PolicyStoreLoadError::InvalidStore(
             "error retrieving first policy_stores element".into(),
@@ -57,7 +62,7 @@ fn extract_first_policy_store(
 /// This function supports multiple sources for loading policies.
 pub(crate) fn load_policy_store(
     config: &PolicyStoreConfig,
-) -> Result<PolicyStore, PolicyStoreLoadError> {
+) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     let policy_store = match &config.source {
         PolicyStoreSource::Json(policy_json) => {
             let agama_policy_store = serde_json::from_str::<AgamaPolicyStore>(policy_json)
@@ -95,7 +100,7 @@ pub(crate) fn load_policy_store(
 /// service has been established
 fn load_policy_store_from_lock_master(
     _policy_store_id: &str,
-) -> Result<PolicyStore, PolicyStoreLoadError> {
+) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     todo!()
 }
 

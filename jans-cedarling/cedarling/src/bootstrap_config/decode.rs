@@ -32,6 +32,14 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_LOG_TYPE", default)]
     pub log_type: LoggerType,
 
+    /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
+    #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS ", default)]
+    pub decision_log_user_claims: Vec<String>,
+
+    /// List of claims to map from user entity, such as ["client_id", "rp_id", ...]
+    #[serde(rename = "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS", default)]
+    pub decision_log_workload_claims: Vec<String>,
+
     /// If `log_type` is set to [`LogType::Memory`], this is the TTL (time to live) of
     /// log entities in seconds.
     #[serde(rename = "CEDARLING_LOG_TTL", default)]
@@ -461,6 +469,8 @@ impl BootstrapConfig {
             use_user_principal: raw.user_authz.is_enabled(),
             use_workload_principal: raw.workload_authz.is_enabled(),
             user_workload_operator: raw.usr_workload_bool_op,
+            decision_log_user_claims: raw.decision_log_user_claims.clone(),
+            decision_log_workload_claims: raw.decision_log_workload_claims.clone(),
         };
 
         Ok(Self {
