@@ -2,15 +2,12 @@
 //! Contains unit tests for the main code flow with the `LogStrategy``
 //! `LogStrategy` wraps all other logger implementations.
 
-use std::{
-    io::Write,
-    time::{SystemTime, UNIX_EPOCH},
-};
-
 use super::*;
 use crate::{common::app_types, log::stdout_logger::TestWriter};
+use chrono::prelude::*;
 use interface::LogWriter;
 use nop_logger::NopLogger;
+use std::io::Write;
 use stdout_logger::StdOutLogger;
 use uuid7::uuid7;
 
@@ -67,10 +64,7 @@ fn test_log_memory_logger() {
     let strategy = LogStrategy::new(&config);
     let entry = LogEntry {
         id: uuid7(),
-        time: SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("Time went backwards")
-            .as_secs(),
+        time: Utc::now().timestamp().try_into().unwrap(),
         log_kind: LogType::Decision,
         pdp_id: uuid7(),
         application_id: Some("test_app".to_string().into()),
@@ -146,10 +140,7 @@ fn test_log_stdout_logger() {
     // Arrange
     let log_entry = LogEntry {
         id: uuid7(),
-        time: SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("Time went backwards")
-            .as_secs(),
+        time: Utc::now().timestamp().try_into().unwrap(),
         log_kind: LogType::Decision,
         pdp_id: uuid7(),
         application_id: Some("test_app".to_string().into()),

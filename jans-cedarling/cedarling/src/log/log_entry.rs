@@ -8,10 +8,9 @@
 //! # Log entry
 //! The module contains structs for logging events.
 
+use chrono::prelude::*;
 use std::collections::HashSet;
 use std::fmt::Display;
-
-use std::time::{SystemTime, UNIX_EPOCH};
 
 use uuid7::uuid7;
 use uuid7::Uuid;
@@ -54,10 +53,10 @@ impl LogEntry {
         application_id: Option<app_types::ApplicationName>,
         log_kind: LogType,
     ) -> LogEntry {
-        let unix_time_sec = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("Time went backwards")
-            .as_secs();
+        let unix_time_sec = Utc::now()
+            .timestamp()
+            .try_into()
+            .expect("Failed to convert timestamp: value might be negative");
 
         Self {
             // We use uuid v7 because it is generated based on the time and sortable.

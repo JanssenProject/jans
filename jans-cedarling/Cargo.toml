@@ -9,7 +9,7 @@ thiserror = "1.0"
 sparkv = { path = "sparkv" }
 cedarling = { path = "cedarling" }
 test_utils = { path = "test_utils" }
-
+chrono = "0.4.38"
 
 [profile.release]
 strip = "symbols"
