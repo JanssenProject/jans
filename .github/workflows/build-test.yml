@@ -37,9 +37,39 @@ on:
         description: 'Service'
         required: true
         default: "jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 jans-scim jans-keycloak-link jans-config-api jans-keycloak-integration jans-casa"
-
+concurrency:
+  group: run-once
+  cancel-in-progress: false
 jobs:
+  cleanup:
+    if: github.event_name == 'push' && github.event.ref == 'refs/heads/main'
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      with:
+        egress-policy: audit
+    - name: Get version ID for 0.0.0-nightly
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      id: get_version_id
+      run: |
+        services=$(gh api -H "Accept: application/vnd.github+json" \
+                  /orgs/JanssenProject/packages?package_type=maven \
+                  | jq -r '.[].name')
+        for service in "${services}"; do
+          version_id=$(gh api -H "Accept: application/vnd.github+json" \
+            /orgs/JanssenProject/packages/maven/io.jans.${service}/versions \
+            | jq -r '.[] | select(.name == "0.0.0-nightly") | .id')
+          echo "version_id=$version_id" >> $GITHUB_ENV
+          gh api --method DELETE \
+          -H "Accept: application/vnd.github+json" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          /orgs/JanssenProject/packages/maven/io.jans."${service}"/versions/"${version_id}"
+        done
+
+
   prep-matrix:
+    needs: cleanup
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -98,23 +128,6 @@ jobs:
       with:
         ref: ${{ github.event.inputs.branch }}
 
-    - name: Get version ID for 0.0.0-nightly
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      id: get_version_id
-      run: |
-        version_id=$(gh api -H "Accept: application/vnd.github+json" \
-          /orgs/JanssenProject/packages/maven/io.jans.${{ matrix.service }}/versions \
-          | jq -r '.[] | select(.name == "0.0.0-nightly") | .id')
-        echo "version_id=$version_id" >> $GITHUB_ENV
-
-    - name: Delete existing 0.0.0-nightly version
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      run: |
-        gh api --method DELETE \
-          -H "Accept: application/vnd.github+json" \
-          -H "X-GitHub-Api-Version: 2022-11-28" \
-          /orgs/JanssenProject/packages/maven/io.jans.${{ matrix.service }}/versions/${{ env.version_id }}
-
     - name: Set up Java 17
       uses: actions/setup-java@v4
       with:
@@ -153,27 +166,10 @@ jobs:
       if: failure()
       run: echo "Build failed"
 
-  cleanup:
-    if: github.event_name == 'push' && github.event.ref == 'refs/heads/main'
-    runs-on: ubuntu-20.04
-    steps:
-    - name: Harden Runner
-      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
-      with:
-        egress-policy: audit
-    - name: Clean up PR assets
-      run: |
-        versions=$(curl -s -H "Authorization: token ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" "https://maven.pkg.github.com/JanssenProject/jans/maven-metadata.xml" | grep -oP '(?<=<version>)[^<]+')
-
-        for version in $versions; do
-          if [[ $version == *-nightly ]]; then
-            curl -X DELETE -H "Authorization: token ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" "https://maven.pkg.github.com/JanssenProject/jans/io/jans/${{ matrix.service.project }}/$version"
-          fi
-        done
-
   run-tests:
     if: github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.project == 'jans-bom, jans-orm, jans-core, jans-lock/lock-server, agama, jans-auth-server, jans-link, jans-fido2, jans-scim, jans-keycloak-link, jans-config-api, jans-keycloak-integration, jans-casa')
     permissions: write-all
+    needs: cleanup
     runs-on: ubuntu-20.04
     env:
       MAVEN_SKIP_TESTS: false
