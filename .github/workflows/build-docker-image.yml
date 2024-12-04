@@ -99,7 +99,7 @@ jobs:
       - uses: actions/delete-package-versions@v5
         continue-on-error: true
         with:
-          package-name: ${{ matrix.docker-images }}
+          package-name: jans/${{ matrix.docker-images }}
           package-type: container
           min-versions-to-keep: 0
           token:  ${{ secrets.GITHUB_TOKEN }}
