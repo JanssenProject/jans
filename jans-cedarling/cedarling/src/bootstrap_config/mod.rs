@@ -83,7 +83,7 @@ impl BootstrapConfig {
 
     /// Loads a `BootstrapConfig` from a JSON string
     pub fn load_from_json(config: &str) -> Result<Self, Box<dyn std::error::Error>> {
-        let raw = serde_json::from_str::<decode::BootstrapConfigRaw>(&config)?;
+        let raw = serde_json::from_str::<decode::BootstrapConfigRaw>(config)?;
         Self::from_raw_config(&raw)
     }
 }

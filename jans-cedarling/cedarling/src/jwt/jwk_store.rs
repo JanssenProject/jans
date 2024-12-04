@@ -166,7 +166,7 @@ impl JwkStore {
         // fetch jwks
         let response = http_client.get(&openid_config.jwks_uri)?;
 
-        let mut store = Self::new_from_jwks_str(store_id, &response.text())?;
+        let mut store = Self::new_from_jwks_str(store_id, response.text())?;
         store.issuer = Some(openid_config.issuer.into());
         store.source_iss = Some(issuer.clone());
 
