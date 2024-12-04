@@ -5,10 +5,14 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use reqwest::blocking::Client;
-use std::{thread::sleep, time::Duration};
+use reqwest::Client;
+use serde::de::DeserializeOwned;
+use tokio::{
+    runtime::{Builder as RtBuilder, Runtime},
+    time::Duration,
+};
 
-/// A wrapper around `reqwest::blocking::Client` providing HTTP request functionality
+/// A wrapper around [`reqwest::Client`] providing HTTP request functionality
 /// with retry logic.
 ///
 /// The `HttpClient` struct allows for sending GET requests with a retry mechanism
@@ -16,13 +20,48 @@ use std::{thread::sleep, time::Duration};
 /// if an error occurs.
 #[derive(Debug)]
 pub struct HttpClient {
-    client: reqwest::blocking::Client,
+    client: reqwest::Client,
     max_retries: u32,
     retry_delay: Duration,
+    rt: Runtime,
+}
+
+/// A wrapper around [`reqwest::Response`]
+#[derive(Debug)]
+pub struct Response<'rt> {
+    rt: &'rt Runtime,
+    resp: reqwest::Response,
+}
+
+impl Response<'_> {
+    /// Deserializes the response into <T> from JSON.
+    pub fn json<T>(self) -> Result<T, HttpClientError>
+    where
+        T: DeserializeOwned,
+    {
+        let resp_json = self
+            .rt
+            .block_on(async { self.resp.json::<T>().await })
+            .map_err(HttpClientError::DeserializeJson)?;
+        Ok(resp_json)
+    }
+
+    /// Deserializes the response into a String.
+    pub fn text(self) -> Result<String, HttpClientError> {
+        let resp_text = self
+            .rt
+            .block_on(async { self.resp.text().await })
+            .map_err(HttpClientError::DeserializeJson)?;
+        Ok(resp_text)
+    }
 }
 
 impl HttpClient {
     pub fn new(max_retries: u32, retry_delay: Duration) -> Result<Self, HttpClientError> {
+        let rt = RtBuilder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("Failed to create Tokio runtime");
         let client = Client::builder()
             .build()
             .map_err(HttpClientError::Initialization)?;
@@ -31,6 +70,7 @@ impl HttpClient {
             client,
             max_retries,
             retry_delay,
+            rt,
         })
     }
 
@@ -38,31 +78,35 @@ impl HttpClient {
     ///
     /// This method will attempt to fetch the resource up to 3 times, with an increasing delay
     /// between each attempt.
-    pub fn get(&self, uri: &str) -> Result<reqwest::blocking::Response, HttpClientError> {
+    pub fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
         // Fetch the JWKS from the jwks_uri
         let mut attempts = 0;
-        let response = loop {
-            match self.client.get(uri).send() {
-                // Exit loop on success
-                Ok(response) => break response,
+        let response = self.rt.block_on(async {
+            loop {
+                match self.client.get(uri).send().await {
+                    // Exit loop on success
+                    Ok(response) => return Ok(response),
 
-                Err(e) if attempts < self.max_retries => {
-                    attempts += 1;
-                    // TODO: pass this message to the logger
-                    eprintln!(
-                        "Request failed (attempt {} of {}): {}. Retrying...",
-                        attempts, self.max_retries, e
-                    );
-                    sleep(self.retry_delay * attempts);
-                },
-                // Exit if max retries exceeded
-                Err(e) => return Err(HttpClientError::MaxHttpRetriesReached(e)),
+                    Err(e) if attempts < self.max_retries => {
+                        attempts += 1;
+                        // TODO: pass this message to the logger
+                        eprintln!(
+                            "Request failed (attempt {} of {}): {}. Retrying...",
+                            attempts, self.max_retries, e
+                        );
+                        tokio::time::sleep(self.retry_delay * attempts).await
+                    },
+                    // Exit if max retries exceeded
+                    Err(e) => return Err(HttpClientError::MaxHttpRetriesReached(e)),
+                }
             }
-        };
+        })?;
 
-        response
+        let resp = response
             .error_for_status()
-            .map_err(HttpClientError::HttpStatus)
+            .map_err(HttpClientError::HttpStatus)?;
+
+        Ok(Response { rt: &self.rt, resp })
     }
 }
 
@@ -75,10 +119,15 @@ pub enum HttpClientError {
     /// Indicates an HTTP error response received from an endpoint.
     #[error("Received error HTTP status: {0}")]
     HttpStatus(#[source] reqwest::Error),
-
     /// Indicates a failure to reach the endpoint after 3 attempts.
     #[error("Could not reach endpoint after trying 3 times: {0}")]
     MaxHttpRetriesReached(#[source] reqwest::Error),
+    /// Indicates a failure to deserialize the http response into JSON.
+    #[error("Failed to deserialize response into JSON: {0}")]
+    DeserializeJson(#[source] reqwest::Error),
+    /// Indicates a failure to deserialize the http response into JSON.
+    #[error("Failed to deserialize response into a String: {0}")]
+    DeserializeText(#[source] reqwest::Error),
 }
 
 #[cfg(test)]
@@ -87,9 +136,9 @@ mod test {
 
     use super::HttpClient;
     use mockito::Server;
-    use serde_json::json;
-    use std::time::Duration;
+    use serde_json::{json, Value};
     use test_utils::assert_eq;
+    use tokio::time::Duration;
 
     #[test]
     fn can_fetch() {
@@ -109,7 +158,7 @@ mod test {
             .create();
 
         let client =
-            HttpClient::new(3, Duration::from_millis(1)).expect("Should create HttpClient.");
+            HttpClient::new(3, Duration::from_millis(10)).expect("Should create HttpClient.");
 
         let response = client
             .get(&format!(
@@ -117,8 +166,8 @@ mod test {
                 mock_server.url()
             ))
             .expect("Should get response")
-            .json::<serde_json::Value>()
-            .expect("Should deserialize JSON response.");
+            .json::<Value>()
+            .expect("Should deserialize response to JSON");
 
         assert_eq!(
             response, expected,
