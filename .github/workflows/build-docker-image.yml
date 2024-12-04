@@ -99,7 +99,7 @@ jobs:
       - uses: actions/delete-package-versions@v5
         with:
           package-name: ${{ matrix.docker-images }}
-          package-type: container
+          package-type: docker
           min-versions-to-keep: 1
           token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
           ignore-versions: '^(?!0.0.0-nightly)'
