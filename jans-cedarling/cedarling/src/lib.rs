@@ -13,10 +13,10 @@
 //! For example, why display form fields that a user is not authorized to see?
 //! The Cedarling is a more productive and flexible way to handle authorization.
 
-mod http;
 mod authz;
 mod bootstrap_config;
 mod common;
+mod http;
 mod init;
 mod jwt;
 mod lock;
