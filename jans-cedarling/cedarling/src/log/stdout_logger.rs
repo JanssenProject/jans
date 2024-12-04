@@ -87,12 +87,9 @@ impl Write for TestWriter {
 #[cfg(test)]
 mod tests {
     use super::super::LogType;
-
+    use chrono::prelude::*;
     use super::*;
-    use std::{
-        io::Write,
-        time::{SystemTime, UNIX_EPOCH},
-    };
+    use std::io::Write;
 
     use uuid7::uuid7;
 
@@ -101,10 +98,7 @@ mod tests {
         // Create a log entry
         let log_entry = LogEntry {
             id: uuid7(),
-            time: SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .expect("Time went backwards")
-                .as_secs(),
+            time: Utc::now().timestamp().try_into().unwrap(),
             log_kind: LogType::Decision,
             pdp_id: uuid7(),
             application_id: Some("test_app".to_string().into()),
