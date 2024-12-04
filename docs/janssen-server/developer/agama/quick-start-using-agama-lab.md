@@ -19,25 +19,37 @@ Major Steps involved in this process are:
 - [Create Agama project on the Agama Lab](#create-agama-project)
 - [Defining The Authentication Flow](#defining-the-authentication-flow)
 - [Design User Interface](#design-user-interface)
-- Deploy `.gama` package on an IDP (Janssen Server)
-- Test the authentication flow
+- [Deploy Agama Project](#deploy-agama-project)
+- [Test Using Tarp](#testing-using-janssen-tarp)
 
-This guide covers these steps in the following sections.
+This guide covers steps above in the following sections.
 
 ## Prerequisites
 
 - We will use the [Janssen Server](https://jans.io) to deploy the Agama project.
 Follow the instructions [here](https://docs.jans.io/head/janssen-server/install/)
 to install the Janssen Server.
-- Two public GitHub repositories. These will be used as development repository
-and release repository
-- Completed GitHub integration using Agama Lab GitHub app
+- A GitHub account where Agama Lab GitHub app has been [integrated](https://github.com/GluuFederation/private/wiki/Sign-Up---Sign-In#need-for-github-account). GitHub
+account can be a personal account or an organizational account. For this guide
+we will assume that a personal account is being used.
+- Two public GitHub repositories. These will be used as [development 
+repository](https://github.com/GluuFederation/private/wiki/Flow-Designer#development-repository) and [release repository](https://github.com/GluuFederation/private/wiki/Flow-Designer#release-repository). Each repository should have at least one 
+commit. A commit that creates a README file is also sufficient.
+
 
 ## Create Agama Project
 
 We will use [Agama Lab](https://cloud.gluu.org/agama-lab/) to create a simple 
-username-password based user authentication flow. This involves defining the authentication steps, designing the user interface to capture user
-inputs, and lastly, releasing the flow as an Agama project.
+username-password based user authentication project. 
+
+![](../../../assets/agama-lab-flow-quick-start-guide.png)
+
+An Agama project may include multiple components. For example, an authentication
+flow, a user interface, assets like organization's logo, external libraries, etc. 
+In this project, we will see how to  
+
+- Define the authentication steps in for of a flow
+- Design the user interface to capture user inputs
 
 ### Log Into Agama Lab
 
@@ -50,24 +62,28 @@ inputs, and lastly, releasing the flow as an Agama project.
 
     ![](../../../assets/agama-lab-git-login.png)
 
-3. Click on `Change Repository`, go to `your repositories` > select your repositories name. Click `Select`
+3. After successful sign in, the [project dashboard](https://github.com/GluuFederation/private/wiki/Agama-Lab-Project-Dashboard)
+will be shown. Next step is to select the repository where you want to create 
+the project. Select the development repository by clicking on `Change Repository` -> `Your Repositories` -> select the name of 
+your repository from drop-down list. Click `Select`
    
     ![](../../../assets/agama-lab-add-git-repo.png)
 
 
-4. Project listing page will be shown. All the existing projects for your GitHub user are listed here. Projects can be
-   created, edited, and deleted from the project listing page.
+4. Project dashboard with all the existing projects(if any) from the GitHub
+repository will be shown. New projects can be created, edited, and deleted 
+from this project listing page.
 
     ![](../../../assets/agamalab-project-page.png)
 
 ### Create A New Project
 
-1. To create a new project, click on the `New Project` button on the project listing page above.
+1. To create a new project, click on the `New Project` button.
    Enter the name and the description for the new project and click the `Create` button.
 
     ![](../../../assets/agamalab-new-proj.png)
 
-2. This will create a new project. It'll be listed on the project listing page.
+2. This will create a new project.
 
     ![](../../../assets/agamalab-project-listing.png)
 
@@ -75,23 +91,23 @@ inputs, and lastly, releasing the flow as an Agama project.
 
 1. Create A Flow File
 
-    _Click on :material-arrow-top-right:_
-
-    The flow authoring view will open with a blank canvas. To start creating the flow, we need to create a `Flow File`. To
-    do that,
-
-    _Right-click on `code` and then select `New` > `Flow File`_
+    Click on :material-arrow-top-right: to open [project editor](https://github.com/GluuFederation/private/wiki/Project-Editor). 
+    To start creating the flow, right-click on the `code` directory > `New` > `Flow File`
 
     ![](../../../assets/agamalab-new-flow.png)
 
-    _Give name and description for the flow file and then click `Create`_
+    Give name and description for the flow file and then click `Create`
 
     ![](../../../assets/agamalab-new-flow-name.png)
 
-    A newly created flow file has one block in it by default.
+    A newly created flow file contains one `start` block.
 
     ![](../../../assets/agamalab-flow-passwd-1.png)
     
+
+    In the subsequent steps, we are going to create nodes in the flow using the
+    flow editor. Refer to [this](https://github.com/GluuFederation/private/wiki/Project-Editor#working-with-the-flow-editor) guide if you need to understand how 
+    to create, delete and configure nodes.
 
 2. Create _AuthenticationService_ Call block
 
@@ -106,7 +122,7 @@ inputs, and lastly, releasing the flow as an Agama project.
 
     ![](../../../assets/agamalab-flow-passwd-new-call.png)
 
-    Click `Call` block and then click :material-pencil: to open the 
+    Click the `Call` block and then click :material-pencil: to open the 
     configuration screen. Add configuration values as shown below.  
     This configuration will create a new instance of 
     `AuthenticationService` class to 
@@ -117,14 +133,11 @@ inputs, and lastly, releasing the flow as an Agama project.
 
 3.  Create _CdiUtil_ Call block
 
-    To perform authentication we will also need a bean instance of `CdiUtil` class. This bean instance  
-    takes `AuthenticationService` instance that we created in the previous step as an argument.
+    To perform authentication we will also need a bean instance of `CdiUtil` class. It 
+    takes `AuthenticationService` instance that we created in the previous step as an input.
 
     After the `AuthenticationService` create new `Call` node 
-    
-
-    ![](../../../assets/agama-create-cdiutil.png)
-
+   
     _Click on the newly created `Call` block and by clicking :material-pencil: open the configuration page.
     Input values as shown below in the configuration screen_
 
@@ -132,14 +145,9 @@ inputs, and lastly, releasing the flow as an Agama project.
 
 4. Create Assignment block
 
-    Next, we need to create an empty variable that the flow will use in the future to store authentication results.
-    
-    Drag and drop endpoint of this :material-circle: at `New Cdiutil Object` block then select `Assignment`
+    Next, we need to create an empty variable that the flow will use in the future to store authentication results. 
 
-    ![](../../../assets/agama-create-assignment.png)
-
-    _Click on the newly created `Assignment` block. Click :material-pencil:.
-    Input values as shown below in the configuration screen_
+    Create an `Assignment` block and configure it as shown below.
 
     ![](../../../assets/agamalab-flow-passwd-edit-assignment.png)
 
@@ -261,7 +269,7 @@ inputs, and lastly, releasing the flow as an Agama project.
 
      The completed flow looks like below:
 
-     ![](../../../assets/agama-lab-flow-passwd-complete-flow.png)
+     ![](../../../assets/agama-lab-flow-quick-start-guide.png)
 
 11. Check Generated code
 
