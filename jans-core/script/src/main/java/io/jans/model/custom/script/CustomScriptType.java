@@ -17,7 +17,9 @@ import io.jans.model.custom.script.type.authzchallenge.AuthorizationChallengeTyp
 import io.jans.model.custom.script.type.authzchallenge.DummyAuthorizationChallengeType;
 import io.jans.model.custom.script.type.authzdetails.AuthzDetailType;
 import io.jans.model.custom.script.type.authzdetails.DummyAuthzDetail;
+import io.jans.model.custom.script.type.authzen.AccessEvaluationDiscoveryType;
 import io.jans.model.custom.script.type.authzen.AccessEvaluationType;
+import io.jans.model.custom.script.type.authzen.DummyAccessEvaluationDiscoveryType;
 import io.jans.model.custom.script.type.authzen.DummyAccessEvaluationType;
 import io.jans.model.custom.script.type.ciba.DummyEndUserNotificationType;
 import io.jans.model.custom.script.type.ciba.EndUserNotificationType;
@@ -102,6 +104,8 @@ public enum CustomScriptType implements AttributeEnum {
             new UmaDummyClaimsGatheringType()),
     ACCESS_EVALUATION("access_evaluation", "Access Evaluation", AccessEvaluationType.class, CustomScript.class, "AccessEvaluation",
             new DummyAccessEvaluationType()),
+    ACCESS_EVALUATION_DISCOVERY("access_evaluation_discovery", "Access Evaluation Discovery", AccessEvaluationDiscoveryType.class, CustomScript.class, "AccessEvaluationDiscovery",
+            new DummyAccessEvaluationDiscoveryType()),
     CONSENT_GATHERING("consent_gathering", "Consent Gathering", ConsentGatheringType.class, CustomScript.class, "ConsentGathering",
             new DummyConsentGatheringType()),
     DYNAMIC_SCOPE("dynamic_scope", "Dynamic Scopes", DynamicScopeType.class, CustomScript.class, "DynamicScope",
