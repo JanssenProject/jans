@@ -1,0 +1,22 @@
+name: Delete Untagged images
+on:
+  schedule:
+    - cron: '0 0 */2 * *'
+  workflow_dispatch:
+jobs:
+  del_untagged_images:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+        with:
+          egress-policy: audit
+      # TODO remove this step in favor for a more secure way to delete untagged images
+      - name: Delete all owner containers without tags
+        uses: Chizkiyahu/delete-untagged-ghcr-action@v5
+        with:
+            token: ${{ github.token }}
+            repository_owner: ${{ github.repository_owner }}
+            owner_type: org
