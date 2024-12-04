@@ -75,7 +75,6 @@ pub enum HttpClientError {
     /// Indicates an HTTP error response received from an endpoint.
     #[error("Received error HTTP status: {0}")]
     HttpStatus(#[source] reqwest::Error),
-
     /// Indicates a failure to reach the endpoint after 3 attempts.
     #[error("Could not reach endpoint after trying 3 times: {0}")]
     MaxHttpRetriesReached(#[source] reqwest::Error),
@@ -83,9 +82,7 @@ pub enum HttpClientError {
 
 #[cfg(test)]
 mod test {
-    use crate::jwt::http_client::HttpClientError;
-
-    use super::HttpClient;
+    use super::{HttpClient, HttpClientError};
     use mockito::Server;
     use serde_json::json;
     use std::time::Duration;

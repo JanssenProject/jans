@@ -5,9 +5,9 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::http_client::{HttpClient, HttpClientError};
 use super::{KeyId, TrustedIssuerId};
 use crate::common::policy_store::TrustedIssuer;
+use crate::http::{HttpClient, HttpClientError};
 use jsonwebtoken::jwk::Jwk;
 use jsonwebtoken::DecodingKey;
 use serde::Deserialize;
@@ -228,10 +228,7 @@ struct IntermediateJwks {
 
 #[cfg(test)]
 mod test {
-    use crate::{
-        common::policy_store::TrustedIssuer,
-        jwt::{http_client::HttpClient, jwk_store::JwkStore},
-    };
+    use crate::{common::policy_store::TrustedIssuer, http::HttpClient, jwt::jwk_store::JwkStore};
     use jsonwebtoken::{jwk::JwkSet, DecodingKey};
     use mockito::Server;
     use serde_json::json;

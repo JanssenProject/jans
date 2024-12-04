@@ -6,11 +6,11 @@
  */
 
 use super::{
-    http_client::{HttpClient, HttpClientError},
     jwk_store::{JwkStore, JwkStoreError},
     TrustedIssuerId,
 };
 use crate::common::policy_store::TrustedIssuer;
+use crate::http::{HttpClient, HttpClientError};
 use jsonwebtoken::DecodingKey;
 use serde_json::{json, Value};
 use std::{collections::HashMap, sync::Arc, time::Duration};
