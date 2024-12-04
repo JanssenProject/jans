@@ -8,6 +8,7 @@
 use super::http_client::{HttpClient, HttpClientError};
 use super::{KeyId, TrustedIssuerId};
 use crate::common::policy_store::TrustedIssuer;
+use chrono::prelude::*;
 use jsonwebtoken::jwk::Jwk;
 use jsonwebtoken::DecodingKey;
 use serde::Deserialize;
@@ -15,7 +16,6 @@ use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Debug;
 use std::sync::Arc;
-use time::OffsetDateTime;
 
 #[derive(Deserialize)]
 struct OpenIdConfig {
@@ -38,7 +38,7 @@ pub struct JwkStore {
     /// A collection of keys that do not have an associated ID.
     keys_without_id: Vec<DecodingKey>,
     /// The timestamp indicating when the store was last updated.
-    last_updated: OffsetDateTime,
+    last_updated: DateTime<Utc>,
     /// From which TrustedIssuer this struct was built (if applicable).
     source_iss: Option<TrustedIssuer>,
 }
@@ -143,7 +143,7 @@ impl JwkStore {
             issuer: None,
             keys,
             keys_without_id,
-            last_updated: OffsetDateTime::now_utc(),
+            last_updated: Utc::now(),
             source_iss: None,
         })
     }
@@ -236,11 +236,11 @@ mod test {
         common::policy_store::TrustedIssuer,
         jwt::{http_client::HttpClient, jwk_store::JwkStore},
     };
+    use chrono::prelude::*;
     use jsonwebtoken::{jwk::JwkSet, DecodingKey};
     use mockito::Server;
     use serde_json::json;
     use std::{collections::HashMap, time::Duration};
-    use time::OffsetDateTime;
 
     #[test]
     fn can_load_from_jwkset() {
@@ -270,7 +270,7 @@ mod test {
             .expect("Should create JwkStore");
         // We edit the `last_updated` from the result so that the comparison
         // wont fail because of the timestamp.
-        result.last_updated = OffsetDateTime::from_unix_timestamp(0).unwrap();
+        result.last_updated = DateTime::from_timestamp(0, 0).unwrap();
 
         let expected_jwkset =
             serde_json::from_value::<JwkSet>(jwks_json).expect("Should create JwkSet");
@@ -291,7 +291,7 @@ mod test {
             issuer: None,
             keys: expected_keys,
             keys_without_id: Vec::new(),
-            last_updated: OffsetDateTime::from_unix_timestamp(0).unwrap(),
+            last_updated: DateTime::from_timestamp(0, 0).unwrap(),
             source_iss: None,
         };
 
@@ -377,7 +377,7 @@ mod test {
                 .expect("Should load JwkStore from Trusted Issuer");
         // We edit the `last_updated` from the result so that the comparison
         // wont fail because of the timestamp.
-        result.last_updated = OffsetDateTime::from_unix_timestamp(0).unwrap();
+        result.last_updated = DateTime::from_timestamp(0, 0).unwrap();
 
         let jwkset =
             serde_json::from_value::<JwkSet>(jwks_json).expect("Should create JwkSet from Value");
@@ -397,7 +397,7 @@ mod test {
             issuer: Some(mock_server.url().into()),
             keys: expected_keys,
             keys_without_id: Vec::new(),
-            last_updated: OffsetDateTime::from_unix_timestamp(0).unwrap(),
+            last_updated: DateTime::from_timestamp(0, 0).unwrap(),
             source_iss: Some(source_iss),
         };
 
@@ -446,7 +446,7 @@ mod test {
             .expect("Should create JwkStore");
         // We edit the `last_updated` from the result so that the comparison
         // wont fail because of the timestamp.
-        result.last_updated = OffsetDateTime::from_unix_timestamp(0).unwrap();
+        result.last_updated = DateTime::from_timestamp(0, 0).unwrap();
 
         let jwkset = serde_json::from_value::<JwkSet>(jwks_json).expect("Should create JwkSet");
         let expected_keys = jwkset
@@ -460,7 +460,7 @@ mod test {
             issuer: None,
             keys: HashMap::new(),
             keys_without_id: expected_keys,
-            last_updated: OffsetDateTime::from_unix_timestamp(0).unwrap(),
+            last_updated: DateTime::from_timestamp(0, 0).unwrap(),
             source_iss: None,
         };
 
@@ -493,7 +493,7 @@ mod test {
             .expect("Should create JwkStore");
         // We edit the `last_updated` from the result so that the comparison
         // wont fail because of the timestamp.
-        result.last_updated = OffsetDateTime::from_unix_timestamp(0).unwrap();
+        result.last_updated = DateTime::from_timestamp(0, 0).unwrap();
 
         assert_eq!(result.get_keys().len(), 2, "Expected 2 keys");
     }
@@ -540,7 +540,7 @@ mod test {
             .expect("Should create JwkStore");
         // We edit the `last_updated` from the result so that the comparison
         // wont fail because of the timestamp.
-        result.last_updated = OffsetDateTime::from_unix_timestamp(0).unwrap();
+        result.last_updated = DateTime::from_timestamp(0, 0).unwrap();
 
         let expected_jwkset = serde_json::from_value::<JwkSet>(json!({"keys": [
             {
@@ -578,7 +578,7 @@ mod test {
             issuer: None,
             keys: expected_keys,
             keys_without_id: Vec::new(),
-            last_updated: OffsetDateTime::from_unix_timestamp(0).unwrap(),
+            last_updated: DateTime::from_timestamp(0, 0).unwrap(),
             source_iss: None,
         };
 

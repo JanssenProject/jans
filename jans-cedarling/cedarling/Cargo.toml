@@ -25,7 +25,6 @@ derive_more = { version = "1.0.0", features = [
     "display",
     "error",
 ] }
-time = { version = "0.3.36", features = ["wasm-bindgen"] }
 regex = "1.11.1"
 chrono = "0.4.38"
 tokio = { version = "1.42.0", features = ["rt", "time"] }
