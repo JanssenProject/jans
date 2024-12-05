@@ -223,11 +223,11 @@ impl Authz {
         // Decision log
         self.config.log_service.as_ref().log_any(&DecisionLogEntry {
             base: BaseLogEntry::new(self.config.pdp_id, LogType::Decision),
-            policystore_id: &self.config.policy_store.id.as_str(),
+            policystore_id: self.config.policy_store.id.as_str(),
             policystore_version: self.config.policy_store.get_store_version(),
             principal: PrincipalLogEntry::new(&self.config.authorization),
-            user: get_entity_claims( &self.config.authorization.decision_log_user_claims.as_slice(),&entities,principal_user_entity_uid),
-            workload: get_entity_claims( &self.config.authorization.decision_log_workload_claims.as_slice(),&entities,principal_workload_uid),
+            user: get_entity_claims( self.config.authorization.decision_log_user_claims.as_slice(),&entities,principal_user_entity_uid),
+            workload: get_entity_claims( self.config.authorization.decision_log_workload_claims.as_slice(),&entities,principal_workload_uid),
             lock_client_id: None,
             action: request.action.clone(),
             resource: resource_uid.to_string(),
@@ -277,7 +277,7 @@ impl Authz {
         let trusted_issuer = tokens.trusted_issuer.unwrap_or_default();
         let tokens_metadata = trusted_issuer.tokens_metadata();
 
-        let role_entities = create_role_entities(policy_store, &tokens, trusted_issuer)?;
+        let role_entities = create_role_entities(policy_store, tokens, trusted_issuer)?;
 
         // Populate the `AuthorizeEntitiesData` structure using the builder pattern
         let data = AuthorizeEntitiesData::builder()
@@ -301,7 +301,7 @@ impl Authz {
             .user_entity(
                 create_user_entity(
                     policy_store,
-                    &tokens,
+                    tokens,
                     // parents for Jans::User entity
                     HashSet::from_iter(role_entities.iter().map(|e|e.uid())),
                     trusted_issuer
@@ -439,8 +439,7 @@ fn get_entity_claims(decision_log_claims: &[String], entities: &Entities,princip
             entities
                 .get(&principal_user_entity_uid)
                 // convert entity to json and result to option
-                .map(|entity| entity.to_json_value().ok())
-                .flatten()
+                .and_then(|entity| entity.to_json_value().ok())
                 // JSON structure of entity:
                 // {
                 //     "uid": {
@@ -457,7 +456,7 @@ fn get_entity_claims(decision_log_claims: &[String], entities: &Entities,princip
                 //         }
                 //     ]
                 // },
-                .map(|json_value| 
+                .and_then(|json_value| 
                     // get `attrs` attribute
                     json_value.get("attrs")
                     .map(|attrs_value| 
@@ -466,7 +465,6 @@ fn get_entity_claims(decision_log_claims: &[String], entities: &Entities,princip
                         .map(|claim_value| claim_value.to_owned())
                     )
                 )
-                .flatten()
                 .flatten()
                 // convert to (String, Value) tuple
                 .map(|attr_json| (claim_key.clone(),attr_json.clone()))

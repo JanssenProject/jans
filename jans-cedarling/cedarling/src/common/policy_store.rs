@@ -68,10 +68,7 @@ impl PolicyStore {
     }
 
     pub(crate) fn get_store_version(&self) -> &str {
-        self.version
-            .as_ref()
-            .map(|v| v.as_str())
-            .unwrap_or("undefined")
+        self.version.as_deref().unwrap_or("undefined")
     }
 }
 
