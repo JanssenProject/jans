@@ -7,7 +7,7 @@ Documentation was generated from python types.
 BootstrapConfig
 ===================
 
-A Python wrapper for the Rust `NewBootstrapConfig` struct.
+A Python wrapper for the Rust `BootstrapConfig` struct.
 Configures the application, including authorization, logging, JWT validation, and policy store settings.
 
 Attributes
@@ -17,6 +17,9 @@ Attributes
 :param policy_store_id: An identifier for the policy store.  
 :param log_type: Log type, e.g., 'none', 'memory', 'std_out', or 'lock'.  
 :param log_ttl: (Optional) TTL (time to live) in seconds for log entities when `log_type` is 'memory'. The default is 60s.  
+:param decision_log_user_claims: List of claims to map from user entity, such as ["sub", "email", "username", ...]  
+:param decision_log_workload_claims: List of claims to map from user entity, such as ["client_id", "rp_id", ...]  
+:param decision_log_default_jwt_id: Token claims that will be used for decision logging. Default is "jti".  
 :param user_authz: Enables querying Cedar engine authorization for a User principal.  
 :param workload_authz: Enables querying Cedar engine authorization for a Workload principal.  
 :param usr_workload_bool_op: Boolean operation ('AND' or 'OR') for combining `USER` and `WORKLOAD` authz results.  
@@ -55,12 +58,15 @@ Example
 from cedarling import BootstrapConfig
 
 # Example configuration
-bootstrap_config = NewBootstrapConfig(
+bootstrap_config = BootstrapConfig(
     application_name="MyApp",
     policy_store_uri=None,
     policy_store_id="policy123",
     log_type="memory",
     log_ttl=60,
+    decision_log_user_claims=["sub", "email", "username"]
+    decision_log_workload_claims=["client_id", "rp_id"]
+    decision_log_default_jwt_id="jti"
     user_authz=True,
     workload_authz=True,
     usr_workload_bool_op="AND",
@@ -293,16 +299,16 @@ ___
 Error encountered while creating Userinfo_token entity
 ___
 
-# authorize_errors.DecodeTokens
-Error encountered while decoding JWT token data
-___
-
 # authorize_errors.EntitiesError
 Error encountered while collecting all entities
 ___
 
 # authorize_errors.EntitiesToJsonError
 Error encountered while parsing all entities to json for logging
+___
+
+# authorize_errors.ProcessTokens
+Error encountered while processing JWT token data
 ___
 
 # authorize_errors.ResourceEntityError

@@ -37,7 +37,7 @@ pub struct AuthorizationConfig {
     /// `CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     pub decision_log_workload_claims: Vec<String>,
 
-    /// You can specify token claims that will be used for decision logging.
+    /// Token claims that will be used for decision logging.
     /// Default is jti, but perhaps some other claim is needed.
     /// `CEDARLING_DECISION_LOG_DEFAULT_JWT_ID` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     pub decision_log_default_jwt_id: String,
