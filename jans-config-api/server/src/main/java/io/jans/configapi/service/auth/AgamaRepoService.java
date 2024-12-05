@@ -21,7 +21,7 @@ public class AgamaRepoService {
     @Inject
     AuthClientFactory authClientFactory;
 
-    public JsonNode getAllAgamaRepositories() {
+    public JsonNode getAllAgamaRepositories() throws Exception{
         return AuthClientFactory.getAllAgamaRepositories(getAgamaFormatedRepositoryURL());
     }
 

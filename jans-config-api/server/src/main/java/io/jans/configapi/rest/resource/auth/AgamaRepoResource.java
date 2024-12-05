@@ -74,7 +74,7 @@ public class AgamaRepoResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_REPO_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.AGAMA_REPO_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllAgamaRepositories() {
+    public Response getAllAgamaRepositories() throws Exception {
         return Response.ok(agamaRepoService.getAllAgamaRepositories()).build();
     }
 

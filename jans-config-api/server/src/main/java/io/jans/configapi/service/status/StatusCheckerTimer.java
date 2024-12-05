@@ -54,6 +54,7 @@ public class StatusCheckerTimer {
     public static final String PROGRAM_FACTER = "facter";
     public static final String PROGRAM_SHOW_VERSION = "/opt/jans/printVersion.py";
     public static final String SERVICE_STATUS = "/opt/jans/bin/jans_services_status.py";
+    public static final String GET_AGAMA_LAB_PROJECTS = "/opt/jans/bin/get_agama_lab_projects.py";
 
     @Inject
     private Logger log;

@@ -81,7 +81,7 @@ public class AuthClientFactory {
     public static JsonNode getHealthCheckResponse(String url) {
         log.debug("HealthCheck - , url:{} ", url);
         Builder clientRequest = getClientBuilder(url);
-        clientRequest.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        clientRequest.header(CONTENT_TYPE, MediaType.TEXT_HTML);
         Response healthResponse = clientRequest.get();
         if (healthResponse.getStatus() == 200) {
             JsonNode jsonNode = healthResponse.readEntity(JsonNode.class);
@@ -91,27 +91,37 @@ public class AuthClientFactory {
         return null;
     }
     
-    public static JsonNode getAllAgamaRepositories(String url) {
-        log.info("Get Agama Repositories - , url:{} ", url);
+    public static JsonNode getAllAgamaRepositories(String url) throws Exception{
+        log.error("\n\n\n TEXT_HTML Get Agama Repositories - url:{} ", url);
         Builder clientRequest = getClientBuilder(url);
-        clientRequest.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        Response healthResponse = clientRequest.get();
-        if (healthResponse.getStatus() == 200) {
-            JsonNode jsonNode = healthResponse.readEntity(JsonNode.class);
-            log.trace("Agama Repositories response is - jsonNode:{}", jsonNode);
-            return jsonNode;
+        clientRequest.header(CONTENT_TYPE, MediaType.TEXT_HTML);
+        Response response = clientRequest.get();
+        
+        log.error("\n\n\n Get Agama Repositories - response:{}, response.getHeaders():{}, response.getMediaType():{}, response.getMetadata():{}, response.getEntity():{}, response.getEntity().getClass():{} ", response, response.getHeaders(), response.getMediaType(),response.getMetadata() , response.getEntity(), response.getEntity().getClass());
+        if (response.getStatus() == 200) {
+            String jsonString = response.readEntity(String.class);
+            log.error("Agama Repositories response is - jsonString:{}", jsonString);
+            JsonNode jsonNode = Jackson.asJsonNode(jsonString);
+            log.error("Agama Repositories response is - jsonNode:{}", jsonNode);
+            List<JsonNode> repoJsonNode = jsonNode.findParents("repositories");
+            log.error("Agama Repositories response is - repoJsonNode:{}", repoJsonNode);
+            log.error("Agama Repositories response is - repoJsonNode:{}", repoJsonNode);
+
+            return null;
         }
         return null;
     }
     
     public static JsonNode getAgamaProjectLatestRelease(String url) {
-        log.info("Get Agama Project Latest Release - , url:{} ", url);
+        log.error("\n\n\n Get Agama Project Latest Release - url:{} ", url);
         Builder clientRequest = getClientBuilder(url);
         clientRequest.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        Response healthResponse = clientRequest.get();
-        if (healthResponse.getStatus() == 200) {
-            JsonNode jsonNode = healthResponse.readEntity(JsonNode.class);
-            log.trace("Agama Agama Project Latest Release response is - jsonNode:{}", jsonNode);
+        Response response = clientRequest.get();
+        
+        log.error("\n\n\n Get Project Latest Release - response:{}, response.getEntity():{}, , response.getEntity().getClass():{} ", response, response.getEntity(), response.getEntity().getClass());
+        if (response.getStatus() == 200) {
+            JsonNode jsonNode = response.readEntity(JsonNode.class);
+            log.error("Agama Agama Project Latest Release response is - jsonNode:{}", jsonNode);
             return jsonNode;
         }
         return null;
