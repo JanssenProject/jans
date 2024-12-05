@@ -13,7 +13,6 @@
 //! - Validating the signatures of JWTs to ensure their integrity and authenticity.
 //! - Verifying the validity of JWTs based on claims such as expiration time and audience.
 
-mod http_client;
 mod issuers_store;
 mod jwk_store;
 mod key_service;
