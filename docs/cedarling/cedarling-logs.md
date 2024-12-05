@@ -63,7 +63,62 @@ The JSON in this document is formatted for readability but is not prettified in 
 }      
 ```
 
-### Decision Log Sample
+### Decision Log
+
+Example of decision log.
+
+```json
+{
+    "request_id": "019394db-f52b-7b06-88b8-a288670a32c2",
+    "timestamp": "2024-12-05T05:27:43.403Z",
+    "log_type": "Decision",
+    "pdp_id": "9e189c4b-96ae-4818-8e7f-75a42186af15",
+    "policystore_id": "a1bf93115de86de760ee0bea1d529b521489e5a11747",
+    "policystore_version": "undefined",
+    "principal": "User & Workload",
+    "User": {
+        "username": "admin@gluu.org"
+    },
+    "Workload": {
+        "org_id": "some_long_id"
+    },
+    "lock_client_id": null,
+    "action": "Jans::Action::\"Update\"",
+    "resource": "Jans::Issue::\"random_id\"",
+    "decision": "ALLOW",
+    "tokens": {
+        "id_token": {
+            "jti": "id_tkn_jti"
+        },
+        "Userinfo": {
+            "jti": "usrinfo_tkn_jti"
+        },
+        "access": {
+            "jti": "access_tkn_jti"
+        }
+    },
+    "decision_time_ms": 3
+}
+```
+
+#### Field Definitions
+
+* `request_id`: unique identifier for the decision request
+* `timestamp`: Derived if possible from the system or context--may be empty in cases where WASM can't access the system clock, and the time wasn't sent in the context.
+* `pdp_id`: unique identifier for the Cedarling
+* `policystore_id`: What policystore this Cedarling instance is using
+* `policystore_version`: What version of the policystore the Cedarling is using
+* `principal`: `User` | `Workload`
+* `User`: A list of claims, specified by the `CEDARLING_DECISION_LOG_USER_CLAIMS` property, that must be present in the Cedar User entity
+* `Workload`:  A list of claims, specified by the `CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS` property, that must be present in the Cedar Workload entity
+* `lock_client_id`: If this Cedarling has registered with a Lock Server, what is the client_id it received
+* `action`: From the request
+* `resource`: From the Request
+* `decision`: `ALLOW` or `DENY`
+* `tokens`: Dictionary with the token type and claims which should be included in the log
+* `decision_time_ms`: how long the decision took
+
+### Debug Log Sample
 
 The result of the authorization is quite extensive because we log all `cedar-policy` entity information for forensic analysis. We cannot truncate the data, as it may contain critical information.
 

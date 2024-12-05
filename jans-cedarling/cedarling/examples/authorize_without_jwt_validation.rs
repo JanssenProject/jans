@@ -27,7 +27,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::And,
-            ..Default::default()
+            decision_log_default_jwt_id: "jti".to_string(),
+            decision_log_user_claims: vec!["client_id".to_string(), "username".to_string()],
+            decision_log_workload_claims: vec!["org_id".to_string()],
         },
     })?;
 
