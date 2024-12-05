@@ -56,7 +56,7 @@ import io.jans.util.Util;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 public class HttpService implements Serializable {

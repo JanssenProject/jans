@@ -6,8 +6,7 @@
 
 package io.jans.configapi.test;
 
-import io.jans.configapi.ConfigServerBaseTest;
-import jakarta.ws.rs.client.Entity;
+import io.jans.configapi.core.test.BaseTest;
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -19,7 +18,7 @@ import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Parameters;
 
-public class JansLinkConfigResourceTest extends ConfigServerBaseTest{
+public class JansLinkConfigResourceTest extends BaseTest {
 
     @Parameters({"issuer", "linkConfigUrl"})
     @Test

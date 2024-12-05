@@ -6,7 +6,7 @@
 
 package io.jans.configapi.test;
 
-import io.jans.configapi.ConfigServerBaseTest;
+import io.jans.configapi.core.test.BaseTest;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
@@ -19,7 +19,7 @@ import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Parameters;
 
-public class JansKcSAMLConfigResourceTest extends ConfigServerBaseTest{
+public class JansKcSAMLConfigResourceTest extends BaseTest {
 
     @Parameters({"issuer", "samlConfigUrl"})
     @Test
