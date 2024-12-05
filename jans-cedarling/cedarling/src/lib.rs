@@ -16,6 +16,7 @@
 mod authz;
 mod bootstrap_config;
 mod common;
+mod http;
 mod init;
 mod jwt;
 mod lock;
