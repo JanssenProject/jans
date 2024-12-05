@@ -22,25 +22,29 @@ def sample_bootstrap_config():
     policy_store_location = join(TEST_FILES_PATH, "policy-store_ok.yaml")
 
     bootstrap_config = BootstrapConfig({
-        "application_name":"TestApp",
-        "policy_store_id":"asdasd123123",
-        "policy_store_local_fn":policy_store_location,
-        "jwt_sig_validation":"disabled",
-        "jwt_status_validation":"disabled",
-        "at_iss_validation":"disabled",
-        "at_jti_validation":"disabled",
-        "at_nbf_validation":"disabled",
-        "idt_iss_validation":"disabled",
-        "idt_sub_validation":"disabled",
-        "idt_exp_validation":"disabled",
-        "idt_iat_validation":"disabled",
-        "idt_aud_validation":"disabled",
-        "id_token_trust_mode":"none",
-        "userinfo_iss_validation":"disabled",
-        "userinfo_aud_validation":"disabled",
-        "userinfo_sub_validation":"disabled",
-        "userinfo_exp_validation":"disabled",
-        "log_type":"std_out"
+        "CEDARLING_APPLICATION_NAME": "TestApp",
+        "CEDARLING_POLICY_STORE_ID": "a1bf93115de86de760ee0bea1d529b521489e5a11747",
+        "CEDARLING_POLICY_STORE_LOCAL_FN": policy_store_location,
+        "CEDARLING_USER_AUTHZ": "enabled",
+        "CEDARLING_WORKLOAD_AUTHZ": "enabled",
+        "CEDARLING_WORKLOAD_BOOLEAN_OPERATION": "AND",
+        "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+        "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
+        "CEDARLING_AT_ISS_VALIDATION": "disabled",
+        "CEDARLING_AT_JTI_VALIDATION": "disabled",
+        "CEDARLING_AT_NBF_VALIDATION": "disabled",
+        "CEDARLING_AT_EXP_VALIDATION": "disabled",
+        "CEDARLING_IDT_ISS_VALIDATION": "disabled",
+        "CEDARLING_IDT_SUB_VALIDATION": "disabled",
+        "CEDARLING_IDT_EXP_VALIDATION": "disabled",
+        "CEDARLING_IDT_IAT_VALIDATION": "disabled",
+        "CEDARLING_IDT_AUD_VALIDATION": "disabled",
+        "CEDARLING_USERINFO_ISS_VALIDATION": "disabled",
+        "CEDARLING_USERINFO_AUD_VALIDATION": "disabled",
+        "CEDARLING_USERINFO_SUB_VALIDATION": "disabled",
+        "CEDARLING_USERINFO_EXP_VALIDATION": "disabled",
+        "CEDARLING_ID_TOKEN_TRUST_MODE": "none",
+        "CEDARLING_LOG_TYPE": "std_out"
     })
 
     return bootstrap_config

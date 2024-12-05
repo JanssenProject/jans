@@ -15,14 +15,17 @@ def test_invalid_log_config(sample_bootstrap_config):
     try:
         # when we set invalid log configuration it should raise ValueError
         config.log_type = "String"
-    except TypeError:
+    except ValueError:
         pass
+    else:
+        assert False, "ValueError was not raised when setting invalid log_type"
 
 
 def test_memory_logger(sample_bootstrap_config):
     # map fixture to variable with shorter name for readability
     config = sample_bootstrap_config
 
+    config.log_ttl = 60
     config.log_type = "memory"
 
     # on initialize Cedarling we should have logs

@@ -246,6 +246,17 @@ impl FromStr for LoggerType {
     }
 }
 
+impl ToString for LoggerType {
+    fn to_string(&self) -> String {
+        match self {
+            LoggerType::Off => "off".to_string(),
+            LoggerType::Memory => "memory".to_string(),
+            LoggerType::StdOut => "stdout".to_string(),
+            LoggerType::Lock => "lock".to_string(),
+        }
+    }
+}
+
 /// Enum varians that represent if feature is enabled or disabled
 #[derive(Debug, PartialEq, Deserialize, Default, Copy, Clone)]
 #[serde(rename_all = "lowercase")]

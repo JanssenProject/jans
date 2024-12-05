@@ -125,7 +125,6 @@ def test_authorize_ok(sample_bootstrap_config):
     assert authorize_result.is_allowed(), "request should be allowed"
 
     workload_result = authorize_result.workload()
-
     decision = workload_result.decision
     # check that Decision type converts to the string correctly
     assert str(decision) == ALLOW_DECISION_STR

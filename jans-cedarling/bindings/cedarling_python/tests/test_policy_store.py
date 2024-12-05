@@ -80,5 +80,7 @@ def test_policy_store_source_wrong_type(sample_bootstrap_config):
     try:
         policy_store_location = "wrong type file"
         config.policy_store_local_fn = policy_store_location
-    except TypeError:
+    except ValueError:
         pass
+    else:
+        assert False, "ValueError was not raised when a policy store has an unsupported file type"
