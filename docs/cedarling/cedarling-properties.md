@@ -14,7 +14,7 @@ These Bootstrap Properties control default application level behavior.
 
 * **`CEDARLING_APPLICATION_NAME`** : Human friendly identifier for this application
 * **`CEDARLING_POLICY_STORE_URI`** : Location of policy store JSON, used if policy store is not local, or retreived from Lock Server.
-* **`CEDARLING_POLICY_STORE_ID`**: A unique identifier for the policy store.
+* **`CEDARLING_POLICY_STORE_ID`** : A unique identifier for the policy store.
 * **`CEDARLING_LOG_TYPE`** (`"off"` | `"memory"` | `"std_out"` | `"lock"`): Selects the logging method.
 * **`CEDARLING_LOG_TTL`** : If the `CEDARLING_LOG_TYPE` is set to `"memory"`, this will set the TTL (Time to Live) of log entities in seconds. Defaults to 60s.
 * **`CEDARLING_USER_AUTHZ`** (`"enabled"` | `"disabled"`): When `enabled`, Cedar engine authorization is queried for a *User* principal.
@@ -55,8 +55,8 @@ The `CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION` property specifies what boolean 
 
 ### Available Operations
 
-- **AND**: authz will be successful if `USER` **AND** `WORKLOAD` is valid.
-- **OR**: authz will be successful if `USER` **OR** `WORKLOAD` is valid.
+* **AND**: authz will be successful if `USER` **AND** `WORKLOAD` is valid.
+* **OR**: authz will be successful if `USER` **OR** `WORKLOAD` is valid.
 
 ## ID Token Trust Mode
 
@@ -73,12 +73,12 @@ Strict mode requires:
 1. The `id_token`'s `aud` matches the `access_token`'s `client_id`;
 2. if a Userinfo token is present, the `sub` matches the `id_token`, and that the `aud` matches the access token's `client_id`.
 
-## Loading The bootstrap config.
+## Loading The bootstrap config
 
 There are multiple ways to load your bootstrap config:
 
-- [From a JSON file](#loading-from-json)
-- [From a YAML file](#loading-from-yaml)
+* [From a JSON file](#loading-from-json)
+* [From a YAML file](#loading-from-yaml)
 
 You can load from both file types using the following code snippet:
 
@@ -136,7 +136,7 @@ Below is an example of a bootstrap config in JSON format.
 }
 ```
 
-- Note that properties set to `"disabled"`, an empty string `""`, zero `0`, and `null` can be ommited since they are the defaults.
+* Note that properties set to `"disabled"`, an empty string `""`, zero `0`, and `null` can be ommited since they are the defaults.
 
 #### Local JWKS
 
@@ -149,10 +149,9 @@ A local JWKS can be used by setting the `CEDARLING_LOCAL_JWKS` bootstrap propert
 }
 ```
 
-- Where keys are `Trusted Issuer IDs` assigned to each key store
-- and the values contains the JSON Web Keys as defined in [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
-- The `trusted_issuers_id` is used to tag a JWKS with a unique identifier and enables using multiple key stores.
-
+* Where keys are `Trusted Issuer IDs` assigned to each key store
+* and the values contains the JSON Web Keys as defined in [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
+* The `trusted_issuers_id` is used to tag a JWKS with a unique identifier and enables using multiple key stores.
 
 ### Loading From YAML
 
@@ -198,4 +197,4 @@ CEDARLING_AUDIT_TELEMETRY_INTERVAL: 0
 CEDARLING_LISTEN_SSE: 'disabled'
 ```
 
-- Note that properties set to `'disabled'`, an empty string `''`, zero `0`, and `null` can be ommited since they are the defaults.
+* Note that properties set to `'disabled'`, an empty string `''`, zero `0`, and `null` can be ommited since they are the defaults.
