@@ -73,7 +73,7 @@ pub struct Cedarling {
 
 impl Cedarling {
     /// Create a new instance of the Cedarling application.
-    pub fn new(config: BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
+    pub fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
         let log = log::init_logger(&config.log_config);
         let pdp_id = app_types::PdpID::new();
 

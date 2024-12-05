@@ -46,7 +46,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     println!("Cedarling initialized with log type: {:?}", log_type);
-    let cedarling = Cedarling::new(BootstrapConfig {
+    let cedarling = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig { log_type },
         policy_store_config: PolicyStoreConfig {

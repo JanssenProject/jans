@@ -112,7 +112,7 @@ pub enum BootstrapConfigLoadingError {
     /// Error returned when parsing the file as YAML fails.
     #[error("Failed to decode YAML string into BootstrapConfig: {0}")]
     DecodingYAML(#[from] serde_yml::Error),
-    
+
     /// Error returned when the boostrap property `CEDARLING_LOG_TTL` is missing.
     #[error("Missing bootstrap property: `CEDARLING_LOG_TTL`. This property is required if `CEDARLING_LOG_TYPE` is set to Memory.")]
     MissingLogTTL,
@@ -130,6 +130,10 @@ pub enum BootstrapConfigLoadingError {
         "Unsupported policy store file format for: {0}. Supported formats include: JSON, YAML"
     )]
     UnsupportedPolicyStoreFileFormat(String),
+
+    /// Error returned when failing to load a local JWKS
+    #[error("Failed to load local JWKS from {0}: {1}")]
+    LoadLocalJwks(String, std::io::Error),
 }
 
 #[cfg(test)]

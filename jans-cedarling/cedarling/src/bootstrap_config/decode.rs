@@ -12,7 +12,7 @@ use super::{
 };
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
-use std::{collections::HashSet, path::Path, str::FromStr};
+use std::{collections::HashSet, fs, path::Path, str::FromStr};
 use typed_builder::TypedBuilder;
 
 #[derive(Deserialize, PartialEq, Debug, TypedBuilder)]
@@ -382,7 +382,9 @@ impl BootstrapConfig {
         let log_type = match raw.log_type {
             LoggerType::Off => LogTypeConfig::Off,
             LoggerType::Memory => LogTypeConfig::Memory(MemoryLogConfig {
-                log_ttl: raw.log_ttl.ok_or(BootstrapConfigLoadingError::MissingLogTTL)?,
+                log_ttl: raw
+                    .log_ttl
+                    .ok_or(BootstrapConfigLoadingError::MissingLogTTL)?,
             }),
             LoggerType::StdOut => LogTypeConfig::StdOut,
             LoggerType::Lock => LogTypeConfig::Lock,
@@ -416,9 +418,9 @@ impl BootstrapConfig {
                 let source = match file_ext.as_deref() {
                     Some("json") => PolicyStoreSource::FileJson(path.into()),
                     Some("yaml") | Some("yml") => PolicyStoreSource::FileYaml(path.into()),
-                    _ => Err(BootstrapConfigLoadingError::UnsupportedPolicyStoreFileFormat(
-                        raw_path,
-                    ))?,
+                    _ => Err(
+                        BootstrapConfigLoadingError::UnsupportedPolicyStoreFileFormat(raw_path),
+                    )?,
                 };
                 PolicyStoreConfig { source }
             },
@@ -426,9 +428,19 @@ impl BootstrapConfig {
             _ => Err(BootstrapConfigLoadingError::ConflictingPolicyStores)?,
         };
 
+        // Load the jwks from a local file
+        let jwks = raw
+            .local_jwks
+            .as_ref()
+            .map(|path| {
+                fs::read_to_string(path)
+                    .map_err(|e| BootstrapConfigLoadingError::LoadLocalJwks(path.to_string(), e))
+            })
+            .transpose()?;
+
         // JWT Config
         let jwt_config = JwtConfig {
-            jwks: None,
+            jwks,
             jwt_sig_validation: raw.jwt_sig_validation.into(),
             jwt_status_validation: raw.jwt_status_validation.into(),
             id_token_trust_mode: raw.id_token_trust_mode,
