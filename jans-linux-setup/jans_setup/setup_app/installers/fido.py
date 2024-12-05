@@ -11,6 +11,8 @@ from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 
+Config.jans_fido2_port = '8073'
+
 class FidoInstaller(JettyInstaller):
 
     source_files = [
