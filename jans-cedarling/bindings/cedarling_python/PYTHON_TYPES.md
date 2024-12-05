@@ -56,47 +56,46 @@ Example
 -------
 ```python
 from cedarling import BootstrapConfig
-
 # Example configuration
-bootstrap_config = BootstrapConfig(
-    application_name="MyApp",
-    policy_store_uri=None,
-    policy_store_id="policy123",
-    log_type="memory",
-    log_ttl=60,
-    decision_log_user_claims=["sub", "email", "username"]
-    decision_log_workload_claims=["client_id", "rp_id"]
-    decision_log_default_jwt_id="jti"
-    user_authz=True,
-    workload_authz=True,
-    usr_workload_bool_op="AND",
-    local_jwks="./path/to/your_jwks.json",
-    local_policy_store=None,
-    policy_store_local_fn="./path/to/your_policy_store.json",
-    jwt_sig_validation=True,
-    jwt_status_validation=False,
-    at_iss_validation=True,
-    at_jti_validation=True,
-    at_nbf_validation=False,
-    idt_iss_validation=True,
-    idt_sub_validation=True,
-    idt_exp_validation=True,
-    idt_iat_validation=True,
-    idt_aud_validation=True,
-    userinfo_iss_validation=True,
-    userinfo_sub_validation=True,
-    userinfo_aud_validation=True,
-    userinfo_exp_validation=True,
-    id_token_trust_mode="Strict",
-    lock=True,
-    lock_master_configuration_uri=None,
-    dynamic_configuration=False,
-    lock_ssa_jwt=None,
-    audit_log_interval=0,
-    audit_health_interval=0,
-    audit_health_telemetry_interval=0,
-    listen_sse=False,
-)
+bootstrap_config = BootstrapConfig({
+    "application_name": "MyApp",
+    "policy_store_uri": None,
+    "policy_store_id": "policy123",
+    "log_type": "memory",
+    "log_ttl": 86400,
+    "decision_log_user_claims": ["sub", "email", "username"]
+    "decision_log_workload_claims": ["client_id", "rp_id"]
+    "decision_log_default_jwt_id":"jti"
+    "user_authz": "enabled",
+    "workload_authz": "enabled",
+    "usr_workload_bool_op": "AND",
+    "local_jwks": "./path/to/your_jwks.json",
+    "local_policy_store": None,
+    "policy_store_local_fn": "./path/to/your_policy_store.json",
+    "jwt_sig_validation": "enabled",
+    "jwt_status_validation": "disabled",
+    "at_iss_validation": "enabled",
+    "at_jti_validation": "enabled",
+    "at_nbf_validation": "disabled",
+    "idt_iss_validation": "enabled",
+    "idt_sub_validation": "enabled",
+    "idt_exp_validation": "enabled",
+    "idt_iat_validation": "enabled",
+    "idt_aud_validation": "enabled",
+    "userinfo_iss_validation": "enabled",
+    "userinfo_sub_validation": "enabled",
+    "userinfo_aud_validation": "enabled",
+    "userinfo_exp_validation": "enabled",
+    "id_token_trust_mode": "Strict",
+    "lock": "disabled",
+    "lock_master_configuration_uri": None,
+    "dynamic_configuration": "disabled",
+    "lock_ssa_jwt": None,
+    "audit_log_interval": 0,
+    "audit_health_interval": 0,
+    "audit_health_telemetry_interval": 0,
+    "listen_sse": "disabled",
+})
 ```
 ___
 
