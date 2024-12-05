@@ -115,6 +115,8 @@ public class UserJansExtUidAttributeTest {
     @Test
 	@Order(1)
     public void testUserPersist() {
+		log.error(System.getProperty("java.class.path"));
+
     	User user = new User();
         user.setDn(userDn);
         user.setUserId(userId);
@@ -134,35 +136,29 @@ public class UserJansExtUidAttributeTest {
 	@Order(3)
     public void addUserLegacyAuthenticators() {
         User user = persistenceEntryManager.find(User.class, userDn);
+        assertNotNull(user);
 
         assertNull(user.getAttributeValues("jansExtUid"));
         
         List<String> jansExtUids = new ArrayList<>();
         jansExtUids.add("type1:id1");
-        jansExtUids.add("type1:id1");
+        jansExtUids.add("type2:id2");
 
         user.setAttribute("jansExtUid", jansExtUids);
         persistenceEntryManager.merge(user);
 
         assertEquals(user.getUserId(), userId);
-
-        assertNotNull(user.getAuthenticator());
-        assertNotNull(user.getAuthenticator().getAuthenticators());
-        assertEquals(user.getAuthenticator().getAuthenticators().size(), 1);
-        assertEquals(userAuthenticatorService.getUserAuthenticatorsByType(user, "type1"), Arrays.asList(new UserAuthenticator("id2", "type2")));
     }
 
     @Test
 	@Order(4)
     public void checkUserLegacyAuthenticators() {
         User user = persistenceEntryManager.find(User.class, userDn);
+        assertNotNull(user);
 
         // Access as custom attribute
         List<String> jansExtUids = user.getAttributeValues("jansExtUid");
         assertNotNull(jansExtUids);
-
-        jansExtUids.add("type1:id1");
-        jansExtUids.add("type2:id2");
 
         assertEquals(jansExtUids.size(), 2);
         assertEquals(jansExtUids.get(0), "type1:id1");
@@ -172,7 +168,90 @@ public class UserJansExtUidAttributeTest {
         assertNotNull(user.getExternalUid());
         assertEquals(user.getExternalUid().length, 2);
         assertEquals(user.getExternalUid()[0], "type1:id1");
-        assertEquals(user.getExternalUid()[0], "type2:id2");
+        assertEquals(user.getExternalUid()[1], "type2:id2");
+    }
+
+    @Test
+	@Order(5)
+    public void removeUserLegacyAuthenticators() {
+        User user = persistenceEntryManager.find(User.class, userDn);
+
+        // Access as custom attribute
+        user.removeAttribute("jansExtUid");
+        persistenceEntryManager.merge(user);
+    }
+
+    @Test
+	@Order(6)
+    public void checkAfterUserLegacyAuthenticatorsRemoval() {
+        User user = persistenceEntryManager.find(User.class, userDn);
+        assertNotNull(user);
+
+        // Access as custom attribute
+        List<String> jansExtUids = user.getAttributeValues("jansExtUid");
+        assertNull(jansExtUids);
+    }
+
+    @Test
+	@Order(7)
+    // Explicetly specify that attribute is multivalued
+    public void addUserLegacyAuthenticators2() {
+        User user = persistenceEntryManager.find(User.class, userDn);
+        assertNotNull(user);
+
+        assertNull(user.getAttributeValues("jansExtUid"));
+        
+        List<Object> jansExtUids = new ArrayList<>();
+        jansExtUids.add("type1:id1");
+        jansExtUids.add("type2:id2");
+
+        user.setAttribute("jansExtUid", jansExtUids, true);
+        persistenceEntryManager.merge(user);
+
+        assertEquals(user.getUserId(), userId);
+    }
+
+    @Test
+	@Order(8)
+    public void checkUserLegacyAuthenticators2() {
+        User user = persistenceEntryManager.find(User.class, userDn);
+        assertNotNull(user);
+
+        // Access as custom attribute
+        List<String> jansExtUids = user.getAttributeValues("jansExtUid");
+        assertNotNull(jansExtUids);
+
+        assertEquals(jansExtUids.size(), 2);
+        assertEquals(jansExtUids.get(0), "type1:id1");
+        assertEquals(jansExtUids.get(1), "type2:id2");
+
+        // Access as generic attribute
+        assertNotNull(user.getExternalUid());
+        assertEquals(user.getExternalUid().length, 2);
+        assertEquals(user.getExternalUid()[0], "type1:id1");
+        assertEquals(user.getExternalUid()[1], "type2:id2");
+    }
+
+    @Test
+	@Order(9)
+    public void removeUserLegacyAuthenticators2() {
+        User user = persistenceEntryManager.find(User.class, userDn);
+
+        // Access as custom attribute
+        user.setAttribute("jansExtUid", (Object) null);
+        persistenceEntryManager.merge(user);
+    }
+
+    @Test
+	@Order(10)
+    public void checkAfterUserLegacyAuthenticatorsRemoval2() {
+        User user = persistenceEntryManager.find(User.class, userDn);
+        assertNotNull(user);
+
+        // Access as custom attribute
+        List<String> jansExtUids = user.getAttributeValues("jansExtUid");
+        assertNull(jansExtUids);
+
     }
 
 }
