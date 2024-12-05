@@ -5,6 +5,12 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+// The following macro uses conditional compilation to include this file code
+// only when the target platform is NOT WebAssembly. This is not required to
+// use the library but is needed here since Cedarling compiles binding to WASM
+// and `use std::env` prevents that compilation.
+#![cfg(not(target_family = "wasm"))]
+
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogStorage,
     LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, WorkloadBoolOp,

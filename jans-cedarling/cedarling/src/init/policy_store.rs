@@ -7,7 +7,9 @@
 
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
 use crate::common::policy_store::{AgamaPolicyStore, PolicyStoreWithID};
+use crate::http::{HttpClient, HttpClientError};
 use std::path::Path;
+use std::time::Duration;
 use std::{fs, io};
 
 /// Errors that can occur when loading a policy store.
@@ -17,8 +19,8 @@ pub enum PolicyStoreLoadError {
     ParseJson(#[from] serde_json::Error),
     #[error("failed to parse the policy store from policy_store yaml: {0}")]
     ParseYaml(#[from] serde_yml::Error),
-    #[error("failed to fetch the policy store from the lock server")]
-    FetchFromLockServer,
+    #[error("failed to fetch the policy store from the lock master")]
+    FetchFromLockMaster(#[from] HttpClientError),
     #[error("Policy Store does not contain correct structure: {0}")]
     InvalidStore(String),
     #[error("Failed to load policy store from {0}: {1}")]
@@ -74,8 +76,8 @@ pub(crate) fn load_policy_store(
                 .map_err(PolicyStoreLoadError::ParseYaml)?;
             extract_first_policy_store(&agama_policy_store)?
         },
-        PolicyStoreSource::LockMaster(policy_store_id) => {
-            load_policy_store_from_lock_master(policy_store_id)?
+        PolicyStoreSource::LockMaster(policy_store_uri) => {
+            load_policy_store_from_lock_master(policy_store_uri)?
         },
         PolicyStoreSource::FileJson(path) => {
             let policy_json = fs::read_to_string(path)
@@ -94,19 +96,22 @@ pub(crate) fn load_policy_store(
     Ok(policy_store)
 }
 
-/// Loads the policy store from the Lock Master service.
+/// Loads the policy store from the Lock Master.
 ///
-/// TODO: implement this function once integration with the lock
-/// service has been established
+/// The URI is from the `CEDARLING_POLICY_STORE_URI` bootstrap property.
 fn load_policy_store_from_lock_master(
-    _policy_store_id: &str,
+    uri: &str,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
-    todo!()
+    let client = HttpClient::new(3, Duration::from_secs(3))?;
+    let agama_policy_store = client.get(uri)?.json::<AgamaPolicyStore>()?;
+    extract_first_policy_store(&agama_policy_store)
 }
 
 #[cfg(test)]
 mod test {
     use std::path::Path;
+
+    use mockito::Server;
 
     use super::load_policy_store;
     use crate::PolicyStoreConfig;
@@ -133,5 +138,30 @@ mod test {
             ),
         })
         .expect("Should load policy store from YAML file");
+    }
+
+    #[test]
+    fn can_load_from_lock_master() {
+        let mut mock_server = Server::new();
+
+        let policy_store_json =
+            include_str!("../../../test_files/policy-store_lock_master_ok.json").to_string();
+
+        let mock_endpoint = mock_server
+            .mock("GET", "/policy-store")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(policy_store_json)
+            .expect(1)
+            .create();
+
+        let uri = format!("{}/policy-store", mock_server.url()).to_string();
+
+        load_policy_store(&PolicyStoreConfig {
+            source: crate::PolicyStoreSource::LockMaster(uri),
+        })
+        .expect("Should load policy store from Lock Master file");
+
+        mock_endpoint.assert();
     }
 }

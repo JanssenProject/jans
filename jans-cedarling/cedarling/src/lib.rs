@@ -16,6 +16,7 @@
 mod authz;
 mod bootstrap_config;
 mod common;
+mod http;
 mod init;
 mod jwt;
 mod lock;
@@ -28,10 +29,11 @@ mod tests;
 use std::sync::Arc;
 
 pub use authz::request::{Request, ResourceData};
+use authz::Authz;
 pub use authz::{AuthorizeError, AuthorizeResult};
-use authz::{Authz, AuthzInitError};
 pub use bootstrap_config::*;
 use init::service_config::{ServiceConfig, ServiceConfigError};
+use init::service_factory::ServiceInitError;
 use init::ServiceFactory;
 
 use common::app_types;
@@ -58,9 +60,9 @@ pub enum InitCedarlingError {
     /// Error while preparing config for internal services
     #[error(transparent)]
     ServiceConfig(#[from] ServiceConfigError),
-    /// Error while initializeing AuthZ module
+    /// Error while initializing a Service
     #[error(transparent)]
-    AuthzInit(#[from] AuthzInitError),
+    ServiceInit(#[from] ServiceInitError),
 }
 
 /// The instance of the Cedarling application.

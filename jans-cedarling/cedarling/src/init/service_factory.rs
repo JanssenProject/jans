@@ -14,7 +14,7 @@ use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt::{JwtService, JwtServiceInitError};
 
 use super::service_config::ServiceConfig;
-use crate::authz::{Authz, AuthzConfig, AuthzInitError};
+use crate::authz::{Authz, AuthzConfig};
 use crate::common::app_types;
 use crate::log;
 
@@ -74,7 +74,7 @@ impl<'a> ServiceFactory<'a> {
     }
 
     // get jwt service
-    pub fn jwt_service(&mut self) -> Result<Arc<JwtService>, JwtServiceInitError> {
+    pub fn jwt_service(&mut self) -> Result<Arc<JwtService>, ServiceInitError> {
         if let Some(jwt_service) = &self.container.jwt_service {
             Ok(jwt_service.clone())
         } else {
@@ -87,7 +87,7 @@ impl<'a> ServiceFactory<'a> {
     }
 
     // get authz service
-    pub fn authz_service(&mut self) -> Result<Arc<Authz>, AuthzInitError> {
+    pub fn authz_service(&mut self) -> Result<Arc<Authz>, ServiceInitError> {
         if let Some(authz) = &self.container.authz_service {
             Ok(authz.clone())
         } else {
@@ -104,4 +104,11 @@ impl<'a> ServiceFactory<'a> {
             Ok(service)
         }
     }
+}
+
+/// Error type for failing to initialize a service
+#[derive(Debug, thiserror::Error)]
+pub enum ServiceInitError {
+    #[error(transparent)]
+    JwtService(#[from] JwtServiceInitError),
 }

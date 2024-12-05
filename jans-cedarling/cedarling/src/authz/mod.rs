@@ -368,14 +368,6 @@ impl AuthorizeEntitiesData {
 
 /// Error type for Authorization Service
 #[derive(thiserror::Error, Debug)]
-pub enum AuthzInitError {
-    /// Error encountered while Initializing [`JwtService`]
-    #[error(transparent)]
-    JwtService(#[from] jwt::JwtServiceInitError),
-}
-
-/// Error type for Authorization Service
-#[derive(thiserror::Error, Debug)]
 pub enum AuthorizeError {
     /// Error encountered while processing JWT token data
     #[error(transparent)]
