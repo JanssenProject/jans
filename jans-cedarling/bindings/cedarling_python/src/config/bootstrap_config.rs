@@ -26,8 +26,8 @@ use std::str::FromStr;
 /// :param policy_store_id: An identifier for the policy store.
 /// :param log_type: Log type, e.g., 'none', 'memory', 'std_out', or 'lock'.
 /// :param log_ttl: (Optional) TTL (time to live) in seconds for log entities when `log_type` is 'memory'. The default is 60s.
-/// :param decision_log_user_claims: List of claims to map from user entity, such as ["sub", "email", "username", ...]
-/// :param decision_log_workload_claims: List of claims to map from user entity, such as ["client_id", "rp_id", ...]
+/// :param decision_log_user_claims: List of claims to map from user entity for decision log, such as ["sub", "email", "username", ...].
+/// :param decision_log_workload_claims: List of claims to map from user entity for decision log, such as ["client_id", "rp_id", ...].
 /// :param decision_log_default_jwt_id: Token claims that will be used for decision logging. Default is "jti".
 /// :param user_authz: Enables querying Cedar engine authorization for a User principal.
 /// :param workload_authz: Enables querying Cedar engine authorization for a Workload principal.
