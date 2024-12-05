@@ -71,6 +71,9 @@ use std::str::FromStr;
 ///     policy_store_id="policy123",
 ///     log_type="memory",
 ///     log_ttl=60,
+///     decision_log_user_claims=["sub", "email", "username"]
+///     decision_log_workload_claims=["client_id", "rp_id"]
+///     decision_log_default_jwt_id="jti"
 ///     user_authz=True,
 ///     workload_authz=True,
 ///     usr_workload_bool_op="AND",
@@ -126,6 +129,10 @@ pub struct BootstrapConfig {
 
     /// List of claims to map from user entity, such as ["client_id", "rp_id", ...]
     pub decision_log_workload_claims: Vec<String>,
+
+    /// Token claims that will be used for decision logging.
+    /// Default is jti, but perhaps some other claim is needed.
+    pub decision_log_default_jwt_id: String,
 
     /// If `log_type` is set to [`LogType::Memory`], this is the TTL (time to live) of
     /// log entities in seconds.
@@ -274,6 +281,8 @@ impl BootstrapConfig {
             get_with_default(options, "decision_log_user_claims", Vec::default())?;
         let decision_log_workload_claims =
             get_with_default(options, "decision_log_workload_claims", Vec::default())?;
+        let decision_log_default_jwt_id =
+            get_with_default(options, "decision_log_default_jwt_id", "jti".to_string())?;
         let user_authz = get_with_default(options, "user_authz", "enabled".to_string())?;
         let workload_authz = get_with_default(options, "workload_authz", "enabled".to_string())?;
         let usr_workload_bool_op =
@@ -334,6 +343,7 @@ impl BootstrapConfig {
             log_ttl,
             decision_log_user_claims,
             decision_log_workload_claims,
+            decision_log_default_jwt_id,
             user_authz,
             workload_authz,
             usr_workload_bool_op,
@@ -436,9 +446,10 @@ impl TryFrom<BootstrapConfig> for cedarling::BootstrapConfig {
             policy_store_uri: value.policy_store_uri,
             policy_store_id: value.policy_store_id,
             log_type: LoggerType::from_str(value.log_type.as_str()).unwrap_or_default(),
+            log_ttl: value.log_ttl,
             decision_log_user_claims: value.decision_log_user_claims,
             decision_log_workload_claims: value.decision_log_workload_claims,
-            log_ttl: value.log_ttl,
+            decision_log_default_jwt_id: value.decision_log_default_jwt_id,
             user_authz: value.user_authz.try_into().unwrap_or_default(),
             workload_authz: value.workload_authz.try_into().unwrap_or_default(),
             usr_workload_bool_op: WorkloadBoolOp::from_str(value.usr_workload_bool_op.as_str())

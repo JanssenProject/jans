@@ -233,9 +233,9 @@ impl Authz {
             resource: resource_uid.to_string(),
             decision: result.decision().into(),
             tokens: LogTokensInfo{
-                access: tokens.access_token.get_log_tokens_info(),
-                id_token: tokens.id_token.get_log_tokens_info(),
-                userinfo: tokens.userinfo_token.get_log_tokens_info(),
+                access: tokens.access_token.get_log_tokens_info(self.config.authorization.decision_log_default_jwt_id.as_str()),
+                id_token: tokens.id_token.get_log_tokens_info(self.config.authorization.decision_log_default_jwt_id.as_str()),
+                userinfo: tokens.userinfo_token.get_log_tokens_info(self.config.authorization.decision_log_default_jwt_id.as_str()),
             },
             decision_time_ms: elapsed_ms,
         });

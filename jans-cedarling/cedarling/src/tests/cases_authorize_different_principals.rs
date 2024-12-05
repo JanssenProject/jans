@@ -102,9 +102,7 @@ fn success_test_for_principal_workload() {
         crate::AuthorizationConfig {
             use_user_principal: false,
             use_workload_principal: true,
-            user_workload_operator: Default::default(),
-            decision_log_user_claims: Default::default(),
-            decision_log_workload_claims: Default::default(),
+            ..Default::default()
         },
     );
 
@@ -140,8 +138,7 @@ fn success_test_for_principal_user() {
             use_user_principal: true,
             use_workload_principal: false,
             user_workload_operator: Default::default(),
-            decision_log_user_claims: Default::default(),
-            decision_log_workload_claims: Default::default(),
+            ..Default::default()
         },
     );
 
@@ -181,8 +178,7 @@ fn success_test_for_principal_person_role() {
             use_user_principal: true,
             use_workload_principal: false,
             user_workload_operator: Default::default(),
-            decision_log_user_claims: Default::default(),
-            decision_log_workload_claims: Default::default(),
+            ..Default::default()
         },
     );
 
@@ -222,8 +218,7 @@ fn success_test_for_principal_workload_role() {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::And,
-            decision_log_user_claims: Default::default(),
-            decision_log_workload_claims: Default::default(),
+            ..Default::default()
         },
     );
 
@@ -269,8 +264,7 @@ fn success_test_for_principal_workload_true_or_user_false() {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::Or,
-            decision_log_user_claims: Default::default(),
-            decision_log_workload_claims: Default::default(),
+            ..Default::default()
         },
     );
 
@@ -316,8 +310,7 @@ fn success_test_for_principal_workload_false_or_user_true() {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::Or,
-            decision_log_user_claims: Default::default(),
-            decision_log_workload_claims: Default::default(),
+            ..Default::default()
         },
     );
 
@@ -363,8 +356,7 @@ fn success_test_for_principal_workload_false_or_user_false() {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::Or,
-            decision_log_user_claims: Default::default(),
-            decision_log_workload_claims: Default::default(),
+            ..Default::default()
         },
     );
 
@@ -409,8 +401,7 @@ fn test_where_principal_workload_cant_be_applied() {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: Default::default(),
-            decision_log_user_claims: Default::default(),
-            decision_log_workload_claims: Default::default(),
+            ..Default::default()
         },
     );
 
@@ -436,8 +427,7 @@ fn test_where_principal_user_cant_be_applied() {
             use_user_principal: true,
             use_workload_principal: false,
             user_workload_operator: Default::default(),
-            decision_log_user_claims: Default::default(),
-            decision_log_workload_claims: Default::default(),
+            ..Default::default()
         },
     );
 

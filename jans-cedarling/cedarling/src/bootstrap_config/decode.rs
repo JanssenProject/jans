@@ -48,6 +48,11 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS", default)]
     pub decision_log_workload_claims: Vec<String>,
 
+    /// Token claims that will be used for decision logging.
+    /// Default is jti, but perhaps some other claim is needed.
+    #[serde(rename = "CEDARLING_DECISION_LOG_DEFAULT_JWT_ID", default)]
+    pub decision_log_default_jwt_id: String,
+
     /// If `log_type` is set to [`LogType::Memory`], this is the TTL (time to live) of
     /// log entities in seconds.
     #[serde(rename = "CEDARLING_LOG_TTL", default)]
@@ -486,6 +491,7 @@ impl BootstrapConfig {
             user_workload_operator: raw.usr_workload_bool_op,
             decision_log_user_claims: raw.decision_log_user_claims.clone(),
             decision_log_workload_claims: raw.decision_log_workload_claims.clone(),
+            decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
         };
 
         Ok(Self {

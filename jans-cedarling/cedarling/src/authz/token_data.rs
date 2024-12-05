@@ -51,17 +51,22 @@ impl TokenPayload {
     }
 
     /// get tokens info claim for [`LogTokensInfo`] structure
-    /// we have no bootstrap property to define that claims should be in result,
-    /// so hardcoded only 'jti' but it can be changed in future
-    pub(crate) fn get_log_tokens_info<'a>(&'a self) -> HashMap<&'a str, &'a serde_json::Value> {
-        const TOKEN_CLAIMS: [&str; 1] = ["jti"];
+    /// if iterator is empty is used claim 'jti'
+    pub(crate) fn get_log_tokens_info<'a>(
+        &'a self,
+        decision_log_default_jwt_id: &'a str,
+    ) -> HashMap<&'a str, &'a serde_json::Value> {
+        let claim = if !decision_log_default_jwt_id.is_empty() {
+            decision_log_default_jwt_id
+        } else {
+            "jti"
+        };
 
-        HashMap::from_iter(
-            TOKEN_CLAIMS
-                .iter()
-                .map(|&claim| self.payload.get(claim).map(|value| (claim, value)))
-                .flatten(),
-        )
+        let iter = [self.payload.get(claim).map(|value| (claim, value))]
+            .into_iter()
+            .flatten();
+
+        HashMap::from_iter(iter)
     }
 }
 
