@@ -55,7 +55,7 @@ impl BootstrapConfig {
     ///     BootstrapConfig::load_from_file("../test_files/bootstrap_props.json")
     ///         .unwrap();
     /// ```
-    pub fn load_from_file(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn load_from_file(path: &str) -> Result<Self, BootstrapConfigLoadingError> {
         let file_ext = Path::new(path)
             .extension()
             .and_then(|ext| ext.to_str())
@@ -82,7 +82,7 @@ impl BootstrapConfig {
     }
 
     /// Loads a `BootstrapConfig` from a JSON string
-    pub fn load_from_json(config: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn load_from_json(config: &str) -> Result<Self, BootstrapConfigLoadingError> {
         let raw = serde_json::from_str::<decode::BootstrapConfigRaw>(config)?;
         Self::from_raw_config(&raw)
     }
@@ -112,6 +112,24 @@ pub enum BootstrapConfigLoadingError {
     /// Error returned when parsing the file as YAML fails.
     #[error("Failed to decode YAML string into BootstrapConfig: {0}")]
     DecodingYAML(#[from] serde_yml::Error),
+    
+    /// Error returned when the boostrap property `CEDARLING_LOG_TTL` is missing.
+    #[error("Missing bootstrap property: `CEDARLING_LOG_TTL`. This property is required if `CEDARLING_LOG_TYPE` is set to Memory.")]
+    MissingLogTTL,
+
+    /// Error returned when multiple policy store sources were provided.
+    #[error("Multiple store options were provided. Make sure you only one of these properties is set: `CEDARLING_POLICY_STORE_URI` or `CEDARLING_LOCAL_POLICY_STORE`")]
+    ConflictingPolicyStores,
+
+    /// Error returned when no policy store source was provided.
+    #[error("No Policy store was provided.")]
+    MissingPolicyStore,
+
+    /// Error returned when the policy store file is in an unsupported format.
+    #[error(
+        "Unsupported policy store file format for: {0}. Supported formats include: JSON, YAML"
+    )]
+    UnsupportedPolicyStoreFileFormat(String),
 }
 
 #[cfg(test)]

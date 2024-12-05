@@ -6,9 +6,9 @@
  */
 
 use super::{
-    authorization_config::AuthorizationConfig, BootstrapConfig, IdTokenTrustMode, JwtConfig,
-    LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
-    TokenValidationConfig,
+    authorization_config::AuthorizationConfig, BootstrapConfig, BootstrapConfigLoadingError,
+    IdTokenTrustMode, JwtConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig,
+    PolicyStoreSource, TokenValidationConfig,
 };
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -375,30 +375,14 @@ pub struct ParseFeatureToggleError {
     value: String,
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum BootstrapDecodingError {
-    #[error("Failed to deserialize Bootstrap config: {0}")]
-    Deserialization(#[from] serde_json::Error),
-    #[error("Missing bootstrap property: `CEDARLING_LOG_TTL`. This property is required if `CEDARLING_LOG_TYPE` is set to Memory.")]
-    MissingLogTTL,
-    #[error("Multiple store options were provided. Make sure you only one of these properties is set: `CEDARLING_POLICY_STORE_URI` or `CEDARLING_LOCAL_POLICY_STORE`")]
-    ConflictingPolicyStores,
-    #[error("No Policy store was provided.")]
-    MissingPolicyStore,
-    #[error(
-        "Unsupported policy store file format for: {0}. Supported formats include: JSON, YAML"
-    )]
-    UnsupportedPolicyStoreFileFormat(String),
-}
-
 impl BootstrapConfig {
     /// Construct an instance from BootstrapConfigRaw
-    pub fn from_raw_config(raw: &BootstrapConfigRaw) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn from_raw_config(raw: &BootstrapConfigRaw) -> Result<Self, BootstrapConfigLoadingError> {
         // Decode LogCofig
         let log_type = match raw.log_type {
             LoggerType::Off => LogTypeConfig::Off,
             LoggerType::Memory => LogTypeConfig::Memory(MemoryLogConfig {
-                log_ttl: raw.log_ttl.ok_or(BootstrapDecodingError::MissingLogTTL)?,
+                log_ttl: raw.log_ttl.ok_or(BootstrapConfigLoadingError::MissingLogTTL)?,
             }),
             LoggerType::StdOut => LogTypeConfig::StdOut,
             LoggerType::Lock => LogTypeConfig::Lock,
@@ -412,7 +396,7 @@ impl BootstrapConfig {
             raw.policy_store_local_fn.clone(),
         ) {
             // Case: no policy store provided
-            (None, None, None) => Err(BootstrapDecodingError::MissingPolicyStore)?,
+            (None, None, None) => Err(BootstrapConfigLoadingError::MissingPolicyStore)?,
             // Case: get the policy store from a JSON string
             (Some(policy_store), None, None) => PolicyStoreConfig {
                 source: PolicyStoreSource::Json(policy_store),
@@ -432,14 +416,14 @@ impl BootstrapConfig {
                 let source = match file_ext.as_deref() {
                     Some("json") => PolicyStoreSource::FileJson(path.into()),
                     Some("yaml") | Some("yml") => PolicyStoreSource::FileYaml(path.into()),
-                    _ => Err(BootstrapDecodingError::UnsupportedPolicyStoreFileFormat(
+                    _ => Err(BootstrapConfigLoadingError::UnsupportedPolicyStoreFileFormat(
                         raw_path,
                     ))?,
                 };
                 PolicyStoreConfig { source }
             },
             // Case: multiple polict stores were set
-            _ => Err(BootstrapDecodingError::ConflictingPolicyStores)?,
+            _ => Err(BootstrapConfigLoadingError::ConflictingPolicyStores)?,
         };
 
         // JWT Config
