@@ -16,6 +16,9 @@ These Bootstrap Properties control default application level behavior.
 * **`CEDARLING_POLICY_STORE_URI`** : Location of policy store JSON, used if policy store is not local, or retreived from Lock Server.
 * **`CEDARLING_POLICY_STORE_ID`** : A unique identifier for the policy store.
 * **`CEDARLING_LOG_TYPE`** (`"off"` | `"memory"` | `"std_out"` | `"lock"`): Selects the logging method.
+* **`CEDARLING_DECISION_LOG_USER_CLAIMS`** : List of claims to map from user entity, such as ["sub", "email", "username", ...]
+* **`CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS`** : List of claims to map from user entity, such as ["client_id", "rp_id", ...]
+* **`CEDARLING_DECISION_LOG_DEFAULT_JWT_ID`** : Token claims that will be used for decision logging. Default is "jti", but perhaps some other claim is needed.
 * **`CEDARLING_LOG_TTL`** : If the `CEDARLING_LOG_TYPE` is set to `"memory"`, this will set the TTL (Time to Live) of log entities in seconds. Defaults to 60s.
 * **`CEDARLING_USER_AUTHZ`** (`"enabled"` | `"disabled"`): When `enabled`, Cedar engine authorization is queried for a *User* principal.
 * **`CEDARLING_WORKLOAD_AUTHZ`** (`"enabled"` | `"disabled"`): When `enabled`, Cedar engine authorization is queried for a *Workload* principal.
@@ -99,6 +102,9 @@ Below is an example of a bootstrap config in JSON format.
     "CEDARLING_POLICY_STORE_URI": "",
     "CEDARLING_POLICY_STORE_ID": "840da5d85403f35ea76519ed1a18a33989f855bf1cf8",
     "CEDARLING_LOG_TYPE": "memory",
+    "CEDARLING_DECISION_LOG_USER_CLAIMS": ["sub", "email", "username"],
+    "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS": ["client_id", "rp_id"],
+    "CEDARLING_DECISION_LOG_DEFAULT_JWT_ID": "jti",
     "CEDARLING_LOG_TTL": 60,
     "CEDARLING_USER_AUTHZ": "enabled",
     "CEDARLING_WORKLOAD_AUTHZ": "enabled",
