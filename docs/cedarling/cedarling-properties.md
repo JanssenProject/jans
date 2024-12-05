@@ -94,7 +94,23 @@ Strict mode requires:
 1. The `id_token`'s `aud` matches the `access_token`'s `client_id`;
 2. if a Userinfo token is present, the `sub` matches the `id_token`, and that the `aud` matches the access token's `client_id`.
 
-## Loading The bootstrap config.
+## Local JWKS
+
+A local JWKS can be used by setting the `CEDARLING_LOCAL_JWKS` bootstrap property to a path to a local JSON file. When providing a local Json Web Key Store (JWKS), the file must follow the following schema:
+
+```json
+{
+    "trusted_issuer_id": [ ... ]
+    "another_trusted_issuer_id": [ ... ]
+}
+```
+
+- Where keys are `Trusted Issuer IDs` assigned to each key store
+- and the values contains the JSON Web Keys as defined in [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
+- The `trusted_issuers_id` is used to tag a JWKS with a unique identifier and enables using multiple key stores.
+
+
+## Loading the bootstrap config
 
 There are multiple ways to load your bootstrap config:
 
@@ -158,22 +174,6 @@ Below is an example of a bootstrap config in JSON format.
 ```
 
 - Note that properties set to `"disabled"`, an empty string `""`, zero `0`, and `null` can be ommited since they are the defaults.
-
-#### Local JWKS
-
-A local JWKS can be used by setting the `CEDARLING_LOCAL_JWKS` bootstrap property to a path to a local JSON file. When providing a local Json Web Key Store (JWKS), the file must follow the following schema:
-
-```json
-{
-    "trusted_issuer_id": [ ... ]
-    "another_trusted_issuer_id": [ ... ]
-}
-```
-
-- Where keys are `Trusted Issuer IDs` assigned to each key store
-- and the values contains the JSON Web Keys as defined in [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
-- The `trusted_issuers_id` is used to tag a JWKS with a unique identifier and enables using multiple key stores.
-
 
 ### Loading From YAML
 
