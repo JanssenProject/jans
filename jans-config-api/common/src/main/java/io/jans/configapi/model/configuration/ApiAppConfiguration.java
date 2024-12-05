@@ -58,15 +58,6 @@ public class ApiAppConfiguration implements Configuration {
     @Schema(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Revoke Token Endpoint.")
     private String authOpenidRevokeUrl;
 
-    @Schema(description = "Agama project prefix.")
-    private String agamaProjectPrefix;
-
-    @Schema(description = "Agama project repository URL.")
-    private String agamaRepositoryURL;
-
-    @Schema(description = "Agama project repository URL for latest URL.")
-    private String agamaLatestRepositoryURL;
-
     @Schema(description = "List of oAuth scope that can be validity for an access tokens only by underlying Jans Auth server.")
     private List<String> exclusiveAuthScopes;
 
@@ -240,30 +231,6 @@ public class ApiAppConfiguration implements Configuration {
         this.authOpenidRevokeUrl = authOpenidRevokeUrl;
     }
 
-    public String getAgamaProjectPrefix() {
-        return agamaProjectPrefix;
-    }
-
-    public void setAgamaProjectPrefix(String agamaProjectPrefix) {
-        this.agamaProjectPrefix = agamaProjectPrefix;
-    }
-
-    public String getAgamaRepositoryURL() {
-        return agamaRepositoryURL;
-    }
-
-    public void setAgamaRepositoryURL(String agamaRepositoryURL) {
-        this.agamaRepositoryURL = agamaRepositoryURL;
-    }
-
-    public String getAgamaLatestRepositoryURL() {
-        return agamaLatestRepositoryURL;
-    }
-
-    public void setAgamaLatestRepositoryURL(String agamaLatestRepositoryURL) {
-        this.agamaLatestRepositoryURL = agamaLatestRepositoryURL;
-    }
-
     public List<String> getExclusiveAuthScopes() {
         return exclusiveAuthScopes;
     }
@@ -318,7 +285,7 @@ public class ApiAppConfiguration implements Configuration {
 
     public void setMaxCount(int maxCount) {
         this.maxCount = maxCount;
-        if (this.maxCount <= 0) {
+        if(this.maxCount<=0) {
             this.maxCount = ApiConstants.DEFAULT_MAX_COUNT;
         }
     }
@@ -393,19 +360,18 @@ public class ApiAppConfiguration implements Configuration {
                 + ", disableLoggerTimer=" + disableLoggerTimer + ", disableAuditLogger=" + disableAuditLogger
                 + ", customAttributeValidationEnabled=" + customAttributeValidationEnabled + ", acrValidationEnabled="
                 + acrValidationEnabled + ", apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType="
-                + apiProtectionType + ", apiClientId=" + apiClientId + ", endpointInjectionEnabled="
-                + endpointInjectionEnabled + ", authIssuerUrl=" + authIssuerUrl + ", authOpenidConfigurationUrl="
-                + authOpenidConfigurationUrl + ", authOpenidIntrospectionUrl=" + authOpenidIntrospectionUrl
-                + ", authOpenidTokenUrl=" + authOpenidTokenUrl + ", authOpenidRevokeUrl=" + authOpenidRevokeUrl
-                + ", agamaProjectPrefix=" + agamaProjectPrefix + ", agamaRepositoryURL=" + agamaRepositoryURL
-                + ", agamaLatestRepositoryURL=" + agamaLatestRepositoryURL + ", exclusiveAuthScopes="
-                + exclusiveAuthScopes + ", corsConfigurationFilters=" + corsConfigurationFilters + ", loggingLevel="
-                + loggingLevel + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration="
-                + externalLoggerConfiguration + ", disableJdkLogger=" + disableJdkLogger + ", maxCount=" + maxCount
-                + ", acrExclusionList=" + acrExclusionList + ", userExclusionAttributes=" + userExclusionAttributes
-                + ", userMandatoryAttributes=" + userMandatoryAttributes + ", agamaConfiguration=" + agamaConfiguration
-                + ", auditLogConf=" + auditLogConf + ", dataFormatConversionConf=" + dataFormatConversionConf
-                + ", plugins=" + plugins + ", assetMgtConfiguration=" + assetMgtConfiguration + "]";
-    }
-
+                + apiProtectionType + ", apiClientId=" + apiClientId 
+                + ", endpointInjectionEnabled=" + endpointInjectionEnabled + ", authIssuerUrl=" + authIssuerUrl
+                + ", authOpenidConfigurationUrl=" + authOpenidConfigurationUrl + ", authOpenidIntrospectionUrl="
+                + authOpenidIntrospectionUrl + ", authOpenidTokenUrl=" + authOpenidTokenUrl + ", authOpenidRevokeUrl="
+                + authOpenidRevokeUrl + ", exclusiveAuthScopes=" + exclusiveAuthScopes + ", corsConfigurationFilters="
+                + corsConfigurationFilters + ", loggingLevel=" + loggingLevel + ", loggingLayout=" + loggingLayout
+                + ", externalLoggerConfiguration=" + externalLoggerConfiguration + ", disableJdkLogger="
+                + disableJdkLogger + ", maxCount=" + maxCount + ", acrExclusionList=" + acrExclusionList
+                + ", userExclusionAttributes=" + userExclusionAttributes + ", userMandatoryAttributes="
+                + userMandatoryAttributes + ", agamaConfiguration=" + agamaConfiguration + ", auditLogConf="
+                + auditLogConf + ", dataFormatConversionConf=" + dataFormatConversionConf + ", plugins=" + plugins
+                + ", assetMgtConfiguration=" + assetMgtConfiguration + "]";
+    }    
+    
 }

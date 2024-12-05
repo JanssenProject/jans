@@ -9304,17 +9304,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        userCanView:
+        adminCanAccess:
           type: boolean
-        adminCanView:
+        userCanAccess:
           type: boolean
         adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
+        userCanView:
           type: boolean
-        adminCanAccess:
+        adminCanView:
           type: boolean
         baseDn:
           type: string
@@ -11033,15 +11033,6 @@ components:
           type: string
           description: Jans URL of the OpenID Connect Provider's OAuth 2.0 Revoke
             Token Endpoint.
-        agamaProjectPrefix:
-          type: string
-          description: Agama project prefix.
-        agamaRepositoryURL:
-          type: string
-          description: Agama project repository URL.
-        agamaLatestRepositoryURL:
-          type: string
-          description: Agama project repository URL for latest URL.
         exclusiveAuthScopes:
           type: array
           description: List of oAuth scope that can be validity for an access tokens
@@ -11298,14 +11289,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:

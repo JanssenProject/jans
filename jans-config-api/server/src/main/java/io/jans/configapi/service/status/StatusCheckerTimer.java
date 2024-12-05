@@ -256,6 +256,47 @@ public class StatusCheckerTimer {
         log.debug("Service Status data - serviceStatus:{}", serviceStatus);
         return serviceStatus;
     }
+    
+    public JsonNode getAllAgamaRepositories() {
+        if (log.isInfoEnabled()) {
+            log.debug("Getting All Agama Lab Projects");
+        }
+       
+        JsonNode appVersion = null;
+        if (!isLinux()) {
+            return appVersion;
+        }
+
+        CommandLine commandLine = new CommandLine(PROGRAM_SHOW_VERSION);
+       
+        commandLine.addArgument("--json");
+        log.error("Getting Agama Lab Projects version for commandLine:{}", commandLine);
+        
+        String resultOutput;
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);) {
+            
+            boolean result = ProcessHelper.executeProgram(commandLine, false, 0, bos);
+            if (!result) {
+                return appVersion;
+            }
+            
+            resultOutput = new String(bos.toByteArray(), UTF_8);
+            log.error("resultOutput:{}", resultOutput);
+            
+            if(StringUtils.isNotBlank(resultOutput)) {
+                appVersion = Jackson.asJsonNode(resultOutput);
+            }
+            
+        } catch (UnsupportedEncodingException uex) {
+            log.error("Failed to parse program {} output", PROGRAM_SHOW_VERSION, uex);
+            return appVersion;
+        } catch (Exception ex) {
+            log.error("Failed to execute program {} output", PROGRAM_SHOW_VERSION, ex);
+            return appVersion;
+        }
+        log.debug("Server application version - appVersion:{}", appVersion);
+        return appVersion;
+    }
 
     private void printDirectory() {
         log.debug("printDirectory");
