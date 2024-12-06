@@ -38,10 +38,8 @@ test_cases_err = [
 @ pytest.mark.parametrize("policy_file_name,expected_error", test_cases_err)
 def test_load_policy_store(load_bootstrap_config, policy_file_name, expected_error):
     # map fixture to variable with shorter name for readability
-    config = load_bootstrap_config()
 
-    policy_store_location = join(TEST_FILES_PATH, policy_file_name)
-    config.policy_store_local_fn = policy_store_location
+    config = load_bootstrap_config(policy_store_location=join(TEST_FILES_PATH, policy_file_name))
 
     try:
         # initialize cedarling

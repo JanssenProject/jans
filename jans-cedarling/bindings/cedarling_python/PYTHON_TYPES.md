@@ -10,10 +10,6 @@ BootstrapConfig
 A Python wrapper for the Rust `cedarling::BootstrapConfig` struct.
 Configures the `Cedarling` application, including authorization, logging, and policy store settings.
 
-----------  
-:param log_type: Log type, e.g., 'none', 'memory', 'std_out', or 'lock'.  
-:param policy_store_local_fn: A path to the local policy store function
-
 Methods
 -------
 .. method:: __init__(self, config)

@@ -10,11 +10,9 @@ from config import load_bootstrap_config
 # In python unit tests we not cover all possible scenarios, but most common.
 
 def test_invalid_log_config(load_bootstrap_config):
-    # map fixture to variable with shorter name for readability
-    config = load_bootstrap_config()
     try:
         # when we set invalid log configuration it should raise ValueError
-        config.log_type = "String"
+        load_bootstrap_config(log_type="String")
     except ValueError:
         pass
     else:
@@ -23,10 +21,7 @@ def test_invalid_log_config(load_bootstrap_config):
 
 def test_memory_logger(load_bootstrap_config):
     # map fixture to variable with shorter name for readability
-    config = load_bootstrap_config()
-
-    config.log_ttl = 60
-    config.log_type = "memory"
+    config = load_bootstrap_config(log_type="memory", log_ttl=60)
 
     # on initialize Cedarling we should have logs
     cedarling = Cedarling(config)
@@ -49,9 +44,7 @@ def test_memory_logger(load_bootstrap_config):
 
 def test_off_logger(load_bootstrap_config):
     # map fixture to variable with shorter name for readability
-    config = load_bootstrap_config()
-
-    config.log_type = "off"
+    config = load_bootstrap_config(log_type="off")
 
     cedarling = Cedarling(config)
 
@@ -62,8 +55,7 @@ def test_off_logger(load_bootstrap_config):
 
 def test_stdout_logger(load_bootstrap_config):
     # Map fixture to variable with shorter name for readability
-    config = load_bootstrap_config()
-    config.log_type = "std_out"
+    config = load_bootstrap_config(log_type="std_out")
 
     cedarling = Cedarling(config)
 
