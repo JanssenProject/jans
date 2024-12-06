@@ -257,7 +257,7 @@ pub struct ProcessTokensResult<'a, A, I, U> {
 }
 
 #[cfg(test)]
-mod new_test {
+mod test {
     use super::test_utils::*;
     use super::JwtService;
     use crate::IdTokenTrustMode;
