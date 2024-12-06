@@ -12,8 +12,10 @@
 //! [cedar json schema grammar](https://docs.cedarpolicy.com/schema/json-schema-grammar.html) - documentation about json structure of cedar schema.
 
 use std::collections::HashMap;
+mod action;
 mod entity_types;
 
+use action::Action;
 pub use entity_types::{CedarSchemaEntityShape, CedarSchemaRecord};
 
 /// Represent `cedar-policy` schema type for external usage.
@@ -83,6 +85,12 @@ impl CedarSchemaJson {
 
         None
     }
+
+    /// Find the action in the schema
+    pub fn find_action(&self, action_name: &str, namespace: &str) -> Option<Action> {
+        let namespace = self.namespace.get(namespace)?;
+        namespace.actions.get(action_name).cloned()
+    }
 }
 
 /// CedarSchemaEntities hold all entities and their shapes in the namespace.
@@ -94,10 +102,13 @@ pub struct CedarSchemaEntities {
     pub entity_types: HashMap<String, CedarSchemaEntityShape>,
     #[serde(rename = "commonTypes", default)]
     pub common_types: HashMap<String, CedarSchemaRecord>,
+    pub actions: HashMap<String, Action>,
 }
 
 #[cfg(test)]
 mod tests {
+
+    use std::collections::HashSet;
 
     use super::entity_types::*;
 
@@ -230,12 +241,22 @@ mod tests {
             },
         )]);
 
+        let actions = HashMap::from([(
+            "Update".to_string(),
+            Action {
+                resource_types: HashSet::from(["Issue"].map(|x| x.to_string())),
+                principal_types: HashSet::from(["Access_token", "Role"].map(|x| x.to_string())),
+                context: None,
+            },
+        )]);
+
         let schema_to_compare = CedarSchemaJson {
             namespace: HashMap::from_iter(vec![(
                 "Jans".to_string(),
                 CedarSchemaEntities {
                     entity_types,
                     common_types,
+                    actions,
                 },
             )]),
         };
