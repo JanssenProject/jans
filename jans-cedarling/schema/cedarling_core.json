@@ -1,1 +1,572 @@
-{"Jans":{"commonTypes":{"Context":{"type":"Record","attributes":{"current_time":{"type":"EntityOrCommon","name":"Long","required":false},"device_health":{"type":"Set","element":{"type":"EntityOrCommon","name":"String"},"required":false},"fraud_indicators":{"type":"Set","element":{"type":"EntityOrCommon","name":"String"},"required":false},"geolocation":{"type":"Set","element":{"type":"EntityOrCommon","name":"String"},"required":false},"network":{"type":"EntityOrCommon","name":"String","required":false},"network_type":{"type":"EntityOrCommon","name":"String","required":false},"operating_system":{"type":"EntityOrCommon","name":"String","required":false},"user_agent":{"type":"EntityOrCommon","name":"String","required":false}}},"Url":{"type":"Record","attributes":{"host":{"type":"EntityOrCommon","name":"String"},"path":{"type":"EntityOrCommon","name":"String"},"protocol":{"type":"EntityOrCommon","name":"String"}}},"email_address":{"type":"Record","attributes":{"domain":{"type":"EntityOrCommon","name":"String"},"uid":{"type":"EntityOrCommon","name":"String"}}}},"entityTypes":{"Access_token":{"shape":{"type":"Record","attributes":{"aud":{"type":"EntityOrCommon","name":"String"},"exp":{"type":"EntityOrCommon","name":"Long"},"iat":{"type":"EntityOrCommon","name":"Long"},"iss":{"type":"EntityOrCommon","name":"TrustedIssuer"},"jti":{"type":"EntityOrCommon","name":"String","required":false},"nbf":{"type":"EntityOrCommon","name":"Long","required":false},"scope":{"type":"Set","element":{"type":"EntityOrCommon","name":"String"},"required":false}}}},"Application":{"shape":{"type":"Record","attributes":{"app_id":{"type":"EntityOrCommon","name":"String"},"name":{"type":"EntityOrCommon","name":"String"},"url":{"type":"EntityOrCommon","name":"Url"}}}},"HTTP_Request":{"shape":{"type":"Record","attributes":{"accept":{"type":"Set","element":{"type":"EntityOrCommon","name":"String"}},"header":{"type":"Set","element":{"type":"EntityOrCommon","name":"String"}},"url":{"type":"EntityOrCommon","name":"Url"}}}},"Role":{},"TrustedIssuer":{"shape":{"type":"Record","attributes":{"issuer_entity_id":{"type":"EntityOrCommon","name":"Url"}}}},"User":{"memberOfTypes":["Role"],"shape":{"type":"Record","attributes":{"email":{"type":"EntityOrCommon","name":"email_address","required":false},"phone_number":{"type":"EntityOrCommon","name":"String","required":false},"role":{"type":"Set","element":{"type":"EntityOrCommon","name":"String"}},"sub":{"type":"EntityOrCommon","name":"String"},"username":{"type":"EntityOrCommon","name":"String","required":false}}}},"Userinfo_token":{"shape":{"type":"Record","attributes":{"aud":{"type":"EntityOrCommon","name":"String"},"birthdate":{"type":"EntityOrCommon","name":"String","required":false},"email":{"type":"EntityOrCommon","name":"email_address","required":false},"exp":{"type":"EntityOrCommon","name":"Long"},"iat":{"type":"EntityOrCommon","name":"Long"},"iss":{"type":"EntityOrCommon","name":"TrustedIssuer"},"jti":{"type":"EntityOrCommon","name":"String","required":false},"name":{"type":"EntityOrCommon","name":"String","required":false},"phone_number":{"type":"EntityOrCommon","name":"String","required":false},"role":{"type":"Set","element":{"type":"EntityOrCommon","name":"String"},"required":false},"sub":{"type":"EntityOrCommon","name":"String"}}}},"Workload":{"shape":{"type":"Record","attributes":{"client_id":{"type":"EntityOrCommon","name":"String"},"iss":{"type":"EntityOrCommon","name":"TrustedIssuer"},"name":{"type":"EntityOrCommon","name":"String","required":false},"rp_id":{"type":"EntityOrCommon","name":"String","required":false},"spiffe_id":{"type":"EntityOrCommon","name":"String","required":false}}}},"id_token":{"shape":{"type":"Record","attributes":{"acr":{"type":"EntityOrCommon","name":"String","required":false},"amr":{"type":"Set","element":{"type":"EntityOrCommon","name":"String"},"required":false},"aud":{"type":"EntityOrCommon","name":"String"},"azp":{"type":"EntityOrCommon","name":"String","required":false},"birthdate":{"type":"EntityOrCommon","name":"String","required":false},"email":{"type":"EntityOrCommon","name":"email_address","required":false},"exp":{"type":"EntityOrCommon","name":"Long"},"iat":{"type":"EntityOrCommon","name":"Long"},"iss":{"type":"EntityOrCommon","name":"TrustedIssuer"},"jti":{"type":"EntityOrCommon","name":"String","required":false},"name":{"type":"EntityOrCommon","name":"String","required":false},"phone_number":{"type":"EntityOrCommon","name":"String","required":false},"role":{"type":"Set","element":{"type":"EntityOrCommon","name":"String"},"required":false},"sub":{"type":"EntityOrCommon","name":"String"}}}}},"actions":{"Compare":{"appliesTo":{"resourceTypes":["Application"],"principalTypes":["User","Workload"],"context":{"type":"Context"}}},"DELETE":{"appliesTo":{"resourceTypes":["HTTP_Request"],"principalTypes":["Workload"],"context":{"type":"Context"}}},"Execute":{"appliesTo":{"resourceTypes":["Application"],"principalTypes":["User","Workload"],"context":{"type":"Context"}}},"GET":{"appliesTo":{"resourceTypes":["HTTP_Request"],"principalTypes":["Workload"],"context":{"type":"Context"}}},"HEAD":{"appliesTo":{"resourceTypes":["HTTP_Request"],"principalTypes":["Workload"],"context":{"type":"Context"}}},"Monitor":{"appliesTo":{"resourceTypes":["Application"],"principalTypes":["User","Workload"],"context":{"type":"Context"}}},"PATCH":{"appliesTo":{"resourceTypes":["HTTP_Request"],"principalTypes":["Workload"],"context":{"type":"Context"}}},"PUT":{"appliesTo":{"resourceTypes":["HTTP_Request"],"principalTypes":["Workload"],"context":{"type":"Context"}}},"Read":{"appliesTo":{"resourceTypes":["Application"],"principalTypes":["User","Workload"],"context":{"type":"Context"}}},"Search":{"appliesTo":{"resourceTypes":["Application"],"principalTypes":["User","Workload"],"context":{"type":"Context"}}},"Share":{"appliesTo":{"resourceTypes":["Application"],"principalTypes":["User","Workload"],"context":{"type":"Context"}}},"Tag":{"appliesTo":{"resourceTypes":["Application"],"principalTypes":["User","Workload"],"context":{"type":"Context"}}},"Write":{"appliesTo":{"resourceTypes":["Application"],"principalTypes":["User","Workload"],"context":{"type":"Context"}}}}}}
+{
+    "Jans": {
+        "commonTypes": {
+            "Context": {
+                "type": "Record",
+                "attributes": {
+                    "current_time": {
+                        "type": "EntityOrCommon",
+                        "name": "Long",
+                        "required": false
+                    },
+                    "device_health": {
+                        "type": "Set",
+                        "element": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "required": false
+                    },
+                    "fraud_indicators": {
+                        "type": "Set",
+                        "element": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "required": false
+                    },
+                    "geolocation": {
+                        "type": "Set",
+                        "element": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "required": false
+                    },
+                    "network": {
+                        "type": "EntityOrCommon",
+                        "name": "String",
+                        "required": false
+                    },
+                    "network_type": {
+                        "type": "EntityOrCommon",
+                        "name": "String",
+                        "required": false
+                    },
+                    "operating_system": {
+                        "type": "EntityOrCommon",
+                        "name": "String",
+                        "required": false
+                    },
+                    "user_agent": {
+                        "type": "EntityOrCommon",
+                        "name": "String",
+                        "required": false
+                    }
+                }
+            },
+            "Url": {
+                "type": "Record",
+                "attributes": {
+                    "host": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
+                    },
+                    "path": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
+                    },
+                    "protocol": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
+                    }
+                }
+            },
+            "email_address": {
+                "type": "Record",
+                "attributes": {
+                    "domain": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
+                    },
+                    "uid": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
+                    }
+                }
+            }
+        },
+        "entityTypes": {
+            "Access_token": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "aud": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "exp": {
+                            "type": "EntityOrCommon",
+                            "name": "Long"
+                        },
+                        "iat": {
+                            "type": "EntityOrCommon",
+                            "name": "Long"
+                        },
+                        "iss": {
+                            "type": "EntityOrCommon",
+                            "name": "TrustedIssuer"
+                        },
+                        "jti": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "nbf": {
+                            "type": "EntityOrCommon",
+                            "name": "Long",
+                            "required": false
+                        },
+                        "scope": {
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            },
+                            "required": false
+                        }
+                    }
+                }
+            },
+            "Application": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "app_id": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "name": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "url": {
+                            "type": "EntityOrCommon",
+                            "name": "Url"
+                        }
+                    }
+                }
+            },
+            "HTTP_Request": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "accept": {
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            }
+                        },
+                        "header": {
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            }
+                        },
+                        "url": {
+                            "type": "EntityOrCommon",
+                            "name": "Url"
+                        }
+                    }
+                }
+            },
+            "Role": {},
+            "TrustedIssuer": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "issuer_entity_id": {
+                            "type": "EntityOrCommon",
+                            "name": "Url"
+                        }
+                    }
+                }
+            },
+            "User": {
+                "memberOfTypes": [
+                    "Role"
+                ],
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "email": {
+                            "type": "EntityOrCommon",
+                            "name": "email_address",
+                            "required": false
+                        },
+                        "phone_number": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "role": {
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            }
+                        },
+                        "sub": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "username": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        }
+                    }
+                }
+            },
+            "Userinfo_token": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "aud": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "birthdate": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "email": {
+                            "type": "EntityOrCommon",
+                            "name": "email_address",
+                            "required": false
+                        },
+                        "exp": {
+                            "type": "EntityOrCommon",
+                            "name": "Long"
+                        },
+                        "iat": {
+                            "type": "EntityOrCommon",
+                            "name": "Long"
+                        },
+                        "iss": {
+                            "type": "EntityOrCommon",
+                            "name": "TrustedIssuer"
+                        },
+                        "jti": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "name": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "phone_number": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "role": {
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            },
+                            "required": false
+                        },
+                        "sub": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        }
+                    }
+                }
+            },
+            "Workload": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "client_id": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "iss": {
+                            "type": "EntityOrCommon",
+                            "name": "TrustedIssuer"
+                        },
+                        "name": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "rp_id": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "spiffe_id": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        }
+                    }
+                }
+            },
+            "id_token": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "acr": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "amr": {
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            },
+                            "required": false
+                        },
+                        "aud": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "azp": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "birthdate": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "email": {
+                            "type": "EntityOrCommon",
+                            "name": "email_address",
+                            "required": false
+                        },
+                        "exp": {
+                            "type": "EntityOrCommon",
+                            "name": "Long"
+                        },
+                        "iat": {
+                            "type": "EntityOrCommon",
+                            "name": "Long"
+                        },
+                        "iss": {
+                            "type": "EntityOrCommon",
+                            "name": "TrustedIssuer"
+                        },
+                        "jti": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "name": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "phone_number": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "role": {
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            },
+                            "required": false
+                        },
+                        "sub": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        }
+                    }
+                }
+            }
+        },
+        "actions": {
+            "Compare": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "DELETE": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "HTTP_Request"
+                    ],
+                    "principalTypes": [
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Execute": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "GET": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "HTTP_Request"
+                    ],
+                    "principalTypes": [
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "HEAD": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "HTTP_Request"
+                    ],
+                    "principalTypes": [
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Monitor": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "PATCH": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "HTTP_Request"
+                    ],
+                    "principalTypes": [
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "PUT": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "HTTP_Request"
+                    ],
+                    "principalTypes": [
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Read": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Search": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Share": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Tag": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Write": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            }
+        }
+    }
+}
