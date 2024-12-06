@@ -10,9 +10,8 @@ use super::{
     LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
     TokenValidationConfig,
 };
-use crate::common::policy_store::PolicyStore;
 use jsonwebtoken::Algorithm;
-use serde::{Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer, Serialize};
 use std::{collections::HashSet, path::Path, str::FromStr};
 use typed_builder::TypedBuilder;
 
@@ -39,6 +38,19 @@ pub struct BootstrapConfigRaw {
     /// How the Logs will be presented.
     #[serde(rename = "CEDARLING_LOG_TYPE", default)]
     pub log_type: LoggerType,
+
+    /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
+    #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS ", default)]
+    pub decision_log_user_claims: Vec<String>,
+
+    /// List of claims to map from user entity, such as ["client_id", "rp_id", ...]
+    #[serde(rename = "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS", default)]
+    pub decision_log_workload_claims: Vec<String>,
+
+    /// Token claims that will be used for decision logging.
+    /// Default is jti, but perhaps some other claim is needed.
+    #[serde(rename = "CEDARLING_DECISION_LOG_DEFAULT_JWT_ID", default)]
+    pub decision_log_default_jwt_id: String,
 
     /// If `log_type` is set to [`LogType::Memory`], this is the TTL (time to live) of
     /// log entities in seconds.
@@ -92,7 +104,7 @@ pub struct BootstrapConfigRaw {
 
     /// JSON object with policy store
     #[serde(rename = "CEDARLING_LOCAL_POLICY_STORE", default)]
-    pub local_policy_store: Option<PolicyStore>,
+    pub local_policy_store: Option<String>,
 
     /// Path to a Policy Store JSON file
     #[serde(
@@ -337,7 +349,7 @@ impl From<bool> for FeatureToggle {
     }
 }
 
-#[derive(Default, Clone, Copy, Debug, PartialEq, Deserialize)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "UPPERCASE")]
 /// Operator that define boolean operator `AND` or `OR`.
 pub enum WorkloadBoolOp {
@@ -428,19 +440,22 @@ impl BootstrapConfig {
 
         // Decode policy store
         let policy_store_config = match (
+            raw.local_policy_store.clone(),
             raw.policy_store_uri.clone(),
             raw.policy_store_local_fn.clone(),
         ) {
             // Case: no policy store provided
-            (None, None) => Err(BootstrapDecodingError::MissingPolicyStore)?,
-
+            (None, None, None) => Err(BootstrapDecodingError::MissingPolicyStore)?,
+            // Case: get the policy store from a JSON string
+            (Some(policy_store), None, None) => PolicyStoreConfig {
+                source: PolicyStoreSource::Json(policy_store),
+            },
             // Case: get the policy store from the lock master
-            (Some(policy_store_uri), None) => PolicyStoreConfig {
+            (None, Some(policy_store_uri), None) => PolicyStoreConfig {
                 source: PolicyStoreSource::LockMaster(policy_store_uri),
             },
-
             // Case: get the policy store from a local JSON file
-            (None, Some(raw_path)) => {
+            (None, None, Some(raw_path)) => {
                 let path = Path::new(&raw_path);
                 let file_ext = Path::new(&path)
                     .extension()
@@ -456,9 +471,8 @@ impl BootstrapConfig {
                 };
                 PolicyStoreConfig { source }
             },
-
             // Case: multiple polict stores were set
-            (Some(_), Some(_)) => Err(BootstrapDecodingError::ConflictingPolicyStores)?,
+            _ => Err(BootstrapDecodingError::ConflictingPolicyStores)?,
         };
 
         // JWT Config
@@ -496,7 +510,9 @@ impl BootstrapConfig {
             use_user_principal: raw.user_authz.is_enabled(),
             use_workload_principal: raw.workload_authz.is_enabled(),
             user_workload_operator: raw.usr_workload_bool_op,
-
+            decision_log_user_claims: raw.decision_log_user_claims.clone(),
+            decision_log_workload_claims: raw.decision_log_workload_claims.clone(),
+            decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
             mapping_user: raw.mapping_user.clone(),
             mapping_workload: raw.mapping_workload.clone(),
             mapping_id_token: raw.mapping_id_token.clone(),

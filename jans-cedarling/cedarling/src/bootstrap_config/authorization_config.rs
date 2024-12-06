@@ -29,6 +29,19 @@ pub struct AuthorizationConfig {
     /// - **OR**: authz will be successful if `USER` **OR** `WORKLOAD` is valid.
     pub user_workload_operator: WorkloadBoolOp,
 
+    /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
+    /// `CEDARLING_DECISION_LOG_USER_CLAIMS` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
+    pub decision_log_user_claims: Vec<String>,
+
+    /// List of claims to map from user entity, such as ["client_id", "rp_id", ...]
+    /// `CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
+    pub decision_log_workload_claims: Vec<String>,
+
+    /// Token claims that will be used for decision logging.
+    /// Default is jti, but perhaps some other claim is needed.
+    /// `CEDARLING_DECISION_LOG_DEFAULT_JWT_ID` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
+    pub decision_log_default_jwt_id: String,
+
     /// Name of Cedar Context schema entity
     pub mapping_user: Option<String>,
 

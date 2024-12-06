@@ -5,7 +5,6 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use cedarling::bindings::PolicyStore;
 use cedarling::{BootstrapConfigRaw, IdTokenTrustMode, LoggerType, WorkloadBoolOp};
 use jsonwebtoken::Algorithm;
 use pyo3::exceptions::{PyKeyError, PyValueError};
@@ -27,6 +26,9 @@ use std::str::FromStr;
 /// :param policy_store_id: An identifier for the policy store.
 /// :param log_type: Log type, e.g., 'none', 'memory', 'std_out', or 'lock'.
 /// :param log_ttl: (Optional) TTL (time to live) in seconds for log entities when `log_type` is 'memory'. The default is 60s.
+/// :param decision_log_user_claims: List of claims to map from user entity for decision log, such as ["sub", "email", "username", ...].
+/// :param decision_log_workload_claims: List of claims to map from user entity for decision log, such as ["client_id", "rp_id", ...].
+/// :param decision_log_default_jwt_id: Token claims that will be used for decision logging. Default is "jti".
 /// :param user_authz: Enables querying Cedar engine authorization for a User principal.
 /// :param workload_authz: Enables querying Cedar engine authorization for a Workload principal.
 /// :param usr_workload_bool_op: Boolean operation ('AND' or 'OR') for combining `USER` and `WORKLOAD` authz results.
@@ -68,49 +70,51 @@ use std::str::FromStr;
 /// -------
 /// ```python
 /// from cedarling import BootstrapConfig
-///
 /// # Example configuration
-/// bootstrap_config = BootstrapConfig(
-///     application_name="MyApp",
-///     policy_store_uri=None,
-///     policy_store_id="policy123",
-///     log_type="memory",
-///     log_ttl=60,
-///     user_authz=True,
-///     workload_authz=True,
-///     usr_workload_bool_op="AND",
-///     mapping_user=None,
-///     mapping_workload=None,
-///     mapping_id_token=None,
-///     mapping_access_token=None,
-///     mapping_userinfo_token=None,
-///     local_jwks="./path/to/your_jwks.json",
-///     local_policy_store=None,
-///     policy_store_local_fn="./path/to/your_policy_store.json",
-///     jwt_sig_validation=True,
-///     jwt_status_validation=False,
-///     at_iss_validation=True,
-///     at_jti_validation=True,
-///     at_nbf_validation=False,
-///     idt_iss_validation=True,
-///     idt_sub_validation=True,
-///     idt_exp_validation=True,
-///     idt_iat_validation=True,
-///     idt_aud_validation=True,
-///     userinfo_iss_validation=True,
-///     userinfo_sub_validation=True,
-///     userinfo_aud_validation=True,
-///     userinfo_exp_validation=True,
-///     id_token_trust_mode="Strict",
-///     lock=True,
-///     lock_master_configuration_uri=None,
-///     dynamic_configuration=False,
-///     lock_ssa_jwt=None,
-///     audit_log_interval=0,
-///     audit_health_interval=0,
-///     audit_health_telemetry_interval=0,
-///     listen_sse=False,
-/// )
+/// bootstrap_config = BootstrapConfig({
+///     "application_name": "MyApp",
+///     "policy_store_uri": None,
+///     "policy_store_id": "policy123",
+///     "log_type": "memory",
+///     "log_ttl": 86400,
+///     "decision_log_user_claims": ["sub", "email", "username"]
+///     "decision_log_workload_claims": ["client_id", "rp_id"]
+///     "decision_log_default_jwt_id":"jti"
+///     "user_authz": "enabled",
+///     "workload_authz": "enabled",
+///     "usr_workload_bool_op": "AND",
+///     "mapping_user": None,
+///     "mapping_workload": None,
+///     "mapping_id_token": None,
+///     "mapping_access_token": None,
+///     "mapping_userinfo_token":None,
+///     "local_jwks": "./path/to/your_jwks.json",
+///     "local_policy_store": None,
+///     "policy_store_local_fn": "./path/to/your_policy_store.json",
+///     "jwt_sig_validation": "enabled",
+///     "jwt_status_validation": "disabled",
+///     "at_iss_validation": "enabled",
+///     "at_jti_validation": "enabled",
+///     "at_nbf_validation": "disabled",
+///     "idt_iss_validation": "enabled",
+///     "idt_sub_validation": "enabled",
+///     "idt_exp_validation": "enabled",
+///     "idt_iat_validation": "enabled",
+///     "idt_aud_validation": "enabled",
+///     "userinfo_iss_validation": "enabled",
+///     "userinfo_sub_validation": "enabled",
+///     "userinfo_aud_validation": "enabled",
+///     "userinfo_exp_validation": "enabled",
+///     "id_token_trust_mode": "Strict",
+///     "lock": "disabled",
+///     "lock_master_configuration_uri": None,
+///     "dynamic_configuration": "disabled",
+///     "lock_ssa_jwt": None,
+///     "audit_log_interval": 0,
+///     "audit_health_interval": 0,
+///     "audit_health_telemetry_interval": 0,
+///     "listen_sse": "disabled",
+/// })
 /// ```
 #[derive(Debug, Clone)]
 #[pyclass]
@@ -130,6 +134,16 @@ pub struct BootstrapConfig {
     ///
     /// Could be set to: 'off' | 'memory' | 'std_out' | 'lock'
     pub log_type: String,
+
+    /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
+    pub decision_log_user_claims: Vec<String>,
+
+    /// List of claims to map from user entity, such as ["client_id", "rp_id", ...]
+    pub decision_log_workload_claims: Vec<String>,
+
+    /// Token claims that will be used for decision logging.
+    /// Default is jti, but perhaps some other claim is needed.
+    pub decision_log_default_jwt_id: String,
 
     /// If `log_type` is set to [`LogType::Memory`], this is the TTL (time to live) of
     /// log entities in seconds.
@@ -289,6 +303,12 @@ impl BootstrapConfig {
         let policy_store_uri = get_optional(options, "policy_store_uri")?;
         let log_type = get_with_default(options, "log_type", "memory".to_string())?;
         let log_ttl = get_with_default(options, "log_ttl", Some(60))?;
+        let decision_log_user_claims =
+            get_with_default(options, "decision_log_user_claims", Vec::default())?;
+        let decision_log_workload_claims =
+            get_with_default(options, "decision_log_workload_claims", Vec::default())?;
+        let decision_log_default_jwt_id =
+            get_with_default(options, "decision_log_default_jwt_id", "jti".to_string())?;
         let user_authz = get_with_default(options, "user_authz", "enabled".to_string())?;
         let workload_authz = get_with_default(options, "workload_authz", "enabled".to_string())?;
         let usr_workload_bool_op =
@@ -352,6 +372,9 @@ impl BootstrapConfig {
             policy_store_uri,
             log_type,
             log_ttl,
+            decision_log_user_claims,
+            decision_log_workload_claims,
+            decision_log_default_jwt_id,
             user_authz,
             workload_authz,
             usr_workload_bool_op,
@@ -460,6 +483,9 @@ impl TryFrom<BootstrapConfig> for cedarling::BootstrapConfig {
             policy_store_id: value.policy_store_id,
             log_type: LoggerType::from_str(value.log_type.as_str()).unwrap_or_default(),
             log_ttl: value.log_ttl,
+            decision_log_user_claims: value.decision_log_user_claims,
+            decision_log_workload_claims: value.decision_log_workload_claims,
+            decision_log_default_jwt_id: value.decision_log_default_jwt_id,
             user_authz: value.user_authz.try_into().unwrap_or_default(),
             workload_authz: value.workload_authz.try_into().unwrap_or_default(),
             usr_workload_bool_op: WorkloadBoolOp::from_str(value.usr_workload_bool_op.as_str())
@@ -474,18 +500,7 @@ impl TryFrom<BootstrapConfig> for cedarling::BootstrapConfig {
             mapping_access_token: value.mapping_access_token,
             mapping_userinfo_token: value.mapping_userinfo_token,
             local_jwks: value.local_jwks,
-            local_policy_store: if let Some(policy_store_str) = value.local_policy_store {
-                let store: PolicyStore =
-                    serde_json::from_str(policy_store_str.as_str()).map_err(|err| {
-                        PyValueError::new_err(format!(
-                            "could not parse field local_policy_store as json to PolicyStore, {err}"
-                        ))
-                    })?;
-
-                Some(store)
-            } else {
-                None
-            },
+            local_policy_store: value.local_policy_store,
             policy_store_local_fn: value.policy_store_local_fn,
             jwt_sig_validation: value
                 .jwt_sig_validation
