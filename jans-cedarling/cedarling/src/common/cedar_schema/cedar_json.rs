@@ -86,9 +86,10 @@ impl CedarSchemaJson {
         None
     }
 
-    /// Find the action if exist in the schema and return it definition
-    pub fn find_action(&self, _action_name: &str, _namespace: &str) -> Option<()> {
-        todo!()
+    /// Find the action in the schema
+    pub fn find_action(&self, action_name: &str, namespace: &str) -> Option<Action> {
+        let namespace = self.namespace.get(namespace)?;
+        namespace.actions.get(action_name).cloned()
     }
 }
 
