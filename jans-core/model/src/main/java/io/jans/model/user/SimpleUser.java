@@ -226,6 +226,10 @@ public class SimpleUser extends BaseEntry implements Serializable {
         getCustomAttributes().add(attribute);
     }
 
+    public void setAttribute(String name, List<String> values) {
+        setAttribute(name, values, null);
+    }
+
     public void setAttribute(String name, List<String> values, Boolean multiValued) {
     	List<Object> objectValues = null;
     	if (values != null) {
