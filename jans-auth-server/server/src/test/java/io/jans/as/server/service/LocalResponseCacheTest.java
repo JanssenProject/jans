@@ -37,4 +37,10 @@ public class LocalResponseCacheTest {
         localResponseCache.putDiscoveryResponse(new JSONObject());
         assertNotNull(localResponseCache.getDiscoveryResponse());
     }
+
+    @Test
+    public void putAccessEvaluationDiscoveryResponse_whenCalled_shouldContainCache() {
+        localResponseCache.putAccessEvaluationDiscoveryResponse(new JSONObject());
+        assertNotNull(localResponseCache.getAccessEvaluationDiscoveryResponse());
+    }
 }
