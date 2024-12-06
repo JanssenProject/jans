@@ -165,6 +165,7 @@ mod test {
                 use_user_principal: true,
                 use_workload_principal: true,
                 user_workload_operator: WorkloadBoolOp::And,
+                ..Default::default()
             },
         };
 
@@ -218,6 +219,7 @@ mod test {
                 use_user_principal: true,
                 use_workload_principal: true,
                 user_workload_operator: WorkloadBoolOp::And,
+                ..Default::default()
             },
         };
 

@@ -42,6 +42,7 @@ pub enum AccessTokenEntitiesError {
 
 /// Create workload entity
 pub fn create_workload(
+    entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
     data: &AccessTokenData,
     meta: &AccessTokenEntityMetadata,
@@ -52,7 +53,7 @@ pub fn create_workload(
 
     let workload_entity_meta = EntityMetadata::new(
         EntityParsedTypeName {
-            typename: "Workload",
+            typename: entity_mapping.unwrap_or("Workload"),
             namespace,
         },
         "client_id",
@@ -63,6 +64,7 @@ pub fn create_workload(
 
 /// Create access_token entity
 pub fn create_access_token(
+    entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
     data: &AccessTokenData,
     meta: &AccessTokenEntityMetadata,
@@ -73,7 +75,7 @@ pub fn create_access_token(
 
     let access_entity_meta = EntityMetadata::new(
         EntityParsedTypeName {
-            typename: "Access_token",
+            typename: entity_mapping.unwrap_or("Access_token"),
             namespace,
         },
         meta.principal_identifier.as_deref().unwrap_or("jti"),
@@ -84,6 +86,7 @@ pub fn create_access_token(
 
 /// Create id_token entity
 pub fn create_id_token_entity(
+    entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
     data: &IdTokenData,
     claim_mapping: &ClaimMappings,
@@ -93,7 +96,7 @@ pub fn create_id_token_entity(
 
     EntityMetadata::new(
         EntityParsedTypeName {
-            typename: "id_token",
+            typename: entity_mapping.unwrap_or("id_token"),
             namespace,
         },
         "jti",
@@ -103,6 +106,7 @@ pub fn create_id_token_entity(
 
 /// Create user entity
 pub fn create_user_entity(
+    entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
     tokens: &ProcessTokensResult,
     parents: HashSet<EntityUid>,
@@ -129,7 +133,7 @@ pub fn create_user_entity(
 
     EntityMetadata::new(
         EntityParsedTypeName {
-            typename: "User",
+            typename: entity_mapping.unwrap_or("User"),
             namespace,
         },
         user_id_mapping.mapping_field,
@@ -139,6 +143,7 @@ pub fn create_user_entity(
 
 /// Create `Userinfo_token` entity
 pub fn create_userinfo_token_entity(
+    entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
     data: &UserInfoTokenData,
     claim_mapping: &ClaimMappings,
@@ -148,7 +153,7 @@ pub fn create_userinfo_token_entity(
 
     EntityMetadata::new(
         EntityParsedTypeName {
-            typename: "Userinfo_token",
+            typename: entity_mapping.unwrap_or("Userinfo_token"),
             namespace,
         },
         "jti",

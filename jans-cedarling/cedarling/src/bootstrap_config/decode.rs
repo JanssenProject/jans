@@ -62,6 +62,26 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION", default)]
     pub usr_workload_bool_op: WorkloadBoolOp,
 
+    /// Name of Cedar Context schema entity
+    #[serde(rename = "CEDARLING_MAPPING_USER", default)]
+    pub mapping_user: Option<String>,
+
+    /// Name of Cedar Workload schema entity
+    #[serde(rename = "CEDARLING_MAPPING_WORKLOAD", default)]
+    pub mapping_workload: Option<String>,
+
+    /// Name of Cedar id_token schema entity
+    #[serde(rename = "CEDARLING_MAPPING_ID_TOKEN", default)]
+    pub mapping_id_token: Option<String>,
+
+    /// Name of Cedar access_token schema entity
+    #[serde(rename = "CEDARLING_MAPPING_ACCESS_TOKEN", default)]
+    pub mapping_access_token: Option<String>,
+
+    /// Name of Cedar userinfo schema entity
+    #[serde(rename = "CEDARLING_MAPPING_USERINFO_TOKEN", default)]
+    pub mapping_userinfo_token: Option<String>,
+
     /// Path to a local file pointing containing a JWKS.
     #[serde(
         rename = "CEDARLING_LOCAL_JWKS",
@@ -476,6 +496,12 @@ impl BootstrapConfig {
             use_user_principal: raw.user_authz.is_enabled(),
             use_workload_principal: raw.workload_authz.is_enabled(),
             user_workload_operator: raw.usr_workload_bool_op,
+
+            mapping_user: raw.mapping_user.clone(),
+            mapping_workload: raw.mapping_workload.clone(),
+            mapping_id_token: raw.mapping_id_token.clone(),
+            mapping_access_token: raw.mapping_access_token.clone(),
+            mapping_userinfo_token: raw.mapping_userinfo_token.clone(),
         };
 
         Ok(Self {

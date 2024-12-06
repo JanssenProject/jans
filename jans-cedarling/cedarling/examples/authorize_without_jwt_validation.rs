@@ -6,7 +6,7 @@
  */
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, LogConfig, LogTypeConfig, JwtConfig,
+    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogTypeConfig,
     PolicyStoreConfig, PolicyStoreSource, Request, ResourceData, WorkloadBoolOp,
 };
 use std::collections::HashMap;
@@ -27,6 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::And,
+            ..Default::default()
         },
     })?;
 

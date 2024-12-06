@@ -208,6 +208,7 @@ impl Authz {
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         let policy_store = &self.config.policy_store;
+        let auth_conf = &self.config.authorization;
 
         // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
         let decode_result: ProcessTokensResult = self
@@ -226,25 +227,33 @@ impl Authz {
 
         // Populate the `AuthorizeEntitiesData` structure using the builder pattern
         let data = AuthorizeEntitiesData::builder()
-            // Add an entity created from the access token
-            .workload_entity(create_workload( policy_store,
+            // Add workload entity
+            .workload_entity(create_workload(auth_conf.mapping_workload.as_deref(), policy_store,
                 &decode_result.access_token,
                 tokens_metadata.access_tokens)?)
-            .access_token(create_access_token(policy_store,
+            // Add access token entity
+            .access_token(create_access_token(auth_conf.mapping_access_token.as_deref(), policy_store,
                 &decode_result.access_token,
                 tokens_metadata.access_tokens)?)
+            // add id_token entity
             .id_token_entity(
-                create_id_token_entity(policy_store, &decode_result.id_token, &tokens_metadata.id_tokens.claim_mapping)
+                create_id_token_entity(auth_conf.mapping_id_token.as_deref(), 
+                    policy_store, 
+                    &decode_result.id_token, 
+                    &tokens_metadata.id_tokens.claim_mapping)
                     .map_err(AuthorizeError::CreateIdTokenEntity)?,
             )
-            // Add an entity created from the userinfo token
+            // Add userinfo_token entity
             .userinfo_token(
-                create_userinfo_token_entity(policy_store, &decode_result.userinfo_token, &tokens_metadata.userinfo_tokens.claim_mapping)
+                create_userinfo_token_entity(auth_conf.mapping_userinfo_token.as_deref(), 
+                    policy_store, 
+                    &decode_result.userinfo_token, 
+                    &tokens_metadata.userinfo_tokens.claim_mapping)
                 .map_err(AuthorizeError::CreateUserinfoTokenEntity)?
             )
-            // Add an entity created from the userinfo token
+            // Add User entity
             .user_entity(
-                create_user_entity(
+                create_user_entity(auth_conf.mapping_user.as_deref(),
                     policy_store,
                     &decode_result,
                     // parents for Jans::User entity
@@ -258,7 +267,7 @@ impl Authz {
                 request.resource.clone(),
                 &self.config.policy_store.schema.json,
             )?)
-            // Add Jans::Role entities
+            // Add Role entities
             .role_entities(role_entities);
 
         Ok(data.build())
