@@ -1,6 +1,6 @@
 from cedarling_python import BootstrapConfig
 from cedarling_python import Cedarling
-from cedarling_python import ResourceData, Request
+from cedarling_python import ResourceData, Request, AuthorizeResult, AuthorizeResultResponse
 from main.logger import logger
 from flask import Flask
 import json
@@ -48,6 +48,18 @@ class CedarlingInstance:
                 return False
         return True
 
+    def generate_report(self, authorize_response: AuthorizeResultResponse | None, report: str) -> _t.List[str]:
+        result = []
+        if authorize_response is not None:
+            diagnostic = authorize_response.diagnostics
+            if report == "reason":
+                for reason in diagnostic.reason:
+                    result.append(reason)
+            else:
+                for error in diagnostic.errors:
+                    result.append(error.error)
+        return result
+
     def authorize(self,
                   subject: DictType,
                   action: _t.Dict[str, str],
@@ -88,14 +100,20 @@ class CedarlingInstance:
             result_dict["decision"] = True
         else:
             result_dict["decision"] = False
+            person_result = authorize_result.person()
+            workload_result = authorize_result.workload()
+            person_diagnostic = self.generate_report(person_result, "reason")
+            person_error = self.generate_report(person_result, "error")
+            workload_diagnostic = self.generate_report(workload_result, "reason")
+            workload_error = self.generate_report(workload_result, "error")
             result_dict["context"] = {
                 "reason_admin": {
-                    "person evaluation": authorize_result.person().decision,
-                    "person diagnostics": authorize_result.person().diagnostics,
-                    "workload evaluation": authorize_result.workload().decision,
-                    "workload diagnostics": authorize_result.workload().diagnostics
+                    "person evaluation": authorize_result.person().decision.value,
+                    "person diagnostics": person_diagnostic,
+                    "person error": person_error,
+                    "workload evaluation": authorize_result.workload().decision.value,
+                    "workload diagnostics": workload_diagnostic,
+                    "workload_error": workload_error
                 }
             }
-            return result_dict
-
         return result_dict
