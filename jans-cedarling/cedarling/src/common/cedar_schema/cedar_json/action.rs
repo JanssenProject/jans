@@ -1,13 +1,37 @@
-use serde::{de, Deserialize};
-use serde_json::Value;
+use super::{
+    entity_types::{
+        CedarSchemaEntityAttribute, CedarSchemaEntityType, PrimitiveType, PrimitiveTypeKind,
+    },
+    CedarSchemaRecord,
+};
+use serde::{de, ser::SerializeMap, Deserialize, Serialize};
+use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
 
 /// Represents an action in the Cedar JSON schema
-#[derive(Default, Debug, PartialEq)]
+#[derive(Default, Debug, PartialEq, Clone)]
 pub struct Action {
-    resource_types: HashSet<String>,
-    principal_types: HashSet<String>,
-    context: Option<Context>,
+    pub resource_types: HashSet<String>,
+    pub principal_types: HashSet<String>,
+    pub context: Option<RecordOrType>,
+}
+
+impl Serialize for Action {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut state = serializer.serialize_map(Some(1))?;
+        state.serialize_entry(
+            "appliesTo",
+            &json!({
+                "resourceTypes": self.resource_types,
+                "principalTypes": self.principal_types,
+                "context": self.context,
+            }),
+        )?;
+        state.end()
+    }
 }
 
 impl<'de> Deserialize<'de> for Action {
@@ -34,7 +58,7 @@ impl<'de> Deserialize<'de> for Action {
 
         let context = action
             .remove("context")
-            .map(|val| serde_json::from_value::<Context>(val).map_err(de::Error::custom))
+            .map(|val| serde_json::from_value::<RecordOrType>(val).map_err(de::Error::custom))
             .transpose()?;
 
         Ok(Self {
@@ -46,23 +70,15 @@ impl<'de> Deserialize<'de> for Action {
 }
 
 type AttrName = String;
-type EntityOrCommonName = String;
 
-#[derive(Debug, PartialEq)]
-pub enum Context {
-    Record {
-        attrs: HashMap<AttrName, ContextAttr>,
-    },
-    EntityOrCommon(EntityOrCommonName),
+#[derive(Debug, PartialEq, Clone, Serialize)]
+#[allow(dead_code)]
+pub enum RecordOrType {
+    Record(CedarSchemaRecord),
+    Type(CedarSchemaEntityType),
 }
 
-#[derive(Debug, PartialEq, Deserialize)]
-pub struct ContextAttr {
-    r#type: String,
-    name: String,
-}
-
-impl<'de> Deserialize<'de> for Context {
+impl<'de> Deserialize<'de> for RecordOrType {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: de::Deserializer<'de>,
@@ -74,28 +90,41 @@ impl<'de> Deserialize<'de> for Context {
             .transpose()?
             .ok_or(de::Error::missing_field("type"))?;
 
-        let context = match context_type.as_str() {
+        match context_type.as_str() {
             "Record" => {
-                let attrs = context
+                let attributes = context
                     .remove("attributes")
                     .map(|val| {
-                        serde_json::from_value::<HashMap<AttrName, ContextAttr>>(val)
+                        serde_json::from_value::<HashMap<AttrName, CedarSchemaEntityAttribute>>(val)
                             .map_err(de::Error::custom)
                     })
                     .transpose()?
                     .ok_or(de::Error::missing_field("attributes"))?;
-                Context::Record { attrs }
+                Ok(RecordOrType::Record(CedarSchemaRecord {
+                    entity_type: "Record".to_string(),
+                    attributes,
+                }))
             },
-            ctx_type => Context::EntityOrCommon(ctx_type.to_string()),
-        };
-
-        Ok(context)
+            type_name => Ok(RecordOrType::Type(CedarSchemaEntityType::Primitive(
+                PrimitiveType {
+                    kind: PrimitiveTypeKind::TypeName(type_name.to_string()),
+                },
+            ))),
+        }
     }
 }
 
 #[cfg(test)]
 mod test {
-    use super::{Action, Context, ContextAttr};
+    use super::Action;
+    use crate::common::cedar_schema::cedar_json::{
+        action::RecordOrType,
+        entity_types::{
+            CedarSchemaEntityAttribute, CedarSchemaEntityType, EntityType, PrimitiveType,
+            PrimitiveTypeKind,
+        },
+        CedarSchemaRecord,
+    };
     use serde::Deserialize;
     use serde_json::{json, Value};
     use std::collections::{HashMap, HashSet};
@@ -123,7 +152,7 @@ mod test {
         schema
     }
 
-    fn build_expected(ctx: Option<Context>) -> MockJsonSchema {
+    fn build_expected(ctx: Option<RecordOrType>) -> MockJsonSchema {
         MockJsonSchema {
             actions: HashMap::from([(
                 "Update".to_string(),
@@ -167,24 +196,31 @@ mod test {
         let result = serde_json::from_value::<MockJsonSchema>(schema)
             .expect("Value should be deserialized successfully");
 
-        let expected = build_expected(Some(Context::Record {
-            attrs: HashMap::from([
+        let expected = build_expected(Some(RecordOrType::Record(CedarSchemaRecord {
+            entity_type: "Record".to_string(),
+            attributes: HashMap::from([
                 (
                     "token".to_string(),
-                    ContextAttr {
-                        r#type: "EntityOrCommon".to_string(),
-                        name: "Access_token".to_string(),
+                    CedarSchemaEntityAttribute {
+                        cedar_type: CedarSchemaEntityType::Typed(EntityType {
+                            kind: "EntityOrCommon".to_string(),
+                            name: "Access_token".to_string(),
+                        }),
+                        required: true,
                     },
                 ),
                 (
                     "username".to_string(),
-                    ContextAttr {
-                        r#type: "EntityOrCommon".to_string(),
-                        name: "String".to_string(),
+                    CedarSchemaEntityAttribute {
+                        cedar_type: CedarSchemaEntityType::Typed(EntityType {
+                            kind: "EntityOrCommon".to_string(),
+                            name: "String".to_string(),
+                        }),
+                        required: true,
                     },
                 ),
             ]),
-        }));
+        })));
 
         assert_eq!(result, expected)
     }
@@ -198,7 +234,11 @@ mod test {
         let result = serde_json::from_value::<MockJsonSchema>(schema)
             .expect("Value should be deserialized successfully");
 
-        let expected = build_expected(Some(Context::EntityOrCommon("Context".to_string())));
+        let expected = build_expected(Some(RecordOrType::Type(CedarSchemaEntityType::Primitive(
+            PrimitiveType {
+                kind: PrimitiveTypeKind::TypeName("Context".to_string()),
+            },
+        ))));
 
         assert_eq!(result, expected)
     }
