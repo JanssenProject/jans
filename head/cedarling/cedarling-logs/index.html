@@ -7324,6 +7324,19 @@
     Cedarling Audit Logs
   </a>
   
+    <nav class="md-nav" aria-label="Cedarling Audit Logs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-log-levels" class="md-nav__link">
+    System Log Levels
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -7383,6 +7396,8 @@
         
           
         
+          
+        
       
       
         
@@ -7413,6 +7428,20 @@
     <li class="md-nav__item">
       <a href="../python/usage/" class="md-nav__link">
         How to use
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/sidecar/" class="md-nav__link">
+        Sidecar
       </a>
     </li>
   
@@ -8503,6 +8532,19 @@
     Cedarling Audit Logs
   </a>
   
+    <nav class="md-nav" aria-label="Cedarling Audit Logs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-log-levels" class="md-nav__link">
+    System Log Levels
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -8599,6 +8641,16 @@ bootstrap property:</p>
 <li><code>System</code> - Startup, debug and other Cedarling messages not related to authz</li>
 <li><code>Metric</code>- Performance and usage data</li>
 </ul>
+<h3 id="system-log-levels">System Log Levels<a class="headerlink" href="#system-log-levels" title="Permanent link">#</a></h3>
+<p>This is set by <code>CEDARLING_LOG_LEVEL</code></p>
+<ul>
+<li><code>FATAL</code>: Indicates very severe error events that will likely lead the application to abort. These are the most critical issues.</li>
+<li><code>ERROR</code>: Designates error events that might still allow the application to continue running but indicate a significant problem.</li>
+<li><code>WARN</code>: Designates potentially harmful situations that should be addressed to prevent future issues.</li>
+<li><code>INFO</code>: Provides informational messages that highlight the progress of the application at a coarse-grained level.</li>
+<li><code>DEBUG</code>: Designates fine-grained informational events useful for debugging the application.</li>
+<li><code>TRACE</code>: Provides finer-grained informational events than DEBUG. It is often used for detailed tracing of program execution.</li>
+</ul>
 <h2 id="jans-lock-server">Jans Lock Server<a class="headerlink" href="#jans-lock-server" title="Permanent link">#</a></h2>
 <p>In enterprise deployments, <a href="../janssen-server/lock/">Janssen Lock Server</a> collects Cedarling
 logs and can stream to a database or S3 bucket. The Cedarling decision logs provide compliance
@@ -8622,7 +8674,7 @@ analysis to show everything the attacker attempted, both allowed and denied.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-28T16:25:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-06T05:20:10+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-06</span>
       
         <br>
         Created:

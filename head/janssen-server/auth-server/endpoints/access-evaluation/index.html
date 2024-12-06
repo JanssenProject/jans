@@ -7387,6 +7387,8 @@
         
           
         
+          
+        
       
       
         
@@ -7417,6 +7419,20 @@
     <li class="md-nav__item">
       <a href="../../../../cedarling/python/usage/" class="md-nav__link">
         How to use
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../cedarling/python/sidecar/" class="md-nav__link">
+        Sidecar
       </a>
     </li>
   
@@ -8584,10 +8600,26 @@ Upon receiving a request, the endpoint evaluates the subject, resource, and acti
 if access should be granted, denied, or if additional information is needed. 
 The endpoint's responses are typically concise, aiming to provide a rapid decision that PEPs can enforce in real-time. 
 The goal is to provide a scalable, secure interface for dynamic and fine-grained access control across applications.</p>
-<p>URL to access access evaluation endpoint on Janssen Server is listed in the response of Janssen Server's well-known
-<a href="../configuration/">configuration endpoint</a> given below.</p>
+<p>URL to access access evaluation endpoint on Janssen Server is listed in both:
+ - the response of Janssen Server's well-known <a href="../configuration/">configuration endpoint</a> given below.
+ - the response of Janssen Server's <code>/.well-known/authzen-configuration</code> endpoint.</p>
+<p><strong>OpenID Discovery</strong>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
-</code></pre></div>
+</code></pre></div></p>
+<p><strong>AuthZEN Discovery</strong>
+<div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/authzen-configuration
+</code></pre></div></p>
+<p><code>/.well-known/authzen-configuration</code> allows to publish data specific to AuthZEN only. Response of AuthZEN discovery endpoint can be 
+changed via <code>AccessEvaluationDiscoveryType</code> custom script. </p>
+<p><strong>Snippet of AccessEvaluationDiscoveryType</strong>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">modifyResponse</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">responseAsJsonObject</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;write to script logger&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">JSONObject</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">JSONObject</span><span class="p">)</span><span class="w"> </span><span class="n">responseAsJsonObject</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">response</span><span class="p">.</span><span class="na">accumulate</span><span class="p">(</span><span class="s">&quot;key_from_java&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;value_from_script_on_java&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+</code></pre></div></p>
 <p><code>access_evaluation_v1_endpoint</code> claim in the response specifies the URL for access evaluation endpoint. By default, access 
 evaluation endpoint looks like below:</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/restv1/access/v1/evaluation
@@ -8943,7 +8975,7 @@ X-Xss-Protection: 1; mode=block
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-20T03:33:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-20</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-06T16:00:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-06</span>
       
         <br>
         Created:
