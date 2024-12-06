@@ -30,6 +30,18 @@ There are three different log records produced by the Cedarling:
 * `System` - Startup, debug and other Cedarling messages not related to authz
 * `Metric`- Performance and usage data
 
+
+### System Log Levels
+
+This is set by `CEDARLING_LOG_LEVEL`
+
+* `FATAL`: Indicates very severe error events that will likely lead the application to abort. These are the most critical issues.
+* `ERROR`: Designates error events that might still allow the application to continue running but indicate a significant problem.
+* `WARN`: Designates potentially harmful situations that should be addressed to prevent future issues.
+* `INFO`: Provides informational messages that highlight the progress of the application at a coarse-grained level.
+* `DEBUG`: Designates fine-grained informational events useful for debugging the application.
+* `TRACE`: Provides finer-grained informational events than DEBUG. It is often used for detailed tracing of program execution.
+
 ## Jans Lock Server
 
 In enterprise deployments, [Janssen Lock Server](../janssen-server/lock/) collects Cedarling
