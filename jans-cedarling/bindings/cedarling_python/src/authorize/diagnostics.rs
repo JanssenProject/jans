@@ -35,16 +35,19 @@ pub struct Diagnostics {
 
 impl From<&cedar_policy::Diagnostics> for Diagnostics {
     fn from(value: &cedar_policy::Diagnostics) -> Self {
-        // use type for logging
-        let diagnostics_info: cedarling::bindings::Diagnostics = value.into();
+        let errors = value
+            .errors()
+            .map(|err| {
+                // convert to cedarling::bindings::PolicyEvaluationError
+                let mapped_error: cedarling::bindings::PolicyEvaluationError = err.into();
+                // convert to PolicyEvaluationError
+                mapped_error.into()
+            })
+            .collect();
 
         Self {
-            reason: diagnostics_info.reason,
-            errors: diagnostics_info
-                .errors
-                .into_iter()
-                .map(|e| e.into())
-                .collect(),
+            reason: HashSet::from_iter(value.reason().map(|policy_id| policy_id.to_string())),
+            errors,
         }
     }
 }
