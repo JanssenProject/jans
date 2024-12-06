@@ -12,6 +12,7 @@
 //! [cedar json schema grammar](https://docs.cedarpolicy.com/schema/json-schema-grammar.html) - documentation about json structure of cedar schema.
 
 use std::collections::HashMap;
+mod action;
 mod entity_types;
 
 pub use entity_types::{CedarSchemaEntityShape, CedarSchemaRecord};
@@ -82,6 +83,11 @@ impl CedarSchemaJson {
         }
 
         None
+    }
+
+    /// Find the action if exist in the schema and return it definition
+    pub fn find_action(&self, _action_name: &str, _namespace: &str) -> Option<()> {
+        todo!()
     }
 }
 
