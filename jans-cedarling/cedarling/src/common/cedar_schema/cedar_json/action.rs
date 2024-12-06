@@ -8,11 +8,13 @@ use serde::{de, ser::SerializeMap, Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
 
+pub type EntityRef = String;
+
 /// Represents an action in the Cedar JSON schema
 #[derive(Default, Debug, PartialEq, Clone)]
 pub struct Action {
-    pub resource_types: HashSet<String>,
-    pub principal_types: HashSet<String>,
+    pub resource_types: HashSet<EntityRef>,
+    pub principal_types: HashSet<EntityRef>,
     pub context: Option<RecordOrType>,
 }
 
