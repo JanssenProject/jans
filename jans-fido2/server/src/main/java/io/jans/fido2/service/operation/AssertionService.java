@@ -6,16 +6,34 @@
 
 package io.jans.fido2.service.operation;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
-import io.jans.entry.DeviceRegistration;
+
+import io.jans.entry.PublicKeyCredentialHints;
+import io.jans.entry.Transports;
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
 import io.jans.fido2.exception.Fido2RuntimeException;
-import io.jans.fido2.model.assertion.*;
+import io.jans.fido2.model.assertion.AsserOptGenerateResponse;
+import io.jans.fido2.model.assertion.AssertionErrorResponseType;
+import io.jans.fido2.model.assertion.AssertionOptions;
+import io.jans.fido2.model.assertion.AssertionOptionsGenerate;
+import io.jans.fido2.model.assertion.AssertionOptionsResponse;
+import io.jans.fido2.model.assertion.AssertionResult;
+import io.jans.fido2.model.assertion.Response;
 import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.common.PublicKeyCredentialDescriptor;
 import io.jans.fido2.model.conf.AppConfiguration;
@@ -32,7 +50,13 @@ import io.jans.fido2.service.util.CommonUtilService;
 import io.jans.fido2.service.verifier.AssertionVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.DomainVerifier;
-import io.jans.orm.model.fido2.*;
+import io.jans.orm.model.fido2.Fido2AuthenticationData;
+import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
+import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
+import io.jans.orm.model.fido2.Fido2RegistrationEntry;
+import io.jans.orm.model.fido2.Fido2RegistrationStatus;
+import io.jans.orm.model.fido2.UserVerification;
 import io.jans.service.net.NetworkService;
 import io.jans.u2f.service.persist.DeviceRegistrationService;
 import io.jans.util.StringHelper;
@@ -41,17 +65,6 @@ import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.Context;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import io.jans.entry.Transports;
 
 /**
  * Core offering by the FIDO2 server, assertion is invoked upon authentication
@@ -149,12 +162,12 @@ public class AssertionService {
 		assertionOptionsResponse.setRpId(origin);
 		log.debug("Put rpId {}", origin);
 
-		String applicationId = origin;
+		
 
 		// Put allowCredentials
 		if (username != null && StringHelper.isNotEmpty(username)) {
 			Pair<List<PublicKeyCredentialDescriptor>, String> allowedCredentialsPair = prepareAllowedCredentials(
-					applicationId, username);
+					origin, username);
 			List<PublicKeyCredentialDescriptor> allowedCredentials = allowedCredentialsPair.getLeft();
 			if (allowedCredentials.isEmpty()) {
 				throw errorResponseFactory.badRequestException(AssertionErrorResponseType.KEYS_NOT_FOUND,
@@ -164,40 +177,31 @@ public class AssertionService {
 			allowedCredentials.stream().forEach(ele -> log.debug("Put allowedCredentials {}", ele.toString()));
 			log.debug("Put allowedCredentials {}", allowedCredentials);
 
-			String fidoApplicationId = allowedCredentialsPair.getRight();
-			if (fidoApplicationId != null) {
-				if (assertionOptions.getExtensions() != null) {
-					ObjectNode extensions = (ObjectNode) assertionOptions.getExtensions();
-					extensions.put("appid", fidoApplicationId);
-//				} else {
-//					ObjectNode extensions = dataMapperService.createObjectNode();
-//					extensions.put("appid", fidoApplicationId);
-//					optionsResponseNode.set("extensions", extensions);
-				}
-			}
+			
 		}
 		else
+		// Conditional UI
 		{
-			//TODO: based on hints, load the necessary allowcreds
-			List<PublicKeyCredentialDescriptor> allowedCredentials = new ArrayList<PublicKeyCredentialDescriptor>();
-			assertionOptionsResponse.setAllowCredentials(allowedCredentials);
+			assertionOptionsResponse.setAllowCredentials(assertionOptions.getAllowCredentials());
 		}
 
-		// Put timeout
-		long timeout = commonVerifiers.verifyTimeout(assertionOptions.getTimeout());
-		assertionOptionsResponse.setTimeout(timeout);
-		log.debug("Put timeout {}", timeout);
-
+		// in case of conditional UI, timeout has to be large.
+		if (username != null && StringHelper.isNotEmpty(username)) {
+			// Put timeout
+			long timeout = commonVerifiers.verifyTimeout(assertionOptions.getTimeout());
+			assertionOptionsResponse.setTimeout(timeout);
+			log.debug("Put timeout {}", timeout);
+		}
+		/*
+		 * else { assertionOptionsResponse.setTimeout(60000l); }
+		 */
 		// Copy extensions
 		if (assertionOptions.getExtensions() != null) {
 			assertionOptionsResponse.setExtensions(assertionOptions.getExtensions());
 			log.debug("Put extensions {}", assertionOptions.getExtensions());
 		}
 
-		/*
-		 * assertionOptionsResponse.setStatus("ok");
-		 * assertionOptionsResponse.setErrorMessage("");
-		 */
+		
 		Fido2AuthenticationData entity = new Fido2AuthenticationData();
 		entity.setUsername(username);
 		entity.setChallenge(challenge);
@@ -226,6 +230,7 @@ public class AssertionService {
 		externalFido2InterceptionService.authenticateAssertionFinish(CommonUtilService.toJsonNode(assertionOptions),
 				externalFido2InterceptionContext);
 
+		log.debug("assertionOptionsResponse :"+ assertionOptionsResponse);
 		return assertionOptionsResponse;
 	}
 
@@ -374,8 +379,10 @@ public class AssertionService {
 					registrationEntry, authenticationEntity, false);
 		}
 
-		PublicKeyCredentialDescriptor credentialDescriptor = new PublicKeyCredentialDescriptor(
-				registrationData.getPublicKeyId());
+		PublicKeyCredentialDescriptor credentialDescriptor = new PublicKeyCredentialDescriptor();
+		credentialDescriptor.setTransports(		registrationData.getTransports());
+		credentialDescriptor.setId(registrationData.getPublicKeyId());
+		credentialDescriptor.setType("public-key");
 		
 		// Create result object
 		// TODO: why should registrationData.isUserPresentFlag() be a string, correct this
@@ -390,6 +397,7 @@ public class AssertionService {
 		externalFido2InterceptionService.verifyAssertionFinish(CommonUtilService.toJsonNode(assertionResultResponse),
 				externalFido2InterceptionContext);
 
+		
 		return assertionResultResponse;
 	}
 
@@ -413,24 +421,10 @@ public class AssertionService {
 		allowedFido2Registrations.forEach((f) -> {
 			log.debug("attestation request:" + f.getRegistrationData().getAttestationRequest());
 
-			String transports[];
-
-			if (f.getRegistrationData().getAttestationType().equalsIgnoreCase(AttestationFormat.apple.getFmt())
-					|| (f.getRegistrationData().getAttestationType().equalsIgnoreCase(AttestationFormat.tpm.getFmt()))
-					|| (f.getRegistrationData().getAttestationRequest() != null && f.getRegistrationData()
-							.getAttestationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment()))) {
-				transports = new String[] { Transports.INTERNAL.getValue() };
-			}
-			// multidevice
-			else if (f.getRegistrationData().getBackupEligibilityFlag()) {
-				transports = new String[] { Transports.HYBRID.getValue() };
-			} else {
-				transports = new String[] { Transports.USB.getValue(), Transports.NFC.getValue(),
-						Transports.BLE.getValue() };
-			}
-
-			PublicKeyCredentialDescriptor descriptor = new PublicKeyCredentialDescriptor(transports,
-					f.getRegistrationData().getPublicKeyId());
+			PublicKeyCredentialDescriptor descriptor = new PublicKeyCredentialDescriptor();
+			descriptor.setTransports(f.getRegistrationData().getTransports());
+			descriptor.setId(f.getRegistrationData().getPublicKeyId());
+			descriptor.setType("public-key");
 
 			allowedFido2Keys.add(descriptor);
 		});

@@ -95,7 +95,7 @@
             function startAssertion() 
 			{
 				
-			   console.log ("assertion_request: "+"assertion_request")
+			   console.log ("assertion_request: "+assertion_request)
 			   console.log('Executing Conditional UI get assertion Fido2 request', assertion_request);
 			   request = JSON.parse(assertion_request);
 			   webauthn.getAssertionConditional(request).then(data => {
@@ -107,7 +107,7 @@
 			   }).catch((err) => {
 					   
 					   console.error('Authentication failed', err);
-
+					   
 					   if (err.name === 'InvalidStateError') {
 							   console.error("This authenticator is not registered for the account '${identity.user.userId}'. Please try again with a registered authenticator.");
 					    } else if (err.name === 'AbortError') {

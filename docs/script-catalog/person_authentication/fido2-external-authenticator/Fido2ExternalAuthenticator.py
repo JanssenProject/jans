@@ -1,9 +1,10 @@
 # Janssen Project software is available under the Apache 2.0 License (2004). See http://www.apache.org/licenses/ for full text.
 # Copyright (c) 2020, Janssen Project
 #
-# Author: Yuriy Movchan
+# Author: Yuriy Movchan, Madhumita Subramaniam
 #
-
+from java.net import URLDecoder, URLEncoder
+from java.lang import System
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.fido2.client import Fido2ClientFactory
 from io.jans.as.server.security import Identity
@@ -17,7 +18,15 @@ from java.util import Arrays
 from java.util.concurrent.locks import ReentrantLock
 from jakarta.ws.rs import ClientErrorException
 from jakarta.ws.rs.core import Response
+
+
+from io.jans.jsf2.message import FacesMessages
+from io.jans.jsf2.service import FacesService
 from jakarta.faces.context import FacesContext
+from jakarta.faces.application import FacesMessage
+
+from jakarta.servlet.http import Cookie
+
 
 import java
 import sys
@@ -43,7 +52,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
         self.metaDataLoaderLock = ReentrantLock()
         self.metaDataConfiguration = None
-
+        
+        # name of cookie for allowlist
+        self.ALLOW_LIST = "allowList"
         print "Fido2. Initialized successfully"
         return True
 
@@ -72,6 +83,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Fido2. Authenticate for step 1"
             logged_in = False
             
+
             # conditional UI is selected
             if token_response is not None:
                 
@@ -157,16 +169,21 @@ class PersonAuthentication(PersonAuthenticationType):
                 attestationService = Fido2ClientFactory.instance().createAttestationService(self.metaDataConfiguration)
                 
                 attestationStatus = attestationService.verify(token_response)
-                print "token_response %s " % token_response
-                print "attestationStatus: %s" % attestationStatus
-                print "attestationStatus.getStatus() : %s" % attestationStatus.getStatus() 
+                print "Fido2. token_response %s " % token_response
+                print "Fido2. attestationStatus: %s" % attestationStatus
+                print "Fido2. attestationStatus.getStatus() : %s" % attestationStatus.getStatus() 
                 attestationStatusEntity = attestationStatus.readEntity(java.lang.String)
                 
                 print "attestationStatusEntity : %s" % attestationStatusEntity 
                 if attestationStatus.getStatus() != Response.Status.OK.getStatusCode():
                     print "Fido2. Authenticate for step 2. Get invalid registration status from Fido2 server"
                     return False
-
+                
+                attestationResponse = json.loads(attestationStatusEntity)
+                    
+                new_credential = attestationResponse.get("credential") 
+                print new_credential
+                self.persistCookie(new_credential)
                 return True
             else:
                 print "Fido2. Prepare for step 2. Authentication method is invalid"
@@ -183,14 +200,15 @@ class PersonAuthentication(PersonAuthenticationType):
         domain = facesContext.getExternalContext().getRequest().getServerName()
         print ("domain %s : " % domain)
         assertionService = Fido2ClientFactory.instance().createAssertionService(metaDataConfiguration)
+        allowList = self.getCookieValue();
         if step == 1:
-            #TODO: this one will change
             try:
-                    
-                    assertionRequest = json.dumps({ 'origin': domain}, separators=(',', ':'))
-                    assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
-                    print "assertionResponse %s " % assertionResponse
-                    identity.setWorkingParameter("fido2_assertion_request", ServerUtil.asJson(assertionResponse))
+                print "Fido2. Prepare for step 1. Call Fido2 endpoint in order to start assertion flow"
+                assertionRequest = json.dumps({ 'origin': domain, 'allowCredentials': allowList}, separators=(',', ':'))
+                print ("Assertion Request : %s" % assertionRequest)
+                assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
+                print "assertionResponse %s " % assertionResponse
+                identity.setWorkingParameter("fido2_assertion_request", ServerUtil.asJson(assertionResponse))
 
             except ClientErrorException, ex:
                     print "Fido2. Prepare for step 1. Failed to start assertion flow. Exception:", sys.exc_info()[1]
@@ -218,13 +236,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if count > 0:
                 print "Fido2. Prepare for step 2. Call Fido2 endpoint in order to start assertion flow"
-
                 try:
-                    
                     assertionRequest = json.dumps({'username': userName, 'origin': domain}, separators=(',', ':'))
                     assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
                     print "assertionResponse %s " % assertionResponse
-
+                    
                 except ClientErrorException, ex:
                     print "Fido2. Prepare for step 2. Failed to start assertion flow. Exception:", sys.exc_info()[1]
                     return False
@@ -233,15 +249,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 try:
                     attestationService = Fido2ClientFactory.instance().createAttestationService(metaDataConfiguration)
-                    
                     basic_json = {'username': userName, 'displayName': userName, 'origin': domain}
-                    
-                    
                     print " basic_json %s" % basic_json
 
                     attestationRequest = json.dumps(basic_json)
-                    
-
                     attestationResponse = attestationService.register(attestationRequest).readEntity(java.lang.String)
                 except ClientErrorException, ex:
                     print "Fido2. Prepare for step 2. Failed to start attestation flow. Exception:", sys.exc_info()[1]
@@ -321,3 +332,74 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Attempting to load metadata: %d" % attempt
         finally:
             self.metaDataLoaderLock.unlock()
+
+
+    def getCookieValue(self):
+    # sample allow list -  [{ id: ...., type: 'public-key', transports: ['usb', 'ble', 'nfc']}]
+      
+        value = []
+        coo =  None
+        httpRequest = ServerUtil.getRequestOrNull()
+        
+        if httpRequest != None:
+            print "Cookies : %s" % httpRequest.getCookies()
+            for cookie in httpRequest.getCookies():
+                if cookie.getName() == "allowList":
+                   coo = cookie
+        
+        if coo == None:
+            print "Passkeys. getCookie. No cookie found"
+        else:
+            print "Passkeys. getCookie. Found cookie"
+            
+            try:
+                now = System.currentTimeMillis()
+                value = URLDecoder.decode(coo.getValue(), "utf-8")
+                # value is an array of objects with properties: id, type, transports
+                value = json.loads(value)
+                
+                print value
+            except:
+                print "Passkeys. getCookie. Unparsable value, dropping cookie..."
+            
+        return value
+        
+    def persistCookie(self, credential):
+        try:
+            now = System.currentTimeMillis()
+            allowList = self.add_credential_if_not_exists( credential)
+            value = json.dumps(allowList, separators=(',',':'))
+            value = URLEncoder.encode(value, "utf-8")
+            coo = Cookie("allowList", value)
+            coo.setSecure(True)
+            coo.setHttpOnly(True)
+            # One week
+            coo.setMaxAge(7 * 24 * 60 * 60)
+            
+            response = self.getHttpResponse()
+            if response != None:
+                print "Passkeys. persistCookie. Adding cookie to response"
+                response.addCookie(coo)
+        except:
+            print "Passkeys. persistCookie. Exception: ", sys.exc_info()[1]
+            
+            
+    def add_credential_if_not_exists(self,  new_credential):
+    
+        allowList = self.getCookieValue()
+        # Check if the id of the new element already exists in the array
+        for json_obj in allowList:
+            if json_obj["id"] == new_credential["id"]:
+                print("Credential with id %s already exists." % new_credential['id'])
+            
+        # If the id doesn't exist, append the new element
+        allowList.append(new_credential)
+        print("new_credential with id %s added successfully." % new_credential['id'])
+        return allowList
+        
+    def getHttpResponse(self):
+        try:
+            return FacesContext.getCurrentInstance().getExternalContext().getResponse()
+        except:
+            print "Passkeys.  Error accessing HTTP response object: ", sys.exc_info()[1]
+            return None

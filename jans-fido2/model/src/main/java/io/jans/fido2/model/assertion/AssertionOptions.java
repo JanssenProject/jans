@@ -1,5 +1,7 @@
 package io.jans.fido2.model.assertion;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -19,7 +21,7 @@ public class AssertionOptions  {
     private String sessionId;
     
     // 1. allowCredentials (An array of objects used to restrict the list of acceptable credentials. An empty array indicates that any credential is acceptable.)
-    private PublicKeyCredentialDescriptor allowCredentials;
+    private List<PublicKeyCredentialDescriptor> allowCredentials;
     // rawid
     private String credentialId;
     
@@ -80,11 +82,22 @@ public class AssertionOptions  {
 		this.credentialId = credentialId;
 	}
 
+	public List<PublicKeyCredentialDescriptor> getAllowCredentials() {
+		return allowCredentials;
+	}
+
+	public void setAllowCredentials(List<PublicKeyCredentialDescriptor> allowCredentials) {
+		this.allowCredentials = allowCredentials;
+	}
+
 	@Override
 	public String toString() {
-		return "AssertionOptions [username=" + username + ", origin=" + origin + ", timeout=" + timeout + ", sessionId="
-				+ sessionId + ", credentialId=" + credentialId + "]";
+		return "AssertionOptions [username=" + username + ", userVerification=" + userVerification + ", origin="
+				+ origin + ", extensions=" + extensions + ", timeout=" + timeout + ", sessionId=" + sessionId
+				+ ", allowCredentials=" + allowCredentials.toString() + ", credentialId=" + credentialId + "]";
 	}
+
+	
 
 	
 }

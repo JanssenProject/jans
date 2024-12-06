@@ -6,6 +6,8 @@
 
 package io.jans.orm.model.fido2;
 
+import java.util.Arrays;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,7 +25,7 @@ public class Fido2RegistrationData extends Fido2Data {
 
     private String uncompressedECPoint;
     private String publicKeyId;
-
+    
     private String type;
 
     private Fido2RegistrationStatus status;
@@ -46,6 +48,7 @@ public class Fido2RegistrationData extends Fido2Data {
 	private String authentictatorAttachment;
 	
 	private String credId;
+	private String transports[];
 	
     public String getUsername() {
         return username;
@@ -223,6 +226,14 @@ public class Fido2RegistrationData extends Fido2Data {
 		this.credId = credId;
 	}
 
+	public String[] getTransports() {
+		return transports;
+	}
+
+	public void setTransports(String[] transports) {
+		this.transports = transports;
+	}
+
 	@Override
 	public String toString() {
 		return "Fido2RegistrationData [username=" + username + ", origin=" + origin + ", userId=" + userId
@@ -233,7 +244,10 @@ public class Fido2RegistrationData extends Fido2Data {
 				+ ", backupStateFlag=" + backupStateFlag + ", backupEligibilityFlag=" + backupEligibilityFlag
 				+ ", attestedCredentialDataFlag=" + attestedCredentialDataFlag + ", extensionDataFlag="
 				+ extensionDataFlag + ", userVerifiedFlag=" + userVerifiedFlag + ", userPresentFlag=" + userPresentFlag
-				+ ", authentictatorAttachment=" + authentictatorAttachment + ", credId=" + credId + "]";
+				+ ", authentictatorAttachment=" + authentictatorAttachment + ", credId=" + credId + ", transports="
+				+ Arrays.toString(transports) + "]";
 	}
+
+	
 	
 }

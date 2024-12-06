@@ -1,5 +1,6 @@
 package io.jans.fido2.model.assertion;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -13,18 +14,18 @@ public class AssertionResult  {
     private String rawId;
     private Response response;
     private HashMap<String, String> clientExtensionResults;
-    private String authentictatorAttachment;
+    private String[] transports;
     
     public AssertionResult() {
     }
 
-    public AssertionResult(String id, String rawId, Response response, String authenticatorAttachment) {
+    public AssertionResult(String id, String rawId, Response response, String []transports) {
         this.id = id;
         this.type = PublicKeyCredentialType.PUBLIC_KEY.getKeyName();
         this.rawId = rawId;
         this.response = response;
         this.clientExtensionResults = clientExtensionResults;
-        this.authentictatorAttachment = authenticatorAttachment;
+        this.transports = transports;
     }
 
     public String getId() {
@@ -63,23 +64,19 @@ public class AssertionResult  {
 		this.clientExtensionResults = clientExtensionResults;
 	}
 
-	public String getAuthentictatorAttachment() {
-		return authentictatorAttachment;
+	public String[] getTransports() {
+		return transports;
 	}
 
-	public void setAuthentictatorAttachment(String authentictatorAttachment) {
-		this.authentictatorAttachment = authentictatorAttachment;
+	public void setTransports(String[] transports) {
+		this.transports = transports;
 	}
 
 	@Override
 	public String toString() {
 		return "AssertionResult [id=" + id + ", type=" + type + ", rawId=" + rawId + ", response=" + response
-				+ ", clientExtensionResults=" + clientExtensionResults + ", authentictatorAttachment="
-				+ authentictatorAttachment + "]";
+				+ ", clientExtensionResults=" + clientExtensionResults + ", transports=" + Arrays.toString(transports)
+				+ "]";
 	}
 
-	
-	
-
-	
 }
