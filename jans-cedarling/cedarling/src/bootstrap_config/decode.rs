@@ -62,23 +62,23 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION", default)]
     pub usr_workload_bool_op: WorkloadBoolOp,
 
-    /// Name of Cedar Context schema entity
+    /// Mapping name of cedar schema User entity
     #[serde(rename = "CEDARLING_MAPPING_USER", default)]
     pub mapping_user: Option<String>,
 
-    /// Name of Cedar Workload schema entity
+    /// Mapping name of cedar schema Workload entity.
     #[serde(rename = "CEDARLING_MAPPING_WORKLOAD", default)]
     pub mapping_workload: Option<String>,
 
-    /// Name of Cedar id_token schema entity
+    /// Mapping name of cedar schema id_token entity.
     #[serde(rename = "CEDARLING_MAPPING_ID_TOKEN", default)]
     pub mapping_id_token: Option<String>,
 
-    /// Name of Cedar access_token schema entity
+    /// Mapping name of cedar schema access_token entity.
     #[serde(rename = "CEDARLING_MAPPING_ACCESS_TOKEN", default)]
     pub mapping_access_token: Option<String>,
 
-    /// Name of Cedar userinfo schema entity
+    /// Mapping name of cedar schema userinfo_token entity.
     #[serde(rename = "CEDARLING_MAPPING_USERINFO_TOKEN", default)]
     pub mapping_userinfo_token: Option<String>,
 

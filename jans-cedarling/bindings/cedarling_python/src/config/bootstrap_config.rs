@@ -30,6 +30,11 @@ use std::str::FromStr;
 /// :param user_authz: Enables querying Cedar engine authorization for a User principal.
 /// :param workload_authz: Enables querying Cedar engine authorization for a Workload principal.
 /// :param usr_workload_bool_op: Boolean operation ('AND' or 'OR') for combining `USER` and `WORKLOAD` authz results.
+/// :param mapping_user: Mapping name of Cedar Context schema User entity.
+/// :param mapping_workload: Mapping name of cedar schema Workload entity.
+/// :param mapping_id_token: Mapping name of cedar schema id_token entity.
+/// :param mapping_access_token: Mapping name of cedar schema access_token entity.
+/// :param mapping_userinfo_token: Mapping name of cedar schema userinfo_token entity.
 /// :param local_jwks: Path to a local file containing a JWKS.
 /// :param local_policy_store: A JSON string containing a policy store.
 /// :param policy_store_local_fn: Path to a policy store JSON file.
@@ -74,6 +79,11 @@ use std::str::FromStr;
 ///     user_authz=True,
 ///     workload_authz=True,
 ///     usr_workload_bool_op="AND",
+///     mapping_user=None,
+///     mapping_workload=None,
+///     mapping_id_token=None,
+///     mapping_access_token=None,
+///     mapping_userinfo_token=None,
 ///     local_jwks="./path/to/your_jwks.json",
 ///     local_policy_store=None,
 ///     policy_store_local_fn="./path/to/your_policy_store.json",
@@ -140,6 +150,21 @@ pub struct BootstrapConfig {
     /// - **'AND'**: authz will be successful if `USER` **AND** `WORKLOAD` is valid.
     /// - **'OR'**: authz will be successful if `USER` **OR** `WORKLOAD` is valid.
     pub usr_workload_bool_op: String,
+
+    /// Mapping name of Cedar Context schema User entity.
+    pub mapping_user: Option<String>,
+
+    /// Mapping name of cedar schema Workload entity.
+    pub mapping_workload: Option<String>,
+
+    /// Mapping name of cedar schema id_token entity.
+    pub mapping_id_token: Option<String>,
+
+    /// Mapping name of cedar schema access_token entity.
+    pub mapping_access_token: Option<String>,
+
+    /// Mapping name of cedar schema userinfo_token entity.
+    pub mapping_userinfo_token: Option<String>,
 
     /// Path to a local file containing a JWKS.
     pub local_jwks: Option<String>,
@@ -268,6 +293,11 @@ impl BootstrapConfig {
         let workload_authz = get_with_default(options, "workload_authz", "enabled".to_string())?;
         let usr_workload_bool_op =
             get_with_default(options, "usr_workload_bool_op", "AND".to_string())?;
+        let mapping_user = get_optional(options, "mapping_user")?;
+        let mapping_workload = get_optional(options, "mapping_workload")?;
+        let mapping_id_token = get_optional(options, "mapping_id_token")?;
+        let mapping_access_token = get_optional(options, "mapping_access_token")?;
+        let mapping_userinfo_token = get_optional(options, "mapping_userinfo_token")?;
         let local_jwks = get_optional(options, "local_jwks")?;
         let local_policy_store = get_optional(options, "local_policy_store")?;
         let policy_store_local_fn = get_optional(options, "policy_store_local_fn")?;
@@ -325,6 +355,11 @@ impl BootstrapConfig {
             user_authz,
             workload_authz,
             usr_workload_bool_op,
+            mapping_user,
+            mapping_workload,
+            mapping_id_token,
+            mapping_access_token,
+            mapping_userinfo_token,
             local_jwks,
             local_policy_store,
             policy_store_local_fn,
@@ -433,6 +468,11 @@ impl TryFrom<BootstrapConfig> for cedarling::BootstrapConfig {
                         "could not parce field: usr_workload_bool_op, {err}"
                     ))
                 })?,
+            mapping_user: value.mapping_user,
+            mapping_workload: value.mapping_workload,
+            mapping_id_token: value.mapping_id_token,
+            mapping_access_token: value.mapping_access_token,
+            mapping_userinfo_token: value.mapping_userinfo_token,
             local_jwks: value.local_jwks,
             local_policy_store: if let Some(policy_store_str) = value.local_policy_store {
                 let store: PolicyStore =

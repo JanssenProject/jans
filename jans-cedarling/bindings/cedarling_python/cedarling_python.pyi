@@ -1,5 +1,6 @@
 from typing import Optional, List, final, Dict, Any
 
+
 @final
 class BootstrapConfig:
     """
@@ -13,6 +14,11 @@ class BootstrapConfig:
         user_authz (str): User authorization status. Defaults to "enabled".
         workload_authz (str): Workload authorization status. Defaults to "enabled".
         usr_workload_bool_op (str): Logical operator for user workload. Defaults to "AND".
+        mapping_user (str or None): Mapping name of Cedar Context schema User entity.
+        mapping_workload (str or None): Mapping name of cedar schema Workload entity.
+        mapping_id_token (str or None): Mapping name of cedar schema id_token entity.
+        mapping_access_token (str or None): Mapping name of cedar schema access_token entity.
+        mapping_userinfo_token (str or None): Mapping name of cedar schema userinfo_token entity.
         local_jwks (str or None): Local JWKS (JSON Web Key Set). Defaults to None.
         local_policy_store (str or None): Local policy store configuration. Defaults to None.
         policy_store_local_fn (str or None): Local policy store function. Defaults to None.
@@ -59,6 +65,11 @@ class BootstrapConfig:
     user_authz: bool | None
     workload_authz: bool | None
     usr_workload_bool_op: str | None
+    mapping_user: str | None
+    mapping_workload: str | None
+    mapping_id_token: str | None
+    mapping_access_token: str | None
+    mapping_userinfo_token: str | None
     local_jwks: str | None
     local_policy_store: str | None
     policy_store_local_fn: str | None
