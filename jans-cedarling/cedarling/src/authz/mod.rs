@@ -29,14 +29,14 @@ mod token_data;
 
 pub use authorize_result::AuthorizeResult;
 use cedar_policy::{Entities, Entity, EntityUid, Response};
+use entities::create_resource_entity;
 use entities::CedarPolicyCreateTypeError;
 use entities::ProcessTokensResult;
 use entities::ResourceEntityError;
 use entities::{
-    create_access_token_entities, create_id_token_entity, create_role_entities, create_user_entity,
-    create_userinfo_token_entity, AccessTokenEntitiesError, RoleEntityError,
+    create_access_token, create_id_token_entity, create_role_entities, create_user_entity,
+    create_userinfo_token_entity, create_workload, AccessTokenEntitiesError, RoleEntityError,
 };
-use entities::{create_resource_entity, AccessTokenEntities};
 use request::Request;
 use token_data::{AccessTokenData, IdTokenData, UserInfoTokenData};
 
@@ -97,7 +97,7 @@ impl Authz {
         let entities_data: AuthorizeEntitiesData = self.authorize_entities_data(&request)?;
 
         // Get entity UIDs what we will be used on authorize check
-        let principal_workload_uid = entities_data.access_token_entities.workload_entity.uid();
+        let principal_workload_uid = entities_data.workload_entity.uid();
         let resource_uid = entities_data.resource_entity.uid();
         let principal_user_entity_uid = entities_data.user_entity.uid();
 
@@ -226,13 +226,13 @@ impl Authz {
 
         // Populate the `AuthorizeEntitiesData` structure using the builder pattern
         let data = AuthorizeEntitiesData::builder()
-            // Populate the structure with entities derived from the access token
-            .access_token_entities(create_access_token_entities(
-                policy_store,
+            // Add an entity created from the access token
+            .workload_entity(create_workload( policy_store,
                 &decode_result.access_token,
-                tokens_metadata.access_tokens
-            )?)
-            // Add an entity created from the ID token
+                tokens_metadata.access_tokens)?)
+            .access_token(create_access_token(policy_store,
+                &decode_result.access_token,
+                tokens_metadata.access_tokens)?)
             .id_token_entity(
                 create_id_token_entity(policy_store, &decode_result.id_token, &tokens_metadata.id_tokens.claim_mapping)
                     .map_err(AuthorizeError::CreateIdTokenEntity)?,
@@ -280,7 +280,8 @@ struct ExecuteAuthorizeParameters<'a> {
 // from some entities to check authorizations
 #[derive(typed_builder::TypedBuilder)]
 pub struct AuthorizeEntitiesData {
-    pub access_token_entities: AccessTokenEntities,
+    pub workload_entity: Entity,
+    pub access_token: Entity,
     pub id_token_entity: Entity,
     pub userinfo_token: Entity,
     pub user_entity: Entity,
@@ -292,13 +293,14 @@ impl AuthorizeEntitiesData {
     /// Create iterator to get all entities
     fn into_iter(self) -> impl Iterator<Item = Entity> {
         vec![
+            self.workload_entity,
+            self.access_token,
             self.id_token_entity,
             self.userinfo_token,
             self.user_entity,
             self.resource_entity,
         ]
         .into_iter()
-        .chain(self.access_token_entities.into_iter())
         .chain(self.role_entities)
     }
 
