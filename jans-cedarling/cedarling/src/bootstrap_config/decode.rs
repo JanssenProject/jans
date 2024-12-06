@@ -12,7 +12,7 @@ use super::{
 };
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
-use std::{collections::HashSet, fs, path::Path, str::FromStr};
+use std::{collections::HashSet, fmt::Display, fs, path::Path, str::FromStr};
 use typed_builder::TypedBuilder;
 
 #[derive(Deserialize, PartialEq, Debug, TypedBuilder)]
@@ -246,13 +246,14 @@ impl FromStr for LoggerType {
     }
 }
 
-impl ToString for LoggerType {
-    fn to_string(&self) -> String {
+impl Display for LoggerType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            LoggerType::Off => "off".to_string(),
-            LoggerType::Memory => "memory".to_string(),
-            LoggerType::StdOut => "stdout".to_string(),
-            LoggerType::Lock => "lock".to_string(),
+            // we have to make the string representation is lowercase
+            LoggerType::Off => write!(f, "off"),
+            LoggerType::Memory => write!(f, "memory"),
+            LoggerType::StdOut => write!(f, "stdout"),
+            LoggerType::Lock => write!(f, "lock"),
         }
     }
 }

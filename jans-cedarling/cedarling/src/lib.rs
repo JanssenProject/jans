@@ -78,7 +78,7 @@ impl Cedarling {
         let log = log::init_logger(&config.log_config);
         let pdp_id = app_types::PdpID::new();
 
-        let service_config = ServiceConfig::new(&config)
+        let service_config = ServiceConfig::new(config)
             .inspect(|_| {
                 log.log(
                     LogEntry::new_with_data(pdp_id, None, LogType::System)
@@ -93,7 +93,7 @@ impl Cedarling {
                 )
             })?;
 
-        let mut service_factory = ServiceFactory::new(&config, service_config, log.clone(), pdp_id);
+        let mut service_factory = ServiceFactory::new(config, service_config, log.clone(), pdp_id);
 
         Ok(Cedarling {
             log,
