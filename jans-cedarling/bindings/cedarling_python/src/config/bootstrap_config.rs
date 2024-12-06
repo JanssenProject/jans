@@ -18,7 +18,7 @@ use pyo3::types::PyDict;
 /// A Python wrapper for the Rust `cedarling::BootstrapConfig` struct.
 /// Configures the `Cedarling` application, including authorization, logging, and policy store settings.
 ///
-//// Attributes
+/// Attributes
 /// ----------
 /// :param log_type: Log type, e.g., 'none', 'memory', 'std_out', or 'lock'.
 /// :param log_ttl: Time to live (TTL) of `memory` logs in seconds.
@@ -104,10 +104,10 @@ impl BootstrapConfig {
         match self.source.as_mut() {
             Some(source) => {
                 source.policy_store_local_fn = Some(path.to_string());
-                self.inner = cedarling::BootstrapConfig::from_raw_config(&source).map_err(|e| PyValueError::new_err(e.to_string()))?;
+                self.inner = cedarling::BootstrapConfig::from_raw_config(source).map_err(|e| PyValueError::new_err(e.to_string()))?;
                 Ok(())
             }
-            None => Err(PyValueError::new_err(format!("Failed to set `CEDARLING_POLICY_STORE_LOCAL_FN` since a policy store wasn't loaded yet."))),
+            None => Err(PyValueError::new_err("Failed to set `CEDARLING_POLICY_STORE_LOCAL_FN` since a policy store wasn't loaded yet.")),
         }
     }
 
@@ -122,13 +122,13 @@ impl BootstrapConfig {
             Some(source) => {
                 source.log_type = LoggerType::from_str(log_type)
                     .map_err(|e| PyValueError::new_err(e.to_string()))?;
-                self.inner = cedarling::BootstrapConfig::from_raw_config(&source)
+                self.inner = cedarling::BootstrapConfig::from_raw_config(source)
                     .map_err(|e| PyValueError::new_err(e.to_string()))?;
                 Ok(())
             },
-            None => Err(PyValueError::new_err(format!(
-                "Failed to set `CEDARLING_LOG_TYPE` since a policy store wasn't loaded yet."
-            ))),
+            None => Err(PyValueError::new_err(
+                "Failed to set `CEDARLING_LOG_TYPE` since a policy store wasn't loaded yet.",
+            )),
         }
     }
 
@@ -144,9 +144,9 @@ impl BootstrapConfig {
                 source.log_ttl = Some(ttl);
                 Ok(())
             },
-            None => Err(PyValueError::new_err(format!(
-                "Failed to set `CEDARLING_LOG_TLL` since a policy store wasn't loaded yet."
-            ))),
+            None => Err(PyValueError::new_err(
+                "Failed to set `CEDARLING_LOG_TLL` since a policy store wasn't loaded yet.",
+            )),
         }
     }
 }
