@@ -40,17 +40,19 @@ import com.fasterxml.jackson.dataformat.cbor.CBORParser;
  * @author Yuriy Movchan
  * @version March 9, 2020
  */
+
 /**
  * authData � a raw buffer struct containing user info.
  * Parser for authData or authenticatorData
- *
  */
 @ApplicationScoped
 public class AuthenticatorDataParser {
 
-	public static final int FLAG_USER_PRESENT = 0x01;
+    public static final int FLAG_USER_PRESENT = 0x01;
     public static final int FLAG_USER_VERIFIED = 0x04;
-	public static final int FLAG_ATTESTED_CREDENTIAL_DATA_INCLUDED = 0x40;
+    private static final int FLAG_BACKUP_ELIGIBILITY = 0x08;
+    public static final int FLAG_BACKUP_STATE = 0x10;
+    public static final int FLAG_ATTESTED_CREDENTIAL_DATA_INCLUDED = 0x40;
     public static final int FLAG_EXTENSION_DATA_INCLUDED = 0x80;
 
     @Inject
@@ -66,12 +68,12 @@ public class AuthenticatorDataParser {
     private CommonVerifiers commonVerifiers;
 
     public AuthData parseAttestationData(String incomingAuthData) {
-    	byte[] incomingAuthDataBuffer = base64Service.decode(incomingAuthData.getBytes());
+        byte[] incomingAuthDataBuffer = base64Service.decode(incomingAuthData.getBytes());
         return parseAuthData(incomingAuthDataBuffer);
     }
 
     public AuthData parseAssertionData(String incomingAuthData) {
-    	byte[] incomingAuthDataBuffer = base64Service.urlDecode(incomingAuthData.getBytes());
+        byte[] incomingAuthDataBuffer = base64Service.urlDecode(incomingAuthData.getBytes());
         return parseAuthData(incomingAuthDataBuffer);
     }
 
@@ -89,6 +91,12 @@ public class AuthenticatorDataParser {
 
         boolean hasAtFlag = verifyAtFlag(flagsBuffer);
         boolean hasEdFlag = verifyEdFlag(flagsBuffer);
+        //Credential backup eligibility and current backup state is conveyed by the BE and BS flags. See https://w3c.github.io/webauthn/#sctn-credential-backup for details.
+        boolean hasBEFlag = verifyBackupEligibility(flagsBuffer);
+        boolean hasBSFlag = verifyBackupState(flagsBuffer);
+        
+        boolean hasUVFlag = verifyUVFlag(flagsBuffer);
+        boolean hasUPFlag = verifyUPFlag(flagsBuffer);
         log.debug("FLAGS hex {}", Hex.encodeHexString(flagsBuffer));
 
         byte[] counterBuffer = Arrays.copyOfRange(buffer, offset, offset += 4);
@@ -132,49 +140,57 @@ public class AuthenticatorDataParser {
             byte[] extensionKeyBuffer = Arrays.copyOfRange(buffer, offset, buffer.length);
 
             verifyExtensionBuffer(extensionKeyBuffer);
-            
+
             log.debug("ExtensionKeyBuffer hex {}", Hex.encodeHexString(extensionKeyBuffer));
             authData.setExtensions(extensionKeyBuffer);
 
             long extSize = getCborDataSize(extensionKeyBuffer);
             offset += extSize;
         }
+        /*
+         * If the Backup State (BS) flag is set (BS=1), the Backup Eligibility (BE) flag must also be set (BE=1). This means that a credential can only be backed up if it is eligible for backup.
+         */
+        if (hasBSFlag) {
+            if (!hasBEFlag) {
+                throw new Fido2RuntimeException("The BE=0 and BS=1 flags combination is not allowed.");
+            }
+        }
 
         byte[] leftovers = Arrays.copyOfRange(buffer, offset, buffer.length);
-    	verifyNoLeftovers(leftovers);
+        verifyNoLeftovers(leftovers);
 
-    	authData.setAttestationBuffer(buffer);
+        authData.setAttestationBuffer(buffer);
 
         return authData;
     }
 
-	private long getCborDataSize(byte[] cosePublicKeyBuffer) {
-		long keySize = 0;
-		CBORParser parser = null;
-		try {
-		    parser = dataMapperService.cborCreateParser(cosePublicKeyBuffer);
-		    while (!parser.isClosed()) {
-		        JsonToken t = parser.nextToken();
-		        if (t.isStructEnd()) {
-		            JsonLocation tocloc = parser.getCurrentLocation();
-		            keySize = tocloc.getByteOffset();
-		            break;
-		        }
-		    }
-		} catch (IOException e) {
-		    throw new Fido2RuntimeException(e.getMessage(), e);
-		} finally {
-		    if (parser != null) {
-		        try {
-		            parser.close();
-		        } catch (IOException e) {
-		            log.error("Exception when closing a parser {}", e.getMessage());
-		        }
-		    }
-		}
+    private long getCborDataSize(byte[] cosePublicKeyBuffer) {
+        long keySize = 0;
+        CBORParser parser = null;
+        try {
+            parser = dataMapperService.cborCreateParser(cosePublicKeyBuffer);
+            while (!parser.isClosed()) {
+                JsonToken t = parser.nextToken();
+                if (t.isStructEnd()) {
+                    JsonLocation tocloc = parser.getCurrentLocation();
+                    keySize = tocloc.getByteOffset();
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            throw new Fido2RuntimeException(e.getMessage(), e);
+        } finally {
+            if (parser != null) {
+                try {
+                    parser.close();
+                } catch (IOException e) {
+                    log.error("Exception when closing a parser {}", e.getMessage());
+                }
+            }
+        }
 
-		return keySize;
-	}
+        return keySize;
+    }
 
     public int parseCounter(byte[] counter) {
         int cnt = ByteBuffer.wrap(counter).asIntBuffer().get();
@@ -189,6 +205,35 @@ public class AuthenticatorDataParser {
         return (flags[0] & FLAG_EXTENSION_DATA_INCLUDED) == FLAG_EXTENSION_DATA_INCLUDED;
     }
 
+    /*
+     * Checks if the Backup Eligibility flag is set in the given flags byte array.
+     */
+    public boolean verifyBackupEligibility(byte[] flags) {
+        return (flags[0] & FLAG_BACKUP_ELIGIBILITY) == FLAG_BACKUP_ELIGIBILITY;
+    }
+    
+    /*
+     * Checks if the BackupState BS flag is set in the given flags byte array.
+     */
+    public boolean verifyBackupState(byte[] flags) {
+        return (flags[0] & FLAG_BACKUP_STATE) == FLAG_BACKUP_STATE;
+    }
+
+    /*
+     * Checks if the UserPresent flag is set in the given flags byte array.
+     */
+    public boolean verifyUPFlag(byte[] flags) {
+        return (flags[0] & FLAG_USER_PRESENT) == FLAG_USER_PRESENT;
+    }
+
+    /*
+     * Checks if the UserVerified flag is set in the given flags byte array.
+     */
+    public boolean verifyUVFlag(byte[] flags) {
+        return (flags[0] & FLAG_USER_VERIFIED) == FLAG_USER_VERIFIED;
+    }
+
+   
     public void verifyAttestationBuffer(byte[] attestationBuffer) {
         if (attestationBuffer.length == 0) {
             throw new Fido2RuntimeException("Invalid attestation data buffer");

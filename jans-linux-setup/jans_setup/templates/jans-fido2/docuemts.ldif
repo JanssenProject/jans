@@ -1,0 +1,25 @@
+dn: inum=%(fido_document_certs_inum)s,ou=document,o=jans
+objectClass: top
+objectClass: jansDocument
+creationDate: %(fido_document_creation_date)s
+description: mdsCertsFolder
+displayName: mdsCertsFolder
+document: %(fido_document_certs_base64)s
+inum: %(fido_document_certs_inum)s
+jansEnabled: true
+jansFilePath: %(fido_document_certs_dir)s
+jansLevel: 0
+jansService: Fido2 MDS
+
+dn: inum=%(fido_document_tocs_inum)s,ou=document,o=jans
+objectClass: top
+objectClass: jansDocument
+creationDate: %(fido_document_creation_date)s
+description: mdsTocsFolder
+displayName: mdsTocsFolder
+document: %(fido_document_tocs_base64)s
+inum: %(fido_document_tocs_inum)s
+jansEnabled: true
+jansFilePath: %(fido_document_tocs_dir)s
+jansLevel: 0
+jansService: Fido2 MDS

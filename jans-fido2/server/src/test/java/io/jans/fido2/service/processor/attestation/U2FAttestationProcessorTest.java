@@ -6,6 +6,7 @@ import io.jans.fido2.exception.Fido2MissingAttestationCertException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.AttestationMode;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
@@ -47,6 +48,9 @@ class U2FAttestationProcessorTest {
     private AppConfiguration appConfiguration;
 
     @Mock
+    private Fido2Configuration fido2Configuration;
+
+    @Mock
     private CommonVerifiers commonVerifiers;
 
     @Mock
@@ -72,6 +76,8 @@ class U2FAttestationProcessorTest {
 
     @Mock
     private ErrorResponseFactory errorResponseFactory;
+    
+    
 
     @Test
     void getAttestationFormat_valid_fidoU2f() {
@@ -81,32 +87,28 @@ class U2FAttestationProcessorTest {
     }
 
     @Test
-    void process_ifAttStmtHasX5cAndSkipValidateMdsInAttestationIsFalseAndVerifyAttestationThrowErrorAndCertificatesIsEmpty_fido2MissingAttestationCertException() {
+    void process_ifAttStmtHasX5cAndVerifyAttestationThrowErrorAndCertificatesIsEmpty_fido2MissingAttestationCertException() {
         JsonNode attStmt = mock(JsonNode.class);
         AuthData authData = mock(AuthData.class);
         Fido2RegistrationData registration = mock(Fido2RegistrationData.class);
         byte[] clientDataHash = new byte[]{};
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
-        Fido2Configuration fido2Configuration = mock(Fido2Configuration.class);
         JsonNode x5cNode = mock(JsonNode.class);
-        when(registration.getDomain()).thenReturn("test-domain");
+        when(registration.getOrigin()).thenReturn("test-domain");
         when(attStmt.hasNonNull("x5c")).thenReturn(true);
         when(attStmt.get("x5c")).thenReturn(x5cNode);
         when(x5cNode.elements()).thenReturn(Collections.emptyIterator());
         when(attStmt.get("sig")).thenReturn(mock(JsonNode.class));
         when(commonVerifiers.verifyBase64String(any())).thenReturn("test-signature");
         when(certificateVerifier.verifyAttestationCertificates(any(), any())).thenThrow(new Fido2MissingAttestationCertException("test missing"));
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-        when(fido2Configuration.isSkipValidateMdsInAttestationEnabled()).thenReturn(false);
         when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
-
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+        when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> u2FAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
         assertNotNull(res);
         assertNotNull(res.getResponse());
         assertEquals(res.getResponse().getStatus(), 400);
         assertEquals(res.getResponse().getEntity(), "test exception");
-//        assertNotNull(ex);
-//        assertEquals(ex.getMessage(), "test missing");
 
         verify(commonVerifiers).verifyAAGUIDZeroed(authData);
         verify(userVerificationVerifier).verifyUserPresent(authData);
@@ -114,7 +116,6 @@ class U2FAttestationProcessorTest {
         verify(commonVerifiers).verifyRpIdHash(authData, "test-domain");
         verify(certificateService).getCertificates(anyList());
         verify(attestationCertificateService).getAttestationRootCertificates((JsonNode) eq(null), anyList());
-        verify(appConfiguration).getFido2Configuration();
         verify(certificateVerifier).verifyAttestationCertificates(anyList(), anyList());
         verify(authenticatorDataVerifier, never()).verifyU2FAttestationSignature(any(AuthData.class), any(byte[].class), any(String.class), any(X509Certificate.class), any(Integer.class));
         verify(log, never()).warn(contains("Failed to find attestation validation signature public certificate with DN"), anyString());
@@ -122,28 +123,26 @@ class U2FAttestationProcessorTest {
     }
 
     @Test
-    void process_ifAttStmtHasX5cAndSkipValidateMdsInAttestationIsFalseAndVerifyAttestationThrowErrorAndCertificatesIsNotEmpty_badRequestException() {
+    void process_ifAttStmprocess_ifAttStmtHasX5cAndVerifyAttestationThrowErrorAndCertificatesIsNotEmpty_badRequestExceptiotHasX5cAndSkipValidateMdsInAttestationIsFalseAndVerifyAttestationThrowErrorAndCertificatesIsNotEmpty_badRequestException() {
         JsonNode attStmt = mock(JsonNode.class);
         AuthData authData = mock(AuthData.class);
         Fido2RegistrationData registration = mock(Fido2RegistrationData.class);
         byte[] clientDataHash = new byte[]{};
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
-        Fido2Configuration fido2Configuration = mock(Fido2Configuration.class);
         JsonNode x5cNode = mock(JsonNode.class);
-        when(registration.getDomain()).thenReturn("test-domain");
+        when(registration.getOrigin()).thenReturn("test-domain");
         when(attStmt.hasNonNull("x5c")).thenReturn(true);
         when(attStmt.get("x5c")).thenReturn(x5cNode);
         when(x5cNode.elements()).thenReturn(Collections.singletonList((JsonNode) new TextNode("cert1")).iterator());
         when(attStmt.get("sig")).thenReturn(mock(JsonNode.class));
         when(commonVerifiers.verifyBase64String(any())).thenReturn("test-signature");
         when(certificateVerifier.verifyAttestationCertificates(any(), any())).thenThrow(new Fido2MissingAttestationCertException("test missing"));
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-        when(fido2Configuration.isSkipValidateMdsInAttestationEnabled()).thenReturn(false);
         X509Certificate publicCert1 = mock(X509Certificate.class);
         when(certificateService.getCertificates(anyList())).thenReturn(Collections.singletonList(publicCert1));
         when(publicCert1.getIssuerDN()).thenReturn((UserPrincipal) () -> "test-issuer");
         when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
-
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+        when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> u2FAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
         assertNotNull(res);
         assertNotNull(res.getResponse());
@@ -156,7 +155,6 @@ class U2FAttestationProcessorTest {
         verify(commonVerifiers).verifyRpIdHash(authData, "test-domain");
         verify(certificateService).getCertificates(anyList());
         verify(attestationCertificateService).getAttestationRootCertificates((JsonNode) eq(null), anyList());
-        verify(appConfiguration).getFido2Configuration();
         verify(certificateVerifier).verifyAttestationCertificates(anyList(), anyList());
         verify(authenticatorDataVerifier, never()).verifyU2FAttestationSignature(any(AuthData.class), any(byte[].class), any(String.class), any(X509Certificate.class), any(Integer.class));
         verify(log).warn("Failed to find attestation validation signature public certificate with DN: '{}'", "test-issuer");
@@ -164,15 +162,15 @@ class U2FAttestationProcessorTest {
     }
 
     @Test
-    void process_ifAttStmtHasX5cAndSkipValidateMdsInAttestationIsFalseAndCertificatesIsNotEmptyAndVerifyAttestationIsValid_success() {
+    void process_ifAttStmtHasX5cAndCertificatesIsNotEmptyAndVerifyAttestationIsValid_success() {
         JsonNode attStmt = mock(JsonNode.class);
         AuthData authData = mock(AuthData.class);
         Fido2RegistrationData registration = mock(Fido2RegistrationData.class);
         byte[] clientDataHash = new byte[]{};
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
-        Fido2Configuration fido2Configuration = mock(Fido2Configuration.class);
         JsonNode x5cNode = mock(JsonNode.class);
-        when(registration.getDomain()).thenReturn("test-domain");
+        when(registration.getOrigin
+        		()).thenReturn("test-domain");
         when(attStmt.hasNonNull("x5c")).thenReturn(true);
         when(attStmt.get("x5c")).thenReturn(x5cNode);
         when(x5cNode.elements()).thenReturn(Collections.singletonList((JsonNode) new TextNode("cert1")).iterator());
@@ -181,8 +179,7 @@ class U2FAttestationProcessorTest {
         when(commonVerifiers.verifyBase64String(any())).thenReturn("test-signature");
         when(certificateVerifier.verifyAttestationCertificates(any(), any())).thenReturn(verifiedCert);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-        when(fido2Configuration.isSkipValidateMdsInAttestationEnabled()).thenReturn(false);
-
+        when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
         u2FAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters);
         verify(commonVerifiers).verifyAAGUIDZeroed(authData);
         verify(userVerificationVerifier).verifyUserPresent(authData);
@@ -196,36 +193,7 @@ class U2FAttestationProcessorTest {
         verifyNoInteractions(log, coseService);
     }
 
-    @Test
-    void process_ifAttStmtHasX5cAndSkipValidateMdsInAttestationIsTrue_success() {
-        JsonNode attStmt = mock(JsonNode.class);
-        AuthData authData = mock(AuthData.class);
-        Fido2RegistrationData registration = mock(Fido2RegistrationData.class);
-        byte[] clientDataHash = new byte[]{};
-        CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
-        Fido2Configuration fido2Configuration = mock(Fido2Configuration.class);
-        JsonNode x5cNode = mock(JsonNode.class);
-        when(registration.getDomain()).thenReturn("test-domain");
-        when(attStmt.hasNonNull("x5c")).thenReturn(true);
-        when(attStmt.get("x5c")).thenReturn(x5cNode);
-        when(x5cNode.elements()).thenReturn(Collections.singletonList((JsonNode) new TextNode("cert1")).iterator());
-        when(attStmt.get("sig")).thenReturn(mock(JsonNode.class));
-        when(commonVerifiers.verifyBase64String(any())).thenReturn("test-signature");
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-        when(fido2Configuration.isSkipValidateMdsInAttestationEnabled()).thenReturn(true);
 
-        u2FAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters);
-        verify(commonVerifiers).verifyAAGUIDZeroed(authData);
-        verify(userVerificationVerifier).verifyUserPresent(authData);
-        verify(userVerificationVerifier).verifyUserPresent(authData);
-        verify(commonVerifiers).verifyRpIdHash(authData, "test-domain");
-        verify(certificateService).getCertificates(anyList());
-        verify(attestationCertificateService).getAttestationRootCertificates((JsonNode) eq(null), anyList());
-        verify(log).warn(eq("SkipValidateMdsInAttestation is enabled"));
-        verifyNoMoreInteractions(log);
-        verify(base64Service, times(2)).urlEncodeToString(any());
-        verifyNoInteractions(certificateVerifier, authenticatorDataVerifier, coseService);
-    }
 
     @Test
     void process_ifAttStmtHasEcdaaKeyId_badRequestException() {
@@ -234,12 +202,14 @@ class U2FAttestationProcessorTest {
         Fido2RegistrationData registration = mock(Fido2RegistrationData.class);
         byte[] clientDataHash = new byte[]{};
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
-        when(registration.getDomain()).thenReturn("test-domain");
+        when(registration.getOrigin()).thenReturn("test-domain");
         when(attStmt.get("sig")).thenReturn(mock(JsonNode.class));
         when(attStmt.hasNonNull("x5c")).thenReturn(false);
         when(attStmt.hasNonNull("ecdaaKeyId")).thenReturn(true);
         when(attStmt.get("ecdaaKeyId")).thenReturn(new TextNode("test-ecdaaKeyId"));
         when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+        when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
 
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> u2FAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
         assertNotNull(res);
@@ -247,13 +217,15 @@ class U2FAttestationProcessorTest {
         assertEquals(res.getResponse().getStatus(), 400);
         assertEquals(res.getResponse().getEntity(), "test exception");
 
+        verify(appConfiguration).getFido2Configuration();
+        verify(fido2Configuration).getAttestationMode();
         verify(commonVerifiers).verifyBase64String(any());
         verify(commonVerifiers).verifyAAGUIDZeroed(authData);
         verify(userVerificationVerifier).verifyUserPresent(authData);
         verify(commonVerifiers).verifyRpIdHash(authData, "test-domain");
         verify(log).warn("Fido-U2F unsupported EcdaaKeyId: {}", "test-ecdaaKeyId");
         verifyNoMoreInteractions(log);
-        verifyNoInteractions(certificateService, certificateVerifier, appConfiguration, attestationCertificateService, authenticatorDataVerifier, coseService, base64Service);
+        verifyNoInteractions(certificateService, certificateVerifier, attestationCertificateService, authenticatorDataVerifier, coseService, base64Service);
     }
 
     @Test
@@ -263,7 +235,7 @@ class U2FAttestationProcessorTest {
         Fido2RegistrationData registration = mock(Fido2RegistrationData.class);
         byte[] clientDataHash = new byte[]{};
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
-        when(registration.getDomain()).thenReturn("test-domain");
+        when(registration.getOrigin()).thenReturn("test-domain");
         when(authData.getAuthDataDecoded()).thenReturn("test-decoded".getBytes());
         when(attStmt.get("sig")).thenReturn(mock(JsonNode.class));
         when(commonVerifiers.verifyBase64String(any())).thenReturn("test-signature");
@@ -271,14 +243,18 @@ class U2FAttestationProcessorTest {
         when(attStmt.hasNonNull("ecdaaKeyId")).thenReturn(false);
         PublicKey publicKey = mock(PublicKey.class);
         when(coseService.getPublicKeyFromUncompressedECPoint(any())).thenReturn(publicKey);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+        when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
 
         u2FAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters);
+        verify(appConfiguration).getFido2Configuration();
+        verify(fido2Configuration).getAttestationMode();
         verify(commonVerifiers).verifyBase64String(any());
         verify(commonVerifiers).verifyAAGUIDZeroed(authData);
         verify(userVerificationVerifier).verifyUserPresent(authData);
         verify(commonVerifiers).verifyRpIdHash(authData, "test-domain");
         verify(coseService).getPublicKeyFromUncompressedECPoint(any());
         verify(authenticatorDataVerifier).verifyPackedSurrogateAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, "test-signature", publicKey, -7);
-        verifyNoInteractions(log, certificateService, certificateVerifier, appConfiguration, attestationCertificateService);
+        verifyNoInteractions(log, certificateService, certificateVerifier);
     }
 }

@@ -6,9 +6,11 @@
 
 package io.jans.fido2.model.conf;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.jans.as.model.configuration.Configuration;
 import io.jans.doc.annotation.DocProperty;
@@ -19,42 +21,60 @@ import jakarta.enterprise.inject.Vetoed;
  * @author Yuriy Movchan
  * @version May 13, 2020
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
+
+
 @Vetoed
-public class AppConfiguration implements Configuration {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class AppConfiguration implements Configuration, Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8558798638575129572L;
 
 	@DocProperty(description = "URL using the https scheme for Issuer identifier")
     private String issuer;
+	
 	@DocProperty(description = "The base URL for Fido2 endpoints")
     private String baseEndpoint;
+	
 	@DocProperty(description = "Time interval for the Clean Service in seconds")
     private int cleanServiceInterval;
+	
 	@DocProperty(description = "Each clean up iteration fetches chunk of expired data per base dn and removes it from storage")
     private int cleanServiceBatchChunkSize = 100;
+	
 	@DocProperty(description = "Boolean value to indicate if Local Cache is to be used")
     private boolean useLocalCache;
+	
 	@DocProperty(description = "Boolean value specifying whether to enable JDK Loggers")
     private boolean disableJdkLogger = true;
+	
 	@DocProperty(description = "Logging level for Fido2 logger")
     private String loggingLevel;
+	
 	@DocProperty(description = "Logging layout used for Fido2")
     private String loggingLayout;
+	
 	@DocProperty(description = "Path to external Fido2 logging configuration")
     private String externalLoggerConfiguration;
+	
 	@DocProperty(description = "The interval for metric reporter in seconds")
     private int metricReporterInterval;
+	
 	@DocProperty(description = "The days to keep report data")
     private int metricReporterKeepDataDays;
+	
 	@DocProperty(description = "Boolean value specifying whether metric reporter is enabled")
     private boolean metricReporterEnabled = true;
+	
 	@DocProperty(description = "Custom object class list for dynamic person enrolment")
     private List<String> personCustomObjectClassList;
-	@DocProperty(description = "Boolean value to enable disable Super Gluu extension")
-    private boolean superGluuEnabled;
+	
+	
     @DocProperty(description = "Boolean value specifying whether to persist session_id in cache", defaultValue = "false")
     private Boolean sessionIdPersistInCache = false;
-	@DocProperty(description = "Boolean value to enable disable old oxAuth U2F enrollments migration")
-    private boolean oldU2fMigrationEnabled;
+	
 	@DocProperty(description = "Boolean value specifying whether to return detailed reason of the error from Fido2. Default value is false", defaultValue = "false")
 	private Boolean errorReasonEnabled = false;
 
@@ -172,14 +192,7 @@ public class AppConfiguration implements Configuration {
 		this.fido2Configuration = fido2Configuration;
 	}
 
-	public boolean isSuperGluuEnabled() {
-		return superGluuEnabled;
-	}
-
-	public void setSuperGluuEnabled(boolean superGluuEnabled) {
-		this.superGluuEnabled = superGluuEnabled;
-	}
-
+	
     public Boolean getSessionIdPersistInCache() {
         if (sessionIdPersistInCache == null) sessionIdPersistInCache = false;
         return sessionIdPersistInCache;
@@ -188,14 +201,6 @@ public class AppConfiguration implements Configuration {
     public void setSessionIdPersistInCache(Boolean sessionIdPersistInCache) {
         this.sessionIdPersistInCache = sessionIdPersistInCache;
     }
-
-	public boolean isOldU2fMigrationEnabled() {
-		return oldU2fMigrationEnabled;
-	}
-
-	public void setOldU2fMigrationEnabled(boolean oldU2fMigrationEnabled) {
-		this.oldU2fMigrationEnabled = oldU2fMigrationEnabled;
-	}
 
 	public Boolean getErrorReasonEnabled() {
 		return errorReasonEnabled;

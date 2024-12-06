@@ -15,7 +15,7 @@ import java.util.UUID;
 import io.jans.fido2.model.assertion.AssertionErrorResponseType;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.error.ErrorResponseFactory;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import io.jans.as.common.model.common.User;
@@ -64,7 +64,7 @@ public class AuthenticationPersistenceService {
     private ErrorResponseFactory errorResponseFactory;
 
     public void save(Fido2AuthenticationData authenticationData) {
-        Fido2AuthenticationEntry authenticationEntity = buildFido2AuthenticationEntry(authenticationData, false);
+        Fido2AuthenticationEntry authenticationEntity = buildFido2AuthenticationEntry(authenticationData);
 
         save(authenticationEntity);
     }
@@ -75,33 +75,38 @@ public class AuthenticationPersistenceService {
         persistenceEntryManager.persist(authenticationEntity);
     }
 
-    public Fido2AuthenticationEntry buildFido2AuthenticationEntry(Fido2AuthenticationData authenticationData, boolean oneStep) {
+    public Fido2AuthenticationEntry buildFido2AuthenticationEntry(Fido2AuthenticationData authenticationData) {
 		String userName = authenticationData.getUsername();
         
 		String userInum = null;
-    	if (!oneStep) {
-	        User user = userService.getUser(userName, "inum");
-	        if (user == null) {
-	            if (appConfiguration.getFido2Configuration().isUserAutoEnrollment()) {
-	                user = userService.addDefaultUser(userName);
-	            } else {
-	                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.USER_AUTO_ENROLLMENT_IS_DISABLED, "Auto user enrollment was disabled. User not exists!");
-	            }
-	        }
-	        userInum = userService.getUserInum(user);
-    	}
+    	
+        User user = userService.getUser(userName, "inum");
+        // user == null could imply conditional UI as well
+        log.debug("User is null");
+        if (user == null) {
+            if (appConfiguration.getFido2Configuration().isDebugUserAutoEnrollment()) {
+                user = userService.addDefaultUser(userName);
+            } else {
+                log.debug("Building fido authentication entry");
+            	//throw errorResponseFactory.badRequestException(AttestationErrorResponseType.USER_AUTO_ENROLLMENT_IS_DISABLED, "Auto user enrollment was disabled. User not exists!");
+            }
+        }
+        else
+        {
+        	userInum = userService.getUserInum(user);
+        }
 
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
         final String id = UUID.randomUUID().toString();
         final String challenge = authenticationData.getChallenge();
 
-        String dn = oneStep ? getDnForAuthenticationEntry(null, id) : getDnForAuthenticationEntry(userInum, id);
+        String dn = getDnForAuthenticationEntry(userInum, id);
         Fido2AuthenticationEntry authenticationEntity = new Fido2AuthenticationEntry(dn, authenticationData.getId(), now, userInum, authenticationData);
         authenticationEntity.setAuthenticationStatus(authenticationData.getStatus());
         if (StringUtils.isNotEmpty(challenge)) {
         	authenticationEntity.setChallengeHash(challengeGenerator.getChallengeHashCode(challenge));
         }
-        authenticationEntity.setRpId(authenticationData.getApplicationId());
+        authenticationEntity.setRpId(authenticationData.getRpId());
 
         authenticationData.setCreatedDate(now);
         authenticationData.setCreatedBy(userName);
@@ -145,8 +150,8 @@ public class AuthenticationPersistenceService {
         }
     }
 
-    public List<Fido2AuthenticationEntry> findByChallenge(String challenge, boolean oneStep) {
-        String baseDn = oneStep ? getDnForAuthenticationEntry(null, null) : getBaseDnForFido2AuthenticationEntries(null);
+    public List<Fido2AuthenticationEntry> findByChallenge(String challenge) {
+        String baseDn = getBaseDnForFido2AuthenticationEntries(null);
 
         Filter codeChallengFilter = Filter.createEqualityFilter("jansCodeChallenge", challenge);
         Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("jansCodeChallengeHash", challengeGenerator.getChallengeHashCode(challenge));

@@ -15,33 +15,33 @@
       "jansCustomPerson",
       "jansPerson"
    ],
-   "superGluuEnabled": false,
    "sessionIdPersistInCache": false,
-   "oldU2fMigrationEnabled": true,
    "errorReasonEnabled": false,
    "fido2Configuration":{
       "authenticatorCertsFolder":"%(fido2ConfigFolder)s/authenticator_cert",
       "mdsCertsFolder":"%(fido2ConfigFolder)s/mds/cert",
       "mdsTocsFolder":"%(fido2ConfigFolder)s/mds/toc",
       "serverMetadataFolder":"%(fido2ConfigFolder)s/server_metadata",
-      "requestedCredentialTypes":[
-         "RS256",
-         "ES256"
-      ],
-      "requestedParties":[
+      "enabledFidoAlgorithms": [
+             "RS256",
+             "ES256"
+         ],
+      "rp":[
          {
-            "name":"https://%(hostname)s",
-            "domains":[
+            "id":"https://%(hostname)s",
+            "origins":[
                "%(hostname)s"
             ]
          }
       ],
+      "metadataServers":[{"url": "https://mds.fidoalliance.org/" }],
       "userAutoEnrollment":false,
       "unfinishedRequestExpiration":180,
       "authenticationHistoryExpiration":1296000,
       "metadataUrlsProvider":"",
       "skipDownloadMdsEnabled":false,
-      "skipValidateMdsInAttestationEnabled":false,
-      "assertionOptionsGenerateEndpointEnabled":true
+      "attestationMode":"monitor",
+      "enterpriseAttestation":"false",
+      "hints":["security-key","client-device","hybrid"]
    }
 }

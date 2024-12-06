@@ -110,12 +110,12 @@ public class DeviceRegistrationService {
 		return fidoRegistrations;
 	}
 
-	public void migrateToFido2(List<DeviceRegistration> fidoRegistrations, String documentDomain, String username) {
+	public void migrateToFido2(List<DeviceRegistration> fidoRegistrations, String origin, String username) {
 		for (DeviceRegistration fidoRegistration: fidoRegistrations) {
 
 			Fido2RegistrationData fido2RegistrationData;
 			try {
-				fido2RegistrationData = convertToFido2RegistrationData(documentDomain, username, fidoRegistration);
+				fido2RegistrationData = convertToFido2RegistrationData(origin, username, fidoRegistration);
 			} catch (IOException ex) {
 				log.error("Faield to migrate Fido to Fido2 device: {}" , fidoRegistration.getId());
 				continue;
@@ -123,7 +123,7 @@ public class DeviceRegistrationService {
 
 			// Save converted Fido2 entry
 			Date enrollmentDate = fidoRegistration.getCreationDate();
-			Fido2RegistrationEntry fido2RegistrationEntry = registrationPersistenceService.buildFido2RegistrationEntry(fido2RegistrationData, false);
+			Fido2RegistrationEntry fido2RegistrationEntry = registrationPersistenceService.buildFido2RegistrationEntry(fido2RegistrationData);
 			
 			// Restore dates modified by buildFido2RegistrationEntry
 			fido2RegistrationEntry.getRegistrationData().setCreatedDate(enrollmentDate);
@@ -150,7 +150,7 @@ public class DeviceRegistrationService {
 		}
 	}
 
-	protected Fido2RegistrationData convertToFido2RegistrationData(String documentDomain, String username,
+	protected Fido2RegistrationData convertToFido2RegistrationData(String origin, String username,
 			DeviceRegistration fidoRegistration) throws IOException {
 		Fido2RegistrationData registrationData = new Fido2RegistrationData();
 		
@@ -160,7 +160,7 @@ public class DeviceRegistrationService {
 		registrationData.setUpdatedBy(username);
 
 		registrationData.setUsername(username);
-		registrationData.setDomain(documentDomain);
+		registrationData.setOrigin(origin);
 
 		JsonNode uncompressedECPoint = coseService.convertECKeyToUncompressedPoint(
 				base64Service.urlDecode(fidoRegistration.getDeviceRegistrationConfiguration().getPublicKey()));
@@ -179,7 +179,7 @@ public class DeviceRegistrationService {
 
 		registrationData.setStatus(Fido2RegistrationStatus.registered);
 		
-		registrationData.setApplicationId(fidoRegistration.getApplication());
+		registrationData.setRpId(fidoRegistration.getApplication());
 
 		return registrationData;
 	}
