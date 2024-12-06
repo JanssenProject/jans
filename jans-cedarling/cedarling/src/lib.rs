@@ -37,6 +37,7 @@ use init::service_factory::ServiceInitError;
 use init::ServiceFactory;
 
 use common::app_types;
+use log::interface::LogWriter;
 use log::LogEntry;
 pub use log::LogStorage;
 use log::LogType;
@@ -114,7 +115,8 @@ impl Cedarling {
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
-        self.authz.authorize_entities_data(request)
+        let tokens = self.authz.decode_tokens(request)?;
+        self.authz.authorize_entities_data(request, &tokens)
     }
 }
 

@@ -5,6 +5,7 @@
 
 from typing import Optional, List, final, Dict, Any
 
+
 @final
 class BootstrapConfig:
     """

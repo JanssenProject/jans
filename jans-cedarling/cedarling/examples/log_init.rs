@@ -57,6 +57,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::And,
+            ..Default::default()
         },
     })?;
 

@@ -27,6 +27,7 @@ derive_more = { version = "1.0.0", features = [
 ] }
 time = { version = "0.3.36", features = ["wasm-bindgen"] }
 regex = "1.11.1"
+chrono = "0.4.38"
 
 [dev-dependencies]
 # is used in testing

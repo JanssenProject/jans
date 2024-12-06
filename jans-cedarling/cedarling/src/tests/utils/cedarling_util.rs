@@ -25,6 +25,7 @@ pub fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::And,
+            ..Default::default()
         },
     })
     .expect("bootstrap config should initialize correctly")

@@ -10,7 +10,7 @@
 use std::sync::Arc;
 
 use crate::bootstrap_config::BootstrapConfig;
-use crate::common::policy_store::PolicyStore;
+use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt::{JwtService, JwtServiceInitError};
 
 use super::service_config::ServiceConfig;
@@ -64,7 +64,7 @@ impl<'a> ServiceFactory<'a> {
     }
 
     // get policy store
-    pub fn policy_store(&self) -> PolicyStore {
+    pub fn policy_store(&self) -> PolicyStoreWithID {
         self.service_config.policy_store.clone()
     }
 
@@ -79,7 +79,7 @@ impl<'a> ServiceFactory<'a> {
             Ok(jwt_service.clone())
         } else {
             let config = &self.bootstrap_config.jwt_config;
-            let trusted_issuers = self.policy_store().trusted_issuers;
+            let trusted_issuers = self.policy_store().trusted_issuers.clone();
             let service = Arc::new(JwtService::new(config, trusted_issuers)?);
             self.container.jwt_service = Some(service.clone());
             Ok(service)
@@ -97,7 +97,7 @@ impl<'a> ServiceFactory<'a> {
                 application_name: self.application_name(),
                 policy_store: self.policy_store(),
                 jwt_service: self.jwt_service()?,
-                authorization: self.bootstrap_config.authorization_config,
+                authorization: self.bootstrap_config.authorization_config.clone(),
             };
             let service = Arc::new(Authz::new(config));
             self.container.authz_service = Some(service.clone());
