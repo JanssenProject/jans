@@ -1,3 +1,8 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+
 from typing import Optional, List, final, Dict, Any
 
 @final
@@ -8,6 +13,7 @@ class BootstrapConfig:
     Attributes:
         application_name (str): The name of the application.
         policy_store_id (str): The ID of the policy store.
+        policy_store_uri (str or None): The ID of the policy store.
         log_type (str): Type of logging. Defaults to "memory".
         log_ttl (int): Log time-to-live in seconds. Defaults to 60.
         user_authz (str): User authorization status. Defaults to "enabled".
