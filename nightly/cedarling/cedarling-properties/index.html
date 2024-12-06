@@ -7381,11 +7381,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#loading-the-bootstrap-config" class="md-nav__link">
-    Loading The bootstrap config.
+  <a href="#local-jwks" class="md-nav__link">
+    Local JWKS
   </a>
   
-    <nav class="md-nav" aria-label="Loading The bootstrap config.">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loading-the-bootstrap-config" class="md-nav__link">
+    Loading the bootstrap config
+  </a>
+  
+    <nav class="md-nav" aria-label="Loading the bootstrap config">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -7397,7 +7404,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#local-jwks" class="md-nav__link">
+  <a href="#local-jwks_1" class="md-nav__link">
     Local JWKS
   </a>
   
@@ -7449,6 +7456,8 @@
         
           
         
+          
+        
       
       
         
@@ -7479,6 +7488,20 @@
     <li class="md-nav__item">
       <a href="../python/usage/" class="md-nav__link">
         How to use
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/sidecar/" class="md-nav__link">
+        Sidecar
       </a>
     </li>
   
@@ -8612,11 +8635,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#loading-the-bootstrap-config" class="md-nav__link">
-    Loading The bootstrap config.
+  <a href="#local-jwks" class="md-nav__link">
+    Local JWKS
   </a>
   
-    <nav class="md-nav" aria-label="Loading The bootstrap config.">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loading-the-bootstrap-config" class="md-nav__link">
+    Loading the bootstrap config
+  </a>
+  
+    <nav class="md-nav" aria-label="Loading the bootstrap config">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -8628,7 +8658,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#local-jwks" class="md-nav__link">
+  <a href="#local-jwks_1" class="md-nav__link">
     Local JWKS
   </a>
   
@@ -8712,41 +8742,62 @@
 <p>These Bootstrap Properties control default application level behavior.</p>
 <ul>
 <li><strong><code>CEDARLING_APPLICATION_NAME</code></strong> : Human friendly identifier for this application</li>
-<li><strong><code>CEDARLING_POLICY_STORE_URI</code></strong> : Location of policy store JSON, used if policy store is not local, or retreived from Lock Server.</li>
-<li><strong><code>CEDARLING_POLICY_STORE_ID</code></strong>: A unique identifier for the policy store.</li>
-<li><strong><code>CEDARLING_LOG_TYPE</code></strong> (<code>"off"</code> | <code>"memory"</code> | <code>"std_out"</code> | <code>"lock"</code>): Selects the logging method.</li>
-<li><strong><code>CEDARLING_LOG_TTL</code></strong> : If the <code>CEDARLING_LOG_TYPE</code> is set to <code>"memory"</code>, this will set the TTL (Time to Live) of log entities in seconds. Defaults to 60s.</li>
-<li><strong><code>CEDARLING_USER_AUTHZ</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When <code>enabled</code>, Cedar engine authorization is queried for a <em>User</em> principal.</li>
-<li><strong><code>CEDARLING_WORKLOAD_AUTHZ</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When <code>enabled</code>, Cedar engine authorization is queried for a <em>Workload</em> principal.</li>
-<li><strong><code>CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION</code></strong> (<code>"AND"</code> | <code>"OR"</code>): Specifies what boolean operation to use for the <code>USER</code> and <code>WORKLOAD</code> when making authz (authorization) decisions. See <a href="#user-workload-boolean-operation">User-Workload Boolean Operation</a></li>
-<li><strong><code>CEDARLING_LOCAL_JWKS</code></strong> : Path to a JWKS file with public keys.</li>
-<li><strong><code>CEDARLING_LOCAL_POLICY_STORE</code></strong> : JSON object containing a <a href="../cedarling-policy-store/">Policy Store</a>.</li>
-<li><strong><code>CEDARLING_POLICY_STORE_LOCAL_FN</code></strong> : Path to a JSON file containing a <a href="../cedarling-policy-store/">Policy Store</a>.</li>
-<li><strong><code>CEDARLING_JWT_SIG_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): Whether to enable the signature validation for Json Web Tokens (JWT). This requires an <code>iss</code> (Issuer) claim is present in the token.</li>
-<li><strong><code>CEDARLING_JWT_STATUS_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): Whether to check the status of JWTs. This requires an <code>iss</code> (Issuer) claim is present in the token.</li>
-<li><strong><code>CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED</code></strong>: Cedarling will only accept tokens signed with these algorithms.</li>
-<li><strong><code>CEDARLING_AT_ISS_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>iss</code> (Issuer) claim must be present in the Access Token and the scheme must be <code>https</code>.</li>
-<li><strong><code>CEDARLING_AT_JTI_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>jti</code> (JWT ID) claim must be present in the Access Token.</li>
-<li><strong><code>CEDARLING_AT_NBF_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>nbf</code> (Not Before) claim must be present in the Access Token and Cedarling will verify that the current date is after the <code>nbf</code>.</li>
-<li><strong><code>CEDARLING_AT_EXP_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>exp</code> (Expiration) claim must be present in the Access Token and not past the date specified.</li>
-<li><strong><code>CEDARLING_IDT_ISS_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>iss</code> (Issuer) claim must be present in the ID Token and the scheme must be <code>https</code>.</li>
-<li><strong><code>CEDARLING_IDT_SUB_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>sub</code> (Subject) claim must be present in the ID Token.</li>
-<li><strong><code>CEDARLING_IDT_EXP_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>exp</code> (Expiration) claim must be present in the ID Token and not past the date specified.</li>
-<li><strong><code>CEDARLING_IDT_IAT_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>iat</code> (Issued at) claim must be present in the ID Token.</li>
-<li><strong><code>CEDARLING_IDT_AUD_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>aud</code> ( Audience) claim must be present in the ID Token.</li>
-<li><strong><code>CEDARLING_USERINFO_ISS_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>iss</code> (Issuer) claim must be present in the Userinfo Token and the scheme must be https.</li>
-<li><strong><code>CEDARLING_USERINFO_SUB_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>sub</code> (Subject) claim must be present in the Userinfo Token.</li>
-<li><strong><code>CEDARLING_USERINFO_AUD_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>aud</code> (Audience) claim must be present in the Userinfo Token.</li>
-<li><strong><code>CEDARLING_USERINFO_EXP_VALIDATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the <code>exp</code> (Expiration) claim must be present in the Userinfo Token and not past the date specified.</li>
-<li><strong><code>CEDARLING_ID_TOKEN_TRUST_MODE</code></strong> (<code>"None"</code> | <code>"Strict"</code>): Varying levels of validations for JWTs. See <a href="#id-token-trust-mode">Validation Levels</a>.</li>
-<li><strong><code>CEDARLING_LOCK</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): When enabled, the Cedarling will connect to the Lock Master for policies, and subscribe for SSE events.</li>
-<li><strong><code>CEDARLING_LOCK_MASTER_CONFIGURATION_URI</code></strong>: URI where Cedarling can get JSON file with all required metadata about Lock Master, i.e. .well-known/lock-master-configuration. This is <strong><em>Required if <code>"LOCK"</code> == <code>"enabled"</code></em></strong>.</li>
-<li><strong><code>CEDARLING_DYNAMIC_CONFIGURATION</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): Controls whether Cedarling should listen for SSE config updates.</li>
-<li><strong><code>CEDARLING_LOCK_SSA_JWT</code></strong>: SSA for DCR in a Lock Master deployment. The Cedarling will validate this JWT prior to DCR.</li>
-<li><strong><code>CEDARLING_AUDIT_LOG_INTERVAL</code></strong>: How often to send log messages to Lock Master in seconds (set this to <code>0</code> to turn off trasmission).</li>
-<li><strong><code>CEDARLING_AUDIT_HEALTH_INTERVAL</code></strong>: How often to send health messages to Lock Master in seconds (set this to <code>0</code> to turn off trasmission).</li>
-<li><strong><code>CEDARLING_AUDIT_TELEMETRY_INTERVAL</code></strong>: How often to send telemetry messages to Lock Master in seconds (set this to <code>0</code> to turn off trasmission).</li>
-<li><strong><code>CEDARLING_LISTEN_SSE</code></strong> (<code>"enabled"</code> | <code>"disabled"</code>): Controls whether Cedarling should listen for updates from the Lock Server.</li>
+<li><strong><code>CEDARLING_POLICY_STORE_URI</code></strong> : Location of policy store JSON, used if policy store is not local, or retreived from Lock Master.</li>
+<li><strong><code>CEDARLING_POLICY_STORE_ID</code></strong> : The identifier of the policy store in case there is more then one policy_store_id in the policy store.</li>
+<li><strong><code>CEDARLING_USER_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a User principal.</li>
+<li><strong><code>CEDARLING_WORKLOAD_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a Workload principal.</li>
+<li><strong><code>CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION</code></strong> :  <code>AND</code>, <code>OR</code></li>
+<li><strong><code>CEDARLING_MAPPING_USER</code></strong> : Name of Cedar User schema entity</li>
+<li><strong><code>CEDARLING_MAPPING_WORKLOAD</code></strong> : Name of Cedar Workload schema entity</li>
+<li><strong><code>CEDARLING_MAPPING_ID_TOKEN</code></strong> : Name of Cedar id_token schema entity</li>
+<li><strong><code>CEDARLING_MAPPING_ACCESS_TOKEN</code></strong> : Name of Cedar access_token schema entity</li>
+<li><strong><code>CEDARLING_MAPPING_USERINFO_TOKEN</code></strong> : Name of Cedar userinfo schema entity</li>
+<li><strong><code>CEDARLING_MAPPING_CONTEXT</code></strong> : Name of Cedar Context schema entity</li>
+</ul>
+<p><strong>The following bootstrap properties are needed to configure log behavior:</strong></p>
+<ul>
+<li><strong><code>CEDARLING_LOG_STORAGE</code></strong> : <code>off</code>, <code>memory</code>, <code>std_out</code></li>
+<li><strong><code>CEDARLING_LOG_LEVEL</code></strong> : System Log Level <a href="../cedarling-logs/">See here</a>. Default to <code>WARN</code></li>
+<li><strong><code>CEDARLING_LOG_STDOUT_TYPE</code></strong> : Either <code>System</code>, <code>Metric</code>, or <code>Decision</code>. Default to System.</li>
+<li><strong><code>CEDARLING_DECISION_LOG_USER_CLAIMS</code></strong> : List of claims to map from user entity, such as ["sub", "email", "username", ...]</li>
+<li><strong><code>CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS</code></strong> : List of claims to map from user entity, such as ["client_id", "rp_id", ...]</li>
+<li><strong><code>CEDARLING_DECISION_LOG_DEFAULT_JWT_ID</code></strong> : Token claims that will be used for decision logging. Default is "jti", but perhaps some other claim is needed.</li>
+<li><strong><code>CEDARLING_LOG_TTL</code></strong> : in case of <code>memory</code> store, TTL (time to live) of log entities in seconds.</li>
+</ul>
+<p><strong>The following bootstrap properties are needed to configure JWT and cryptographic behavior:</strong></p>
+<ul>
+<li><strong><code>CEDARLING_LOCAL_JWKS</code></strong> : JWKS file with public keys</li>
+<li><strong><code>CEDARLING_LOCAL_POLICY_STORE</code></strong> : JSON object with policy store</li>
+<li><strong><code>CEDARLING_POLICY_STORE_LOCAL_FN</code></strong> : Local file with JSON object with policy store</li>
+<li><strong><code>CEDARLING_JWT_SIG_VALIDATION</code></strong> : <code>Enabled</code> | <code>Disabled</code> -- Whether to check the signature  of all JWT tokens. This requires an <code>iss</code> is present.</li>
+<li><strong><code>CEDARLING_JWT_STATUS_VALIDATION</code></strong> : <code>Enabled</code> | <code>Disabled</code> -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retreive the latest Status List JWT from the <code>.well-known/openid-configuration</code> via the <code>status_list_endpoint</code> claim and cache it. See the <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">IETF Draft</a> for more info.</li>
+<li><strong><code>CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED</code></strong> : Only tokens signed with these algorithms are acceptable to the Cedarling.</li>
+<li><strong><code>CEDARLING_AT_ISS_VALIDATION</code></strong> : When enabled, the <code>iss</code> claim must be present in access token and the scheme must be <code>https</code>.</li>
+<li><strong><code>CEDARLING_AT_JTI_VALIDATION</code></strong> : When enabled, the <code>jti</code> claim must be present in access token.</li>
+<li><strong><code>CEDARLING_AT_NBF_VALIDATION</code></strong> : When enabled, the <code>nbf</code> claim must be present in access token and the Cedarling should verify that the current date is after the <code>nbf</code>.</li>
+<li><strong><code>CEDARLING_AT_EXP_VALIDATION</code></strong> : When enabled, the <code>exp</code> claim must be present and not past the date specified.</li>
+<li><strong><code>CEDARLING_IDT_ISS_VALIDATION</code></strong> : When enabled, the <code>iss</code> claim must be present in id_token and the scheme must be <code>https</code>.</li>
+<li><strong><code>CEDARLING_IDT_SUB_VALIDATION</code></strong> : When enabled, the <code>sub</code> claim must be present in id_token.</li>
+<li><strong><code>CEDARLING_IDT_EXP_VALIDATION</code></strong> : When enabled, the <code>exp</code> claim must be present and not past the date specified.</li>
+<li><strong><code>CEDARLING_IDT_IAT_VALIDATION</code></strong> : When enabled, the <code>iat</code> claim must be present in id_token.</li>
+<li><strong><code>CEDARLING_IDT_AUD_VALIDATION</code></strong> : When enabled, the <code>aud</code> claim must be present in id_token.</li>
+<li><strong><code>CEDARLING_USERINFO_ISS_VALIDATION</code></strong> : When enabled, the <code>iss</code> claim must be present and the scheme must be <code>https</code>.</li>
+<li><strong><code>CEDARLING_USERINFO_SUB_VALIDATION</code></strong> : When enabled, the <code>sub</code> claim must be present in Userinfo JWT.</li>
+<li><strong><code>CEDARLING_USERINFO_AUD_VALIDATION</code></strong> : When enabled, the <code>aud</code> claim must be present in Userinfo JWT.</li>
+<li><strong><code>CEDARLING_USERINFO_EXP_VALIDATION</code></strong> : When enabled, the <code>exp</code> claim must be present and not past the date specified.</li>
+<li><strong><code>CEDARLING_ID_TOKEN_TRUST_MODE</code></strong> :  <code>Strict</code> | <code>None</code>. Varying levels of validations based on the preference of the developer.
+<code>Strict</code> mode requires (1) id_token <code>aud</code> matches the access_token <code>client_id</code>; (2) if a Userinfo token is present, the <code>sub</code> matches the id_token, and that the <code>aud</code> matches the access token client_id.</li>
+</ul>
+<p><strong>The following bootstrap properties are only needed for enterprise deployments.</strong></p>
+<ul>
+<li><strong><code>CEDARLING_LOCK</code></strong> : Enabled | Disabled. If Enabled, the Cedarling will connect to the Lock Master for policies, and subscribe for SSE events.</li>
+<li><strong><code>CEDARLING_LOCK_MASTER_CONFIGURATION_URI</code></strong> : Required if <code>LOCK</code> == <code>Enabled</code>. URI where Cedarling can get JSON file with all required metadata about Lock Master, i.e. <code>.well-known/lock-master-configuration</code>.</li>
+<li><strong><code>CEDARLING_LOCK_DYNAMIC_CONFIGURATION</code></strong> : Enabled | Disabled, controls whether Cedarling should listen for SSE config updates.</li>
+<li><strong><code>CEDARLING_LOCK_SSA_JWT</code></strong> : SSA for DCR in a Lock Master deployment. The Cedarling will validate this SSA JWT prior to DCR.</li>
+<li><strong><code>CEDARLING_LOCK_LOG_INTERVAL</code></strong> : How often to send log messages to Lock Master (0 to turn off trasmission).</li>
+<li><strong><code>CEDARLING_LOCK_HEALTH_INTERVAL</code></strong> : How often to send health messages to Lock Master (0 to turn off transmission).</li>
+<li><strong><code>CEDARLING_LOCK_TELEMETRY_INTERVAL</code></strong> : How often to send telemetry messages to Lock Master (0 to turn off transmission).</li>
+<li><strong><code>CEDARLING_LOCK_LISTEN_SSE</code></strong> :  Enabled | Disabled: controls whether Cedarling should listen for updates from the Lock Server.</li>
 </ul>
 <h2 id="user-workload-boolean-operation">User-Workload Boolean Operation<a class="headerlink" href="#user-workload-boolean-operation" title="Permanent link">#</a></h2>
 <p>The <code>CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION</code> property specifies what boolean operation to use for the <code>USER</code> and <code>WORKLOAD</code> when making authz (authorization) decisions.</p>
@@ -8765,7 +8816,19 @@
 <li>The <code>id_token</code>'s <code>aud</code> matches the <code>access_token</code>'s <code>client_id</code>;</li>
 <li>if a Userinfo token is present, the <code>sub</code> matches the <code>id_token</code>, and that the <code>aud</code> matches the access token's <code>client_id</code>.</li>
 </ol>
-<h2 id="loading-the-bootstrap-config">Loading The bootstrap config.<a class="headerlink" href="#loading-the-bootstrap-config" title="Permanent link">#</a></h2>
+<h2 id="local-jwks">Local JWKS<a class="headerlink" href="#local-jwks" title="Permanent link">#</a></h2>
+<p>A local JWKS can be used by setting the <code>CEDARLING_LOCAL_JWKS</code> bootstrap property to a path to a local JSON file. When providing a local Json Web Key Store (JWKS), the file must follow the following schema:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;trusted_issuer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;another_trusted_issuer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>Where keys are <code>Trusted Issuer IDs</code> assigned to each key store</li>
+<li>and the values contains the JSON Web Keys as defined in <a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517</a>.</li>
+<li>The <code>trusted_issuers_id</code> is used to tag a JWKS with a unique identifier and enables using multiple key stores.</li>
+</ul>
+<h2 id="loading-the-bootstrap-config">Loading the bootstrap config<a class="headerlink" href="#loading-the-bootstrap-config" title="Permanent link">#</a></h2>
 <p>There are multiple ways to load your bootstrap config:</p>
 <ul>
 <li><a href="#loading-from-json">From a JSON file</a></li>
@@ -8784,6 +8847,9 @@
 <span class="w">    </span><span class="nt">&quot;CEDARLING_POLICY_STORE_URI&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_POLICY_STORE_ID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_LOG_TYPE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;memory&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_DECISION_LOG_USER_CLAIMS&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;email&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;username&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;client_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;rp_id&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_DECISION_LOG_DEFAULT_JWT_ID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_LOG_TTL&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_USER_AUTHZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_WORKLOAD_AUTHZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
@@ -8823,7 +8889,7 @@
 <ul>
 <li>Note that properties set to <code>"disabled"</code>, an empty string <code>""</code>, zero <code>0</code>, and <code>null</code> can be ommited since they are the defaults.</li>
 </ul>
-<h4 id="local-jwks">Local JWKS<a class="headerlink" href="#local-jwks" title="Permanent link">#</a></h4>
+<h4 id="local-jwks_1">Local JWKS<a class="headerlink" href="#local-jwks_1" title="Permanent link">#</a></h4>
 <p>A local JWKS can be used by setting the <code>CEDARLING_LOCAL_JWKS</code> bootstrap property to a path to a local JSON file. When providing a local Json Web Key Store (JWKS), the file must follow the following schema:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;trusted_issuer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
@@ -8833,7 +8899,12 @@
 <ul>
 <li>Where keys are <code>Trusted Issuer IDs</code> assigned to each key store</li>
 <li>and the values contains the JSON Web Keys as defined in <a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517</a>.</li>
-<li>The <code>trusted_issuers_id</code> is used to tag a JWKS with a unique identifier and enables using multiple key stores.</li>
+<li>
+<p>The <code>trusted_issuers_id</code> is used to tag a JWKS with a unique identifier and enables using multiple key stores.</p>
+</li>
+<li>
+<p>Note that properties set to <code>"disabled"</code>, an empty string <code>""</code>, zero <code>0</code>, and <code>null</code> can be ommited since they are the defaults.</p>
+</li>
 </ul>
 <h3 id="loading-from-yaml">Loading From YAML<a class="headerlink" href="#loading-from-yaml" title="Permanent link">#</a></h3>
 <p>Below is an example of a bootstrap config in YAML format.</p>
@@ -8884,7 +8955,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-02T15:32:07+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-02</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-06T17:07:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-06</span>
       
         <br>
         Created:

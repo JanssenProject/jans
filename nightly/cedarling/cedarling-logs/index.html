@@ -7324,6 +7324,19 @@
     Cedarling Audit Logs
   </a>
   
+    <nav class="md-nav" aria-label="Cedarling Audit Logs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-log-levels" class="md-nav__link">
+    System Log Levels
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -7334,9 +7347,49 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#sample-logs" class="md-nav__link">
+    Sample logs
+  </a>
+  
+    <nav class="md-nav" aria-label="Sample logs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#startup-message" class="md-nav__link">
     Startup Message
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision-log" class="md-nav__link">
+    Decision Log
+  </a>
+  
+    <nav class="md-nav" aria-label="Decision Log">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#field-definitions" class="md-nav__link">
+    Field Definitions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-log-sample" class="md-nav__link">
+    Debug Log Sample
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -7383,6 +7436,8 @@
         
           
         
+          
+        
       
       
         
@@ -7413,6 +7468,20 @@
     <li class="md-nav__item">
       <a href="../python/usage/" class="md-nav__link">
         How to use
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/sidecar/" class="md-nav__link">
+        Sidecar
       </a>
     </li>
   
@@ -8503,6 +8572,19 @@
     Cedarling Audit Logs
   </a>
   
+    <nav class="md-nav" aria-label="Cedarling Audit Logs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-log-levels" class="md-nav__link">
+    System Log Levels
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -8513,9 +8595,49 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#sample-logs" class="md-nav__link">
+    Sample logs
+  </a>
+  
+    <nav class="md-nav" aria-label="Sample logs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#startup-message" class="md-nav__link">
     Startup Message
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision-log" class="md-nav__link">
+    Decision Log
+  </a>
+  
+    <nav class="md-nav" aria-label="Decision Log">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#field-definitions" class="md-nav__link">
+    Field Definitions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-log-sample" class="md-nav__link">
+    Debug Log Sample
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8599,21 +8721,200 @@ bootstrap property:</p>
 <li><code>System</code> - Startup, debug and other Cedarling messages not related to authz</li>
 <li><code>Metric</code>- Performance and usage data</li>
 </ul>
+<h3 id="system-log-levels">System Log Levels<a class="headerlink" href="#system-log-levels" title="Permanent link">#</a></h3>
+<p>This is set by <code>CEDARLING_LOG_LEVEL</code></p>
+<ul>
+<li><code>FATAL</code>: Indicates very severe error events that will likely lead the application to abort. These are the most critical issues.</li>
+<li><code>ERROR</code>: Designates error events that might still allow the application to continue running but indicate a significant problem.</li>
+<li><code>WARN</code>: Designates potentially harmful situations that should be addressed to prevent future issues.</li>
+<li><code>INFO</code>: Provides informational messages that highlight the progress of the application at a coarse-grained level.</li>
+<li><code>DEBUG</code>: Designates fine-grained informational events useful for debugging the application.</li>
+<li><code>TRACE</code>: Provides finer-grained informational events than DEBUG. It is often used for detailed tracing of program execution.</li>
+</ul>
 <h2 id="jans-lock-server">Jans Lock Server<a class="headerlink" href="#jans-lock-server" title="Permanent link">#</a></h2>
 <p>In enterprise deployments, <a href="../janssen-server/lock/">Janssen Lock Server</a> collects Cedarling
 logs and can stream to a database or S3 bucket. The Cedarling decision logs provide compliance
 evidence of usage of the domain's externalized policies. The logs are also useful for forensic
 analysis to show everything the attacker attempted, both allowed and denied.</p>
-<h2 id="startup-message">Startup Message<a class="headerlink" href="#startup-message" title="Permanent link">#</a></h2>
+<h2 id="sample-logs">Sample logs<a class="headerlink" href="#sample-logs" title="Permanent link">#</a></h2>
+<p>The JSON in this document is formatted for readability but is not prettified in the actual implementation.  </p>
+<h3 id="startup-message">Startup Message<a class="headerlink" href="#startup-message" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;01937359-8968-766e-bc4a-82df4aa1f4bf&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1732807068</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;01937015-462d-7727-b789-ed95f7faf7a4&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1732752262</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;log_kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;System&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;pdp_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;b862f21f-bcb1-4618-995d-ba7041e9bd16&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;pdp_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;75f0dc93-0a90-4076-95fa-dc16d3f00375&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;msg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;configuration parsed successfully&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;01937015-462f-7cb5-86bb-d06c56dc5ab3&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1732752262</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;log_kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;System&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;pdp_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;75f0dc93-0a90-4076-95fa-dc16d3f00375&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;msg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cedarling Authz initialized successfully&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;application_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestApp&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;cedar_lang_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4.1.0&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;cedar_sdk_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4.2.2&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w">      </span>
+</code></pre></div>
+<h3 id="decision-log">Decision Log<a class="headerlink" href="#decision-log" title="Permanent link">#</a></h3>
+<p>Example of decision log.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;request_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;019394db-f52b-7b06-88b8-a288670a32c2&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-12-05T05:27:43.403Z&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;log_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Decision&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;pdp_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9e189c4b-96ae-4818-8e7f-75a42186af15&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;policystore_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a1bf93115de86de760ee0bea1d529b521489e5a11747&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;policystore_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;undefined&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;principal&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User &amp; Workload&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;User&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin@gluu.org&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Workload&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;org_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_long_id&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;lock_client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Action::\&quot;Update\&quot;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Issue::\&quot;random_id\&quot;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;decision&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;id_tkn_jti&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;Userinfo&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;usrinfo_tkn_jti&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;access&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;access_tkn_jti&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;decision_time_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<h4 id="field-definitions">Field Definitions<a class="headerlink" href="#field-definitions" title="Permanent link">#</a></h4>
+<ul>
+<li><code>request_id</code>: unique identifier for the decision request</li>
+<li><code>timestamp</code>: Derived if possible from the system or context--may be empty in cases where WASM can't access the system clock, and the time wasn't sent in the context.</li>
+<li><code>pdp_id</code>: unique identifier for the Cedarling</li>
+<li><code>policystore_id</code>: What policystore this Cedarling instance is using</li>
+<li><code>policystore_version</code>: What version of the policystore the Cedarling is using</li>
+<li><code>principal</code>: <code>User</code> | <code>Workload</code></li>
+<li><code>User</code>: A list of claims, specified by the <code>CEDARLING_DECISION_LOG_USER_CLAIMS</code> property, that must be present in the Cedar User entity</li>
+<li><code>Workload</code>:  A list of claims, specified by the <code>CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS</code> property, that must be present in the Cedar Workload entity</li>
+<li><code>lock_client_id</code>: If this Cedarling has registered with a Lock Server, what is the client_id it received</li>
+<li><code>action</code>: From the request</li>
+<li><code>resource</code>: From the Request</li>
+<li><code>decision</code>: <code>ALLOW</code> or <code>DENY</code></li>
+<li><code>tokens</code>: Dictionary with the token type and claims which should be included in the log</li>
+<li><code>decision_time_ms</code>: how long the decision took</li>
+</ul>
+<h3 id="debug-log-sample">Debug Log Sample<a class="headerlink" href="#debug-log-sample" title="Permanent link">#</a></h3>
+<p>The result of the authorization is quite extensive because we log all <code>cedar-policy</code> entity information for forensic analysis. We cannot truncate the data, as it may contain critical information.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;01937015-4649-7aad-8df8-4976e4bd8565&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1732752262</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;log_kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Decision&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;pdp_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;75f0dc93-0a90-4076-95fa-dc16d3f00375&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;msg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Result of authorize.&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;application_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestApp&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Action::\&quot;Read\&quot;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Application::\&quot;some_id\&quot;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;user_agent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;operating_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;network_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Local&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;network&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;geolocation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;America&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">],</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;fraud_indicators&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;Allowed&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">],</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;device_health&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;Healthy&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">],</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;current_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1732752262</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;entities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;attrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">                    </span><span class="s2">&quot;CasaAdmin&quot;</span><span class="w"></span>
+<span class="w">                </span><span class="p">],</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;domain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans.test&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin&quot;</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">                </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Role&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CasaAdmin&quot;</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="p">]</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::id_token&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ijLZO1ooRyWrgIn7cIdNyA&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;attrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;acr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple_password_auth&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1731956630</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ijLZO1ooRyWrgIn7cIdNyA&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;amr&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;d7f71bea-c38d-4caf-a1ba-e43c74a11a62&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;__entity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::TrustedIssuer&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://account.gluu.org&quot;</span><span class="w"></span>
+<span class="w">                    </span><span class="p">}</span><span class="w"></span>
+<span class="w">                </span><span class="p">},</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1731953030</span><span class="w"></span>
+<span class="w">            </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+
+<span class="w">        </span><span class="err">...</span><span class="w"></span>
+
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Action&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Tag&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;attrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;person_principal&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User::\&quot;qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0\&quot;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;person_diagnostics&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple policy example for principal user&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">],</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;errors&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;person_decision&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;workload_principal&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Workload::\&quot;d7f71bea-c38d-4caf-a1ba-e43c74a11a62\&quot;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;workload_diagnostics&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;444da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple policy example for principal workload&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">],</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;errors&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;workload_decision&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;authorized&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
 
@@ -8622,7 +8923,7 @@ analysis to show everything the attacker attempted, both allowed and denied.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-28T16:25:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-06T17:07:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-06</span>
       
         <br>
         Created:
