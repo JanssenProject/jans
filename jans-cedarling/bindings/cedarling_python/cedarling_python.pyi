@@ -5,6 +5,7 @@
 
 from typing import Optional, List, final, Dict, Any
 
+
 @final
 class BootstrapConfig:
     """
@@ -15,6 +16,9 @@ class BootstrapConfig:
         policy_store_id (str): The ID of the policy store.
         policy_store_uri (str or None): The ID of the policy store.
         log_type (str): Type of logging. Defaults to "memory".
+        decision_log_user_claims ([str]): List of claims to map from user entity.
+        decision_log_workload_claims ([str]): List of claims to map from user entity for decision log.
+        decision_log_default_jwt_id (str): Token claims that will be used for decision logging.
         log_ttl (int): Log time-to-live in seconds. Defaults to 60.
         user_authz (str): User authorization status. Defaults to "enabled".
         workload_authz (str): Workload authorization status. Defaults to "enabled".
