@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -29,11 +28,9 @@ import org.slf4j.Logger;
 
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.service.common.ApplicationFactory;
-import io.jans.model.user.authenticator.UserAuthenticator;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.model.PersistenceConfiguration;
-import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.orm.service.PersistanceFactoryService;
 import io.jans.orm.util.properties.FileConfiguration;
 import io.jans.service.EncryptionService;
@@ -115,8 +112,6 @@ public class UserJansExtUidAttributeTest {
     @Test
 	@Order(1)
     public void testUserPersist() {
-		log.error(System.getProperty("java.class.path"));
-
     	User user = new User();
         user.setDn(userDn);
         user.setUserId(userId);
