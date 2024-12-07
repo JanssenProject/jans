@@ -44,7 +44,7 @@ os.environ['JANS_PROFILE'] = profile
 from setup_app.utils import arg_parser
 
 argsp = arg_parser.get_parser()
-
+aks_setup_removal = argsp.n
 
 # first import paths and make changes if necassary
 from setup_app import paths
@@ -490,15 +490,12 @@ def main():
         msg_text = msg.post_installation if Config.installed_instance else msg.installation_completed.format(
             Config.hostname)
         print(msg_text)
-        print('\n', static.colors.ENDC)
-        print(static.colors.DANGER)
-        print(msg.setup_removal_warning)
-        print(static.colors.ENDC, '\n')
+
         # we need this for progress write last line
         time.sleep(2)
 
         if not os.environ.get('FLEX_PRE_JANS'):
-            if not argsp.n:
+            if not aks_setup_removal:
                 print(f"\033[31m\033[1mDo you want to remove directories {Config.distFolder} and {__STATIC_SETUP_DIR__} [yes/N] \033[0m")
 
                 i, o, e = select.select( [sys.stdin], [], [], 10 )
