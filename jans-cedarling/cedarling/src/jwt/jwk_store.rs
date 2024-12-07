@@ -5,9 +5,9 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::http_client::{HttpClient, HttpClientError};
 use super::{KeyId, TrustedIssuerId};
 use crate::common::policy_store::TrustedIssuer;
+use crate::http::{HttpClient, HttpClientError};
 use jsonwebtoken::jwk::Jwk;
 use jsonwebtoken::DecodingKey;
 use serde::Deserialize;
@@ -84,12 +84,14 @@ impl PartialEq for JwkStore {
 impl JwkStore {
     /// Creates a JwkStore from a [`serde_json::Value`]
     pub fn new_from_jwks_value(store_id: Arc<str>, jwks: Value) -> Result<Self, JwkStoreError> {
-        let jwks = serde_json::from_value::<IntermediateJwks>(jwks)?;
+        let jwks =
+            serde_json::from_value::<IntermediateJwks>(jwks).map_err(JwkStoreError::DecodeJwk)?;
         Self::new_from_jwks(store_id, jwks)
     }
     /// Creates a JwkStore from a [`String`]
     pub fn new_from_jwks_str(store_id: Arc<str>, jwks: &str) -> Result<Self, JwkStoreError> {
-        let jwks = serde_json::from_str::<IntermediateJwks>(jwks)?;
+        let jwks =
+            serde_json::from_str::<IntermediateJwks>(jwks).map_err(JwkStoreError::DecodeJwk)?;
         Self::new_from_jwks(store_id, jwks)
     }
 
@@ -102,7 +104,8 @@ impl JwkStore {
             let kid = key
                 .get("kid")
                 .map(|kid| serde_json::from_value::<String>(kid.clone()))
-                .transpose()?;
+                .transpose()
+                .map_err(JwkStoreError::DecodeJwk)?;
 
             // try to create a key
             let key = match serde_json::from_value::<Jwk>(key) {
@@ -163,9 +166,7 @@ impl JwkStore {
         // fetch jwks
         let response = http_client.get(&openid_config.jwks_uri)?;
 
-        let jwks = response.text().map_err(JwkStoreError::FetchJwks)?;
-
-        let mut store = Self::new_from_jwks_str(store_id, &jwks)?;
+        let mut store = Self::new_from_jwks_str(store_id, response.text())?;
         store.issuer = Some(openid_config.issuer.into());
         store.source_iss = Some(issuer.clone());
 
@@ -204,7 +205,7 @@ impl JwkStore {
 #[derive(thiserror::Error, Debug)]
 pub enum JwkStoreError {
     #[error("Failed to fetch OpenIdConfig remote server: {0}")]
-    FetchOpenIdConfig(#[source] reqwest::Error),
+    FetchOpenIdConfig(#[source] serde_json::Error),
     #[error("Failed to fetch JWKS from remote server: {0}")]
     FetchJwks(#[source] reqwest::Error),
     #[error("Failed to make HTTP Request: {0}")]
@@ -212,7 +213,7 @@ pub enum JwkStoreError {
     #[error("Failed to create Decoding Key from JWK: {0}")]
     CreateDecodingKey(#[from] jsonwebtoken::errors::Error),
     #[error("Failed to decode JWK: {0}")]
-    DecodeJwk(#[from] serde_json::Error),
+    DecodeJwk(#[source] serde_json::Error),
 }
 
 /// A simple struct to deserialize a collection of JWKs (JSON Web Keys).
@@ -228,10 +229,7 @@ struct IntermediateJwks {
 
 #[cfg(test)]
 mod test {
-    use crate::{
-        common::policy_store::TrustedIssuer,
-        jwt::{http_client::HttpClient, jwk_store::JwkStore},
-    };
+    use crate::{common::policy_store::TrustedIssuer, http::HttpClient, jwt::jwk_store::JwkStore};
     use jsonwebtoken::{jwk::JwkSet, DecodingKey};
     use mockito::Server;
     use serde_json::json;

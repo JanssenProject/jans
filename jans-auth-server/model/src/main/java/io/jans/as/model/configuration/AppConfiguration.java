@@ -152,6 +152,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Access evaluation custom script name.")
     private String accessEvaluationScriptName;
 
+    @DocProperty(description = "Lifetime of access evaluation discovery cache (/.well-known/authzen-configuration).", defaultValue = "5")
+    private int accessEvaluationDiscoveryCacheLifetimeInMinutes = 5;
+
     @DocProperty(description = "Boolean value true encrypts request object", defaultValue = "false")
     private Boolean requireRequestObjectEncryption = false;
 
@@ -3529,6 +3532,15 @@ public class AppConfiguration implements Configuration {
     public AppConfiguration setAccessEvaluationAllowBasicClientAuthorization(Boolean accessEvaluationAllowBasicClientAuthorization) {
         if (accessEvaluationAllowBasicClientAuthorization == null) accessEvaluationAllowBasicClientAuthorization = false;
         this.accessEvaluationAllowBasicClientAuthorization = accessEvaluationAllowBasicClientAuthorization;
+        return this;
+    }
+
+    public int getAccessEvaluationDiscoveryCacheLifetimeInMinutes() {
+        return accessEvaluationDiscoveryCacheLifetimeInMinutes;
+    }
+
+    public AppConfiguration setAccessEvaluationDiscoveryCacheLifetimeInMinutes(int accessEvaluationDiscoveryCacheLifetimeInMinutes) {
+        this.accessEvaluationDiscoveryCacheLifetimeInMinutes = accessEvaluationDiscoveryCacheLifetimeInMinutes;
         return this;
     }
 

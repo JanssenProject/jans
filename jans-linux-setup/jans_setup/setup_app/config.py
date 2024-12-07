@@ -226,6 +226,7 @@ class Config:
                             os.path.join(self.install_dir, 'static/scripts/testBind.py'),
                             os.path.join(self.install_dir, 'static/scripts/jans'),
                             os.path.join(self.install_dir, 'static/scripts/jans_services_status.py'),
+                            os.path.join(self.install_dir, 'static/scripts/get_agama_lab_projects.py'),
                             ]
 
         self.redhat_services = ['httpd', 'rsyslog']
