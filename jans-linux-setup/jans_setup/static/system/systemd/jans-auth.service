@@ -4,8 +4,8 @@ After=%(order_jans_auth_service)s
 
 [Service]
 Type=forking
-ExecStart=/opt/dist/scripts/jans-auth start
-ExecStop=/opt/dist/scripts/jans-auth stop
+ExecStart=%(jans_scripts_dir)s/jans-auth start
+ExecStop=%(jans_scripts_dir)s/jans-auth stop
 User=jetty
 Group=jetty
 

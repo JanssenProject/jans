@@ -114,6 +114,7 @@ class Config:
         self.dist_app_dir = os.path.join(self.distFolder, 'app')
         self.dist_jans_dir = os.path.join(self.distFolder, 'jans')
         self.distTmpFolder = os.path.join(self.distFolder, 'tmp')
+        self.jans_scripts_dir = os.path.join(self.jansOptFolder, 'scripts')
 
         self.downloadWars = None
         self.templateRenderingDict = {

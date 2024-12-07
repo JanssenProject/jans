@@ -4,8 +4,8 @@ After=%(order_jans_fido2_service)s
 
 [Service]
 Type=forking
-ExecStart=/opt/dist/scripts/jans-fido2 start
-ExecStop=/opt/dist/scripts/jans-fido2 stop
+ExecStart=%(jans_scripts_dir)s/jans-fido2 start
+ExecStop=%(jans_scripts_dir)s/jans-fido2 stop
 User=jetty
 Group=jetty
 
