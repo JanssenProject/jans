@@ -9,23 +9,156 @@ use super::{
     entity_types::{
         CedarSchemaEntityAttribute, CedarSchemaEntityType, PrimitiveType, PrimitiveTypeKind,
     },
-    CedarSchemaRecord,
+    CedarSchemaJson, CedarSchemaRecord, CedarType, GetCedarTypeError, SchemaDefinedType,
 };
 use serde::{de, ser::SerializeMap, Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
 
-pub type EntityRef = String;
+type EntityRef = String;
+type AttrName = String;
+
+pub struct Action {
+    pub entities: HashSet<String>,
+}
+
+impl CedarSchemaJson {
+    /// Find the action in the schema
+    pub fn find_action(
+        &self,
+        action_name: &str,
+        namespace: &str,
+    ) -> Result<Option<Action>, FindActionError> {
+        let schema_entities = match self.namespace.get(namespace) {
+            Some(entities) => entities,
+            None => return Ok(None),
+        };
+        let action_schema = match schema_entities.actions.get(action_name) {
+            Some(schema) => schema,
+            None => return Ok(None),
+        };
+
+        let mut entities = HashSet::new();
+
+        for res_type in action_schema.principal_types.iter().map(|s| s.as_str()) {
+            self.collect_entities(res_type, namespace, &mut entities)?;
+        }
+        for res_type in action_schema.resource_types.iter().map(|s| s.as_str()) {
+            self.collect_entities(res_type, namespace, &mut entities)?;
+        }
+        if let Some(ctx) = &action_schema.context {
+            self.process_action_context(ctx, namespace, &mut entities)?;
+        }
+
+        Ok(Some(Action { entities }))
+    }
+
+    /// Collect all entities recursively for a given type
+    fn collect_entities(
+        &self,
+        type_name: &str,
+        namespace: &str,
+        entities: &mut HashSet<String>,
+    ) -> Result<(), FindActionError> {
+        if let Some(defined_type) = self.find_type(type_name, namespace) {
+            match defined_type {
+                SchemaDefinedType::Entity(shape) => {
+                    if !entities.contains(type_name) {
+                        entities.insert(type_name.to_string());
+                    }
+                    if let Some(shape) = &shape.shape {
+                        for attr in shape.attributes.values() {
+                            self.process_attribute(attr, namespace, entities)?;
+                        }
+                    }
+                },
+                SchemaDefinedType::CommonType(record) => {
+                    for attr in record.attributes.values() {
+                        self.process_attribute(attr, namespace, entities)?;
+                    }
+                },
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Process a single attribute and collect its entities recursively
+    fn process_attribute<'a>(
+        &'a self,
+        attr: &CedarSchemaEntityAttribute,
+        namespace: &str,
+        entities: &mut HashSet<String>,
+    ) -> Result<(), FindActionError> {
+        match attr.get_type()? {
+            CedarType::TypeName(type_name) => {
+                self.collect_entities(&type_name, namespace, entities)?;
+            },
+            CedarType::Set(inner_type) => {
+                if let CedarType::TypeName(type_name) = *inner_type {
+                    self.collect_entities(&type_name, namespace, entities)?;
+                }
+            },
+            _ => {}, // Ignore non-entity types
+        }
+
+        Ok(())
+    }
+
+    fn process_action_context(
+        &self,
+        ctx: &RecordOrType,
+        namespace: &str,
+        entities: &mut HashSet<String>,
+    ) -> Result<(), FindActionError> {
+        match ctx {
+            RecordOrType::Record(record) => {
+                for attr in record.attributes.values() {
+                    self.process_attribute(attr, namespace, entities)?;
+                }
+            },
+            RecordOrType::Type(entity_type) => match entity_type {
+                CedarSchemaEntityType::Typed(entity_type) => {
+                    self.collect_entities(&entity_type.kind, namespace, entities)?;
+                },
+                CedarSchemaEntityType::Primitive(primitive_type) => {
+                    if let PrimitiveTypeKind::TypeName(type_name) = &primitive_type.kind {
+                        self.collect_entities(type_name, namespace, entities)?;
+                    }
+                },
+                CedarSchemaEntityType::Set(set_entity_type) => match &set_entity_type.element {
+                    CedarSchemaEntityType::Set(inner) => {
+                        self.process_action_context(
+                            &RecordOrType::Type(CedarSchemaEntityType::Set(inner.clone())),
+                            namespace,
+                            entities,
+                        )?;
+                    },
+                    CedarSchemaEntityType::Typed(entity_type) => {
+                        self.collect_entities(&entity_type.kind, namespace, entities)?;
+                    },
+                    CedarSchemaEntityType::Primitive(primitive_type) => {
+                        if let PrimitiveTypeKind::TypeName(type_name) = &primitive_type.kind {
+                            self.collect_entities(type_name, namespace, entities)?;
+                        }
+                    },
+                },
+            },
+        }
+
+        Ok(())
+    }
+}
 
 /// Represents an action in the Cedar JSON schema
 #[derive(Default, Debug, PartialEq, Clone)]
-pub struct Action {
+pub struct ActionSchema {
     pub resource_types: HashSet<EntityRef>,
     pub principal_types: HashSet<EntityRef>,
     pub context: Option<RecordOrType>,
 }
 
-impl Serialize for Action {
+impl Serialize for ActionSchema {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -43,7 +176,7 @@ impl Serialize for Action {
     }
 }
 
-impl<'de> Deserialize<'de> for Action {
+impl<'de> Deserialize<'de> for ActionSchema {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -78,10 +211,7 @@ impl<'de> Deserialize<'de> for Action {
     }
 }
 
-type AttrName = String;
-
 #[derive(Debug, PartialEq, Clone, Serialize)]
-#[allow(dead_code)]
 pub enum RecordOrType {
     Record(CedarSchemaRecord),
     Type(CedarSchemaEntityType),
@@ -123,9 +253,15 @@ impl<'de> Deserialize<'de> for RecordOrType {
     }
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum FindActionError {
+    #[error("Error while collecting entities from action schema: {0}")]
+    CollectEntities(#[from] GetCedarTypeError),
+}
+
 #[cfg(test)]
 mod test {
-    use super::Action;
+    use super::ActionSchema;
     use crate::common::cedar_schema::cedar_json::{
         action::RecordOrType,
         entity_types::{
@@ -141,7 +277,7 @@ mod test {
     type ActionType = String;
     #[derive(Deserialize, Debug, PartialEq)]
     struct MockJsonSchema {
-        actions: HashMap<ActionType, Action>,
+        actions: HashMap<ActionType, ActionSchema>,
     }
 
     fn build_schema(ctx: Option<Value>) -> Value {
@@ -165,7 +301,7 @@ mod test {
         MockJsonSchema {
             actions: HashMap::from([(
                 "Update".to_string(),
-                Action {
+                ActionSchema {
                     resource_types: HashSet::from(["Issue"].map(|s| s.to_string())),
                     principal_types: HashSet::from(["Workload", "User"].map(|s| s.to_string())),
                     context: ctx,

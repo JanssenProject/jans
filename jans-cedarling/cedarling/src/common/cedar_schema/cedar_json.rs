@@ -11,11 +11,12 @@
 //! `cedar translate-schema --direction cedar-to-json  -s .\cedar.schema`
 //! [cedar json schema grammar](https://docs.cedarpolicy.com/schema/json-schema-grammar.html) - documentation about json structure of cedar schema.
 
-use std::collections::HashMap;
 mod action;
 mod entity_types;
 
-use action::Action;
+use action::ActionSchema;
+use std::collections::HashMap;
+
 pub use entity_types::{CedarSchemaEntityShape, CedarSchemaRecord};
 
 /// Represent `cedar-policy` schema type for external usage.
@@ -85,12 +86,6 @@ impl CedarSchemaJson {
 
         None
     }
-
-    /// Find the action in the schema
-    pub fn find_action(&self, action_name: &str, namespace: &str) -> Option<Action> {
-        let namespace = self.namespace.get(namespace)?;
-        namespace.actions.get(action_name).cloned()
-    }
 }
 
 /// CedarSchemaEntities hold all entities and their shapes in the namespace.
@@ -102,17 +97,14 @@ pub struct CedarSchemaEntities {
     pub entity_types: HashMap<String, CedarSchemaEntityShape>,
     #[serde(rename = "commonTypes", default)]
     pub common_types: HashMap<String, CedarSchemaRecord>,
-    pub actions: HashMap<String, Action>,
+    pub actions: HashMap<String, ActionSchema>,
 }
 
 #[cfg(test)]
 mod tests {
-
-    use std::collections::HashSet;
-
     use super::entity_types::*;
-
     use super::*;
+    use std::collections::HashSet;
     use test_utils::assert_eq;
     use test_utils::SortedJson;
 
@@ -243,7 +235,7 @@ mod tests {
 
         let actions = HashMap::from([(
             "Update".to_string(),
-            Action {
+            ActionSchema {
                 resource_types: HashSet::from(["Issue"].map(|x| x.to_string())),
                 principal_types: HashSet::from(["Access_token", "Role"].map(|x| x.to_string())),
                 context: None,
@@ -309,5 +301,50 @@ mod tests {
         let parse_error =
             serde_json::from_str::<CedarSchemaJson>(json_value).expect_err("should fail to parse");
         assert_eq!(parse_error.to_string(),"could not deserialize CedarSchemaEntityAttribute, field 'is_required': invalid type: integer `1234`, expected a boolean at line 22 column 1")
+    }
+
+    #[test]
+    fn can_parse_action_with_ctx() {
+        let expected = HashSet::from([
+            "Workload".into(),
+            "User".into(),
+            "Issue".into(),
+            "Access_token".into(),
+            "TrustedIssuer".into(),
+        ]);
+
+        // Test case where the context is a record:
+        // action "Update" appliesTo {
+        //  principal: [Workload, User],
+        //  resource: [Issue],
+        //  context: {
+        //      time: Long,
+        //      user: User,
+        //      workload: Workload,
+        //      access_token: Access_token,
+        //  }};
+        let json_value = include_str!("./test_files/test_schema_with_record_ctx.json");
+        let parsed_cedar_schema: CedarSchemaJson =
+            serde_json::from_str(json_value).expect("Should parse JSON schema");
+        let action = parsed_cedar_schema
+            .find_action("Update", "Jans")
+            .expect("Should not error while finding action")
+            .expect("Action should not be none");
+        assert_eq!(action.entities, expected);
+
+        // Test case where the context is a type:
+        // action "Update" appliesTo {
+        //  principal: [Workload, User],
+        //  resource: [Issue],
+        //  context: Context
+        // };
+        let json_value = include_str!("./test_files/test_schema_with_type_ctx.json");
+        let parsed_cedar_schema: CedarSchemaJson =
+            serde_json::from_str(json_value).expect("Should parse JSON schema");
+        let action = parsed_cedar_schema
+            .find_action("Update", "Jans")
+            .expect("Should not error while finding action")
+            .expect("Action should not be none");
+        assert_eq!(action.entities, expected);
     }
 }
