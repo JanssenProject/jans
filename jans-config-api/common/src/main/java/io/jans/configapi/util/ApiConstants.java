@@ -6,6 +6,9 @@
 
 package io.jans.configapi.util;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class ApiConstants {
     
     private ApiConstants() {}
@@ -169,7 +172,14 @@ public class ApiConstants {
     //Pagination
     public static final String DEFAULT_LIST_SIZE = "50";
     public static final String DEFAULT_LIST_START_INDEX = "0";
-    public static final int DEFAULT_MAX_COUNT = 200;  
+    public static final int DEFAULT_MAX_COUNT = 200;
+    public static final List<String> BLOCKED_URLS = Arrays.asList(
+            "localhost",
+            "127.0.",
+            "192.168.",
+            "172."
+    );
+    public static final String URL_PREFIX = "https://";
     public static final String SORT_BY = "sortBy";
     public static final String SORT_ORDER = "sortOrder";
     public static final String ASCENDING = "ascending";

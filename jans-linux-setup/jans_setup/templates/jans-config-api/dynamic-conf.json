@@ -20,6 +20,14 @@
   "loggingLayout": "text",
   "externalLoggerConfiguration": "",
   "maxCount": 200,
+  "blockedUrls": [
+    "http://",
+    "file://",
+    "localhost",
+    "127.0.",
+    "192.168.",
+    "172."
+  ]
   "acrExclusionList": [
     "simple_password_auth"
   ],
