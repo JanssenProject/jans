@@ -8,36 +8,30 @@ package io.jans.fido2.service.verifier;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
-import io.jans.entry.PublicKeyCredentialHints;
-import io.jans.fido2.model.assertion.AssertionErrorResponseType;
+
+import io.jans.fido2.ctap.TokenBindingSupport;
+import io.jans.fido2.exception.Fido2CompromisedDevice;
+import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.assertion.AssertionOptions;
 import io.jans.fido2.model.assertion.AssertionResult;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.attestation.AttestationOptions;
 import io.jans.fido2.model.attestation.AttestationResult;
-import io.jans.fido2.model.attestation.Response;
-import io.jans.fido2.model.conf.RequestedParty;
-import io.jans.fido2.model.error.ErrorResponseFactory;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import io.jans.fido2.ctap.AttestationConveyancePreference;
-import io.jans.fido2.ctap.TokenBindingSupport;
-import io.jans.fido2.exception.Fido2CompromisedDevice;
-import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
-import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.RequestedParty;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
@@ -463,9 +457,15 @@ public class CommonVerifiers {
 
     public TPMT_PUBLIC tpmParseToPublic(byte[] value) {
         return TPMT_PUBLIC.fromTpm(value);
+        
+        
     }
 
     public TPMS_ATTEST tpmParseToAttest(byte[] value) {
         return TPMS_ATTEST.fromTpm(value);
     }
+    
+   
+
+    
 }

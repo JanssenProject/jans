@@ -46,6 +46,8 @@ import org.slf4j.Logger;
 
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -183,9 +185,12 @@ public class AttestationService {
 		entity.setChallenge(challenge);
 		entity.setOrigin(origin);
 		entity.setStatus(Fido2RegistrationStatus.pending);
-		entity.setAuthentictatorAttachment(credentialCreationOptions.getAuthenticatorSelection().getAuthenticatorAttachment().getAttachment());
 		entity.setRpId(origin);
 		
+		if(credentialCreationOptions.getAuthenticatorSelection()!=null && credentialCreationOptions.getAuthenticatorSelection().getAuthenticatorAttachment() != null)
+		{
+			entity.setAuthentictatorAttachment(credentialCreationOptions.getAuthenticatorSelection().getAuthenticatorAttachment().getAttachment());
+		}
 
 		// Store original requests
 		entity.setAttestationRequest(CommonUtilService.toJsonNode(attestationOptions).toString());
@@ -252,6 +257,23 @@ public class AttestationService {
 		registrationData.setPublicKeyId(keyId);
 		registrationData.setType(PublicKeyCredentialType.PUBLIC_KEY.getKeyName());
 		registrationData.setAttestationType(attestationData.getAttestationType());
+		
+		
+		// ----- testing
+		HashSet<String> tempTransports = new HashSet<String>(
+				Arrays.asList(attestationResult.getResponse().getTransports()));
+		// in somecases only USB is shows up in transport
+		if (tempTransports.contains(Transports.USB.getValue()) || tempTransports.contains(Transports.NFC.getValue())
+				|| tempTransports.contains(Transports.BLE.getValue())) {
+			tempTransports.add(Transports.USB.getValue());
+			tempTransports.add(Transports.NFC.getValue());
+			tempTransports.add(Transports.BLE.getValue());
+		}
+
+		String[] transports = (String[]) tempTransports.toArray(new String[tempTransports.size()]);
+
+		registrationData.setTransports(transports);
+		// --------- testing
 
 		// all flags being set
 		registrationData.setBackupEligibilityFlag(attestationData.getBackupEligibilityFlag());
@@ -261,6 +283,27 @@ public class AttestationService {
 		registrationData.setUserVerifiedFlag(attestationData.isUserVerifiedFlag());
 
 		registrationData.setStatus(Fido2RegistrationStatus.registered);
+		
+		if(attestationResult.getAuthentictatorAttachment() == null)
+		{
+			
+			log.debug("Transports : "+ attestationResult.getResponse().getTransports().toString());
+			// look inside transports
+			
+			if(tempTransports.contains(Transports.INTERNAL.getValue()))
+			{
+				registrationData.setAuthentictatorAttachment( AuthenticatorAttachment.PLATFORM.getAttachment());
+			}
+			else
+			{
+				registrationData.setAuthentictatorAttachment(AuthenticatorAttachment.CROSS_PLATFORM.getAttachment());
+			}
+			
+		}
+		else
+		{
+			registrationData.setAuthentictatorAttachment(attestationResult.getAuthentictatorAttachment());
+		}
 
 		// Store original response
 		registrationData.setAttestationResponse(CommonUtilService.toJsonNode(attestationResult).toString());
@@ -268,19 +311,6 @@ public class AttestationService {
 		// Set actual counter value. Note: Fido2 not update initial value in
 		// Fido2RegistrationData to minimize DB updates
 		registrationData.setCounter(registrationEntry.getCounter());
-
-	/*	String deviceDataFromReq = attestationResult.getResponse().getDeviceData();
-		if (!Strings.isNullOrEmpty(deviceDataFromReq)) {
-            try {
-				Fido2DeviceData deviceData = dataMapperService.readValue(
-						new String(base64Service.urlDecode(deviceDataFromReq), StandardCharsets.UTF_8),
-						Fido2DeviceData.class);
-                registrationEntry.setDeviceData(deviceData);
-            } catch (Exception ex) {
-                throw errorResponseFactory.invalidRequest(String.format("Device data is invalid: %s", deviceDataFromReq), ex);
-            }
-        }*/
-
         registrationEntry.setPublicKeyId(registrationData.getPublicKeyId());
 
         int publicKeyIdHash = registrationPersistenceService.getPublicKeyIdHash(registrationData.getPublicKeyId());
@@ -304,13 +334,13 @@ public class AttestationService {
         }
 
 
-		PublicKeyCredentialDescriptor credentialDescriptor = new PublicKeyCredentialDescriptor(
+		PublicKeyCredentialDescriptor credentialDescriptor = new PublicKeyCredentialDescriptor("public-key",registrationData.getTransports(),
 				registrationData.getPublicKeyId());
 		
 		// Create result object
         AttestationOrAssertionResponse attestationResultResponse = new AttestationOrAssertionResponse(
 				credentialDescriptor, "ok", "", registrationData.getUsername(),
-				registrationData.getAuthentictatorAttachment().toString(), String.valueOf(registrationData.isUserPresentFlag()), true,
+				registrationData.getAuthentictatorAttachment().toString() , String.valueOf(registrationData.isUserPresentFlag()), true,
 				registrationData.getBackupStateFlag(), registrationData.getBackupEligibilityFlag(),
 				registrationData.getType().toString(), true, "level", "aaguid", "authenticatorName", registrationData.getOrigin(),
 				"hint", registrationData.getChallenge(), registrationData.getRpId(), null, Long.valueOf(9000), null);
@@ -327,24 +357,39 @@ public class AttestationService {
 
 		// set hints - client-device, security key, hybrid
 		List<String> hints = appConfiguration.getFido2Configuration().getHints();
-		
+		log.debug("hints"+hints+":"+hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE.getValue()) );
 		//TODO: crosscheck this set hints, do we need to set this here?, i guess yes, cross check before discounting this
 		credentialCreationOptions.setHints(new HashSet<String>(hints));
 		
 		credentialCreationOptions.setAuthenticatorSelection(new AuthenticatorSelection());
+		
+		
 		// only platform
-		if (hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE) && hints.size() == 1) {
+		if (hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE.getValue()) && hints.size() == 1) {
+			
+
+			log.debug("platform ");
 			credentialCreationOptions.getAuthenticatorSelection()
 					.setAuthenticatorAttachment(AuthenticatorAttachment.PLATFORM);
 			credentialCreationOptions.getAuthenticatorSelection().setUserVerification(UserVerification.preferred);
 			credentialCreationOptions.getAuthenticatorSelection().setRequireResidentKey(true);
 			credentialCreationOptions.getAuthenticatorSelection().setResidentKey(UserVerification.preferred);
 
-		} else {
+		} 
+		// only cross platform
+		else if (hints.size() > 0 && (hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE.getValue()) == false))
+		{
+			log.debug("cross platform ");
 			credentialCreationOptions.getAuthenticatorSelection()
 					.setAuthenticatorAttachment(AuthenticatorAttachment.CROSS_PLATFORM);
 			credentialCreationOptions.getAuthenticatorSelection().setUserVerification(UserVerification.required);
 			credentialCreationOptions.getAuthenticatorSelection().setRequireResidentKey(false);
+		}
+		else
+		{
+			// both platform and cross platform are a possiblity
+			log.debug("both platform and cross platform are a possiblity");
+			
 		}
 		log.debug("Put authenticatorSelection {}", credentialCreationOptions.getAuthenticatorSelection());
 	}
@@ -352,6 +397,7 @@ public class AttestationService {
 	private void prepareAttestation(PublicKeyCredentialCreationOptions credentialCreationOptions) {
 		
 		List<String> hints = appConfiguration.getFido2Configuration().getHints();
+		
 		// set attestation - enterprise, none, direct
 				boolean enterpriseAttestation = appConfiguration.getFido2Configuration().isEnterpriseAttestation();
 				if (enterpriseAttestation)
@@ -475,7 +521,7 @@ public class AttestationService {
 				.findByRpRegisteredUserDevices(username, origin);
 		Set<PublicKeyCredentialDescriptor> excludedKeys = existingRegistrations.parallelStream()
 				.filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId()))
-				.map(f -> new PublicKeyCredentialDescriptor(
+				.map(f -> new PublicKeyCredentialDescriptor("public-key",
 						new String[] { Transports.USB.getValue(),Transports.BLE.getValue() ,Transports.NFC.getValue() ,Transports.INTERNAL.getValue(), Transports.HYBRID.getValue() },
 						f.getRegistrationData().getPublicKeyId()))
 				.collect(Collectors.toSet());

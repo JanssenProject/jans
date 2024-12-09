@@ -15,7 +15,7 @@ import java.util.UUID;
 import io.jans.fido2.model.assertion.AssertionErrorResponseType;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.error.ErrorResponseFactory;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import io.jans.as.common.model.common.User;
@@ -81,15 +81,20 @@ public class AuthenticationPersistenceService {
 		String userInum = null;
     	
         User user = userService.getUser(userName, "inum");
+        // user == null could imply conditional UI as well
+        log.debug("User is null");
         if (user == null) {
             if (appConfiguration.getFido2Configuration().isDebugUserAutoEnrollment()) {
                 user = userService.addDefaultUser(userName);
             } else {
-                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.USER_AUTO_ENROLLMENT_IS_DISABLED, "Auto user enrollment was disabled. User not exists!");
+                log.debug("Building fido authentication entry");
+            	//throw errorResponseFactory.badRequestException(AttestationErrorResponseType.USER_AUTO_ENROLLMENT_IS_DISABLED, "Auto user enrollment was disabled. User not exists!");
             }
         }
-        userInum = userService.getUserInum(user);
-	
+        else
+        {
+        	userInum = userService.getUserInum(user);
+        }
 
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
         final String id = UUID.randomUUID().toString();

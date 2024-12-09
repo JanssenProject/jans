@@ -6,6 +6,7 @@
 
 package io.jans.fido2.model.common;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.base.Strings;
@@ -26,18 +27,6 @@ public class PublicKeyCredentialDescriptor {
     private String[] transports;
     // rawId
     private String id;
-
-    public PublicKeyCredentialDescriptor(String id) {
-        this.type = PublicKeyCredentialType.PUBLIC_KEY.getKeyName();
-        this.id = id;
-    }
-
-    public PublicKeyCredentialDescriptor(String[] transports, String id) {
-        this.type = PublicKeyCredentialType.PUBLIC_KEY.getKeyName();
-        this.transports = transports;
-        this.id = id;
-    }
-
     public String getType() {
         return type;
     }
@@ -50,7 +39,30 @@ public class PublicKeyCredentialDescriptor {
         return id;
     }
 
-    @Override
+    public void setType(String type) {
+		this.type = type;
+	}
+
+	public void setTransports(String[] transports) {
+		this.transports = transports;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public PublicKeyCredentialDescriptor(String type, String[] transports, String id) {
+		super();
+		this.type = type;
+		this.transports = transports;
+		this.id = id;
+	}
+
+	public PublicKeyCredentialDescriptor() {
+		super();
+	}
+
+	@Override
     public String toString() {
         return "PublicKeyCredentialDescriptor{" +
                 "type='" + type + '\'' +
