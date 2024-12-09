@@ -416,7 +416,7 @@ jobs:
       - name: install pkg-config
         run: |
           sudo apt-get update
-          sudo apt install -y pkg-config
+          sudo apt install -y pkg-config libssl-dev
       - name: Build Wheels - musllinux
         uses: PyO3/maturin-action@v1
         with:
