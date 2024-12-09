@@ -96,14 +96,14 @@ jobs:
           sudo pip3 install -r ./automation/requirements.txt
           sudo apt-get update
 
-      - uses: actions/delete-package-versions@v5
-        continue-on-error: true
-        with:
-          package-name: jans/${{ matrix.docker-images }}
-          package-type: container
-          min-versions-to-keep: 1000
-          token:  ${{ secrets.GITHUB_TOKEN }}
-          delete-only-untagged-versions: true
+      #- uses: actions/delete-package-versions@v5
+      #  continue-on-error: true
+      #  with:
+      #    package-name: jans/${{ matrix.docker-images }}
+      #    package-type: container
+      #    min-versions-to-keep: 1000
+      #    token:  ${{ secrets.GITHUB_TOKEN }}
+      #    delete-only-untagged-versions: true
 
       - name: Prepare
         if: steps.build_docker_image.outputs.build || github.event_name == 'tags'
