@@ -25,7 +25,7 @@ use std::io::Cursor;
 
 mod authorize_result;
 
-mod entities;
+pub(crate) mod entities;
 pub(crate) mod request;
 mod token_data;
 

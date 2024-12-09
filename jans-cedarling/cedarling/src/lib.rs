@@ -42,6 +42,8 @@ use log::LogEntry;
 pub use log::LogStorage;
 use log::LogType;
 
+pub use crate::authz::entities::CedarPolicyCreateTypeError;
+
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
 
