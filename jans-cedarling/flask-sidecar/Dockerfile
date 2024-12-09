@@ -35,6 +35,7 @@ ENV JANS_SOURCE_VERSION=46f9a51ee4b71d94f7e8c4d7e99d959c35510a89
 
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
+COPY ./secrets/bootstrap.json /api/
 
 # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 web
@@ -67,7 +68,7 @@ RUN poetry add /api/cedarling_python-$(cat /api/cedarling_version)-cp311-cp311-m
 
 ENV FLASK_APP=main.core:app \
     GUNICORN_LOG_LEVEL=${GUNICORN_LOG_LEVEL:-debug} \
-    CEDARLING_BOOTSTRAP_CONFIG_FILE=${CEDARLING_BOOTSTRAP_CONFIG_FILE}
+    CEDARLING_BOOTSTRAP_CONFIG_FILE=${CEDARLING_BOOTSTRAP_CONFIG_FILE:-/api/bootstrap.json}
 
 EXPOSE 5000
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cedarling-flask-sidecar" \
