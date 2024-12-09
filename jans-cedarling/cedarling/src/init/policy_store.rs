@@ -6,8 +6,7 @@
  */
 
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
-use crate::common::policy_store::AgamaPolicyStore;
-use crate::common::policy_store::PolicyStore;
+use crate::common::policy_store::{AgamaPolicyStore, PolicyStoreWithID};
 use crate::http::{HttpClient, HttpClientError};
 use std::path::Path;
 use std::time::Duration;
@@ -33,20 +32,26 @@ pub enum PolicyStoreLoadError {
 // extract the first 'policy_stores' entry.
 fn extract_first_policy_store(
     agama_policy_store: &AgamaPolicyStore,
-) -> Result<PolicyStore, PolicyStoreLoadError> {
+) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     if agama_policy_store.policy_stores.len() != 1 {
         return Err(PolicyStoreLoadError::InvalidStore(format!(
             "expected exactly one 'policy_stores' entry, but found {:?}",
             agama_policy_store.policy_stores.len()
         )));
     }
+
     // extract exactly the first policy store in the struct
-    let mut policy_stores = agama_policy_store
+    let policy_store_option = agama_policy_store
         .policy_stores
-        .values()
+        .iter()
         .take(1)
-        .collect::<Vec<_>>();
-    match policy_stores.pop() {
+        .map(|(k, v)| PolicyStoreWithID {
+            id: k.to_owned(),
+            store: v.to_owned(),
+        })
+        .next();
+
+    match policy_store_option {
         Some(policy_store) => Ok(policy_store.clone()),
         None => Err(PolicyStoreLoadError::InvalidStore(
             "error retrieving first policy_stores element".into(),
@@ -59,7 +64,7 @@ fn extract_first_policy_store(
 /// This function supports multiple sources for loading policies.
 pub(crate) fn load_policy_store(
     config: &PolicyStoreConfig,
-) -> Result<PolicyStore, PolicyStoreLoadError> {
+) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     let policy_store = match &config.source {
         PolicyStoreSource::Json(policy_json) => {
             let agama_policy_store = serde_json::from_str::<AgamaPolicyStore>(policy_json)
@@ -94,7 +99,9 @@ pub(crate) fn load_policy_store(
 /// Loads the policy store from the Lock Master.
 ///
 /// The URI is from the `CEDARLING_POLICY_STORE_URI` bootstrap property.
-fn load_policy_store_from_lock_master(uri: &str) -> Result<PolicyStore, PolicyStoreLoadError> {
+fn load_policy_store_from_lock_master(
+    uri: &str,
+) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     let client = HttpClient::new(3, Duration::from_secs(3))?;
     let agama_policy_store = client.get(uri)?.json::<AgamaPolicyStore>()?;
     extract_first_policy_store(&agama_policy_store)

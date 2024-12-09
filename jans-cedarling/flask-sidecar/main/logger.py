@@ -38,6 +38,6 @@ class JsonLogFormatter(jsonlogger.JsonFormatter):  # pragma: no cover
             log_record["timestamp"] = now
 
         if "application" not in log_record:
-            log_record["application"] = "Scan Protected APIs"
+            log_record["application"] = "Flask Sidecar"
 
         jsonlogger.merge_record_extra(record, log_record, reserved=self._skip_fields)
