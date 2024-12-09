@@ -16,21 +16,16 @@ use super::utils::*;
 use crate::Cedarling;
 use crate::{cmp_decision, cmp_policy};
 use cedarling_util::get_raw_config;
+use std::sync::LazyLock;
 use test_utils::assert_eq;
 
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../../test_files/policy-store_entity_mapping.yaml");
 
-/// we not specify any mapping to check if it works correctly with default mapping
-#[test]
-fn test_default_mapping() {
-    let raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
-    let config = crate::BootstrapConfig::from_raw_config(&raw_config)
-        .expect("raw config should parse without errors");
-    let cedarling = Cedarling::new(config).expect("could be created without error");
-
+/// static [`Request`] value that will be used in tests
+static REQUEST: LazyLock<Request> = LazyLock::new(|| {
     // deserialize `Request` from json
-    let request = Request::deserialize(serde_json::json!(
+    Request::deserialize(serde_json::json!(
         {
             "access_token": generate_token_using_claims(json!({
                     "org_id": "some_long_id",
@@ -63,7 +58,18 @@ fn test_default_mapping() {
             "context": {},
         }
     ))
-    .expect("Request should be deserialized from json");
+    .expect("Request should be deserialized from json")
+});
+
+/// we not specify any mapping to check if it works correctly with default mapping
+#[test]
+fn test_default_mapping() {
+    let raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
+    let config = crate::BootstrapConfig::from_raw_config(&raw_config)
+        .expect("raw config should parse without errors");
+    let cedarling = Cedarling::new(config).expect("could be created without error");
+
+    let request = REQUEST.clone();
 
     let result = cedarling
         .authorize(request)
@@ -116,41 +122,7 @@ fn test_custom_mapping() {
         .expect("raw config should parse without errors");
     let cedarling = Cedarling::new(config).expect("could be created without error");
 
-    // deserialize `Request` from json
-    let request = Request::deserialize(serde_json::json!(
-        {
-            "access_token": generate_token_using_claims(json!({
-                    "org_id": "some_long_id",
-                    "jti": "some_jti",
-                    "client_id": "some_client_id",
-                    "iss": "some_iss",
-                    "aud": "some_aud",
-                })),
-            "id_token": generate_token_using_claims(json!({
-                    "jti": "some_jti",
-                    "iss": "some_iss",
-                    "aud": "some_aud",
-                    "sub": "some_sub",
-                })),
-            "userinfo_token":  generate_token_using_claims(json!({
-                    "jti": "some_jti",
-                    "country": "US",
-                    "sub": "some_sub",
-                    "iss": "some_iss",
-                    "client_id": "some_client_id",
-                    "role": "Admin",
-                })),
-            "action": "Jans::Action::\"UpdateMappedWorkloadAndUser\"",
-            "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
-                "org_id": "some_long_id",
-                "country": "US"
-            },
-            "context": {},
-        }
-    ))
-    .expect("Request should be deserialized from json");
+    let request = REQUEST.clone();
 
     let result = cedarling
         .authorize(request)
