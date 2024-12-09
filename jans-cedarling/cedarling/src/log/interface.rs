@@ -9,12 +9,22 @@
 //! Contains the interface for logging. And getting log information from storage.
 
 use super::LogEntry;
+use uuid7::Uuid;
 
 /// Log Writer
 /// interface for logging events
 pub(crate) trait LogWriter {
+    /// log any serializable entry that not suitable for [`LogEntry`]
+    fn log_any<T: Loggable>(&self, entry: T);
+
     /// log logging entry
-    fn log(&self, entry: LogEntry);
+    fn log(&self, entry: LogEntry) {
+        self.log_any(entry);
+    }
+}
+
+pub(crate) trait Loggable: serde::Serialize {
+    fn get_request_id(&self) -> Uuid;
 }
 
 /// Log Storage
@@ -29,6 +39,3 @@ pub trait LogStorage {
     /// returns a list of all log ids
     fn get_log_ids(&self) -> Vec<String>;
 }
-
-/// Super trait for logger
-pub trait Log: LogWriter + LogStorage + Send + Sync {}
