@@ -107,6 +107,13 @@ create_exception!(
     "Error encountered while collecting all entities"
 );
 
+create_exception!(
+    authorize_errors,
+    EntitiesToJsonError,
+    AuthorizeError,
+    "Error encountered while parsing all entities to json for logging"
+);
+
 #[pyclass]
 #[derive()]
 pub struct ErrorPayload(CedarlingAuthorizeError);
@@ -156,7 +163,8 @@ errors_functions! {
     CreateContext => CreateContextError,
     CreateRequestWorkloadEntity => CreateRequestWorkloadEntityError,
     CreateRequestUserEntity => CreateRequestUserEntityError,
-    Entities => EntitiesError
+    Entities => EntitiesError,
+    EntitiesToJson => EntitiesToJsonError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {
