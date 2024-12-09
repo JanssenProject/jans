@@ -19,6 +19,7 @@ from sqlalchemy.exc import DatabaseError
 from sqlalchemy.sql import select
 
 from jans.pycloudlib.lock.base_lock import BaseLock
+from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.utils import get_password_from_file
 
 if _t.TYPE_CHECKING:  # pragma: no cover
@@ -31,68 +32,21 @@ logger = logging.getLogger(__name__)
 
 
 class SqlLock(BaseLock):
-    def __init__(self) -> None:
-        self._metadata: _t.Optional[MetaData] = None
-        self._dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-
-    @cached_property
-    def engine(self) -> Engine:
-        """Lazy init of engine instance object."""
-        return create_engine(self.engine_url, pool_pre_ping=True, hide_parameters=True)
-
-    @property
-    def engine_url(self) -> str:
-        """Engine connection URL."""
-        host = os.environ.get("CN_SQL_DB_HOST", "localhost")
-
-        port = os.environ.get("CN_SQL_DB_PORT", 3306)
-
-        database = os.environ.get("CN_SQL_DB_NAME", "jans")
-
-        user = os.environ.get("CN_SQL_DB_USER", "jans")
-
-        password_file = os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
-
-        password = get_password_from_file(password_file)
-
-        if self._dialect in ("pgsql", "postgresql"):
-            connector = "postgresql+psycopg2"
-        else:
-            connector = "mysql+pymysql"
-        return f"{connector}://{user}:{password}@{host}:{port}/{database}"
-
-    @property
-    def metadata(self) -> MetaData:
-        """Lazy init of metadata."""
-        if not self._metadata:
-            with warnings.catch_warnings():
-                # postgresql driver will show warnings about unsupported reflection
-                # on expression-based index, i.e. `lower(uid::text)`; but we don't
-                # want to clutter the logs with these warnings, hence we suppress the
-                # warnings
-                warnings.filterwarnings(
-                    "ignore",
-                    message="Skipped unsupported reflection of expression-based index",
-                    category=SAWarning,
-                )
-
-                # do reflection on database table
-                self._metadata = MetaData(bind=self.engine)
-                self._metadata.reflect()
-        return self._metadata
+    def __init__(self, manager) -> None:
+        self.client = SqlClient(manager)
 
     def _prepare_table(self, table_name) -> None:
         try:
             # prepare table
             Table(
                 table_name,
-                self.metadata,
+                self.client.metadata,
                 Column("doc_id", String(128), primary_key=True),
                 # handle type compatibility with current Janssen by using TEXT instead of JSON/JSONB
                 Column("jansData", Text(), default="{}"),
                 extend_existing=True,
             )
-            self.metadata.create_all(self.engine)
+            self.client.metadata.create_all(self.client.engine)
 
         except DatabaseError as exc:
             raise_on_error = False
@@ -111,10 +65,10 @@ class SqlLock(BaseLock):
         """Get table object."""
         table_name = "jansOciLock"
 
-        _table = self.metadata.tables.get(table_name)
+        _table = self.client.metadata.tables.get(table_name)
         if _table is None:
             self._prepare_table(table_name)
-            _table = self.metadata.tables.get(table_name)
+            _table = self.client.metadata.tables.get(table_name)
 
         # underlying table object
         return _table  # noqa: R504
@@ -130,7 +84,7 @@ class SqlLock(BaseLock):
         """
         stmt = select([self.table]).where(self.table.c.doc_id == key).limit(1)
 
-        with self.engine.connect() as conn:
+        with self.client.engine.connect() as conn:
             result = conn.execute(stmt)
             entry = result.fetchone()
 
@@ -156,7 +110,7 @@ class SqlLock(BaseLock):
             jansData=json.dumps({"owner": owner, "ttl": ttl, "updated_at": updated_at}),
         )
 
-        with self.engine.connect() as conn:
+        with self.client.engine.connect() as conn:
             try:
                 result = conn.execute(stmt)
                 created = bool(result.inserted_primary_key)
@@ -180,7 +134,7 @@ class SqlLock(BaseLock):
             jansData=json.dumps({"owner": owner, "ttl": ttl, "updated_at": updated_at}),
         )
 
-        with self.engine.connect() as conn:
+        with self.client.engine.connect() as conn:
             result = conn.execute(stmt)
             return bool(result.rowcount)
 
@@ -195,7 +149,7 @@ class SqlLock(BaseLock):
         """
         stmt = self.table.delete().where(self.table.c.doc_id == key)
 
-        with self.engine.connect() as conn:
+        with self.client.engine.connect() as conn:
             result = conn.execute(stmt)
             return bool(result.rowcount)
 
@@ -205,6 +159,6 @@ class SqlLock(BaseLock):
         Returns:
             A boolean to indicate connection is established.
         """
-        with self.engine.connect() as conn:
+        with self.client.engine.connect() as conn:
             result = conn.execute("SELECT 1 AS is_alive")
             return bool(result.fetchone()[0] > 0)

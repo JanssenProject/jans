@@ -2,10 +2,12 @@
 
 import logging
 import os
+import socket
 import typing as _t
 from abc import ABC
 from abc import abstractproperty
 from functools import cached_property
+from types import SimpleNamespace
 
 from jans.pycloudlib.config import ConsulConfig
 from jans.pycloudlib.config import KubernetesConfig
@@ -19,7 +21,7 @@ from jans.pycloudlib.secret import AwsSecret
 from jans.pycloudlib.secret import FileSecret
 from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.utils import encode_text
-from jans.pycloudlib.lock import LockManager
+from jans.pycloudlib.lock import LockRecord
 
 logger = logging.getLogger(__name__)
 
@@ -374,7 +376,6 @@ class Manager:
     def __init__(self):
         self.config = ConfigManager()
         self.secret = SecretManager()
-        self.lock = LockManager()
 
     def _bootstrap_assets(self, adapter):
         assets = self._bootstrap_asset_mappings.get(adapter) or []
@@ -394,6 +395,46 @@ class Manager:
     def bootstrap(self):
         for adapter_name in [self.config.remote_adapter_name, self.secret.remote_adapter_name]:
             self._bootstrap_assets(adapter_name)
+
+    def create_lock(
+        self,
+        name: str,
+        owner: str = "",
+        ttl: int = 10,
+        retry_delay: float = 5.0,
+        max_start_delay: float = 0.0,
+    ):
+        """Create lock object.
+
+        Args:
+            name: Name of the lock.
+            owner: Owner of the lock.
+            ttl: Duration of lock (in seconds).
+            retry_delay: Delay before retrying to acquire lock (in seconds).
+            max_start_delay: Max. delay before starting to acquire lock.
+
+        Returns:
+            Instance of `jans.pycloudlib.lock.Lock`.
+        """
+        # default to hostname as owner
+        owner = owner or socket.gethostname()
+        lock = LockRecord(name, owner, ttl, retry_delay, max_start_delay)
+        lock.init_adapter(self)
+
+        # pre-flight connection checking
+        lock.check_adapter_connection()
+        return lock
+
+    @property
+    def lock(self):  # pragma: no cover
+        # backward-compat for .lock attribute
+        ns = SimpleNamespace()
+        ns.create_lock = self.create_lock
+        logger.warning(
+            f"Accessing {self.__class__.__name__}.lock.create_lock is deprecated; "
+            f"use {self.__class__.__name__}.create_lock instead"
+        )
+        return ns
 
 
 def get_manager() -> Manager:  # noqa: D412
