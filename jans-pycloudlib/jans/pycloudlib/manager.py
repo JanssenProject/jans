@@ -414,10 +414,11 @@ class Manager:
             max_start_delay: Max. delay before starting to acquire lock.
 
         Returns:
-            Instance of `jans.pycloudlib.lock.Lock`.
+            Instance of `jans.pycloudlib.lock.LockRecord`.
         """
         # default to hostname as owner
         owner = owner or socket.gethostname()
+
         lock = LockRecord(name, owner, ttl, retry_delay, max_start_delay)
         lock.init_adapter(self)
 
@@ -430,10 +431,7 @@ class Manager:
         # backward-compat for .lock attribute
         ns = SimpleNamespace()
         ns.create_lock = self.create_lock
-        logger.warning(
-            f"Accessing {self.__class__.__name__}.lock.create_lock is deprecated; "
-            f"use {self.__class__.__name__}.create_lock instead"
-        )
+        logger.warning(f"Accessing {self.__class__.__name__}.lock attribute is deprecated")
         return ns
 
 

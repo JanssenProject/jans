@@ -2,31 +2,18 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import typing as _t
-import warnings
-from functools import cached_property
 
-from sqlalchemy import create_engine
-from sqlalchemy import MetaData
 from sqlalchemy import Table
 from sqlalchemy import Column
 from sqlalchemy import String
 from sqlalchemy import Text
-from sqlalchemy.exc import SAWarning
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.sql import select
 
 from jans.pycloudlib.lock.base_lock import BaseLock
 from jans.pycloudlib.persistence.sql import SqlClient
-from jans.pycloudlib.utils import get_password_from_file
-
-if _t.TYPE_CHECKING:  # pragma: no cover
-    # imported objects for function type hint, completion, etc.
-    # these won't be executed in runtime
-    from sqlalchemy.engine import Engine
-
 
 logger = logging.getLogger(__name__)
 
@@ -159,6 +146,4 @@ class SqlLock(BaseLock):
         Returns:
             A boolean to indicate connection is established.
         """
-        with self.client.engine.connect() as conn:
-            result = conn.execute("SELECT 1 AS is_alive")
-            return bool(result.fetchone()[0] > 0)
+        return self.client.connected()
