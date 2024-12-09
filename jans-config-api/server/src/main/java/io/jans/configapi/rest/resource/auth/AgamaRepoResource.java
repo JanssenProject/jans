@@ -8,14 +8,12 @@ package io.jans.configapi.rest.resource.auth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.service.auth.AgamaRepoService;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.orm.model.PagedResult;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -44,9 +42,6 @@ import org.slf4j.Logger;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class AgamaRepoResource extends ConfigBaseResource {
-
-    private class AgamaRepoPagedResult extends PagedResult<JsonNode> {
-    };
 
     @Inject
     Logger log;

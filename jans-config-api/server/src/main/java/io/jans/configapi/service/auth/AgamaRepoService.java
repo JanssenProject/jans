@@ -17,12 +17,12 @@ public class AgamaRepoService {
     @Inject
     private StatusCheckerTimer statusCheckerTimer;
 
-    public JsonNode getAllAgamaRepositories() throws Exception {
-        return statusCheckerTimer.getAllAgamaRepositories();
-    }
-    
-    public JsonNode getAgamaProjectLatestRepository(String repositoryName)  {
+    public JsonNode getAllAgamaRepositories() {
         return statusCheckerTimer.getAllAgamaRepositories();
     }
 
+    public JsonNode getAgamaProjectLatestRepository(String repositoryName) {
+        return statusCheckerTimer.getAllAgamaRepositories();
+    }
+    
 }
