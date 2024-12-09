@@ -413,16 +413,8 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
       - uses: actions/setup-python@v5
-      - name: Build Wheels - manylinux
-        uses: PyO3/maturin-action@v1
-        with:
-          target: ${{ matrix.platform.target }}
-          manylinux: auto
-          container: off
-          args: --release -o dist
-      - uses: actions/setup-python@v5
       - name: Build Wheels - musllinux
-        uses: PyO3/maturin-action@main
+        uses: PyO3/maturin-action@v1
         with:
           working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_python
           target: ${{ matrix.platform.target }}
