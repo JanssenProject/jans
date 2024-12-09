@@ -1,7 +1,30 @@
 package io.jans.ca.plugin.adminui.service.webhook;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.validation.Valid;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.python.google.common.collect.Sets;
+import org.slf4j.Logger;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
@@ -21,16 +44,6 @@ import io.jans.orm.search.filter.Filter;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
-import org.python.google.common.collect.Sets;
-import org.slf4j.Logger;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
-import javax.validation.Valid;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Singleton
 public class WebhookService {
@@ -336,6 +349,19 @@ public class WebhookService {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_CONTENT_TYPE_REQUIRED.getDescription());
             }
         }
+        for (String blockedUrl : getBlockedUrls()) {
+            String url = webhookEntry.getUrl().toLowerCase();
+            String regex = "^(?:[a-z]+://)?" + blockedUrl.replace(".", "\\.") + ".*";
+            Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+            if (pattern.matcher(url).matches()) {
+                log.error(ErrorResponse.WEBHOOK_URL_BLOCKED.getDescription());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_URL_BLOCKED.getDescription());
+            }
+        }
+        if (!webhookEntry.getUrl().startsWith(ApiConstants.URL_PREFIX)) {
+            log.error(ErrorResponse.WEBHOOK_URL_PREFIX.getDescription());
+            throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_URL_PREFIX.getDescription());
+        }
     }
 
     /**
@@ -403,5 +429,15 @@ public class WebhookService {
         return (configurationFactory.getApiAppConfiguration().getMaxCount() > 0
                 ? configurationFactory.getApiAppConfiguration().getMaxCount()
                 : ApiConstants.DEFAULT_MAX_COUNT);
+    }
+
+    public List<String> getBlockedUrls() {
+        log.trace("Blocked URLs details - Configured BlockedProtocols:{}, Default BlockedProtocols:{}",
+                configurationFactory.getApiAppConfiguration().getBlockedUrls(), ApiConstants.BLOCKED_URLS);
+
+        return configurationFactory.getApiAppConfiguration().getBlockedUrls() != null &&
+                !configurationFactory.getApiAppConfiguration().getBlockedUrls().isEmpty()
+                ? configurationFactory.getApiAppConfiguration().getBlockedUrls()
+                : ApiConstants.BLOCKED_URLS;
     }
 }

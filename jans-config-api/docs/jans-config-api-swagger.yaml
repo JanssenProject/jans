@@ -11029,6 +11029,12 @@ components:
           type: integer
           description: Maximum number of results per page in search endpoints.
           format: int32
+        blockedUrls:
+          type: array
+          description: List of URLs that are blocked.
+          items:
+            type: string
+            description: Each blocked URL.
         acrExclusionList:
           type: array
           description: List of ACR values that should be excluded from active validation
