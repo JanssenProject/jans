@@ -20,9 +20,5 @@ public class AgamaRepoService {
     public JsonNode getAllAgamaRepositories() {
         return statusCheckerTimer.getAllAgamaRepositories();
     }
-
-    public JsonNode getAgamaProjectLatestRepository(String repositoryName) {
-        return statusCheckerTimer.getAllAgamaRepositories();
-    }
     
 }

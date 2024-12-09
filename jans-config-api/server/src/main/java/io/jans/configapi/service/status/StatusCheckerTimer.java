@@ -301,7 +301,7 @@ public class StatusCheckerTimer {
         return appVersion;
     }
 
-    private void printDirectory() {
+    public void printDirectory() {
         log.debug("printDirectory");
 
         if (!isLinux()) {

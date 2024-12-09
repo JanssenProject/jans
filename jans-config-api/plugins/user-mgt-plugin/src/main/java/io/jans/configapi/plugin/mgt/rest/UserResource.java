@@ -407,7 +407,7 @@ public class UserResource extends BaseResource {
         }
     }
 
-    private String validateUserName(User user, boolean isUpdate) throws ApiApplicationException {
+    private String validateUserName(User user, boolean isUpdate)  {
         logger.info(USER_PLACEHOLDER, " isUpdate:{}", user, isUpdate);
 
         String msg = null;
@@ -439,7 +439,7 @@ public class UserResource extends BaseResource {
         return msg;
     }
 
-    private String validateUserEmail(User user, boolean isUpdate) throws ApiApplicationException {
+    private String validateUserEmail(User user, boolean isUpdate)  {
         logger.info(USER_PLACEHOLDER, " isUpdate:{}", user, isUpdate);
 
         String msg = null;
