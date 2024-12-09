@@ -10,14 +10,14 @@ namespace Jans {
         uid: String
     };
     type Context = {
-        network: String,
-        network_type: String,
-        user_agent: String,
-        operating_system: String,
-        device_health: Set<String>,
-        current_time: Long,
-        geolocation: Set<String>,
-        fraud_indicators: Set<String>,
+        network?: String,
+        network_type?: String,
+        user_agent?: String,
+        operating_system?: String,
+        device_health?: Set<String>,
+        current_time?: Long,
+        geolocation?: Set<String>,
+        fraud_indicators?: Set<String>,
     };
 
     // ******  Entities  ******
@@ -33,24 +33,24 @@ namespace Jans {
         exp: Long,
         iat: Long,
         iss: TrustedIssuer,
-        jti: String,
-        nbf: Long,
-        scope: Set<String>
+        jti?: String,
+        nbf?: Long,
+        scope?: Set<String>
     };
     entity TrustedIssuer = {
         issuer_entity_id: Url
     };
     entity Role;
     entity User in [Role] = {
-        email: email_address,
+        email?: email_address,
         phone_number?: String,
         role: Set<String>,
         sub: String,
         "username"?: String
     };
     entity id_token = {
-        acr: String,
-        amr: Set<String>,
+        acr?: String,
+        amr?: Set<String>,
         aud: String,
         azp?: String,
         birthdate?: String,
@@ -58,7 +58,7 @@ namespace Jans {
         exp: Long,
         iat: Long,
         iss: TrustedIssuer,
-        jti: String,
+        jti?: String,
         name?: String,
         phone_number?: String,
         role?: Set<String>,
@@ -68,10 +68,10 @@ namespace Jans {
         aud: String,
         birthdate?: String,
         email?: email_address,
-        exp?: Long,
-        iat?: Long,
+        exp: Long,
+        iat: Long,
         iss: TrustedIssuer,
-        jti: String,
+        jti?: String,
         name?: String,
         phone_number?: String,
         role?: Set<String>,

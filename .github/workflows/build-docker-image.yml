@@ -22,9 +22,9 @@ on:
   workflow_dispatch:
     inputs:
       services:
-        description: 'One or set of the docker images. Format as following: "docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link docker-jans-kc-scheduler"'
+        description: 'One or set of the docker images. Format as following: "docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link docker-jans-kc-scheduler cedarling-flask-sidecar"'
         required: true
-        default: 'docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link docker-jans-kc-scheduler'
+        default: 'docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link docker-jans-kc-scheduler cedarling-flask-sidecar'
       cn_version:
         description: 'The war version to build the image off'
         required: false
@@ -49,7 +49,7 @@ jobs:
     strategy:
       max-parallel: 8
       matrix:
-        docker-images: ["auth-server", "certmanager", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "saml", "keycloak-link", "kc-scheduler"]
+        docker-images: ["auth-server", "certmanager", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "saml", "keycloak-link", "kc-scheduler", "cedarling-flask-sidecar"]
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
@@ -67,6 +67,7 @@ jobs:
             docker-jans-${{ matrix.docker-images }}
             automation
             demos
+            jans-cedarling
       - name: Check docker directories that changed
         id: build_docker_image
         run: |
@@ -74,7 +75,7 @@ jobs:
           DEFAULT_ALL=${{ github.event.inputs.services }}
           if [ -z "$DEFAULT_ALL" ]
           then
-            DEFAULT_ALL="docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link docker-jans-kc-scheduler"
+            DEFAULT_ALL="docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link docker-jans-kc-scheduler cedarling-flask-sidecar"
           else
             echo "$DEFAULT_ALL"
           fi
@@ -95,6 +96,14 @@ jobs:
           sudo pip3 install -r ./automation/requirements.txt
           sudo apt-get update
 
+      - uses: actions/delete-package-versions@v5
+        continue-on-error: true
+        with:
+          package-name: jans/${{ matrix.docker-images }}
+          package-type: container
+          min-versions-to-keep: 1000
+          token:  ${{ secrets.GITHUB_TOKEN }}
+          delete-only-untagged-versions: true
 
       - name: Prepare
         if: steps.build_docker_image.outputs.build || github.event_name == 'tags'
@@ -105,6 +114,9 @@ jobs:
           if [[ "loadtesting-jmeter" =~ "${{ matrix.docker-images }}" ]]; then
             DOCKER_FILE_LOCATION=./demos/benchmarking/docker-jans-loadtesting-jmeter
           fi
+          if [[ "cedarling-flask-sidecar" =~ "${{ matrix.docker-images }}" ]]; then
+            DOCKER_FILE_LOCATION=./jans-cedarling/flask-sidecar
+          fi          
           MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('$DOCKER_FILE_LOCATION') ; print(dfparser.labels['org.opencontainers.image.version'])")
           DOCKER_IMAGE=ghcr.io/$REPOSITORY/${{ matrix.docker-images }}
           VERSION=${MAIN_VERSION}

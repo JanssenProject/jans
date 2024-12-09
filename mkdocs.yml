@@ -413,6 +413,7 @@ nav:
   - Python:
       - cedarling/python/README.md
       - How to use: cedarling/python/usage.md
+      - Sidecar: cedarling/python/sidecar.md
   - WASM: 'cedarling/cedarling-wasm.md'
   - iOS: 'cedarling/cedarling-ios.md'
   - Android: 'cedarling/cedarling-android.md'

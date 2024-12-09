@@ -16,6 +16,7 @@
 mod authz;
 mod bootstrap_config;
 mod common;
+mod http;
 mod init;
 mod jwt;
 mod lock;
@@ -32,9 +33,11 @@ use authz::Authz;
 pub use authz::{AuthorizeError, AuthorizeResult};
 pub use bootstrap_config::*;
 use init::service_config::{ServiceConfig, ServiceConfigError};
+use init::service_factory::ServiceInitError;
 use init::ServiceFactory;
 
 use common::app_types;
+use log::interface::LogWriter;
 use log::LogEntry;
 pub use log::LogStorage;
 use log::LogType;
@@ -47,6 +50,7 @@ pub mod bindings {
     pub use super::log::{
         AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
     };
+    pub use crate::common::policy_store::PolicyStore;
     pub use cedar_policy;
 }
 
@@ -56,6 +60,9 @@ pub enum InitCedarlingError {
     /// Error while preparing config for internal services
     #[error(transparent)]
     ServiceConfig(#[from] ServiceConfigError),
+    /// Error while initializing a Service
+    #[error(transparent)]
+    ServiceInit(#[from] ServiceInitError),
 }
 
 /// The instance of the Cedarling application.
@@ -63,7 +70,6 @@ pub enum InitCedarlingError {
 #[derive(Clone)]
 pub struct Cedarling {
     log: log::Logger,
-    #[allow(dead_code)]
     authz: Arc<Authz>,
 }
 
@@ -92,7 +98,7 @@ impl Cedarling {
 
         Ok(Cedarling {
             log,
-            authz: service_factory.authz_service(),
+            authz: service_factory.authz_service()?,
         })
     }
 
@@ -109,7 +115,8 @@ impl Cedarling {
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
-        self.authz.authorize_entities_data(request)
+        let tokens = self.authz.decode_tokens(request)?;
+        self.authz.authorize_entities_data(request, &tokens)
     }
 }
 

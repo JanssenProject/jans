@@ -43,7 +43,7 @@
                             <Plugin-Provider>Gluu Inc.</Plugin-Provider>
                             <Plugin-Class>io.jans.casa.plugins.emailotp.EmailOtpPlugin</Plugin-Class>
                             <Plugin-Description>
-                                A plugin to enroll e-mail as a 2FA Credential
+                                A plugin that registers a new authentication method so OTP via e-mail can be used as a 2FA credential
                             </Plugin-Description>
                             <Plugin-License>Apache 2</Plugin-License>
                             <Logger-Name>io.jans.casa.plugins</Logger-Name>

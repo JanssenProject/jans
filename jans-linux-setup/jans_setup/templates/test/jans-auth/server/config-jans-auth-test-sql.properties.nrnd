@@ -1,6 +1,6 @@
-config.sql.db.schema.name=%(rdbm_db)s
+config.sql.db.schema.name=%(rdbm_schema_name)s
 
-config.sql.connection.uri=jdbc:%(rdbm_type)s://%(hostname)s:%(rdbm_port)s/%(rdbm_db)s
+config.sql.connection.uri=jdbc:%(rdbm_name_str)s://%(hostname)s:%(rdbm_port)s/%(rdbm_db)s
 
 config.sql.connection.driver-property.serverTimezone=%(server_time_zone)s
 # Prefix connection.driver-property.key=value will be coverterd to key=value JDBC driver properties

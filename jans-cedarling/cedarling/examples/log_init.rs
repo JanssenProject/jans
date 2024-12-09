@@ -5,9 +5,15 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+// The following macro uses conditional compilation to include this file code
+// only when the target platform is NOT WebAssembly. This is not required to
+// use the library but is needed here since Cedarling compiles binding to WASM
+// and `use std::env` prevents that compilation.
+#![cfg(not(target_family = "wasm"))]
+
 use cedarling::{
-    BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig,
-    PolicyStoreConfig, PolicyStoreSource,
+    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogStorage,
+    LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, WorkloadBoolOp,
 };
 use std::env;
 
@@ -46,7 +52,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
         },
-        jwt_config: JwtConfig::Disabled,
+        jwt_config: JwtConfig::new_without_validation(),
+        authorization_config: AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: true,
+            user_workload_operator: WorkloadBoolOp::And,
+            ..Default::default()
+        },
     })?;
 
     println!("Stage 1:");

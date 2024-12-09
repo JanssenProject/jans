@@ -36,14 +36,13 @@ pub enum GetCedarTypeError {
 /// Enum to get info about type based on name.
 /// Is used as a result in [`CedarSchemaJson::find_type`]
 pub enum SchemaDefinedType<'a> {
-    #[allow(dead_code)]
     Entity(&'a CedarSchemaEntityShape),
     CommonType(&'a CedarSchemaRecord),
 }
 
 /// JSON representation of a [`cedar_policy::Schema`]
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq)]
-pub(crate) struct CedarSchemaJson {
+pub struct CedarSchemaJson {
     #[serde(flatten)]
     pub namespace: HashMap<String, CedarSchemaEntities>,
 }
