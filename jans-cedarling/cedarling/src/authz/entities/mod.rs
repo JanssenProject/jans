@@ -33,20 +33,13 @@ use super::token_data::TokenPayload;
 pub(crate) type ProcessTokensResult<'a> =
     jwt::ProcessTokensResult<'a, AccessTokenData, IdTokenData, UserInfoTokenData>;
 
-/// Describe errors on creating entites for AccessToken
-#[derive(thiserror::Error, Debug)]
-pub enum AccessTokenEntitiesError {
-    #[error("could not create entity from access_token: {0}")]
-    Create(#[from] CedarPolicyCreateTypeError),
-}
-
 /// Create workload entity
 pub fn create_workload(
     entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
     data: &AccessTokenData,
     meta: &AccessTokenEntityMetadata,
-) -> Result<cedar_policy::Entity, AccessTokenEntitiesError> {
+) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
     let schema = &policy_store.schema.json;
     let namespace = policy_store.namespace();
     let claim_mapping = &meta.entity_metadata.claim_mapping;
@@ -68,7 +61,7 @@ pub fn create_access_token(
     policy_store: &PolicyStore,
     data: &AccessTokenData,
     meta: &AccessTokenEntityMetadata,
-) -> Result<cedar_policy::Entity, AccessTokenEntitiesError> {
+) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
     let schema = &policy_store.schema.json;
     let namespace = policy_store.namespace();
     let claim_mapping = &meta.entity_metadata.claim_mapping;
