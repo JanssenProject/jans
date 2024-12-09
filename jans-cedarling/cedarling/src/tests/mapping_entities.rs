@@ -13,8 +13,8 @@
 //! CEDARLING_MAPPING_USERINFO_TOKEN
 
 use super::utils::*;
-use crate::Cedarling;
-use crate::{cmp_decision, cmp_policy};
+use crate::{cmp_decision, cmp_policy, CedarPolicyCreateTypeError};
+use crate::{AuthorizeError, Cedarling};
 use cedarling_util::get_raw_config;
 use std::sync::LazyLock;
 use test_utils::assert_eq;
@@ -153,4 +153,149 @@ fn test_custom_mapping() {
     );
 
     assert!(result.is_allowed(), "request result should be allowed");
+}
+
+/// Check if we get error on mapping user to undefined entity
+#[test]
+fn test_failed_user_mapping() {
+    let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
+
+    raw_config.mapping_user = Some("MappedUserNotExist".to_string());
+
+    let config = crate::BootstrapConfig::from_raw_config(&raw_config)
+        .expect("raw config should parse without errors");
+
+    let cedarling = Cedarling::new(config).expect("could be created without error");
+
+    let request = REQUEST.clone();
+
+    let err = cedarling
+        .authorize(request)
+        .expect_err("request should be parsed with mapping error");
+
+    assert!(
+        matches!(
+            err,
+            AuthorizeError::CreateUserEntity(CedarPolicyCreateTypeError::CouldNotFindEntity(_))
+        ),
+        "should be error CouldNotFindEntity"
+    );
+}
+
+/// Check if we get error on mapping workload to undefined entity
+#[test]
+fn test_failed_workload_mapping() {
+    let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
+
+    raw_config.mapping_workload = Some("MappedWorkloadNotExist".to_string());
+    // raw_config.mapping_id_token = Some("MappedIdToken".to_string());
+    // raw_config.mapping_access_token = Some("MappedAccess_token".to_string());
+    // raw_config.mapping_userinfo_token = Some("MappedUserinfo_token".to_string());
+
+    let config = crate::BootstrapConfig::from_raw_config(&raw_config)
+        .expect("raw config should parse without errors");
+
+    let cedarling = Cedarling::new(config).expect("could be created without error");
+
+    let request = REQUEST.clone();
+
+    let err = cedarling
+        .authorize(request)
+        .expect_err("request should be parsed with mapping error");
+
+    assert!(
+        matches!(
+            err,
+            AuthorizeError::CreateWorkloadEntity(CedarPolicyCreateTypeError::CouldNotFindEntity(_))
+        ),
+        "should be error CouldNotFindEntity"
+    );
+}
+
+/// Check if we get error on mapping id_token to undefined entity
+#[test]
+fn test_failed_id_token_mapping() {
+    let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
+
+    raw_config.mapping_id_token = Some("MappedIdTokenNotExist".to_string());
+    // raw_config.mapping_access_token = Some("MappedAccess_token".to_string());
+    // raw_config.mapping_userinfo_token = Some("MappedUserinfo_token".to_string());
+
+    let config = crate::BootstrapConfig::from_raw_config(&raw_config)
+        .expect("raw config should parse without errors");
+
+    let cedarling = Cedarling::new(config).expect("could be created without error");
+
+    let request = REQUEST.clone();
+
+    let err = cedarling
+        .authorize(request)
+        .expect_err("request should be parsed with mapping error");
+
+    assert!(
+        matches!(
+            err,
+            AuthorizeError::CreateWorkloadEntity(CedarPolicyCreateTypeError::CouldNotFindEntity(_))
+        ),
+        "should be error CouldNotFindEntity"
+    );
+}
+
+/// Check if we get error on mapping access_token to undefined entity
+#[test]
+fn test_failed_access_token_mapping() {
+    let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
+
+    raw_config.mapping_access_token = Some("MappedAccess_tokenNotExist".to_string());
+    // raw_config.mapping_userinfo_token = Some("MappedUserinfo_token".to_string());
+
+    let config = crate::BootstrapConfig::from_raw_config(&raw_config)
+        .expect("raw config should parse without errors");
+
+    let cedarling = Cedarling::new(config).expect("could be created without error");
+
+    let request = REQUEST.clone();
+
+    let err = cedarling
+        .authorize(request)
+        .expect_err("request should be parsed with mapping error");
+
+    assert!(
+        matches!(
+            err,
+            AuthorizeError::CreateAccessTokenEntity(
+                CedarPolicyCreateTypeError::CouldNotFindEntity(_)
+            )
+        ),
+        "should be error CouldNotFindEntity"
+    );
+}
+
+/// Check if we get error on mapping userinfo_token to undefined entity
+#[test]
+fn test_failed_userinfo_token_mapping() {
+    let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
+
+    raw_config.mapping_userinfo_token = Some("MappedUserinfo_tokenNotExist".to_string());
+
+    let config = crate::BootstrapConfig::from_raw_config(&raw_config)
+        .expect("raw config should parse without errors");
+
+    let cedarling = Cedarling::new(config).expect("could be created without error");
+
+    let request = REQUEST.clone();
+
+    let err = cedarling
+        .authorize(request)
+        .expect_err("request should be parsed with mapping error");
+
+    assert!(
+        matches!(
+            err,
+            AuthorizeError::CreateUserinfoTokenEntity(
+                CedarPolicyCreateTypeError::CouldNotFindEntity(_)
+            )
+        ),
+        "should be error CouldNotFindEntity"
+    );
 }
