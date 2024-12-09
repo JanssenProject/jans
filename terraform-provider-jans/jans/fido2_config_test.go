@@ -28,16 +28,8 @@ func TestFido2Config(t *testing.T) {
 	origBasepoint := cfg.BaseEndpoint
 	cfg.BaseEndpoint = "newbasepoint"
 
-	origSuperGluuEnabled := cfg.SuperGluuEnabled
-	cfg.SuperGluuEnabled = true
-
-	origOldU2fMigrationEnabled := cfg.OldU2fMigrationEnabled
-	cfg.OldU2fMigrationEnabled = true
-
 	ret := &JansFido2DynConfiguration{
 		BaseEndpoint:           "newbasepoint",
-		SuperGluuEnabled:       true,
-		OldU2fMigrationEnabled: true,
 	}
 	updatedConfig, err := client.UpdateFido2Configuration(ctx, ret)
 	if err != nil {
@@ -46,8 +38,6 @@ func TestFido2Config(t *testing.T) {
 
 	t.Cleanup(func() {
 		ret.BaseEndpoint = origBasepoint
-		ret.SuperGluuEnabled = origSuperGluuEnabled
-		ret.OldU2fMigrationEnabled = origOldU2fMigrationEnabled
 		_, _ = client.UpdateFido2Configuration(ctx, ret)
 	})
 
