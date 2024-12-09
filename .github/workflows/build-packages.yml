@@ -415,7 +415,8 @@ jobs:
       - uses: actions/setup-python@v5
       - name: install pkg-config
         run: |
-          sudo apt install -y pkg-config || sudo yum install -y pkg-config || sudo zypper install -y pkg-config || sudo pkg install pkg-config || sudo apk add pkgconfig
+          sudo apt-get update
+          sudo apt install -y pkg-config
       - name: Build Wheels - musllinux
         uses: PyO3/maturin-action@v1
         with:
