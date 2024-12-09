@@ -4647,6 +4647,7 @@ paths:
                   - uma_rpt_claims
                   - uma_claims_gathering
                   - access_evaluation
+                  - access_evaluation_discovery
                   - consent_gathering
                   - dynamic_scope
                   - spontaneous_scope
@@ -9300,8 +9301,6 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        selected:
-          type: boolean
         adminCanEdit:
           type: boolean
         adminCanView:
@@ -9315,6 +9314,8 @@ components:
         adminCanAccess:
           type: boolean
         whitePagesCanView:
+          type: boolean
+        selected:
           type: boolean
         baseDn:
           type: string
@@ -9402,6 +9403,9 @@ components:
           type: boolean
         accessEvaluationScriptName:
           type: string
+        accessEvaluationDiscoveryCacheLifetimeInMinutes:
+          type: integer
+          format: int32
         requireRequestObjectEncryption:
           type: boolean
         requirePkce:
@@ -11241,6 +11245,7 @@ components:
           - uma_rpt_claims
           - uma_claims_gathering
           - access_evaluation
+          - access_evaluation_discovery
           - consent_gathering
           - dynamic_scope
           - spontaneous_scope
@@ -11289,14 +11294,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
@@ -11725,10 +11730,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:

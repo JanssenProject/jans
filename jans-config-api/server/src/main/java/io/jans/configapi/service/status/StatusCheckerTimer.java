@@ -270,7 +270,7 @@ public class StatusCheckerTimer {
             return appVersion;
         }
 
-        CommandLine commandLine = new CommandLine(PROGRAM_SHOW_VERSION);
+        CommandLine commandLine = new CommandLine(GET_AGAMA_LAB_PROJECTS);
        
         commandLine.addArgument(JSON_ARG);
         log.error("Getting Agama Lab Projects version for commandLine:{}", commandLine);

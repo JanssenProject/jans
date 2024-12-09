@@ -15,6 +15,7 @@ import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -73,6 +74,7 @@ public class AgamaRepoResource extends ConfigBaseResource {
         return Response.ok(agamaRepoService.getAllAgamaRepositories()).build();
     }
 
+    @Hidden
     @Operation(summary = "Gets Agama project latest release.", description = "Gets Agama project latest release.", operationId = "get-agama-project-latest-release", tags = {
             "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.AGAMA_REPO_READ_ACCESS, ApiAccessConstants.AGAMA_REPO_WRITE_ACCESS,

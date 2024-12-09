@@ -25,7 +25,7 @@ import org.python.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
