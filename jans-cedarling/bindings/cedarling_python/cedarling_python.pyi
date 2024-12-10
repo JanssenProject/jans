@@ -31,44 +31,44 @@ class BootstrapConfig:
             options (dict): A dictionary containing configuration key-value pairs.
 
                 Required keys:
-                    - "application_name" (str): The name of the application.
-                    - "policy_store_id" (str): The ID of the policy store.
+                    - "CEDARLING_APPLICATION_NAME" (str): The name of the application.
+                    - "CEDARLING_POLICY_STORE_ID" (str): The ID of the policy store.
 
                 Optional keys:
-                    - "policy_store_uri" (str, optional): URI of the policy store. Defaults to None.
-                    - "log_type" (str, optional): Type of logging. Defaults to "memory".
-                    - "log_ttl" (int, optional): Log time-to-live in seconds. Defaults to 60.
-                    - "user_authz" (str, optional): User authorization status. Defaults to "enabled".
-                    - "workload_authz" (str, optional): Workload authorization status. Defaults to "enabled".
-                    - "usr_workload_bool_op" (str, optional): Logical operator for user workload. Defaults to "AND".
-                    - "local_jwks" (str, optional): Local JWKS (JSON Web Key Set). Defaults to None.
-                    - "local_policy_store" (str, optional): Local policy store configuration. Defaults to None.
-                    - "policy_store_local_fn" (str, optional): Local policy store function. Defaults to None.
-                    - "jwt_sig_validation" (str, optional): JWT signature validation status. Defaults to "enabled".
-                    - "jwt_status_validation" (str, optional): JWT status validation status. Defaults to "enabled".
-                    - "jwt_signature_algorithms_supported" (list, optional): Supported JWT signature algorithms. Defaults to an empty list.
-                    - "at_iss_validation" (str, optional): Access token issuer validation status. Defaults to "enabled".
-                    - "at_jti_validation" (str, optional): Access token JWT ID validation status. Defaults to "enabled".
-                    - "at_nbf_validation" (str, optional): Access token "not before" validation status. Defaults to "enabled".
-                    - "at_exp_validation" (str, optional): Access token expiration validation status. Defaults to "enabled".
-                    - "idt_iss_validation" (str, optional): ID token issuer validation status. Defaults to "enabled".
-                    - "idt_sub_validation" (str, optional): ID token subject validation status. Defaults to "enabled".
-                    - "idt_exp_validation" (str, optional): ID token expiration validation status. Defaults to "enabled".
-                    - "idt_iat_validation" (str, optional): ID token issued-at validation status. Defaults to "enabled".
-                    - "idt_aud_validation" (str, optional): ID token audience validation status. Defaults to "enabled".
-                    - "userinfo_iss_validation" (str, optional): User info issuer validation status. Defaults to "enabled".
-                    - "userinfo_sub_validation" (str, optional): User info subject validation status. Defaults to "enabled".
-                    - "userinfo_aud_validation" (str, optional): User info audience validation status. Defaults to "enabled".
-                    - "userinfo_exp_validation" (str, optional): User info expiration validation status. Defaults to "enabled".
-                    - "id_token_trust_mode" (str, optional): Trust mode for ID tokens. Defaults to "strict".
-                    - "lock" (str, optional): Lock mechanism status. Defaults to "disabled".
-                    - "lock_master_configuration_uri" (str, optional): Master configuration URI for locks. Defaults to None.
-                    - "dynamic_configuration" (str, optional): Dynamic configuration status. Defaults to "disabled".
-                    - "lock_ssa_jwt" (str, optional): JWT for SSA locks. Defaults to None.
-                    - "audit_log_interval" (int, optional): Interval for audit logs in seconds. Defaults to 0.
-                    - "audit_health_interval" (int, optional): Interval for health audit in seconds. Defaults to 0.
-                    - "audit_health_telemetry_interval" (int, optional): Interval for telemetry health audit in seconds. Defaults to 0.
-                    - "listen_sse" (str, optional): Server-Sent Events listening status. Defaults to "disabled".
+                    - "CEDARLING_POLICY_STORE_URI" (str, optional): URI of the policy store. Defaults to None.
+                    - "CEDARLING_LOG_TYPE" (str, optional): Type of logging. Defaults to "memory".
+                    - "CEDARLING_LOG_TTL" (int, optional): Log time-to-live in seconds. Defaults to 60.
+                    - "CEDARLING_USER_AUTHZ" (str, optional): User authorization status. Defaults to "enabled".
+                    - "CEDARLING_WORKLOAD_AUTHZ" (str, optional): Workload authorization status. Defaults to "enabled".
+                    - "CEDARLING_USR_WORKLOAD_BOOL_OP" (str, optional): Logical operator for user workload. Defaults to "AND".
+                    - "CEDARLING_LOCAL_JWKS" (str, optional): Local JWKS (JSON Web Key Set). Defaults to None.
+                    - "CEDARLING_LOCAL_POLICY_STORE" (str, optional): Local policy store configuration. Defaults to None.
+                    - "CEDARLING_POLICY_STORE_LOCAL_FN" (str, optional): Local policy store function. Defaults to None.
+                    - "CEDARLING_JWT_SIG_VALIDATION" (str, optional): JWT signature validation status. Defaults to "enabled".
+                    - "CEDARLING_JWT_STATUS_VALIDATION" (str, optional): JWT status validation status. Defaults to "enabled".
+                    - "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED" (list, optional): Supported JWT signature algorithms. Defaults to an empty list.
+                    - "CEDARLING_AT_ISS_VALIDATION" (str, optional): Access token issuer validation status. Defaults to "enabled".
+                    - "CEDARLING_AT_JTI_VALIDATION" (str, optional): Access token JWT ID validation status. Defaults to "enabled".
+                    - "CEDARLING_AT_NBF_VALIDATION" (str, optional): Access token "not before" validation status. Defaults to "enabled".
+                    - "CEDARLING_AT_EXP_VALIDATION" (str, optional): Access token expiration validation status. Defaults to "enabled".
+                    - "CEDARLING_IDT_ISS_VALIDATION" (str, optional): ID token issuer validation status. Defaults to "enabled".
+                    - "CEDARLING_IDT_SUB_VALIDATION" (str, optional): ID token subject validation status. Defaults to "enabled".
+                    - "CEDARLING_IDT_EXP_VALIDATION" (str, optional): ID token expiration validation status. Defaults to "enabled".
+                    - "CEDARLING_IDT_IAT_VALIDATION" (str, optional): ID token issued-at validation status. Defaults to "enabled".
+                    - "CEDARLING_IDT_AUD_VALIDATION" (str, optional): ID token audience validation status. Defaults to "enabled".
+                    - "CEDARLING_USERINFO_ISS_VALIDATION" (str, optional): User info issuer validation status. Defaults to "enabled".
+                    - "CEDARLING_USERINFO_SUB_VALIDATION" (str, optional): User info subject validation status. Defaults to "enabled".
+                    - "CEDARLING_USERINFO_AUD_VALIDATION" (str, optional): User info audience validation status. Defaults to "enabled".
+                    - "CEDARLING_USERINFO_EXP_VALIDATION" (str, optional): User info expiration validation status. Defaults to "enabled".
+                    - "CEDARLING_ID_TOKEN_TRUST_MODE" (str, optional): Trust mode for ID tokens. Defaults to "strict".
+                    - "CEDARLING_LOCK" (str, optional): Lock mechanism status. Defaults to "disabled".
+                    - "CEDARLING_LOCK_MASTER_CONFIGURATION_URI" (str, optional): Master configuration URI for locks. Defaults to None.
+                    - "CEDARLING_DYNAMIC_CONFIGURATION" (str, optional): Dynamic configuration status. Defaults to "disabled".
+                    - "CEDARLING_LOCK_SSA_JWT" (str, optional): JWT for SSA locks. Defaults to None.
+                    - "CEDARLING_AUDIT_LOG_INTERVAL" (int, optional): Interval for audit logs in seconds. Defaults to 0.
+                    - "CEDARLING_AUDIT_HEALTH_INTERVAL" (int, optional): Interval for health audit in seconds. Defaults to 0.
+                    - "CEDARLING_AUDIT_HEALTH_TELEMETRY_INTERVAL" (int, optional): Interval for telemetry health audit in seconds. Defaults to 0.
+                    - "CEDARLING_LISTEN_SSE" (str, optional): Server-Sent Events listening status. Defaults to "disabled".
 
         Returns:
             None: This method initializes the instance.
