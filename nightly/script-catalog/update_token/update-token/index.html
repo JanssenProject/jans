@@ -8986,9 +8986,10 @@ To Associate an Update Token script to a client (RP), execute the command below 
 <ol>
 <li>Access token lifetime:</li>
 </ol>
-<div class="highlight"><pre><span></span><code>    def getAccessTokenLifetimeInSeconds(self, context):
+<p><div class="highlight"><pre><span></span><code>    def getAccessTokenLifetimeInSeconds(self, context):
         return 10 * 60 * 60 # 10 hours
 </code></pre></div>
+Access token lifetime from script has highest priority (it wins from client's access token lifetime configuration).</p>
 <h3 id="modifyrefreshtoken">modifyRefreshToken() :<a class="headerlink" href="#modifyrefreshtoken" title="Permanent link">#</a></h3>
 <p>Used to modify claims in a Refresh Token</p>
 <div class="highlight"><pre><span></span><code>    # Returns boolean, true - indicates that script applied changes. If false is returned token will not be created.
@@ -9066,7 +9067,7 @@ Get it as integer, via
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-21T08:21:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-21</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-10T10:37:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-10</span>
       
         <br>
         Created:
