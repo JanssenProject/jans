@@ -30,7 +30,7 @@ public class UserResourceTest extends BaseTest {
 
         Response response = request.get();
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.error("\n\n Response for getUserResourceData() -  response:{}", response);
+        log.error("\n\cn Response for getUserResourceData() -  response:{}", response);
     }
     
 	
