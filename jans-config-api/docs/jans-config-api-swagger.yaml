@@ -4616,6 +4616,7 @@ paths:
                   - uma_rpt_claims
                   - uma_claims_gathering
                   - access_evaluation
+                  - access_evaluation_discovery
                   - consent_gathering
                   - dynamic_scope
                   - spontaneous_scope
@@ -9269,21 +9270,21 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
+        selected:
+          type: boolean
         whitePagesCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        adminCanView:
-          type: boolean
-        userCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanView:
           type: boolean
         adminCanAccess:
           type: boolean
-        selected:
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -9371,6 +9372,9 @@ components:
           type: boolean
         accessEvaluationScriptName:
           type: string
+        accessEvaluationDiscoveryCacheLifetimeInMinutes:
+          type: integer
+          format: int32
         requireRequestObjectEncryption:
           type: boolean
         requirePkce:
@@ -11210,6 +11214,7 @@ components:
           - uma_rpt_claims
           - uma_claims_gathering
           - access_evaluation
+          - access_evaluation_discovery
           - consent_gathering
           - dynamic_scope
           - spontaneous_scope
