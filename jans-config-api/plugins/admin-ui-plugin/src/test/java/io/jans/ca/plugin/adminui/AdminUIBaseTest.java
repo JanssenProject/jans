@@ -118,6 +118,9 @@ public class AdminUIBaseTest extends BaseTest{
         this.accessToken = getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
         log.error("\n\n\n\n AdminUI- accessToken:{}", accessToken);
     }
+	
+	
+
     
     
 }

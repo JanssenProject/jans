@@ -217,6 +217,19 @@ public class BaseTest {
 
         log.error("\n\n decodeFileValue - decoded:{}", decoded);
         return decoded;
-
     }
+    
+    protected boolean isServiceDeployed(String serviceName) {
+        log.error("\n\n\n *** Check if  service is deployed - serviceName:{}", serviceName+" *** \n\n\n");
+        boolean isDeployed = false;
+        try {
+            Class.forName(serviceName);
+            isDeployed = true;
+        } catch (ClassNotFoundException ex) {
+            log.error("*** \n\n\n'{}' service is NOT deployed ***\n\n", serviceName);
+            return isDeployed;
+        }
+        return isDeployed;
+    }
+    
 }

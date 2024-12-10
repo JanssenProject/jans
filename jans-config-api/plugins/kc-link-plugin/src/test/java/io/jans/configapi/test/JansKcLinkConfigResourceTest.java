@@ -16,10 +16,26 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 
+import java.lang.reflect.Method;
+
+import org.testng.SkipException;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Parameters;
 
 public class JansKcLinkConfigResourceTest extends BaseTest {
 
+    // Execute before each test is run
+    @BeforeMethod
+    public void before(Method methodName){
+        boolean isServiceDeployed = isServiceDeployed("io.jans.configapi.plugin.kc.link.rest.ApiApplication");
+          log.error("\n\n\n *** JansKcLinkConfigResourceTest - isServiceDeployed:{}",isServiceDeployed);
+        // check condition, note once you condition is met the rest of the tests will be skipped as well
+        if(!isServiceDeployed) {
+            throw new SkipException("KC-LINK Plugin not deployed");
+        }
+    
+    }   
+    
     @Parameters({"issuer", "kcLinkConfigUrl"})
     @Test
     public void getKcLinkConfiguration(final String issuer, final String kcLinkConfigUrl) {
