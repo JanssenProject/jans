@@ -52,7 +52,8 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
 
 /// create [`Cedarling`] from [`PolicyStoreSource`]
 pub fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
-    Cedarling::new(get_config(policy_source)).expect("bootstrap config should initialize correctly")
+    Cedarling::new(&get_config(policy_source))
+        .expect("bootstrap config should initialize correctly")
 }
 
 /// create [`Cedarling`] from [`PolicyStoreSource`]

@@ -67,7 +67,7 @@ fn test_default_mapping() {
     let raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
-    let cedarling = Cedarling::new(config).expect("could be created without error");
+    let cedarling = Cedarling::new(&config).expect("could be created without error");
 
     let request = REQUEST.clone();
 
@@ -120,7 +120,7 @@ fn test_custom_mapping() {
 
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
-    let cedarling = Cedarling::new(config).expect("could be created without error");
+    let cedarling = Cedarling::new(&config).expect("could be created without error");
 
     let mut request = REQUEST.clone();
     request.action = "Jans::Action::\"UpdateMappedWorkloadAndUser\"".to_string();
@@ -166,7 +166,7 @@ fn test_failed_user_mapping() {
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
 
-    let cedarling = Cedarling::new(config).expect("could be created without error");
+    let cedarling = Cedarling::new(&config).expect("could be created without error");
 
     let request = REQUEST.clone();
 
@@ -194,7 +194,7 @@ fn test_failed_workload_mapping() {
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
 
-    let cedarling = Cedarling::new(config).expect("could be created without error");
+    let cedarling = Cedarling::new(&config).expect("could be created without error");
 
     let request = REQUEST.clone();
 
@@ -221,7 +221,7 @@ fn test_failed_id_token_mapping() {
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
 
-    let cedarling = Cedarling::new(config).expect("could be created without error");
+    let cedarling = Cedarling::new(&config).expect("could be created without error");
 
     let request = REQUEST.clone();
 
@@ -248,7 +248,7 @@ fn test_failed_access_token_mapping() {
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
 
-    let cedarling = Cedarling::new(config).expect("could be created without error");
+    let cedarling = Cedarling::new(&config).expect("could be created without error");
 
     let request = REQUEST.clone();
 
@@ -277,7 +277,7 @@ fn test_failed_userinfo_token_mapping() {
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
 
-    let cedarling = Cedarling::new(config).expect("could be created without error");
+    let cedarling = Cedarling::new(&config).expect("could be created without error");
 
     let request = REQUEST.clone();
 
