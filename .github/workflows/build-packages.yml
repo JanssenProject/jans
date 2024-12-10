@@ -416,9 +416,13 @@ jobs:
       - name: install pkg-config
         run: |
           sudo apt-get update
-          sudo apt install -y pkg-config libssl-dev openssl
+          sudo apt -y install pkg-config libssl-dev
+          sudo apt-get -y install libudev-dev
+          apt-file list libssl-dev
       - name: Build Wheels - musllinux
         uses: PyO3/maturin-action@v1
+        env:
+          OPENSSL_INCLUDE_DIR: /usr/include/ssl
         with:
           working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_python
           target: ${{ matrix.platform.target }}
