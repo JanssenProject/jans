@@ -51,7 +51,7 @@ impl KeyService {
     /// [`RFC 7517`]: https://datatracker.ietf.org/doc/html/rfc7517
     pub fn new_from_str(key_stores: &str) -> Result<Self, KeyServiceError> {
         let parsed_stores = serde_json::from_str::<HashMap<String, Value>>(key_stores)
-            .map_err(|e| KeyServiceError::DecodeJwkStores(e))?;
+            .map_err(KeyServiceError::DecodeJwkStores)?;
         let mut key_stores = HashMap::new();
         for (iss_id, keys) in &parsed_stores {
             let iss_id = TrustedIssuerId::from(iss_id.as_str());
