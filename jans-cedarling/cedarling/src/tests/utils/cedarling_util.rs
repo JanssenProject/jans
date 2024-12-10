@@ -60,7 +60,7 @@ pub fn get_cedarling_with_authorization_conf(
     policy_source: PolicyStoreSource,
     auth_conf: AuthorizationConfig,
 ) -> Cedarling {
-    Cedarling::new(BootstrapConfig {
+    Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
             log_type: LogTypeConfig::StdOut,

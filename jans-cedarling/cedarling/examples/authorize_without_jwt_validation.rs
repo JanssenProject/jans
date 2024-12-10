@@ -14,7 +14,7 @@ use std::collections::HashMap;
 static POLICY_STORE_RAW: &str = include_str!("../../test_files/policy-store_ok.yaml");
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let cedarling = Cedarling::new(BootstrapConfig {
+    let cedarling = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
             log_type: LogTypeConfig::StdOut,
