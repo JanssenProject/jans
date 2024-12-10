@@ -1,7 +1,7 @@
 FROM python:3.10.16-slim-bookworm
 
 # ===============
-# Alpine packages
+# Debian packages
 # ===============
 
 RUN apt-get update \
