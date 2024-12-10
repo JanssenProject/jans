@@ -52,7 +52,7 @@ pub fn create_workload(
         "client_id",
     );
 
-    Ok(workload_entity_meta.create_entity(schema, data, HashSet::new(), claim_mapping)?)
+    workload_entity_meta.create_entity(schema, data, HashSet::new(), claim_mapping)
 }
 
 /// Create access_token entity
@@ -74,7 +74,7 @@ pub fn create_access_token(
         meta.principal_identifier.as_deref().unwrap_or("jti"),
     );
 
-    Ok(access_entity_meta.create_entity(schema, data, HashSet::new(), claim_mapping)?)
+    access_entity_meta.create_entity(schema, data, HashSet::new(), claim_mapping)
 }
 
 /// Create id_token entity
