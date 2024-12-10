@@ -76,7 +76,7 @@ jobs:
           sed -i "s|^\(ARG JANS_KEYCLOAK_LINK_IMAGE=\).*|\1ghcr.io/janssenproject/jans/keycloak-link:$VERSION|" ./docker-jans-all-in-one/Dockerfile || echo "not here"
           sed -i "s|^\(ARG JANS_SAML_IMAGE=\).*|\1ghcr.io/janssenproject/jans/saml:$VERSION|" ./docker-jans-all-in-one/Dockerfile || echo "not here"
           
-          sed -i "s|^\(ARG PYFACTER_VERSION=\).*|\101a3c572144575dc2c18587d1d9fb446d1234cf0|" ./docker-jans-config-api/Dockerfile || echo "not here"
+          sed -i "s|^\(ARG PYFACTER_VERSION=\).*|\c05fea5dd8956e087197c822729f7a856ff83b75|" ./docker-jans-config-api/Dockerfile || echo "not here"
     
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "build=${BUILD}" >> $GITHUB_OUTPUT
