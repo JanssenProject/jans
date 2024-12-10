@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       max-parallel: 8
       matrix:
-        docker-images: ["certmanager", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "saml", "keycloak-link", "kc-scheduler", "cedarling-flask-sidecar"]
+        docker-images: ["config-api", "all-in-one"]
         tags: ["1.0.15", "1.0.16", "1.0.17", "1.0.18", "1.0.19", "1.0.20", "1.0.21", "1.0.22", "1.1.0", "1.1.1", "1.1.2", "1.1.3", "1.1.4", "1.1.5", "1.1.6"]
     steps:
       - name: Harden Runner
@@ -65,19 +65,23 @@ jobs:
           if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\_[a-b]{1}[0-9]{1,3}$ ]]; then
             TAGS="$TAGS,${DOCKER_IMAGE}:${MAIN_VERSION}"
           fi
+          sed -i "s|^\(ARG JANS_CONFIGURATOR_IMAGE=\).*|\1ghcr.io/janssenproject/jans/configurator:$VERSION|" ./docker-jans-all-in-one/Dockerfile || echo "not here"
+          sed -i "s|^\(ARG JANS_PERSISTENCE_LOADER_IMAGE=\).*|\1ghcr.io/janssenproject/jans/persistence-loader:$VERSION|" ./docker-jans-all-in-one/Dockerfile || echo "not here"
+          sed -i "s|^\(ARG JANS_AUTH_IMAGE=\).*|\1ghcr.io/janssenproject/jans/auth-server:$VERSION|" ./docker-jans-all-in-one/Dockerfile || echo "not here"
+          sed -i "s|^\(ARG JANS_CONFIG_API_IMAGE=\).*|\1ghcr.io/janssenproject/jans/config-api:$VERSION|" ./docker-jans-all-in-one/Dockerfile || echo "not here"
+          sed -i "s|^\(ARG JANS_FIDO2_IMAGE=\).*|\1ghcr.io/janssenproject/jans/fido2:$VERSION|" ./docker-jans-all-in-one/Dockerfile || echo "not here"
+          sed -i "s|^\(ARG JANS_SCIM_IMAGE=\).*|\1ghcr.io/janssenproject/jans/scim:$VERSION|" ./docker-jans-all-in-one/Dockerfile || echo "not here"
+          sed -i "s|^\(ARG JANS_CASA_IMAGE=\).*|\1ghcr.io/janssenproject/jans/casa:$VERSION|" ./docker-jans-all-in-one/Dockerfile || echo "not here"
+          sed -i "s|^\(ARG JANS_LINK_IMAGE=\).*|\1ghcr.io/janssenproject/jans/link:$VERSION|" ./docker-jans-all-in-one/Dockerfile || echo "not here"
+          sed -i "s|^\(ARG JANS_KEYCLOAK_LINK_IMAGE=\).*|\1ghcr.io/janssenproject/jans/keycloak-link:$VERSION|" ./docker-jans-all-in-one/Dockerfile || echo "not here"
+          sed -i "s|^\(ARG JANS_SAML_IMAGE=\).*|\1ghcr.io/janssenproject/jans/saml:$VERSION|" ./docker-jans-all-in-one/Dockerfile || echo "not here"
+          
+          sed -i "s|^\(ARG PYFACTER_VERSION=\).*|\1c05fea5dd8956e087197c822729f7a856ff83b75|" ./docker-jans-config-api/Dockerfile || echo "not here"
+    
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "build=${BUILD}" >> $GITHUB_OUTPUT
           echo "dockerfilelocation=${DOCKER_FILE_LOCATION}" >> $GITHUB_OUTPUT
-          # wait for all images in DEFAULT_ALL to be built before building the all-in-one image as it depends on all other images
-          if [[ "docker-jans-all-in-one" =~ "${{ matrix.docker-images }}" ]]; then
-            if [[ ${{ github.event_name != 'pull_request' }} ]]; then
-              TEMP_IMG="auth-server certmanager config-api configurator fido2 persistence-loader scim monolith loadtesting-jmeter link casa saml keycloak-link kc-scheduler"
-              for i in $TEMP_IMG; do
-                echo "Waiting for $i to be built"
-                sleep 30
-              done
-            fi
-          fi
+
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@5306bad0baa6b616b9934712d4eba8da2112606d # master
