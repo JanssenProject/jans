@@ -99,7 +99,7 @@ ALLOW_DECISION_STR = "ALLOW"
 DENY_DECISION_STR = "DENY"
 
 
-def test_authorize_ok(load_bootstrap_config):
+def test_authorize_ok():
     '''
     Test create correct cedarling requst where Resource.org_id is same as Workload.org_id.
     Workload is created from ACCESS_TOKEN
@@ -181,7 +181,7 @@ def raise_authorize_error(bootstrap_config):
     instance.authorize(request)
 
 
-def test_resource_entity_error(load_bootstrap_config):
+def test_resource_entity_error():
     '''
     Test catch authorize_errors.ResourceEntityError.
     This error (authorize_errors.ResourceEntityError) is inherited from authorize_errors.AuthorizeError.
@@ -192,7 +192,7 @@ def test_resource_entity_error(load_bootstrap_config):
         assert str(e) == "could not create resource entity: could not get attribute value from payload: could not convert json field with key: org_id to: String, got: number"
 
 
-def test_authorize_error(load_bootstrap_config):
+def test_authorize_error():
     '''
     Test catch authorize_errors.AuthorizeError.
     It is the base error for all errors that can be caused by the authorize method of Cedarling.

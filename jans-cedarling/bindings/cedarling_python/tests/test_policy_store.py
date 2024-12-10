@@ -36,7 +36,7 @@ test_cases_err = [
 
 
 @ pytest.mark.parametrize("policy_file_name,expected_error", test_cases_err)
-def test_load_policy_store(load_bootstrap_config, policy_file_name, expected_error):
+def test_load_policy_store(policy_file_name, expected_error):
     # map fixture to variable with shorter name for readability
 
     config = load_bootstrap_config(policy_store_location=join(TEST_FILES_PATH, policy_file_name))
@@ -60,7 +60,7 @@ def test_load_policy_store(load_bootstrap_config, policy_file_name, expected_err
         raise Exception("expected error not found")
 
 
-def test_load_policy_store_ok(load_bootstrap_config):
+def test_load_policy_store_ok():
     # map fixture to variable with shorter name for readability
     policy_store_location = join(TEST_FILES_PATH, "policy-store_ok.yaml")
 
@@ -70,7 +70,7 @@ def test_load_policy_store_ok(load_bootstrap_config):
     Cedarling(config)
 
 
-def test_policy_store_source_wrong_type(load_bootstrap_config):
+def test_policy_store_source_wrong_type():
     # map fixture to variable with shorter name for readability
 
     try:
