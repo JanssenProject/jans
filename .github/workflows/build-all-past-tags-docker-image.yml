@@ -1,0 +1,143 @@
+name: Build past official tags
+
+on:
+  workflow_dispatch:
+
+
+permissions:
+  contents: read
+
+jobs:
+  docker:
+    permissions:
+      packages: write
+      id-token: write
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        docker-images: ["config-api", "all-in-one"]
+        tags: ["1.0.15", "1.0.16", "1.0.17", "1.0.18", "1.0.19", "1.0.20", "1.0.21", "1.0.22", "1.1.0", "1.1.1", "1.1.2", "1.1.3", "1.1.4", "1.1.5", "1.1.6"]
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+        with:
+          egress-policy: audit
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.5.0
+
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          ref: v${{ matrix.tags }}
+          fetch-depth: 0
+          sparse-checkout: |
+            docker-jans-${{ matrix.docker-images }}
+            automation
+            demos
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo python3 -m pip install --upgrade pip
+          sudo pip3 install setuptools --upgrade
+          sudo pip3 install -r ./automation/requirements.txt
+          sudo apt-get update
+
+      - name: Prepare
+        id: prep
+        run: |
+          REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+          DOCKER_FILE_LOCATION=./docker-jans-${{ matrix.docker-images }}
+          if [[ "loadtesting-jmeter" =~ "${{ matrix.docker-images }}" ]]; then
+            DOCKER_FILE_LOCATION=./demos/benchmarking/docker-jans-loadtesting-jmeter
+          fi
+          if [[ "cedarling-flask-sidecar" =~ "${{ matrix.docker-images }}" ]]; then
+            DOCKER_FILE_LOCATION=./jans-cedarling/flask-sidecar
+          fi
+          MAIN_VERSION=${{ matrix.tags }}
+          DOCKER_IMAGE=ghcr.io/$REPOSITORY/${{ matrix.docker-images }}
+          VERSION="${MAIN_VERSION}"-1
+          BUILD=true
+          TAGS="${DOCKER_IMAGE}:${VERSION}"
+          if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\_[a-b]{1}[0-9]{1,3}$ ]]; then
+            TAGS="$TAGS,${DOCKER_IMAGE}:${MAIN_VERSION}"
+          fi
+          python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-all-in-one') ; dfparser.envs['JANS_CONFIGURATOR_IMAGE'] = 'ghcr.io/janssenproject/jans/configurator:$VERSION' ; dfparser.write_to_file()" || echo "not here"
+          python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-all-in-one') ; dfparser.envs['JANS_PERSISTENCE_LOADER_IMAGE'] = 'ghcr.io/janssenproject/jans/persistence-loader:$VERSION' ; dfparser.write_to_file()" || echo "not here"
+          python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-all-in-one') ; dfparser.envs['JANS_AUTH_IMAGE'] = 'ghcr.io/janssenproject/jans/auth-server:$VERSION' ; dfparser.write_to_file()" || echo "not here"
+          python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-all-in-one') ; dfparser.envs['JANS_CONFIG_API_IMAGE'] = 'ghcr.io/janssenproject/jans/config-api:$VERSION' ; dfparser.write_to_file()" || echo "not here"
+          python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-all-in-one') ; dfparser.envs['JANS_FIDO2_IMAGE'] = 'ghcr.io/janssenproject/jans/fido2:$VERSION' ; dfparser.write_to_file()" || echo "not here"
+          python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-all-in-one') ; dfparser.envs['JANS_SCIM_IMAGE'] = 'ghcr.io/janssenproject/jans/scim:$VERSION' ; dfparser.write_to_file()" || echo "not here"
+          python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-all-in-one') ; dfparser.envs['JANS_CASA_IMAGE'] = 'ghcr.io/janssenproject/jans/casa:$VERSION' ; dfparser.write_to_file()" || echo "not here"
+          python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-all-in-one') ; dfparser.envs['JANS_LINK_IMAGE'] = 'ghcr.io/janssenproject/jans/link:$VERSION' ; dfparser.write_to_file()" || echo "not here"
+          python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-all-in-one') ; dfparser.envs['JANS_KEYCLOAK_LINK_IMAGE'] = 'ghcr.io/janssenproject/jans/keycloak-link:$VERSION' ; dfparser.write_to_file()" || echo "not here"
+          python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-all-in-one') ; dfparser.envs['JANS_SAML_IMAGE'] = 'ghcr.io/janssenproject/jans/saml:$VERSION' ; dfparser.write_to_file()" || echo "not here"
+  
+          python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-config-api') ; dfparser.envs['PYFACTER_VERSION'] = '01a3c572144575dc2c18587d1d9fb446d1234cf0' ; dfparser.write_to_file()" || echo "not here"
+          cat $DOCKER_FILE_LOCATION/Dockerfile | grep -q "PYFACTER_VERSION" || echo "didn't work"
+          cat $DOCKER_FILE_LOCATION/Dockerfile | grep -q "ARG" || echo "didn't work"
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "build=${BUILD}" >> $GITHUB_OUTPUT
+          echo "dockerfilelocation=${DOCKER_FILE_LOCATION}" >> $GITHUB_OUTPUT
+
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@5306bad0baa6b616b9934712d4eba8da2112606d # master
+        with:
+          image: tonistiigi/binfmt:master
+          platforms: all
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
+
+      - name: Login to ghcr
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0 # v5.3.0
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: ${{ steps.prep.outputs.dockerfilelocation }}
+          file: ${{ steps.prep.outputs.dockerfilelocation }}/Dockerfile
+          sbom: true
+          provenance: true
+          #target: prod
+          # add to platforms comma seperated linux/ppc64leL Issue: py3-grpcio
+          # add to platforms comma seperated linux/386 : Issue: openjdk11-jre-headless alpine package not
+          # add to platforms comma seperated ,linux/arm/v6 : Issue: openjdk11-jre-headless alpine package not found
+          # add to platforms comma seperated ,linux/arm/v7 : Issue: openjdk11-jre-headless alpine package not found
+          # add to platforms comma seperated ,linux/s390x: All images with openjdk hav an issue with linux/s390x Problematic frame: J 6 c1 java.lang.String.hashCode()I java.base@11.0.9 (49 bytes) : Issue: openjdk11-jre-headles
+          # add to platforms comma seperated ,linux/arm64:  : PyDev issue only
+
+          platforms: linux/amd64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.prep.outputs.tags }}
+      - name: Image digest
+        if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
+        run: echo ${{ steps.docker_build.outputs.digest }}
+
+      - name: Sign the images with GitHub OIDC Token
+        if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
+        env:
+          DIGEST: ${{ steps.docker_build.outputs.digest }}
+          TAGS: ${{ steps.prep.outputs.tags }}
+        run: |
+          images=""
+          for tag in ${TAGS//,/ }; do
+            if [[ $tag == *"_dev"* && $TAGS == *","* ]]; then
+              continue
+            fi
+            images+="${tag}@${DIGEST} "
+          done
+          if [[ -n $images ]]; then
+            cosign sign --yes -a author=JanssenProject ${images}
+          fi
