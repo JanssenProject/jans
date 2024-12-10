@@ -12,7 +12,7 @@ Configures the `Cedarling` application, including authorization, logging, and po
 
 Methods
 -------
-.. method:: __init__(self, config)
+.. method:: __init__(self, options)
 
     Initializes the Cedarling instance with the provided configuration.
 
@@ -237,6 +237,10 @@ ___
 
 # authorize_errors.EntitiesError
 Error encountered while collecting all entities
+___
+
+# authorize_errors.EntitiesToJsonError
+Error encountered while parsing all entities to json for logging
 ___
 
 # authorize_errors.ProcessTokens

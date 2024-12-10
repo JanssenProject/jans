@@ -17,7 +17,7 @@ use pyo3::types::PyDict;
 ///
 /// Methods
 /// -------
-/// .. method:: __init__(self, config)
+/// .. method:: __init__(self, options)
 ///
 ///     Initializes the Cedarling instance with the provided configuration.
 ///
