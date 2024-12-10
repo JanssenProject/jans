@@ -7,12 +7,32 @@
 
 use crate::{AuthorizationConfig, JwtConfig, WorkloadBoolOp};
 pub use crate::{
-    BootstrapConfig, Cedarling, LogConfig, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
+    BootstrapConfig, BootstrapConfigRaw, Cedarling, FeatureToggle, LogConfig, LogTypeConfig,
+    PolicyStoreConfig, PolicyStoreSource,
 };
 
-/// create [`Cedarling`] from [`PolicyStoreSource`]
-pub fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
-    Cedarling::new(BootstrapConfig {
+/// fixture for [`BootstrapConfigRaw`]
+pub fn get_raw_config(local_policy_store: &str) -> BootstrapConfigRaw {
+    // field `local_policy_store` should get JSON field. So we map yaml to json
+    let local_policy_store_json: serde_json::Value =
+        serde_yml::from_str(local_policy_store).expect("yaml should be parsed without errors");
+
+    BootstrapConfigRaw {
+        application_name: "test_app".to_string(),
+        user_authz: FeatureToggle::Enabled,
+        workload_authz: FeatureToggle::Enabled,
+        usr_workload_bool_op: WorkloadBoolOp::And,
+        log_type: crate::LoggerType::StdOut,
+        local_policy_store: Some(local_policy_store_json.to_string()),
+        jwt_status_validation: FeatureToggle::Disabled,
+        id_token_trust_mode: crate::IdTokenTrustMode::None,
+        ..Default::default()
+    }
+}
+
+/// fixture for [`BootstrapConfig`]
+pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
+    BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
             log_type: LogTypeConfig::StdOut,
@@ -27,8 +47,12 @@ pub fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
             user_workload_operator: WorkloadBoolOp::And,
             ..Default::default()
         },
-    })
-    .expect("bootstrap config should initialize correctly")
+    }
+}
+
+/// create [`Cedarling`] from [`PolicyStoreSource`]
+pub fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
+    Cedarling::new(get_config(policy_source)).expect("bootstrap config should initialize correctly")
 }
 
 /// create [`Cedarling`] from [`PolicyStoreSource`]

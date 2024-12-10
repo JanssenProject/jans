@@ -23,7 +23,6 @@ These Bootstrap Properties control default application level behavior.
 * **`CEDARLING_MAPPING_ID_TOKEN`** : Name of Cedar id_token schema entity
 * **`CEDARLING_MAPPING_ACCESS_TOKEN`** : Name of Cedar access_token schema entity
 * **`CEDARLING_MAPPING_USERINFO_TOKEN`** : Name of Cedar userinfo schema entity
-* **`CEDARLING_MAPPING_CONTEXT`** : Name of Cedar Context schema entity
 
 **The following bootstrap properties are needed to configure log behavior:**
 

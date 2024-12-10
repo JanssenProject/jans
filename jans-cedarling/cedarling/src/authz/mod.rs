@@ -25,20 +25,20 @@ use std::io::Cursor;
 
 mod authorize_result;
 
-mod entities;
+pub(crate) mod entities;
 pub(crate) mod request;
 mod token_data;
 
 pub use authorize_result::AuthorizeResult;
 use cedar_policy::{Entities, Entity, EntityUid, Response};
+use entities::create_resource_entity;
 use entities::CedarPolicyCreateTypeError;
 use entities::ProcessTokensResult;
 use entities::ResourceEntityError;
 use entities::{
-    create_access_token_entities, create_id_token_entity, create_role_entities, create_user_entity,
-    create_userinfo_token_entity, AccessTokenEntitiesError, RoleEntityError,
+    create_access_token, create_id_token_entity, create_role_entities, create_user_entity,
+    create_userinfo_token_entity, create_workload, RoleEntityError,
 };
-use entities::{create_resource_entity, AccessTokenEntities};
 use request::Request;
 use std::time::Instant;
 use token_data::{AccessTokenData, IdTokenData, UserInfoTokenData};
@@ -120,7 +120,7 @@ impl Authz {
         let entities_data: AuthorizeEntitiesData = self.authorize_entities_data(&request,&tokens)?;
 
         // Get entity UIDs what we will be used on authorize check
-        let principal_workload_uid = entities_data.access_token_entities.workload_entity.uid();
+        let principal_workload_uid = entities_data.workload_entity.uid();
         let resource_uid = entities_data.resource_entity.uid();
         let principal_user_entity_uid = entities_data.user_entity.uid();
 
@@ -273,6 +273,17 @@ impl Authz {
         tokens: &ProcessTokensResult,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         let policy_store = &self.config.policy_store;
+        let auth_conf = &self.config.authorization;
+
+        // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
+        let decode_result: ProcessTokensResult = self
+        .config
+        .jwt_service
+        .process_tokens::<AccessTokenData, IdTokenData, UserInfoTokenData>(
+            &request.access_token,
+            &request.id_token,
+            Some(&request.userinfo_token),
+        )?;
 
         let trusted_issuer = tokens.trusted_issuer.unwrap_or_default();
         let tokens_metadata = trusted_issuer.tokens_metadata();
@@ -281,25 +292,33 @@ impl Authz {
 
         // Populate the `AuthorizeEntitiesData` structure using the builder pattern
         let data = AuthorizeEntitiesData::builder()
-            // Populate the structure with entities derived from the access token
-            .access_token_entities(create_access_token_entities(
-                policy_store,
+            // Add workload entity
+            .workload_entity(create_workload(auth_conf.mapping_workload.as_deref(), policy_store,
+                &decode_result.access_token,
+                tokens_metadata.access_tokens).map_err(AuthorizeError::CreateWorkloadEntity)?)
+            // Add access token entity
+            .access_token(create_access_token(auth_conf.mapping_access_token.as_deref(), policy_store,
                 &tokens.access_token,
-                tokens_metadata.access_tokens
-            )?)
-            // Add an entity created from the ID token
+                tokens_metadata.access_tokens).map_err(AuthorizeError::CreateAccessTokenEntity)?)
+            // add id_token entity
             .id_token_entity(
-                create_id_token_entity(policy_store, &tokens.id_token, &tokens_metadata.id_tokens.claim_mapping)
+                create_id_token_entity(auth_conf.mapping_id_token.as_deref(), 
+                    policy_store, 
+                    &tokens.id_token, 
+                    &tokens_metadata.id_tokens.claim_mapping)
                     .map_err(AuthorizeError::CreateIdTokenEntity)?,
             )
-            // Add an entity created from the userinfo token
+            // Add userinfo_token entity
             .userinfo_token(
-                create_userinfo_token_entity(policy_store, &tokens.userinfo_token, &tokens_metadata.userinfo_tokens.claim_mapping)
+                create_userinfo_token_entity(auth_conf.mapping_userinfo_token.as_deref(), 
+                    policy_store, 
+                    &tokens.userinfo_token, 
+                    &tokens_metadata.userinfo_tokens.claim_mapping)
                 .map_err(AuthorizeError::CreateUserinfoTokenEntity)?
             )
-            // Add an entity created from the userinfo token
+            // Add User entity
             .user_entity(
-                create_user_entity(
+                create_user_entity(auth_conf.mapping_user.as_deref(),
                     policy_store,
                     tokens,
                     // parents for Jans::User entity
@@ -313,7 +332,7 @@ impl Authz {
                 request.resource.clone(),
                 &self.config.policy_store.schema.json,
             )?)
-            // Add Jans::Role entities
+            // Add Role entities
             .role_entities(role_entities);
 
         Ok(data.build())
@@ -335,7 +354,8 @@ struct ExecuteAuthorizeParameters<'a> {
 // from some entities to check authorizations
 #[derive(typed_builder::TypedBuilder)]
 pub struct AuthorizeEntitiesData {
-    pub access_token_entities: AccessTokenEntities,
+    pub workload_entity: Entity,
+    pub access_token: Entity,
     pub id_token_entity: Entity,
     pub userinfo_token: Entity,
     pub user_entity: Entity,
@@ -347,13 +367,14 @@ impl AuthorizeEntitiesData {
     /// Create iterator to get all entities
     fn into_iter(self) -> impl Iterator<Item = Entity> {
         vec![
+            self.workload_entity,
+            self.access_token,
             self.id_token_entity,
             self.userinfo_token,
             self.user_entity,
             self.resource_entity,
         ]
         .into_iter()
-        .chain(self.access_token_entities.into_iter())
         .chain(self.role_entities)
     }
 
@@ -372,18 +393,21 @@ pub enum AuthorizeError {
     /// Error encountered while processing JWT token data
     #[error(transparent)]
     ProcessTokens(#[from] jwt::JwtProcessingError),
-    /// Error encountered while creating access token entities
-    #[error("{0}")]
-    AccessTokenEntities(#[from] AccessTokenEntitiesError),
-    /// Error encountered while creating id token entities
+    /// Error encountered while creating id token entity
     #[error("could not create id_token entity: {0}")]
     CreateIdTokenEntity(CedarPolicyCreateTypeError),
-    /// Error encountered while creating userinfo token entities
+    /// Error encountered while creating userinfo entity
     #[error("could not create userinfo entity: {0}")]
     CreateUserinfoTokenEntity(CedarPolicyCreateTypeError),
-    /// Error encountered while creating access token entities
+    /// Error encountered while creating access_token entity
+    #[error("could not create access_token entity: {0}")]
+    CreateAccessTokenEntity(CedarPolicyCreateTypeError),
+    /// Error encountered while creating user entity
     #[error("could not create User entity: {0}")]
     CreateUserEntity(CedarPolicyCreateTypeError),
+    /// Error encountered while creating workload
+    #[error("could not create Workload entity: {0}")]
+    CreateWorkloadEntity(CedarPolicyCreateTypeError),
     /// Error encountered while creating resource entity
     #[error("{0}")]
     ResourceEntity(#[from] ResourceEntityError),

@@ -23,6 +23,11 @@ Attributes
 :param user_authz: Enables querying Cedar engine authorization for a User principal.  
 :param workload_authz: Enables querying Cedar engine authorization for a Workload principal.  
 :param usr_workload_bool_op: Boolean operation ('AND' or 'OR') for combining `USER` and `WORKLOAD` authz results.  
+:param mapping_user: Mapping name of Cedar Context schema User entity.  
+:param mapping_workload: Mapping name of cedar schema Workload entity.  
+:param mapping_id_token: Mapping name of cedar schema id_token entity.  
+:param mapping_access_token: Mapping name of cedar schema access_token entity.  
+:param mapping_userinfo_token: Mapping name of cedar schema userinfo_token entity.  
 :param local_jwks: Path to a local file containing a JWKS.  
 :param local_policy_store: A JSON string containing a policy store.  
 :param policy_store_local_fn: Path to a policy store JSON file.  
@@ -69,6 +74,11 @@ bootstrap_config = BootstrapConfig({
     "user_authz": "enabled",
     "workload_authz": "enabled",
     "usr_workload_bool_op": "AND",
+    "mapping_user": None,
+    "mapping_workload": None,
+    "mapping_id_token": None,
+    "mapping_access_token": None,
+    "mapping_userinfo_token":None,
     "local_jwks": "./path/to/your_jwks.json",
     "local_policy_store": None,
     "policy_store_local_fn": "./path/to/your_policy_store.json",
@@ -262,16 +272,16 @@ error : str
     The error message describing the evaluation failure.
 ___
 
-# authorize_errors.AccessTokenEntitiesError
-Error encountered while creating access token entities
-___
-
 # authorize_errors.ActionError
 Error encountered while parsing Action to EntityUid
 ___
 
 # authorize_errors.AuthorizeError
 Exception raised by authorize_errors
+___
+
+# authorize_errors.CreateAccessTokenEntityError
+Error encountered while creating access_token entity
 ___
 
 # authorize_errors.CreateContextError
@@ -296,6 +306,10 @@ ___
 
 # authorize_errors.CreateUserinfoTokenEntityError
 Error encountered while creating Userinfo_token entity
+___
+
+# authorize_errors.CreateWorkloadEntityError
+Error encountered while creating workload entity
 ___
 
 # authorize_errors.EntitiesError

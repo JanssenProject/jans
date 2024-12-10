@@ -32,13 +32,6 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    AccessTokenEntitiesError,
-    AuthorizeError,
-    "Error encountered while creating access token entities"
-);
-
-create_exception!(
-    authorize_errors,
     CreateIdTokenEntityError,
     AuthorizeError,
     "Error encountered while creating id token entities"
@@ -50,12 +43,25 @@ create_exception!(
     AuthorizeError,
     "Error encountered while creating Userinfo_token entity"
 );
+create_exception!(
+    authorize_errors,
+    CreateAccessTokenEntityError,
+    AuthorizeError,
+    "Error encountered while creating access_token entity"
+);
 
 create_exception!(
     authorize_errors,
     CreateUserEntityError,
     AuthorizeError,
     "Error encountered while creating User entity"
+);
+
+create_exception!(
+    authorize_errors,
+    CreateWorkloadEntityError,
+    AuthorizeError,
+    "Error encountered while creating workload entity"
 );
 
 create_exception!(
@@ -153,10 +159,11 @@ macro_rules! errors_functions {
 // For each possible case of `AuthorizeError`, we have created a corresponding Python exception that inherits from `cedarling::AuthorizeError`.
 errors_functions! {
     ProcessTokens => ProcessTokens,
-    AccessTokenEntities => AccessTokenEntitiesError,
     CreateIdTokenEntity => CreateIdTokenEntityError,
     CreateUserinfoTokenEntity => CreateUserinfoTokenEntityError,
+    CreateAccessTokenEntity => CreateAccessTokenEntityError,
     CreateUserEntity => CreateUserEntityError,
+    CreateWorkloadEntity => CreateWorkloadEntityError,
     ResourceEntity => ResourceEntityError,
     RoleEntity => RoleEntityError,
     Action => ActionError,

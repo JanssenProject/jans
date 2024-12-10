@@ -392,37 +392,48 @@ fn get_record_expression(
 /// Describe errors on creating entity
 #[derive(thiserror::Error, Debug)]
 pub enum CedarPolicyCreateTypeError {
+    /// Could not parse entity type
     #[error("could not parse entity type name: {0}, error: {1}")]
     EntityTypeName(String, cedar_policy::ParseErrors),
 
+    /// Could find entity type in the `cedar-policy` schema
     #[error("could find entity type: {0} in the schema")]
     CouldNotFindEntity(String),
+
+    /// Type in the schema is not record
     #[error("type: {0} in the schema is not record")]
     NotRecord(String),
 
+    /// Could create entity
     #[error("could create entity with uid: {0}, error: {1}")]
     CreateEntity(String, cedar_policy::EntityAttrEvaluationError),
 
+    /// Could not get attribute value from payload
     #[error("could not get attribute value from payload: {0}")]
     GetTokenClaimValue(#[from] GetTokenClaimValue),
 
+    /// Could not retrieve attribute from cedar-policy schema
     #[error("could not retrieve attribute from cedar-policy schema: {0}")]
     GetCedarType(#[from] GetCedarTypeError),
 
+    /// Error on cedar-policy type attribute
     #[error("err build cedar-policy type: {0}, mapped JWT attribute `{1}`: {2}")]
     BuildAttribute(String, String, Box<CedarPolicyCreateTypeError>),
 
+    /// Error on creating `cedar-policy` record, in schema it is named as type
     #[error("could not create `cedar-policy` record/type {0} : {1}")]
     CreateRecord(String, Box<CedarPolicyCreateTypeError>),
 
+    /// Wrapped error on [`RestrictedExpression::new_record`]
     // this error probably newer happen
-    // return on RestrictedExpression::new_record
     #[error("could not build expression from list of expressions: {0}")]
     CreateRecordFromIter(cedar_policy::ExpressionConstructionError),
 
+    /// Cause when cannot find record/type in json schema.
     #[error("could find record/type: {0}")]
     FindType(String),
 
+    /// Error when using the transaction token. Its usage is currently not implemented.
     #[error("transaction token not implemented")]
     TransactionToken,
 }
