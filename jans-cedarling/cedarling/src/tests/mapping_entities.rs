@@ -122,7 +122,8 @@ fn test_custom_mapping() {
         .expect("raw config should parse without errors");
     let cedarling = Cedarling::new(config).expect("could be created without error");
 
-    let request = REQUEST.clone();
+    let mut request = REQUEST.clone();
+    request.action = "Jans::Action::\"UpdateMappedWorkloadAndUser\"".to_string();
 
     let result = cedarling
         .authorize(request)
@@ -178,7 +179,8 @@ fn test_failed_user_mapping() {
             err,
             AuthorizeError::CreateUserEntity(CedarPolicyCreateTypeError::CouldNotFindEntity(_))
         ),
-        "should be error CouldNotFindEntity"
+        "should be error CouldNotFindEntity, got: {:?}",
+        err
     );
 }
 
@@ -188,9 +190,6 @@ fn test_failed_workload_mapping() {
     let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
 
     raw_config.mapping_workload = Some("MappedWorkloadNotExist".to_string());
-    // raw_config.mapping_id_token = Some("MappedIdToken".to_string());
-    // raw_config.mapping_access_token = Some("MappedAccess_token".to_string());
-    // raw_config.mapping_userinfo_token = Some("MappedUserinfo_token".to_string());
 
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
@@ -218,8 +217,6 @@ fn test_failed_id_token_mapping() {
     let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
 
     raw_config.mapping_id_token = Some("MappedIdTokenNotExist".to_string());
-    // raw_config.mapping_access_token = Some("MappedAccess_token".to_string());
-    // raw_config.mapping_userinfo_token = Some("MappedUserinfo_token".to_string());
 
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
@@ -235,9 +232,9 @@ fn test_failed_id_token_mapping() {
     assert!(
         matches!(
             err,
-            AuthorizeError::CreateWorkloadEntity(CedarPolicyCreateTypeError::CouldNotFindEntity(_))
+            AuthorizeError::CreateIdTokenEntity(CedarPolicyCreateTypeError::CouldNotFindEntity(_))
         ),
-        "should be error CouldNotFindEntity"
+        "should be error CouldNotFindEntity, got: {err:?}"
     );
 }
 
@@ -247,7 +244,6 @@ fn test_failed_access_token_mapping() {
     let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
 
     raw_config.mapping_access_token = Some("MappedAccess_tokenNotExist".to_string());
-    // raw_config.mapping_userinfo_token = Some("MappedUserinfo_token".to_string());
 
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
