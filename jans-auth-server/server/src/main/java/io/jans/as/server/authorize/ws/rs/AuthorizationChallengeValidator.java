@@ -14,7 +14,6 @@ import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 
-import javax.inject.Named;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -23,9 +22,7 @@ import java.util.Set;
  * @author Yuriy Z
  */
 @RequestScoped
-@Named
 public class AuthorizationChallengeValidator {
-
     @Inject
     private Logger log;
 

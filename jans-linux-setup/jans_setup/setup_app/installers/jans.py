@@ -156,7 +156,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         # Create these folder on all instances
         for folder in (Config.jansOptFolder, Config.jansOptBinFolder, Config.jansOptSystemFolder,
                         Config.jansOptPythonFolder, Config.configFolder, Config.certFolder,
-                        Config.output_dir, Config.os_default, os.path.join(Config.distFolder, 'scripts')):
+                        Config.output_dir, Config.os_default, os.path.join(Config.jansOptFolder, 'scripts')):
 
             if not os.path.exists(folder):
                 self.run([paths.cmd_mkdir, '-p', folder])
@@ -513,6 +513,20 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         # Update jansServiceModule for config-api on DB
         base.current_app.ConfigApiInstaller.update_jansservicemodule()
+
+        self.call_service_post_install_tasks()
+
+    def call_service_post_install_tasks(self):
+
+        # call service_post_install_tasks before starting services
+        self.logIt("Calling service_post_install_tasks()")
+
+        for jans_service in jansProgress.services:
+            if 'object' in jans_service:
+                service_installer = jans_service['object']
+                service_install_var = getattr(service_installer, 'install_var', None)
+                if Config.get(service_install_var):
+                    service_installer.service_post_install_tasks()
 
     def secure_files(self):
         self.run([paths.cmd_chown, '-R', 'jetty:root', Config.certFolder])
