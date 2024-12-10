@@ -70,7 +70,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=871c36da8a2550ee2febd7c0d72c521898b226c3
+ENV JANS_SOURCE_VERSION=26713a82b14a67d5e65b9a7e72d6f1403314f679
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -108,7 +108,9 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
     && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico \
     && cp ${JANS_SETUP_DIR}/static/scripts/facter /usr/bin/facter \
-    && chmod +x /usr/bin/facter
+    && chmod +x /usr/bin/facter \
+    && cp ${JANS_SETUP_DIR}/static/scripts/get_agama_lab_projects.py /opt/jans/bin/get_agama_lab_projects.py \
+    && chmod +x /opt/jans/bin/get_agama_lab_projects.py
 
 # ======
 # Python

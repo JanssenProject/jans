@@ -955,3 +955,60 @@ spec:
   {{- end }}
   {{- end }}
 {{- end }}
+
+---
+
+{{ if index .Values "global" "auth-server" "ingress" "authzenConfigEnabled" -}}
+{{ $fullName := include "nginx-ingress.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-authzen-config
+  labels:
+    app: {{ $fullName }}-authzen-config
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if index .Values.global "auth-server" "ingress" "authzenConfigLabels" }}
+{{ toYaml (index .Values.global "auth-server" "ingress" "authzenConfigLabels") | indent 4 }}
+{{- end }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/restv1/authzen-configuration
+{{- if index .Values.global "auth-server" "ingress" "authzenAdditionalAnnotations" }}
+{{ toYaml (index .Values.global "auth-server" "ingress" "authzenAdditionalAnnotations") | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.additionalAnnotations }}
+{{ toYaml .Values.ingress.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /.well-known/authzen-configuration
+            pathType: Exact
+            backend:
+              service:
+                name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
+                port:
+                  number: 8080
+  {{- end }}
+  {{- end }}
+{{- end }}
