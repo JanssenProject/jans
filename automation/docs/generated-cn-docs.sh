@@ -14,7 +14,7 @@ tar xvf helm-docs_"${HELM_DOCS_VERSION}"_Linux_x86_64.tar.gz
 sudo cp helm-docs /usr/local/bin/
 cd ..
 # Generate Helm docs
-helm-docs "$MAIN_DIRECTORY_LOCATION"/charts/
+helm-docs "$MAIN_DIRECTORY_LOCATION"/charts/ --skip-version-footer
 rm -rf helmtemp
 echo "Copying Helm chart Readme to helm-chart.md"
 cp "$MAIN_DIRECTORY_LOCATION"/charts/janssen/README.md "$MAIN_DIRECTORY_LOCATION"/docs/janssen-server/reference/kubernetes/helm-chart.md
