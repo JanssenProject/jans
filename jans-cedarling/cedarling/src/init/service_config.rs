@@ -7,13 +7,13 @@
 
 use super::policy_store::{load_policy_store, PolicyStoreLoadError};
 use crate::bootstrap_config;
-use crate::common::policy_store::PolicyStore;
+use crate::common::policy_store::PolicyStoreWithID;
 use bootstrap_config::BootstrapConfig;
 
 /// Configuration that hold validated infomation from bootstrap config
-#[derive(typed_builder::TypedBuilder, Clone)]
+#[derive(Clone)]
 pub(crate) struct ServiceConfig {
-    pub policy_store: PolicyStore,
+    pub policy_store: PolicyStoreWithID,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -27,8 +27,6 @@ impl ServiceConfig {
     pub fn new(bootstrap: &BootstrapConfig) -> Result<Self, ServiceConfigError> {
         let policy_store = load_policy_store(&bootstrap.policy_store_config)?;
 
-        let builder = ServiceConfig::builder().policy_store(policy_store);
-
-        Ok(builder.build())
+        Ok(Self { policy_store })
     }
 }

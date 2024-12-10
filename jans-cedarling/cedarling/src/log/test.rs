@@ -2,17 +2,13 @@
 //! Contains unit tests for the main code flow with the `LogStrategy``
 //! `LogStrategy` wraps all other logger implementations.
 
-use std::{
-    io::Write,
-    time::{SystemTime, UNIX_EPOCH},
-};
+use std::io::Write;
 
 use super::*;
 use crate::{common::app_types, log::stdout_logger::TestWriter};
-use interface::LogWriter;
+use interface::{LogWriter, Loggable};
 use nop_logger::NopLogger;
 use stdout_logger::StdOutLogger;
-use uuid7::uuid7;
 
 use crate::bootstrap_config::log_config;
 
@@ -27,7 +23,7 @@ fn test_new_log_strategy_off() {
     let strategy = LogStrategy::new(&config);
 
     // Assert
-    assert!(matches!(strategy, LogStrategy::OnlyWriter(_)));
+    assert!(matches!(strategy, LogStrategy::Off(_)));
 }
 
 #[test]
@@ -55,7 +51,7 @@ fn test_new_logstrategy_stdout() {
     let strategy = LogStrategy::new(&config);
 
     // Assert
-    assert!(matches!(strategy, LogStrategy::OnlyWriter(_)));
+    assert!(matches!(strategy, LogStrategy::StdOut(_)));
 }
 
 #[test]
@@ -66,13 +62,7 @@ fn test_log_memory_logger() {
     };
     let strategy = LogStrategy::new(&config);
     let entry = LogEntry {
-        id: uuid7(),
-        time: SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("Time went backwards")
-            .as_secs(),
-        log_kind: LogType::Decision,
-        pdp_id: uuid7(),
+        base: BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision),
         application_id: Some("test_app".to_string().into()),
         auth_info: None,
         msg: "Test message".to_string(),
@@ -118,12 +108,16 @@ fn test_log_memory_logger() {
     // check that we have two entries in the log database
     assert_eq!(strategy.get_log_ids().len(), 2);
     assert_eq!(
-        strategy.get_log_by_id(&entry1.id.to_string()).unwrap(),
+        strategy
+            .get_log_by_id(&entry1.get_request_id().to_string())
+            .unwrap(),
         entry1,
         "Failed to get log entry by id"
     );
     assert_eq!(
-        strategy.get_log_by_id(&entry2.id.to_string()).unwrap(),
+        strategy
+            .get_log_by_id(&entry2.get_request_id().to_string())
+            .unwrap(),
         entry2,
         "Failed to get log entry by id"
     );
@@ -145,13 +139,7 @@ fn test_log_memory_logger() {
 fn test_log_stdout_logger() {
     // Arrange
     let log_entry = LogEntry {
-        id: uuid7(),
-        time: SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("Time went backwards")
-            .as_secs(),
-        log_kind: LogType::Decision,
-        pdp_id: uuid7(),
+        base: BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision),
         application_id: Some("test_app".to_string().into()),
         auth_info: None,
         msg: "Test message".to_string(),
@@ -165,7 +153,7 @@ fn test_log_stdout_logger() {
     let test_writer = TestWriter::new();
     let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
     let logger = StdOutLogger::new_with(buffer);
-    let strategy = LogStrategy::OnlyWriter(Box::new(logger));
+    let strategy = LogStrategy::StdOut(logger);
 
     // Act
     strategy.log(log_entry);
@@ -177,7 +165,7 @@ fn test_log_stdout_logger() {
 
 #[test]
 fn test_log_storage_for_only_writer() {
-    let strategy = LogStrategy::OnlyWriter(Box::new(NopLogger));
+    let strategy = LogStrategy::Off(NopLogger);
 
     // make same test as for the memory logger
     // create log entries
@@ -202,11 +190,15 @@ fn test_log_storage_for_only_writer() {
     // we should not have any entries in the memory logger
     assert_eq!(strategy.get_log_ids().len(), 0);
     assert!(
-        strategy.get_log_by_id(&entry1.id.to_string()).is_none(),
+        strategy
+            .get_log_by_id(&entry1.get_request_id().to_string())
+            .is_none(),
         "We should not have entry1 entry in the memory logger"
     );
     assert!(
-        strategy.get_log_by_id(&entry2.id.to_string()).is_none(),
+        strategy
+            .get_log_by_id(&entry2.get_request_id().to_string())
+            .is_none(),
         "We should not have entry2 entry in the memory logger"
     );
 
