@@ -167,4 +167,18 @@ spec:
           number: 8080
       weight: 100
   {{- end }}
+  {{ if index .Values "global" "auth-server" "ingress" "authzenConfigEnabled" -}}
+  - name: "{{ .Release.Name }}-istio-authzen-config"
+    match:
+    - uri:
+        prefix: "/.well-known/authzen-configuration"
+    rewrite:
+      uri: "/jans-auth/restv1/authzen-configuration"
+    route:
+      - destination:
+          host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
+          port:
+            number: 8080
+        weight: 100
+  {{- end }}
 {{- end }}
