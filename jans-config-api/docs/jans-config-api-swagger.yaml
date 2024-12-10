@@ -497,6 +497,37 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/agama.readonly
+  /api/v1/agama-repo:
+    get:
+      tags:
+      - Agama
+      summary: Gets all agama repositories.
+      description: Gets all agama repositories.
+      operationId: get-agama-repositories
+      responses:
+        "200":
+          description: Agama repositories
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonNode'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/agama-repo.readonly
+        - https://jans.io/oauth/config/agama-repo.write
+        - https://jans.io/oauth/config/read-all
   /api/v1/agama/syntax-check/{qname}:
     post:
       tags:
@@ -9272,19 +9303,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanView:
-          type: boolean
         adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        adminCanAccess:
+        adminCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         userCanAccess:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -10143,6 +10174,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10152,8 +10185,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn

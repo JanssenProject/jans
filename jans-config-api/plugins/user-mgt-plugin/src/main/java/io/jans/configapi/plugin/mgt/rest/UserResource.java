@@ -278,8 +278,10 @@ public class UserResource extends BaseResource {
             logger.info("User:{} to be patched with :{}, removeNonLDAPAttributes:{} ", escapeLog(inum),
                     escapeLog(userPatchRequest), removeNonLDAPAttributes);
         }
-        // check if user exists
-        User existingUser = userMgmtSrv.getUserBasedOnInum(inum);
+        CustomUser customUser = null;
+       try { 
+           // check if user exists
+           User existingUser = userMgmtSrv.getUserBasedOnInum(inum);
 
         // parse birthdate if present
         userMgmtSrv.parseBirthDateAttribute(existingUser);
@@ -294,9 +296,15 @@ public class UserResource extends BaseResource {
         existingUser = excludeUserAttributes(existingUser);
 
         // get custom user
-        CustomUser customUser = getCustomUser(existingUser, removeNonLDAPAttributes);
+        customUser = getCustomUser(existingUser, removeNonLDAPAttributes);
         logger.info("patched customUser:{}", customUser);
-
+       } catch (InvalidAttributeException iae) {
+           logger.error("InvalidAttributeException while updating user is:{}, cause:{}", iae, iae.getCause());
+           throwBadRequestException("USER_PATCH_ERROR", iae.getMessage());
+       } catch (Exception ex) {
+           logger.error("Exception while pactching user is:{}, cause:{}", ex, ex.getCause());
+           throwInternalServerException(ex);
+       }
         return Response.ok(customUser).build();
     }
 
@@ -399,7 +407,7 @@ public class UserResource extends BaseResource {
         }
     }
 
-    private String validateUserName(User user, boolean isUpdate) throws ApiApplicationException {
+    private String validateUserName(User user, boolean isUpdate)  {
         logger.info(USER_PLACEHOLDER, " isUpdate:{}", user, isUpdate);
 
         String msg = null;
@@ -431,7 +439,7 @@ public class UserResource extends BaseResource {
         return msg;
     }
 
-    private String validateUserEmail(User user, boolean isUpdate) throws ApiApplicationException {
+    private String validateUserEmail(User user, boolean isUpdate)  {
         logger.info(USER_PLACEHOLDER, " isUpdate:{}", user, isUpdate);
 
         String msg = null;
@@ -557,7 +565,7 @@ public class UserResource extends BaseResource {
 
     private User ignoreCustomAttributes(User user, boolean removeNonLDAPAttributes) {
         logger.info(
-                "** validate User CustomObjectClasses - User user:{}, removeNonLDAPAttributes:{}, user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
+                "\n\n ** validate User CustomObjectClasses - User user:{}, removeNonLDAPAttributes:{}, user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
                 user, removeNonLDAPAttributes, user.getCustomObjectClasses(), userMgmtSrv.getPersistenceType(),
                 userMgmtSrv.isLDAP());
 

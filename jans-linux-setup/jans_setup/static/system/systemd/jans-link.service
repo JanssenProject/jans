@@ -4,8 +4,8 @@ After=%(order_jans_link_service)s
 
 [Service]
 Type=forking
-ExecStart=/opt/dist/scripts/jans-link start
-ExecStop=/opt/dist/scripts/jans-link stop
+ExecStart=%(jans_scripts_dir)s/jans-link start
+ExecStop=%(jans_scripts_dir)s/jans-link stop
 User=jetty
 Group=jetty
 

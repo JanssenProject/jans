@@ -4,8 +4,8 @@ After=%(order_jans_casa_service)s
 
 [Service]
 Type=forking
-ExecStart=/opt/dist/scripts/jans-casa start
-ExecStop=/opt/dist/scripts/jans-casa stop
+ExecStart=%(jans_scripts_dir)s/jans-casa start
+ExecStop=%(jans_scripts_dir)s/jans-casa stop
 User=jetty
 Group=jetty
 
