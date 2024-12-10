@@ -3290,6 +3290,34 @@
           ]
         }
       ]
+    },
+    {
+      "path": "/jans-config-api/api/v1/agama-repo",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.91",
+              "name": "https://jans.io/oauth/config/agama-repo.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.92",
+              "name": "https://jans.io/oauth/config/agama-repo.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
