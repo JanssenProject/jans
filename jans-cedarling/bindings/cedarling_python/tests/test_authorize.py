@@ -4,13 +4,13 @@
 # Copyright (c) 2024, Gluu, Inc.
 
 from cedarling_python import Cedarling
-from config import sample_bootstrap_config
 from cedarling_python import ResourceData, Request, authorize_errors
+from config import load_bootstrap_config
 
 
 # In python unit tests we not cover all possible scenarios, but most common.
 
-# in fixture `sample_bootstrap_config` we use policy store `policy-store_ok.json`
+# in fixture `load_bootstrap_config` we use policy store `policy-store_ok.json`
 # The human-readable policy and schema file is located in next folder:
 # `test_files\policy-store_ok`
 
@@ -99,12 +99,12 @@ ALLOW_DECISION_STR = "ALLOW"
 DENY_DECISION_STR = "DENY"
 
 
-def test_authorize_ok(sample_bootstrap_config):
+def test_authorize_ok():
     '''
     Test create correct cedarling requst where Resource.org_id is same as Workload.org_id.
     Workload is created from ACCESS_TOKEN
     '''
-    instance = Cedarling(sample_bootstrap_config)
+    instance = Cedarling(load_bootstrap_config())
 
     # Create resouce with type "Jans::Issue" from cedar-policy schema.
     resource = ResourceData.from_dict({
@@ -125,7 +125,6 @@ def test_authorize_ok(sample_bootstrap_config):
     assert authorize_result.is_allowed(), "request should be allowed"
 
     workload_result = authorize_result.workload()
-
     decision = workload_result.decision
     # check that Decision type converts to the string correctly
     assert str(decision) == ALLOW_DECISION_STR
@@ -141,7 +140,7 @@ def test_authorize_ok(sample_bootstrap_config):
 
 
 # function that we will call in tests where check error handling
-def raise_authorize_error(sample_bootstrap_config):
+def raise_authorize_error(bootstrap_config):
     '''
         The function attempts to make an authorized request but raises an error (authorize_errors.ResourceEntityError)
         because, in the cedar-policy type Jans::Issue, field `org_id` should be a string.
@@ -153,7 +152,7 @@ def raise_authorize_error(sample_bootstrap_config):
         - test_resource_entity_error
         - test_authorize_error
     '''
-    instance = Cedarling(sample_bootstrap_config)
+    instance = Cedarling(bootstrap_config)
 
     # In schema this type described as:
     # namespace Jans{
@@ -182,24 +181,24 @@ def raise_authorize_error(sample_bootstrap_config):
     instance.authorize(request)
 
 
-def test_resource_entity_error(sample_bootstrap_config):
+def test_resource_entity_error():
     '''
     Test catch authorize_errors.ResourceEntityError.
     This error (authorize_errors.ResourceEntityError) is inherited from authorize_errors.AuthorizeError.
     '''
     try:
-        raise_authorize_error(sample_bootstrap_config)
+        raise_authorize_error(load_bootstrap_config())
     except authorize_errors.ResourceEntityError as e:
         assert str(e) == "could not create resource entity: could not get attribute value from payload: could not convert json field with key: org_id to: String, got: number"
 
 
-def test_authorize_error(sample_bootstrap_config):
+def test_authorize_error():
     '''
     Test catch authorize_errors.AuthorizeError.
     It is the base error for all errors that can be caused by the authorize method of Cedarling.
     '''
 
     try:
-        raise_authorize_error(sample_bootstrap_config)
+        raise_authorize_error(load_bootstrap_config())
     except authorize_errors.AuthorizeError as e:
         assert str(e) == "could not create resource entity: could not get attribute value from payload: could not convert json field with key: org_id to: String, got: number"

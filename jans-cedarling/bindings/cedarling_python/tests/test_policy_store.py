@@ -5,14 +5,14 @@
 
 from cedarling_python import BootstrapConfig
 from cedarling_python import Cedarling
-from config import TEST_FILES_PATH, sample_bootstrap_config
+from config import TEST_FILES_PATH, load_bootstrap_config
 from os.path import join
 import pytest
 
 # In python unit tests we not cover all possible scenarios, but most common.
 # also we try duplicate rust test cases
 
-# in fixture `sample_bootstrap_config` we use policy store `policy-store_ok.json`
+# in fixture `load_bootstrap_config` we use policy store `policy-store_ok.json`
 # The human-readable policy and schema file is located in next folder:
 # `test_files\policy-store_ok`
 
@@ -36,12 +36,10 @@ test_cases_err = [
 
 
 @ pytest.mark.parametrize("policy_file_name,expected_error", test_cases_err)
-def test_load_policy_store(sample_bootstrap_config, policy_file_name, expected_error):
+def test_load_policy_store(policy_file_name, expected_error):
     # map fixture to variable with shorter name for readability
-    config = sample_bootstrap_config
 
-    policy_store_location = join(TEST_FILES_PATH, policy_file_name)
-    config.policy_store_local_fn = policy_store_location
+    config = load_bootstrap_config(policy_store_location=join(TEST_FILES_PATH, policy_file_name))
 
     try:
         # initialize cedarling
@@ -62,23 +60,22 @@ def test_load_policy_store(sample_bootstrap_config, policy_file_name, expected_e
         raise Exception("expected error not found")
 
 
-def test_load_policy_store_ok(sample_bootstrap_config):
+def test_load_policy_store_ok():
     # map fixture to variable with shorter name for readability
-    config = sample_bootstrap_config
-
     policy_store_location = join(TEST_FILES_PATH, "policy-store_ok.yaml")
-    config.policy_store_local_fn = policy_store_location
+
+    config = load_bootstrap_config(policy_store_location)
 
     # initialize cedarling
     Cedarling(config)
 
 
-def test_policy_store_source_wrong_type(sample_bootstrap_config):
+def test_policy_store_source_wrong_type():
     # map fixture to variable with shorter name for readability
-    config = sample_bootstrap_config
 
     try:
-        policy_store_location = "wrong type file"
-        config.policy_store_local_fn = policy_store_location
-    except TypeError:
+        load_bootstrap_config("invalid_config.abc")
+    except ValueError:
         pass
+    else:
+        assert False, "ValueError was not raised when a policy store has an unsupported file type"

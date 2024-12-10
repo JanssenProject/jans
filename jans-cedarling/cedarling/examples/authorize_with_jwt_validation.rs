@@ -39,7 +39,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Initialize the main Cedarling instance, responsible for policy-based authorization.
     // This setup includes basic application information, logging configuration, and
     // policy store configuration.
-    let cedarling = Cedarling::new(BootstrapConfig {
+    let cedarling = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
             log_type: LogTypeConfig::StdOut,
