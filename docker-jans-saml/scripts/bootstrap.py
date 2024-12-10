@@ -214,6 +214,12 @@ class PersistenceSetup:
 
 
 def render_keycloak_creds():
+    # Keycloak UI requires initial admin credentials (username + password) that configured using
+    # KEYCLOAK_ADMIN and KEYCLOAK_ADMIN_PASSWORD env vars; note that exporting env vars via Python
+    # os.environ wont work because the process wont alter the parent's environment, hence we create
+    # credentials file in order to make shell script parse and pass the credentials via export command;
+    # for security purpose, it's recommended to remove the credentials file after shell script finished
+    # exporting the env vars
     creds_file = os.environ.get("CN_SAML_KC_ADMIN_CREDENTIALS_FILE", "/etc/jans/conf/kc_admin_creds")
 
     if not os.path.isfile(creds_file):

@@ -404,12 +404,6 @@ class MysqlKeycloak:
 def main():
     manager = get_manager()
 
-    creds_file = os.environ.get("CN_SAML_KC_ADMIN_CREDENTIALS_FILE", "/etc/jans/conf/kc_admin_creds")
-
-    with open(creds_file) as f:
-        creds = f.read().strip()
-        admin_username, admin_password = base64.b64decode(creds).decode().strip().split(":")
-
     ctx = {
         "jans_idp_realm": "jans",
         "jans_idp_client_id": manager.config.get("jans_idp_client_id"),
@@ -427,7 +421,7 @@ def main():
 
     with manager.create_lock("saml-configure-kc"):
         logger.info("Configuring Keycloak (if required)")
-        kc = KC(admin_username, admin_password, base_dir, ctx)
+        kc = KC(manager.config.get("kc_admin_username"), manager.secret.get("kc_admin_password"), base_dir, ctx)
         kc.login()
 
         kc.render_templates(templates=[
