@@ -5,7 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::interface::{Log, LogStorage, LogWriter};
+use super::interface::{LogStorage, LogWriter, Loggable};
 use super::memory_logger::MemoryLogger;
 use super::nop_logger::NopLogger;
 use super::stdout_logger::StdOutLogger;
@@ -16,8 +16,9 @@ use crate::bootstrap_config::log_config::LogTypeConfig;
 /// LogStrategy implements strategy pattern for logging.
 /// It is used to provide a single point of access for logging and same api for different loggers.
 pub(crate) enum LogStrategy {
+    Off(NopLogger),
     MemoryLogger(MemoryLogger),
-    OnlyWriter(Box<dyn LogWriter + Send + Sync>),
+    StdOut(StdOutLogger),
 }
 
 impl LogStrategy {
@@ -25,9 +26,9 @@ impl LogStrategy {
     /// Initializes the corresponding logger accordingly.
     pub fn new(config: &LogConfig) -> Self {
         match config.log_type {
-            LogTypeConfig::Off => Self::OnlyWriter(Box::new(NopLogger)),
+            LogTypeConfig::Off => Self::Off(NopLogger),
             LogTypeConfig::Memory(config) => Self::MemoryLogger(MemoryLogger::new(config)),
-            LogTypeConfig::StdOut => Self::OnlyWriter(Box::new(StdOutLogger::new())),
+            LogTypeConfig::StdOut => Self::StdOut(StdOutLogger::new()),
             LogTypeConfig::Lock => todo!(),
         }
     }
@@ -35,10 +36,11 @@ impl LogStrategy {
 
 // Implementation of LogWriter
 impl LogWriter for LogStrategy {
-    fn log(&self, entry: LogEntry) {
+    fn log_any<T: Loggable>(&self, entry: T) {
         match self {
-            Self::MemoryLogger(memory_logger) => memory_logger.log(entry),
-            Self::OnlyWriter(log_writer) => log_writer.log(entry),
+            LogStrategy::Off(log) => log.log_any(entry),
+            LogStrategy::MemoryLogger(memory_logger) => memory_logger.log_any(entry),
+            LogStrategy::StdOut(std_out_logger) => std_out_logger.log_any(entry),
         }
     }
 }
@@ -49,23 +51,21 @@ impl LogStorage for LogStrategy {
     fn pop_logs(&self) -> Vec<LogEntry> {
         match self {
             Self::MemoryLogger(memory_logger) => memory_logger.pop_logs(),
-            Self::OnlyWriter(_log_writer) => Vec::new(),
+            _ => Vec::new(),
         }
     }
 
     fn get_log_by_id(&self, id: &str) -> Option<LogEntry> {
         match self {
             Self::MemoryLogger(memory_logger) => memory_logger.get_log_by_id(id),
-            Self::OnlyWriter(_log_writer) => None,
+            _ => None,
         }
     }
 
     fn get_log_ids(&self) -> Vec<String> {
         match self {
             Self::MemoryLogger(memory_logger) => memory_logger.get_log_ids(),
-            Self::OnlyWriter(_log_writer) => Vec::new(),
+            _ => Vec::new(),
         }
     }
 }
-
-impl Log for LogStrategy {}

@@ -138,7 +138,15 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<argLine>-Xms1024m -Xmx2048m -XX:MaxMetaspaceSize=512m -XX:+DisableExplicitGC
+                <properties>
+                    <configurationParameters>
+                        junit.jupiter.conditions.deactivate = *
+                        junit.jupiter.extensions.autodetection.enabled = true
+                        junit.jupiter.testinstance.lifecycle.default = per_class
+                        junit.jupiter.execution.parallel.enabled = true
+                    </configurationParameters>
+                </properties>
+     					<argLine>-Xms1024m -Xmx2048m -XX:MaxMetaspaceSize=512m -XX:+DisableExplicitGC
 						-Djans.base=${project.build.directory}
 						-Dlog.base=${project.build.directory}
 						-Dgluu.disable.scheduler=true
@@ -571,6 +579,12 @@
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
 			<artifactId>json-simple</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.mvel</groupId>
@@ -591,11 +605,44 @@
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<scope>test</scope>
-            <version>6.14.3</version> <!-- we need 6.14.3 due to Arquillian -->
 		</dependency>
+		<!-- Test -->
 		<dependency>
 			<groupId>org.jboss.weld</groupId>
 			<artifactId>weld-junit5</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- JUnit Jupiter -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-params</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- Mockito -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-inline</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.surefire</groupId>
+			<artifactId>surefire-testng</artifactId>
+			<version>3.5.2</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -773,7 +820,7 @@
                     <artifactId>jakarta.ejb-api</artifactId>
                 </dependency>
 
- 
+
 				<!-- Test: Embedded Jetty -->
 				<dependency>
 					<groupId>org.jboss.arquillian.container</groupId>
@@ -826,7 +873,7 @@
 								</manifest>
 								<manifestEntries>
 									<Implementation-Build>${buildNumber}</Implementation-Build>
-                                    <!--suppress UnresolvedMavenProperty -->
+									<!--suppress UnresolvedMavenProperty -->
                                     <Build-Branch>${git.branch}</Build-Branch>
 								</manifestEntries>
 							</archive>
@@ -1051,7 +1098,7 @@
 				</repository>
 			</repositories>
 			<dependencies>
-<!--
+				<!--
 				<dependency>
 				    <groupId>com.eatthepath</groupId>
 				    <artifactId>pushy</artifactId>
