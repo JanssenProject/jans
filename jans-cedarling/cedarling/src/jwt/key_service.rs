@@ -51,7 +51,7 @@ impl KeyService {
     /// [`RFC 7517`]: https://datatracker.ietf.org/doc/html/rfc7517
     pub fn new_from_str(key_stores: &str) -> Result<Self, KeyServiceError> {
         let parsed_stores = serde_json::from_str::<HashMap<String, Value>>(key_stores)
-            .map_err(|e| KeyServiceError::DecodeJwkStores(e, key_stores.to_string()))?;
+            .map_err(|e| KeyServiceError::DecodeJwkStores(e))?;
         let mut key_stores = HashMap::new();
         for (iss_id, keys) in &parsed_stores {
             let iss_id = TrustedIssuerId::from(iss_id.as_str());
@@ -115,8 +115,8 @@ impl KeyService {
 
 #[derive(thiserror::Error, Debug)]
 pub enum KeyServiceError {
-    #[error("Failed to decode JWK Stores from string: {0}\n{1}\n")]
-    DecodeJwkStores(serde_json::Error, String),
+    #[error("Failed to decode JWK Stores from string: {0}")]
+    DecodeJwkStores(serde_json::Error),
     #[error("Failed to make HTTP Request: {0}")]
     Http(#[from] HttpClientError),
     #[error("Failed to load JWKS: {0}")]
