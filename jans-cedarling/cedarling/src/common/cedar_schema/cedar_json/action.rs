@@ -42,7 +42,7 @@ impl Action<'_> {
     /// `type` and `id`) and other values, which can be mapped through the provided
     /// `id_mapping` and `value_mapping`.
     ///
-    /// The `id_mapping` param is a A `HashMap` that maps context attribute keys 
+    /// The `id_mapping` param is a A `HashMap` that maps context attribute keys
     /// (like `"access_token"`) to their corresponding `id`s (like `"acs-tkn-1"`).
     ///
     /// # Usage Example
@@ -58,18 +58,13 @@ impl Action<'_> {
         let mut json = json!({});
 
         for attr in self.context_entities.iter() {
-            match &attr.kind {
-                // Case: the attribute is an entity reference
-                CedarType::TypeName(type_name) => {
-                    let id = match id_mapping.remove(&attr.key) {
-                        Some(val) => val,
-                        None => Err(BuildJsonCtxError::MissingIdMapping(attr.key.clone()))?,
-                    };
-                    let type_name = format!("{}::{}", attr.namespace, type_name);
-                    json[attr.key.clone()] = json!({"type": type_name, "id": id});
-                },
-                // Case: the attribute is not a reference
-                _ => {},
+            if let CedarType::TypeName(type_name) = &attr.kind {
+                let id = match id_mapping.remove(&attr.key) {
+                    Some(val) => val,
+                    None => Err(BuildJsonCtxError::MissingIdMapping(attr.key.clone()))?,
+                };
+                let type_name = format!("{}::{}", attr.namespace, type_name);
+                json[attr.key.clone()] = json!({"type": type_name, "id": id});
             }
         }
 
