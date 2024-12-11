@@ -10,6 +10,7 @@ use super::{
     IdTokenTrustMode, JwtConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig,
     PolicyStoreSource, TokenValidationConfig,
 };
+use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
 use std::{collections::HashSet, fmt::Display, fs, path::Path, str::FromStr};
@@ -73,6 +74,10 @@ pub struct BootstrapConfigRaw {
     /// - **OR**: authz will be successful if `USER` **OR** `WORKLOAD` is valid.
     #[serde(rename = "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION", default)]
     pub usr_workload_bool_op: WorkloadBoolOp,
+
+    /// Log level filter for logging. TRACE is lowest. FATAL is highest.
+    #[serde(rename = "CEDARLING_LOG_LEVEL", default)]
+    pub log_level: LogLevel,
 
     /// Path to a local file pointing containing a JWKS.
     #[serde(
@@ -414,7 +419,10 @@ impl BootstrapConfig {
             LoggerType::StdOut => LogTypeConfig::StdOut,
             LoggerType::Lock => LogTypeConfig::Lock,
         };
-        let log_config = LogConfig { log_type };
+        let log_config = LogConfig {
+            log_type,
+            log_level: raw.log_level,
+        };
 
         // Decode policy store
         let policy_store_config = match (

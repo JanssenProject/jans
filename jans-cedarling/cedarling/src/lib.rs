@@ -39,8 +39,8 @@ use init::ServiceFactory;
 use common::app_types;
 use log::interface::LogWriter;
 use log::LogEntry;
-pub use log::LogStorage;
 use log::LogType;
+pub use log::{LogLevel, LogStorage};
 
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;

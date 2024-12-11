@@ -17,6 +17,7 @@ fn test_new_log_strategy_off() {
     // Arrange
     let config = LogConfig {
         log_type: log_config::LogTypeConfig::Off,
+        log_level: crate::LogLevel::DEBUG,
     };
 
     // Act
@@ -31,6 +32,7 @@ fn test_new_log_strategy_memory() {
     // Arrange
     let config = LogConfig {
         log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
+        log_level: crate::LogLevel::DEBUG,
     };
 
     // Act
@@ -45,6 +47,7 @@ fn test_new_logstrategy_stdout() {
     // Arrange
     let config = LogConfig {
         log_type: log_config::LogTypeConfig::StdOut,
+        log_level: crate::LogLevel::DEBUG,
     };
 
     // Act
@@ -59,6 +62,7 @@ fn test_log_memory_logger() {
     // Arrange
     let config = LogConfig {
         log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
+        log_level: crate::LogLevel::DEBUG,
     };
     let strategy = LogStrategy::new(&config);
     let entry = LogEntry {
