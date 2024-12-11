@@ -16,6 +16,7 @@ class FidoInstaller(JettyInstaller):
                 (os.path.join(Config.dist_app_dir, os.path.basename(base.current_app.app_info['APPLE_WEBAUTHN'])), base.current_app.app_info['APPLE_WEBAUTHN']),
                 (os.path.join(Config.dist_app_dir, 'fido2/mds/toc/toc.jwt'), 'https://mds.fidoalliance.org/'),
                 (os.path.join(Config.dist_app_dir, 'fido2/mds/cert/root-r3.crt'), 'https://secure.globalsign.com/cacert/root-r3.crt'),
+                (os.path.join(Config.dist_jans_dir, 'fido2-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/fido2-plugin/{0}/fido2-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
                 ]
 
     def __init__(self):
@@ -42,9 +43,6 @@ class FidoInstaller(JettyInstaller):
         self.logIt("Copying fido.war into jetty webapps folder...")
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
-
-        if Config.installed_instance and Config.install_config_api:
-            base.current_app.ConfigApiInstaller.install_plugin('fido2-plugin')
 
         self.enable()
 
@@ -92,3 +90,6 @@ class FidoInstaller(JettyInstaller):
                 os.path.join(Config.dist_app_dir, 'fido2'),
                 self.fido2ConfigFolder
             )
+
+    def service_post_install_tasks(self):
+        base.current_app.ConfigApiInstaller.install_plugin('fido2')
