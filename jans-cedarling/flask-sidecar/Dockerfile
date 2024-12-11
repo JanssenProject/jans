@@ -35,13 +35,14 @@ ENV JANS_SOURCE_VERSION=46f9a51ee4b71d94f7e8c4d7e99d959c35510a89
 
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
-COPY ./secrets/bootstrap.json /api/
 
 # create non-root user
 RUN adduser --shell /bin/sh --uid 1000 web \
     && usermod -aG sudo web
 
 WORKDIR /api
+
+COPY --chown=1000:1000 ./secrets/bootstrap.json /api/
 
 RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans /tmp/jans \
         && cd /tmp/jans \
