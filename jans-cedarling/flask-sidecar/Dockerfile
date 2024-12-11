@@ -31,7 +31,7 @@ RUN pip3 install "poetry==$POETRY_VERSION" gunicorn \
 # ===============
 # Project setup
 # ===============
-ENV JANS_SOURCE_VERSION=46f9a51ee4b71d94f7e8c4d7e99d959c35510a89
+ENV JANS_SOURCE_VERSION=92cc167ade06492e25425fa14426722c9882b0ec
 
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
