@@ -350,9 +350,7 @@ fn build_context(
         id_mapping.insert(type_name, type_id.to_string());
     }
 
-    let value_mapping = HashMap::new();
-
-    let entities_context = action_schema.build_ctx_entities_json(id_mapping, value_mapping).unwrap();
+    let entities_context = action_schema.build_ctx_entity_refs_json(id_mapping).unwrap();
 
     let context = merge_json_values(entities_context, request_context)?;
 

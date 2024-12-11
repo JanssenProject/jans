@@ -42,24 +42,18 @@ impl Action<'_> {
     /// `type` and `id`) and other values, which can be mapped through the provided
     /// `id_mapping` and `value_mapping`.
     ///
-    /// # Params
-    ///
-    /// - `id_mapping`: A `HashMap` that maps context attribute keys (like `"access_token"`)
-    ///   to their corresponding `id`s (like `"acs-tkn-1"`).
-    /// - `value_mapping`: A `HashMap` that maps context attribute keys (like `"time"`) to
-    ///   their corresponding values (e.g., `json!(123123123)`).
+    /// The `id_mapping` param is a A `HashMap` that maps context attribute keys 
+    /// (like `"access_token"`) to their corresponding `id`s (like `"acs-tkn-1"`).
     ///
     /// # Usage Example
     ///
     /// ```rs
     /// let id_mapping = HashMap::from([("access_token".to_string(), "acs-tkn-1".to_string())]);
-    /// let value_mapping = HashMap::from([("time".to_string(), json!(123123123))]);
     /// let json = action.build_ctx_entities_json(id_mapping, value_mapping);
     /// ```
-    pub fn build_ctx_entities_json(
+    pub fn build_ctx_entity_refs_json(
         &self,
         mut id_mapping: HashMap<String, String>,
-        mut value_mapping: HashMap<String, Value>,
     ) -> Result<Value, BuildJsonCtxError> {
         let mut json = json!({});
 
@@ -75,13 +69,7 @@ impl Action<'_> {
                     json[attr.key.clone()] = json!({"type": type_name, "id": id});
                 },
                 // Case: the attribute is not a reference
-                _ => {
-                    let val = match value_mapping.remove(&attr.key) {
-                        Some(val) => val,
-                        None => Err(BuildJsonCtxError::MissingValueMapping(attr.key.clone()))?,
-                    };
-                    json[attr.key.clone()] = val;
-                },
+                _ => {},
             }
         }
 

@@ -379,9 +379,8 @@ mod tests {
             ("user".into(), "user-123".into()),
             ("workload".into(), "workload-321".into()),
         ]);
-        let value_mapping = HashMap::from([("time".into(), json!(123123123))]);
         let ctx_json = action
-            .build_ctx_entities_json(id_mapping, value_mapping)
+            .build_ctx_entity_refs_json(id_mapping)
             .expect("Should build JSON context");
         assert_eq!(
             ctx_json,
@@ -389,7 +388,6 @@ mod tests {
                 "access_token": { "type": "Jans::Access_token", "id": "tkn-1" },
                 "user": { "type": "Jans::User", "id": "user-123" },
                 "workload": { "type": "Jans::Workload", "id": "workload-321" },
-                "time": 123123123,
             })
         )
     }
