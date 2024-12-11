@@ -121,6 +121,14 @@
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.prometheus</groupId>
+			<artifactId>simpleclient_common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.agkn</groupId>
+			<artifactId>hll</artifactId>
+		</dependency>
 
 		<!-- RestEasy -->
 		<dependency>
