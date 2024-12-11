@@ -199,16 +199,16 @@ error : str
     The error message describing the evaluation failure.
 ___
 
-# authorize_errors.AccessTokenEntitiesError
-Error encountered while creating access token entities
-___
-
 # authorize_errors.ActionError
 Error encountered while parsing Action to EntityUid
 ___
 
 # authorize_errors.AuthorizeError
 Exception raised by authorize_errors
+___
+
+# authorize_errors.CreateAccessTokenEntityError
+Error encountered while creating access_token entity
 ___
 
 # authorize_errors.CreateContextError
@@ -233,6 +233,10 @@ ___
 
 # authorize_errors.CreateUserinfoTokenEntityError
 Error encountered while creating Userinfo_token entity
+___
+
+# authorize_errors.CreateWorkloadEntityError
+Error encountered while creating workload entity
 ___
 
 # authorize_errors.EntitiesError
