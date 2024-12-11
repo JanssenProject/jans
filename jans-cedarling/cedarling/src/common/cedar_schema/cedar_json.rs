@@ -15,11 +15,13 @@ mod action;
 mod entity_types;
 
 use action::ActionSchema;
+use derive_more::derive::Display;
 use std::collections::HashMap;
 
 pub use entity_types::{CedarSchemaEntityShape, CedarSchemaRecord};
 
 /// Represent `cedar-policy` schema type for external usage.
+#[derive(Debug, PartialEq, Hash, Eq, Display)]
 pub enum CedarType {
     Long,
     String,
@@ -104,6 +106,8 @@ pub struct CedarSchemaEntities {
 mod tests {
     use super::entity_types::*;
     use super::*;
+    use action::CtxAttribute;
+    use serde_json::json;
     use std::collections::HashSet;
     use test_utils::assert_eq;
     use test_utils::SortedJson;
@@ -305,12 +309,30 @@ mod tests {
 
     #[test]
     fn can_parse_action_with_ctx() {
-        let expected = HashSet::from([
-            "Workload".into(),
-            "User".into(),
-            "Issue".into(),
-            "Access_token".into(),
-            "TrustedIssuer".into(),
+        let expected_principal_entities =
+            HashSet::from(["Jans::Workload".into(), "Jans::User".into()]);
+        let expected_resource_entities = HashSet::from(["Jans::Issue".into()]);
+        let expected_context_entities = HashSet::from([
+            CtxAttribute {
+                namespace: "Jans".into(),
+                key: "access_token".into(),
+                kind: CedarType::TypeName("Access_token".to_string()),
+            },
+            CtxAttribute {
+                namespace: "Jans".into(),
+                key: "time".into(),
+                kind: CedarType::Long,
+            },
+            CtxAttribute {
+                namespace: "Jans".into(),
+                key: "user".into(),
+                kind: CedarType::TypeName("User".to_string()),
+            },
+            CtxAttribute {
+                namespace: "Jans".into(),
+                key: "workload".into(),
+                kind: CedarType::TypeName("Workload".to_string()),
+            },
         ]);
 
         // Test case where the context is a record:
@@ -330,7 +352,9 @@ mod tests {
             .find_action("Update", "Jans")
             .expect("Should not error while finding action")
             .expect("Action should not be none");
-        assert_eq!(action.entities, expected);
+        assert_eq!(action.principal_entities, expected_principal_entities);
+        assert_eq!(action.resource_entities, expected_resource_entities);
+        assert_eq!(action.context_entities, expected_context_entities);
 
         // Test case where the context is a type:
         // action "Update" appliesTo {
@@ -345,6 +369,27 @@ mod tests {
             .find_action("Update", "Jans")
             .expect("Should not error while finding action")
             .expect("Action should not be none");
-        assert_eq!(action.entities, expected);
+        assert_eq!(action.principal_entities, expected_principal_entities);
+        assert_eq!(action.resource_entities, expected_resource_entities);
+        assert_eq!(action.context_entities, expected_context_entities);
+
+        let id_mapping = HashMap::from([
+            ("access_token".into(), "tkn-1".into()),
+            ("user".into(), "user-123".into()),
+            ("workload".into(), "workload-321".into()),
+        ]);
+        let value_mapping = HashMap::from([("time".into(), json!(123123123))]);
+        let ctx_json = action
+            .build_ctx_entities_json(id_mapping, value_mapping)
+            .expect("Should build JSON context");
+        assert_eq!(
+            ctx_json,
+            json!({
+                "access_token": { "type": "Jans::Access_token", "id": "tkn-1" },
+                "user": { "type": "Jans::User", "id": "user-123" },
+                "workload": { "type": "Jans::Workload", "id": "workload-321" },
+                "time": 123123123,
+            })
+        )
     }
 }

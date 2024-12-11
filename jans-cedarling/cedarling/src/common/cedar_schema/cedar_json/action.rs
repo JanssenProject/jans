@@ -5,21 +5,98 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use crate::common::cedar_schema::cedar_json::SchemaDefinedType;
+
 use super::{
     entity_types::{
         CedarSchemaEntityAttribute, CedarSchemaEntityType, PrimitiveType, PrimitiveTypeKind,
     },
-    CedarSchemaJson, CedarSchemaRecord, CedarType, GetCedarTypeError, SchemaDefinedType,
+    CedarSchemaEntities, CedarSchemaJson, CedarSchemaRecord, CedarType, GetCedarTypeError,
 };
 use serde::{de, ser::SerializeMap, Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
 
-type EntityRef = String;
 type AttrName = String;
 
-pub struct Action {
-    pub entities: HashSet<String>,
+#[derive(Debug, Eq, Hash, PartialEq)]
+pub struct CtxAttribute {
+    pub namespace: String,
+    pub key: String,
+    pub kind: CedarType,
+}
+
+pub struct Action<'a> {
+    pub principal_entities: HashSet<String>,
+    pub resource_entities: HashSet<String>,
+    pub context_entities: HashSet<CtxAttribute>,
+    pub schema_entities: &'a CedarSchemaEntities,
+    pub schema: &'a ActionSchema,
+}
+
+impl Action<'_> {
+    /// Builds the JSON representation of context entities for a given action.
+    ///
+    /// This method processes the context attributes of the action and generates a
+    /// corresponding JSON value. The context may include entity references (with
+    /// `type` and `id`) and other values, which can be mapped through the provided
+    /// `id_mapping` and `value_mapping`.
+    ///
+    /// # Params
+    ///
+    /// - `id_mapping`: A `HashMap` that maps context attribute keys (like `"access_token"`)
+    ///   to their corresponding `id`s (like `"acs-tkn-1"`).
+    /// - `value_mapping`: A `HashMap` that maps context attribute keys (like `"time"`) to
+    ///   their corresponding values (e.g., `json!(123123123)`).
+    ///
+    /// # Usage Example
+    ///
+    /// ```rs
+    /// let id_mapping = HashMap::from([("access_token".to_string(), "acs-tkn-1".to_string())]);
+    /// let value_mapping = HashMap::from([("time".to_string(), json!(123123123))]);
+    /// let json = action.build_ctx_entities_json(id_mapping, value_mapping);
+    /// ```
+    pub fn build_ctx_entities_json(
+        &self,
+        mut id_mapping: HashMap<String, String>,
+        mut value_mapping: HashMap<String, Value>,
+    ) -> Result<Value, BuildJsonCtxError> {
+        let mut json = json!({});
+
+        for attr in self.context_entities.iter() {
+            match &attr.kind {
+                // Case: the attribute is an entity reference
+                CedarType::TypeName(type_name) => {
+                    let id = match id_mapping.remove(&attr.key) {
+                        Some(val) => val,
+                        None => Err(BuildJsonCtxError::MissingIdMapping(attr.key.clone()))?,
+                    };
+                    let type_name = format!("{}::{}", attr.namespace, type_name);
+                    json[attr.key.clone()] = json!({"type": type_name, "id": id});
+                },
+                // Case: the attribute is not a reference
+                _ => {
+                    let val = match value_mapping.remove(&attr.key) {
+                        Some(val) => val,
+                        None => Err(BuildJsonCtxError::MissingValueMapping(attr.key.clone()))?,
+                    };
+                    json[attr.key.clone()] = val;
+                },
+            }
+        }
+
+        Ok(json)
+    }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum BuildJsonCtxError {
+    /// If an entity reference is provided but the ID is missing from `id_mapping`.
+    #[error("An entity reference for `{0}` is required by the schema but an ID was not provided via the `id_mapping`")]
+    MissingIdMapping(String),
+    /// If a non-entity attribute is provided but the value is missing from `value_mapping`.
+    #[error("A non-entity attribute for `{0}` is required by the schema but a value was not provided via the `value_mapping`")]
+    MissingValueMapping(String),
 }
 
 impl CedarSchemaJson {
@@ -33,115 +110,75 @@ impl CedarSchemaJson {
             Some(entities) => entities,
             None => return Ok(None),
         };
+
         let action_schema = match schema_entities.actions.get(action_name) {
             Some(schema) => schema,
             None => return Ok(None),
         };
 
-        let mut entities = HashSet::new();
-
+        let mut principal_entities = HashSet::new();
         for res_type in action_schema.principal_types.iter().map(|s| s.as_str()) {
-            self.collect_entities(res_type, namespace, &mut entities)?;
+            principal_entities.insert(format!("{}::{}", namespace, res_type));
         }
+        let mut resource_entities = HashSet::new();
         for res_type in action_schema.resource_types.iter().map(|s| s.as_str()) {
-            self.collect_entities(res_type, namespace, &mut entities)?;
+            resource_entities.insert(format!("{}::{}", namespace, res_type));
         }
+        let mut context_entities = HashSet::new();
         if let Some(ctx) = &action_schema.context {
-            self.process_action_context(ctx, namespace, &mut entities)?;
+            self.process_action_context(ctx, namespace, &mut context_entities)?;
         }
 
-        Ok(Some(Action { entities }))
-    }
-
-    /// Collect all entities recursively for a given type
-    fn collect_entities(
-        &self,
-        type_name: &str,
-        namespace: &str,
-        entities: &mut HashSet<String>,
-    ) -> Result<(), FindActionError> {
-        if let Some(defined_type) = self.find_type(type_name, namespace) {
-            match defined_type {
-                SchemaDefinedType::Entity(shape) => {
-                    if !entities.contains(type_name) {
-                        entities.insert(type_name.to_string());
-                    }
-                    if let Some(shape) = &shape.shape {
-                        for attr in shape.attributes.values() {
-                            self.process_attribute(attr, namespace, entities)?;
-                        }
-                    }
-                },
-                SchemaDefinedType::CommonType(record) => {
-                    for attr in record.attributes.values() {
-                        self.process_attribute(attr, namespace, entities)?;
-                    }
-                },
-            }
-        }
-
-        Ok(())
-    }
-
-    /// Process a single attribute and collect its entities recursively
-    fn process_attribute<'a>(
-        &'a self,
-        attr: &CedarSchemaEntityAttribute,
-        namespace: &str,
-        entities: &mut HashSet<String>,
-    ) -> Result<(), FindActionError> {
-        match attr.get_type()? {
-            CedarType::TypeName(type_name) => {
-                self.collect_entities(&type_name, namespace, entities)?;
-            },
-            CedarType::Set(inner_type) => {
-                if let CedarType::TypeName(type_name) = *inner_type {
-                    self.collect_entities(&type_name, namespace, entities)?;
-                }
-            },
-            _ => {}, // Ignore non-entity types
-        }
-
-        Ok(())
+        Ok(Some(Action {
+            principal_entities,
+            resource_entities,
+            context_entities,
+            schema_entities,
+            schema: action_schema,
+        }))
     }
 
     fn process_action_context(
         &self,
         ctx: &RecordOrType,
         namespace: &str,
-        entities: &mut HashSet<String>,
+        entities: &mut HashSet<CtxAttribute>,
     ) -> Result<(), FindActionError> {
         match ctx {
             RecordOrType::Record(record) => {
-                for attr in record.attributes.values() {
-                    self.process_attribute(attr, namespace, entities)?;
+                for (key, attr) in record.attributes.iter() {
+                    entities.insert(CtxAttribute {
+                        namespace: namespace.to_string(),
+                        key: key.to_string(),
+                        kind: attr.get_type()?,
+                    });
                 }
             },
             RecordOrType::Type(entity_type) => match entity_type {
-                CedarSchemaEntityType::Typed(entity_type) => {
-                    self.collect_entities(&entity_type.kind, namespace, entities)?;
-                },
                 CedarSchemaEntityType::Primitive(primitive_type) => {
                     if let PrimitiveTypeKind::TypeName(type_name) = &primitive_type.kind {
-                        self.collect_entities(type_name, namespace, entities)?;
+                        let cedar_type = self.find_type(type_name, namespace).unwrap();
+                        match cedar_type {
+                            SchemaDefinedType::CommonType(common) => {
+                                for (key, attr) in common.attributes.iter() {
+                                    entities.insert(CtxAttribute {
+                                        namespace: namespace.to_string(),
+                                        key: key.to_string(),
+                                        kind: attr.get_type()?,
+                                    });
+                                }
+                            },
+                            SchemaDefinedType::Entity(_) => {
+                                Err(FindActionError::EntityContext(entity_type.clone()))?
+                            },
+                        }
                     }
                 },
-                CedarSchemaEntityType::Set(set_entity_type) => match &set_entity_type.element {
-                    CedarSchemaEntityType::Set(inner) => {
-                        self.process_action_context(
-                            &RecordOrType::Type(CedarSchemaEntityType::Set(inner.clone())),
-                            namespace,
-                            entities,
-                        )?;
-                    },
-                    CedarSchemaEntityType::Typed(entity_type) => {
-                        self.collect_entities(&entity_type.kind, namespace, entities)?;
-                    },
-                    CedarSchemaEntityType::Primitive(primitive_type) => {
-                        if let PrimitiveTypeKind::TypeName(type_name) = &primitive_type.kind {
-                            self.collect_entities(type_name, namespace, entities)?;
-                        }
-                    },
+                CedarSchemaEntityType::Set(_) => {
+                    Err(FindActionError::SetContext(entity_type.clone()))?
+                },
+                CedarSchemaEntityType::Typed(_) => {
+                    Err(FindActionError::TypedContext(entity_type.clone()))?
                 },
             },
         }
@@ -153,8 +190,8 @@ impl CedarSchemaJson {
 /// Represents an action in the Cedar JSON schema
 #[derive(Default, Debug, PartialEq, Clone)]
 pub struct ActionSchema {
-    pub resource_types: HashSet<EntityRef>,
-    pub principal_types: HashSet<EntityRef>,
+    pub resource_types: HashSet<String>,
+    pub principal_types: HashSet<String>,
     pub context: Option<RecordOrType>,
 }
 
@@ -257,6 +294,12 @@ impl<'de> Deserialize<'de> for RecordOrType {
 pub enum FindActionError {
     #[error("Error while collecting entities from action schema: {0}")]
     CollectEntities(#[from] GetCedarTypeError),
+    #[error("Using `Set` as the context type is unsupported: {0:#?}")]
+    SetContext(CedarSchemaEntityType),
+    #[error("Using `Entity` as the context type is unsupported: {0:#?}")]
+    EntityContext(CedarSchemaEntityType),
+    #[error("Using `Typed` as the context type is unsupported: {0:#?}")]
+    TypedContext(CedarSchemaEntityType),
 }
 
 #[cfg(test)]
