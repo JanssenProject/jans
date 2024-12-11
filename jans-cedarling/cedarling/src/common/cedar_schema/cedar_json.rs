@@ -18,6 +18,7 @@ use action::ActionSchema;
 use derive_more::derive::Display;
 use std::collections::HashMap;
 
+pub use action::{BuildJsonCtxError, FindActionError};
 pub use entity_types::{CedarSchemaEntityShape, CedarSchemaRecord};
 
 /// Represent `cedar-policy` schema type for external usage.

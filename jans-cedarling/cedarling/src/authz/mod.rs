@@ -15,6 +15,7 @@ use std::sync::Arc;
 
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types;
+use crate::common::cedar_schema::cedar_json::{BuildJsonCtxError, FindActionError};
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt;
 use crate::log::interface::LogWriter;
@@ -31,7 +32,7 @@ pub(crate) mod request;
 mod token_data;
 
 pub use authorize_result::AuthorizeResult;
-use cedar_policy::{Entities, Entity, EntityUid, Response};
+use cedar_policy::{ContextJsonError, Entities, Entity, EntityUid, Response};
 use entities::CedarPolicyCreateTypeError;
 use entities::ProcessTokensResult;
 use entities::ResourceEntityError;
@@ -42,7 +43,7 @@ use entities::{
 use entities::{create_resource_entity, AccessTokenEntities};
 use merge_json::{merge_json_values, MergeError};
 use request::Request;
-use serde_json::{json, Value};
+use serde_json::Value;
 use std::time::Instant;
 use token_data::{AccessTokenData, IdTokenData, UserInfoTokenData};
 
@@ -122,6 +123,7 @@ impl Authz {
         let principal_user_entity_uid = entities_data.user_entity.uid();
 
         let context = build_context(
+            &self.config,
             request.context.clone(),
             &entities_data,
             &schema.schema,
@@ -325,33 +327,33 @@ impl Authz {
 
 /// Constructs the authorization context by adding the built entities from the tokens
 fn build_context(
+    config: &AuthzConfig,
     request_context: Value,
     entities_data: &AuthorizeEntitiesData,
     schema: &cedar_policy::Schema,
     action: &cedar_policy::EntityUid,
-) -> Result<cedar_policy::Context, AuthorizeError> {
-    let entities_context = json!({
-        "user": {"__entity": {
-            "type": entities_data.user_entity.uid().type_name().to_string(),
-            "id": entities_data.user_entity.uid().id().escaped(),
-        }},
-        "workload": {"__entity": {
-            "type": entities_data.access_token_entities.workload_entity.uid().type_name().to_string(),
-            "id": entities_data.access_token_entities.workload_entity.uid().id().escaped(),
-        }},
-        "access_token": {"__entity": {
-            "type": entities_data.access_token_entities.access_token_entity.uid().type_name().to_string(),
-            "id": entities_data.access_token_entities.access_token_entity.uid().id().escaped(),
-        }},
-        "id_token": {"__entity": {
-            "type": entities_data.id_token_entity.uid().type_name().to_string(),
-            "id": entities_data.id_token_entity.uid().id().escaped(),
-        }},
-        "userinfo_token": {"__entity": {
-            "type": entities_data.userinfo_token.uid().type_name().to_string(),
-            "id": entities_data.userinfo_token.uid().id().escaped(),
-        }},
-    });
+) -> Result<cedar_policy::Context, BuildContextError> {
+    let namespace = config.policy_store.namespace();
+    let action_name = action.id().escaped().to_string();
+    let action_schema = config.policy_store.schema.json.
+        find_action(&action_name, namespace)
+        .map_err(|e| BuildContextError::FindActionSchema(action_name.clone(), e))?
+        .ok_or(BuildContextError::MissingActionSchema(action_name))?;
+    
+    let mut id_mapping = HashMap::new();
+    for entity in entities_data.iter() {
+        // we strip the namespace from the type_name then make it lowercase
+        // example: 'Jans::Id_token' -> 'id_token'
+        let type_name = entity.uid().type_name().to_string();
+        let type_name = type_name.strip_prefix(&format!("{}::", namespace)).unwrap_or(&type_name).to_lowercase();
+        let type_id = entity.uid().id().escaped();
+        id_mapping.insert(type_name, type_id.to_string());
+    }
+
+    let value_mapping = HashMap::new();
+
+    let entities_context = action_schema.build_ctx_entities_json(id_mapping, value_mapping).unwrap();
+
     let context = merge_json_values(entities_context, request_context)?;
 
     let context: cedar_policy::Context =
@@ -395,6 +397,19 @@ impl AuthorizeEntitiesData {
         .into_iter()
         .chain(self.access_token_entities.into_iter())
         .chain(self.role_entities)
+    }
+
+    /// Create iterator to get all entities
+    fn iter(&self) -> impl Iterator<Item = &Entity> {
+        vec![
+            &self.id_token_entity,
+            &self.userinfo_token,
+            &self.user_entity,
+            &self.resource_entity,
+        ]
+        .into_iter()
+        .chain(self.access_token_entities.iter())
+        .chain(&self.role_entities)
     }
 
     /// Collect all entities to [`cedar_policy::Entities`]
@@ -445,13 +460,33 @@ pub enum AuthorizeError {
     /// Error encountered while collecting all entities
     #[error("could not collect all entities: {0}")]
     Entities(#[from] cedar_policy::entities_errors::EntitiesError),
-    /// Error encountered while validating context according to the schema
-    #[error("could not build context")]
-    BuildContext(#[from] MergeError),
     /// Error encountered while parsing all entities to json for logging
     #[error("could convert entities to json: {0}")]
     EntitiesToJson(serde_json::Error),
+    /// Error encountered while building the context for the request
+    #[error("Failed to build context: {0}")]
+    BuildContext(#[from] BuildContextError),
 }
+
+#[derive(Debug, thiserror::Error)]
+pub enum BuildContextError {
+    /// Error encountered while validating context according to the schema
+    #[error(transparent)]
+    Merge(#[from] MergeError),
+    /// Error encountered while deserializing the Context from JSON
+    #[error(transparent)]
+    DeserializeFromJson(#[from] ContextJsonError),
+    /// Error encountered while deserializing the Context from JSON
+    #[error("Failed to find the action `{0}` in the schema: {0}")]
+    FindActionSchema(String, FindActionError),
+    /// Error encountered while deserializing the Context from JSON
+    #[error("The action `{0}` was not found in the schema")]
+    MissingActionSchema(String),
+    /// Error encountered while deserializing the Context from JSON
+    #[error(transparent)]
+    BuildJson(#[from] BuildJsonCtxError),
+}
+
 
 #[derive(Debug, derive_more::Error, derive_more::Display)]
 #[display("could not create request user entity principal for {uid}: {err}")]

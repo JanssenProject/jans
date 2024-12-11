@@ -44,6 +44,10 @@ impl AccessTokenEntities {
     pub fn into_iter(self) -> impl Iterator<Item = cedar_policy::Entity> {
         vec![self.workload_entity, self.access_token_entity].into_iter()
     }
+
+    pub fn iter(&self) -> impl Iterator<Item = &cedar_policy::Entity> {
+        vec![&self.workload_entity, &self.access_token_entity].into_iter()
+    }
 }
 
 /// Describe errors on creating entites for AccessToken
