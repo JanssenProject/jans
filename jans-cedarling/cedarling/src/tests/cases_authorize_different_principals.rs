@@ -102,6 +102,7 @@ fn success_test_for_principal_workload() {
         crate::AuthorizationConfig {
             use_user_principal: false,
             use_workload_principal: true,
+            user_workload_operator: Default::default(),
             ..Default::default()
         },
     );

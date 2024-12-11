@@ -42,6 +42,8 @@ use log::LogEntry;
 pub use log::LogStorage;
 use log::LogType;
 
+pub use crate::authz::entities::CedarPolicyCreateTypeError;
+
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
 
@@ -75,11 +77,11 @@ pub struct Cedarling {
 
 impl Cedarling {
     /// Create a new instance of the Cedarling application.
-    pub fn new(config: BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
+    pub fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
         let log = log::init_logger(&config.log_config);
         let pdp_id = app_types::PdpID::new();
 
-        let service_config = ServiceConfig::new(&config)
+        let service_config = ServiceConfig::new(config)
             .inspect(|_| {
                 log.log(
                     LogEntry::new_with_data(pdp_id, None, LogType::System)
@@ -94,7 +96,7 @@ impl Cedarling {
                 )
             })?;
 
-        let mut service_factory = ServiceFactory::new(&config, service_config, log.clone(), pdp_id);
+        let mut service_factory = ServiceFactory::new(config, service_config, log.clone(), pdp_id);
 
         Ok(Cedarling {
             log,
