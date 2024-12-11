@@ -69,9 +69,7 @@ class RegistrationViewModel : ViewModel() {
             is RegistrationUiEvent.Submit -> {
                 // TODO Trigger registration in authentication flow
                 registrationState.value = registrationState.value.copy(isRegistrationSuccessful = true)
-            }
-
-            else -> { return false}
+            } else -> { return false}
         }
         return true
     }
@@ -84,9 +82,7 @@ class RegistrationViewModel : ViewModel() {
      */
     private fun validateInputs(): Boolean {
         val username = registrationState.value.username.trim()
-        //val mobileNumberString = registrationState.value.mobileNumber.trim()
         val passwordString = registrationState.value.password.trim()
-        //val confirmPasswordString = registrationState.value.confirmPassword.trim()
 
         return when {
 

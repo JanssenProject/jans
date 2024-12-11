@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
@@ -14,7 +13,6 @@ import com.example.fido2.*
 import com.example.fido2.ui.common.customComposableViews.CustomTextField
 import com.example.fido2.ui.common.customComposableViews.LoginButton
 import com.example.fido2.ui.common.customComposableViews.NormalButton
-import com.example.fido2.ui.common.customComposableViews.PasswordTextField
 import com.example.fido2.ui.screens.unauthenticated.registration.state.RegistrationState
 import com.example.fido2.ui.theme.AppTheme
 import org.jetbrains.compose.resources.stringResource

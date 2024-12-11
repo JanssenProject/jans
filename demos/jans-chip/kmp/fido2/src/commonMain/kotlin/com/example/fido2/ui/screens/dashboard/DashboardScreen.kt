@@ -3,9 +3,11 @@ package com.example.fido2.ui.screens.dashboard
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
@@ -28,8 +30,8 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import com.example.fido2.model.LogoutResponse
 import com.example.fido2.model.UserDetails
-import com.example.fido2.ui.common.customComposableViews.AppAlertDialog
-import com.example.fido2.ui.common.customComposableViews.LogButton
+import com.example.fido2.ui.common.customComposableViews.CustomAlertDialog
+import com.example.fido2.ui.common.customComposableViews.LoginButton
 import com.example.fido2.ui.common.customComposableViews.UserInfoRow
 import com.example.fido2.ui.screens.unauthenticated.login.LoginViewModel
 import com.example.fido2.ui.screens.unauthenticated.login.state.LoginUiEvent
@@ -46,10 +48,14 @@ fun DashboardScreen(
     val shouldShowDialog = remember { mutableStateOf(false) }
     val dialogContent = remember { mutableStateOf("") }
 
-    AppAlertDialog(
-        shouldShowDialog = shouldShowDialog,
-        content = dialogContent
-    )
+    CustomAlertDialog(
+        stringResource(Res.string.warning),
+        dialogContent.value,
+        stringResource(Res.string.ok),
+        shouldShowDialog
+    ) {
+        // Action
+    }
     // Full Screen Content
     Column(
         modifier = Modifier
@@ -57,19 +63,25 @@ fun DashboardScreen(
             .navigationBarsPadding()
             .imePadding()
             .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.Start
     ) {
         if (viewModel.mainState.attestationResultSuccess || viewModel.mainState.assertionResultSuccess) { // viewModel.mainState.isClientRegistered && (
             if (viewModel.mainState.isUserIsAuthenticated) {
-                TitleText(text = "Welcome" + " " + viewModel.getUsername())
+                TitleText(
+                    modifier = Modifier.padding(top = 24.dp, start = 16.dp),
+                    text = stringResource(Res.string.welcome) + " " + viewModel.getUsername()
+                )
                 if (viewModel.getUserInfoResponse()?.response != null) {
                     val userInfo: UserDetails = Json.decodeFromString(viewModel.getUserInfoResponse()?.response.toString())
                     for (user in userInfo.info()) {
                         UserInfoRow(user.key, user.value)
                     }
                 }
-                LogButton(
-                    isClickable = true,
+                LoginButton(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 24.dp)
+                        .fillMaxWidth(),
                     text = stringResource(Res.string.logout),
                     onClick = {
                         CoroutineScope(Dispatchers.Main).launch {

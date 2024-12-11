@@ -4,7 +4,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.example.fido2.authAdaptor.AuthenticationProvider
 import com.example.fido2.ui.screens.dashboard.DashboardScreen
 import com.example.fido2.ui.screens.settings.SettingsScreen
 import com.example.fido2.ui.screens.unauthenticated.login.LoginScreen

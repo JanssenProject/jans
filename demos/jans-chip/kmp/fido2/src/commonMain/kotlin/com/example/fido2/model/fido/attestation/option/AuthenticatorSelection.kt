@@ -8,7 +8,7 @@ data class AuthenticatorSelection(
 
     var requireResidentKey: Boolean,
 
-    var userVerification: String,
+    var userVerification: String
 
-    var residentKey: String,
+//    var residentKey: String,
 )

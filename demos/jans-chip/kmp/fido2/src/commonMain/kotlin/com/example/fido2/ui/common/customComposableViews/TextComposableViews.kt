@@ -23,21 +23,6 @@ fun TitleText(
 }
 
 @Composable
-fun MediumTitleText(
-    modifier: Modifier = Modifier,
-    text: String,
-    textAlign: TextAlign = TextAlign.Start
-) {
-    Text(
-        modifier = modifier,
-        text = text,
-        style = MaterialTheme.typography.h3,
-        color = Color.DarkGray,
-        textAlign = textAlign
-    )
-}
-
-@Composable
 fun ErrorTextInputField(
     modifier: Modifier = Modifier,
     text: String

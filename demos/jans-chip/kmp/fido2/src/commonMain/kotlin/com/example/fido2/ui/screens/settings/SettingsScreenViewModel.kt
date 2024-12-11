@@ -7,11 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.example.fido2.usecase.AllDataUseCase
 import com.example.fido2.usecase.SettingsUseCase
 import com.example.fido2.utils.AppConfig
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
 
 class SettingsScreenViewModel(
     private val settingsUseCase: SettingsUseCase,

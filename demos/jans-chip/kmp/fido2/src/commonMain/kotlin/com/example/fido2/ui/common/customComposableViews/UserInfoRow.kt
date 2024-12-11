@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fido2.ui.theme.LightColors
 
 @Composable
 fun UserInfoRow(
@@ -23,7 +24,8 @@ fun UserInfoRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(120.dp)
-            .padding(15.dp)
+            .padding(15.dp),
+        backgroundColor = LightColors.background
     ) {
         Row {  // 1
             Text(

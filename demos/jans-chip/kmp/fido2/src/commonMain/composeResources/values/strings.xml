@@ -59,4 +59,7 @@
     <string name="enter_url">Enter authentication server url</string>
     <string name="url_empty">Server url cannot be empty</string>
     <string name="save">Save</string>
+    <string name="ok">Ok</string>
+    <string name="warning">Warning</string>
+    <string name="welcome">Welcome</string>
 </resources>

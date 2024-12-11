@@ -1,27 +1,29 @@
 package com.example.fido2.ui.common.customComposableViews
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Colors
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.outlined.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.example.fido2.ui.theme.AppTheme
 import com.example.fido2.ui.theme.LightColors
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
+
+enum class Direction {
+    LEFT, RIGHT
+}
 
 @Composable
 fun NormalButton(
@@ -66,27 +68,52 @@ fun LoginButton(
 @Composable
 fun SmallClickableWithIconAndText(
     modifier: Modifier = Modifier,
-    iconVector: ImageVector = Icons.Outlined.Add,
-    iconContentDescription: String = "",
+    icon: DrawableResource,
     text: String = "",
+    direction: Direction = Direction.LEFT,
     onClick: () -> Unit
 ) {
     Row(
-        modifier = modifier.clickable {
-            onClick.invoke()
-        },
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = iconVector,
-            contentDescription = iconContentDescription,
-            tint = MaterialTheme.colors.primary
+        if (direction == Direction.LEFT) {Image(
+            painterResource(icon),
+            contentDescription = null,
+            modifier = Modifier.clickable {
+                onClick.invoke()
+            }
+                .size(25.dp)
+                .padding(start = 12.dp)
         )
-        Text(
-            modifier = Modifier.padding(start = AppTheme.dimens.paddingSmall),
-            text = text,
-            style = MaterialTheme.typography.subtitle1,
-            color = MaterialTheme.colors.primary
-        )
+            Text(
+                modifier = Modifier.clickable {
+                    onClick.invoke()
+                }
+                    .padding(start = AppTheme.dimens.paddingSmall),
+                text = text,
+                style = MaterialTheme.typography.subtitle1,
+                color = MaterialTheme.colors.primary
+            )
+        } else {
+            Text(
+                modifier = Modifier.clickable {
+                    onClick.invoke()
+                }
+                    .padding(start = AppTheme.dimens.paddingSmall),
+                text = text,
+                style = MaterialTheme.typography.subtitle1,
+                color = MaterialTheme.colors.primary
+            )
+            Image(
+                painterResource(icon),
+                contentDescription = null,
+                modifier = Modifier.clickable {
+                    onClick.invoke()
+                }
+                    .size(25.dp)
+                    .padding(start = 12.dp)
+            )
+        }
     }
 }

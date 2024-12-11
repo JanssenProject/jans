@@ -7,7 +7,6 @@ import kotlinx.coroutines.withContext
 import com.example.fido2.model.OIDCClient
 import com.example.fido2.model.OPConfiguration
 import com.example.fido2.model.fido.config.FidoConfiguration
-import com.example.fido2.utils.AppConfig
 
 class LocalDataSourceImpl(
     private val db: AppDatabase,

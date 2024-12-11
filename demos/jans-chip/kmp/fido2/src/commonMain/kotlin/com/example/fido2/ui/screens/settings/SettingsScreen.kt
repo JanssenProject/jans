@@ -32,7 +32,7 @@ import com.example.fido2.enter_url
 import com.example.fido2.loading
 import com.example.fido2.save
 import com.example.fido2.ui.common.customComposableViews.CustomTextField
-import com.example.fido2.ui.common.customComposableViews.LogButton
+import com.example.fido2.ui.common.customComposableViews.LoginButton
 import com.example.fido2.ui.theme.AppTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -87,7 +87,7 @@ fun SettingsScreen(
         Column(
             modifier = Modifier.background(Color.White).padding(24.dp),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.Start
         ) {
             CustomTextField(
                 modifier = Modifier
@@ -102,8 +102,9 @@ fun SettingsScreen(
             )
             Spacer(modifier = Modifier.height(40.dp))
             Row(horizontalArrangement = Arrangement.End) {
-                LogButton(
-                    isClickable = true,
+                LoginButton(
+                    modifier = Modifier
+                        .fillMaxWidth(),
                     text = stringResource(Res.string.save),
                     onClick = onButtonClick
                 )

@@ -24,12 +24,7 @@ class LoginViewModel : ViewModel() {
 
             // Submit Login
             is LoginUiEvent.Submit -> {
-                //val inputsValidated = validateInputs()
-                //if (inputsValidated) {
-                // TODO Trigger login in authentication flow
                 loginState.value = loginState.value.copy(isLoading = true)
-//                loginState.value = loginState.value.copy(isLoginSuccessful = true)
-                //}
             }
 
             is LoginUiEvent.Logout -> {

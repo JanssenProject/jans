@@ -1,6 +1,6 @@
 package com.example.fido2.ui.screens.unauthenticated.login
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,11 +10,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,8 +23,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fido2.*
@@ -40,11 +36,14 @@ import com.example.fido2.model.TokenResponse
 import com.example.fido2.model.UserInfoResponse
 import com.example.fido2.model.fido.assertion.option.AssertionOptionResponse
 import com.example.fido2.model.fido.assertion.result.AssertionResultRequest
-import com.example.fido2.ui.common.customComposableViews.AppAlertDialog
-import com.example.fido2.ui.common.customComposableViews.AppAlertDialogWithTwoButtons
+import com.example.fido2.ui.common.customComposableViews.CustomAlertDialog
+import com.example.fido2.ui.common.customComposableViews.CustomAlertDialogWithTwoButtons
+import com.example.fido2.ui.common.customComposableViews.Direction
+import com.example.fido2.ui.common.customComposableViews.SmallClickableWithIconAndText
 import com.example.fido2.ui.common.customComposableViews.TitleText
 import com.example.fido2.ui.screens.unauthenticated.login.state.LoginUiEvent
 import com.example.fido2.ui.theme.AppTheme
+import com.example.fido2.ui.theme.LightColors
 import com.example.fido2.viewmodel.MainViewModel
 import org.jetbrains.compose.resources.stringResource
 
@@ -81,13 +80,19 @@ fun LoginScreen(
             onNavigateToAuthenticatedRoute.invoke()
         }
     } else {
-        AppAlertDialog(
-            shouldShowDialog = shouldShowDialog,
-            content = dialogContent
-        )
-        AppAlertDialogWithTwoButtons(
-            shouldShowDialog = shouldShowDeleteKeysDialog,
-            text = stringResource(Res.string.delete_all_dialog_title)
+        CustomAlertDialog(
+            stringResource(Res.string.warning),
+            dialogContent.value,
+            stringResource(Res.string.ok),
+            shouldShowDialog
+        ) {
+            // Action
+        }
+        CustomAlertDialogWithTwoButtons(
+            stringResource(Res.string.delete_all_dialog_title),
+            "",
+            stringResource(Res.string.ok),
+            shouldShowDeleteKeysDialog
         ) {
             viewModel.deleteAllKeys()
         }
@@ -119,56 +124,48 @@ fun LoginScreen(
             ) {
                 // Register Section
                 Row(
-                    modifier = Modifier.padding(AppTheme.dimens.paddingNormal).fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp)
+                        .background(LightColors.background),
                     horizontalArrangement = getHorizontalArrangement(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (creds?.isEmpty() == false) {
-                        Text(
+                        SmallClickableWithIconAndText(
                             modifier = Modifier
-                                .padding(start = AppTheme.dimens.paddingExtraSmall)
-                                .clickable {
-                                    shouldShowDeleteKeysDialog.value = true
-                                },
-                            fontWeight = FontWeight.Bold,
+                                .height(44.dp)
+                                .background(LightColors.background),
+                            icon = Res.drawable.clear_logs_icon,
                             text = stringResource(Res.string.delete_all),
-                            color = MaterialTheme.colors.primary
+                            onClick = {
+                                shouldShowDeleteKeysDialog.value = true
+                            }
                         )
                     }
-                    //Register
-                    Text(
+                    SmallClickableWithIconAndText(
                         modifier = Modifier
-                            .padding(start = AppTheme.dimens.paddingExtraSmall)
-                            .clickable {
-                                onNavigateToRegistration.invoke()
-                            },
-                        fontWeight = FontWeight.Bold,
-                        text = "enrol ->",
-                        color = MaterialTheme.colors.primary
+                            .height(44.dp)
+                            .padding(end = AppTheme.dimens.paddingNormal)
+                            .background(LightColors.background),
+                        icon = Res.drawable.right,
+                        text = stringResource(Res.string.enrol),
+                        direction = Direction.RIGHT,
+                        onClick = {
+                            onNavigateToRegistration.invoke()
+                        }
                     )
                 }
 
                 // Main card Content for Login
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(AppTheme.dimens.paddingLarge)
+                        .padding(AppTheme.dimens.paddingNormal)
                 ) {
                     Column(
                         modifier = Modifier
-                            .padding(horizontal = AppTheme.dimens.paddingLarge)
-                            .padding(bottom = AppTheme.dimens.paddingExtraLarge)
+                            .padding(AppTheme.dimens.paddingNormal)
                     ) {
-
-                        // Heading Jetpack Compose
-                        TitleText(
-                            modifier = Modifier
-                                .padding(top = AppTheme.dimens.paddingLarge)
-                                .fillMaxWidth(),
-                            text = stringResource(Res.string.janssen),
-                            textAlign = TextAlign.Center
-                        )
-
                         // Heading Login
                         // Login Inputs Composable
                         if (creds.isNullOrEmpty()) {
@@ -178,22 +175,17 @@ fun LoginScreen(
                             )
                         } else {
                             TitleText(
-                                modifier = Modifier.padding(top = AppTheme.dimens.paddingSmall),
+                                modifier = Modifier.padding(vertical = AppTheme.dimens.paddingSmall),
                                 text = stringResource(Res.string.use_saved_passkey)
                             )
                         }
                         Column(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .wrapContentSize(unbounded = true)
-
                         ) {
                             creds?.forEach { ele ->
                                 LoginInputs(
-                                    loginState = loginState,
                                     heading = ele.userDisplayName ?: "none",
                                     subheading = ele.rpId ?: "unknown",
-//                                    icon = Res.drawable.passkey_icon,
                                     onContinueClick = {
 
                                         if (isBiometricAvailable) {

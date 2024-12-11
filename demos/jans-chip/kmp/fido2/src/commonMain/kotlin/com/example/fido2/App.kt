@@ -21,7 +21,6 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,7 +35,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.fido2.ui.common.customComposableViews.AppAlertDialog
+import com.example.fido2.ui.common.customComposableViews.CustomAlertDialog
 import com.example.fido2.ui.screens.NavigationRoutes
 import org.koin.compose.koinInject
 import com.example.fido2.ui.screens.authenticatedGraph
@@ -71,10 +70,14 @@ fun App() {
             ) {
                 val shouldShowDialog = remember { mutableStateOf(false) }
                 val dialogContent = remember { mutableStateOf("") }
-                AppAlertDialog(
-                    shouldShowDialog = shouldShowDialog,
-                    content = dialogContent
-                )
+                CustomAlertDialog(
+                    stringResource(Res.string.warning),
+                    dialogContent.value,
+                    stringResource(Res.string.ok),
+                    shouldShowDialog
+                ) {
+                    // Action
+                }
                 if (!viewModel.mainState.isLoading) {
                     MainApp(viewModel)
                 } else {
@@ -169,7 +172,7 @@ fun MainAppNavHost(
 fun getIconForScreen(screen: String): DrawableResource {
     return when (screen) {
         NavigationRoutes.Unauthenticated.NavigationRoute.route -> Res.drawable.home_icon
-        NavigationRoutes.Unauthenticated.Settings.route -> Res.drawable.search_icon
+        NavigationRoutes.Unauthenticated.Settings.route -> Res.drawable.settings_icon
         else -> Res.drawable.home_icon
     }
 }
