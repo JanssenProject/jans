@@ -41,4 +41,19 @@ pub struct AuthorizationConfig {
     /// Default is jti, but perhaps some other claim is needed.
     /// `CEDARLING_DECISION_LOG_DEFAULT_JWT_ID` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     pub decision_log_default_jwt_id: String,
+
+    /// Name of Cedar Context schema entity
+    pub mapping_user: Option<String>,
+
+    /// Name of Cedar Workload schema entity
+    pub mapping_workload: Option<String>,
+
+    /// Name of Cedar id_token schema entity
+    pub mapping_id_token: Option<String>,
+
+    /// Name of Cedar access_token schema entity
+    pub mapping_access_token: Option<String>,
+
+    /// Name of Cedar userinfo schema entity
+    pub mapping_userinfo_token: Option<String>,
 }
