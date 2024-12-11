@@ -35,7 +35,7 @@ enum MaybeEncoded {
 /// Box that holds the [`cedar_policy::Schema`] and
 /// JSON representation that is used to create entities from the schema in the policy store.
 #[derive(Debug, Clone)]
-pub(crate) struct CedarSchema {
+pub struct CedarSchema {
     pub schema: cedar_policy::Schema,
     pub json: cedar_json::CedarSchemaJson,
 }
@@ -258,7 +258,7 @@ mod deserialize {
 
         // In fact this fails because of limitations in cedar_policy::Policy::from_json
         // see PolicyContentType
-        #[allow(dead_code)]
+        #[test]
         fn test_both_ok() {
             static POLICY_STORE_RAW: &str =
                 include_str!("../../../../test_files/policy-store_blobby.json");
@@ -306,7 +306,7 @@ mod deserialize {
             let err_msg = policy_result.unwrap_err().to_string();
             assert_eq!(
                 err_msg,
-                "policy_stores.a1bf93115de86de760ee0bea1d529b521489e5a11747: unable to parse cedar policy schema: failed to resolve type: User_TypeNotExist at line 4 column 5"
+                "policy_stores.a1bf93115de86de760ee0bea1d529b521489e5a11747: unable to parse cedar policy schema: failed to resolve type: User_TypeNotExist at line 8 column 5"
             );
         }
     }
