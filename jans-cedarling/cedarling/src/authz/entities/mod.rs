@@ -33,70 +33,53 @@ use super::token_data::TokenPayload;
 pub(crate) type ProcessTokensResult<'a> =
     jwt::ProcessTokensResult<'a, AccessTokenData, IdTokenData, UserInfoTokenData>;
 
-/// Access token entities
-pub struct AccessTokenEntities {
-    pub workload_entity: cedar_policy::Entity,
-    pub access_token_entity: cedar_policy::Entity,
-}
-
-impl AccessTokenEntities {
-    /// Map all values to vector of cedar-policy entities
-    pub fn into_iter(self) -> impl Iterator<Item = cedar_policy::Entity> {
-        vec![self.workload_entity, self.access_token_entity].into_iter()
-    }
-}
-
-/// Describe errors on creating entites for AccessToken
-#[derive(thiserror::Error, Debug)]
-pub enum AccessTokenEntitiesError {
-    #[error("could not create entity from access_token: {0}")]
-    Create(#[from] CedarPolicyCreateTypeError),
-}
-
-/// Create all entities from AccessToken
-pub fn create_access_token_entities(
+/// Create workload entity
+pub fn create_workload(
+    entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
     data: &AccessTokenData,
     meta: &AccessTokenEntityMetadata,
-) -> Result<AccessTokenEntities, AccessTokenEntitiesError> {
+) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
+    let schema = &policy_store.schema.json;
+    let namespace = policy_store.namespace();
+    let claim_mapping = &meta.entity_metadata.claim_mapping;
+
+    let workload_entity_meta = EntityMetadata::new(
+        EntityParsedTypeName {
+            typename: entity_mapping.unwrap_or("Workload"),
+            namespace,
+        },
+        "client_id",
+    );
+
+    workload_entity_meta.create_entity(schema, data, HashSet::new(), claim_mapping)
+}
+
+/// Create access_token entity
+pub fn create_access_token(
+    entity_mapping: Option<&str>,
+    policy_store: &PolicyStore,
+    data: &AccessTokenData,
+    meta: &AccessTokenEntityMetadata,
+) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
     let schema = &policy_store.schema.json;
     let namespace = policy_store.namespace();
     let claim_mapping = &meta.entity_metadata.claim_mapping;
 
     let access_entity_meta = EntityMetadata::new(
         EntityParsedTypeName {
-            typename: "Access_token",
+            typename: entity_mapping.unwrap_or("Access_token"),
             namespace,
         },
         meta.principal_identifier.as_deref().unwrap_or("jti"),
     );
 
-    let workload_entity_meta = EntityMetadata::new(
-        EntityParsedTypeName {
-            typename: "Workload",
-            namespace,
-        },
-        "client_id",
-    );
-
-    Ok(AccessTokenEntities {
-        access_token_entity: access_entity_meta.create_entity(
-            schema,
-            data,
-            HashSet::new(),
-            claim_mapping,
-        )?,
-        workload_entity: workload_entity_meta.create_entity(
-            schema,
-            data,
-            HashSet::new(),
-            claim_mapping,
-        )?,
-    })
+    access_entity_meta.create_entity(schema, data, HashSet::new(), claim_mapping)
 }
 
 /// Create id_token entity
 pub fn create_id_token_entity(
+    entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
     data: &IdTokenData,
     claim_mapping: &ClaimMappings,
@@ -106,7 +89,7 @@ pub fn create_id_token_entity(
 
     EntityMetadata::new(
         EntityParsedTypeName {
-            typename: "id_token",
+            typename: entity_mapping.unwrap_or("id_token"),
             namespace,
         },
         "jti",
@@ -116,6 +99,7 @@ pub fn create_id_token_entity(
 
 /// Create user entity
 pub fn create_user_entity(
+    entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
     tokens: &ProcessTokensResult,
     parents: HashSet<EntityUid>,
@@ -142,7 +126,7 @@ pub fn create_user_entity(
 
     EntityMetadata::new(
         EntityParsedTypeName {
-            typename: "User",
+            typename: entity_mapping.unwrap_or("User"),
             namespace,
         },
         user_id_mapping.mapping_field,
@@ -152,6 +136,7 @@ pub fn create_user_entity(
 
 /// Create `Userinfo_token` entity
 pub fn create_userinfo_token_entity(
+    entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
     data: &UserInfoTokenData,
     claim_mapping: &ClaimMappings,
@@ -161,7 +146,7 @@ pub fn create_userinfo_token_entity(
 
     EntityMetadata::new(
         EntityParsedTypeName {
-            typename: "Userinfo_token",
+            typename: entity_mapping.unwrap_or("Userinfo_token"),
             namespace,
         },
         "jti",

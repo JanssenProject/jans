@@ -267,6 +267,12 @@ auth-server:
     u2fConfigLabels: { }
     # -- u2f config ingress resource additional annotations.
     u2fAdditionalAnnotations: { }
+    # -- Enable endpoint /.well-known/authzen-configuration
+    authzenConfigEnabled: true
+    # -- authzen config ingress resource labels. key app is taken
+    authzenConfigLabels: { }
+    # -- authzen config ingress resource additional annotations.
+    authzenAdditionalAnnotations: { }
     # -- Auth server ingress resource labels. key app is taken
     authServerLabels: { }
     # -- Auth server ingress resource additional annotations.

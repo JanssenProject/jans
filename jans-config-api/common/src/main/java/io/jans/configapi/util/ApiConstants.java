@@ -101,6 +101,7 @@ public class ApiConstants {
     public static final String USERDN_PATH = "/{userDn}";
     public static final String AGAMA = "/agama";
     public static final String AGAMA_DEPLOYMENTS = "/agama-deployment";
+    public static final String AGAMA_REPO = "/agama-repo";
     public static final String QNAME_PATH = "{qname}";
     public static final String ENABLED = "enabled";
     public static final String QNAME = "qname";

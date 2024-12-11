@@ -116,7 +116,7 @@ impl KeyService {
 #[derive(thiserror::Error, Debug)]
 pub enum KeyServiceError {
     #[error("Failed to decode JWK Stores from string: {0}")]
-    DecodeJwkStores(#[source] serde_json::Error),
+    DecodeJwkStores(serde_json::Error),
     #[error("Failed to make HTTP Request: {0}")]
     Http(#[from] HttpClientError),
     #[error("Failed to load JWKS: {0}")]
