@@ -129,7 +129,7 @@ jobs:
       - name: Set up JDK 17
         # JanssenProject/jans-cli-tui is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
         if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli-tui'
-        uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4.0.0
+        uses: actions/setup-java@7136edc5e8145b3c0b6bae8f4e62706c74e76538 # v4.0.0
         with:
           java-version: '17'
           distribution: 'adopt'
