@@ -647,21 +647,20 @@ def sync_sql_password(manager: Manager) -> None:
     Args:
         manager: An instance of manager class.
     """
-    password_file = get_sql_password_file()
-
-    # previous version may not have sql_password secret hence we're pre-populating
-    # the value from mounted password file (if any)
-    if os.path.isfile(password_file):
-        manager.secret.set("sql_password", get_password_from_file(password_file))
-
-    # make sure password file always exists
-    if not os.path.isfile(password_file):
-        manager.secret.to_file("sql_password", password_file)
+    logger.warning(
+        f"Accessing jans.pycloudlib.persistence.sql.sync_sql_password is deprecated; "
+        f"Use jans.pycloudlib.persistence.sql.get_sql_password instead"
+    )
 
 
 def get_sql_password(manager: Manager | None = None):
     password_file = get_sql_password_file()
-    return get_password_from_file(password_file)
+    if os.path.isfile(password_file):
+        return get_password_from_file(password_file)
+
+    # safer method to get credential
+    return manager.secret.get("sql_password")
+
 
 
 def preconfigure_simple_json(dbapi_connection, connection_record):
