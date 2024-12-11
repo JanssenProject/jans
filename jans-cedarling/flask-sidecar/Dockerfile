@@ -42,7 +42,7 @@ RUN adduser --shell /bin/sh --uid 1000 web \
 
 WORKDIR /api
 
-COPY --chown=1000:1000 ./secrets/bootstrap.json /api/
+COPY --chown=1000:1000 ./ /api/
 
 RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans /tmp/jans \
         && cd /tmp/jans \
@@ -50,7 +50,6 @@ RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject
         && git checkout ${JANS_SOURCE_VERSION} \
         && git sparse-checkout set jans-cedarling \
         && cd jans-cedarling/bindings/cedarling_python \
-        && cp -r ../../flask-sidecar/* /api \
         && version=$(sed -n 's/.*version = "\(.*\)"/\1/p' pyproject.toml) \
         && echo "${version}" > /api/cedarling_version \
         && release_version="${version}" \
