@@ -1,0 +1,36 @@
+{
+    "keys": [
+        {
+            "descr": "Signature Key: RSA RSASSA-PKCS1-v1_5 using SHA-256",
+            "kty": "RSA",
+            "e": "AQAB",
+            "use": "sig",
+            "key_ops_type": [],
+            "kid": "connect_71d85c47-15ed-4975-865b-9e9cdc50f1a0_sig_rs256",
+            "x5c": [
+                "MIIDCjCCAfKgAwIBAgIhAP3ay8EhBgfQ09NbSrKmcsV4GNU6HU9219iy5mdNp4o4MA0GCSqGSIb3DQEBCwUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjQxMDE5MTg1NzIxWhcNMjQxMDIxMTk1NzMxWjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1oqts+YC9dQ5JdtbJHIzEsWCf0wmhilFdwqC2I6T87luc4DDs2WC90j73XnnEsJdSgoUmGzazUTId08iTk8R6ucbXDs1zJNbzkwLsOR6/MNtgvKSZXoZAjD8pXLduaKbzxzSiH/Cu+2eDTi9rRnJRbCIbx0xVOYwhcrPCi5eKUQ3/Cf1JimRGfIIW3hTTMuSEnM27HNTaYTx4Deb4mlf26rZ4sDPodlA4Z5xEpb929z+vjn2GFyiFw6MTn4YZS4xMUoioS2pWKfARL17gT8n9VAddlmym/yYaN+y7EbzpYEhWiS1dRttBiDZNPktxVgoZnu4/JUE4MCwYj7S54kLfwIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQELBQADggEBAHrTbXSjzLJ1eJV6u34QxVFBu6LKpYLzAcikwjM8ymPGw6s7TutMwkKaOFlLl0ljSK35Zgx/bRrOR2G/fR/xbBSwttnXPpiIIOG5JpGtNC02rH5YKdtlTQWh6KjUb4EEMCOxQ5R9+l3Rf41EoZAHJN1HHR9kwcV3E8oViMaq851h7LADvZLQWckUn/BZW0Eh33q3fhCTbdWnf8YqtBiiLmXXzXwnzbzTbHnpw4xlqFummGkoLELR0HCGQR2ziZCsOJDm0h4fstlWJOTmktaXln1+pwoYDylaD4NuKgB7kH4KchVYn/YPVL30kGgq3H44ygz95KebXAzJQeeggLMFIUo="
+            ],
+            "name": "Connect RS256 Sign Key",
+            "exp": 1729540651438,
+            "alg": "RS256",
+            "n": "1oqts-YC9dQ5JdtbJHIzEsWCf0wmhilFdwqC2I6T87luc4DDs2WC90j73XnnEsJdSgoUmGzazUTId08iTk8R6ucbXDs1zJNbzkwLsOR6_MNtgvKSZXoZAjD8pXLduaKbzxzSiH_Cu-2eDTi9rRnJRbCIbx0xVOYwhcrPCi5eKUQ3_Cf1JimRGfIIW3hTTMuSEnM27HNTaYTx4Deb4mlf26rZ4sDPodlA4Z5xEpb929z-vjn2GFyiFw6MTn4YZS4xMUoioS2pWKfARL17gT8n9VAddlmym_yYaN-y7EbzpYEhWiS1dRttBiDZNPktxVgoZnu4_JUE4MCwYj7S54kLfw"
+        },
+        {
+            "descr": "Signature Key: RSASSA-PSS using SHA-512 and MGF1 with SHA-512",
+            "kty": "RSA",
+            "e": "AQAB",
+            "use": "sig",
+            "key_ops_type": [
+                "ssa"
+            ],
+            "kid": "ssa_80e27753-b6b2-4b17-bc66-aede1c16dfdd_sig_ps512",
+            "x5c": [
+                "MIIDczCCAiegAwIBAgIgFIUuarM7om76E9eiZK0cKyptauh1LPhh8KeRgBQdXwAwQQYJKoZIhvcNAQEKMDSgDzANBglghkgBZQMEAgMFAKEcMBoGCSqGSIb3DQEBCDANBglghkgBZQMEAgMFAKIDAgFAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwIBcNMjQwOTE5MDQxNTU4WhgPMjA3NDA5MTkwNDE2MDhaMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDJM03eeAORObYh/OoAYpToKmdqR0+WXS1lZinuaQFVnU2jyWGUAtbnx4CgBzPdSi6l8tEM9Px5u09UmOGxTdwGxX5V1VOVbvb9Ca6mAjSj4cx9YNkR2WjDYutxDnOiwlvErB6VyTZLO/sAq6CieE7vBYR36Xn/MEDZhb6h5EfA1doJIHfDqfUh/EH0f1HA1CfAf4ObXuU0wMxp5yz/f1CxjbqbRRbZ5qdtDiwMsH4naYZC81j7spT8F3qDDKm4VGO3p+u0m0/5YvlRf6vTCDZHK+3KNog3SJZbKZ/iIpZ8IIuby1lBoIMVpUXPpSpkRJnwwdekUVxc8zonHgrgrvwdAgMBAAGjJzAlMCMGA1UdJQQcMBoGCCsGAQUFBwMBBggrBgEFBQcDAgYEVR0lADBBBgkqhkiG9w0BAQowNKAPMA0GCWCGSAFlAwQCAwUAoRwwGgYJKoZIhvcNAQEIMA0GCWCGSAFlAwQCAwUAogMCAUADggEBAGe7bc12iwm4UlKl2S8hxJE9pt+g9x1tfFa+RNJ2qyr708eB44B48L2qqles3trjSlWvER+ty16wEEZXM/TDK8UEE7HSDZt1nvNKlcZbiWatDJQLexWr/HENCkpzBTtdOrU1ZdIvbyf8f+Q3gk9zTWM+5haTGyt4Koh5t46SROhIBfiLVTNSMJpF3i0bZMxnX5AYqnn9ggSZ3xeD5fMC/7yz8C6OQdlB0q3nzGxWd8IMvidhU4A8FzcjJ7ok1CHJHHlIMuCrVzkZGBS2OpEKoHnI6Q1O3WARSwat9Ma9KZFWSeoeKs2jlUOirx0yorzBPsgXZu6xICcNfg7AGoSBiFI="
+            ],
+            "name": "Connect PS512 Sign Key",
+            "exp": 3304556168031,
+            "alg": "PS512",
+            "n": "yTNN3ngDkTm2IfzqAGKU6CpnakdPll0tZWYp7mkBVZ1No8lhlALW58eAoAcz3UoupfLRDPT8ebtPVJjhsU3cBsV-VdVTlW72_QmupgI0o-HMfWDZEdlow2LrcQ5zosJbxKwelck2Szv7AKugonhO7wWEd-l5_zBA2YW-oeRHwNXaCSB3w6n1IfxB9H9RwNQnwH-Dm17lNMDMaecs_39QsY26m0UW2eanbQ4sDLB-J2mGQvNY-7KU_Bd6gwypuFRjt6frtJtP-WL5UX-r0wg2RyvtyjaIN0iWWymf4iKWfCCLm8tZQaCDFaVFz6UqZESZ8MHXpFFcXPM6Jx4K4K78HQ"
+        }
+    ]
+}
