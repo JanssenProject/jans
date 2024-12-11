@@ -1,11 +1,11 @@
-FROM python:3.10.14-alpine3.19
+FROM python:3.10.16-slim-bookworm
 
 # ===============
-# Alpine packages
+# Debian packages
 # ===============
 
-RUN apk update \
-    && apk add --no-cache bash unzip wget git curl
+RUN apt-get update \
+    && apt-get install -y bash unzip wget git curl
 
 
 # ========================
@@ -37,9 +37,12 @@ COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
 
 # create non-root user
-RUN adduser -s /bin/sh -D -G root -u 1000 web
+RUN adduser --shell /bin/sh --uid 1000 web \
+    && usermod -aG sudo web
 
 WORKDIR /api
+
+COPY --chown=1000:1000 ./secrets/bootstrap.json /api/
 
 RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans /tmp/jans \
         && cd /tmp/jans \
@@ -52,7 +55,7 @@ RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject
         && echo "${version}" > /api/cedarling_version \
         && release_version="${version}" \
         && if [ "$version" = "0.0.0" ]; then release_version="nightly"; fi \
-        && wget -q https://github.com/JanssenProject/jans/releases/download/"${release_version}"/cedarling_python-"${version}"-cp311-cp311-manylinux_2_34_x86_64.whl -O /api/cedarling_python-"${version}"-cp311-cp311-manylinux_2_34_x86_64.whl \
+        && wget -q https://github.com/JanssenProject/jans/releases/download/"${release_version}"/cedarling_python-"${version}"-cp310-cp310-manylinux_2_34_x86_64.whl -O /api/cedarling_python-"${version}"-cp310-cp310-manylinux_2_34_x86_64.whl \
         && rm -rf /tmp/jans
 
 # Setting up proper permissions:
@@ -60,14 +63,14 @@ RUN chmod -R g=u /api \
     && chown -R 1000:1000 /api
 
 # Project initialization:
-RUN poetry add /api/cedarling_python-$(cat /api/cedarling_version)-cp311-cp311-manylinux_2_34_x86_64.whl \
+RUN poetry add /api/cedarling_python-$(cat /api/cedarling_version)-cp310-cp310-manylinux_2_34_x86_64.whl \
     && poetry install --no-dev --no-root --no-interaction --no-ansi \
     # Cleaning poetry installation's cache for production:
     && rm -rf "$POETRY_CACHE_DIR"
 
 ENV FLASK_APP=main.core:app \
     GUNICORN_LOG_LEVEL=${GUNICORN_LOG_LEVEL:-debug} \
-    CEDARLING_BOOTSTRAP_CONFIG_FILE=${CEDARLING_BOOTSTRAP_CONFIG_FILE}
+    CEDARLING_BOOTSTRAP_CONFIG_FILE=${CEDARLING_BOOTSTRAP_CONFIG_FILE:-/api/bootstrap.json}
 
 EXPOSE 5000
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cedarling-flask-sidecar" \
