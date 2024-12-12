@@ -35,6 +35,7 @@ import io.jans.fido2.exception.Fido2MissingAttestationCertException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.AttestationMode;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
 import io.jans.fido2.service.CoseService;
@@ -58,11 +59,12 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
     @Inject
     private Logger log;
 
-    @Inject
-    private AppConfiguration appConfiguration;
 
     @Inject
     private CommonVerifiers commonVerifiers;
+
+    @Inject
+   	private AppConfiguration appConfiguration;
 
     @Inject
     private AuthenticatorDataVerifier authenticatorDataVerifier;
@@ -102,22 +104,23 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
         commonVerifiers.verifyAAGUIDZeroed(authData);
 
         userVerificationVerifier.verifyUserPresent(authData);
-        commonVerifiers.verifyRpIdHash(authData, registration.getDomain());
+        commonVerifiers.verifyRpIdHash(authData, registration.getOrigin());
 
-        if (attStmt.hasNonNull("x5c")) {
-            Iterator<JsonNode> i = attStmt.get("x5c").elements();
-            ArrayList<String> certificatePath = new ArrayList<>();
-            while (i.hasNext()) {
-                certificatePath.add(i.next().asText());
-            }
-            List<X509Certificate> certificates = certificateService.getCertificates(certificatePath);
+        // if attestation mode is enabled in the global config
+        if(appConfiguration.getFido2Configuration().getAttestationMode().equalsIgnoreCase(AttestationMode.DISABLED.getValue()) == false)
+        {
+        	if (attStmt.hasNonNull("x5c")) {
+                Iterator<JsonNode> i = attStmt.get("x5c").elements();
+                ArrayList<String> certificatePath = new ArrayList<>();
+                while (i.hasNext()) {
+                    certificatePath.add(i.next().asText());
+                }
+                List<X509Certificate> certificates = certificateService.getCertificates(certificatePath);
 
-            credIdAndCounters.setSignatureAlgorithm(alg);
-            List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getAttestationRootCertificates((JsonNode) null, certificates);
+                credIdAndCounters.setSignatureAlgorithm(alg);
+                List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getAttestationRootCertificates((JsonNode) null, certificates);
 
-            if (appConfiguration.getFido2Configuration().isSkipValidateMdsInAttestationEnabled()) {
-                log.warn("SkipValidateMdsInAttestation is enabled");
-            } else {
+
                 try {
                     X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
                     authenticatorDataVerifier.verifyU2FAttestationSignature(authData, clientDataHash, signature, verifiedCert, alg);
@@ -129,19 +132,26 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
                     }
                     throw errorResponseFactory.badRequestException(AttestationErrorResponseType.FIDO_U2F_ERROR, "Error on verify attestation mds: " + ex.getMessage());
                 }
-            }
 
-        } else if (attStmt.hasNonNull("ecdaaKeyId")) {
-            String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
-            log.warn("Fido-U2F unsupported EcdaaKeyId: {}", ecdaaKeyId);
-            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.FIDO_U2F_ERROR, "ecdaaKeyId is not supported");
-        } else {
-            PublicKey publicKey = coseService.getPublicKeyFromUncompressedECPoint(authData.getCosePublicKey());
-            authenticatorDataVerifier.verifyPackedSurrogateAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, publicKey, alg);
+
+            } else if (attStmt.hasNonNull("ecdaaKeyId")) {
+                String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
+                log.warn("Fido-U2F unsupported EcdaaKeyId: {}", ecdaaKeyId);
+                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.FIDO_U2F_ERROR, "ecdaaKeyId is not supported");
+            } else {
+                PublicKey publicKey = coseService.getPublicKeyFromUncompressedECPoint(authData.getCosePublicKey());
+                authenticatorDataVerifier.verifyPackedSurrogateAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, publicKey, alg);
+            }
         }
+        else
+		{
+			log.debug("In Global fido configuration, AttestationMode is DISABLED, hence skipping the attestation check");
+		}
+        
 
         credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
         credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
         credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
+        credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
     }
 }

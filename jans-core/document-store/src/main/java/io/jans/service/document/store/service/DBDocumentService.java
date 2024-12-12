@@ -31,6 +31,7 @@ public class DBDocumentService implements Serializable {
 	public static final String displayName = "displayName";
 	public static final String description = "description";
 	public static final String alias = "jansAlias";
+	public static final String jansFilePath = "jansFilePath";
 
 	@Inject
 	private Logger logger;
@@ -59,7 +60,7 @@ public class DBDocumentService implements Serializable {
 	/**
 	 * Add new Document entry
 	 * 
-	 * @param Document
+	 * @param document
 	 *            Document
 	 */
 	public void addDocument(Document document) throws Exception {
@@ -70,7 +71,7 @@ public class DBDocumentService implements Serializable {
 	/**
 	 * Remove Document entry
 	 * 
-	 * @param Document
+	 * @param document
 	 *            Document
 	 */
 	public void removeDocument(Document document) throws Exception {
@@ -98,7 +99,7 @@ public class DBDocumentService implements Serializable {
 	/**
 	 * Update Document entry
 	 * 
-	 * @param Document
+	 * @param document
 	 *            Document
 	 */
 	public void updateDocument(Document document) throws Exception {
@@ -185,7 +186,7 @@ public class DBDocumentService implements Serializable {
 	/**
 	 * Get documents by DisplayName
 	 * 
-	 * @param DisplayName
+	 * @param displayName
 	 * @return documents
 	 */
 	public Document getDocumentByDisplayName(String displayName) throws Exception {
@@ -247,5 +248,23 @@ public class DBDocumentService implements Serializable {
 	public String baseDn() {
 		return String.format("ou=document,%s", "o=jans");
     }
+
+	public List<Document> getDocumentsByFilePath(String filePath){
+		Filter searchFilter = null;
+		if (StringHelper.isNotEmpty(filePath)) {
+			String[] targetArray = new String[] { filePath };
+			Filter displayNameFilter = Filter.createSubstringFilter(jansFilePath, null, targetArray,
+					null);
+			searchFilter = Filter.createORFilter(displayNameFilter);
+		}
+		List<Document> result = new ArrayList<>();
+		try {
+			result = persistenceEntryManager.findEntries(getDnForDocument(null), Document.class, searchFilter, 100);
+			return result;
+		} catch (Exception e) {
+			logger.error("Failed to find Document : ", e);
+		}
+		return result;
+	}
 
 }
