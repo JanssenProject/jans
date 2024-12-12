@@ -53,13 +53,13 @@ impl Action<'_> {
     /// ```
     pub fn build_ctx_entity_refs_json(
         &self,
-        mut id_mapping: HashMap<String, String>,
+        id_mapping: HashMap<String, String>,
     ) -> Result<Value, BuildJsonCtxError> {
         let mut json = json!({});
 
         for attr in self.context_entities.iter() {
             if let CedarType::TypeName(type_name) = &attr.kind {
-                let id = match id_mapping.remove(&attr.key) {
+                let id = match id_mapping.get(&attr.key) {
                     Some(val) => val,
                     None => Err(BuildJsonCtxError::MissingIdMapping(attr.key.clone()))?,
                 };
