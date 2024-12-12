@@ -40,6 +40,15 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_LOG_TYPE", default)]
     pub log_type: LoggerType,
 
+    /// Log level filter for logging. TRACE is lowest. FATAL is highest.
+    #[serde(rename = "CEDARLING_LOG_LEVEL", default)]
+    pub log_level: LogLevel,
+
+    /// If `log_type` is set to [`LogType::Memory`], this is the TTL (time to live) of
+    /// log entities in seconds.
+    #[serde(rename = "CEDARLING_LOG_TTL", default)]
+    pub log_ttl: Option<u64>,
+
     /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
     #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS ", default)]
     pub decision_log_user_claims: Vec<String>,
@@ -52,11 +61,6 @@ pub struct BootstrapConfigRaw {
     /// Default is jti, but perhaps some other claim is needed.
     #[serde(rename = "CEDARLING_DECISION_LOG_DEFAULT_JWT_ID", default)]
     pub decision_log_default_jwt_id: String,
-
-    /// If `log_type` is set to [`LogType::Memory`], this is the TTL (time to live) of
-    /// log entities in seconds.
-    #[serde(rename = "CEDARLING_LOG_TTL", default)]
-    pub log_ttl: Option<u64>,
 
     /// When `enabled`, Cedar engine authorization is queried for a User principal.
     #[serde(rename = "CEDARLING_USER_AUTHZ", default)]
@@ -74,10 +78,6 @@ pub struct BootstrapConfigRaw {
     /// - **OR**: authz will be successful if `USER` **OR** `WORKLOAD` is valid.
     #[serde(rename = "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION", default)]
     pub usr_workload_bool_op: WorkloadBoolOp,
-
-    /// Log level filter for logging. TRACE is lowest. FATAL is highest.
-    #[serde(rename = "CEDARLING_LOG_LEVEL", default)]
-    pub log_level: LogLevel,
 
     /// Path to a local file pointing containing a JWKS.
     #[serde(

@@ -22,6 +22,7 @@ use crate::common::app_types::{self, ApplicationName};
 use crate::common::policy_store::PoliciesContainer;
 
 use super::interface::Loggable;
+use super::LogLevel;
 
 /// ISO-8601 time format for [`chrono`]
 /// example: 2024-11-27T10:10:50.654Z
@@ -94,11 +95,20 @@ impl LogEntry {
         self.cedar_sdk_version = Some(cedar_policy::get_sdk_version());
         self
     }
+
+    pub(crate) fn set_level(mut self, level: LogLevel) -> Self {
+        self.base.level = Some(level);
+        self
+    }
 }
 
 impl Loggable for LogEntry {
     fn get_request_id(&self) -> Uuid {
         self.base.get_request_id()
+    }
+
+    fn get_log_level(&self) -> Option<LogLevel> {
+        self.base.get_log_level()
     }
 }
 
@@ -293,6 +303,10 @@ impl Loggable for &DecisionLogEntry<'_> {
     fn get_request_id(&self) -> Uuid {
         self.base.get_request_id()
     }
+
+    fn get_log_level(&self) -> Option<LogLevel> {
+        self.base.get_log_level()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -304,14 +318,22 @@ pub struct BaseLogEntry {
     /// or it is not specified in context
     pub timestamp: Option<String>,
     /// kind of log entry
-    pub log_type: LogType,
+    pub log_kind: LogType,
     /// unique id of cedarling
     pub pdp_id: Uuid,
+    /// log level of entry
+    pub level: Option<LogLevel>,
 }
 
 impl BaseLogEntry {
     pub(crate) fn new(pdp_id: app_types::PdpID, log_type: LogType) -> Self {
         let local_time_string = chrono::Local::now().format(ISO8601).to_string();
+
+        let default_log_level = if log_type == LogType::System {
+            Some(LogLevel::TRACE)
+        } else {
+            None
+        };
 
         Self {
             // We use uuid v7 because it is generated based on the time and sortable.
@@ -319,8 +341,9 @@ impl BaseLogEntry {
             // Sparkv store data in BTree. So we need have correct order of ids.
             request_id: uuid7(),
             timestamp: Some(local_time_string),
-            log_type,
+            log_kind: log_type,
             pdp_id: pdp_id.0,
+            level: default_log_level,
         }
     }
 }
@@ -328,6 +351,10 @@ impl BaseLogEntry {
 impl Loggable for BaseLogEntry {
     fn get_request_id(&self) -> Uuid {
         self.request_id
+    }
+
+    fn get_log_level(&self) -> Option<LogLevel> {
+        self.level
     }
 }
 
