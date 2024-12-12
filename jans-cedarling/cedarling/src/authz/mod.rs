@@ -16,7 +16,7 @@ use std::sync::Arc;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types;
 use crate::common::policy_store::PolicyStoreWithID;
-use crate::jwt;
+use crate::{jwt, LogLevel};
 use crate::log::interface::LogWriter;
 use crate::log::{
     AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, LogEntry, LogTokensInfo, LogType, Logger, PersonAuthorizeInfo, PrincipalLogEntry, WorkloadAuthorizeInfo
@@ -187,8 +187,8 @@ impl Authz {
             LogEntry::new_with_data(
                 self.config.pdp_id,
                 Some(self.config.application_name.clone()),
-                LogType::Decision,
-            )
+                LogType::System,
+            ).set_level(LogLevel::DEBUG)
             .set_auth_info(AuthorizationLogInfo {
                 action: request.action.clone(),
                 context: request.context.clone(),
