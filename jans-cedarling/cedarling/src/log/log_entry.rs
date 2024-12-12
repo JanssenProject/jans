@@ -322,6 +322,7 @@ pub struct BaseLogEntry {
     /// unique id of cedarling
     pub pdp_id: Uuid,
     /// log level of entry
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub level: Option<LogLevel>,
 }
 
