@@ -6,7 +6,7 @@
  */
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogTypeConfig,
+    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
     PolicyStoreConfig, PolicyStoreSource, Request, ResourceData, WorkloadBoolOp,
 };
 use std::collections::HashMap;
@@ -18,6 +18,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
             log_type: LogTypeConfig::StdOut,
+            log_level: LogLevel::INFO,
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),

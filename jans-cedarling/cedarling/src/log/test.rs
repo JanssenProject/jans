@@ -17,6 +17,7 @@ fn test_new_log_strategy_off() {
     // Arrange
     let config = LogConfig {
         log_type: log_config::LogTypeConfig::Off,
+        log_level: crate::LogLevel::DEBUG,
     };
 
     // Act
@@ -31,6 +32,7 @@ fn test_new_log_strategy_memory() {
     // Arrange
     let config = LogConfig {
         log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
+        log_level: crate::LogLevel::DEBUG,
     };
 
     // Act
@@ -45,6 +47,7 @@ fn test_new_logstrategy_stdout() {
     // Arrange
     let config = LogConfig {
         log_type: log_config::LogTypeConfig::StdOut,
+        log_level: crate::LogLevel::DEBUG,
     };
 
     // Act
@@ -59,6 +62,7 @@ fn test_log_memory_logger() {
     // Arrange
     let config = LogConfig {
         log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
+        log_level: crate::LogLevel::TRACE,
     };
     let strategy = LogStrategy::new(&config);
     let entry = LogEntry {
@@ -152,7 +156,7 @@ fn test_log_stdout_logger() {
 
     let test_writer = TestWriter::new();
     let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
-    let logger = StdOutLogger::new_with(buffer);
+    let logger = StdOutLogger::new_with(buffer, LogLevel::TRACE);
     let strategy = LogStrategy::StdOut(logger);
 
     // Act

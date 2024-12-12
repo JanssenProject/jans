@@ -27,8 +27,10 @@ impl LogStrategy {
     pub fn new(config: &LogConfig) -> Self {
         match config.log_type {
             LogTypeConfig::Off => Self::Off(NopLogger),
-            LogTypeConfig::Memory(config) => Self::MemoryLogger(MemoryLogger::new(config)),
-            LogTypeConfig::StdOut => Self::StdOut(StdOutLogger::new()),
+            LogTypeConfig::Memory(memory_config) => {
+                Self::MemoryLogger(MemoryLogger::new(memory_config, config.log_level))
+            },
+            LogTypeConfig::StdOut => Self::StdOut(StdOutLogger::new(config.log_level)),
             LogTypeConfig::Lock => todo!(),
         }
     }

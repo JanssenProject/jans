@@ -9,6 +9,7 @@
 //! Contains the interface for logging. And getting log information from storage.
 
 use super::LogEntry;
+use super::LogLevel;
 use uuid7::Uuid;
 
 /// Log Writer
@@ -24,7 +25,31 @@ pub(crate) trait LogWriter {
 }
 
 pub(crate) trait Loggable: serde::Serialize {
+    /// get unique request ID
     fn get_request_id(&self) -> Uuid;
+    /// get log level for entity
+    /// not all log entities have log level, only when `log_kind` == `System`
+    fn get_log_level(&self) -> Option<LogLevel>;
+
+    /// check if entry can log to logger
+    ///
+    // default implementation of method
+    // is used to avoid boilerplate code
+    fn can_log(&self, logger_level: LogLevel) -> bool {
+        if let Some(entry_log_level) = self.get_log_level() {
+            if entry_log_level < logger_level {
+                // entry log level lower than logger level
+                false
+            } else {
+                // entry log higher or equal than logger level
+                true
+            }
+        } else {
+            // if `.get_log_level` return None
+            // it means that `log_kind` != `System` and we should log it
+            true
+        }
+    }
 }
 
 /// Log Storage
