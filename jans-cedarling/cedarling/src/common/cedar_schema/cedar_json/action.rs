@@ -31,7 +31,7 @@ pub struct CtxAttribute {
 pub struct Action<'a> {
     pub principal_entities: HashSet<String>,
     pub resource_entities: HashSet<String>,
-    pub context_entities: HashSet<CtxAttribute>,
+    pub context_entities: Option<HashSet<CtxAttribute>>,
     pub schema_entities: &'a CedarSchemaEntities,
     pub schema: &'a ActionSchema,
 }
@@ -59,15 +59,17 @@ impl Action<'_> {
     ) -> Result<Value, BuildJsonCtxError> {
         let mut json = json!({});
 
-        for attr in self.context_entities.iter() {
-            if let CedarType::TypeName(type_name) = &attr.kind {
-                let id = match id_mapping.get(&attr.key) {
-                    Some(val) => val,
-                    None => Err(BuildJsonCtxError::MissingIdMapping(attr.key.clone()))?,
-                };
-                let type_name =
-                    [attr.namespace.clone(), type_name.to_string()].join(CEDAR_POLICY_SEPARATOR);
-                json[attr.key.clone()] = json!({"type": type_name, "id": id});
+        if let Some(ctx_entities) = &self.context_entities {
+            for attr in ctx_entities.iter() {
+                if let CedarType::TypeName(type_name) = &attr.kind {
+                    let id = match id_mapping.get(&attr.key) {
+                        Some(val) => val,
+                        None => Err(BuildJsonCtxError::MissingIdMapping(attr.key.clone()))?,
+                    };
+                    let type_name = [attr.namespace.clone(), type_name.to_string()]
+                        .join(CEDAR_POLICY_SEPARATOR);
+                    json[attr.key.clone()] = json!({"type": type_name, "id": id});
+                }
             }
         }
 
@@ -114,10 +116,11 @@ impl CedarSchemaJson {
                 .iter()
                 .map(|resource_type| [namespace, resource_type].join(CEDAR_POLICY_SEPARATOR)),
         );
-        let mut context_entities = HashSet::new();
-        if let Some(ctx) = &action_schema.context {
-            self.process_action_context(ctx, namespace, &mut context_entities)?;
-        }
+        let context_entities = action_schema
+            .context
+            .as_ref()
+            .and_then(|ctx| Some(self.process_action_context(&ctx, namespace)))
+            .transpose()?;
 
         Ok(Some(Action {
             principal_entities,
@@ -132,9 +135,22 @@ impl CedarSchemaJson {
         &self,
         ctx: &RecordOrType,
         namespace: &str,
-        entities: &mut HashSet<CtxAttribute>,
-    ) -> Result<(), FindActionError> {
+    ) -> Result<HashSet<CtxAttribute>, FindActionError> {
+        let mut entities = HashSet::<CtxAttribute>::new();
+
         match ctx {
+            // Case: the context is defined as a record in the schema
+            // for example:
+            // Jans {
+            //     action View appliesTo {
+            //         principal: [User],
+            //         resource: [File],
+            //         context: {
+            //             "status": String,
+            //             "id_token": Id_token,
+            //         },
+            //     };
+            // }
             RecordOrType::Record(record) => {
                 for (key, attr) in record.attributes.iter() {
                     entities.insert(CtxAttribute {
@@ -144,6 +160,19 @@ impl CedarSchemaJson {
                     });
                 }
             },
+            // Case: the context is defined as a type in the schema
+            // for example:
+            // Jans {
+            //     type Context = {
+            //         "status": String,
+            //         "id_token": Id_token,
+            //     };
+            //     action View appliesTo {
+            //         principal: [User],
+            //         resource: [File],
+            //         context: Context,
+            //     };
+            // }
             RecordOrType::Type(entity_type) => match entity_type {
                 CedarSchemaEntityType::Primitive(primitive_type) => {
                     if let PrimitiveTypeKind::TypeName(type_name) = &primitive_type.kind {
@@ -173,7 +202,7 @@ impl CedarSchemaJson {
             },
         }
 
-        Ok(())
+        Ok(entities)
     }
 }
 

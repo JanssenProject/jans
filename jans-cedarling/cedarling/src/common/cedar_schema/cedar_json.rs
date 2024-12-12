@@ -313,7 +313,7 @@ mod tests {
         let expected_principal_entities =
             HashSet::from(["Jans::Workload".into(), "Jans::User".into()]);
         let expected_resource_entities = HashSet::from(["Jans::Issue".into()]);
-        let expected_context_entities = HashSet::from([
+        let expected_context_entities = Some(HashSet::from([
             CtxAttribute {
                 namespace: "Jans".into(),
                 key: "access_token".into(),
@@ -334,7 +334,7 @@ mod tests {
                 key: "workload".into(),
                 kind: CedarType::TypeName("Workload".to_string()),
             },
-        ]);
+        ]));
 
         // Test case where the context is a record:
         // action "Update" appliesTo {
