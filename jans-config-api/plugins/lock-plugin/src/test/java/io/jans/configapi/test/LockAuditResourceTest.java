@@ -6,7 +6,7 @@
 
 package io.jans.configapi.test;
 
-import io.jans.configapi.ConfigServerBaseTest;
+import io.jans.configapi.core.test.BaseTest;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
@@ -23,7 +23,7 @@ import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Parameters;
 
-public class LockAuditResourceTest extends ConfigServerBaseTest{
+public class LockAuditResourceTest extends BaseTest{
     
     // Execute before each test is run
     @BeforeMethod
@@ -37,12 +37,27 @@ public class LockAuditResourceTest extends ConfigServerBaseTest{
     
     }   
     
-
-    @Parameters({"issuer", "lockAuditUrl"})
+    @Parameters({"issuer", "lockAuditHealthPostUrl", "audit_health_post_1"})
     @Test
-    public void getLockAuditData(final String issuer, final String lockAuditUrl) {
-        log.error("getLockAuditData() - accessToken:{}, issuer:{}, lockAuditUrl:{}", accessToken, issuer, lockAuditUrl);
-        Builder request = getResteasyService().getClientBuilder(issuer + lockAuditUrl);
+    public void getLockAuditData(final String issuer, final String lockAuditHealthPostUrl, final String json) {
+        log.error("getLockAuditData() - accessToken:{}, issuer:{}, lockAuditHealthPostUrl:{}, json:{}", accessToken, issuer, lockAuditHealthPostUrl, json);
+        Builder request = getResteasyService().getClientBuilder(issuer + lockAuditHealthPostUrl);
+        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+
+        Response response = request.post(Entity.entity(json, MediaType.APPLICATION_JSON));
+        log.error("post lock audit -  response:{}", response);
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
+        log.error("Response for getLockAuditData -  response:{}", response);
+    }
+
+    
+
+    @Parameters({"issuer", "lockAuditHealthSearchUrl"})
+    //@Test
+    public void getLockAuditData(final String issuer, final String lockAuditHealthSearchUrl) {
+        log.error("getLockAuditData() - accessToken:{}, issuer:{}, lockAuditHealthSearchUrl:{}", accessToken, issuer, lockAuditHealthSearchUrl);
+        Builder request = getResteasyService().getClientBuilder(issuer + lockAuditHealthSearchUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 

@@ -9305,17 +9305,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanEdit:
+        adminCanView:
           type: boolean
-        userCanView:
+        adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanView:
-          type: boolean
-        userCanAccess:
+        userCanView:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -9690,6 +9690,9 @@ components:
         saveTokensInCacheAndDontSaveInPersistence:
           type: boolean
         accessTokenLifetime:
+          type: integer
+          format: int32
+        userInfoLifetime:
           type: integer
           format: int32
         cleanServiceInterval:
@@ -11730,10 +11733,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

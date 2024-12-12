@@ -15,7 +15,7 @@
         </classes>
     </test>
 	
-	<!--<test name="Agama Deployments" enabled="true">
+	<test name="Agama Deployments" enabled="true">
         <classes>
              <class name="io.jans.configapi.test.auth.AgamaDeploymentsResourceTest" />
         </classes>
@@ -31,7 +31,7 @@
         <classes>
              <class name="io.jans.configapi.test.auth.ClientResourceTest" />
         </classes>
-    </test>-->
+    </test>
 
 	<test name="Config" enabled="true">
         <classes>

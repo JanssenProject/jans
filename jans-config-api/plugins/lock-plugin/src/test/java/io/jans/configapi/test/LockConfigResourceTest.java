@@ -6,8 +6,7 @@
 
 package io.jans.configapi.test;
 
-import io.jans.configapi.ConfigServerBaseTest;
-import jakarta.ws.rs.client.Entity;
+import io.jans.configapi.core.test.BaseTest;
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -23,7 +22,7 @@ import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Parameters;
 
-public class LockConfigResourceTest extends ConfigServerBaseTest{
+public class LockConfigResourceTest extends BaseTest{
 
     // Execute before each test is run
     @BeforeMethod
