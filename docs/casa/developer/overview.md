@@ -101,7 +101,7 @@ Pack your new project and deploy it. Wait for around 30 seconds and try to log i
 
 Do as many changes as needed to your page. Then pick another page to alter and feed your `Override templates` accordingly. Repeat until your are done. Recall there is no need to restart `jans-auth` or `casa`.
 
-In some cases, the original look-and-feel may be satisfying but it's the text content what you would like to change. Agama engine supports localization and internationalization as explained [here](../../janssen-server/developer/agama/advanced-usages.md#localization-and-internationalization) so you can supply  translated messages in your own project and make templates use those. Note Casa is only bundled with a set of "default" labels out-of-the box and thus pages don't change content regardless of browser's language or location. By overriding templates and providing labels in several languages, you can achieve full localization/internationalization in authentication flow UI.
+In some cases, the original look-and-feel may be satisfying but it's the text content what you would like to change. Agama engine supports localization and internationalization as explained [here](../../janssen-server/developer/agama/advanced-usages.md#localization-and-internationalization) so you can supply  translated messages in your own project and make templates use those. Note Casa is only bundled with a set of "default" labels out-of-the box and thus pages don't change content regardless of browser's language or location. By overriding templates and providing labels in several languages, you can achieve full localization/internationalization in the authentication UI.
 
 ### Support more authentication methods
 
