@@ -3,6 +3,7 @@ package io.jans.as.server.userinfo.ws.rs;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantType;
@@ -15,6 +16,7 @@ import org.testng.annotations.Test;
 
 import java.util.Date;
 
+import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
 
@@ -30,8 +32,13 @@ public class UserInfoServiceTest {
     @Mock
     private Logger log;
 
+    @Mock
+    private AppConfiguration appConfiguration;
+
     @Test
     public void fillJwr_whenCalled_shouldFillRequiredClaims() {
+        when(appConfiguration.getUserInfoLifetime()).thenReturn(3600);
+
         Client client = new Client();
         client.setClientId("1234");
         AuthorizationGrant grant = getTestGrant(client);
@@ -42,6 +49,9 @@ public class UserInfoServiceTest {
 
         assertEquals("1234", jwr.getClaims().getClaimAsString("client_id"));
         assertNotNull(jwr.getClaims().getClaimAsString("jti"));
+        assertNotNull(jwr.getClaims().getClaimAsDate("exp"));
+        assertNotNull(jwr.getClaims().getClaimAsDate("iat"));
+        assertNotNull(jwr.getClaims().getClaimAsDate("nbf"));
     }
 
     private static AuthorizationGrant getTestGrant(final Client client) {

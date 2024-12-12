@@ -46,16 +46,6 @@ public enum AttestationErrorResponseType implements IErrorType {
     TPM_ERROR("tpm_error"),
 
     /**
-     * Android key validation error
-     */
-    ANDROID_KEY_ERROR("android_key_error"),
-
-    /**
-     * Android safetynet validation error
-     */
-    ANDROID_SAFETYNET_ERROR("android_safetynet_error"),
-
-    /**
      * Apple validation error
      */
     APPLE_ERROR("apple_error"),
@@ -64,6 +54,11 @@ public enum AttestationErrorResponseType implements IErrorType {
      * Fido U2F validation error
      */
     FIDO_U2F_ERROR("fido_u2f_error"),
+
+    /**
+     * Attestation Origin validation error
+     */
+    INVALID_ORIGIN("invalid_origin"),
     ;
 
     private final String paramName;
