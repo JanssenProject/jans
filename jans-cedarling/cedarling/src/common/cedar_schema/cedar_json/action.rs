@@ -5,7 +5,9 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use crate::common::cedar_schema::cedar_json::SchemaDefinedType;
+use crate::{
+    authz::entities::CEDAR_POLICY_SEPARATOR, common::cedar_schema::cedar_json::SchemaDefinedType,
+};
 
 use super::{
     entity_types::{
@@ -63,7 +65,8 @@ impl Action<'_> {
                     Some(val) => val,
                     None => Err(BuildJsonCtxError::MissingIdMapping(attr.key.clone()))?,
                 };
-                let type_name = format!("{}::{}", attr.namespace, type_name);
+                let type_name =
+                    [attr.namespace.clone(), type_name.to_string()].join(CEDAR_POLICY_SEPARATOR);
                 json[attr.key.clone()] = json!({"type": type_name, "id": id});
             }
         }
