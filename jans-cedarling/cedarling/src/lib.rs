@@ -83,7 +83,7 @@ impl Cedarling {
             .inspect(|_| {
                 log.log(
                     LogEntry::new_with_data(pdp_id, None, LogType::System)
-                        .set_level(LogLevel::INFO)
+                        .set_level(LogLevel::DEBUG)
                         .set_message("configuration parsed successfully".to_string()),
                 )
             })
