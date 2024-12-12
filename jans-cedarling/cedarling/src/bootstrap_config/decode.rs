@@ -14,9 +14,8 @@ use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
 use std::{collections::HashSet, fmt::Display, fs, path::Path, str::FromStr};
-use typed_builder::TypedBuilder;
 
-#[derive(Deserialize, PartialEq, Debug, TypedBuilder)]
+#[derive(Deserialize, PartialEq, Debug, Default)]
 /// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
 /// from [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
 pub struct BootstrapConfigRaw {
@@ -78,6 +77,26 @@ pub struct BootstrapConfigRaw {
     /// - **OR**: authz will be successful if `USER` **OR** `WORKLOAD` is valid.
     #[serde(rename = "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION", default)]
     pub usr_workload_bool_op: WorkloadBoolOp,
+
+    /// Mapping name of cedar schema User entity
+    #[serde(rename = "CEDARLING_MAPPING_USER", default)]
+    pub mapping_user: Option<String>,
+
+    /// Mapping name of cedar schema Workload entity.
+    #[serde(rename = "CEDARLING_MAPPING_WORKLOAD", default)]
+    pub mapping_workload: Option<String>,
+
+    /// Mapping name of cedar schema id_token entity.
+    #[serde(rename = "CEDARLING_MAPPING_ID_TOKEN", default)]
+    pub mapping_id_token: Option<String>,
+
+    /// Mapping name of cedar schema access_token entity.
+    #[serde(rename = "CEDARLING_MAPPING_ACCESS_TOKEN", default)]
+    pub mapping_access_token: Option<String>,
+
+    /// Mapping name of cedar schema userinfo_token entity.
+    #[serde(rename = "CEDARLING_MAPPING_USERINFO_TOKEN", default)]
+    pub mapping_userinfo_token: Option<String>,
 
     /// Path to a local file pointing containing a JWKS.
     #[serde(
@@ -509,6 +528,11 @@ impl BootstrapConfig {
             decision_log_user_claims: raw.decision_log_user_claims.clone(),
             decision_log_workload_claims: raw.decision_log_workload_claims.clone(),
             decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
+            mapping_user: raw.mapping_user.clone(),
+            mapping_workload: raw.mapping_workload.clone(),
+            mapping_id_token: raw.mapping_id_token.clone(),
+            mapping_access_token: raw.mapping_access_token.clone(),
+            mapping_userinfo_token: raw.mapping_userinfo_token.clone(),
         };
 
         Ok(Self {
