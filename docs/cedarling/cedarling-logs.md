@@ -30,7 +30,6 @@ There are three different log records produced by the Cedarling:
 * `System` - Startup, debug and other Cedarling messages not related to authz
 * `Metric`- Performance and usage data
 
-
 ### System Log Levels
 
 This is set by `CEDARLING_LOG_LEVEL`
@@ -57,22 +56,24 @@ The JSON in this document is formatted for readability but is not prettified in 
 
 ```json
 {
-    "id": "01937015-462d-7727-b789-ed95f7faf7a4",
-    "time": 1732752262,
+    "request_id": "0193b8a8-efc0-77ce-bd90-4a62a2998462",
+    "timestamp": "2024-12-12T04:18:19.456Z",
     "log_kind": "System",
-    "pdp_id": "75f0dc93-0a90-4076-95fa-dc16d3f00375",
+    "pdp_id": "d47e245e-beaa-4ea4-b899-b8184cd3eb7e",
+    "level": "DEBUG",
     "msg": "configuration parsed successfully"
 }
 {
-    "id": "01937015-462f-7cb5-86bb-d06c56dc5ab3",
-    "time": 1732752262,
+    "request_id": "0193b8a8-efc1-7e42-9678-b2480268b91f",
+    "timestamp": "2024-12-12T04:18:19.457Z",
     "log_kind": "System",
-    "pdp_id": "75f0dc93-0a90-4076-95fa-dc16d3f00375",
+    "pdp_id": "d47e245e-beaa-4ea4-b899-b8184cd3eb7e",
+    "level": "INFO",
     "msg": "Cedarling Authz initialized successfully",
-    "application_id": "TestApp",
+    "application_id": "My App",
     "cedar_lang_version": "4.1.0",
     "cedar_sdk_version": "4.2.2"
-}      
+}
 ```
 
 ### Decision Log
@@ -138,7 +139,8 @@ The result of the authorization is quite extensive because we log all `cedar-pol
 {
     "id": "01937015-4649-7aad-8df8-4976e4bd8565",
     "time": 1732752262,
-    "log_kind": "Decision",
+    "log_type": "Decision",
+    "level": "DEBUG",
     "pdp_id": "75f0dc93-0a90-4076-95fa-dc16d3f00375",
     "msg": "Result of authorize.",
     "application_id": "TestApp",

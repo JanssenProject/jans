@@ -12,7 +12,7 @@
 #![cfg(not(target_family = "wasm"))]
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogStorage,
+    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogLevel, LogStorage,
     LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, WorkloadBoolOp,
 };
 use std::env;
@@ -48,7 +48,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Cedarling initialized with log type: {:?}", log_type);
     let cedarling = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
-        log_config: LogConfig { log_type },
+        log_config: LogConfig {
+            log_type,
+            log_level: LogLevel::INFO,
+        },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
         },
