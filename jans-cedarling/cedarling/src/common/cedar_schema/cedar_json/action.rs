@@ -119,7 +119,7 @@ impl CedarSchemaJson {
         let context_entities = action_schema
             .context
             .as_ref()
-            .and_then(|ctx| Some(self.process_action_context(&ctx, namespace)))
+            .map(|ctx| self.process_action_context(&ctx, namespace))
             .transpose()?;
 
         Ok(Some(Action {
