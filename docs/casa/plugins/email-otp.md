@@ -50,13 +50,13 @@ The SMTP configuration must be previously populated in the Jans Server. For this
     - `subject`: Subject to use in e-mail messages. You can use `%s` as a placeholder to insert the value of the generated OTP
     - `message`: Body of e-mail messages. You can use `%s` as a placeholder to insert the value of the generated OTP. Basic HTML markup is supported; ensure to properly escape characters like double quotes - keep in mind this is JSON content  
 
-1. Parameterize the `casa` project: in the `casa` project configuration, locate the `selector` section under `io.jans.casa.authn.main` flow and add an entry with key `io.jans.casa.authn.emailotp`. Assign an icon and a short descriptive text. Example:
+1. Parameterize the `casa` project: in the `casa` project configuration, locate the `selector` section under `io.jans.casa.authn.main` flow and add an entry with key `io.jans.casa.authn.emailotp`. Assign an icon and a pointer to a short descriptive text. Example:
 
     ```
     ...
     "io.jans.casa.authn.emailotp": {
         "icon": "<i class='fas fa-envelope' data-fa-transform='shrink-1'></i>",
-        "text": "A code sent to my e-mail address"
+        "textKey": "email2fa.selector_text"
     }
     ...
     ```

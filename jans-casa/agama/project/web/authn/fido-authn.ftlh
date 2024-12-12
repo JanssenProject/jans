@@ -21,7 +21,7 @@ function startAssertion() {
     
     let request = ${assertion?no_esc}
     setError("")
-    setStatus("Please wait...")
+    setStatus("${labels("casa.fido.wait")?no_esc}")
     
     webauthn.getAssertion(request)
         .then(data => {
@@ -36,11 +36,11 @@ function startAssertion() {
     
                 if (name === "NotAllowedError") {
                     //Credential not recognized. 
-                    message = "Please use a fido credential already associated to your account"
+                    message = "${labels("casa.fido.notAllowed")?no_esc}"
                 } else if (name === "AbortError") {
-                    message = "Operation was cancelled"
+                    message = "${labels("casa.fido.abort")?no_esc}"
                 } else {
-                    message = "An error occurred"
+                    message = "${labels("casa.fido.error")?no_esc}"
                     
                     if (err.message) {
                         console.log(err.message)
@@ -61,20 +61,20 @@ window.onload = (event) => {
 </script>
 
 <section class="pa4 shadow-4 bg-blank gray cust-section">
-    <h2 class="f3 dark-blue2">2-step verification</h2>
+    <h2 class="f3 dark-blue2">${labels("casa.2fa_verification")}</h2>
 
     <div class="tc f7 mt2" id="status"></div>
     
     <div class="mw5 dark-red pv3 ph0 ma0 f7-cust" id="error"></div>
     
     <div class="tc green hover-green f7-cust pl3 dn" id="retry">
-        <a href="javascript:startAssertion()" class="btn-link link-secondary">Retry security key</a>
+        <a href="javascript:startAssertion()" class="btn-link link-secondary">${labels("casa.fido.retry")}</a>
     </div>
 
     <div class="flex flex-column items-center pa3">
-        <p class="f4 tc">Insert your security key</p>
+        <p class="f4 tc">${labels("casa.fido.insert")}</p>
         <img class="w4" src="${webCtx.contextPath}/img/securitykey.jpg" />
-        <div class="db w5 tc f7-cust pv3">If your key has a button, tap it. Otherwise you can remove it and re-insert it</div>
+        <div class="db w5 tc f7-cust pv3">${labels("casa.fido.tap_reinsert")}</div>
     </div>
     
     <form method="post" enctype="application/x-www-form-urlencoded">

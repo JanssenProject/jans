@@ -4,11 +4,11 @@
 
 <section class="pa4 shadow-4 bg-blank gray cust-section">
 
-    <h2 class="f3 dark-blue2">2-step verification</h2>
+    <h2 class="f3 dark-blue2">${labels("casa.2fa_verification")}</h2>
 
     <div class="flex flex-column items-center pa3">
         <i class="fas fa-envelope f1"></i>
-        <div class="f7-cust pv2 db w5 tc">Choose an e-mail to send you a verification passcode:</div>
+        <div class="f7-cust pv2 db w5 tc">${labels("email2fa.choose")}</div>
     </div>
 
     <form method="post" enctype="application/x-www-form-urlencoded">
@@ -26,7 +26,7 @@
 
         <div class="flex justify-end mt2">
             <input class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white cust-primary-button"
-                type="submit" value="Continue">
+                type="submit" value="${labels("email2fa.continue")}">
         </div>        
     </form>
 

@@ -1,0 +1,60 @@
+casa.enableJS=Please enable javascript to use this page!
+casa.stuck_authn=Stuck or changed your mind?
+casa.alternative_authn=Use a different authentication method
+casa.welcome=Welcome
+casa.username=Username
+casa.password=Password
+casa.login=Login
+casa.2fa_verification=2-step verification
+
+# Selector page labels
+
+casa.selector.otp=A verification code from my OTP mobile app or hardware token
+casa.selector.twilio=A verification code sent to my phone via text message
+casa.selector.fido=My Fido device (eg. security key)
+casa.selector.sg=A notification to my Super Gluu
+
+# Specific authn method labels
+
+# Twilio SMS
+
+casa.sms.choose=Choose a number to send an SMS to:
+casa.sms.send=Send
+casa.sms.wrong=Wrong code entered
+casa.sms.enter=Enter the code sent via SMS
+
+# Passkeys
+casa.fido.retry=Retry security key
+casa.fido.insert=Insert your security key
+casa.fido.tap_reinsert=If your key has a button, tap it. Otherwise you can remove it and re-insert it
+
+#The following labels are used inside Javascript strings. HTML escaping is not applied (see fido-authn template).
+#If double quotes are needed, use escaping like \\" to avoid JS syntax errors - or just single quotes
+casa.fido.wait=Please wait...
+casa.fido.notAllowed=Please use a fido credential already associated to your account
+casa.fido.abort=Operation was cancelled
+casa.fido.error=An error occurred
+
+# OTP
+
+casa.otp.wrong=Wrong code entered
+casa.otp.title=Get a verification code from your OTP mobile app or hardware token
+casa.otp.enter=Enter code
+
+# SuperGluu
+
+casa.sg.sent=A notification to your Super Gluu was sent
+casa.sg.noNotification=Didn't receive a notification?
+casa.sg.scanQRInstead=Scan a QR code instead
+casa.sg.scanQR=Scan the QR code with your Super Gluu
+casa.sg.remaining=Time remaining:
+casa.sg.secondsAbbr=secs
+casa.sg.waitAuthn2=We'll log you in as soon as we detect your approval.
+
+#For the following label HTML escaping is not applied (see notification template).
+casa.sg.waitAuthn1=You will be authenticated once you tap &quot;approve&quot; in the <br> notification screen.
+
+#The following labels are used inside Javascript strings. HTML escaping is not applied (see notification and code-scan templates).
+#If double quotes are needed, use escaping like \\" to avoid JS syntax errors - or just single quotes
+casa.sg.error=An error occurred
+casa.sg.timeout=We couldn't detect approval of the notification sent
