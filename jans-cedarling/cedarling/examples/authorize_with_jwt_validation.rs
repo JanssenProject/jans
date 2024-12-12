@@ -7,7 +7,7 @@
 
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LogConfig,
-    LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
+    LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
     TokenValidationConfig, WorkloadBoolOp,
 };
 use jsonwebtoken::Algorithm;
@@ -43,6 +43,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
             log_type: LogTypeConfig::StdOut,
+            log_level: LogLevel::INFO,
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
