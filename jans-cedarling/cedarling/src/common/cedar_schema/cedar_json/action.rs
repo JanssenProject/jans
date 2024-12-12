@@ -102,14 +102,18 @@ impl CedarSchemaJson {
             None => return Ok(None),
         };
 
-        let mut principal_entities = HashSet::new();
-        for res_type in action_schema.principal_types.iter().map(|s| s.as_str()) {
-            principal_entities.insert(format!("{}::{}", namespace, res_type));
-        }
-        let mut resource_entities = HashSet::new();
-        for res_type in action_schema.resource_types.iter().map(|s| s.as_str()) {
-            resource_entities.insert(format!("{}::{}", namespace, res_type));
-        }
+        let principal_entities = HashSet::from_iter(
+            action_schema
+                .principal_types
+                .iter()
+                .map(|principal_type| [namespace, principal_type].join(CEDAR_POLICY_SEPARATOR)),
+        );
+        let resource_entities = HashSet::from_iter(
+            action_schema
+                .resource_types
+                .iter()
+                .map(|resource_type| [namespace, resource_type].join(CEDAR_POLICY_SEPARATOR)),
+        );
         let mut context_entities = HashSet::new();
         if let Some(ctx) = &action_schema.context {
             self.process_action_context(ctx, namespace, &mut context_entities)?;
