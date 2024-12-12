@@ -134,7 +134,39 @@
             }
         },
         "actions": {
-            "Update": {
+            "UpdateWithRecordCtx": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Issue"
+                    ],
+                    "principalTypes": [
+                        "Workload",
+                        "User"
+                    ],
+                    "context": {
+                        "type": "Record",
+                        "attributes": {
+                            "access_token": {
+                                "type": "EntityOrCommon",
+                                "name": "Access_token"
+                            },
+                            "time": {
+                                "type": "EntityOrCommon",
+                                "name": "Long"
+                            },
+                            "user": {
+                                "type": "EntityOrCommon",
+                                "name": "User"
+                            },
+                            "workload": {
+                                "type": "EntityOrCommon",
+                                "name": "Workload"
+                            }
+                        }
+                    }
+                }
+            },
+            "UpdateWithTypeCtx": {
                 "appliesTo": {
                     "resourceTypes": [
                         "Issue"

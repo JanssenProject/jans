@@ -346,11 +346,11 @@ mod tests {
         //      workload: Workload,
         //      access_token: Access_token,
         //  }};
-        let json_value = include_str!("./test_files/test_schema_with_record_ctx.json");
+        let json_value = include_str!("./test_files/test_schema.json");
         let parsed_cedar_schema: CedarSchemaJson =
             serde_json::from_str(json_value).expect("Should parse JSON schema");
         let action = parsed_cedar_schema
-            .find_action("Update", "Jans")
+            .find_action("UpdateWithRecordCtx", "Jans")
             .expect("Should not error while finding action")
             .expect("Action should not be none");
         assert_eq!(action.principal_entities, expected_principal_entities);
@@ -363,11 +363,11 @@ mod tests {
         //  resource: [Issue],
         //  context: Context
         // };
-        let json_value = include_str!("./test_files/test_schema_with_type_ctx.json");
+        let json_value = include_str!("./test_files/test_schema.json");
         let parsed_cedar_schema: CedarSchemaJson =
             serde_json::from_str(json_value).expect("Should parse JSON schema");
         let action = parsed_cedar_schema
-            .find_action("Update", "Jans")
+            .find_action("UpdateWithTypeCtx", "Jans")
             .expect("Should not error while finding action")
             .expect("Action should not be none");
         assert_eq!(action.principal_entities, expected_principal_entities);
