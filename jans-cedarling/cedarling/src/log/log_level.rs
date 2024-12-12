@@ -5,7 +5,8 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt;
 use std::str::FromStr;
 
 /// Log levels
@@ -70,7 +71,34 @@ impl<'de> Deserialize<'de> for LogLevel {
     where
         D: Deserializer<'de>,
     {
-        let s: &str = Deserialize::deserialize(deserializer)?;
-        LogLevel::from_str(s).map_err(serde::de::Error::custom)
+        deserializer.deserialize_str(LogLevelVisitor)
+    }
+}
+
+// Custom Visitor for LogLevel deserialization
+//
+// we use custom visitor to avoid error: `invalid type: string "DEBUG", expected a borrowed string`
+// so we implement deserialization for `&str` and for `String`
+struct LogLevelVisitor;
+
+impl<'de> de::Visitor<'de> for LogLevelVisitor {
+    type Value = LogLevel;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("a log level string (FATAL, ERROR, WARN, INFO, DEBUG, or TRACE)")
+    }
+
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+    where
+        E: de::Error,
+    {
+        LogLevel::from_str(v).map_err(de::Error::custom)
+    }
+
+    fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
+    where
+        E: de::Error,
+    {
+        LogLevel::from_str(&v).map_err(de::Error::custom)
     }
 }
