@@ -81,7 +81,7 @@ impl<'de> Deserialize<'de> for LogLevel {
 // so we implement deserialization for `&str` and for `String`
 struct LogLevelVisitor;
 
-impl<'de> de::Visitor<'de> for LogLevelVisitor {
+impl de::Visitor<'_> for LogLevelVisitor {
     type Value = LogLevel;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
