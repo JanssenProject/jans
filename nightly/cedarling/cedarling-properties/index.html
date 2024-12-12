@@ -8758,6 +8758,13 @@
 <li><strong><code>CEDARLING_LOG_STORAGE</code></strong> : <code>off</code>, <code>memory</code>, <code>std_out</code></li>
 <li><strong><code>CEDARLING_LOG_LEVEL</code></strong> : System Log Level <a href="../cedarling-logs/">See here</a>. Default to <code>WARN</code></li>
 <li><strong><code>CEDARLING_LOG_STDOUT_TYPE</code></strong> : Either <code>System</code>, <code>Metric</code>, or <code>Decision</code>. Default to System.</li>
+<li><strong><code>CEDARLING_LOG_LEVEL</code></strong> : Log level filter for logging. Log level has only <code>System</code> log type entries. <code>TRACE</code> is lowest. <code>FATAL</code> is highest. Possible variants:</li>
+<li>FATAL</li>
+<li>ERROR</li>
+<li>WARN</li>
+<li>INFO</li>
+<li>DEBUG</li>
+<li>TRACE</li>
 <li><strong><code>CEDARLING_DECISION_LOG_USER_CLAIMS</code></strong> : List of claims to map from user entity, such as ["sub", "email", "username", ...]</li>
 <li><strong><code>CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS</code></strong> : List of claims to map from user entity, such as ["client_id", "rp_id", ...]</li>
 <li><strong><code>CEDARLING_DECISION_LOG_DEFAULT_JWT_ID</code></strong> : Token claims that will be used for decision logging. Default is "jti", but perhaps some other claim is needed.</li>
@@ -8846,6 +8853,7 @@
 <span class="w">    </span><span class="nt">&quot;CEDARLING_POLICY_STORE_URI&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_POLICY_STORE_ID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_LOG_TYPE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;memory&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_LOG_LEVEL&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_DECISION_LOG_USER_CLAIMS&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;email&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;username&quot;</span><span class="p">],</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;client_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;rp_id&quot;</span><span class="p">],</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_DECISION_LOG_DEFAULT_JWT_ID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span><span class="w"></span>
@@ -8916,6 +8924,9 @@
 <span class="nt">CEDARLING_POLICY_STORE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span><span class="w"></span>
 <span class="nt">CEDARLING_POLICY_STORE_ID</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&#39;</span><span class="w"></span>
 <span class="nt">CEDARLING_LOG_TYPE</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;memory&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_LOG_LEVEL</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;INFO&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_DECISION_LOG_USER_CLAIMS</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;sub&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;email&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="nt">CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;client_id&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;rp_id&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
 <span class="nt">CEDARLING_LOG_TTL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60</span><span class="w"></span>
 <span class="nt">CEDARLING_USER_AUTHZ</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
 <span class="nt">CEDARLING_WORKLOAD_AUTHZ</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
@@ -8964,7 +8975,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-11T09:42:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-11</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-12T17:40:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-12</span>
       
         <br>
         Created:
