@@ -39,11 +39,11 @@ pub(crate) trait Loggable: serde::Serialize {
         if let Some(entry_log_level) = self.get_log_level() {
             if entry_log_level < logger_level {
                 // entry log level lower than logger level
-                return false;
+                false
             } else {
-                // entry log higher than logger level
-                return true;
-            };
+                // entry log higher or equal than logger level
+                true
+            }
         } else {
             // if `.get_log_level` return None
             // it means that `log_kind` != `System` and we should log it
