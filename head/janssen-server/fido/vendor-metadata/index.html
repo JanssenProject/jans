@@ -8833,12 +8833,12 @@
 </ol>
 <h3 id="3-skip-metadata-validation">3. Skip metadata validation<a class="headerlink" href="#3-skip-metadata-validation" title="Permanent link">#</a></h3>
 <p>Metadata validation is recommended but not mandatory as per FIDO2 specifications.
-In FIDO2 we can disable this validation by setting the <code>skipValidateMdsInAttestationEnabled</code> parameter (default is
-false).</p>
+In FIDO2 we can disable this validation by setting the <code>attestionMode</code> parameter (default is
+monitor).</p>
 <p>It should look something like this:</p>
 <div class="highlight"><pre><span></span><code>&quot;fido2Configuration&quot;: {
   ...,
-  &quot;skipValidateMdsInAttestationEnabled&quot;: true,
+  &quot;attestationMode&quot;: &quot;disabled&quot;,
   ...
 }
 </code></pre></div>
@@ -8861,7 +8861,7 @@ https://medium.com/webauthnworks/webauthn-fido2-verifying-apple-anonymous-attest
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-12T09:46:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-12</span>
       
         <br>
         Created:

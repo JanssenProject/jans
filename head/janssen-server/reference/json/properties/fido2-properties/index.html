@@ -6162,13 +6162,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#oldu2fmigrationenabled" class="md-nav__link">
-    oldU2fMigrationEnabled
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#personcustomobjectclasslist" class="md-nav__link">
     personCustomObjectClassList
   </a>
@@ -6176,15 +6169,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#requestedcredentialtypes" class="md-nav__link">
-    requestedCredentialTypes
+  <a href="#enabledfidoalgorithms" class="md-nav__link">
+    enabledFidoAlgorithms
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#requestedparties" class="md-nav__link">
-    requestedParties
+  <a href="#rp" class="md-nav__link">
+    rp
   </a>
   
 </li>
@@ -6192,13 +6185,6 @@
         <li class="md-nav__item">
   <a href="#servermetadatafolder" class="md-nav__link">
     serverMetadataFolder
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#supergluuenabled" class="md-nav__link">
-    superGluuEnabled
   </a>
   
 </li>
@@ -6225,8 +6211,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#userautoenrollment" class="md-nav__link">
-    userAutoEnrollment
+  <a href="#debuguserautoenrollment" class="md-nav__link">
+    debugUserAutoEnrollment
   </a>
   
 </li>
@@ -8822,13 +8808,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#oldu2fmigrationenabled" class="md-nav__link">
-    oldU2fMigrationEnabled
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#personcustomobjectclasslist" class="md-nav__link">
     personCustomObjectClassList
   </a>
@@ -8836,15 +8815,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#requestedcredentialtypes" class="md-nav__link">
-    requestedCredentialTypes
+  <a href="#enabledfidoalgorithms" class="md-nav__link">
+    enabledFidoAlgorithms
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#requestedparties" class="md-nav__link">
-    requestedParties
+  <a href="#rp" class="md-nav__link">
+    rp
   </a>
   
 </li>
@@ -8852,13 +8831,6 @@
         <li class="md-nav__item">
   <a href="#servermetadatafolder" class="md-nav__link">
     serverMetadataFolder
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#supergluuenabled" class="md-nav__link">
-    superGluuEnabled
   </a>
   
 </li>
@@ -8885,8 +8857,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#userautoenrollment" class="md-nav__link">
-    userAutoEnrollment
+  <a href="#debuguserautoenrollment" class="md-nav__link">
+    debugUserAutoEnrollment
   </a>
   
 </li>
@@ -9039,24 +9011,19 @@
 <td><a href="#metricreporterkeepdatadays">Details</a></td>
 </tr>
 <tr>
-<td>oldU2fMigrationEnabled</td>
-<td>Boolean value to enable disable old oxAuth U2F enrollments migration</td>
-<td><a href="#oldu2fmigrationenabled">Details</a></td>
-</tr>
-<tr>
 <td>personCustomObjectClassList</td>
 <td>Custom object class list for dynamic person enrolment</td>
 <td><a href="#personcustomobjectclasslist">Details</a></td>
 </tr>
 <tr>
-<td>requestedCredentialTypes</td>
+<td>enabledFidoAlgorithms</td>
 <td>List of Requested Credential Types</td>
-<td><a href="#requestedcredentialtypes">Details</a></td>
+<td><a href="#enabledFidoAlgorithms">Details</a></td>
 </tr>
 <tr>
-<td>requestedParties</td>
-<td>Authenticators metadata in json format</td>
-<td><a href="#requestedparties">Details</a></td>
+<td>rp</td>
+<td>Requested Parties Authenticators metadata in json format</td>
+<td><a href="#rp">Details</a></td>
 </tr>
 <tr>
 <td>serverMetadataFolder</td>
@@ -9069,11 +9036,6 @@
 <td><a href="#sessionidpersistincache">Details</a></td>
 </tr>
 <tr>
-<td>superGluuEnabled</td>
-<td>Boolean value to enable disable Super Gluu extension</td>
-<td><a href="#supergluuenabled">Details</a></td>
-</tr>
-<tr>
 <td>unfinishedRequestExpiration</td>
 <td>Expiration time in seconds for pending enrollment/authentication requests</td>
 <td><a href="#unfinishedrequestexpiration">Details</a></td>
@@ -9084,7 +9046,7 @@
 <td><a href="#uselocalcache">Details</a></td>
 </tr>
 <tr>
-<td>userAutoEnrollment</td>
+<td>debugUserAutoEnrollment</td>
 <td>Allow to enroll users on enrollment/authentication requests</td>
 <td><a href="#userautoenrollment">Details</a></td>
 </tr>
@@ -9306,18 +9268,6 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="oldu2fmigrationenabled">oldU2fMigrationEnabled<a class="headerlink" href="#oldu2fmigrationenabled" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: Boolean value to enable disable old oxAuth U2F enrollments migration</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
 <h3 id="personcustomobjectclasslist">personCustomObjectClassList<a class="headerlink" href="#personcustomobjectclasslist" title="Permanent link">#</a></h3>
 <ul>
 <li>
@@ -9330,7 +9280,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="requestedcredentialtypes">requestedCredentialTypes<a class="headerlink" href="#requestedcredentialtypes" title="Permanent link">#</a></h3>
+<h3 id="enabledfidoalgorithms">enabledFidoAlgorithms<a class="headerlink" href="#enabledfidoalgorithms" title="Permanent link">#</a></h3>
 <ul>
 <li>
 <p>Description: List of Requested Credential Types</p>
@@ -9342,10 +9292,10 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="requestedparties">requestedParties<a class="headerlink" href="#requestedparties" title="Permanent link">#</a></h3>
+<h3 id="rp">rp<a class="headerlink" href="#rp" title="Permanent link">#</a></h3>
 <ul>
 <li>
-<p>Description: Authenticators metadata in json format</p>
+<p>Description: Requested Parties Authenticators metadata in json format</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -9358,18 +9308,6 @@
 <ul>
 <li>
 <p>Description: Authenticators metadata in json format</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="supergluuenabled">superGluuEnabled<a class="headerlink" href="#supergluuenabled" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: Boolean value to enable disable Super Gluu extension</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -9414,7 +9352,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="userautoenrollment">userAutoEnrollment<a class="headerlink" href="#userautoenrollment" title="Permanent link">#</a></h3>
+<h3 id="debuguserautoenrollment">debugUserAutoEnrollment<a class="headerlink" href="#debuguserautoenrollment" title="Permanent link">#</a></h3>
 <ul>
 <li>
 <p>Description: Allow to enroll users on enrollment/authentication requests</p>
@@ -9432,7 +9370,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-12T09:46:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-12</span>
       
         <br>
         Created:
