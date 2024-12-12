@@ -50,7 +50,7 @@ pub struct BootstrapConfigRaw {
     pub log_ttl: Option<u64>,
 
     /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
-    #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS ", default)]
+    #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS", default)]
     pub decision_log_user_claims: Vec<String>,
 
     /// List of claims to map from user entity, such as ["client_id", "rp_id", ...]
