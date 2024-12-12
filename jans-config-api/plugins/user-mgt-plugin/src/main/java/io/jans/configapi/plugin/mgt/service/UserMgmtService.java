@@ -245,6 +245,9 @@ public class UserMgmtService {
             return user;
         }
 
+        //validate custom attribute validation
+        validateAttributes(customAttributes);
+        
         for (CustomObjectAttribute attribute : customAttributes) {
             CustomObjectAttribute existingAttribute = userService.getCustomAttribute(user, attribute.getName());
             logger.debug("Existing CustomAttributes with existingAttribute:{} ", existingAttribute);

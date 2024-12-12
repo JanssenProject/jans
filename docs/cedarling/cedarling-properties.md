@@ -18,12 +18,11 @@ These Bootstrap Properties control default application level behavior.
 * **`CEDARLING_USER_AUTHZ`** : When `enabled`, Cedar engine authorization is queried for a User principal.
 * **`CEDARLING_WORKLOAD_AUTHZ`** : When `enabled`, Cedar engine authorization is queried for a Workload principal.
 * **`CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION`** :  `AND`, `OR`
-* **`CEDARLING_MAPPING_USER`** : Name of Cedar User schema entity
+* **`CEDARLING_MAPPING_USER`** : Name of Cedar User schema entity if we don't want to use default. When specified cedarling try build defined entity (from schema) as user instead of default `User` entity defined in `cedar` schema. Works in namespace defined in the policy store.
 * **`CEDARLING_MAPPING_WORKLOAD`** : Name of Cedar Workload schema entity
 * **`CEDARLING_MAPPING_ID_TOKEN`** : Name of Cedar id_token schema entity
 * **`CEDARLING_MAPPING_ACCESS_TOKEN`** : Name of Cedar access_token schema entity
 * **`CEDARLING_MAPPING_USERINFO_TOKEN`** : Name of Cedar userinfo schema entity
-* **`CEDARLING_MAPPING_CONTEXT`** : Name of Cedar Context schema entity
 
 **The following bootstrap properties are needed to configure log behavior:**
 
@@ -127,7 +126,7 @@ let config =
 
 ### Loading From JSON
 
-Below is an example of a bootstrap config in JSON format.
+Below is an example of a bootstrap config in JSON format. Not all fields should be specified, almost all have default value.
 
 ```json
 {
@@ -142,6 +141,11 @@ Below is an example of a bootstrap config in JSON format.
     "CEDARLING_USER_AUTHZ": "enabled",
     "CEDARLING_WORKLOAD_AUTHZ": "enabled",
     "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
+    "CEDARLING_MAPPING_USER": "CustomUser",
+    "CEDARLING_MAPPING_WORKLOAD": "CustomWorkload",
+    "CEDARLING_MAPPING_ID_TOKEN": "CustomIdToken",
+    "CEDARLING_MAPPING_ACCESS_TOKEN": "CustomAccessToken",
+    "CEDARLING_MAPPING_USERINFO_TOKEN": "CustomUserinfoToken",
     "CEDARLING_LOCAL_JWKS": "../test_files/local_jwks.json",
     "CEDARLING_LOCAL_POLICY_STORE": null,
     "CEDARLING_POLICY_STORE_LOCAL_FN": "../test_files/policy-store_blobby.json",
@@ -196,7 +200,7 @@ A local JWKS can be used by setting the `CEDARLING_LOCAL_JWKS` bootstrap propert
 
 ### Loading From YAML
 
-Below is an example of a bootstrap config in YAML format.
+Below is an example of a bootstrap config in YAML format. Not all fields should be specified, almost all have default value.
 
 ```yaml
 CEDARLING_APPLICATION_NAME: My App
@@ -207,6 +211,11 @@ CEDARLING_LOG_TTL: 60
 CEDARLING_USER_AUTHZ: 'enabled'
 CEDARLING_WORKLOAD_AUTHZ: 'enabled'
 CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION: 'AND'
+CEDARLING_MAPPING_USER: 'CustomUser'
+CEDARLING_MAPPING_WORKLOAD: 'CustomWorkload'
+CEDARLING_MAPPING_ID_TOKEN: 'CustomIdToken'
+CEDARLING_MAPPING_ACCESS_TOKEN: 'CustomAccessToken'
+CEDARLING_MAPPING_USERINFO_TOKEN: 'CustomUserinfoToken'
 CEDARLING_LOCAL_JWKS: '../test_files/local_jwks.json'
 CEDARLING_LOCAL_POLICY_STORE: null
 CEDARLING_POLICY_STORE_LOCAL_FN: '../test_files/policy-store_blobby.json'

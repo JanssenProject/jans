@@ -497,6 +497,37 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/agama.readonly
+  /api/v1/agama-repo:
+    get:
+      tags:
+      - Agama
+      summary: Gets all agama repositories.
+      description: Gets all agama repositories.
+      operationId: get-agama-repositories
+      responses:
+        "200":
+          description: Agama repositories
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonNode'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/agama-repo.readonly
+        - https://jans.io/oauth/config/agama-repo.write
+        - https://jans.io/oauth/config/read-all
   /api/v1/agama/syntax-check/{qname}:
     post:
       tags:
@@ -4616,6 +4647,7 @@ paths:
                   - uma_rpt_claims
                   - uma_claims_gathering
                   - access_evaluation
+                  - access_evaluation_discovery
                   - consent_gathering
                   - dynamic_scope
                   - spontaneous_scope
@@ -9271,19 +9303,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        adminCanView:
+        whitePagesCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
-          type: boolean
         userCanView:
           type: boolean
-        whitePagesCanView:
-          type: boolean
         userCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -9371,6 +9403,9 @@ components:
           type: boolean
         accessEvaluationScriptName:
           type: string
+        accessEvaluationDiscoveryCacheLifetimeInMinutes:
+          type: integer
+          format: int32
         requireRequestObjectEncryption:
           type: boolean
         requirePkce:
@@ -9819,6 +9854,8 @@ components:
         pairwiseCalculationSalt:
           type: string
         shareSubjectIdBetweenClientsWithSameSectorId:
+          type: boolean
+        useOpenidSubAttributeValueForPairwiseLocalAccountId:
           type: boolean
         webKeysStorage:
           type: string
@@ -10914,10 +10951,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -11208,6 +11245,7 @@ components:
           - uma_rpt_claims
           - uma_claims_gathering
           - access_evaluation
+          - access_evaluation_discovery
           - consent_gathering
           - dynamic_scope
           - spontaneous_scope
@@ -11692,10 +11730,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:

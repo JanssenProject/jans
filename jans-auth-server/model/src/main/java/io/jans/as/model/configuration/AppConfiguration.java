@@ -43,6 +43,7 @@ public class AppConfiguration implements Configuration {
     public static final int DEFAULT_STATUS_LIST_BIT_SIZE = 2;
     public static final int DEFAULT_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE = 100;
     public static final XFrameOptions DEFAULT_X_FRAME_ORIGINS_VALUE = XFrameOptions.SAMEORIGIN;
+    public static final int DEFAULT_USER_INFO_LIFETIME = 3600;
 
     @DocProperty(description = "URL using the https scheme that OP asserts as Issuer identifier")
     private String issuer;
@@ -403,6 +404,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "The lifetime of the short lived Access Token")
     private int accessTokenLifetime;
+
+    @DocProperty(description = "The lifetime of the User Info", defaultValue = "3600")
+    private int userInfoLifetime;
 
     @DocProperty(description = "Time interval for the Clean Service in seconds")
     private int cleanServiceInterval;
@@ -2410,6 +2414,16 @@ public class AppConfiguration implements Configuration {
 
     public void setAccessTokenLifetime(int accessTokenLifetime) {
         this.accessTokenLifetime = accessTokenLifetime;
+    }
+
+    public int getUserInfoLifetime() {
+        if (userInfoLifetime <= 0) userInfoLifetime = DEFAULT_USER_INFO_LIFETIME;
+        return userInfoLifetime;
+    }
+
+    public AppConfiguration setUserInfoLifetime(int userInfoLifetime) {
+        this.userInfoLifetime = userInfoLifetime;
+        return this;
     }
 
     public Boolean getSaveTokensInCache() {
