@@ -392,7 +392,7 @@ class Upgrade:
 def main():
     manager = get_manager()
 
-    with manager.lock.create_lock("config-api-upgrade"):
+    with manager.create_lock("config-api-upgrade"):
         upgrade = Upgrade(manager)
         upgrade.invoke()
 

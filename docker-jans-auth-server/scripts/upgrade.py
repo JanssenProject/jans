@@ -239,7 +239,7 @@ class Upgrade:
 def main():  # noqa: D103
     manager = get_manager()
 
-    with manager.lock.create_lock("auth-upgrade"):
+    with manager.create_lock("auth-upgrade"):
         upgrade = Upgrade(manager)
         upgrade.invoke()
 
