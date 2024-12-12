@@ -89,8 +89,8 @@ impl Authz {
             .config
             .jwt_service
             .process_tokens::<AccessTokenData, IdTokenData, UserInfoTokenData>(
-                &request.access_token,
-                &request.id_token,
+                Some(&request.access_token),
+                Some(&request.id_token),
                 Some(&request.userinfo_token),
         )?)
     }
@@ -280,8 +280,8 @@ impl Authz {
         .config
         .jwt_service
         .process_tokens::<AccessTokenData, IdTokenData, UserInfoTokenData>(
-            &request.access_token,
-            &request.id_token,
+            Some(&request.access_token),
+            Some(&request.id_token),
             Some(&request.userinfo_token),
         )?;
 

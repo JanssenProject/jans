@@ -56,6 +56,8 @@ pub enum JwtProcessingError {
     MissingClaimsInStrictMode(&'static str, &'static str),
     #[error("Failed to deserialize from Value to String: {0}")]
     StringDeserialization(#[from] serde_json::Error),
+    #[error("{0}")]
+    Unimplemented(String),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -160,23 +162,37 @@ impl JwtService {
 
     pub fn process_tokens<'a, A, I, U>(
         &'a self,
-        access_token: &'a str,
-        id_token: &'a str,
+        access_token: Option<&'a str>,
+        id_token: Option<&'a str>,
         userinfo_token: Option<&'a str>,
     ) -> Result<ProcessTokensResult<'a, A, I, U>, JwtProcessingError>
+    // TODO: make this function return Option<DeserializeOwned> for each of these
+    // once the authz module supports it
+    //
+    // And probably get the `trusted_issuer` from which token is available.
     where
         A: DeserializeOwned,
         I: DeserializeOwned,
         U: DeserializeOwned,
     {
-        let access_token = self
-            .access_tkn_validator
-            .process_jwt(access_token)
-            .map_err(JwtProcessingError::InvalidAccessToken)?;
-        let id_token = self
-            .id_tkn_validator
-            .process_jwt(id_token)
-            .map_err(JwtProcessingError::InvalidIdToken)?;
+        let access_token = match access_token {
+            Some(jwt) => self
+                .access_tkn_validator
+                .process_jwt(jwt)
+                .map_err(JwtProcessingError::InvalidAccessToken)?,
+            None => Err(JwtProcessingError::Unimplemented(
+                "Having no access_token is not supported yet".to_string(),
+            ))?,
+        };
+        let id_token = match id_token {
+            Some(jwt) => self
+                .id_tkn_validator
+                .process_jwt(jwt)
+                .map_err(JwtProcessingError::InvalidIdToken)?,
+            None => Err(JwtProcessingError::Unimplemented(
+                "Having no id_token is not supported yet".to_string(),
+            ))?,
+        };
         let userinfo_token = userinfo_token
             .map(|jwt| self.userinfo_tkn_validator.process_jwt(jwt))
             .transpose()
@@ -233,7 +249,9 @@ impl JwtService {
 
         let userinfo_token = match userinfo_token {
             Some(token) => token,
-            None => unimplemented!("Having no userinfo token is not yet supported."),
+            None => Err(JwtProcessingError::Unimplemented(
+                "Having no userinfo token is not yet supported.".to_string(),
+            ))?,
         };
 
         Ok(ProcessTokensResult {
@@ -319,7 +337,11 @@ mod test {
         .expect("Should create JwtService");
 
         jwt_service
-            .process_tokens::<Value, Value, Value>(&access_tkn, &id_tkn, Some(&userinfo_tkn))
+            .process_tokens::<Value, Value, Value>(
+                Some(&access_tkn),
+                Some(&id_tkn),
+                Some(&userinfo_tkn),
+            )
             .expect("Should process JWTs");
     }
 }
