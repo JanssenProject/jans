@@ -30,6 +30,13 @@ These Bootstrap Properties control default application level behavior.
 * **`CEDARLING_LOG_STORAGE`** : `off`, `memory`, `std_out`
 * **`CEDARLING_LOG_LEVEL`** : System Log Level [See here](./cedarling-logs.md). Default to `WARN`
 * **`CEDARLING_LOG_STDOUT_TYPE`** : Either `System`, `Metric`, or `Decision`. Default to System.
+* **`CEDARLING_LOG_LEVEL`** : Log level filter for logging. Log level has only `System` log type entries. `TRACE` is lowest. `FATAL` is highest. Possible variants:
+  * FATAL
+  * ERROR
+  * WARN
+  * INFO
+  * DEBUG
+  * TRACE
 * **`CEDARLING_DECISION_LOG_USER_CLAIMS`** : List of claims to map from user entity, such as ["sub", "email", "username", ...]
 * **`CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS`** : List of claims to map from user entity, such as ["client_id", "rp_id", ...]
 * **`CEDARLING_DECISION_LOG_DEFAULT_JWT_ID`** : Token claims that will be used for decision logging. Default is "jti", but perhaps some other claim is needed.
@@ -135,6 +142,7 @@ Below is an example of a bootstrap config in JSON format.
     "CEDARLING_POLICY_STORE_URI": "",
     "CEDARLING_POLICY_STORE_ID": "840da5d85403f35ea76519ed1a18a33989f855bf1cf8",
     "CEDARLING_LOG_TYPE": "memory",
+    "CEDARLING_LOG_LEVEL": "INFO",
     "CEDARLING_DECISION_LOG_USER_CLAIMS": ["sub", "email", "username"],
     "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS": ["client_id", "rp_id"],
     "CEDARLING_DECISION_LOG_DEFAULT_JWT_ID": "jti",
@@ -203,6 +211,9 @@ CEDARLING_APPLICATION_NAME: My App
 CEDARLING_POLICY_STORE_URI: ''
 CEDARLING_POLICY_STORE_ID: '840da5d85403f35ea76519ed1a18a33989f855bf1cf8'
 CEDARLING_LOG_TYPE: 'memory'
+CEDARLING_LOG_LEVEL: 'INFO'
+CEDARLING_DECISION_LOG_USER_CLAIMS: ["sub","email"]
+CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS: ["client_id", "rp_id"]
 CEDARLING_LOG_TTL: 60
 CEDARLING_USER_AUTHZ: 'enabled'
 CEDARLING_WORKLOAD_AUTHZ: 'enabled'
