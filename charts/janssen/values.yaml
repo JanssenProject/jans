@@ -778,6 +778,8 @@ global:
       lockConfigEnabled: false
       # -- Enable endpoint /jans-lock
       lockEnabled: false
+      # -- Enable endpoint /.well-known/authzen-configuration
+      authzenConfigEnabled: true
       # -- Lock config ingress resource labels. key app is taken
       lockConfigLabels: { }
       # -- Lock config ingress resource additional annotations.
@@ -814,8 +816,6 @@ global:
       u2fConfigLabels: { }
       # -- u2f config ingress resource additional annotations.
       u2fAdditionalAnnotations: { }
-      # -- Enable endpoint /.well-known/authzen-configuration
-      authzenConfigEnabled: true
       # -- authzen config ingress resource labels. key app is taken
       authzenConfigLabels: { }
       # -- authzen config ingress resource additional annotations.
