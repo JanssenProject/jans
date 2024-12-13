@@ -20,8 +20,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import static io.restassured.RestAssured.given;
-
 public class ConfigResourceTest extends ConfigServerBaseTest {
 
     @Parameters({ "issuer", "apiConfigtionUrl" })

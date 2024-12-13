@@ -13,6 +13,9 @@ import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import jakarta.ws.rs.core.Response.Status;
+
+import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -31,7 +34,7 @@ public class LicenseResourceTest extends AdminUIBaseTest {
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
-        //assertEquals(response.getStatus(), Status.OK.getStatusCode());
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
         log.info("\n\n Response for getLicenseDetails -  response:{}", response);
     }
 

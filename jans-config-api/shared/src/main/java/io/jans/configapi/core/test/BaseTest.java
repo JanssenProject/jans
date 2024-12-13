@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -35,7 +36,7 @@ import org.testng.annotations.BeforeSuite;
 public class BaseTest {
 
     private static final String FILE_PREFIX = "file:";
-    private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+    private static final Charset DEFAULT_CHARSET =  StandardCharsets.UTF_8;
     private static final String NEW_LINE = System.getProperty("line.separator");
     protected static final String CONTENT_TYPE = "Content-Type";
     protected static final String AUTHORIZATION = "Authorization";
@@ -50,21 +51,16 @@ public class BaseTest {
     protected String accessToken;
 
     @BeforeSuite
-    public void initTestSuite(ITestContext context) throws Exception {
+    public void initTestSuite(ITestContext context)  {
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
         log.info("Invoked initTestSuite propertiesFile '{}'", propertiesFile);
         propertiesMap = context.getSuite().getXmlSuite().getParameters();
         log.info("End initTestSuite propertiesMap: {}", propertiesMap);
     }
 
-    @AfterSuite
-    public void finalize() {
-        // cleanup
-        log.info("After Suite finalize'");
-    }
 
     @BeforeMethod
-    public void getAccessToken() throws Exception {
+    public void getAccessToken()  {
         log.info("getAccessToken - propertiesMap:{}", propertiesMap);
         String tokenUrl = propertiesMap.get("tokenEndpoint");
         String strGrantType = propertiesMap.get("tokenGrantType");
