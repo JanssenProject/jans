@@ -66,9 +66,9 @@ impl Action<'_> {
                         Some(val) => val,
                         None => Err(BuildJsonCtxError::MissingIdMapping(attr.key.clone()))?,
                     };
-                    let type_name = [attr.namespace.clone(), type_name.to_string()]
-                        .join(CEDAR_POLICY_SEPARATOR);
-                    json[attr.key.clone()] = json!({"type": type_name, "id": id});
+                    let type_name =
+                        [attr.namespace.as_str(), &type_name].join(CEDAR_POLICY_SEPARATOR);
+                    json[attr.key.as_str()] = json!({"type": type_name, "id": id});
                 }
             }
         }

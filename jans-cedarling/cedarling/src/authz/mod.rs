@@ -33,7 +33,7 @@ mod token_data;
 
 pub use authorize_result::AuthorizeResult;
 use cedar_policy::{ContextJsonError, Entities, Entity, EntityUid, Response};
-use entities::create_resource_entity;
+use entities::{create_resource_entity, CEDAR_POLICY_SEPARATOR};
 use entities::CedarPolicyCreateTypeError;
 use entities::ProcessTokensResult;
 use entities::ResourceEntityError;
@@ -364,7 +364,7 @@ fn build_context(
         // we strip the namespace from the type_name then make it lowercase
         // example: 'Jans::Id_token' -> 'id_token'
         let type_name = entity.uid().type_name().to_string();
-        let type_name = type_name.strip_prefix(&format!("{}::", namespace)).unwrap_or(&type_name).to_lowercase();
+        let type_name = type_name.strip_prefix(&format!("{}{}", namespace, CEDAR_POLICY_SEPARATOR)).unwrap_or(&type_name).to_lowercase();
         let type_id = entity.uid().id().escaped();
         id_mapping.insert(type_name, type_id.to_string());
     }
