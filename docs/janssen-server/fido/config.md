@@ -25,21 +25,21 @@ tags:
 
 #### Fido2Configuration structure
 
-| Field named                             | Example                                                                          | Description                                                                                             |
-|-----------------------------------------|----------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
-| authenticatorCertsFolder                | /etc/jans/conf/fido2/authenticator_cert                                          | Authenticators certificates fodler.                                                                     |
-| mdsCertsFolder                          | /etc/jans/conf/fido2/mds/cert                                                    | MDS TOC root certificates folder.                                                                       |
-| mdsTocsFolder                           | /etc/jans/conf/fido2/mds/toc                                                     | MDS TOC files folder.                                                                                   |
-| serverMetadataFolder                    | /etc/jans/conf/fido2/server_metadata                                             | Authenticators metadata in json format. Example: virtual devices.                                       |
-| metadataUrlsProvider                    | https://mds3.fido.tools                                                          | String value to provide source of URLs with external metadata.                                          |
-| requestedCredentialTypes                | ["RS256","ES256"]                                                                |                                                                                                         |
-| requestedParties                        | [{"name":"https://my-jans-server.jans.io","domains":["my-jans-server.jans.io"]}] | Requested party name.                                                                                   |
-| userAutoEnrollment                      | false                                                                            | Allow to enroll users on enrollment/authentication requests. (Useful while running tests)               |
-| unfinishedRequestExpiration             | 180                                                                              | Expiration time in seconds for pending enrollment/authentication requests                               |
-| authenticationHistoryExpiration         | 1296000                                                                          | Expiration time in seconds for approved authentication requests.                                        |
-| skipDownloadMdsEnabled                  | false                                                                            | Boolean value indicating whether the MDS download should be omitted                                     |
-| skipValidateMdsInAttestationEnabled     | false                                                                            | Boolean value indicating whether MDS validation should be omitted during attestation                    |
-| assertionOptionsGenerateEndpointEnabled | false                                                                            | Boolean value indicating whether the assertion custom endpoint (used especially in passkey) is enabled. |
+| Field named                             | Example                                                                        | Description                                                                                             |
+|-----------------------------------------|--------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| authenticatorCertsFolder                | /etc/jans/conf/fido2/authenticator_cert                                        | Authenticators certificates fodler.                                                                     |
+| mdsCertsFolder                          | /etc/jans/conf/fido2/mds/cert                                                  | MDS TOC root certificates folder.                                                                       |
+| mdsTocsFolder                           | /etc/jans/conf/fido2/mds/toc                                                   | MDS TOC files folder.                                                                                   |
+| serverMetadataFolder                    | /etc/jans/conf/fido2/server_metadata                                           | Authenticators metadata in json format. Example: virtual devices.                                       |
+| metadataUrlsProvider                    | https://mds3.fido.tools                                                        | String value to provide source of URLs with external metadata.                                          |
+| enabledFidoAlgorithms                   | ["RS256","ES256"]                                                              |                                                                                                         |
+| rp                                      | [{"id":"https://my-jans-server.jans.io","origins":["my-jans-server.jans.io"]}] | Requested party id.                                                                                     |
+| debugUserAutoEnrollment                 | false                                                                          | Allow to enroll users on enrollment/authentication requests. (Useful while running tests)               |
+| unfinishedRequestExpiration             | 180                                                                            | Expiration time in seconds for pending enrollment/authentication requests                               |
+| authenticationHistoryExpiration         | 1296000                                                                        | Expiration time in seconds for approved authentication requests.                                        |
+| disableMetadataService                  | false                                                                          | Boolean value indicating whether the MDS download should be omitted                                     |
+| attestationMode                         | "monitor"                                                                      | Enum value indicating whether MDS validation should be omitted during attestation                       |
+| assertionOptionsGenerateEndpointEnabled | false                                                                          | Boolean value indicating whether the assertion custom endpoint (used especially in passkey) is enabled. |
 
 ### Configuring the FIDO2 server:
 #### 1. Read Configuration parameters:
@@ -66,30 +66,28 @@ Response:
     "jansCustomPerson",
     "jansPerson"
   ],
-  "superGluuEnabled": true,
   "sessionIdPersistInCache": false,
-  "oldU2fMigrationEnabled": true,
   "fido2Configuration": {
     "authenticatorCertsFolder": "/etc/jans/conf/fido2/authenticator_cert",
     "mdsCertsFolder": "/etc/jans/conf/fido2/mds/cert",
     "mdsTocsFolder": "/etc/jans/conf/fido2/mds/toc",
     "checkU2fAttestations": false,
-    "userAutoEnrollment": false,
+    "debugUserAutoEnrollment": false,
     "unfinishedRequestExpiration": 180,
     "authenticationHistoryExpiration": 1296000,
     "serverMetadataFolder": "/etc/jans/conf/fido2/server_metadata",
     "metadataUrlsProvider": "",
-    "skipDownloadMdsEnabled": false,
-    "skipValidateMdsInAttestationEnabled": false,
+    "disableMetadataService": false,
+    "attestationMode": "monitor",
     "assertionOptionsGenerateEndpointEnabled":true,
-    "requestedCredentialTypes": [
+    "enabledFidoAlgorithms": [
       "RS256",
       "ES256"
     ],
-    "requestedParties": [
+    "rp": [
       {
-        "name": "https://my.jans.server",
-        "domains": [
+        "id": "https://my.jans.server",
+        "origins": [
           "my.jans.server"
         ]
       }

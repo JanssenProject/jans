@@ -157,6 +157,7 @@ mod test {
             application_name: "My App".to_string(),
             log_config: LogConfig {
                 log_type: LogTypeConfig::StdOut,
+                log_level: crate::LogLevel::DEBUG,
             },
             policy_store_config: PolicyStoreConfig {
                 source: crate::PolicyStoreSource::FileJson(
@@ -211,6 +212,7 @@ mod test {
             application_name: "My App".to_string(),
             log_config: LogConfig {
                 log_type: LogTypeConfig::Memory(MemoryLogConfig { log_ttl: 60 }),
+                log_level: crate::LogLevel::DEBUG,
             },
             policy_store_config: PolicyStoreConfig {
                 source: crate::PolicyStoreSource::FileJson(

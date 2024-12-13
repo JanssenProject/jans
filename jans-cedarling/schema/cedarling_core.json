@@ -240,11 +240,13 @@
                         },
                         "exp": {
                             "type": "EntityOrCommon",
-                            "name": "Long"
+                            "name": "Long",
+                            "required": false
                         },
                         "iat": {
                             "type": "EntityOrCommon",
-                            "name": "Long"
+                            "name": "Long",
+                            "required": false
                         },
                         "iss": {
                             "type": "EntityOrCommon",
@@ -397,7 +399,8 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Workload"
+                        "Workload",
+                        "Role"
                     ],
                     "context": {
                         "type": "Context"
@@ -424,7 +427,8 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Workload"
+                        "Workload",
+                        "Role"
                     ],
                     "context": {
                         "type": "Context"
@@ -464,7 +468,8 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Workload"
+                        "Workload",
+                        "Role"
                     ],
                     "context": {
                         "type": "Context"
@@ -504,7 +509,8 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Workload"
+                        "Workload",
+                        "Role"
                     ],
                     "context": {
                         "type": "Context"
@@ -518,7 +524,8 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Workload"
+                        "Workload",
+                        "Role"
                     ],
                     "context": {
                         "type": "Context"
@@ -532,7 +539,8 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Workload"
+                        "Workload",
+                        "Role"
                     ],
                     "context": {
                         "type": "Context"
@@ -546,7 +554,8 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Workload"
+                        "Workload",
+                        "Role"
                     ],
                     "context": {
                         "type": "Context"
@@ -560,7 +569,8 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Workload"
+                        "Workload",
+                        "Role"
                     ],
                     "context": {
                         "type": "Context"

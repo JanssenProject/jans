@@ -16,7 +16,7 @@ use std::sync::Arc;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types;
 use crate::common::policy_store::PolicyStoreWithID;
-use crate::jwt;
+use crate::{jwt, LogLevel};
 use crate::log::interface::LogWriter;
 use crate::log::{
     AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, LogEntry, LogTokensInfo, LogType, Logger, PersonAuthorizeInfo, PrincipalLogEntry, WorkloadAuthorizeInfo
@@ -72,7 +72,7 @@ impl Authz {
                 Some(config.application_name.clone()),
                 LogType::System,
             )
-            .set_cedar_version()
+            .set_cedar_version().set_level(LogLevel::INFO)
             .set_message("Cedarling Authz initialized successfully".to_string()),
         );
 
@@ -187,8 +187,8 @@ impl Authz {
             LogEntry::new_with_data(
                 self.config.pdp_id,
                 Some(self.config.application_name.clone()),
-                LogType::Decision,
-            )
+                LogType::System,
+            ).set_level(LogLevel::DEBUG)
             .set_auth_info(AuthorizationLogInfo {
                 action: request.action.clone(),
                 context: request.context.clone(),
@@ -448,12 +448,12 @@ pub struct CreateRequestRoleError {
 /// Get entity claims from list in config
 // 
 // To get claims we convert entity to json, because no other way to get introspection
-fn get_entity_claims(decision_log_claims: &[String], entities: &Entities,principal_user_entity_uid: EntityUid) -> HashMap<String, serde_json::Value> {
+fn get_entity_claims(decision_log_claims: &[String], entities: &Entities, entity_uid: EntityUid) -> HashMap<String, serde_json::Value> {
     HashMap::from_iter(  decision_log_claims
         .iter()
         .filter_map(|claim_key| {
             entities
-                .get(&principal_user_entity_uid)
+                .get(&entity_uid)
                 // convert entity to json and result to option
                 .and_then(|entity| entity.to_json_value().ok())
                 // JSON structure of entity:
