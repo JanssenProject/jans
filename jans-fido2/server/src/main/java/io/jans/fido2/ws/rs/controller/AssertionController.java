@@ -13,7 +13,7 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.operation.AssertionService;
-
+import jakarta.validation.constraints.NotNull;
 import io.jans.fido2.service.util.CommonUtilService;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -22,7 +22,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
-import javax.validation.constraints.NotNull;
+
 
 /**
  * serves request for /assertion endpoint exposed by FIDO2 sever
