@@ -8834,7 +8834,16 @@ When data.skipped is &quot;&quot;
     ...
 }
 </code></pre></div>
-<p>Both <code>icon</code> and <code>text</code> may contain HTML markup. In this example we are using the font awesome library available in the selector page for rendering a nice <a href="https://fontawesome.com/v5/search?q=pizza&amp;o=r&amp;m=free">icon</a> but we could have used any other thing here like an <code>img</code> tag, for instance.</p>
+<p>Alternatively, a pointer to a localized message can be used instead of <code>text</code>. This is the recommended practice if <a href="../../../janssen-server/developer/agama/advanced-usages/#localization-and-internationalization">localization/internationalization</a> is relevant. In this case, something like the below will work:</p>
+<div class="highlight"><pre><span></span><code>            ...
+            &quot;com.acme.authn.food&quot;: {
+                &quot;icon&quot;: &quot;&lt;i class=&#39;fas fa-pizza-slice&#39;&gt;&lt;/i&gt;&quot;,
+                &quot;textKey&quot;: &quot;foodAuth.methodTitle&quot;
+            }
+            ...
+</code></pre></div>
+<p>as long as the message key <code>foodAuth.methodTitle</code> is defined in the project's <code>labels.txt</code> file, or elsewhere in another project. Note <code>textKey</code> takes precedence over <code>text</code> when rendering the page. </p>
+<p>Both <code>icon</code> and <code>textKey</code> (or <code>text</code>) may contain HTML markup. In this example we are using the font awesome library available in the selector page for rendering a nice <a href="https://fontawesome.com/v5/search?q=pizza&amp;o=r&amp;m=free">icon</a> but we could have used any other thing here like an <code>img</code> tag, for instance.</p>
 <p>Ensure to properly escape double quotes if necessary. Also make the markup a one-liner: JSON strings cannot span several lines.</p>
 <h3 id="recommended-practices">Recommended practices<a class="headerlink" href="#recommended-practices" title="Permanent link">#</a></h3>
 <div class="admonition note">
@@ -8909,7 +8918,7 @@ JSONObject p = ips.getAgamaFlowConfigProperties(&quot;flow qname&quot;);
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-27T17:24:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-13T17:16:17+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-13</span>
       
         <br>
         Created:
