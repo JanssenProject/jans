@@ -67,7 +67,7 @@ impl Action<'_> {
                         None => Err(BuildJsonCtxError::MissingIdMapping(attr.key.clone()))?,
                     };
                     let type_name =
-                        [attr.namespace.as_str(), &type_name].join(CEDAR_POLICY_SEPARATOR);
+                        [attr.namespace.as_str(), type_name].join(CEDAR_POLICY_SEPARATOR);
                     json[attr.key.as_str()] = json!({"type": type_name, "id": id});
                 }
             }
@@ -119,7 +119,7 @@ impl CedarSchemaJson {
         let context_entities = action_schema
             .context
             .as_ref()
-            .map(|ctx| self.process_action_context(&ctx, namespace))
+            .map(|ctx| self.process_action_context(ctx, namespace))
             .transpose()?;
 
         Ok(Some(Action {
