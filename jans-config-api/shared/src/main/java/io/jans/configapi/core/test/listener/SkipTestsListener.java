@@ -1,10 +1,8 @@
 package io.jans.configapi.core.test.listener;
 
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.IAnnotationTransformer;
@@ -36,7 +34,6 @@ public class SkipTestsListener implements IAnnotationTransformer {
               }
       	  }
       }
-      
   }
   
 }

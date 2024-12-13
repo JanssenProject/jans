@@ -12,18 +12,16 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import org.testng.annotations.Test;
-
 import static org.testng.Assert.assertEquals;
-
 import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 
 public class AgamaDeploymentsResourceTest extends ConfigServerBaseTest {
 
     @Parameters({ "issuer", "agamaDeploymentUrl" })
     @Test
     public void getDeployments(final String issuer, final String agamaDeploymentUrl) {
-        log.error("accessToken:{}, issuer:{}, agamaDeploymentUrl:{}", accessToken, issuer, agamaDeploymentUrl);
+        log.info("accessToken:{}, issuer:{}, agamaDeploymentUrl:{}", accessToken, issuer, agamaDeploymentUrl);
 
         Builder request = getResteasyService().getClientBuilder(issuer + agamaDeploymentUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
@@ -31,7 +29,7 @@ public class AgamaDeploymentsResourceTest extends ConfigServerBaseTest {
 
         Response response = request.get();
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.error("Response for getDefaultAuthenticationMethod -  response:{}", response);
+        log.info("Response for getDefaultAuthenticationMethod -  response:{}", response);
 
     }
 

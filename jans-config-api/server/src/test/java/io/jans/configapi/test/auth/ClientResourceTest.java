@@ -16,16 +16,13 @@ import static org.testng.Assert.*;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-
-
 public class ClientResourceTest extends ConfigServerBaseTest {
 
-    private String clientId;
-
+ 
     @Parameters({ "issuer", "openidClientsUrl" })
     @Test
     public void getAllClient(final String issuer, final String openidClientsUrl) {
-        log.error("getAllClient() - accessToken:{}, issuer:{}, openidClientsUrl:{}", accessToken, issuer,
+        log.info("getAllClient() - accessToken:{}, issuer:{}, openidClientsUrl:{}", accessToken, issuer,
                 openidClientsUrl);
         Builder request = getResteasyService().getClientBuilder(issuer + openidClientsUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
@@ -33,22 +30,20 @@ public class ClientResourceTest extends ConfigServerBaseTest {
 
         Response response = request.get();
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.error("Response for getAllClient -  response:{}", response);
+        log.info("Response for getAllClient -  response:{}", response);
     }
 
     @Parameters({ "issuer", "openidClientsUrl", "openid_client_1" })
     @Test
     public void postClient(final String issuer, final String openidClientsUrl, final String json) {
-        log.error("\n\n\n postClient2 - accessToken:{}, issuer:{}, openidClientsUrl:{}, json:{}", accessToken, issuer,
+        log.info("\n\n\n postClient2 - accessToken:{}, issuer:{}, openidClientsUrl:{}, json:{}", accessToken, issuer,
                 openidClientsUrl, json);
 
         Builder request = getResteasyService().getClientBuilder(issuer + openidClientsUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
-        // String jsonStr = decodeFileValue(json);
-        // log.error("\n\n\n postClient2 - jsonStr:{}", jsonStr);
         Response response = request.post(Entity.entity(json, MediaType.APPLICATION_JSON));
-        log.error("post client -  response:{}", response);
+        log.info("post client -  response:{}", response);
 
         if (response.getStatus() == 201) {
             log.trace("Response for postClient -  response.getEntity():{}, response.getClass():{}",

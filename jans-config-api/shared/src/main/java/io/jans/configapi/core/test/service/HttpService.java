@@ -6,12 +6,16 @@
 
 package io.jans.configapi.core.test.service;
 
+import io.jans.model.net.HttpServiceResponse;
+import io.jans.util.StringHelper;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -22,6 +26,9 @@ import java.util.Map.Entry;
 
 import javax.net.ssl.SSLContext;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,7 +38,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -50,23 +56,14 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
 
-import io.jans.model.net.HttpServiceResponse;
-import io.jans.util.StringHelper;
-import io.jans.util.Util;
-import jakarta.annotation.PostConstruct;
-import jakarta.inject.Inject;
-import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
-
 public class HttpService implements Serializable {
 
     private static final long serialVersionUID = -2398422090669045605L;
-    protected Logger log = LogManager.getLogger(getClass());
+    protected transient Logger log = LogManager.getLogger(getClass());
+    private static final String CON_STATS_STR = "Connection manager stats: {}";
+    private transient Base64 base64;
 
-    private Base64 base64;
-
-    private PoolingHttpClientConnectionManager connectionManager;
+    private transient PoolingHttpClientConnectionManager connectionManager;
 
     @PostConstruct
     public void init() {
@@ -79,7 +76,7 @@ public class HttpService implements Serializable {
 
     public CloseableHttpClient getHttpsClientTrustAll()
             throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
-        log.trace("Connection manager stats: {}", connectionManager.getTotalStats());
+        log.trace(CON_STATS_STR, connectionManager.getTotalStats());
 
         TrustStrategy acceptingTrustStrategy = (cert, authType) -> true;
         SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
@@ -96,7 +93,7 @@ public class HttpService implements Serializable {
     }
 
     public CloseableHttpClient getHttpsClient(RequestConfig requestConfig) {
-        log.trace("Connection manager stats: {}", connectionManager.getTotalStats());
+        log.trace(CON_STATS_STR, connectionManager.getTotalStats());
 
         return HttpClients.custom()
                 .setDefaultRequestConfig(RequestConfig.copy(requestConfig).setCookieSpec(CookieSpecs.STANDARD).build())
@@ -104,23 +101,23 @@ public class HttpService implements Serializable {
     }
 
     public CloseableHttpClient getHttpsClient(HttpRoutePlanner routerPlanner) {
-        log.trace("Connection manager stats: {}", connectionManager.getTotalStats());
+        log.trace(CON_STATS_STR, connectionManager.getTotalStats());
 
         return getHttpsClient(RequestConfig.custom().build(), routerPlanner);
     }
 
     public CloseableHttpClient getHttpsClient(RequestConfig requestConfig, HttpRoutePlanner routerPlanner) {
-        log.trace("Connection manager stats: {}", connectionManager.getTotalStats());
+        log.trace(CON_STATS_STR, connectionManager.getTotalStats());
 
         return HttpClients.custom()
                 .setDefaultRequestConfig(RequestConfig.copy(requestConfig).setCookieSpec(CookieSpecs.STANDARD).build())
                 .setConnectionManager(connectionManager).setRoutePlanner(routerPlanner).build();
     }
 
-    public CloseableHttpClient getHttpsClient(String trustStoreType, String trustStorePath, String trustStorePassword)
+    public CloseableHttpClient getHttpsClient(String trustStorePath, String trustStorePassword)
             throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, CertificateException,
             IOException {
-        log.trace("Connection manager stats: {}", connectionManager.getTotalStats());
+        log.trace(CON_STATS_STR, connectionManager.getTotalStats());
 
         SSLContext sslContext = SSLContexts.custom()
                 .loadTrustMaterial(new File(trustStorePath), trustStorePassword.toCharArray()).build();
@@ -131,10 +128,10 @@ public class HttpService implements Serializable {
                 .setConnectionManager(connectionManager).build();
     }
 
-    public CloseableHttpClient getHttpsClient(String trustStoreType, String trustStorePath, String trustStorePassword,
-            String keyStoreType, String keyStorePath, String keyStorePassword) throws KeyManagementException,
-            NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException, UnrecoverableKeyException {
-        log.trace("Connection manager stats: {}", connectionManager.getTotalStats());
+    public CloseableHttpClient getHttpsClient(String trustStorePath, String trustStorePassword, String keyStorePath,
+            String keyStorePassword) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException,
+            CertificateException, IOException, UnrecoverableKeyException {
+        log.trace(CON_STATS_STR, connectionManager.getTotalStats());
 
         SSLContext sslContext = SSLContexts.custom()
                 .loadTrustMaterial(new File(trustStorePath), trustStorePassword.toCharArray())
@@ -160,8 +157,8 @@ public class HttpService implements Serializable {
         if (StringHelper.isNotEmpty(authCode)) {
             httpPost.setHeader("Authorization", authType + authCode);
         }
-        
-        if(contentType==null) {
+
+        if (contentType == null) {
             contentType = ContentType.APPLICATION_JSON;
         }
 
@@ -201,23 +198,11 @@ public class HttpService implements Serializable {
     }
 
     public String encodeBase64(String value) {
-        try {
-            return new String(base64.encode((value).getBytes(Util.UTF8)), Util.UTF8);
-        } catch (UnsupportedEncodingException ex) {
-            log.error("Failed to convert '{}' to base64", value, ex);
-        }
-
-        return null;
+        return new String(base64.encode((value).getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
     }
 
     public String encodeUrl(String value) {
-        try {
-            return URLEncoder.encode(value, Util.UTF8);
-        } catch (UnsupportedEncodingException ex) {
-            log.error("Failed to encode url '{}'", value, ex);
-        }
-
-        return null;
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
     public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers) {
@@ -245,8 +230,7 @@ public class HttpService implements Serializable {
         return executeGet(httpClient, requestUri, headers);
     }
 
-    public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri)
-            throws ClientProtocolException, IOException {
+    public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri) {
         return executeGet(httpClient, requestUri, null);
     }
 
@@ -315,9 +299,9 @@ public class HttpService implements Serializable {
                 || (responseStastusCode == HttpStatus.SC_PARTIAL_CONTENT)
                 || (responseStastusCode == HttpStatus.SC_MULTI_STATUS)) {
             return true;
+        } else {
+            return false;
         }
-
-        return false;
     }
 
     public boolean isResponseStatusCodeOk(HttpResponse httpResponse) {
@@ -334,9 +318,9 @@ public class HttpService implements Serializable {
         if (StringHelper.equals(contentTypeValue, ContentType.APPLICATION_XML.getMimeType())
                 || StringHelper.equals(contentTypeValue, ContentType.TEXT_XML.getMimeType())) {
             return true;
+        } else {
+            return false;
         }
-
-        return false;
     }
 
     public String constructServerUrl(final HttpServletRequest request) {
