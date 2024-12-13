@@ -7,7 +7,6 @@
 package io.jans.fido2.ws.rs.controller;
 
 import org.slf4j.Logger;
-
 import io.jans.fido2.model.attestation.AttestationOptions;
 import io.jans.fido2.model.attestation.AttestationResult;
 import io.jans.fido2.model.attestation.PublicKeyCredentialCreationOptions;
@@ -26,6 +25,9 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import java.io.IOException;
+
 
 /**
  * serves request for /attestation endpoint exposed by FIDO2 sever

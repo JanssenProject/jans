@@ -23,6 +23,8 @@ import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
 
+import jakarta.validation.constraints.NotNull;
+
 
 /**
  * serves request for /assertion endpoint exposed by FIDO2 sever
