@@ -71,7 +71,7 @@ public class UserSessionIdService {
         return true;
     }
 
-    public void updateUserSessionIdOnFinishRequest(String sessionId, String userInum, Fido2RegistrationEntry registrationEntry, boolean enroll, boolean oneStep) {
+    public void updateUserSessionIdOnFinishRequest(String sessionId, String userInum, Fido2RegistrationEntry registrationEntry, boolean enroll) {
         SessionId entity = getSessionId(sessionId);
         if (entity == null) {
             return;
@@ -83,12 +83,10 @@ public class UserSessionIdService {
         } else {
             sessionAttributes.put("session_custom_state", "declined");
         }
-        updateUserSessionAttributes(userInum, registrationEntry, enroll, oneStep, sessionAttributes);
-
         updateSessionId(entity);
     }
 
-    public void updateUserSessionIdOnFinishRequest(String sessionId, String userInum, Fido2RegistrationEntry registrationEntry, Fido2AuthenticationEntry authenticationEntry, boolean enroll, boolean oneStep) {
+    public void updateUserSessionIdOnFinishRequest(String sessionId, String userInum, Fido2RegistrationEntry registrationEntry, Fido2AuthenticationEntry authenticationEntry, boolean enroll) {
         SessionId entity = getSessionId(sessionId);
         if (entity == null) {
             return;
@@ -100,19 +98,11 @@ public class UserSessionIdService {
         } else {
             sessionAttributes.put("session_custom_state", "declined");
         }
-        updateUserSessionAttributes(userInum, registrationEntry, enroll, oneStep, sessionAttributes);
+        
 
         updateSessionId(entity);
     }
 
-	private void updateUserSessionAttributes(String userInum, Fido2RegistrationEntry registrationEntry, boolean enroll,
-			boolean oneStep, Map<String, String> sessionAttributes) {
-		sessionAttributes.put("super_gluu_u2f_device_id", registrationEntry.getId());
-        sessionAttributes.put("super_gluu_u2f_device_dn", registrationEntry.getDn());
-        sessionAttributes.put("super_gluu_u2f_device_user_inum", userInum);
-        sessionAttributes.put("super_gluu_u2f_device_enroll", Boolean.toString(enroll));
-        sessionAttributes.put("super_gluu_u2f_device_one_step", Boolean.toString(oneStep));
-	}
 
     public void updateUserSessionIdOnError(String sessionId) {
         SessionId entity = getSessionId(sessionId);
