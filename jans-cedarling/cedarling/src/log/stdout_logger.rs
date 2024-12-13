@@ -5,7 +5,8 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::interface::LogWriter;
+use super::interface::{LogWriter, Loggable};
+use super::LogLevel;
 use std::{
     io::Write,
     sync::{Arc, Mutex},
@@ -15,28 +16,36 @@ use std::{
 pub(crate) struct StdOutLogger {
     // we use `dyn Write`` trait to make it testable and mockable.
     writer: Mutex<Box<dyn Write + Send + Sync>>,
+    log_level: LogLevel,
 }
 
 impl StdOutLogger {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(log_level: LogLevel) -> Self {
         Self {
             writer: Mutex::new(Box::new(std::io::stdout())),
+            log_level,
         }
     }
 
     // Create a new StdOutLogger with custom writer.
     // is used in tests.
     #[allow(dead_code)]
-    pub(crate) fn new_with(writer: Box<dyn Write + Send + Sync>) -> Self {
+    pub(crate) fn new_with(writer: Box<dyn Write + Send + Sync>, log_level: LogLevel) -> Self {
         Self {
             writer: Mutex::new(Box::new(writer)),
+            log_level,
         }
     }
 }
 
 // Implementation of LogWriter
 impl LogWriter for StdOutLogger {
-    fn log_any<T: serde::Serialize>(&self, entry: T) {
+    fn log_any<T: Loggable>(&self, entry: T) {
+        if !entry.can_log(self.log_level) {
+            // do nothing
+            return;
+        }
+
         let json_str = serde_json::json!(&entry).to_string();
         // we can't handle error here or test it so we just panic if it happens.
         // we should have specific platform to get error
@@ -113,7 +122,7 @@ mod tests {
         let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
 
         // Create logger with test writer
-        let logger = StdOutLogger::new_with(buffer);
+        let logger = StdOutLogger::new_with(buffer, LogLevel::TRACE);
 
         // Log the entry
         logger.log(log_entry);

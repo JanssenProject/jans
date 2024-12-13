@@ -47,8 +47,8 @@ pub struct BootstrapConfig {
 #[pymethods]
 impl BootstrapConfig {
     #[new]
-    pub fn new(options: &Bound<'_, PyDict>) -> PyResult<Self> {
-        let source: cedarling::BootstrapConfigRaw = serde_pyobject::from_pyobject(options.clone())
+    pub fn new(options: Bound<'_, PyDict>) -> PyResult<Self> {
+        let source: cedarling::BootstrapConfigRaw = serde_pyobject::from_pyobject(options)
             .map_err(|e| PyValueError::new_err(e.to_string()))?;
         let inner = cedarling::BootstrapConfig::from_raw_config(&source)
             .map_err(|e| PyValueError::new_err(e.to_string()))?;

@@ -7,6 +7,7 @@
 
 use super::interface::{LogStorage, LogWriter, Loggable};
 use super::LogEntry;
+use super::LogLevel;
 use crate::bootstrap_config::log_config::MemoryLogConfig;
 use sparkv::{Config as ConfigSparKV, SparKV};
 use std::{sync::Mutex, time::Duration};
@@ -18,10 +19,11 @@ const STORAGE_JSON_PARSE_EXPECT_MESSAGE: &str =
 /// A logger that store logs in-memory.
 pub(crate) struct MemoryLogger {
     storage: Mutex<SparKV>,
+    log_level: LogLevel,
 }
 
 impl MemoryLogger {
-    pub fn new(config: MemoryLogConfig) -> Self {
+    pub fn new(config: MemoryLogConfig, log_level: LogLevel) -> Self {
         let sparkv_config = ConfigSparKV {
             default_ttl: Duration::from_secs(config.log_ttl),
             ..Default::default()
@@ -29,6 +31,7 @@ impl MemoryLogger {
 
         MemoryLogger {
             storage: Mutex::new(SparKV::with_config(sparkv_config)),
+            log_level,
         }
     }
 }
@@ -36,6 +39,11 @@ impl MemoryLogger {
 // Implementation of LogWriter
 impl LogWriter for MemoryLogger {
     fn log_any<T: Loggable>(&self, entry: T) {
+        if !entry.can_log(self.log_level) {
+            // do nothing
+            return;
+        }
+
         let json_string = serde_json::json!(entry).to_string();
 
         let result = self
@@ -92,7 +100,7 @@ mod tests {
 
     fn create_memory_logger() -> MemoryLogger {
         let config = MemoryLogConfig { log_ttl: 60 };
-        MemoryLogger::new(config)
+        MemoryLogger::new(config, LogLevel::TRACE)
     }
 
     #[test]
