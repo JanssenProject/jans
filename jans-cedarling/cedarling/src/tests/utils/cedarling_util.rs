@@ -36,6 +36,7 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
             log_type: LogTypeConfig::StdOut,
+            log_level: crate::LogLevel::DEBUG,
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_source,
@@ -65,6 +66,7 @@ pub fn get_cedarling_with_authorization_conf(
         application_name: "test_app".to_string(),
         log_config: LogConfig {
             log_type: LogTypeConfig::StdOut,
+            log_level: crate::LogLevel::DEBUG,
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_source,
