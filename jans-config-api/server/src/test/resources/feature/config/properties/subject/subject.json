@@ -1,7 +1,0 @@
- {
-  "subjectTypesSupported": [
-    "public",
-    "pairwise"
-  ],
-  "shareSubjectIdBetweenClientsWithSameSectorId": true
-}
