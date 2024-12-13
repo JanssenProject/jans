@@ -1,12 +1,7 @@
 package io.jans.configapi.core.test.listener;
 
-import io.jans.util.StringHelper;
-import io.jans.util.security.SecurityProviderUtility;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.testng.IAlterSuiteListener;
-import org.testng.xml.XmlSuite;
+import io.jans.util.security.SecurityProviderUtility;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,6 +12,11 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.List;
 import java.util.Properties;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.testng.IAlterSuiteListener;
+import org.testng.xml.XmlSuite;
 
 public class AlterSuiteListener implements IAlterSuiteListener {
 	
@@ -32,22 +32,19 @@ public class AlterSuiteListener implements IAlterSuiteListener {
 		
 		try {
             SecurityProviderUtility.installBCProvider();
-            logger.error("\n\n Parsing XML suite");
+            logger.info("\n\n Parsing XML suite");
 	    	XmlSuite suite = suites.get(0);
 		
             //Properties with the file: preffix will point to real .json files stored under src/test/resources folder
             String propertiesFile = suite.getParameter("propertiesFile");
        
-
             Properties prop = new Properties();
-            prop.load(Files.newBufferedReader(Paths.get(propertiesFile), DEFAULT_CHARSET));     //do not bother about IO issues here
+            prop.load(Files.newBufferedReader(Paths.get(propertiesFile), DEFAULT_CHARSET));  
         
             persistenceType = PersistenceType.fromString(prop.getProperty("persistenceType"));
-            logger.error("Using persistence type = {}", persistenceType);
+            logger.info("Using persistence type = {}", persistenceType);
 
             Map<String, String> parameters = new Hashtable<>();
-            //do not bother about empty keys... but
-            //If a value is found null, this will throw a NPE since we are using a Hashtable
             prop.forEach((Object key, Object value) -> parameters.put(key.toString(), decodeFileValue(value.toString())));
             // Override test parameters
             suite.setParameters(parameters);
@@ -59,7 +56,7 @@ public class AlterSuiteListener implements IAlterSuiteListener {
 	}
 
     private String decodeFileValue(String value) {
-        logger.error("\n\n decodeFileValue");
+        logger.debug("\n\n decodeFileValue");
         String decoded = value;
         if (value.startsWith(FILE_PREFIX)) {
             value = value.substring(FILE_PREFIX.length());    //remove the prefix
@@ -75,7 +72,7 @@ public class AlterSuiteListener implements IAlterSuiteListener {
             }
         }
         
-        logger.error("\n\n decodeFileValue - decoded:{}",decoded);
+        logger.debug("\n\n decodeFileValue - decoded:{}",decoded);
         return decoded;
 
     }

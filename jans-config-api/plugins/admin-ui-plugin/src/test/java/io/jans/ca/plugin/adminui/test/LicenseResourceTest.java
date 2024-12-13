@@ -6,24 +6,15 @@
 
 package io.jans.ca.plugin.adminui.test;
 
-import io.jans.as.common.model.registration.Client;
 
-import static io.restassured.RestAssured.given;
 import io.jans.ca.plugin.adminui.AdminUIBaseTest;
-import io.jans.model.net.HttpServiceResponse;
-import jakarta.ws.rs.client.Entity;
+
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
-import java.util.Map;
-
-import org.apache.http.entity.ContentType;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import static org.testng.Assert.*;
-
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
 
 public class LicenseResourceTest extends AdminUIBaseTest {
 
@@ -33,7 +24,7 @@ public class LicenseResourceTest extends AdminUIBaseTest {
     @Parameters({ "test.issuer", "checkActiveLicenseURL" })
     @Test
     public void getLicenseDetails(final String issuer, final String checkActiveLicenseURL) {
-        log.error("getLicenseDetails() - accessToken:{}, issuer:{}, checkActiveLicenseURL:{}", accessToken, issuer,
+        log.info("getLicenseDetails() - accessToken:{}, issuer:{}, checkActiveLicenseURL:{}", accessToken, issuer,
                 checkActiveLicenseURL);
         Builder request = getResteasyService().getClientBuilder(issuer + checkActiveLicenseURL);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
@@ -41,7 +32,7 @@ public class LicenseResourceTest extends AdminUIBaseTest {
 
         Response response = request.get();
         //assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.error("\n\n Response for getLicenseDetails -  response:{}", response);
+        log.info("\n\n Response for getLicenseDetails -  response:{}", response);
     }
 
 }

@@ -1,7 +1,6 @@
 package io.jans.configapi.core.test.listener;
 
 import io.jans.util.StringHelper;
-
 import java.util.stream.Stream;
 
 public enum PersistenceType { 

@@ -12,10 +12,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import org.testng.annotations.Test;
-
 import static org.testng.Assert.assertEquals;
-
+import org.testng.annotations.Test;
 import java.lang.reflect.Method;
 
 import org.testng.SkipException;
@@ -26,25 +24,24 @@ public class JansKcSAMLTrustRelationshipTest extends BaseTest {
 
     // Execute before each test is run
     @BeforeMethod
-    public void before(Method methodName){
-        // check condition, note once you condition is met the rest of the tests will be skipped as well
-        if(!isServiceDeployed("io.jans.configapi.plugin.saml.rest.ApiApplication"))
+    public void before(Method methodName) {
+        // check condition, note once you condition is met the rest of the tests will be
+        // skipped as well
+        if (!isServiceDeployed("io.jans.configapi.plugin.saml.rest.ApiApplication"))
             throw new SkipException("KC-SAML Plugin not deployed");
-    }   
-    
-    @Parameters({"issuer", "samlTrustRelationshipUrl"})
+    }
+
+    @Parameters({ "issuer", "samlTrustRelationshipUrl" })
     @Test
     public void getKcSAMLTrustRelationship(final String issuer, final String samlTrustRelationshipUrl) {
-        log.error("getKcSAMLTrustRelationship() - accessToken:{}, issuer:{}, samlTrustRelationshipUrl:{}", accessToken, issuer, samlTrustRelationshipUrl);
+        log.info("getKcSAMLTrustRelationship() - accessToken:{}, issuer:{}, samlTrustRelationshipUrl:{}", accessToken,
+                issuer, samlTrustRelationshipUrl);
         Builder request = getResteasyService().getClientBuilder(issuer + samlTrustRelationshipUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-
         Response response = request.get();
-       // assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.error("Response for getKcSAMLTrustRelationship -  response:{}", response);
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
+        log.info("Response for getKcSAMLTrustRelationship -  response:{}", response);
     }
-    
-	
 
 }
