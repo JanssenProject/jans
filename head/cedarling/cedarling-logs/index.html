@@ -8740,22 +8740,24 @@ analysis to show everything the attacker attempted, both allowed and denied.</p>
 <p>The JSON in this document is formatted for readability but is not prettified in the actual implementation.  </p>
 <h3 id="startup-message">Startup Message<a class="headerlink" href="#startup-message" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;01937015-462d-7727-b789-ed95f7faf7a4&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1732752262</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;request_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0193b8a8-efc0-77ce-bd90-4a62a2998462&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-12-12T04:18:19.456Z&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;log_kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;System&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;pdp_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;75f0dc93-0a90-4076-95fa-dc16d3f00375&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;pdp_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;d47e245e-beaa-4ea4-b899-b8184cd3eb7e&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;msg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;configuration parsed successfully&quot;</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 <span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;01937015-462f-7cb5-86bb-d06c56dc5ab3&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1732752262</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;request_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0193b8a8-efc1-7e42-9678-b2480268b91f&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-12-12T04:18:19.457Z&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;log_kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;System&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;pdp_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;75f0dc93-0a90-4076-95fa-dc16d3f00375&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;pdp_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;d47e245e-beaa-4ea4-b899-b8184cd3eb7e&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;msg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cedarling Authz initialized successfully&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;application_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestApp&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;application_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;cedar_lang_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4.1.0&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;cedar_sdk_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4.2.2&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w">      </span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <h3 id="decision-log">Decision Log<a class="headerlink" href="#decision-log" title="Permanent link">#</a></h3>
 <p>Example of decision log.</p>
@@ -8813,7 +8815,8 @@ analysis to show everything the attacker attempted, both allowed and denied.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;01937015-4649-7aad-8df8-4976e4bd8565&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1732752262</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;log_kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Decision&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;log_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Decision&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;pdp_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;75f0dc93-0a90-4076-95fa-dc16d3f00375&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;msg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Result of authorize.&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;application_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestApp&quot;</span><span class="p">,</span><span class="w"></span>
@@ -8923,7 +8926,7 @@ analysis to show everything the attacker attempted, both allowed and denied.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-06T17:07:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-06</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-12T17:40:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-12</span>
       
         <br>
         Created:

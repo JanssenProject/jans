@@ -6537,7 +6537,14 @@
     4. Locating FIDO2 configuration in Persistence Layer
   </a>
   
-    <nav class="md-nav" aria-label="4. Locating FIDO2 configuration in Persistence Layer">
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-webauthn-endpoint" class="md-nav__link">
+    5. WebAuthn Endpoint
+  </a>
+  
+    <nav class="md-nav" aria-label="5. WebAuthn Endpoint">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -8617,7 +8624,14 @@
     4. Locating FIDO2 configuration in Persistence Layer
   </a>
   
-    <nav class="md-nav" aria-label="4. Locating FIDO2 configuration in Persistence Layer">
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-webauthn-endpoint" class="md-nav__link">
+    5. WebAuthn Endpoint
+  </a>
+  
+    <nav class="md-nav" aria-label="5. WebAuthn Endpoint">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -8695,6 +8709,11 @@
 <td>baseEndpoint</td>
 <td>https://my-jans-server/jans-fido2/restv1</td>
 <td>Base URL of the FIDO2 server Endpoints</td>
+</tr>
+<tr>
+<td>webAuthnEndpoint</td>
+<td>https://FQDN/jans-fido2/restv1/webauthn/configuration</td>
+<td>Base URL of the FIDO2 Web Authn Server Endpoint which return RP Origins</td>
 </tr>
 <tr>
 <td>cleanServiceInterval</td>
@@ -8892,6 +8911,9 @@
     <code>jans cli --operation-id put-properties-fido --data /tmp/config_values.json</code></p>
 <h4 id="4-locating-fido2-configuration-in-persistence-layer">4. Locating FIDO2 configuration in Persistence Layer<a class="headerlink" href="#4-locating-fido2-configuration-in-persistence-layer" title="Permanent link">#</a></h4>
 <p>While it is not recommended that an administrator directly edits a configuration at the persistence layer, it may be useful information for a developer.</p>
+<h4 id="5-webauthn-endpoint">5. WebAuthn Endpoint<a class="headerlink" href="#5-webauthn-endpoint" title="Permanent link">#</a></h4>
+<p>A. The WebAuthn Endpoints retrieve the list of RP (Relying Party) Origins configured for FIDO2 authentication.
+  B. Endpoints: https://FQDN/restv1/webauthn/configuration &amp;&amp; https://FQDN/.well-known/webauthn</p>
 <h5 id="mysql">MySQL<a class="headerlink" href="#mysql" title="Permanent link">#</a></h5>
 <pre class="mermaid"><code>erDiagram
     jansAppConf {
@@ -8905,7 +8927,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-12T09:46:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-13T14:17:11+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-13</span>
       
         <br>
         Created:
