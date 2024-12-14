@@ -18,17 +18,21 @@ mod jwk_store;
 mod key_service;
 #[cfg(test)]
 mod test_utils;
+mod token;
 mod validator;
 
 use crate::common::policy_store::TrustedIssuer;
 use crate::{IdTokenTrustMode, JwtConfig};
 use key_service::{KeyService, KeyServiceError};
 use serde::de::DeserializeOwned;
+use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
+use token::TokenStr;
 use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
 
 pub use jsonwebtoken::Algorithm;
+pub use token::DecodedToken;
 
 /// Type alias for Trusted Issuers' ID.
 type TrustedIssuerId = Arc<str>;
@@ -160,6 +164,34 @@ impl JwtService {
         })
     }
 
+    #[allow(dead_code)]
+    pub fn process_token<'a>(
+        &'a self,
+        token: TokenStr<'a>,
+    ) -> Result<DecodedToken<'a>, JwtProcessingError> {
+        let result = match token {
+            TokenStr::AccessToken(tkn_str) => self
+                .access_tkn_validator
+                .process_jwt(tkn_str)
+                .map_err(JwtProcessingError::InvalidAccessToken)?,
+            TokenStr::IdToken(tkn_str) => self
+                .id_tkn_validator
+                .process_jwt(tkn_str)
+                .map_err(JwtProcessingError::InvalidIdToken)?,
+            TokenStr::UserinfoToken(tkn_str) => self
+                .userinfo_tkn_validator
+                .process_jwt(tkn_str)
+                .map_err(JwtProcessingError::InvalidUserinfoToken)?,
+        };
+
+        let claims = serde_json::from_value::<HashMap<String, Value>>(result.claims)?;
+
+        Ok(DecodedToken {
+            claims,
+            iss: result.trusted_iss,
+        })
+    }
+
     pub fn process_tokens<'a, A, I, U>(
         &'a self,
         access_token: Option<&'a str>,
@@ -277,14 +309,18 @@ pub struct ProcessTokensResult<'a, A, I, U> {
 #[cfg(test)]
 mod test {
     use super::test_utils::*;
+    use super::token::TokenStr;
     use super::JwtService;
+    use crate::jwt::DecodedToken;
     use crate::IdTokenTrustMode;
     use crate::JwtConfig;
     use crate::TokenValidationConfig;
     use jsonwebtoken::Algorithm;
     use serde_json::json;
     use serde_json::Value;
+    use std::collections::HashMap;
     use std::collections::HashSet;
+    use test_utils::assert_eq;
 
     #[test]
     pub fn can_validate_tokens() {
@@ -343,5 +379,98 @@ mod test {
                 Some(&userinfo_tkn),
             )
             .expect("Should process JWTs");
+    }
+
+    #[test]
+    pub fn can_validate_token() {
+        // Generate token
+        let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
+        let access_tkn_claims = json!({
+            "iss": "https://accounts.test.com",
+            "sub": "some_sub",
+            "jti": 1231231231,
+            "exp": u64::MAX,
+            "client_id": "test123",
+        });
+        let access_tkn = generate_token_using_claims(&access_tkn_claims, &keys)
+            .expect("Should generate access token");
+        let id_tkn_claims = json!({
+            "iss": "https://accounts.test.com",
+            "aud": "test123",
+            "sub": "some_sub",
+            "name": "John Doe",
+            "exp": u64::MAX,
+        });
+        let id_tkn =
+            generate_token_using_claims(&id_tkn_claims, &keys).expect("Should generate id token");
+        let userinfo_tkn_claims = json!({
+            "iss": "https://accounts.test.com",
+            "aud": "test123",
+            "sub": "some_sub",
+            "name": "John Doe",
+            "exp": u64::MAX,
+        });
+        let userinfo_tkn = generate_token_using_claims(&userinfo_tkn_claims, &keys)
+            .expect("Should generate userinfo token");
+
+        // Prepare JWKS
+        let local_jwks = json!({"test_idp": generate_jwks(&vec![keys]).keys}).to_string();
+
+        let jwt_service = JwtService::new(
+            &JwtConfig {
+                jwks: Some(local_jwks),
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                id_token_trust_mode: IdTokenTrustMode::Strict,
+                signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                access_token_config: TokenValidationConfig::access_token(),
+                id_token_config: TokenValidationConfig::id_token(),
+                userinfo_token_config: TokenValidationConfig::userinfo_token(),
+            },
+            None,
+        )
+        .expect("Should create JwtService");
+
+        // Test access_token
+        let access_tkn = jwt_service
+            .process_token(TokenStr::AccessToken(&access_tkn))
+            .expect("Should process access_token");
+        let expected_claims = serde_json::from_value::<HashMap<String, Value>>(access_tkn_claims)
+            .expect("Should create expected access_token claims");
+        assert_eq!(
+            access_tkn,
+            DecodedToken {
+                claims: expected_claims,
+                iss: None,
+            }
+        );
+
+        // Test id_token
+        let id_tkn = jwt_service
+            .process_token(TokenStr::IdToken(&id_tkn))
+            .expect("Should process id_token");
+        let expected_claims = serde_json::from_value::<HashMap<String, Value>>(id_tkn_claims)
+            .expect("Should create expected id_token claims");
+        assert_eq!(
+            id_tkn,
+            DecodedToken {
+                claims: expected_claims,
+                iss: None,
+            }
+        );
+
+        // Test userinfo_token
+        let userinfo_tkn = jwt_service
+            .process_token(TokenStr::UserinfoToken(&userinfo_tkn))
+            .expect("Should process userinfo_token");
+        let expected_claims = serde_json::from_value::<HashMap<String, Value>>(userinfo_tkn_claims)
+            .expect("Should create expected userinfo_token claims");
+        assert_eq!(
+            userinfo_tkn,
+            DecodedToken {
+                claims: expected_claims,
+                iss: None,
+            }
+        );
     }
 }
