@@ -35,7 +35,7 @@ pub struct AccessTokenEntityMetadata {
 /// a `ClaimMapping` struct.
 #[derive(Debug, PartialEq, Clone, Default, Deserialize)]
 pub struct TokenEntityMetadata {
-    /// An optional user identifier extracted from the token metadata.
+    /// The claim used to create the user id
     #[serde(deserialize_with = "parse_option_string", default)]
     pub user_id: Option<String>,
     /// An optional string indicating the role mapping for the user.

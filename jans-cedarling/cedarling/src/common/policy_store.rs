@@ -153,6 +153,13 @@ impl Default for RoleMapping<'_> {
     }
 }
 
+pub struct UserMappings<'a> {
+    pub access_token: Option<UserMapping<'a>>,
+    pub id_token: Option<UserMapping<'a>>,
+    pub userinfo_token: Option<UserMapping<'a>>,
+    pub tx_token: Option<UserMapping<'a>>,
+}
+
 /// Structure define the source from where user mappings are retrieved.
 pub struct UserMapping<'a> {
     pub kind: TokenKind,
@@ -250,6 +257,59 @@ impl TrustedIssuer {
         }
 
         None
+    }
+
+    /// Returns the claim where the user_id for the User entity is stored.
+    pub fn get_user_mapping(&self, token_kind: TokenKind) -> Option<&String> {
+        match token_kind {
+            TokenKind::Access => self.access_tokens.entity_metadata.user_id.as_ref(),
+            TokenKind::Id => self.id_tokens.user_id.as_ref(),
+            TokenKind::Userinfo => self.userinfo_tokens.user_id.as_ref(),
+            TokenKind::Transaction => self.tx_tokens.user_id.as_ref(),
+        }
+    }
+
+    pub fn user_mappings(&self) -> UserMappings {
+        let access_token = self
+            .access_tokens
+            .entity_metadata
+            .user_id
+            .as_ref()
+            .map(|claim_name| UserMapping {
+                kind: TokenKind::Access,
+                mapping_field: claim_name,
+            });
+        let id_token = self
+            .id_tokens
+            .user_id
+            .as_ref()
+            .map(|claim_name| UserMapping {
+                kind: TokenKind::Id,
+                mapping_field: claim_name,
+            });
+        let userinfo_token = self
+            .userinfo_tokens
+            .user_id
+            .as_ref()
+            .map(|claim_name| UserMapping {
+                kind: TokenKind::Userinfo,
+                mapping_field: claim_name,
+            });
+        let tx_token = self
+            .tx_tokens
+            .user_id
+            .as_ref()
+            .map(|claim_name| UserMapping {
+                kind: TokenKind::Transaction,
+                mapping_field: claim_name,
+            });
+
+        UserMappings {
+            access_token,
+            id_token,
+            userinfo_token,
+            tx_token,
+        }
     }
 
     pub fn tokens_metadata(&self) -> TokensMetadata<'_> {

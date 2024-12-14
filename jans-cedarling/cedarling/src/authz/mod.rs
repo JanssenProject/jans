@@ -81,9 +81,9 @@ impl Authz {
 
     // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
     pub (crate) fn decode_tokens<'a>(&'a self, request: &'a Request) -> Result<DecodedTokens<'a>, AuthorizeError> {
-        let access_token = self.config.jwt_service.process_token(TokenStr::AccessToken(&request.access_token))?;
-        let id_token = self.config.jwt_service.process_token(TokenStr::IdToken(&request.id_token))?;
-        let userinfo_token = self.config.jwt_service.process_token(TokenStr::UserinfoToken(&request.userinfo_token))?;
+        let access_token = request.access_token.as_ref().map(|tkn| self.config.jwt_service.process_token(TokenStr::AccessToken(tkn))).transpose()?;
+        let id_token = request.id_token.as_ref().map(|tkn| self.config.jwt_service.process_token(TokenStr::IdToken(tkn))).transpose()?;
+        let userinfo_token = request.userinfo_token.as_ref().map(|tkn| self.config.jwt_service.process_token(TokenStr::UserinfoToken(tkn))).transpose()?;
 
         Ok(DecodedTokens { access_token, id_token, userinfo_token })
     }
@@ -110,12 +110,12 @@ impl Authz {
         )?;
 
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
-        let entities_data: AuthorizeEntitiesData = self.authorize_entities_data(&request, &tokens)?;
+        let entities_data: AuthorizeEntitiesData = self.build_entities(&request, &tokens)?;
 
         // Get entity UIDs what we will be used on authorize check
-        let principal_workload_uid = entities_data.workload_entity.uid();
-        let resource_uid = entities_data.resource_entity.uid();
-        let principal_user_entity_uid = entities_data.user_entity.uid();
+        let principal_workload_uid = entities_data.workload.uid();
+        let resource_uid = entities_data.resource.uid();
+        let principal_user_entity_uid = entities_data.user.uid();
 
         // Convert [`AuthorizeEntitiesData`] to  [`cedar_policy::Entities`] structure,
         // hold all entities that will be used on authorize check.
@@ -212,6 +212,12 @@ impl Authz {
             })
             .set_message("Result of authorize.".to_string()),
         );
+        
+        let tokens_logging_info = LogTokensInfo {
+            access: tokens.access_token.as_ref().map(|tkn| tkn.get_logging_info(self.config.authorization.decision_log_default_jwt_id.as_str())),
+            id_token: tokens.access_token.as_ref().map(|tkn| tkn.get_logging_info(self.config.authorization.decision_log_default_jwt_id.as_str())),
+            userinfo: tokens.userinfo_token.as_ref().map(|tkn| tkn.get_logging_info(self.config.authorization.decision_log_default_jwt_id.as_str())),
+        };
 
         // Decision log
         self.config.log_service.as_ref().log_any(&DecisionLogEntry {
@@ -225,11 +231,7 @@ impl Authz {
             action: request.action.clone(),
             resource: resource_uid.to_string(),
             decision: result.decision().into(),
-            tokens: LogTokensInfo{
-                access: tokens.access_token.get_logging_info(self.config.authorization.decision_log_default_jwt_id.as_str()),
-                id_token: tokens.id_token.get_logging_info(self.config.authorization.decision_log_default_jwt_id.as_str()),
-                userinfo: tokens.userinfo_token.get_logging_info(self.config.authorization.decision_log_default_jwt_id.as_str()),
-            },
+            tokens: tokens_logging_info,
             decision_time_ms: elapsed_ms,
         });
 
@@ -259,67 +261,60 @@ impl Authz {
         Ok(response)
     }
 
-    /// Create all [`Entity`]-s from [`Request`]
-    pub fn authorize_entities_data(
+    /// Build all the Cedar [`Entities`] from a [`Request`]
+    ///
+    /// [`Entities`]: Entity
+    pub fn build_entities(
         &self,
         request: &Request,
         tokens: &DecodedTokens,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         let policy_store = &self.config.policy_store;
         let auth_conf = &self.config.authorization;
+
+        let workload = create_workload(auth_conf.mapping_workload.as_deref(), policy_store,
+                &tokens,
+                ).map_err(AuthorizeError::CreateWorkloadEntity)?;
+
+        // build access_token Entity
+        let access_token = tokens.access_token.as_ref().map(|tkn| {
+            let tkns_metadata = tkn.iss.unwrap_or_default().tokens_metadata();
+             create_access_token(auth_conf.mapping_access_token.as_deref(), policy_store, tkn, tkns_metadata.access_tokens)
+                .map_err(AuthorizeError::CreateAccessTokenEntity)
+        }).transpose()?;
+
+        // build id_token Entity
+        let id_token = tokens.id_token.as_ref().map(|tkn| {
+            let tkns_metadata = tkn.iss.unwrap_or_default().tokens_metadata();
+             create_id_token_entity(auth_conf.mapping_id_token.as_deref(), policy_store, tkn, &tkns_metadata.id_tokens.claim_mapping)
+                .map_err(AuthorizeError::CreateIdTokenEntity)
+        }).transpose()?;
+
+        // build userinfo_token Entity
+        let userinfo_token = tokens.id_token.as_ref().map(|tkn| {
+            let tkns_metadata = tkn.iss.unwrap_or_default().tokens_metadata();
+             create_userinfo_token_entity(auth_conf.mapping_userinfo_token.as_deref(), policy_store, tkn, &tkns_metadata.userinfo_tokens.claim_mapping)
+                .map_err(AuthorizeError::CreateUserinfoTokenEntity)
+        }).transpose()?;
+            
+        // build role entity
+        let role = create_role_entities(policy_store, tokens)?;
         
-        // TODO: use other tokens if the access_token isn't available
-        let trusted_issuer = tokens.access_token.iss.unwrap_or_default();
-        let tokens_metadata = trusted_issuer.tokens_metadata();
-
-        let role_entities = create_role_entities(policy_store, tokens, trusted_issuer)?;
-
-        // Populate the `AuthorizeEntitiesData` structure using the builder pattern
-        let data = AuthorizeEntitiesData::builder()
-            // Add workload entity
-            .workload_entity(create_workload(auth_conf.mapping_workload.as_deref(), policy_store,
-                &tokens.access_token,
-                tokens_metadata.access_tokens).map_err(AuthorizeError::CreateWorkloadEntity)?)
-            // Add access token entity
-            .access_token(create_access_token(auth_conf.mapping_access_token.as_deref(), policy_store,
-                &tokens.access_token,
-                tokens_metadata.access_tokens).map_err(AuthorizeError::CreateAccessTokenEntity)?)
-            // add id_token entity
-            .id_token_entity(
-                create_id_token_entity(auth_conf.mapping_id_token.as_deref(), 
-                    policy_store, 
-                    &tokens.id_token, 
-                    &tokens_metadata.id_tokens.claim_mapping)
-                    .map_err(AuthorizeError::CreateIdTokenEntity)?,
-            )
-            // Add userinfo_token entity
-            .userinfo_token(
-                create_userinfo_token_entity(auth_conf.mapping_userinfo_token.as_deref(), 
-                    policy_store, 
-                    &tokens.userinfo_token, 
-                    &tokens_metadata.userinfo_tokens.claim_mapping)
-                .map_err(AuthorizeError::CreateUserinfoTokenEntity)?
-            )
-            // Add User entity
-            .user_entity(
-                create_user_entity(auth_conf.mapping_user.as_deref(),
+        // build user entity
+        let user = create_user_entity(auth_conf.mapping_user.as_deref(),
                     policy_store,
                     tokens,
-                    // parents for Jans::User entity
-                    HashSet::from_iter(role_entities.iter().map(|e|e.uid())),
-                    trusted_issuer
+                    HashSet::from_iter(role.iter().map(|e|e.uid())),
                 )
-                .map_err(AuthorizeError::CreateUserEntity)?,
-            )
-            // Add an entity created from the resource in the request
-            .resource_entity(create_resource_entity(
+                .map_err(AuthorizeError::CreateUserEntity)?;
+
+        // build resource entity
+        let resource = create_resource_entity(
                 request.resource.clone(),
                 &self.config.policy_store.schema.json,
-            )?)
-            // Add Role entities
-            .role_entities(role_entities);
+            )?;
 
-        Ok(data.build())
+        Ok(AuthorizeEntitiesData { workload, access_token, id_token, userinfo_token, user, resource, role })
     }
 }
 
@@ -333,33 +328,37 @@ struct ExecuteAuthorizeParameters<'a> {
 }
 
 /// Structure to hold entites created from tokens
-//
-// we can't use simple vector because we need use uid-s
-// from some entities to check authorizations
-#[derive(typed_builder::TypedBuilder)]
 pub struct AuthorizeEntitiesData {
-    pub workload_entity: Entity,
-    pub access_token: Entity,
-    pub id_token_entity: Entity,
-    pub userinfo_token: Entity,
-    pub user_entity: Entity,
-    pub resource_entity: Entity,
-    pub role_entities: Vec<Entity>,
+    pub workload: Entity,
+    pub access_token: Option<Entity>,
+    pub id_token: Option<Entity>,
+    pub userinfo_token: Option<Entity>,
+    pub user: Entity,
+    pub resource: Entity,
+    pub role: Vec<Entity>,
 }
 
 impl AuthorizeEntitiesData {
     /// Create iterator to get all entities
     fn into_iter(self) -> impl Iterator<Item = Entity> {
-        vec![
-            self.workload_entity,
-            self.access_token,
-            self.id_token_entity,
-            self.userinfo_token,
-            self.user_entity,
-            self.resource_entity,
-        ]
-        .into_iter()
-        .chain(self.role_entities)
+        let mut entities = vec![
+            self.workload,
+            self.user,
+            self.resource,
+        ];
+
+        if let Some(entity) = self.access_token {
+            entities.push(entity);
+        }
+        if let Some(entity) = self.userinfo_token {
+            entities.push(entity);
+        }
+        if let Some(entity) = self.id_token {
+            entities.push(entity);
+        }
+
+        entities.into_iter()
+        .chain(self.role)
     }
 
     /// Collect all entities to [`cedar_policy::Entities`]

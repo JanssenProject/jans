@@ -15,7 +15,7 @@ mod test_create;
 
 use crate::common::cedar_schema::CedarSchemaJson;
 use crate::common::policy_store::{
-    AccessTokenEntityMetadata, ClaimMappings, PolicyStore, TokenKind, TrustedIssuer,
+    AccessTokenEntityMetadata, ClaimMappings, PolicyStore, TokenKind,
 };
 use crate::jwt::Token;
 use cedar_policy::EntityUid;
@@ -27,32 +27,51 @@ use std::collections::HashSet;
 use super::request::ResourceData;
 
 pub struct DecodedTokens<'a> {
-    pub access_token: Token<'a>,
-    pub id_token: Token<'a>,
-    pub userinfo_token: Token<'a>,
+    pub access_token: Option<Token<'a>>,
+    pub id_token: Option<Token<'a>>,
+    pub userinfo_token: Option<Token<'a>>,
 }
 
 /// Create workload entity
 pub fn create_workload(
     entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
-    token: &Token,
-    meta: &AccessTokenEntityMetadata,
+    tokens: &DecodedTokens,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
-    // TODO: build the workload using the id_token if an
-    // access_token was not provided
-    let schema = &policy_store.schema.json;
     let namespace = policy_store.namespace();
-    let claim_mapping = &meta.entity_metadata.claim_mapping;
 
-    let workload_entity_meta = EntityMetadata::new(
-        EntityParsedTypeName {
-            typename: entity_mapping.unwrap_or("Workload"),
-            namespace,
-        },
-        "client_id",
-    );
+    // try to build the Workload entity using the access_token
+    // or id_token whichever is available.
+    let (token, workload_entity_meta, claim_mapping) =
+        if let Some(access_tkn) = tokens.access_token.as_ref() {
+            let meta = access_tkn.iss.unwrap_or_default().tokens_metadata();
+            let claim_mapping = &meta.access_tokens.entity_metadata.claim_mapping;
+            let workload_entity_meta = EntityMetadata::new(
+                EntityParsedTypeName {
+                    typename: entity_mapping.unwrap_or("Workload"),
+                    namespace,
+                },
+                "client_id",
+            );
+            (access_tkn, workload_entity_meta, claim_mapping)
+        } else if let Some(id_tkn) = tokens.id_token.as_ref() {
+            let meta = id_tkn.iss.unwrap_or_default().tokens_metadata();
+            let claim_mapping = &meta.id_tokens.claim_mapping;
+            let workload_entity_meta = EntityMetadata::new(
+                EntityParsedTypeName {
+                    typename: entity_mapping.unwrap_or("Workload"),
+                    namespace,
+                },
+                "aud",
+            );
+            (id_tkn, workload_entity_meta, claim_mapping)
+        } else {
+            Err(CedarPolicyCreateTypeError::UnavailableToken(
+                "Workload".to_string(),
+            ))?
+        };
 
+    let schema = &policy_store.schema.json;
     workload_entity_meta.create_entity(schema, token, HashSet::new(), claim_mapping)
 }
 
@@ -104,33 +123,71 @@ pub fn create_user_entity(
     policy_store: &PolicyStore,
     tokens: &DecodedTokens,
     parents: HashSet<EntityUid>,
-    trusted_issuer: &TrustedIssuer,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
-    let user_id_mapping = trusted_issuer.get_user_id_mapping().unwrap_or_default();
-
     let schema: &CedarSchemaJson = &policy_store.schema.json;
     let namespace = policy_store.namespace();
 
-    // payload and claim mapping for getting user ID
-    let (token, claim_mapping): (&Token, &ClaimMappings) = match user_id_mapping.kind {
-        TokenKind::Access => (
-            &tokens.access_token,
-            &trusted_issuer.access_tokens.entity_metadata.claim_mapping,
-        ),
-        TokenKind::Id => (&tokens.id_token, &trusted_issuer.id_tokens.claim_mapping),
-        TokenKind::Userinfo => (
-            &tokens.userinfo_token,
-            &trusted_issuer.userinfo_tokens.claim_mapping,
-        ),
-        TokenKind::Transaction => return Err(CedarPolicyCreateTypeError::TransactionToken),
-    };
+    // We attempt to create the User entity using the first available token that also
+    // has an assigned claim to get the User Entity's id from.
+
+    let mut data: Option<(&Token, &String, &ClaimMappings)> = None;
+
+    if let Some(access_tkn) = tokens.access_token.as_ref() {
+        let iss = access_tkn.iss.unwrap_or_default();
+        if let Some(user_mapping) = iss.get_user_mapping(TokenKind::Access) {
+            data = Some((
+                access_tkn,
+                user_mapping,
+                &iss.access_tokens.entity_metadata.claim_mapping,
+            ));
+        }
+    }
+
+    if data.is_none() {
+        if let Some(id_tkn) = tokens.id_token.as_ref() {
+            let iss = id_tkn.iss.unwrap_or_default();
+            if let Some(user_mapping) = iss.get_user_mapping(TokenKind::Id) {
+                data = Some((
+                    id_tkn,
+                    user_mapping,
+                    &iss.access_tokens.entity_metadata.claim_mapping,
+                ));
+            }
+        }
+    }
+
+    if data.is_none() {
+        if let Some(id_tkn) = tokens.id_token.as_ref() {
+            let iss = id_tkn.iss.unwrap_or_default();
+            if let Some(user_mapping) = iss.get_user_mapping(TokenKind::Userinfo) {
+                data = Some((id_tkn, user_mapping, &iss.id_tokens.claim_mapping));
+            }
+        }
+    }
+
+    if data.is_none() {
+        if let Some(userinfo_tkn) = tokens.userinfo_token.as_ref() {
+            let iss = userinfo_tkn.iss.unwrap_or_default();
+            if let Some(user_mapping) = iss.get_user_mapping(TokenKind::Userinfo) {
+                data = Some((
+                    userinfo_tkn,
+                    user_mapping,
+                    &iss.userinfo_tokens.claim_mapping,
+                ));
+            }
+        }
+    }
+
+    let (token, user_mapping, claim_mapping) = data.ok_or(
+        CedarPolicyCreateTypeError::UnavailableToken("User".to_string()),
+    )?;
 
     EntityMetadata::new(
         EntityParsedTypeName {
             typename: entity_mapping.unwrap_or("User"),
             namespace,
         },
-        user_id_mapping.mapping_field,
+        user_mapping,
     )
     .create_entity(schema, token, parents, claim_mapping)
 }
@@ -192,45 +249,39 @@ pub enum RoleEntityError {
         error: CedarPolicyCreateTypeError,
         token_kind: TokenKind,
     },
+
+    /// Indicates that the creation of the Role Entity failed due to the absence of available tokens.
+    #[error("Role Entity creation failed: no available token to build the entity from")]
+    UnavailableToken,
 }
 
 /// Create `Role` entity from based on `TrustedIssuer` or default value of `RoleMapping`
 pub fn create_role_entities(
     policy_store: &PolicyStore,
     tokens: &DecodedTokens,
-    trusted_issuer: &TrustedIssuer,
 ) -> Result<Vec<cedar_policy::Entity>, RoleEntityError> {
-    // get role mapping or default value
-    let role_mapping = trusted_issuer.get_role_mapping().unwrap_or_default();
+    let (token_data, role_mapping, token_mapping) =
+        if let Some(token) = tokens.access_token.as_ref() {
+            let iss = token.iss.unwrap_or_default();
+            let role_mapping = iss.get_role_mapping().unwrap_or_default();
+            let token_mapping = &iss.access_tokens.entity_metadata.claim_mapping;
+            (token, role_mapping, token_mapping)
+        } else if let Some(token) = tokens.id_token.as_ref() {
+            let iss = token.iss.unwrap_or_default();
+            let role_mapping = iss.get_role_mapping().unwrap_or_default();
+            let token_mapping = &iss.id_tokens.claim_mapping;
+            (token, role_mapping, token_mapping)
+        } else if let Some(token) = tokens.userinfo_token.as_ref() {
+            let iss = token.iss.unwrap_or_default();
+            let role_mapping = iss.get_role_mapping().unwrap_or_default();
+            let token_mapping = &iss.userinfo_tokens.claim_mapping;
+            (token, role_mapping, token_mapping)
+        } else {
+            Err(RoleEntityError::UnavailableToken)?
+        };
 
     let parsed_typename = EntityParsedTypeName::new("Role", policy_store.namespace());
     let role_entity_type = parsed_typename.full_type_name();
-
-    // map payload from token
-    let token_data: &'_ Token = match role_mapping.kind {
-        TokenKind::Access => &tokens.access_token,
-        TokenKind::Id => &tokens.id_token,
-        TokenKind::Userinfo => &tokens.userinfo_token,
-        TokenKind::Transaction => {
-            return Err(RoleEntityError::Create {
-                error: CedarPolicyCreateTypeError::TransactionToken,
-                token_kind: TokenKind::Transaction,
-            })
-        },
-    };
-
-    // we don't really need mapping for `role` but if user specify custom role with
-    let token_mapping = match role_mapping.kind {
-        TokenKind::Access => &trusted_issuer.access_tokens.entity_metadata.claim_mapping,
-        TokenKind::Id => &trusted_issuer.id_tokens.claim_mapping,
-        TokenKind::Userinfo => &trusted_issuer.userinfo_tokens.claim_mapping,
-        TokenKind::Transaction => {
-            return Err(RoleEntityError::Create {
-                error: CedarPolicyCreateTypeError::TransactionToken,
-                token_kind: TokenKind::Transaction,
-            })
-        },
-    };
 
     // get payload of role id in JWT token data
     let Ok(payload) = token_data.get_claim(role_mapping.mapping_field) else {

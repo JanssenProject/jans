@@ -118,7 +118,7 @@ impl Cedarling {
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         let tokens = self.authz.decode_tokens(request)?;
-        self.authz.authorize_entities_data(request, &tokens)
+        self.authz.build_entities(request, &tokens)
     }
 }
 

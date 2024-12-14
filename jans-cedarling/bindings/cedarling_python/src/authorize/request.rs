@@ -81,9 +81,9 @@ impl Request {
         })?;
 
         Ok(cedarling::Request {
-            access_token: self.access_token.clone(),
-            id_token: self.id_token.clone(),
-            userinfo_token: self.userinfo_token.clone(),
+            access_token: Some(self.access_token.clone()),
+            id_token: Some(self.id_token.clone()),
+            userinfo_token: Some(self.userinfo_token.clone()),
             action: self.action.clone(),
             resource: self.resource.clone().into(),
             context,

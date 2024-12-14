@@ -386,8 +386,8 @@ impl serde::Serialize for PrincipalLogEntry {
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct LogTokensInfo<'a> {
-    pub id_token: HashMap<&'a str, &'a serde_json::Value>,
+    pub id_token: Option<HashMap<&'a str, &'a serde_json::Value>>,
     #[serde(rename = "Userinfo")]
-    pub userinfo: HashMap<&'a str, &'a serde_json::Value>,
-    pub access: HashMap<&'a str, &'a serde_json::Value>,
+    pub userinfo: Option<HashMap<&'a str, &'a serde_json::Value>>,
+    pub access: Option<HashMap<&'a str, &'a serde_json::Value>>,
 }

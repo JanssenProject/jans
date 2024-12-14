@@ -431,4 +431,8 @@ pub enum CedarPolicyCreateTypeError {
     /// Error when using the transaction token. Its usage is currently not implemented.
     #[error("transaction token not implemented")]
     TransactionToken,
+
+    /// Indicates that the creation of an Entity failed due to the absence of available tokens.
+    #[error("{0} Entity creation failed: no available token to build the entity from")]
+    UnavailableToken(String),
 }
