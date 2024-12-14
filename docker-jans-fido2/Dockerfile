@@ -42,7 +42,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2024-11-15 09:10'
+ENV CN_BUILD_DATE='2024-12-13 17:24'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
@@ -61,7 +61,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=871c36da8a2550ee2febd7c0d72c521898b226c3
+ENV JANS_SOURCE_VERSION=27310997a412bf8e8c996853313af4192736fb29
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -90,10 +90,7 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
-    && cp ${JANS_SETUP_DIR}/templates/jans-fido2/fido2.ldif /app/templates/jans-fido2/ \
-    && cp ${JANS_SETUP_DIR}/templates/jans-fido2/dynamic-conf.json /app/templates/jans-fido2/ \
-    && cp ${JANS_SETUP_DIR}/templates/jans-fido2/static-conf.json /app/templates/jans-fido2/ \
-    && cp ${JANS_SETUP_DIR}/templates/jans-fido2/jans-fido2-errors.json /app/templates/jans-fido2/ \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-fido2/* /app/templates/jans-fido2/ \
     && mkdir -p org/eclipse/jetty \
     && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
     && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
