@@ -6,6 +6,7 @@
  */
 
 use crate::common::policy_store::TrustedIssuer;
+use serde::Deserialize;
 use serde_json::Value;
 use std::collections::HashMap;
 
@@ -16,14 +17,31 @@ pub enum TokenStr<'a> {
     UserinfoToken(&'a str),
 }
 
-#[derive(Debug, PartialEq)]
-pub struct DecodedToken<'a> {
-    pub claims: HashMap<String, serde_json::Value>,
+/// A struct holding information on a decoded JWT.
+#[derive(Debug, PartialEq, Default)]
+pub struct Token<'a> {
+    pub claims: HashMap<String, Value>,
     pub iss: Option<&'a TrustedIssuer>,
 }
 
+impl<'de> Deserialize<'de> for Token<'_> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let claims = HashMap::<String, Value>::deserialize(deserializer)?;
+        Ok(Self { claims, iss: None })
+    }
+}
+
+impl From<HashMap<String, Value>> for Token<'_> {
+    fn from(claims: HashMap<String, Value>) -> Self {
+        Self { claims, iss: None }
+    }
+}
+
 #[allow(dead_code)]
-impl<'a> DecodedToken<'a> {
+impl<'a> Token<'a> {
     pub fn new(claims: HashMap<String, serde_json::Value>, iss: Option<&'a TrustedIssuer>) -> Self {
         Self { claims, iss }
     }
@@ -32,14 +50,14 @@ impl<'a> DecodedToken<'a> {
         Self::new(HashMap::from_iter(map), None)
     }
 
-    pub fn get_claim(&self, name: &str) -> Result<Claim, TokenClaimError> {
+    pub fn get_claim(&self, name: &str) -> Result<TokenClaim, GetTokenClaimError> {
         self.claims
             .get(name)
-            .map(|value| Claim {
+            .map(|value| TokenClaim {
                 key: name.to_string(),
                 value,
             })
-            .ok_or(TokenClaimError::MissingKey(name.to_string()))
+            .ok_or(GetTokenClaimError::MissingKey(name.to_string()))
     }
 
     pub fn get_logging_info(
@@ -61,13 +79,13 @@ impl<'a> DecodedToken<'a> {
 }
 
 #[allow(dead_code)]
-pub(crate) struct Claim<'a> {
+pub struct TokenClaim<'a> {
     key: String,
     value: &'a serde_json::Value,
 }
 
 #[allow(dead_code)]
-impl Claim<'_> {
+impl TokenClaim<'_> {
     pub fn key(&self) -> &str {
         &self.key
     }
@@ -76,39 +94,41 @@ impl Claim<'_> {
         self.value
     }
 
-    pub fn as_i64(&self) -> Result<i64, TokenClaimError> {
-        self.value
-            .as_i64()
-            .ok_or(TokenClaimError::type_mismatch(&self.key, "i64", self.value))
+    pub fn as_i64(&self) -> Result<i64, GetTokenClaimError> {
+        self.value.as_i64().ok_or(GetTokenClaimError::type_mismatch(
+            &self.key, "i64", self.value,
+        ))
     }
 
-    pub fn as_str(&self) -> Result<&str, TokenClaimError> {
-        self.value.as_str().ok_or(TokenClaimError::type_mismatch(
+    pub fn as_str(&self) -> Result<&str, GetTokenClaimError> {
+        self.value.as_str().ok_or(GetTokenClaimError::type_mismatch(
             &self.key, "String", self.value,
         ))
     }
 
-    pub fn as_bool(&self) -> Result<bool, TokenClaimError> {
-        self.value.as_bool().ok_or(TokenClaimError::type_mismatch(
-            &self.key, "bool", self.value,
-        ))
+    pub fn as_bool(&self) -> Result<bool, GetTokenClaimError> {
+        self.value
+            .as_bool()
+            .ok_or(GetTokenClaimError::type_mismatch(
+                &self.key, "bool", self.value,
+            ))
     }
 
-    pub fn as_array(&self) -> Result<Vec<Claim>, TokenClaimError> {
+    pub fn as_array(&self) -> Result<Vec<TokenClaim>, GetTokenClaimError> {
         self.value
             .as_array()
             .map(|array| {
                 array
                     .iter()
                     .enumerate()
-                    .map(|(i, v)| Claim {
+                    .map(|(i, v)| TokenClaim {
                         // show current key and index in array
                         key: format!("{}[{}]", self.key, i),
                         value: v,
                     })
                     .collect()
             })
-            .ok_or(TokenClaimError::type_mismatch(
+            .ok_or(GetTokenClaimError::type_mismatch(
                 &self.key, "Array", self.value,
             ))
     }
@@ -116,7 +136,7 @@ impl Claim<'_> {
 
 /// Errors that can occur when trying to get claim attribute value from token data
 #[derive(Debug, thiserror::Error)]
-pub enum TokenClaimError {
+pub enum GetTokenClaimError {
     #[error("Key not found: {0}")]
     MissingKey(String),
     #[error(
@@ -129,9 +149,9 @@ pub enum TokenClaimError {
     },
 }
 
-impl TokenClaimError {
+impl GetTokenClaimError {
     /// Returns the JSON type name of the given value.
-    fn json_value_type_name(value: &Value) -> String {
+    pub fn json_value_type_name(value: &Value) -> String {
         match value {
             Value::Null => "null".to_string(),
             Value::Bool(_) => "bool".to_string(),
@@ -143,10 +163,10 @@ impl TokenClaimError {
     }
 
     /// Constructs a `TypeMismatch` error with detailed information about the expected and actual types.
-    fn type_mismatch(key: &str, expected_type_name: &str, got_value: &Value) -> TokenClaimError {
+    fn type_mismatch(key: &str, expected_type_name: &str, got_value: &Value) -> GetTokenClaimError {
         let got_value_type_name = Self::json_value_type_name(got_value);
 
-        TokenClaimError::TypeMismatch {
+        GetTokenClaimError::TypeMismatch {
             key: key.to_string(),
             expected_type: expected_type_name.to_string(),
             actual_type: got_value_type_name,

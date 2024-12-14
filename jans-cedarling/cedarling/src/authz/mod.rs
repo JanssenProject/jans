@@ -16,7 +16,7 @@ use std::sync::Arc;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types;
 use crate::common::policy_store::PolicyStoreWithID;
-use crate::jwt;
+use crate::jwt::{self, TokenStr};
 use crate::log::interface::LogWriter;
 use crate::log::{
     AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, LogEntry, LogTokensInfo, LogType, Logger, PersonAuthorizeInfo, PrincipalLogEntry, WorkloadAuthorizeInfo
@@ -27,13 +27,11 @@ mod authorize_result;
 
 pub(crate) mod entities;
 pub(crate) mod request;
-mod token_data;
-
 pub use authorize_result::AuthorizeResult;
+
 use cedar_policy::{Entities, Entity, EntityUid, Response};
-use entities::create_resource_entity;
+use entities::{create_resource_entity, DecodedTokens};
 use entities::CedarPolicyCreateTypeError;
-use entities::ProcessTokensResult;
 use entities::ResourceEntityError;
 use entities::{
     create_access_token, create_id_token_entity, create_role_entities, create_user_entity,
@@ -41,7 +39,6 @@ use entities::{
 };
 use request::Request;
 use std::time::Instant;
-use token_data::{AccessTokenData, IdTokenData, UserInfoTokenData};
 
 /// Configuration to Authz to initialize service without errors
 pub(crate) struct AuthzConfig {
@@ -83,16 +80,12 @@ impl Authz {
     }
 
     // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
-    pub (crate) fn decode_tokens<'a>(&'a self, request: &'a Request) -> Result<ProcessTokensResult<'a>, AuthorizeError> {
-            // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
-        Ok(self
-            .config
-            .jwt_service
-            .process_tokens::<AccessTokenData, IdTokenData, UserInfoTokenData>(
-                Some(&request.access_token),
-                Some(&request.id_token),
-                Some(&request.userinfo_token),
-        )?)
+    pub (crate) fn decode_tokens<'a>(&'a self, request: &'a Request) -> Result<DecodedTokens<'a>, AuthorizeError> {
+        let access_token = self.config.jwt_service.process_token(TokenStr::AccessToken(&request.access_token))?;
+        let id_token = self.config.jwt_service.process_token(TokenStr::IdToken(&request.id_token))?;
+        let userinfo_token = self.config.jwt_service.process_token(TokenStr::UserinfoToken(&request.userinfo_token))?;
+
+        Ok(DecodedTokens { access_token, id_token, userinfo_token })
     }
 
     /// Evaluate Authorization Request
@@ -117,7 +110,7 @@ impl Authz {
         )?;
 
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
-        let entities_data: AuthorizeEntitiesData = self.authorize_entities_data(&request,&tokens)?;
+        let entities_data: AuthorizeEntitiesData = self.authorize_entities_data(&request, &tokens)?;
 
         // Get entity UIDs what we will be used on authorize check
         let principal_workload_uid = entities_data.workload_entity.uid();
@@ -233,9 +226,9 @@ impl Authz {
             resource: resource_uid.to_string(),
             decision: result.decision().into(),
             tokens: LogTokensInfo{
-                access: tokens.access_token.get_log_tokens_info(self.config.authorization.decision_log_default_jwt_id.as_str()),
-                id_token: tokens.id_token.get_log_tokens_info(self.config.authorization.decision_log_default_jwt_id.as_str()),
-                userinfo: tokens.userinfo_token.get_log_tokens_info(self.config.authorization.decision_log_default_jwt_id.as_str()),
+                access: tokens.access_token.get_logging_info(self.config.authorization.decision_log_default_jwt_id.as_str()),
+                id_token: tokens.id_token.get_logging_info(self.config.authorization.decision_log_default_jwt_id.as_str()),
+                userinfo: tokens.userinfo_token.get_logging_info(self.config.authorization.decision_log_default_jwt_id.as_str()),
             },
             decision_time_ms: elapsed_ms,
         });
@@ -270,22 +263,13 @@ impl Authz {
     pub fn authorize_entities_data(
         &self,
         request: &Request,
-        tokens: &ProcessTokensResult,
+        tokens: &DecodedTokens,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         let policy_store = &self.config.policy_store;
         let auth_conf = &self.config.authorization;
-
-        // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
-        let decode_result: ProcessTokensResult = self
-        .config
-        .jwt_service
-        .process_tokens::<AccessTokenData, IdTokenData, UserInfoTokenData>(
-            Some(&request.access_token),
-            Some(&request.id_token),
-            Some(&request.userinfo_token),
-        )?;
-
-        let trusted_issuer = tokens.trusted_issuer.unwrap_or_default();
+        
+        // TODO: use other tokens if the access_token isn't available
+        let trusted_issuer = tokens.access_token.iss.unwrap_or_default();
         let tokens_metadata = trusted_issuer.tokens_metadata();
 
         let role_entities = create_role_entities(policy_store, tokens, trusted_issuer)?;
@@ -294,7 +278,7 @@ impl Authz {
         let data = AuthorizeEntitiesData::builder()
             // Add workload entity
             .workload_entity(create_workload(auth_conf.mapping_workload.as_deref(), policy_store,
-                &decode_result.access_token,
+                &tokens.access_token,
                 tokens_metadata.access_tokens).map_err(AuthorizeError::CreateWorkloadEntity)?)
             // Add access token entity
             .access_token(create_access_token(auth_conf.mapping_access_token.as_deref(), policy_store,

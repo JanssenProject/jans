@@ -13,33 +13,34 @@ mod trait_as_expression;
 #[cfg(test)]
 mod test_create;
 
-use std::collections::HashSet;
-
 use crate::common::cedar_schema::CedarSchemaJson;
-
-use crate::authz::token_data::{AccessTokenData, IdTokenData, UserInfoTokenData};
 use crate::common::policy_store::{
     AccessTokenEntityMetadata, ClaimMappings, PolicyStore, TokenKind, TrustedIssuer,
 };
-use crate::jwt;
+use crate::jwt::Token;
 use cedar_policy::EntityUid;
 pub use create::CedarPolicyCreateTypeError;
 use create::EntityParsedTypeName;
 use create::{build_entity_uid, create_entity, parse_namespace_and_typename, EntityMetadata};
+use std::collections::HashSet;
 
 use super::request::ResourceData;
-use super::token_data::TokenPayload;
 
-pub(crate) type ProcessTokensResult<'a> =
-    jwt::ProcessTokensResult<'a, AccessTokenData, IdTokenData, UserInfoTokenData>;
+pub struct DecodedTokens<'a> {
+    pub access_token: Token<'a>,
+    pub id_token: Token<'a>,
+    pub userinfo_token: Token<'a>,
+}
 
 /// Create workload entity
 pub fn create_workload(
     entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
-    data: &AccessTokenData,
+    token: &Token,
     meta: &AccessTokenEntityMetadata,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
+    // TODO: build the workload using the id_token if an
+    // access_token was not provided
     let schema = &policy_store.schema.json;
     let namespace = policy_store.namespace();
     let claim_mapping = &meta.entity_metadata.claim_mapping;
@@ -52,14 +53,14 @@ pub fn create_workload(
         "client_id",
     );
 
-    workload_entity_meta.create_entity(schema, data, HashSet::new(), claim_mapping)
+    workload_entity_meta.create_entity(schema, token, HashSet::new(), claim_mapping)
 }
 
 /// Create access_token entity
 pub fn create_access_token(
     entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
-    data: &AccessTokenData,
+    data: &Token,
     meta: &AccessTokenEntityMetadata,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
     let schema = &policy_store.schema.json;
@@ -81,7 +82,7 @@ pub fn create_access_token(
 pub fn create_id_token_entity(
     entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
-    data: &IdTokenData,
+    data: &Token,
     claim_mapping: &ClaimMappings,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
     let schema = &policy_store.schema.json;
@@ -101,7 +102,7 @@ pub fn create_id_token_entity(
 pub fn create_user_entity(
     entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
-    tokens: &ProcessTokensResult,
+    tokens: &DecodedTokens,
     parents: HashSet<EntityUid>,
     trusted_issuer: &TrustedIssuer,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
@@ -111,7 +112,7 @@ pub fn create_user_entity(
     let namespace = policy_store.namespace();
 
     // payload and claim mapping for getting user ID
-    let (payload, claim_mapping): (&TokenPayload, &ClaimMappings) = match user_id_mapping.kind {
+    let (token, claim_mapping): (&Token, &ClaimMappings) = match user_id_mapping.kind {
         TokenKind::Access => (
             &tokens.access_token,
             &trusted_issuer.access_tokens.entity_metadata.claim_mapping,
@@ -131,14 +132,14 @@ pub fn create_user_entity(
         },
         user_id_mapping.mapping_field,
     )
-    .create_entity(schema, payload, parents, claim_mapping)
+    .create_entity(schema, token, parents, claim_mapping)
 }
 
 /// Create `Userinfo_token` entity
 pub fn create_userinfo_token_entity(
     entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
-    data: &UserInfoTokenData,
+    data: &Token,
     claim_mapping: &ClaimMappings,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
     let schema = &policy_store.schema.json;
@@ -196,7 +197,7 @@ pub enum RoleEntityError {
 /// Create `Role` entity from based on `TrustedIssuer` or default value of `RoleMapping`
 pub fn create_role_entities(
     policy_store: &PolicyStore,
-    tokens: &ProcessTokensResult,
+    tokens: &DecodedTokens,
     trusted_issuer: &TrustedIssuer,
 ) -> Result<Vec<cedar_policy::Entity>, RoleEntityError> {
     // get role mapping or default value
@@ -206,7 +207,7 @@ pub fn create_role_entities(
     let role_entity_type = parsed_typename.full_type_name();
 
     // map payload from token
-    let token_data: &'_ TokenPayload = match role_mapping.kind {
+    let token_data: &'_ Token = match role_mapping.kind {
         TokenKind::Access => &tokens.access_token,
         TokenKind::Id => &tokens.id_token,
         TokenKind::Userinfo => &tokens.userinfo_token,
@@ -232,7 +233,7 @@ pub fn create_role_entities(
     };
 
     // get payload of role id in JWT token data
-    let Ok(payload) = token_data.get_payload(role_mapping.mapping_field) else {
+    let Ok(payload) = token_data.get_claim(role_mapping.mapping_field) else {
         // if key not found we return empty vector
         return Ok(Vec::new());
     };
