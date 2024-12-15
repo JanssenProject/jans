@@ -80,22 +80,14 @@ decision_result = authz(input)
 
 ## Automatically Adding Entity References to the Context
 
-Cedarling simplifies context creation by automatically including certain entities. This means you don't need to manually pass their references when using them in your policies. The following entities are automatically added to the context:  
+Cedarling simplifies context creation by automatically including certain entities. This means you don't need to manually pass their references when using them in your policies. The following entities are automatically added to the context, along with their naming conventions in `lower_snake_case` format:
 
-- **Workload Entity**  
-- **User Entity**  
-- **Resource Entity**  
-- **Access Token Entity**  
-- **ID Token Entity**  
-- **Userinfo Token Entity**
-
-### Important Note: Key Naming Convention  
-
-The keys in your context must match the entity names in **lower_snake_case** format. For example:  
-
-- The `Access_token` entity should be referenced as `access_token` in the context.  
-- The `User` entity should be referenced as `user`.  
-- The `Workload` entity should be referenced as `workload`.  
+- **Workload Entity**: `workload`
+- **User Entity**: `user`
+- **Resource Entity**: `resource`
+- **Access Token Entity**: `access_token`
+- **ID Token Entity**: `id_token`
+- **Userinfo Token Entity**: `userinfo_token`
 
 ### Example Policy
 
@@ -146,7 +138,7 @@ entity Workload = {
 };
 
 action "Update" appliesTo {
-  principal: [Workload, User],
+  principal: [Role, Workload, User],
   resource: [Issue],
   context: {
     "access_token": Access_token, 
@@ -157,21 +149,16 @@ action "Update" appliesTo {
 };
 
 action "View" appliesTo {
-  principal: [Workload, User],
+  principal: [Role, Workload, User],
   resource: [Issue],
   context: Context
 };
 ```
 
-### Simplified Context Creation
-
-With Cedarling, you only need to provide the fields that are not automatically included. For instance, to define the `time` in the context:
+With this schema, you only need to provide the fields that are not automatically included. For instance, to define the `time` in the context:
 
 ```js
 let context = {
   "time": 1719266610.98636,
 }
 ```
-
-Cedarling will automatically populate the remaining entities in the context (e.g., `access_token`, `user`, `workload`) as long as the keys follow the `lower_snake_case` naming convention as outlined in [this section](#important-note-key-naming-convention)
-This streamlined approach reduces boilerplate and ensures consistency across your policies.
