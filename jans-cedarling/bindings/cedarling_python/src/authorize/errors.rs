@@ -94,14 +94,14 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    CreateRequestWorkloadEntityError,
+    WorkloadRequestValidationError,
     AuthorizeError,
     "Error encountered while creating cedar_policy::Request for workload entity principal"
 );
 
 create_exception!(
     authorize_errors,
-    CreateRequestUserEntityError,
+    UserRequestValidationError,
     AuthorizeError,
     "Error encountered while creating cedar_policy::Request for user entity principal"
 );
@@ -118,6 +118,13 @@ create_exception!(
     EntitiesToJsonError,
     AuthorizeError,
     "Error encountered while parsing all entities to json for logging"
+);
+
+create_exception!(
+    authorize_errors,
+    MissingPrincipalError,
+    AuthorizeError,
+    "Could not authorize since an Entity for the principal was not created."
 );
 
 #[pyclass]
@@ -168,10 +175,11 @@ errors_functions! {
     RoleEntity => RoleEntityError,
     Action => ActionError,
     CreateContext => CreateContextError,
-    CreateRequestWorkloadEntity => CreateRequestWorkloadEntityError,
-    CreateRequestUserEntity => CreateRequestUserEntityError,
+    WorkloadRequestValidation => WorkloadRequestValidationError,
+    UserRequestValidation => UserRequestValidationError,
     Entities => EntitiesError,
-    EntitiesToJson => EntitiesToJsonError
+    EntitiesToJson => EntitiesToJsonError,
+    MissingPrincipal => MissingPrincipalError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {

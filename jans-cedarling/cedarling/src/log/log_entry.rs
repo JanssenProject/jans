@@ -274,7 +274,7 @@ pub struct DecisionLogEntry<'a> {
     pub user: HashMap<String, serde_json::Value>,
     /// A list of claims, specified by the CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS property, that must be present in the Cedar Workload entity
     #[serde(rename = "Workload")]
-    pub workload: HashMap<String, serde_json::Value>,
+    pub workload: Option<HashMap<String, serde_json::Value>>,
     /// If this Cedarling has registered with a Lock Server, what is the client_id it received
     pub lock_client_id: Option<String>,
     /// action UID for request
