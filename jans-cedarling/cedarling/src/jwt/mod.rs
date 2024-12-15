@@ -30,7 +30,7 @@ use std::sync::Arc;
 use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
 
 pub use jsonwebtoken::Algorithm;
-pub use token::{Token, TokenClaim, TokenClaimTypeError, TokenStr};
+pub use token::{Token, TokenClaim, TokenClaimTypeError, TokenData, TokenStr};
 
 /// Type alias for Trusted Issuers' ID.
 type TrustedIssuerId = Arc<str>;
@@ -165,38 +165,41 @@ impl JwtService {
         })
     }
 
-    #[allow(dead_code)]
-    pub fn process_token<'a>(
-        &'a self,
-        token: TokenStr<'a>,
-    ) -> Result<Token<'a>, JwtProcessingError> {
-        let result = match token {
-            TokenStr::AccessToken(tkn_str) => self
-                .access_tkn_validator
-                .process_jwt(tkn_str)
-                .map_err(JwtProcessingError::InvalidAccessToken)?,
-            TokenStr::IdToken(tkn_str) => self
-                .id_tkn_validator
-                .process_jwt(tkn_str)
-                .map_err(JwtProcessingError::InvalidIdToken)?,
-            TokenStr::UserinfoToken(tkn_str) => self
-                .userinfo_tkn_validator
-                .process_jwt(tkn_str)
-                .map_err(JwtProcessingError::InvalidUserinfoToken)?,
-        };
-
-        let claims = serde_json::from_value::<HashMap<String, Value>>(result.claims)?;
-
-        Ok(Token::new(claims, result.trusted_iss))
+    pub fn process_token<'a>(&'a self, token: TokenStr<'a>) -> Result<Token, JwtProcessingError> {
+        match token {
+            TokenStr::AccessToken(tkn_str) => {
+                let token = self
+                    .access_tkn_validator
+                    .process_jwt(tkn_str)
+                    .map_err(JwtProcessingError::InvalidAccessToken)?;
+                let claims = serde_json::from_value::<HashMap<String, Value>>(token.claims)?;
+                Ok(Token::Access(TokenData::new(claims, token.trusted_iss)))
+            },
+            TokenStr::IdToken(tkn_str) => {
+                let token = self
+                    .id_tkn_validator
+                    .process_jwt(tkn_str)
+                    .map_err(JwtProcessingError::InvalidIdToken)?;
+                let claims = serde_json::from_value::<HashMap<String, Value>>(token.claims)?;
+                Ok(Token::Id(TokenData::new(claims, token.trusted_iss)))
+            },
+            TokenStr::UserinfoToken(tkn_str) => {
+                let token = self
+                    .userinfo_tkn_validator
+                    .process_jwt(tkn_str)
+                    .map_err(JwtProcessingError::InvalidUserinfoToken)?;
+                let claims = serde_json::from_value::<HashMap<String, Value>>(token.claims)?;
+                Ok(Token::Userinfo(TokenData::new(claims, token.trusted_iss)))
+            },
+        }
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::test_utils::*;
-    use super::token::TokenStr;
     use super::JwtService;
-    use crate::jwt::Token;
+    use super::{Token, TokenData, TokenStr};
     use crate::IdTokenTrustMode;
     use crate::JwtConfig;
     use crate::TokenValidationConfig;
@@ -263,7 +266,10 @@ mod test {
             .expect("Should process access_token");
         let expected_claims = serde_json::from_value::<HashMap<String, Value>>(access_tkn_claims)
             .expect("Should create expected access_token claims");
-        assert_eq!(access_tkn, Token::new(expected_claims, None));
+        assert_eq!(
+            access_tkn,
+            Token::Access(TokenData::new(expected_claims, None))
+        );
 
         // Test id_token
         let id_tkn = jwt_service
@@ -271,7 +277,7 @@ mod test {
             .expect("Should process id_token");
         let expected_claims = serde_json::from_value::<HashMap<String, Value>>(id_tkn_claims)
             .expect("Should create expected id_token claims");
-        assert_eq!(id_tkn, Token::new(expected_claims, None));
+        assert_eq!(id_tkn, Token::Id(TokenData::new(expected_claims, None)));
 
         // Test userinfo_token
         let userinfo_tkn = jwt_service
@@ -279,6 +285,9 @@ mod test {
             .expect("Should process userinfo_token");
         let expected_claims = serde_json::from_value::<HashMap<String, Value>>(userinfo_tkn_claims)
             .expect("Should create expected userinfo_token claims");
-        assert_eq!(userinfo_tkn, Token::new(expected_claims, None));
+        assert_eq!(
+            userinfo_tkn,
+            Token::Userinfo(TokenData::new(expected_claims, None))
+        );
     }
 }

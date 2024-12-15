@@ -26,9 +26,6 @@ use std::collections::HashSet;
 
 use super::request::ResourceData;
 
-const DEFAULT_USER_ID_SRC_CLAIM: &str = "sub";
-const DEFAULT_ROLE_SRC_CLAIM: &str = "role";
-
 pub struct DecodedTokens<'a> {
     pub access_token: Option<Token<'a>>,
     pub id_token: Option<Token<'a>>,
@@ -47,7 +44,7 @@ pub fn create_workload(
     // or id_token whichever is available.
     let (token, workload_entity_meta, claim_mapping) =
         if let Some(access_tkn) = tokens.access_token.as_ref() {
-            let meta = access_tkn.iss.unwrap_or_default().tokens_metadata();
+            let meta = access_tkn.metadata();
             let claim_mapping = &meta.access_tokens.entity_metadata.claim_mapping;
             let workload_entity_meta = EntityMetadata::new(
                 EntityParsedTypeName {
@@ -58,7 +55,7 @@ pub fn create_workload(
             );
             (access_tkn, workload_entity_meta, claim_mapping)
         } else if let Some(id_tkn) = tokens.id_token.as_ref() {
-            let meta = id_tkn.iss.unwrap_or_default().tokens_metadata();
+            let meta = id_tkn.metadata();
             let claim_mapping = &meta.id_tokens.claim_mapping;
             let workload_entity_meta = EntityMetadata::new(
                 EntityParsedTypeName {
@@ -134,70 +131,53 @@ pub fn create_user_entity(
     // We attempt to create the User entity using the first available token that also
     // has an assigned claim to get the User Entity's id from.
 
-    let mut data: Option<(&Token, &str, &ClaimMappings)> = None;
+    // (token, user_mapping, claim_mapping)
+    let mut token: Option<&Token> = None;
 
-    if let Some(userinfo_tkn) = tokens.userinfo_token.as_ref() {
-        let iss = userinfo_tkn.iss.unwrap_or_default();
-        let user_mapping = iss
-            .get_user_mapping(TokenKind::Userinfo)
-            .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM);
-        println!("checking userinfo_tkn");
-        if userinfo_tkn.has_claim(user_mapping) {
-            data = Some((
-                userinfo_tkn,
-                user_mapping,
-                &iss.userinfo_tokens.claim_mapping,
-            ));
+    if let Some(tkn) = tokens.userinfo_token.as_ref() {
+        let user_mapping = tkn.user_mapping();
+        if tkn.has_claim(user_mapping) {
+            token = Some(tkn);
         }
     }
 
-    if data.is_none() {
-        if let Some(id_tkn) = tokens.id_token.as_ref() {
-            let iss = id_tkn.iss.unwrap_or_default();
-            let user_mapping = iss
-                .get_user_mapping(TokenKind::Id)
-                .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM);
-            if id_tkn.has_claim(user_mapping) {
-                data = Some((id_tkn, user_mapping, &iss.id_tokens.claim_mapping));
+    if token.is_none() {
+        if let Some(tkn) = tokens.id_token.as_ref() {
+            let user_mapping = tkn.user_mapping();
+            if tkn.has_claim(user_mapping) {
+                token = Some(tkn);
             }
         }
     }
 
-    if data.is_none() {
-        if let Some(access_tkn) = tokens.access_token.as_ref() {
-            let iss = access_tkn.iss.unwrap_or_default();
-            let user_mapping = iss
-                .get_user_mapping(TokenKind::Access)
-                .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM);
-            if access_tkn.has_claim(user_mapping) {
-                data = Some((
-                    access_tkn,
-                    user_mapping,
-                    &iss.access_tokens.entity_metadata.claim_mapping,
-                ));
+    if token.is_none() {
+        if let Some(tkn) = tokens.userinfo_token.as_ref() {
+            let user_mapping = tkn.user_mapping();
+            if tkn.has_claim(user_mapping) {
+                token = Some(tkn);
             }
         }
     }
 
-    let (token, user_mapping, claim_mapping) = data.ok_or(
-        CedarPolicyCreateTypeError::UnavailableToken("User".to_string()),
-    )?;
+    let token = token.ok_or(CedarPolicyCreateTypeError::UnavailableToken(
+        "User".to_string(),
+    ))?;
 
     EntityMetadata::new(
         EntityParsedTypeName {
             typename: entity_mapping.unwrap_or("User"),
             namespace,
         },
-        user_mapping,
+        token.user_mapping(),
     )
-    .create_entity(schema, token, parents, claim_mapping)
+    .create_entity(schema, token, parents, token.claim_mapping())
 }
 
 /// Create `Userinfo_token` entity
 pub fn create_userinfo_token_entity(
     entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
-    data: &Token,
+    token: &Token,
     claim_mapping: &ClaimMappings,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
     let schema = &policy_store.schema.json;
@@ -210,7 +190,7 @@ pub fn create_userinfo_token_entity(
         },
         "jti",
     )
-    .create_entity(schema, data, HashSet::new(), claim_mapping)
+    .create_entity(schema, token, HashSet::new(), claim_mapping)
 }
 
 /// Describe errors on creating resource entity
@@ -261,47 +241,36 @@ pub fn create_role_entities(
     policy_store: &PolicyStore,
     tokens: &DecodedTokens,
 ) -> Result<Vec<cedar_policy::Entity>, RoleEntityError> {
-    let mut mapping_info: Option<(TokenKind, &Token, &str, &ClaimMappings)> = None;
+    let mut token: Option<&Token> = None;
 
-    if let Some(token) = tokens.access_token.as_ref() {
-        let iss = token.iss.unwrap_or_default();
-        let role_mapping = iss
-            .get_role_mapping_new(TokenKind::Access)
-            .unwrap_or(DEFAULT_ROLE_SRC_CLAIM);
-        if token.has_claim(role_mapping) {
-            let token_mapping = &iss.access_tokens.entity_metadata.claim_mapping;
-            mapping_info = Some((TokenKind::Access, token, role_mapping, token_mapping));
+    if let Some(tkn) = tokens.access_token.as_ref() {
+        let role_mapping = tkn.role_mapping();
+        if tkn.has_claim(role_mapping) {
+            token = Some(tkn);
         }
     }
 
-    if mapping_info.is_none() {
-        if let Some(token) = tokens.id_token.as_ref() {
-            let iss = token.iss.unwrap_or_default();
-            let role_mapping = iss
-                .get_role_mapping_new(TokenKind::Id)
-                .unwrap_or(DEFAULT_ROLE_SRC_CLAIM);
-            if token.has_claim(role_mapping) {
-                let token_mapping = &iss.id_tokens.claim_mapping;
-                mapping_info = Some((TokenKind::Id, token, role_mapping, token_mapping));
+    if token.is_none() {
+        if let Some(tkn) = tokens.id_token.as_ref() {
+            let role_mapping = tkn.role_mapping();
+            if tkn.has_claim(role_mapping) {
+                token = Some(tkn);
             }
         }
     }
 
-    if mapping_info.is_none() {
-        if let Some(token) = tokens.userinfo_token.as_ref() {
-            let iss = token.iss.unwrap_or_default();
-            let role_mapping = iss
-                .get_role_mapping_new(TokenKind::Userinfo)
-                .unwrap_or(DEFAULT_ROLE_SRC_CLAIM);
-            if token.has_claim(role_mapping) {
-                let token_mapping = &iss.userinfo_tokens.claim_mapping;
-                mapping_info = Some((TokenKind::Userinfo, token, role_mapping, token_mapping));
+    if token.is_none() {
+        if let Some(tkn) = tokens.userinfo_token.as_ref() {
+            let role_mapping = tkn.role_mapping();
+            if tkn.has_claim(role_mapping) {
+                token = Some(tkn);
             }
         }
     }
 
-    let (token_kind, token_data, role_mapping, token_mapping) = match mapping_info {
-        Some(info) => (info.0, info.1, info.2, info.3),
+    // (token_kind, token_data, role_mapping, token_mapping)
+    let token = match token {
+        Some(token) => token,
         None => return Ok(Vec::new()),
     };
 
@@ -309,7 +278,7 @@ pub fn create_role_entities(
     let role_entity_type = parsed_typename.full_type_name();
 
     // get payload of role id in JWT token data
-    let Some(payload) = token_data.get_claim(role_mapping) else {
+    let Some(payload) = token.get_claim(token.role_mapping()) else {
         // if key not found we return empty vector
         return Ok(Vec::new());
     };
@@ -321,7 +290,7 @@ pub fn create_role_entities(
             build_entity_uid(role_entity_type.as_str(), payload_str).map_err(|err| {
                 RoleEntityError::Create {
                     error: err,
-                    token_kind,
+                    token_kind: token.kind(),
                 }
             })?;
         vec![entity_uid]
@@ -338,13 +307,13 @@ pub fn create_role_entities(
                         // get each element of array as `str`
                         payload_el.as_str().map_err(|err| RoleEntityError::Create {
                             error: err.into(),
-                            token_kind,
+                            token_kind: token.kind(),
                         })
                         // build entity uid 
                         .and_then(|name| build_entity_uid(role_entity_type.as_str(), name)
                         .map_err(|err| RoleEntityError::Create {
                             error: err,
-                            token_kind,
+                            token_kind: token.kind(),
                         }))
                     })
                     .collect::<Result<Vec<_>, _>>()?
@@ -353,7 +322,7 @@ pub fn create_role_entities(
                 // Handle the case where the payload is neither a string nor an array
                 return Err(RoleEntityError::Create {
                     error: err.into(),
-                    token_kind,
+                    token_kind: token.kind(),
                 });
             },
         }
@@ -369,13 +338,13 @@ pub fn create_role_entities(
                 entity_uid,
                 &parsed_typename,
                 schema,
-                token_data,
+                token.data(),
                 HashSet::new(),
-                token_mapping,
+                token.claim_mapping(),
             )
             .map_err(|err| RoleEntityError::Create {
                 error: err,
-                token_kind,
+                token_kind: token.kind(),
             })
         })
         .collect::<Result<Vec<_>, _>>()

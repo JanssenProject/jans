@@ -11,6 +11,7 @@ use super::create::*;
 use crate::common::cedar_schema::CedarSchemaJson;
 use crate::jwt::Token;
 use crate::jwt::TokenClaimTypeError;
+use crate::jwt::TokenData;
 use std::collections::HashSet;
 use test_utils::assert_eq;
 use test_utils::SortedJson;
@@ -40,10 +41,15 @@ fn successful_scenario_empty_namespace() {
         "set_set_key": [["some_string"]]
     });
 
-    let payload: Token = serde_json::from_value(json).unwrap();
+    let payload: TokenData = serde_json::from_value(json).unwrap();
 
     let entity = metadata
-        .create_entity(&schema, &payload, HashSet::new(), &Default::default())
+        .create_entity(
+            &schema,
+            &Token::Access(payload),
+            HashSet::new(),
+            &Default::default(),
+        )
         .expect("entity should be created");
 
     let entity_json = entity.to_json_value().expect("should serialize to json");
@@ -95,10 +101,15 @@ fn successful_scenario_not_empty_namespace() {
         "bool_key": true,
     });
 
-    let payload: Token = serde_json::from_value(json).unwrap();
+    let payload: TokenData = serde_json::from_value(json).unwrap();
 
     let entity = metadata
-        .create_entity(&schema, &payload, HashSet::new(), &Default::default())
+        .create_entity(
+            &schema,
+            &Token::Access(payload),
+            HashSet::new(),
+            &Default::default(),
+        )
         .expect("entity should be created");
 
     let entity_json = entity.to_json_value().expect("should serialize to json");
@@ -151,10 +162,15 @@ fn get_token_claim_type_string_error() {
         "set_set_key": [["some_string"]]
     });
 
-    let payload: Token = serde_json::from_value(json.clone()).unwrap();
+    let payload: TokenData = serde_json::from_value(json.clone()).unwrap();
 
     let entity_creation_error = metadata
-        .create_entity(&schema, &payload, HashSet::new(), &Default::default())
+        .create_entity(
+            &schema,
+            &Token::Access(payload),
+            HashSet::new(),
+            &Default::default(),
+        )
         .expect_err("entity creating should throw error");
 
     if let CedarPolicyCreateTypeError::GetTokenClaim(TokenClaimTypeError {
@@ -200,10 +216,15 @@ fn get_token_claim_type_long_error() {
         "set_set_key": [["some_string"]]
     });
 
-    let payload: Token = serde_json::from_value(json.clone()).unwrap();
+    let payload: TokenData = serde_json::from_value(json.clone()).unwrap();
 
     let entity_creation_error = metadata
-        .create_entity(&schema, &payload, HashSet::new(), &Default::default())
+        .create_entity(
+            &schema,
+            &Token::Access(payload),
+            HashSet::new(),
+            &Default::default(),
+        )
         .expect_err("entity creating should throw error");
 
     if let CedarPolicyCreateTypeError::GetTokenClaim(TokenClaimTypeError {
@@ -249,10 +270,15 @@ fn get_token_claim_type_entity_uid_error() {
         "set_set_key": [["some_string"]]
     });
 
-    let payload: Token = serde_json::from_value(json.clone()).unwrap();
+    let payload: TokenData = serde_json::from_value(json.clone()).unwrap();
 
     let entity_creation_error = metadata
-        .create_entity(&schema, &payload, HashSet::new(), &Default::default())
+        .create_entity(
+            &schema,
+            &Token::Access(payload),
+            HashSet::new(),
+            &Default::default(),
+        )
         .expect_err("entity creating should throw error");
 
     if let CedarPolicyCreateTypeError::GetTokenClaim(TokenClaimTypeError {
@@ -298,10 +324,15 @@ fn get_token_claim_type_boolean_error() {
         "set_set_key": [["some_string"]]
     });
 
-    let payload: Token = serde_json::from_value(json.clone()).unwrap();
+    let payload: TokenData = serde_json::from_value(json.clone()).unwrap();
 
     let entity_creation_error = metadata
-        .create_entity(&schema, &payload, HashSet::new(), &Default::default())
+        .create_entity(
+            &schema,
+            &Token::Access(payload),
+            HashSet::new(),
+            &Default::default(),
+        )
         .expect_err("entity creating should throw error");
 
     if let CedarPolicyCreateTypeError::GetTokenClaim(TokenClaimTypeError {
@@ -352,10 +383,15 @@ fn get_token_claim_type_set_error() {
         "set_set_key": [["some_string"]]
     });
 
-    let payload: Token = serde_json::from_value(json.clone()).unwrap();
+    let payload: TokenData = serde_json::from_value(json.clone()).unwrap();
 
     let entity_creation_error = metadata
-        .create_entity(&schema, &payload, HashSet::new(), &Default::default())
+        .create_entity(
+            &schema,
+            &Token::Access(payload),
+            HashSet::new(),
+            &Default::default(),
+        )
         .expect_err("entity creating should throw error");
 
     if let CedarPolicyCreateTypeError::GetTokenClaim(TokenClaimTypeError {
@@ -405,10 +441,15 @@ fn get_token_claim_type_set_of_set_error() {
         "set_set_key": ["some_string"]
     });
 
-    let payload: Token = serde_json::from_value(json.clone()).unwrap();
+    let payload: TokenData = serde_json::from_value(json.clone()).unwrap();
 
     let entity_creation_error = metadata
-        .create_entity(&schema, &payload, HashSet::new(), &Default::default())
+        .create_entity(
+            &schema,
+            &Token::Access(payload),
+            HashSet::new(),
+            &Default::default(),
+        )
         .expect_err("entity creating should throw error");
 
     if let CedarPolicyCreateTypeError::GetTokenClaim(TokenClaimTypeError {
@@ -461,10 +502,15 @@ fn get_token_claim_cedar_typename_error() {
         "bool_key": true,
     });
 
-    let payload: Token = serde_json::from_value(json).unwrap();
+    let payload: TokenData = serde_json::from_value(json).unwrap();
 
     let entity_creation_error = metadata
-        .create_entity(&schema, &payload, HashSet::new(), &Default::default())
+        .create_entity(
+            &schema,
+            &Token::Access(payload),
+            HashSet::new(),
+            &Default::default(),
+        )
         .expect_err("entity creating should throw error");
 
     if let CedarPolicyCreateTypeError::EntityTypeName(typename, _) = &entity_creation_error {
@@ -507,10 +553,15 @@ fn get_token_claim_cedar_typename_in_attr_error() {
         "bool_key": true,
     });
 
-    let payload: Token = serde_json::from_value(json).unwrap();
+    let payload: TokenData = serde_json::from_value(json).unwrap();
 
     let entity_creation_error = metadata
-        .create_entity(&schema, &payload, HashSet::new(), &Default::default())
+        .create_entity(
+            &schema,
+            &Token::Access(payload),
+            HashSet::new(),
+            &Default::default(),
+        )
         .expect_err("entity creating should throw error");
 
     if let CedarPolicyCreateTypeError::FindType(typename) = &entity_creation_error {

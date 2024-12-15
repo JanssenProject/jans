@@ -5,26 +5,140 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use crate::common::policy_store::TrustedIssuer;
+use crate::common::policy_store::{ClaimMappings, TokenKind, TokensMetadata, TrustedIssuer};
 use serde::Deserialize;
 use serde_json::Value;
 use std::collections::HashMap;
 
-#[allow(dead_code)]
+const DEFAULT_USER_ID_SRC_CLAIM: &str = "sub";
+const DEFAULT_ROLE_SRC_CLAIM: &str = "role";
+
 pub enum TokenStr<'a> {
     AccessToken(&'a str),
     IdToken(&'a str),
     UserinfoToken(&'a str),
 }
 
+#[derive(Debug, PartialEq)]
+pub enum Token<'a> {
+    Access(TokenData<'a>),
+    Id(TokenData<'a>),
+    Userinfo(TokenData<'a>),
+}
+
+impl Token<'_> {
+    pub fn kind(&self) -> TokenKind {
+        match self {
+            Token::Access(_) => TokenKind::Access,
+            Token::Id(_) => TokenKind::Id,
+            Token::Userinfo(_) => TokenKind::Userinfo,
+        }
+    }
+
+    pub fn iss(&self) -> Option<&TrustedIssuer> {
+        match self {
+            Token::Access(data) | Token::Id(data) | Token::Userinfo(data) => data.iss,
+        }
+    }
+
+    pub fn metadata(&self) -> TokensMetadata<'_> {
+        match self {
+            Token::Access(data) | Token::Id(data) | Token::Userinfo(data) => {
+                data.iss.unwrap_or_default().tokens_metadata()
+            },
+        }
+    }
+
+    pub fn user_mapping(&self) -> &str {
+        match self {
+            Token::Access(data) => data
+                .iss
+                .unwrap_or_default()
+                .get_user_mapping(TokenKind::Access)
+                .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM),
+            Token::Id(data) => data
+                .iss
+                .unwrap_or_default()
+                .get_user_mapping(TokenKind::Id)
+                .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM),
+            Token::Userinfo(data) => data
+                .iss
+                .unwrap_or_default()
+                .get_user_mapping(TokenKind::Userinfo)
+                .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM),
+        }
+    }
+
+    pub fn claim_mapping(&self) -> &ClaimMappings {
+        match self {
+            Token::Access(data) => {
+                &data
+                    .iss
+                    .unwrap_or_default()
+                    .access_tokens
+                    .entity_metadata
+                    .claim_mapping
+            },
+            Token::Id(data) => &data.iss.unwrap_or_default().id_tokens.claim_mapping,
+            Token::Userinfo(data) => &data.iss.unwrap_or_default().userinfo_tokens.claim_mapping,
+        }
+    }
+
+    pub fn role_mapping(&self) -> &str {
+        match self {
+            Token::Access(data) => data
+                .iss
+                .unwrap_or_default()
+                .get_role_mapping_new(TokenKind::Access)
+                .unwrap_or(DEFAULT_ROLE_SRC_CLAIM),
+            Token::Id(data) => &data
+                .iss
+                .unwrap_or_default()
+                .get_role_mapping_new(TokenKind::Id)
+                .unwrap_or(DEFAULT_ROLE_SRC_CLAIM),
+            Token::Userinfo(data) => &data
+                .iss
+                .unwrap_or_default()
+                .get_role_mapping_new(TokenKind::Userinfo)
+                .unwrap_or(DEFAULT_ROLE_SRC_CLAIM),
+        }
+    }
+
+    pub fn get_claim(&self, name: &str) -> Option<TokenClaim> {
+        match self {
+            Token::Access(data) | Token::Id(data) | Token::Userinfo(data) => data.get_claim(name),
+        }
+    }
+
+    pub fn has_claim(&self, name: &str) -> bool {
+        match self {
+            Token::Access(data) | Token::Id(data) | Token::Userinfo(data) => data.has_claim(name),
+        }
+    }
+
+    pub fn data(&self) -> &TokenData {
+        match self {
+            Token::Access(data) | Token::Id(data) | Token::Userinfo(data) => data,
+        }
+    }
+
+    pub fn logging_info<'a>(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
+        match self {
+            Token::Access(data) | Token::Id(data) | Token::Userinfo(data) => {
+                data.get_logging_info(claim)
+            },
+        }
+    }
+}
+
 /// A struct holding information on a decoded JWT.
 #[derive(Debug, PartialEq, Default)]
-pub struct Token<'a> {
+pub struct TokenData<'a> {
     claims: HashMap<String, Value>,
     pub iss: Option<&'a TrustedIssuer>,
 }
 
-impl<'de> Deserialize<'de> for Token<'_> {
+impl<'de> Deserialize<'de> for TokenData<'_> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -34,14 +148,13 @@ impl<'de> Deserialize<'de> for Token<'_> {
     }
 }
 
-impl From<HashMap<String, Value>> for Token<'_> {
+impl From<HashMap<String, Value>> for TokenData<'_> {
     fn from(claims: HashMap<String, Value>) -> Self {
         Self { claims, iss: None }
     }
 }
 
-#[allow(dead_code)]
-impl<'a> Token<'a> {
+impl<'a> TokenData<'a> {
     pub fn new(claims: HashMap<String, serde_json::Value>, iss: Option<&'a TrustedIssuer>) -> Self {
         Self { claims, iss }
     }
@@ -49,7 +162,7 @@ impl<'a> Token<'a> {
     pub fn from_json_map(map: serde_json::Map<String, serde_json::Value>) -> Self {
         Self::new(HashMap::from_iter(map), None)
     }
-    
+
     pub fn has_claim(&self, name: &str) -> bool {
         self.claims.contains_key(name)
     }
@@ -61,15 +174,8 @@ impl<'a> Token<'a> {
         })
     }
 
-    pub fn get_logging_info(
-        &'a self,
-        decision_log_default_jwt_id: &'a str,
-    ) -> HashMap<&'a str, &'a serde_json::Value> {
-        let claim = if !decision_log_default_jwt_id.is_empty() {
-            decision_log_default_jwt_id
-        } else {
-            "jti"
-        };
+    pub fn get_logging_info(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
+        let claim = if !claim.is_empty() { claim } else { "jti" };
 
         let iter = [self.claims.get(claim).map(|value| (claim, value))]
             .into_iter()
@@ -79,13 +185,11 @@ impl<'a> Token<'a> {
     }
 }
 
-#[allow(dead_code)]
 pub struct TokenClaim<'a> {
     key: String,
     value: &'a serde_json::Value,
 }
 
-#[allow(dead_code)]
 impl TokenClaim<'_> {
     pub fn key(&self) -> &str {
         &self.key

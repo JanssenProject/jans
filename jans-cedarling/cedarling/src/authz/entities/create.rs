@@ -11,17 +11,20 @@ use std::{
 };
 
 use super::trait_as_expression::AsExpression;
-use crate::common::{
-    cedar_schema::{
-        cedar_json::{
-            CedarSchemaEntityShape, CedarSchemaRecord, CedarType, GetCedarTypeError,
-            SchemaDefinedType,
+use crate::jwt::{TokenClaim, TokenClaimTypeError, TokenData};
+use crate::{
+    common::{
+        cedar_schema::{
+            cedar_json::{
+                CedarSchemaEntityShape, CedarSchemaRecord, CedarType, GetCedarTypeError,
+                SchemaDefinedType,
+            },
+            CedarSchemaJson,
         },
-        CedarSchemaJson,
+        policy_store::ClaimMappings,
     },
-    policy_store::ClaimMappings,
+    jwt::Token,
 };
-use crate::jwt::{Token, TokenClaim, TokenClaimTypeError};
 use cedar_policy::{EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 
 pub const CEDAR_POLICY_SEPARATOR: &str = "::";
@@ -66,7 +69,7 @@ impl<'a> EntityMetadata<'a> {
             entity_uid,
             &self.entity_type,
             schema,
-            token,
+            token.data(),
             parents,
             claim_mapping,
         )
@@ -167,7 +170,7 @@ fn entity_meta_attributes(
 fn build_entity_attributes(
     schema: &CedarSchemaJson,
     parsed_typename: &EntityParsedTypeName,
-    token: &Token,
+    tkn_data: &TokenData,
     claim_mapping: &ClaimMappings,
 ) -> Result<HashMap<String, RestrictedExpression>, CedarPolicyCreateTypeError> {
     // fetch the schema entity shape from the json-schema.
@@ -180,7 +183,7 @@ fn build_entity_attributes(
                 let attr_name = attr.attribute_name;
                 let cedar_exp_result = token_attribute_to_cedar_exp(
                     &attr,
-                    token,
+                    tkn_data,
                     parsed_typename,
                     schema,
                     claim_mapping,
@@ -207,11 +210,11 @@ pub fn create_entity(
     entity_uid: EntityUid,
     parsed_typename: &EntityParsedTypeName,
     schema: &CedarSchemaJson,
-    token: &Token,
+    tkn_data: &TokenData,
     parents: HashSet<EntityUid>,
     claim_mapping: &ClaimMappings,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
-    let attrs = build_entity_attributes(schema, parsed_typename, token, claim_mapping)?;
+    let attrs = build_entity_attributes(schema, parsed_typename, tkn_data, claim_mapping)?;
 
     let entity_uid_string = entity_uid.to_string();
     cedar_policy::Entity::new(entity_uid, attrs, parents)
@@ -232,7 +235,7 @@ pub struct EntityAttributeMetadata<'a> {
 /// Get the cedar policy expression value for a given type.
 fn token_attribute_to_cedar_exp(
     attribute_metadata: &EntityAttributeMetadata,
-    token: &Token,
+    tkn_data: &TokenData,
     entity_typename: &EntityParsedTypeName,
     schema: &CedarSchemaJson,
     claim_mapping: &ClaimMappings,
@@ -240,7 +243,7 @@ fn token_attribute_to_cedar_exp(
     let token_claim_key = attribute_metadata.attribute_name;
 
     let token_claim_value =
-        token
+        tkn_data
             .get_claim(token_claim_key)
             .ok_or(CedarPolicyCreateTypeError::MissingClaim(
                 token_claim_key.to_string(),
@@ -342,16 +345,16 @@ fn get_record_expression(
     claim_mapping: &ClaimMappings,
 ) -> Result<RestrictedExpression, CedarPolicyCreateTypeError> {
     // map json value of `token_claim` to TokenPayload object (HashMap)
-    let mapped_claim: Token =
+    let mapped_claim: TokenData =
         match claim_mapping.get_mapping(token_claim.key(), &cedar_record_type.full_type_name()) {
             Some(m) => m.apply_mapping(token_claim.value()).into(),
             // if we do not have mapping, and value is json object, return TokenPayload based on it.
             // if value is not json object, return empty value
             None => {
                 if let Some(map) = token_claim.value().as_object() {
-                    Token::from_json_map(map.to_owned())
+                    TokenData::from_json_map(map.to_owned())
                 } else {
-                    Token::default()
+                    TokenData::default()
                 }
             },
         };
