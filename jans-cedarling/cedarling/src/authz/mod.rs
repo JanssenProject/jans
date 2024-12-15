@@ -261,29 +261,31 @@ impl Authz {
         let auth_conf = &self.config.authorization;
         
         // build workload entity
-        let workload = match auth_conf.use_workload_principal {
-            true => Some(
-                    create_workload(auth_conf.mapping_workload.as_deref(), policy_store,
-                &tokens,
-                ).map_err(AuthorizeError::CreateWorkloadEntity)?
-            ),
-            false => None,
+        let workload = if auth_conf.use_workload_principal {
+            Some(
+                create_workload(
+                    auth_conf.mapping_workload.as_deref(),
+                    policy_store,
+                    &tokens,
+                ).map_err(AuthorizeError::CreateWorkloadEntity)?,
+            )
+        } else {
+            None
         };
 
         // build role entity
         let role = create_role_entities(policy_store, tokens)?;
     
         // build user entity
-        let user = match auth_conf.use_user_principal {
-            true => Some(
-                        create_user_entity(auth_conf.mapping_user.as_deref(),
-                        policy_store,
-                        tokens,
-                        HashSet::from_iter(role.iter().map(|e| e.uid())),
-                    )
-                .map_err(AuthorizeError::CreateUserEntity)?
-            ),
-            false => None,
+        let user = if auth_conf.use_user_principal {
+            Some(
+                create_user_entity(auth_conf.mapping_user.as_deref(),
+                policy_store,
+                tokens,
+                HashSet::from_iter(role.iter().map(|e| e.uid())),
+            ).map_err(AuthorizeError::CreateUserEntity)?)
+        } else {
+            None
         };
     
         // build access_token Entity
