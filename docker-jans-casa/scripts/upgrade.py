@@ -217,7 +217,7 @@ class Upgrade:
 def main():
     manager = get_manager()
 
-    with manager.lock.create_lock("casa-upgrade"):
+    with manager.create_lock("casa-upgrade"):
         upgrade = Upgrade(manager)
         upgrade.invoke()
 

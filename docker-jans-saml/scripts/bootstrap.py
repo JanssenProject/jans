@@ -18,7 +18,6 @@ from jans.pycloudlib import wait_for_persistence
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import render_sql_properties
-from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.sql import override_simple_json_property
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.persistence.utils import render_base_properties
@@ -79,7 +78,6 @@ def main():
             render_hybrid_properties(hybrid_prop)
 
     if "sql" in persistence_groups:
-        sync_sql_password(manager)
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
         render_sql_properties(
             manager,
@@ -95,7 +93,7 @@ def main():
         "/opt/keycloak/conf/quarkus.properties",
     )
 
-    with manager.lock.create_lock("saml-setup"):
+    with manager.create_lock("saml-setup"):
         persistence_setup = PersistenceSetup(manager)
         persistence_setup.import_ldif_files()
         render_keycloak_conf()
@@ -216,6 +214,12 @@ class PersistenceSetup:
 
 
 def render_keycloak_creds():
+    # Keycloak UI requires initial admin credentials (username + password) that configured using
+    # KEYCLOAK_ADMIN and KEYCLOAK_ADMIN_PASSWORD env vars; note that exporting env vars via Python
+    # os.environ wont work because the process wont alter the parent's environment, hence we create
+    # credentials file in order to make shell script parse and pass the credentials via export command;
+    # for security purpose, it's recommended to remove the credentials file after shell script finished
+    # exporting the env vars
     creds_file = os.environ.get("CN_SAML_KC_ADMIN_CREDENTIALS_FILE", "/etc/jans/conf/kc_admin_creds")
 
     if not os.path.isfile(creds_file):
