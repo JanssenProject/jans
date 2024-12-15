@@ -53,12 +53,14 @@
 
 pub mod interface;
 mod log_entry;
+mod log_level;
 pub(crate) mod log_strategy;
 mod memory_logger;
 mod nop_logger;
 mod stdout_logger;
 
 pub use log_entry::*;
+pub use log_level::*;
 
 #[cfg(test)]
 mod test;

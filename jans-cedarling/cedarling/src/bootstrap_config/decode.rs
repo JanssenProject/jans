@@ -10,6 +10,7 @@ use super::{
     IdTokenTrustMode, JwtConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig,
     PolicyStoreSource, TokenValidationConfig,
 };
+use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
 use std::{collections::HashSet, fmt::Display, fs, path::Path, str::FromStr};
@@ -38,8 +39,17 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_LOG_TYPE", default)]
     pub log_type: LoggerType,
 
+    /// Log level filter for logging. TRACE is lowest. FATAL is highest.
+    #[serde(rename = "CEDARLING_LOG_LEVEL", default)]
+    pub log_level: LogLevel,
+
+    /// If `log_type` is set to [`LogType::Memory`], this is the TTL (time to live) of
+    /// log entities in seconds.
+    #[serde(rename = "CEDARLING_LOG_TTL", default)]
+    pub log_ttl: Option<u64>,
+
     /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
-    #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS ", default)]
+    #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS", default)]
     pub decision_log_user_claims: Vec<String>,
 
     /// List of claims to map from user entity, such as ["client_id", "rp_id", ...]
@@ -50,11 +60,6 @@ pub struct BootstrapConfigRaw {
     /// Default is jti, but perhaps some other claim is needed.
     #[serde(rename = "CEDARLING_DECISION_LOG_DEFAULT_JWT_ID", default)]
     pub decision_log_default_jwt_id: String,
-
-    /// If `log_type` is set to [`LogType::Memory`], this is the TTL (time to live) of
-    /// log entities in seconds.
-    #[serde(rename = "CEDARLING_LOG_TTL", default)]
-    pub log_ttl: Option<u64>,
 
     /// When `enabled`, Cedar engine authorization is queried for a User principal.
     #[serde(rename = "CEDARLING_USER_AUTHZ", default)]
@@ -433,7 +438,10 @@ impl BootstrapConfig {
             LoggerType::StdOut => LogTypeConfig::StdOut,
             LoggerType::Lock => LogTypeConfig::Lock,
         };
-        let log_config = LogConfig { log_type };
+        let log_config = LogConfig {
+            log_type,
+            log_level: raw.log_level,
+        };
 
         // Decode policy store
         let policy_store_config = match (

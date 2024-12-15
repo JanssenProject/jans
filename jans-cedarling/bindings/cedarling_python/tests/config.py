@@ -8,6 +8,7 @@ TEST_FILES_PATH = os.path.join(ROOT_FOLDER_PATH, "test_files")
 # The human-readable policy and schema file is located in next folder:
 # `test_files\policy-store_ok`
 
+
 def load_bootstrap_config(policy_store_location=None, log_type="std_out", log_ttl=None):
     """
     Loads the bootstrap configuration with predefined settings.
@@ -15,7 +16,8 @@ def load_bootstrap_config(policy_store_location=None, log_type="std_out", log_tt
     """
 
     if policy_store_location is None:
-        policy_store_location = os.path.join(TEST_FILES_PATH, "policy-store_ok.yaml")
+        policy_store_location = os.path.join(
+            TEST_FILES_PATH, "policy-store_ok.yaml")
 
     return BootstrapConfig({
         "CEDARLING_APPLICATION_NAME": "TestApp",
@@ -42,4 +44,5 @@ def load_bootstrap_config(policy_store_location=None, log_type="std_out", log_tt
         "CEDARLING_ID_TOKEN_TRUST_MODE": "none",
         "CEDARLING_LOG_TYPE": log_type,
         "CEDARLING_LOG_TTL": log_ttl,
+        "CEDARLING_LOG_LEVEL": "DEBUG",
     })
