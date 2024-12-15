@@ -126,7 +126,7 @@ pub struct AuthorizationLogInfo {
     // It allow deserialize json to flatten structure.
     /// Person authorize info
     #[serde(flatten)]
-    pub person_authorize_info: Option<PersonAuthorizeInfo>,
+    pub person_authorize_info: Option<UserAuthorizeInfo>,
     /// Workload authorize info
     #[serde(flatten)]
     pub workload_authorize_info: Option<WorkloadAuthorizeInfo>,
@@ -137,24 +137,24 @@ pub struct AuthorizationLogInfo {
 
 /// Person authorize info
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-pub struct PersonAuthorizeInfo {
+pub struct UserAuthorizeInfo {
     /// cedar-policy user/person principal
-    pub person_principal: String,
+    pub principal: String,
     /// cedar-policy user/person diagnostics information
-    pub person_diagnostics: Diagnostics,
+    pub diagnostics: Diagnostics,
     /// cedar-policy user/person decision
-    pub person_decision: Decision,
+    pub decision: Decision,
 }
 
 /// Workload authorize info
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct WorkloadAuthorizeInfo {
     /// cedar-policy workload principal
-    pub workload_principal: String,
+    pub principal: String,
     /// cedar-policy workload diagnostics information
-    pub workload_diagnostics: Diagnostics,
+    pub diagnostics: Diagnostics,
     /// cedar-policy workload decision
-    pub workload_decision: Decision,
+    pub decision: Decision,
 }
 
 /// Cedar-policy decision of the authorization
@@ -271,7 +271,7 @@ pub struct DecisionLogEntry<'a> {
     pub principal: PrincipalLogEntry,
     /// A list of claims, specified by the CEDARLING_DECISION_LOG_USER_CLAIMS property, that must be present in the Cedar User entity
     #[serde(rename = "User")]
-    pub user: HashMap<String, serde_json::Value>,
+    pub user: Option<HashMap<String, serde_json::Value>>,
     /// A list of claims, specified by the CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS property, that must be present in the Cedar Workload entity
     #[serde(rename = "Workload")]
     pub workload: Option<HashMap<String, serde_json::Value>>,

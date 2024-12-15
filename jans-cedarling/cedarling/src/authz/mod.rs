@@ -19,7 +19,7 @@ use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt::{self, TokenStr};
 use crate::log::interface::LogWriter;
 use crate::log::{
-    AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, LogEntry, LogTokensInfo, LogType, Logger, PersonAuthorizeInfo, PrincipalLogEntry, WorkloadAuthorizeInfo
+    AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, LogEntry, LogTokensInfo, LogType, Logger, UserAuthorizeInfo, PrincipalLogEntry, WorkloadAuthorizeInfo
 };
 use std::io::Cursor;
 
@@ -29,7 +29,7 @@ pub(crate) mod entities;
 pub(crate) mod request;
 pub use authorize_result::AuthorizeResult;
 
-use cedar_policy::{Entities, Entity, EntityUid, Response};
+use cedar_policy::{Entities, Entity, EntityUid};
 use entities::{create_resource_entity, DecodedTokens};
 use entities::CedarPolicyCreateTypeError;
 use entities::ResourceEntityError;
@@ -113,7 +113,6 @@ impl Authz {
 
         // Get entity UIDs what we will be used on authorize check
         let resource_uid = entities_data.resource.uid();
-        let principal_user_entity_uid = entities_data.user.uid();
 
         // Convert [`AuthorizeEntitiesData`] to  [`cedar_policy::Entities`] structure,
         // hold all entities that will be used on authorize check.
@@ -126,12 +125,12 @@ impl Authz {
             let authz_result = self.execute_authorize(ExecuteAuthorizeParameters { entities: &entities, principal: principal.clone(), action: action.clone(), resource: resource_uid.clone(), context: context.clone() }).map_err(AuthorizeError::WorkloadRequestValidation)?;
 
             let authz_info = WorkloadAuthorizeInfo {
-                workload_principal: principal.to_string(),
-                workload_diagnostics: Diagnostics::new(
+                principal: principal.to_string(),
+                diagnostics: Diagnostics::new(
                     authz_result.diagnostics(),
                     &self.config.policy_store.policies,
                 ),
-                workload_decision: authz_result.decision().into(),
+                decision: authz_result.decision().into(),
             };
 
             let workload_entity_claims = get_entity_claims( self.config.authorization.decision_log_workload_claims.as_slice(),&entities, principal);
@@ -141,17 +140,22 @@ impl Authz {
         };
 
         // Check authorize where principal is `"Jans::User"` from cedar-policy schema.
-        let person_result: Option<Response> = if self.config.authorization.use_user_principal {
-            match self.execute_authorize(ExecuteAuthorizeParameters {
-                entities: &entities,
-                principal: principal_user_entity_uid.clone(),
-                action: action.clone(),
-                resource: resource_uid.clone(),
-                context: context.clone(),
-            }) {
-                Ok(resp) => Some(resp),
-                Err(err) => return Err(AuthorizeError::UserRequestValidation(err)),
-            }
+        let user_result = if self.config.authorization.use_user_principal {
+            let principal = entities_data.user.ok_or(AuthorizeError::MissingPrincipal("User".to_string()))?.uid();
+            
+            let authz_result = self.execute_authorize(ExecuteAuthorizeParameters { entities: &entities, principal: principal.clone(), action: action.clone(), resource: resource_uid.clone(), context: context.clone() }).map_err(AuthorizeError::UserRequestValidation)?;
+
+            let authz_info = UserAuthorizeInfo {
+                principal: principal.to_string(),
+                diagnostics: Diagnostics::new(
+                    authz_result.diagnostics(),
+                    &self.config.policy_store.policies,
+                ),
+                decision: authz_result.decision().into(),
+            };
+
+            let person_entity_claims = get_entity_claims(self.config.authorization.decision_log_user_claims.as_slice(),&entities, principal);
+            Some((authz_result, authz_info, person_entity_claims))
         } else {
             None
         };
@@ -159,7 +163,7 @@ impl Authz {
         let result = AuthorizeResult::new(
             self.config.authorization.user_workload_operator,
             workload_result.clone().map(|x| x.0),
-            person_result,
+            user_result.clone().map(|x| x.0),
         );
 
         // measure time how long request executes
@@ -190,14 +194,7 @@ impl Authz {
                 resource: resource_uid.to_string(),
                 entities: entities_json,
 
-                person_authorize_info: result.person.as_ref().map(|response| PersonAuthorizeInfo {
-                    person_principal: principal_user_entity_uid.to_string(),
-                    person_diagnostics: Diagnostics::new(
-                        response.diagnostics(),
-                        &self.config.policy_store.policies,
-                    ),
-                    person_decision: response.decision().into(),
-                }),
+                person_authorize_info: user_result.clone().map(|x| x.1),
                 workload_authorize_info: workload_result.clone().map(|x| x.1),
                 authorized: result.is_allowed(),
             })
@@ -216,7 +213,7 @@ impl Authz {
             policystore_id: self.config.policy_store.id.as_str(),
             policystore_version: self.config.policy_store.get_store_version(),
             principal: PrincipalLogEntry::new(&self.config.authorization),
-            user: get_entity_claims( self.config.authorization.decision_log_user_claims.as_slice(),&entities,principal_user_entity_uid),
+            user: user_result.map(|res| res.2),
             workload: workload_result.map(|res| res.2),
             lock_client_id: None,
             action: request.action.clone(),
@@ -263,6 +260,7 @@ impl Authz {
         let policy_store = &self.config.policy_store;
         let auth_conf = &self.config.authorization;
         
+        // build workload entity
         let workload = match auth_conf.use_workload_principal {
             true => Some(
                     create_workload(auth_conf.mapping_workload.as_deref(), policy_store,
@@ -272,6 +270,22 @@ impl Authz {
             false => None,
         };
 
+        // build role entity
+        let role = create_role_entities(policy_store, tokens)?;
+    
+        // build user entity
+        let user = match auth_conf.use_user_principal {
+            true => Some(
+                        create_user_entity(auth_conf.mapping_user.as_deref(),
+                        policy_store,
+                        tokens,
+                        HashSet::from_iter(role.iter().map(|e| e.uid())),
+                    )
+                .map_err(AuthorizeError::CreateUserEntity)?
+            ),
+            false => None,
+        };
+    
         // build access_token Entity
         let access_token = tokens.access_token.as_ref().map(|tkn| {
             let tkns_metadata = tkn.iss.unwrap_or_default().tokens_metadata();
@@ -292,18 +306,7 @@ impl Authz {
              create_userinfo_token_entity(auth_conf.mapping_userinfo_token.as_deref(), policy_store, tkn, &tkns_metadata.userinfo_tokens.claim_mapping)
                 .map_err(AuthorizeError::CreateUserinfoTokenEntity)
         }).transpose()?;
-            
-        // build role entity
-        let role = create_role_entities(policy_store, tokens)?;
         
-        // build user entity
-        let user = create_user_entity(auth_conf.mapping_user.as_deref(),
-                    policy_store,
-                    tokens,
-                    HashSet::from_iter(role.iter().map(|e| e.uid())),
-                )
-                .map_err(AuthorizeError::CreateUserEntity)?;
-
         // build resource entity
         let resource = create_resource_entity(
                 request.resource.clone(),
@@ -327,7 +330,7 @@ struct ExecuteAuthorizeParameters<'a> {
 #[derive(Clone)]
 pub struct AuthorizeEntitiesData {
     pub workload: Option<Entity>,
-    pub user: Entity,
+    pub user: Option<Entity>,
     pub access_token: Option<Entity>,
     pub id_token: Option<Entity>,
     pub userinfo_token: Option<Entity>,
@@ -339,10 +342,12 @@ impl AuthorizeEntitiesData {
     /// Create iterator to get all entities
     fn into_iter(self) -> impl Iterator<Item = Entity> {
         let mut entities = vec![
-            self.user,
             self.resource,
         ];
 
+        if let Some(entity) = self.user {
+            entities.push(entity);
+        }
         if let Some(entity) = self.workload {
             entities.push(entity);
         }
