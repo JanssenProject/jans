@@ -30,7 +30,7 @@ use std::sync::Arc;
 use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
 
 pub use jsonwebtoken::Algorithm;
-pub use token::{GetTokenClaimError, Token, TokenClaim, TokenStr};
+pub use token::{Token, TokenClaim, TokenClaimTypeError, TokenStr};
 
 /// Type alias for Trusted Issuers' ID.
 type TrustedIssuerId = Arc<str>;
@@ -187,10 +187,7 @@ impl JwtService {
 
         let claims = serde_json::from_value::<HashMap<String, Value>>(result.claims)?;
 
-        Ok(Token {
-            claims,
-            iss: result.trusted_iss,
-        })
+        Ok(Token::new(claims, result.trusted_iss))
     }
 }
 
@@ -266,13 +263,7 @@ mod test {
             .expect("Should process access_token");
         let expected_claims = serde_json::from_value::<HashMap<String, Value>>(access_tkn_claims)
             .expect("Should create expected access_token claims");
-        assert_eq!(
-            access_tkn,
-            Token {
-                claims: expected_claims,
-                iss: None,
-            }
-        );
+        assert_eq!(access_tkn, Token::new(expected_claims, None));
 
         // Test id_token
         let id_tkn = jwt_service
@@ -280,13 +271,7 @@ mod test {
             .expect("Should process id_token");
         let expected_claims = serde_json::from_value::<HashMap<String, Value>>(id_tkn_claims)
             .expect("Should create expected id_token claims");
-        assert_eq!(
-            id_tkn,
-            Token {
-                claims: expected_claims,
-                iss: None,
-            }
-        );
+        assert_eq!(id_tkn, Token::new(expected_claims, None));
 
         // Test userinfo_token
         let userinfo_tkn = jwt_service
@@ -294,12 +279,6 @@ mod test {
             .expect("Should process userinfo_token");
         let expected_claims = serde_json::from_value::<HashMap<String, Value>>(userinfo_tkn_claims)
             .expect("Should create expected userinfo_token claims");
-        assert_eq!(
-            userinfo_tkn,
-            Token {
-                claims: expected_claims,
-                iss: None,
-            }
-        );
+        assert_eq!(userinfo_tkn, Token::new(expected_claims, None));
     }
 }

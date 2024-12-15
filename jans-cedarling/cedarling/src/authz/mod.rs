@@ -287,7 +287,7 @@ impl Authz {
         }).transpose()?;
 
         // build userinfo_token Entity
-        let userinfo_token = tokens.id_token.as_ref().map(|tkn| {
+        let userinfo_token = tokens.userinfo_token.as_ref().map(|tkn| {
             let tkns_metadata = tkn.iss.unwrap_or_default().tokens_metadata();
              create_userinfo_token_entity(auth_conf.mapping_userinfo_token.as_deref(), policy_store, tkn, &tkns_metadata.userinfo_tokens.claim_mapping)
                 .map_err(AuthorizeError::CreateUserinfoTokenEntity)
@@ -300,7 +300,7 @@ impl Authz {
         let user = create_user_entity(auth_conf.mapping_user.as_deref(),
                     policy_store,
                     tokens,
-                    HashSet::from_iter(role.iter().map(|e|e.uid())),
+                    HashSet::from_iter(role.iter().map(|e| e.uid())),
                 )
                 .map_err(AuthorizeError::CreateUserEntity)?;
 

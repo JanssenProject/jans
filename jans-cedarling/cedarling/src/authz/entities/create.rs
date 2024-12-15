@@ -10,24 +10,19 @@ use std::{
     str::FromStr,
 };
 
-use crate::{
-    common::cedar_schema::cedar_json::SchemaDefinedType,
-    jwt::{Token, TokenClaim},
-};
-use crate::{
-    common::{
-        cedar_schema::{
-            cedar_json::{CedarSchemaEntityShape, CedarSchemaRecord, CedarType, GetCedarTypeError},
-            CedarSchemaJson,
-        },
-        policy_store::ClaimMappings,
-    },
-    jwt::GetTokenClaimError,
-};
-
-use cedar_policy::{EntityId, EntityTypeName, EntityUid, RestrictedExpression};
-
 use super::trait_as_expression::AsExpression;
+use crate::common::{
+    cedar_schema::{
+        cedar_json::{
+            CedarSchemaEntityShape, CedarSchemaRecord, CedarType, GetCedarTypeError,
+            SchemaDefinedType,
+        },
+        CedarSchemaJson,
+    },
+    policy_store::ClaimMappings,
+};
+use crate::jwt::{Token, TokenClaim, TokenClaimTypeError};
+use cedar_policy::{EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 
 pub const CEDAR_POLICY_SEPARATOR: &str = "::";
 
@@ -59,7 +54,12 @@ impl<'a> EntityMetadata<'a> {
     ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
         let entity_uid = build_entity_uid(
             self.entity_type.full_type_name().as_str(),
-            token.get_claim(self.entity_id_data_key)?.as_str()?,
+            token
+                .get_claim(self.entity_id_data_key)
+                .ok_or(CedarPolicyCreateTypeError::MissingClaim(
+                    self.entity_id_data_key.to_string(),
+                ))?
+                .as_str()?,
         )?;
 
         create_entity(
@@ -188,9 +188,7 @@ fn build_entity_attributes(
                 match (cedar_exp_result, attr.is_required) {
                     (Ok(cedar_exp), _) => Some(Ok((attr_name.to_string(), cedar_exp))),
                     (
-                        Err(CedarPolicyCreateTypeError::GetTokenClaim(
-                            GetTokenClaimError::MissingKey(_),
-                        )),
+                        Err(CedarPolicyCreateTypeError::MissingClaim(_)),
                         false,
                         // when the attribute is not required and not found in token data we skip it
                     ) => None,
@@ -241,7 +239,12 @@ fn token_attribute_to_cedar_exp(
 ) -> Result<RestrictedExpression, CedarPolicyCreateTypeError> {
     let token_claim_key = attribute_metadata.attribute_name;
 
-    let token_claim_value = token.get_claim(token_claim_key)?;
+    let token_claim_value =
+        token
+            .get_claim(token_claim_key)
+            .ok_or(CedarPolicyCreateTypeError::MissingClaim(
+                token_claim_key.to_string(),
+            ))?;
 
     get_expression(
         &attribute_metadata.cedar_policy_type,
@@ -358,7 +361,9 @@ fn get_record_expression(
     for (attribute_key, entity_attribute) in record.attributes.iter() {
         let attribute_type = entity_attribute.get_type()?;
 
-        let mapped_claim_value = mapped_claim.get_claim(attribute_key)?;
+        let mapped_claim_value = mapped_claim.get_claim(attribute_key).ok_or(
+            CedarPolicyCreateTypeError::MissingClaim(attribute_key.to_string()),
+        )?;
 
         let exp = get_expression(
             &attribute_type,
@@ -405,7 +410,7 @@ pub enum CedarPolicyCreateTypeError {
 
     /// Could not get attribute value from payload
     #[error("could not get attribute value from payload: {0}")]
-    GetTokenClaim(#[from] GetTokenClaimError),
+    GetTokenClaim(#[from] TokenClaimTypeError),
 
     /// Could not retrieve attribute from cedar-policy schema
     #[error("could not retrieve attribute from cedar-policy schema: {0}")]
@@ -435,4 +440,8 @@ pub enum CedarPolicyCreateTypeError {
     /// Indicates that the creation of an Entity failed due to the absence of available tokens.
     #[error("{0} Entity creation failed: no available token to build the entity from")]
     UnavailableToken(String),
+
+    /// Missing claim
+    #[error("{0} Entity creation failed: no available token to build the entity from")]
+    MissingClaim(String),
 }

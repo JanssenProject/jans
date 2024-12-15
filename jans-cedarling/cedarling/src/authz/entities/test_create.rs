@@ -9,7 +9,8 @@
 
 use super::create::*;
 use crate::common::cedar_schema::CedarSchemaJson;
-use crate::jwt::{GetTokenClaimError, Token};
+use crate::jwt::Token;
+use crate::jwt::TokenClaimTypeError;
 use std::collections::HashSet;
 use test_utils::assert_eq;
 use test_utils::SortedJson;
@@ -156,14 +157,12 @@ fn get_token_claim_type_string_error() {
         .create_entity(&schema, &payload, HashSet::new(), &Default::default())
         .expect_err("entity creating should throw error");
 
-    if let CedarPolicyCreateTypeError::GetTokenClaim(GetTokenClaimError::TypeMismatch {
-        key,
-        actual_type,
-        ..
+    if let CedarPolicyCreateTypeError::GetTokenClaim(TokenClaimTypeError {
+        key, actual_type, ..
     }) = entity_creation_error
     {
         let json_attr_value = json.as_object().unwrap().get(test_key).unwrap();
-        let origin_type = GetTokenClaimError::json_value_type_name(json_attr_value);
+        let origin_type = TokenClaimTypeError::json_value_type_name(json_attr_value);
 
         assert!(key == test_key, "expected key: {test_key}, but got: {key}");
         assert!(
@@ -171,7 +170,7 @@ fn get_token_claim_type_string_error() {
             "expected type: {origin_type}, but got: {actual_type}"
         );
     } else {
-        panic!("expected error type: CedarPolicyCreateTypeError::GetTokenClaimError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
+        panic!("expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
     }
 }
 
@@ -207,14 +206,12 @@ fn get_token_claim_type_long_error() {
         .create_entity(&schema, &payload, HashSet::new(), &Default::default())
         .expect_err("entity creating should throw error");
 
-    if let CedarPolicyCreateTypeError::GetTokenClaim(GetTokenClaimError::TypeMismatch {
-        key,
-        actual_type,
-        ..
+    if let CedarPolicyCreateTypeError::GetTokenClaim(TokenClaimTypeError {
+        key, actual_type, ..
     }) = entity_creation_error
     {
         let json_attr_value = json.as_object().unwrap().get(test_key).unwrap();
-        let origin_type = GetTokenClaimError::json_value_type_name(json_attr_value);
+        let origin_type = TokenClaimTypeError::json_value_type_name(json_attr_value);
 
         assert!(key == test_key, "expected key: {test_key}, but got: {key}");
         assert!(
@@ -222,7 +219,7 @@ fn get_token_claim_type_long_error() {
             "expected type: {origin_type}, but got: {actual_type}"
         );
     } else {
-        panic!("expected error type: CedarPolicyCreateTypeError::GetTokenClaimError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
+        panic!("expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
     }
 }
 
@@ -258,14 +255,12 @@ fn get_token_claim_type_entity_uid_error() {
         .create_entity(&schema, &payload, HashSet::new(), &Default::default())
         .expect_err("entity creating should throw error");
 
-    if let CedarPolicyCreateTypeError::GetTokenClaim(GetTokenClaimError::TypeMismatch {
-        key,
-        actual_type,
-        ..
+    if let CedarPolicyCreateTypeError::GetTokenClaim(TokenClaimTypeError {
+        key, actual_type, ..
     }) = entity_creation_error
     {
         let json_attr_value = json.as_object().unwrap().get(test_key).unwrap();
-        let origin_type = GetTokenClaimError::json_value_type_name(json_attr_value);
+        let origin_type = TokenClaimTypeError::json_value_type_name(json_attr_value);
 
         assert!(key == test_key, "expected key: {test_key}, but got: {key}");
         assert!(
@@ -273,7 +268,7 @@ fn get_token_claim_type_entity_uid_error() {
             "expected type: {origin_type}, but got: {actual_type}"
         );
     } else {
-        panic!("expected error type: CedarPolicyCreateTypeError::GetTokenClaimError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
+        panic!("expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
     }
 }
 
@@ -309,14 +304,14 @@ fn get_token_claim_type_boolean_error() {
         .create_entity(&schema, &payload, HashSet::new(), &Default::default())
         .expect_err("entity creating should throw error");
 
-    if let CedarPolicyCreateTypeError::GetTokenClaim(GetTokenClaimError::TypeMismatch {
+    if let CedarPolicyCreateTypeError::GetTokenClaim(TokenClaimTypeError {
         key,
         actual_type,
         expected_type,
     }) = entity_creation_error
     {
         let json_attr_value = json.as_object().unwrap().get(test_key).unwrap();
-        let origin_type = GetTokenClaimError::json_value_type_name(json_attr_value);
+        let origin_type = TokenClaimTypeError::json_value_type_name(json_attr_value);
 
         assert!(
             key == test_key,
@@ -327,7 +322,7 @@ fn get_token_claim_type_boolean_error() {
             "expected type: {origin_type}, but got: {actual_type} with schema expected_type: {expected_type}"
         );
     } else {
-        panic!("expected error type: CedarPolicyCreateTypeError::GetTokenClaimError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
+        panic!("expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
     }
 }
 
@@ -363,14 +358,14 @@ fn get_token_claim_type_set_error() {
         .create_entity(&schema, &payload, HashSet::new(), &Default::default())
         .expect_err("entity creating should throw error");
 
-    if let CedarPolicyCreateTypeError::GetTokenClaim(GetTokenClaimError::TypeMismatch {
+    if let CedarPolicyCreateTypeError::GetTokenClaim(TokenClaimTypeError {
         key,
         actual_type,
         expected_type,
     }) = entity_creation_error
     {
         let json_attr_value = json.as_object().unwrap().get(test_key).unwrap();
-        let origin_type = GetTokenClaimError::json_value_type_name(json_attr_value);
+        let origin_type = TokenClaimTypeError::json_value_type_name(json_attr_value);
 
         assert!(
             key == test_key,
@@ -381,7 +376,7 @@ fn get_token_claim_type_set_error() {
             "expected type: {origin_type}, but got: {actual_type} with schema expected_type: {expected_type}"
         );
     } else {
-        panic!("expected error type: CedarPolicyCreateTypeError::GetTokenClaimError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
+        panic!("expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
     }
 }
 
@@ -416,7 +411,7 @@ fn get_token_claim_type_set_of_set_error() {
         .create_entity(&schema, &payload, HashSet::new(), &Default::default())
         .expect_err("entity creating should throw error");
 
-    if let CedarPolicyCreateTypeError::GetTokenClaim(GetTokenClaimError::TypeMismatch {
+    if let CedarPolicyCreateTypeError::GetTokenClaim(TokenClaimTypeError {
         key,
         actual_type,
         expected_type,
@@ -424,7 +419,7 @@ fn get_token_claim_type_set_of_set_error() {
     {
         let json_attr_value = json.as_object().unwrap().get("set_set_key").unwrap();
         let origin_type =
-            GetTokenClaimError::json_value_type_name(&json_attr_value.as_array().unwrap()[0]);
+            TokenClaimTypeError::json_value_type_name(&json_attr_value.as_array().unwrap()[0]);
 
         // key set_set_key and zero element in array
         let test_key = "set_set_key[0]";
@@ -438,7 +433,7 @@ fn get_token_claim_type_set_of_set_error() {
             "expected type: {origin_type}, but got: {actual_type} with schema expected_type: {expected_type}"
         );
     } else {
-        panic!("expected error type: CedarPolicyCreateTypeError::GetTokenClaimError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
+        panic!("expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
     }
 }
 

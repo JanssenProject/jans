@@ -20,7 +20,7 @@ pub enum TokenStr<'a> {
 /// A struct holding information on a decoded JWT.
 #[derive(Debug, PartialEq, Default)]
 pub struct Token<'a> {
-    pub claims: HashMap<String, Value>,
+    claims: HashMap<String, Value>,
     pub iss: Option<&'a TrustedIssuer>,
 }
 
@@ -49,15 +49,16 @@ impl<'a> Token<'a> {
     pub fn from_json_map(map: serde_json::Map<String, serde_json::Value>) -> Self {
         Self::new(HashMap::from_iter(map), None)
     }
+    
+    pub fn has_claim(&self, name: &str) -> bool {
+        self.claims.contains_key(name)
+    }
 
-    pub fn get_claim(&self, name: &str) -> Result<TokenClaim, GetTokenClaimError> {
-        self.claims
-            .get(name)
-            .map(|value| TokenClaim {
-                key: name.to_string(),
-                value,
-            })
-            .ok_or(GetTokenClaimError::MissingKey(name.to_string()))
+    pub fn get_claim(&self, name: &str) -> Option<TokenClaim> {
+        self.claims.get(name).map(|value| TokenClaim {
+            key: name.to_string(),
+            value,
+        })
     }
 
     pub fn get_logging_info(
@@ -94,27 +95,31 @@ impl TokenClaim<'_> {
         self.value
     }
 
-    pub fn as_i64(&self) -> Result<i64, GetTokenClaimError> {
-        self.value.as_i64().ok_or(GetTokenClaimError::type_mismatch(
-            &self.key, "i64", self.value,
-        ))
+    pub fn as_i64(&self) -> Result<i64, TokenClaimTypeError> {
+        self.value
+            .as_i64()
+            .ok_or(TokenClaimTypeError::type_mismatch(
+                &self.key, "i64", self.value,
+            ))
     }
 
-    pub fn as_str(&self) -> Result<&str, GetTokenClaimError> {
-        self.value.as_str().ok_or(GetTokenClaimError::type_mismatch(
-            &self.key, "String", self.value,
-        ))
+    pub fn as_str(&self) -> Result<&str, TokenClaimTypeError> {
+        self.value
+            .as_str()
+            .ok_or(TokenClaimTypeError::type_mismatch(
+                &self.key, "String", self.value,
+            ))
     }
 
-    pub fn as_bool(&self) -> Result<bool, GetTokenClaimError> {
+    pub fn as_bool(&self) -> Result<bool, TokenClaimTypeError> {
         self.value
             .as_bool()
-            .ok_or(GetTokenClaimError::type_mismatch(
+            .ok_or(TokenClaimTypeError::type_mismatch(
                 &self.key, "bool", self.value,
             ))
     }
 
-    pub fn as_array(&self) -> Result<Vec<TokenClaim>, GetTokenClaimError> {
+    pub fn as_array(&self) -> Result<Vec<TokenClaim>, TokenClaimTypeError> {
         self.value
             .as_array()
             .map(|array| {
@@ -128,28 +133,21 @@ impl TokenClaim<'_> {
                     })
                     .collect()
             })
-            .ok_or(GetTokenClaimError::type_mismatch(
+            .ok_or(TokenClaimTypeError::type_mismatch(
                 &self.key, "Array", self.value,
             ))
     }
 }
 
-/// Errors that can occur when trying to get claim attribute value from token data
 #[derive(Debug, thiserror::Error)]
-pub enum GetTokenClaimError {
-    #[error("Key not found: {0}")]
-    MissingKey(String),
-    #[error(
-        "Type mismatch for key '{key}': expected: '{expected_type}', but found: '{actual_type}'"
-    )]
-    TypeMismatch {
-        key: String,
-        expected_type: String,
-        actual_type: String,
-    },
+#[error("Type mismatch for key '{key}': expected: '{expected_type}', but found: '{actual_type}'")]
+pub struct TokenClaimTypeError {
+    pub key: String,
+    pub expected_type: String,
+    pub actual_type: String,
 }
 
-impl GetTokenClaimError {
+impl TokenClaimTypeError {
     /// Returns the JSON type name of the given value.
     pub fn json_value_type_name(value: &Value) -> String {
         match value {
@@ -163,10 +161,10 @@ impl GetTokenClaimError {
     }
 
     /// Constructs a `TypeMismatch` error with detailed information about the expected and actual types.
-    fn type_mismatch(key: &str, expected_type_name: &str, got_value: &Value) -> GetTokenClaimError {
+    fn type_mismatch(key: &str, expected_type_name: &str, got_value: &Value) -> Self {
         let got_value_type_name = Self::json_value_type_name(got_value);
 
-        GetTokenClaimError::TypeMismatch {
+        Self {
             key: key.to_string(),
             expected_type: expected_type_name.to_string(),
             actual_type: got_value_type_name,

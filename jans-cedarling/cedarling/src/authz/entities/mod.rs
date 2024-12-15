@@ -26,6 +26,9 @@ use std::collections::HashSet;
 
 use super::request::ResourceData;
 
+const DEFAULT_USER_ID_SRC_CLAIM: &str = "sub";
+const DEFAULT_ROLE_SRC_CLAIM: &str = "role";
+
 pub struct DecodedTokens<'a> {
     pub access_token: Option<Token<'a>>,
     pub id_token: Option<Token<'a>>,
@@ -124,21 +127,26 @@ pub fn create_user_entity(
     tokens: &DecodedTokens,
     parents: HashSet<EntityUid>,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
+    println!("parents: {:?}", parents);
     let schema: &CedarSchemaJson = &policy_store.schema.json;
     let namespace = policy_store.namespace();
 
     // We attempt to create the User entity using the first available token that also
     // has an assigned claim to get the User Entity's id from.
 
-    let mut data: Option<(&Token, &String, &ClaimMappings)> = None;
+    let mut data: Option<(&Token, &str, &ClaimMappings)> = None;
 
-    if let Some(access_tkn) = tokens.access_token.as_ref() {
-        let iss = access_tkn.iss.unwrap_or_default();
-        if let Some(user_mapping) = iss.get_user_mapping(TokenKind::Access) {
+    if let Some(userinfo_tkn) = tokens.userinfo_token.as_ref() {
+        let iss = userinfo_tkn.iss.unwrap_or_default();
+        let user_mapping = iss
+            .get_user_mapping(TokenKind::Userinfo)
+            .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM);
+        println!("checking userinfo_tkn");
+        if userinfo_tkn.has_claim(user_mapping) {
             data = Some((
-                access_tkn,
+                userinfo_tkn,
                 user_mapping,
-                &iss.access_tokens.entity_metadata.claim_mapping,
+                &iss.userinfo_tokens.claim_mapping,
             ));
         }
     }
@@ -146,33 +154,26 @@ pub fn create_user_entity(
     if data.is_none() {
         if let Some(id_tkn) = tokens.id_token.as_ref() {
             let iss = id_tkn.iss.unwrap_or_default();
-            if let Some(user_mapping) = iss.get_user_mapping(TokenKind::Id) {
-                data = Some((
-                    id_tkn,
-                    user_mapping,
-                    &iss.access_tokens.entity_metadata.claim_mapping,
-                ));
-            }
-        }
-    }
-
-    if data.is_none() {
-        if let Some(id_tkn) = tokens.id_token.as_ref() {
-            let iss = id_tkn.iss.unwrap_or_default();
-            if let Some(user_mapping) = iss.get_user_mapping(TokenKind::Userinfo) {
+            let user_mapping = iss
+                .get_user_mapping(TokenKind::Id)
+                .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM);
+            if id_tkn.has_claim(user_mapping) {
                 data = Some((id_tkn, user_mapping, &iss.id_tokens.claim_mapping));
             }
         }
     }
 
     if data.is_none() {
-        if let Some(userinfo_tkn) = tokens.userinfo_token.as_ref() {
-            let iss = userinfo_tkn.iss.unwrap_or_default();
-            if let Some(user_mapping) = iss.get_user_mapping(TokenKind::Userinfo) {
+        if let Some(access_tkn) = tokens.access_token.as_ref() {
+            let iss = access_tkn.iss.unwrap_or_default();
+            let user_mapping = iss
+                .get_user_mapping(TokenKind::Access)
+                .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM);
+            if access_tkn.has_claim(user_mapping) {
                 data = Some((
-                    userinfo_tkn,
+                    access_tkn,
                     user_mapping,
-                    &iss.userinfo_tokens.claim_mapping,
+                    &iss.access_tokens.entity_metadata.claim_mapping,
                 ));
             }
         }
@@ -260,31 +261,55 @@ pub fn create_role_entities(
     policy_store: &PolicyStore,
     tokens: &DecodedTokens,
 ) -> Result<Vec<cedar_policy::Entity>, RoleEntityError> {
-    let (token_data, role_mapping, token_mapping) =
-        if let Some(token) = tokens.access_token.as_ref() {
-            let iss = token.iss.unwrap_or_default();
-            let role_mapping = iss.get_role_mapping().unwrap_or_default();
+    let mut mapping_info: Option<(TokenKind, &Token, &str, &ClaimMappings)> = None;
+
+    if let Some(token) = tokens.access_token.as_ref() {
+        let iss = token.iss.unwrap_or_default();
+        let role_mapping = iss
+            .get_role_mapping_new(TokenKind::Access)
+            .unwrap_or(DEFAULT_ROLE_SRC_CLAIM);
+        if token.has_claim(role_mapping) {
             let token_mapping = &iss.access_tokens.entity_metadata.claim_mapping;
-            (token, role_mapping, token_mapping)
-        } else if let Some(token) = tokens.id_token.as_ref() {
+            mapping_info = Some((TokenKind::Access, token, role_mapping, token_mapping));
+        }
+    }
+
+    if mapping_info.is_none() {
+        if let Some(token) = tokens.id_token.as_ref() {
             let iss = token.iss.unwrap_or_default();
-            let role_mapping = iss.get_role_mapping().unwrap_or_default();
-            let token_mapping = &iss.id_tokens.claim_mapping;
-            (token, role_mapping, token_mapping)
-        } else if let Some(token) = tokens.userinfo_token.as_ref() {
+            let role_mapping = iss
+                .get_role_mapping_new(TokenKind::Id)
+                .unwrap_or(DEFAULT_ROLE_SRC_CLAIM);
+            if token.has_claim(role_mapping) {
+                let token_mapping = &iss.id_tokens.claim_mapping;
+                mapping_info = Some((TokenKind::Id, token, role_mapping, token_mapping));
+            }
+        }
+    }
+
+    if mapping_info.is_none() {
+        if let Some(token) = tokens.userinfo_token.as_ref() {
             let iss = token.iss.unwrap_or_default();
-            let role_mapping = iss.get_role_mapping().unwrap_or_default();
-            let token_mapping = &iss.userinfo_tokens.claim_mapping;
-            (token, role_mapping, token_mapping)
-        } else {
-            Err(RoleEntityError::UnavailableToken)?
-        };
+            let role_mapping = iss
+                .get_role_mapping_new(TokenKind::Userinfo)
+                .unwrap_or(DEFAULT_ROLE_SRC_CLAIM);
+            if token.has_claim(role_mapping) {
+                let token_mapping = &iss.userinfo_tokens.claim_mapping;
+                mapping_info = Some((TokenKind::Userinfo, token, role_mapping, token_mapping));
+            }
+        }
+    }
+
+    let (token_kind, token_data, role_mapping, token_mapping) = match mapping_info {
+        Some(info) => (info.0, info.1, info.2, info.3),
+        None => return Ok(Vec::new()),
+    };
 
     let parsed_typename = EntityParsedTypeName::new("Role", policy_store.namespace());
     let role_entity_type = parsed_typename.full_type_name();
 
     // get payload of role id in JWT token data
-    let Ok(payload) = token_data.get_claim(role_mapping.mapping_field) else {
+    let Some(payload) = token_data.get_claim(role_mapping) else {
         // if key not found we return empty vector
         return Ok(Vec::new());
     };
@@ -296,7 +321,7 @@ pub fn create_role_entities(
             build_entity_uid(role_entity_type.as_str(), payload_str).map_err(|err| {
                 RoleEntityError::Create {
                     error: err,
-                    token_kind: role_mapping.kind,
+                    token_kind,
                 }
             })?;
         vec![entity_uid]
@@ -313,13 +338,13 @@ pub fn create_role_entities(
                         // get each element of array as `str`
                         payload_el.as_str().map_err(|err| RoleEntityError::Create {
                             error: err.into(),
-                            token_kind: role_mapping.kind,
+                            token_kind,
                         })
                         // build entity uid 
                         .and_then(|name| build_entity_uid(role_entity_type.as_str(), name)
                         .map_err(|err| RoleEntityError::Create {
                             error: err,
-                            token_kind: role_mapping.kind,
+                            token_kind,
                         }))
                     })
                     .collect::<Result<Vec<_>, _>>()?
@@ -328,7 +353,7 @@ pub fn create_role_entities(
                 // Handle the case where the payload is neither a string nor an array
                 return Err(RoleEntityError::Create {
                     error: err.into(),
-                    token_kind: role_mapping.kind,
+                    token_kind,
                 });
             },
         }
@@ -350,7 +375,7 @@ pub fn create_role_entities(
             )
             .map_err(|err| RoleEntityError::Create {
                 error: err,
-                token_kind: role_mapping.kind,
+                token_kind,
             })
         })
         .collect::<Result<Vec<_>, _>>()

@@ -218,6 +218,15 @@ impl TrustedIssuer {
         None
     }
 
+    pub fn get_role_mapping_new(&self, token_kind: TokenKind) -> Option<&str> {
+        match token_kind {
+            TokenKind::Access => self.access_tokens.entity_metadata.role_mapping.as_deref(),
+            TokenKind::Id => self.id_tokens.role_mapping.as_deref(),
+            TokenKind::Userinfo => self.userinfo_tokens.role_mapping.as_deref(),
+            TokenKind::Transaction => self.tx_tokens.role_mapping.as_deref(),
+        }
+    }
+
     /// Retrieves the available `user id` mapping from the token metadata.
     ///
     /// Checks each token metadata and returns the first one found with a `role_mapping` field.
@@ -260,12 +269,12 @@ impl TrustedIssuer {
     }
 
     /// Returns the claim where the user_id for the User entity is stored.
-    pub fn get_user_mapping(&self, token_kind: TokenKind) -> Option<&String> {
+    pub fn get_user_mapping(&self, token_kind: TokenKind) -> Option<&str> {
         match token_kind {
-            TokenKind::Access => self.access_tokens.entity_metadata.user_id.as_ref(),
-            TokenKind::Id => self.id_tokens.user_id.as_ref(),
-            TokenKind::Userinfo => self.userinfo_tokens.user_id.as_ref(),
-            TokenKind::Transaction => self.tx_tokens.user_id.as_ref(),
+            TokenKind::Access => self.access_tokens.entity_metadata.user_id.as_deref(),
+            TokenKind::Id => self.id_tokens.user_id.as_deref(),
+            TokenKind::Userinfo => self.userinfo_tokens.user_id.as_deref(),
+            TokenKind::Transaction => self.tx_tokens.user_id.as_deref(),
         }
     }
 

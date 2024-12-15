@@ -177,9 +177,9 @@ fn test_failed_user_mapping() {
     assert!(
         matches!(
             err,
-            AuthorizeError::CreateUserEntity(CedarPolicyCreateTypeError::CouldNotFindEntity(_))
+            AuthorizeError::CreateUserEntity(CedarPolicyCreateTypeError::CouldNotFindEntity(ref err)) if err == "MappedUserNotExist"
         ),
-        "should be error CouldNotFindEntity, got: {:?}",
+        "should be error CreateUserEntity(MissingClaim(\"MappedUserNotExist\")), got: {:?}",
         err
     );
 }
