@@ -56,4 +56,18 @@ spec:
           number: 8080
       weight: 100
   {{- end }}
+  {{- if .Values.global.fido2.ingress.fido2WebauthnEnabled }}
+  - name: {{ .Release.Name }}-istio-webauthn
+    match:
+    - uri:
+        prefix: /.well-known/webauthn
+    rewrite:
+      uri: /jans-fido2/restv1/fido2/webauthn/configuration
+    route:
+      - destination:
+          host: {{ .Values.global.fido2.fido2ServiceName }}.{{.Release.Namespace}}.svc.cluster.local
+          port:
+            number: 8080
+        weight: 100
+  {{- end }}
 {{- end }}
