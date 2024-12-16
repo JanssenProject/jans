@@ -62,7 +62,7 @@ spec:
     - uri:
         prefix: /.well-known/webauthn
     rewrite:
-      uri: /jans-fido2/restv1/fido2/webauthn/configuration
+      uri: /jans-fido2/restv1/webauthn/configuration
     route:
       - destination:
           host: {{ .Values.global.fido2.fido2ServiceName }}.{{.Release.Namespace}}.svc.cluster.local
