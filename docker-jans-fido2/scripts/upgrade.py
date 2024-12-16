@@ -24,11 +24,10 @@ def _transform_fido2_dynamic_config(conf):
     # add missing config (if not exist)
     for k, v in [
         ("superGluuEnabled", False),
-        ("oldU2fMigrationEnabled", True),
         ("metadataUrlsProvider", ""),
         ("errorReasonEnabled", False),
         ("skipDownloadMdsEnabled", False),
-        ("skipValidateMdsInAttestationEnabled", False),
+        ("attestationMode", "monitor"),
         ("sessionIdPersistInCache", False),
         ("assertionOptionsGenerateEndpointEnabled", True),
     ]:
@@ -177,7 +176,7 @@ class Upgrade:
 def main():  # noqa: D103
     manager = get_manager()
 
-    with manager.lock.create_lock("fido2-upgrade"):
+    with manager.create_lock("fido2-upgrade"):
         upgrade = Upgrade(manager)
         upgrade.invoke()
 

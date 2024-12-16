@@ -27,6 +27,8 @@ export_keycloak_admin_creds() {
     admin_password=$(echo "$creds" | awk -F ":" '{print $2}')
     export KEYCLOAK_ADMIN="$admin_username"
     export KEYCLOAK_ADMIN_PASSWORD="$admin_password"
+    # remove file for security purpose
+    rm -f "$creds_file"
 }
 
 python3 "$basedir/wait.py"
