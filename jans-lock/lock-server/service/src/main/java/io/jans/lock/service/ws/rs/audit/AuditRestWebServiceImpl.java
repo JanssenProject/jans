@@ -65,7 +65,6 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
     public Response processLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.info("Processing Log request - request:{}", request);
         return processAuditRequest(request, "log");
-
     }
 
 	@Override

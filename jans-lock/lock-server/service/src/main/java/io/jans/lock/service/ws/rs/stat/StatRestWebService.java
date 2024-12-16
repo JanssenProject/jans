@@ -1,7 +1,7 @@
 package io.jans.lock.service.ws.rs.stat;
 
 import io.jans.service.security.api.ProtectedApi;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
@@ -17,7 +17,7 @@ import jakarta.ws.rs.core.Response;
  *
  * @author Yuriy Movchan Date: 12/02/2024
  */
-@ApplicationScoped
+@Dependent
 @Path("/internal/stat")
 public interface StatRestWebService {
 

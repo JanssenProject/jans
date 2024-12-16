@@ -21,7 +21,7 @@ import io.jans.lock.util.ServerUtil;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.exporter.common.TextFormat;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.HeaderParam;
@@ -36,7 +36,7 @@ import jakarta.ws.rs.core.Response;
  *
  * @author Yuriy Movchan Date: 12/02/2024
  */
-@ApplicationScoped
+@Dependent
 @Path("/internal/stat")
 public class StatRestWebServiceImpl implements StatRestWebService {
 

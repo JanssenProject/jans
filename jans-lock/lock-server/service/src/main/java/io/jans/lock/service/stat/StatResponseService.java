@@ -2,15 +2,11 @@ package io.jans.lock.service.stat;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -19,11 +15,9 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 
-import io.jans.lock.model.Stat;
 import io.jans.lock.model.StatEntry;
 import io.jans.lock.service.ws.rs.stat.StatResponse;
 import io.jans.lock.service.ws.rs.stat.StatResponseItem;
-import io.jans.lock.service.ws.rs.stat.StatRestWebServiceImpl;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -104,7 +98,7 @@ public class StatResponseService {
         }
     }
 
-    // this should not occur for newly created StatEntry (only outdated db)
+    // This should not occur for newly created StatEntry (only outdated db)
     private void checkNotMatchedEntries(String month, List<StatEntry> entries) {
         final List<StatEntry> notMatched = Lists.newArrayList();
         for (StatEntry entry : entries) {
