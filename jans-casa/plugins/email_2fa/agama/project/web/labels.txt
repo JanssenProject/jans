@@ -1,0 +1,10 @@
+
+email2fa.selector_text=A code sent to my e-mail address
+email2fa.wrong=Wrong code entered
+email2fa.expired=Sorry, your code has expired
+email2fa.sentCheck=Check your inbox. We sent you an authentication code
+email2fa.enter=Enter code
+email2fa.noCode=Didn't get any message or code expired?
+email2fa.resend=Send a new code
+email2fa.choose=Choose an e-mail to send you a verification passcode:
+email2fa.continue=Continue
