@@ -672,6 +672,63 @@ spec:
 
 ---
 
+{{ if .Values.global.fido2.ingress.fido2WebauthnEnabled -}}
+{{ $fullName := include "nginx-ingress.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-webauthn
+  labels:
+    app: {{ $fullName }}-fido2
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.global.fido2.ingress.fido2WebauthnLabels }}
+{{ toYaml .Values.global.fido2.ingress.fido2WebauthnLabels | indent 4 }}
+{{- end }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-fido2/restv1/webauthn/configuration
+{{- if .Values.global.fido2.ingress.fido2WebauthnAdditionalAnnotations }}
+{{ toYaml .Values.global.fido2.ingress.fido2WebauthnAdditionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.additionalAnnotations }}
+{{ toYaml .Values.ingress.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /.well-known/webauthn
+            pathType: Exact
+            backend:
+              service:
+                name: {{ .Values.global.fido2.fido2ServiceName }}
+                port:
+                  number: 8080
+  {{- end }}
+  {{- end }}
+{{- end }}
+
+---
+
 {{ if index .Values "global" "auth-server" "ingress" "authServerEnabled" -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
