@@ -2,7 +2,7 @@
 
 <suite name="Config-API" parallel="false">
 
-    <parameter name="propertiesFile" value="target/test-classes/test.properties" />
+    <parameter name="propertiesFile" value="./target/test-classes/test.properties" />
 	
 	<listeners>
         <listener class-name="io.jans.configapi.core.test.listener.AlterSuiteListener" />
