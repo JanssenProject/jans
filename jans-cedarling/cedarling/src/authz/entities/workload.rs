@@ -33,6 +33,8 @@ pub fn create_workload_entity(
             Ok(entity) => return Ok(entity),
             Err(e) => errors.push((TokenKind::Id, e)),
         }
+    } else {
+        errors.push((TokenKind::Id, CreateCedarEntityError::UnavailableToken));
     }
 
     if let Some(token) = tokens.access_token.as_ref() {
@@ -48,6 +50,8 @@ pub fn create_workload_entity(
             Ok(entity) => return Ok(entity),
             Err(e) => errors.push((TokenKind::Access, e)),
         }
+    } else {
+        errors.push((TokenKind::Access, CreateCedarEntityError::UnavailableToken));
     }
 
     Err(CreateWorkloadEntityError { errors })
@@ -82,11 +86,9 @@ impl fmt::Display for CreateWorkloadEntityError {
 mod test {
     use super::create_workload_entity;
     use crate::{
-        authz::entities::{CreateWorkloadEntityError, DecodedTokens},
-        common::policy_store::TokenKind,
-        init::policy_store::load_policy_store,
-        jwt::TokenData,
-        CreateCedarEntityError, PolicyStoreConfig, PolicyStoreSource,
+        authz::entities::DecodedTokens, common::policy_store::TokenKind,
+        init::policy_store::load_policy_store, jwt::TokenData, CreateCedarEntityError,
+        PolicyStoreConfig, PolicyStoreSource,
     };
     use cedar_policy::{Entity, RestrictedExpression};
     use serde_json::json;
@@ -247,10 +249,13 @@ mod test {
         let result = create_workload_entity(entity_mapping, &policy_store, &tokens)
             .expect_err("expected to error while creating workload entity");
 
-        assert!(
-            matches!(result, CreateWorkloadEntityError { .. }),
-            "expected CreateWorkloadEntityError, got: {:?}",
-            result
-        );
+        assert_eq!(result.errors.len(), 2);
+        for (_tkn_kind, err) in result.errors.iter() {
+            assert!(
+                matches!(err, CreateCedarEntityError::UnavailableToken),
+                "expected error UnavailableToken, got: {:?}",
+                err
+            );
+        }
     }
 }

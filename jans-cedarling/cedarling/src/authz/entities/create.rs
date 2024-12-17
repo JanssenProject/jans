@@ -445,8 +445,8 @@ pub enum CreateCedarEntityError {
     TransactionToken,
 
     /// Indicates that the creation of an Entity failed due to the absence of available tokens.
-    #[error("{0} Entity creation failed: no available token to build the entity from")]
-    UnavailableToken(String),
+    #[error("no available token to build the entity from")]
+    UnavailableToken,
 
     /// Missing claim
     #[error("{0} Entity creation failed: no available token to build the entity from")]

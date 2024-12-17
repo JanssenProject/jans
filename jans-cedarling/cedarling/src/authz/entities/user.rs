@@ -36,6 +36,8 @@ pub fn create_user_entity(
             Ok(entity) => return Ok(entity),
             Err(e) => errors.push((TokenKind::Id, e)),
         }
+    } else {
+        errors.push((TokenKind::Id, CreateCedarEntityError::UnavailableToken));
     }
 
     if let Some(token) = tokens.access_token.as_ref() {
@@ -51,6 +53,8 @@ pub fn create_user_entity(
             Ok(entity) => return Ok(entity),
             Err(e) => errors.push((TokenKind::Access, e)),
         }
+    } else {
+        errors.push((TokenKind::Access, CreateCedarEntityError::UnavailableToken));
     }
 
     if let Some(token) = tokens.userinfo_token.as_ref() {
@@ -66,6 +70,11 @@ pub fn create_user_entity(
             Ok(entity) => return Ok(entity),
             Err(e) => errors.push((TokenKind::Userinfo, e)),
         }
+    } else {
+        errors.push((
+            TokenKind::Userinfo,
+            CreateCedarEntityError::UnavailableToken,
+        ));
     }
 
     Err(CreateUserEntityError { errors })
@@ -100,11 +109,9 @@ impl fmt::Display for CreateUserEntityError {
 mod test {
     use super::create_user_entity;
     use crate::{
-        authz::entities::{CreateUserEntityError, DecodedTokens},
-        common::policy_store::TokenKind,
-        init::policy_store::load_policy_store,
-        jwt::TokenData,
-        CreateCedarEntityError, PolicyStoreConfig, PolicyStoreSource,
+        authz::entities::DecodedTokens, common::policy_store::TokenKind,
+        init::policy_store::load_policy_store, jwt::TokenData, CreateCedarEntityError,
+        PolicyStoreConfig, PolicyStoreSource,
     };
     use cedar_policy::{Entity, RestrictedExpression};
     use serde_json::json;
@@ -302,10 +309,13 @@ mod test {
         let result = create_user_entity(entity_mapping, &policy_store, &tokens, HashSet::new())
             .expect_err("expected to error while creating user entity");
 
-        assert!(
-            matches!(result, CreateUserEntityError { .. }),
-            "expected CreateUserEntityError, got: {:?}",
-            result
-        );
+        assert_eq!(result.errors.len(), 3);
+        for (_tkn_kind, err) in result.errors.iter() {
+            assert!(
+                matches!(err, CreateCedarEntityError::UnavailableToken),
+                "expected error UnavailableToken, got: {:?}",
+                err
+            );
+        }
     }
 }
