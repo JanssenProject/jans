@@ -524,8 +524,7 @@ public class UserMgmtService {
         }
         StringBuilder sb = new StringBuilder();
         for (CustomObjectAttribute customObjectAttribute : customAttributes) {
-            logger.info("customObjectAttribute:{}, customObjectAttribute.getName():{}", customObjectAttribute,
-                    customObjectAttribute.getName());
+            logger.info("customObjectAttribute.getName():{}", customObjectAttribute.getName());
             JansAttribute attribute = attributeService.getAttributeByName(customObjectAttribute.getName());
             AttributeValidation validation = null;
             if (attribute != null) {
