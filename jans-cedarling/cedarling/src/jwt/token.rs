@@ -14,9 +14,9 @@ const DEFAULT_USER_ID_SRC_CLAIM: &str = "sub";
 const DEFAULT_ROLE_SRC_CLAIM: &str = "role";
 
 pub enum TokenStr<'a> {
-    AccessToken(&'a str),
-    IdToken(&'a str),
-    UserinfoToken(&'a str),
+    Access(&'a str),
+    Id(&'a str),
+    Userinfo(&'a str),
 }
 
 #[derive(Debug, PartialEq)]
@@ -91,12 +91,12 @@ impl Token<'_> {
                 .unwrap_or_default()
                 .role_mapping(TokenKind::Access)
                 .unwrap_or(DEFAULT_ROLE_SRC_CLAIM),
-            Token::Id(data) => &data
+            Token::Id(data) => data
                 .iss
                 .unwrap_or_default()
                 .role_mapping(TokenKind::Id)
                 .unwrap_or(DEFAULT_ROLE_SRC_CLAIM),
-            Token::Userinfo(data) => &data
+            Token::Userinfo(data) => data
                 .iss
                 .unwrap_or_default()
                 .role_mapping(TokenKind::Userinfo)

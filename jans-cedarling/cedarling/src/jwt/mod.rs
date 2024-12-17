@@ -167,7 +167,7 @@ impl JwtService {
 
     pub fn process_token<'a>(&'a self, token: TokenStr<'a>) -> Result<Token, JwtProcessingError> {
         match token {
-            TokenStr::AccessToken(tkn_str) => {
+            TokenStr::Access(tkn_str) => {
                 let token = self
                     .access_tkn_validator
                     .process_jwt(tkn_str)
@@ -175,7 +175,7 @@ impl JwtService {
                 let claims = serde_json::from_value::<HashMap<String, Value>>(token.claims)?;
                 Ok(Token::Access(TokenData::new(claims, token.trusted_iss)))
             },
-            TokenStr::IdToken(tkn_str) => {
+            TokenStr::Id(tkn_str) => {
                 let token = self
                     .id_tkn_validator
                     .process_jwt(tkn_str)
@@ -183,7 +183,7 @@ impl JwtService {
                 let claims = serde_json::from_value::<HashMap<String, Value>>(token.claims)?;
                 Ok(Token::Id(TokenData::new(claims, token.trusted_iss)))
             },
-            TokenStr::UserinfoToken(tkn_str) => {
+            TokenStr::Userinfo(tkn_str) => {
                 let token = self
                     .userinfo_tkn_validator
                     .process_jwt(tkn_str)
@@ -262,7 +262,7 @@ mod test {
 
         // Test access_token
         let access_tkn = jwt_service
-            .process_token(TokenStr::AccessToken(&access_tkn))
+            .process_token(TokenStr::Access(&access_tkn))
             .expect("Should process access_token");
         let expected_claims = serde_json::from_value::<HashMap<String, Value>>(access_tkn_claims)
             .expect("Should create expected access_token claims");
@@ -273,7 +273,7 @@ mod test {
 
         // Test id_token
         let id_tkn = jwt_service
-            .process_token(TokenStr::IdToken(&id_tkn))
+            .process_token(TokenStr::Id(&id_tkn))
             .expect("Should process id_token");
         let expected_claims = serde_json::from_value::<HashMap<String, Value>>(id_tkn_claims)
             .expect("Should create expected id_token claims");
@@ -281,7 +281,7 @@ mod test {
 
         // Test userinfo_token
         let userinfo_tkn = jwt_service
-            .process_token(TokenStr::UserinfoToken(&userinfo_tkn))
+            .process_token(TokenStr::Userinfo(&userinfo_tkn))
             .expect("Should process userinfo_token");
         let expected_claims = serde_json::from_value::<HashMap<String, Value>>(userinfo_tkn_claims)
             .expect("Should create expected userinfo_token claims");

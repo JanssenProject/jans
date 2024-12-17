@@ -79,9 +79,9 @@ impl Authz {
 
     // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
     pub (crate) fn decode_tokens<'a>(&'a self, request: &'a Request) -> Result<DecodedTokens<'a>, AuthorizeError> {
-        let access_token = request.access_token.as_ref().map(|tkn| self.config.jwt_service.process_token(TokenStr::AccessToken(tkn))).transpose()?;
-        let id_token = request.id_token.as_ref().map(|tkn| self.config.jwt_service.process_token(TokenStr::IdToken(tkn))).transpose()?;
-        let userinfo_token = request.userinfo_token.as_ref().map(|tkn| self.config.jwt_service.process_token(TokenStr::UserinfoToken(tkn))).transpose()?;
+        let access_token = request.access_token.as_ref().map(|tkn| self.config.jwt_service.process_token(TokenStr::Access(tkn))).transpose()?;
+        let id_token = request.id_token.as_ref().map(|tkn| self.config.jwt_service.process_token(TokenStr::Id(tkn))).transpose()?;
+        let userinfo_token = request.userinfo_token.as_ref().map(|tkn| self.config.jwt_service.process_token(TokenStr::Userinfo(tkn))).transpose()?;
 
         Ok(DecodedTokens { access_token, id_token, userinfo_token })
     }
@@ -263,7 +263,7 @@ impl Authz {
                 create_workload_entity(
                     auth_conf.mapping_workload.as_deref(),
                     policy_store,
-                    &tokens,
+                    tokens,
                 )?,
             )
         } else {
