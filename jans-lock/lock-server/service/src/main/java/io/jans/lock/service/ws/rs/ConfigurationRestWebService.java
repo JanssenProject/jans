@@ -19,7 +19,7 @@ package io.jans.lock.service.ws.rs;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.jans.lock.service.config.ConfigurationService;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -32,7 +32,7 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
  *
  * @author Yuriy Movchan Date: 12/19/2018
  */
-@ApplicationScoped
+@Dependent
 @Path("/configuration")
 public class ConfigurationRestWebService {
 
