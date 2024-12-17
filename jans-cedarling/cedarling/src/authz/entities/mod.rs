@@ -19,10 +19,11 @@ use crate::common::policy_store::{
 };
 use crate::jwt::Token;
 use cedar_policy::EntityUid;
-pub use create::CedarPolicyCreateTypeError;
+pub use create::CreateCedarEntityError;
 use create::EntityParsedTypeName;
 use create::{build_entity_uid, create_entity, parse_namespace_and_typename, EntityMetadata};
 use std::collections::HashSet;
+use std::fmt;
 
 use super::request::ResourceData;
 
@@ -33,46 +34,73 @@ pub struct DecodedTokens<'a> {
 }
 
 /// Create workload entity
-pub fn create_workload(
+pub fn create_workload_entity(
     entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
     tokens: &DecodedTokens,
-) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
+) -> Result<cedar_policy::Entity, CreateWorkloadEntityError> {
     let namespace = policy_store.namespace();
-
-    // try to build the Workload entity using the access_token
-    // or id_token whichever is available.
-    let (token, workload_entity_meta, claim_mapping) =
-        if let Some(access_tkn) = tokens.access_token.as_ref() {
-            let meta = access_tkn.metadata();
-            let claim_mapping = &meta.access_tokens.entity_metadata.claim_mapping;
-            let workload_entity_meta = EntityMetadata::new(
-                EntityParsedTypeName {
-                    typename: entity_mapping.unwrap_or("Workload"),
-                    namespace,
-                },
-                "client_id",
-            );
-            (access_tkn, workload_entity_meta, claim_mapping)
-        } else if let Some(id_tkn) = tokens.id_token.as_ref() {
-            let meta = id_tkn.metadata();
-            let claim_mapping = &meta.id_tokens.claim_mapping;
-            let workload_entity_meta = EntityMetadata::new(
-                EntityParsedTypeName {
-                    typename: entity_mapping.unwrap_or("Workload"),
-                    namespace,
-                },
-                "aud",
-            );
-            (id_tkn, workload_entity_meta, claim_mapping)
-        } else {
-            Err(CedarPolicyCreateTypeError::UnavailableToken(
-                "Workload".to_string(),
-            ))?
-        };
-
     let schema = &policy_store.schema.json;
-    workload_entity_meta.create_entity(schema, token, HashSet::new(), claim_mapping)
+    let mut errors = Vec::new();
+
+    if let Some(token) = tokens.id_token.as_ref() {
+        let meta = token.metadata();
+        let claim_mapping = &meta.id_tokens.claim_mapping;
+        let workload_entity_meta = EntityMetadata::new(
+            EntityParsedTypeName {
+                typename: entity_mapping.unwrap_or("Workload"),
+                namespace,
+            },
+            "aud",
+        );
+        match workload_entity_meta.create_entity(schema, token, HashSet::new(), claim_mapping) {
+            Ok(entity) => return Ok(entity),
+            Err(e) => errors.push((TokenKind::Id, e)),
+        }
+    }
+
+    if let Some(token) = tokens.access_token.as_ref() {
+        let meta = token.metadata();
+        let claim_mapping = &meta.id_tokens.claim_mapping;
+        let workload_entity_meta = EntityMetadata::new(
+            EntityParsedTypeName {
+                typename: entity_mapping.unwrap_or("Workload"),
+                namespace,
+            },
+            "client_id",
+        );
+        match workload_entity_meta.create_entity(schema, token, HashSet::new(), claim_mapping) {
+            Ok(entity) => return Ok(entity),
+            Err(e) => errors.push((TokenKind::Access, e)),
+        }
+    }
+
+    Err(CreateWorkloadEntityError { errors })
+}
+
+#[derive(Debug, thiserror::Error)]
+pub struct CreateWorkloadEntityError {
+    pub errors: Vec<(TokenKind, CreateCedarEntityError)>,
+}
+
+impl fmt::Display for CreateWorkloadEntityError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.errors.is_empty() {
+            writeln!(
+                f,
+                "Failed to create Workload Entity since no tokens were provided"
+            )?;
+        } else {
+            writeln!(
+                f,
+                "Failed to create Workload Entity due to the following errors:"
+            )?;
+            for (token_kind, error) in &self.errors {
+                writeln!(f, "- TokenKind {:?}: {}", token_kind, error)?;
+            }
+        }
+        Ok(())
+    }
 }
 
 /// Create access_token entity
@@ -81,7 +109,7 @@ pub fn create_access_token(
     policy_store: &PolicyStore,
     data: &Token,
     meta: &AccessTokenEntityMetadata,
-) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
+) -> Result<cedar_policy::Entity, CreateCedarEntityError> {
     let schema = &policy_store.schema.json;
     let namespace = policy_store.namespace();
     let claim_mapping = &meta.entity_metadata.claim_mapping;
@@ -103,7 +131,7 @@ pub fn create_id_token_entity(
     policy_store: &PolicyStore,
     data: &Token,
     claim_mapping: &ClaimMappings,
-) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
+) -> Result<cedar_policy::Entity, CreateCedarEntityError> {
     let schema = &policy_store.schema.json;
     let namespace = policy_store.namespace();
 
@@ -123,7 +151,7 @@ pub fn create_user_entity(
     policy_store: &PolicyStore,
     tokens: &DecodedTokens,
     parents: HashSet<EntityUid>,
-) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
+) -> Result<cedar_policy::Entity, CreateCedarEntityError> {
     println!("parents: {:?}", parents);
     let schema: &CedarSchemaJson = &policy_store.schema.json;
     let namespace = policy_store.namespace();
@@ -159,9 +187,7 @@ pub fn create_user_entity(
         }
     }
 
-    let token = token.ok_or(CedarPolicyCreateTypeError::UnavailableToken(
-        "User".to_string(),
-    ))?;
+    let token = token.ok_or(CreateCedarEntityError::UnavailableToken("User".to_string()))?;
 
     EntityMetadata::new(
         EntityParsedTypeName {
@@ -179,7 +205,7 @@ pub fn create_userinfo_token_entity(
     policy_store: &PolicyStore,
     token: &Token,
     claim_mapping: &ClaimMappings,
-) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
+) -> Result<cedar_policy::Entity, CreateCedarEntityError> {
     let schema = &policy_store.schema.json;
     let namespace = policy_store.namespace();
 
@@ -197,7 +223,7 @@ pub fn create_userinfo_token_entity(
 #[derive(thiserror::Error, Debug)]
 pub enum ResourceEntityError {
     #[error("could not create resource entity: {0}")]
-    Create(#[from] CedarPolicyCreateTypeError),
+    Create(#[from] CreateCedarEntityError),
 }
 
 /// Create entity from [`ResourceData`]
@@ -206,7 +232,7 @@ pub fn create_resource_entity(
     schema: &CedarSchemaJson,
 ) -> Result<cedar_policy::Entity, ResourceEntityError> {
     let entity_uid = resource.entity_uid().map_err(|err| {
-        CedarPolicyCreateTypeError::EntityTypeName(resource.resource_type.clone(), err)
+        CreateCedarEntityError::EntityTypeName(resource.resource_type.clone(), err)
     })?;
 
     let (typename, namespace) = parse_namespace_and_typename(&resource.resource_type);
@@ -227,7 +253,7 @@ pub fn create_resource_entity(
 pub enum RoleEntityError {
     #[error("could not create Jans::Role entity from {token_kind} token: {error}")]
     Create {
-        error: CedarPolicyCreateTypeError,
+        error: CreateCedarEntityError,
         token_kind: TokenKind,
     },
 

@@ -173,7 +173,7 @@ fn get_token_claim_type_string_error() {
         )
         .expect_err("entity creating should throw error");
 
-    if let CedarPolicyCreateTypeError::GetTokenClaim(TokenClaimTypeError {
+    if let CreateCedarEntityError::GetTokenClaim(TokenClaimTypeError {
         key, actual_type, ..
     }) = entity_creation_error
     {
@@ -227,7 +227,7 @@ fn get_token_claim_type_long_error() {
         )
         .expect_err("entity creating should throw error");
 
-    if let CedarPolicyCreateTypeError::GetTokenClaim(TokenClaimTypeError {
+    if let CreateCedarEntityError::GetTokenClaim(TokenClaimTypeError {
         key, actual_type, ..
     }) = entity_creation_error
     {
@@ -281,7 +281,7 @@ fn get_token_claim_type_entity_uid_error() {
         )
         .expect_err("entity creating should throw error");
 
-    if let CedarPolicyCreateTypeError::GetTokenClaim(TokenClaimTypeError {
+    if let CreateCedarEntityError::GetTokenClaim(TokenClaimTypeError {
         key, actual_type, ..
     }) = entity_creation_error
     {
@@ -335,7 +335,7 @@ fn get_token_claim_type_boolean_error() {
         )
         .expect_err("entity creating should throw error");
 
-    if let CedarPolicyCreateTypeError::GetTokenClaim(TokenClaimTypeError {
+    if let CreateCedarEntityError::GetTokenClaim(TokenClaimTypeError {
         key,
         actual_type,
         expected_type,
@@ -394,7 +394,7 @@ fn get_token_claim_type_set_error() {
         )
         .expect_err("entity creating should throw error");
 
-    if let CedarPolicyCreateTypeError::GetTokenClaim(TokenClaimTypeError {
+    if let CreateCedarEntityError::GetTokenClaim(TokenClaimTypeError {
         key,
         actual_type,
         expected_type,
@@ -452,7 +452,7 @@ fn get_token_claim_type_set_of_set_error() {
         )
         .expect_err("entity creating should throw error");
 
-    if let CedarPolicyCreateTypeError::GetTokenClaim(TokenClaimTypeError {
+    if let CreateCedarEntityError::GetTokenClaim(TokenClaimTypeError {
         key,
         actual_type,
         expected_type,
@@ -513,7 +513,7 @@ fn get_token_claim_cedar_typename_error() {
         )
         .expect_err("entity creating should throw error");
 
-    if let CedarPolicyCreateTypeError::EntityTypeName(typename, _) = &entity_creation_error {
+    if let CreateCedarEntityError::EntityTypeName(typename, _) = &entity_creation_error {
         assert_eq!("Jans:::Test", typename);
     } else {
         panic!(
@@ -564,7 +564,7 @@ fn get_token_claim_cedar_typename_in_attr_error() {
         )
         .expect_err("entity creating should throw error");
 
-    if let CedarPolicyCreateTypeError::FindType(typename) = &entity_creation_error {
+    if let CreateCedarEntityError::FindType(typename) = &entity_creation_error {
         assert_eq!("Jans:::Test2", typename);
     } else {
         panic!(

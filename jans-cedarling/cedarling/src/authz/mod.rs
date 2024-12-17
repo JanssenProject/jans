@@ -30,12 +30,12 @@ pub(crate) mod request;
 pub use authorize_result::AuthorizeResult;
 
 use cedar_policy::{Entities, Entity, EntityUid};
-use entities::{create_resource_entity, DecodedTokens};
-use entities::CedarPolicyCreateTypeError;
+use entities::{create_resource_entity, CreateWorkloadEntityError, DecodedTokens};
+use entities::CreateCedarEntityError;
 use entities::ResourceEntityError;
 use entities::{
     create_access_token, create_id_token_entity, create_role_entities, create_user_entity,
-    create_userinfo_token_entity, create_workload, RoleEntityError,
+    create_userinfo_token_entity, create_workload_entity, RoleEntityError,
 };
 use request::Request;
 use std::time::Instant;
@@ -49,8 +49,6 @@ pub(crate) struct AuthzConfig {
     pub jwt_service: Arc<jwt::JwtService>,
     pub authorization: AuthorizationConfig,
 }
-
-
 
 /// Authorization Service
 /// The primary service of the Cedarling application responsible for evaluating authorization requests.
@@ -262,11 +260,11 @@ impl Authz {
         // build workload entity
         let workload = if auth_conf.use_workload_principal {
             Some(
-                create_workload(
+                create_workload_entity(
                     auth_conf.mapping_workload.as_deref(),
                     policy_store,
                     &tokens,
-                ).map_err(AuthorizeError::CreateWorkloadEntity)?,
+                )?,
             )
         } else {
             None
@@ -383,19 +381,19 @@ pub enum AuthorizeError {
     ProcessTokens(#[from] jwt::JwtProcessingError),
     /// Error encountered while creating id token entity
     #[error("could not create id_token entity: {0}")]
-    CreateIdTokenEntity(CedarPolicyCreateTypeError),
+    CreateIdTokenEntity(CreateCedarEntityError),
     /// Error encountered while creating userinfo entity
     #[error("could not create userinfo entity: {0}")]
-    CreateUserinfoTokenEntity(CedarPolicyCreateTypeError),
+    CreateUserinfoTokenEntity(CreateCedarEntityError),
     /// Error encountered while creating access_token entity
     #[error("could not create access_token entity: {0}")]
-    CreateAccessTokenEntity(CedarPolicyCreateTypeError),
+    CreateAccessTokenEntity(CreateCedarEntityError),
     /// Error encountered while creating user entity
     #[error("could not create User entity: {0}")]
-    CreateUserEntity(CedarPolicyCreateTypeError),
+    CreateUserEntity(CreateCedarEntityError),
     /// Error encountered while creating workload
-    #[error("could not create Workload entity: {0}")]
-    CreateWorkloadEntity(CedarPolicyCreateTypeError),
+    #[error(transparent)]
+    CreateWorkloadEntity(#[from] CreateWorkloadEntityError),
     /// Error encountered while creating resource entity
     #[error("{0}")]
     ResourceEntity(#[from] ResourceEntityError),
