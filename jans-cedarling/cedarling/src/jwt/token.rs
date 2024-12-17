@@ -54,17 +54,17 @@ impl Token<'_> {
             Token::Access(data) => data
                 .iss
                 .unwrap_or_default()
-                .get_user_mapping(TokenKind::Access)
+                .user_mapping(TokenKind::Access)
                 .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM),
             Token::Id(data) => data
                 .iss
                 .unwrap_or_default()
-                .get_user_mapping(TokenKind::Id)
+                .user_mapping(TokenKind::Id)
                 .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM),
             Token::Userinfo(data) => data
                 .iss
                 .unwrap_or_default()
-                .get_user_mapping(TokenKind::Userinfo)
+                .user_mapping(TokenKind::Userinfo)
                 .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM),
         }
     }
@@ -89,17 +89,17 @@ impl Token<'_> {
             Token::Access(data) => data
                 .iss
                 .unwrap_or_default()
-                .get_role_mapping_new(TokenKind::Access)
+                .role_mapping(TokenKind::Access)
                 .unwrap_or(DEFAULT_ROLE_SRC_CLAIM),
             Token::Id(data) => &data
                 .iss
                 .unwrap_or_default()
-                .get_role_mapping_new(TokenKind::Id)
+                .role_mapping(TokenKind::Id)
                 .unwrap_or(DEFAULT_ROLE_SRC_CLAIM),
             Token::Userinfo(data) => &data
                 .iss
                 .unwrap_or_default()
-                .get_role_mapping_new(TokenKind::Userinfo)
+                .role_mapping(TokenKind::Userinfo)
                 .unwrap_or(DEFAULT_ROLE_SRC_CLAIM),
         }
     }

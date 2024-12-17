@@ -137,88 +137,9 @@ impl Default for &TrustedIssuer {
     }
 }
 
-/// Structure define the source from where role mappings are retrieved.
-pub struct RoleMapping<'a> {
-    pub kind: TokenKind,
-    pub mapping_field: &'a str,
-}
-
-// By default we will search role in the User token
-impl Default for RoleMapping<'_> {
-    fn default() -> Self {
-        Self {
-            kind: TokenKind::Userinfo,
-            mapping_field: "role",
-        }
-    }
-}
-
-pub struct UserMappings<'a> {
-    pub access_token: Option<UserMapping<'a>>,
-    pub id_token: Option<UserMapping<'a>>,
-    pub userinfo_token: Option<UserMapping<'a>>,
-    pub tx_token: Option<UserMapping<'a>>,
-}
-
-/// Structure define the source from where user mappings are retrieved.
-pub struct UserMapping<'a> {
-    pub kind: TokenKind,
-    pub mapping_field: &'a str,
-}
-
-// By default we will search role in the User token
-impl Default for UserMapping<'_> {
-    fn default() -> Self {
-        Self {
-            kind: TokenKind::Userinfo,
-            mapping_field: "sub",
-        }
-    }
-}
-
 impl TrustedIssuer {
-    /// Retrieves the available `RoleMapping` from the token metadata.
-    ///
-    /// Checks each token metadata and returns the first one found with a `role_mapping` field.
-    ///
-    /// The checks happen in this order:
-    ///     1. access_token
-    ///     2. id_token
-    ///     3. userinfo_token
-    ///     4. tx_token
-    pub fn get_role_mapping(&self) -> Option<RoleMapping> {
-        if let Some(role_mapping) = &self.access_tokens.entity_metadata.role_mapping {
-            return Some(RoleMapping {
-                kind: TokenKind::Access,
-                mapping_field: role_mapping.as_str(),
-            });
-        }
-
-        if let Some(role_mapping) = &self.id_tokens.role_mapping {
-            return Some(RoleMapping {
-                kind: TokenKind::Id,
-                mapping_field: role_mapping.as_str(),
-            });
-        }
-
-        if let Some(role_mapping) = &self.userinfo_tokens.role_mapping {
-            return Some(RoleMapping {
-                kind: TokenKind::Userinfo,
-                mapping_field: role_mapping.as_str(),
-            });
-        }
-
-        if let Some(role_mapping) = &self.tx_tokens.role_mapping {
-            return Some(RoleMapping {
-                kind: TokenKind::Transaction,
-                mapping_field: role_mapping.as_str(),
-            });
-        }
-
-        None
-    }
-
-    pub fn get_role_mapping_new(&self, token_kind: TokenKind) -> Option<&str> {
+    /// Retrieves the claim that defines the `Role` for a given token type.
+    pub fn role_mapping(&self, token_kind: TokenKind) -> Option<&str> {
         match token_kind {
             TokenKind::Access => self.access_tokens.entity_metadata.role_mapping.as_deref(),
             TokenKind::Id => self.id_tokens.role_mapping.as_deref(),
@@ -227,97 +148,13 @@ impl TrustedIssuer {
         }
     }
 
-    /// Retrieves the available `user id` mapping from the token metadata.
-    ///
-    /// Checks each token metadata and returns the first one found with a `role_mapping` field.
-    ///
-    /// The checks happen in this order:
-    ///     1. access_token
-    ///     2. id_token
-    ///     3. userinfo_token
-    ///     4. tx_token
-    pub fn get_user_id_mapping(&self) -> Option<UserMapping> {
-        if let Some(user_mapping) = &self.access_tokens.entity_metadata.user_id {
-            return Some(UserMapping {
-                kind: TokenKind::Access,
-                mapping_field: user_mapping.as_str(),
-            });
-        }
-
-        if let Some(user_mapping) = &self.id_tokens.user_id {
-            return Some(UserMapping {
-                kind: TokenKind::Id,
-                mapping_field: user_mapping.as_str(),
-            });
-        }
-
-        if let Some(user_mapping) = &self.userinfo_tokens.user_id {
-            return Some(UserMapping {
-                kind: TokenKind::Userinfo,
-                mapping_field: user_mapping.as_str(),
-            });
-        }
-
-        if let Some(user_mapping) = &self.tx_tokens.user_id {
-            return Some(UserMapping {
-                kind: TokenKind::Transaction,
-                mapping_field: user_mapping.as_str(),
-            });
-        }
-
-        None
-    }
-
-    /// Returns the claim where the user_id for the User entity is stored.
-    pub fn get_user_mapping(&self, token_kind: TokenKind) -> Option<&str> {
+    /// Retrieves the claim that defines the `User` for a given token type.
+    pub fn user_mapping(&self, token_kind: TokenKind) -> Option<&str> {
         match token_kind {
             TokenKind::Access => self.access_tokens.entity_metadata.user_id.as_deref(),
             TokenKind::Id => self.id_tokens.user_id.as_deref(),
             TokenKind::Userinfo => self.userinfo_tokens.user_id.as_deref(),
             TokenKind::Transaction => self.tx_tokens.user_id.as_deref(),
-        }
-    }
-
-    pub fn user_mappings(&self) -> UserMappings {
-        let access_token = self
-            .access_tokens
-            .entity_metadata
-            .user_id
-            .as_ref()
-            .map(|claim_name| UserMapping {
-                kind: TokenKind::Access,
-                mapping_field: claim_name,
-            });
-        let id_token = self
-            .id_tokens
-            .user_id
-            .as_ref()
-            .map(|claim_name| UserMapping {
-                kind: TokenKind::Id,
-                mapping_field: claim_name,
-            });
-        let userinfo_token = self
-            .userinfo_tokens
-            .user_id
-            .as_ref()
-            .map(|claim_name| UserMapping {
-                kind: TokenKind::Userinfo,
-                mapping_field: claim_name,
-            });
-        let tx_token = self
-            .tx_tokens
-            .user_id
-            .as_ref()
-            .map(|claim_name| UserMapping {
-                kind: TokenKind::Transaction,
-                mapping_field: claim_name,
-            });
-
-        UserMappings {
-            access_token,
-            id_token,
-            userinfo_token,
-            tx_token,
         }
     }
 
