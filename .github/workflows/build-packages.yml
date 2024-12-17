@@ -121,6 +121,7 @@ jobs:
         cd jans/
         sed -i "s/%VERSION%/${{ steps.previoustag.outputs.version }}/g" checksum.sh
         sudo ./checksum.sh
+        ls ${{github.workspace}}/${{ matrix.asset_path }}
 
     - name: Upload binaries to release
       id: upload_binaries
