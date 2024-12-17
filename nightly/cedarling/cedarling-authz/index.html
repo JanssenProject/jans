@@ -7253,9 +7253,53 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Authz
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Authz
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#automatically-adding-entity-references-to-the-context" class="md-nav__link">
+    Automatically Adding Entity References to the Context
+  </a>
+  
+    <nav class="md-nav" aria-label="Automatically Adding Entity References to the Context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-policy" class="md-nav__link">
+    Example Policy
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -8463,6 +8507,34 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#automatically-adding-entity-references-to-the-context" class="md-nav__link">
+    Automatically Adding Entity References to the Context
+  </a>
+  
+    <nav class="md-nav" aria-label="Automatically Adding Entity References to the Context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-policy" class="md-nav__link">
+    Example Policy
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -8573,13 +8645,90 @@ this is a sample request from a hypothetical application:</p>
 
 <span class="nx">decision_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">authz</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span><span class="w"></span>
 </code></pre></div>
+<h2 id="automatically-adding-entity-references-to-the-context">Automatically Adding Entity References to the Context<a class="headerlink" href="#automatically-adding-entity-references-to-the-context" title="Permanent link">#</a></h2>
+<p>Cedarling simplifies context creation by automatically including certain entities. This means you don't need to manually pass their references when using them in your policies. The following entities are automatically added to the context, along with their naming conventions in <code>lower_snake_case</code> format:</p>
+<ul>
+<li><strong>Workload Entity</strong>: <code>workload</code></li>
+<li><strong>User Entity</strong>: <code>user</code></li>
+<li><strong>Resource Entity</strong>: <code>resource</code></li>
+<li><strong>Access Token Entity</strong>: <code>access_token</code></li>
+<li><strong>ID Token Entity</strong>: <code>id_token</code></li>
+<li><strong>Userinfo Token Entity</strong>: <code>userinfo_token</code></li>
+</ul>
+<h3 id="example-policy">Example Policy<a class="headerlink" href="#example-policy" title="Permanent link">#</a></h3>
+<p>Below is an example policy schema that illustrates how entities are used:  </p>
+<div class="highlight"><pre><span></span><code>type Context = {
+  &quot;access_token&quot;: Access_token, 
+  &quot;time&quot;: Long, 
+  &quot;user&quot;: User, 
+  &quot;workload&quot;: Workload
+};
+
+type Url = {
+  &quot;host&quot;: String, 
+  &quot;path&quot;: String, 
+  &quot;protocol&quot;: String
+};
+
+entity Access_token = {
+  &quot;exp&quot;: Long, 
+  &quot;iss&quot;: TrustedIssuer
+};
+
+entity Issue = {
+  &quot;country&quot;: String, 
+  &quot;org_id&quot;: String
+};
+
+entity Role;
+
+entity TrustedIssuer = {
+  &quot;issuer_entity_id&quot;: Url
+};
+
+entity User in [Role] = {
+  &quot;country&quot;: String, 
+  &quot;email&quot;: String, 
+  &quot;sub&quot;: String, 
+  &quot;username&quot;: String
+};
+
+entity Workload = {
+  &quot;client_id&quot;: String, 
+  &quot;iss&quot;: TrustedIssuer, 
+  &quot;name&quot;: String, 
+  &quot;org_id&quot;: String
+};
+
+action &quot;Update&quot; appliesTo {
+  principal: [Role, Workload, User],
+  resource: [Issue],
+  context: {
+    &quot;access_token&quot;: Access_token, 
+    &quot;time&quot;: Long, 
+    &quot;user&quot;: User, 
+    &quot;workload&quot;: Workload
+  }
+};
+
+action &quot;View&quot; appliesTo {
+  principal: [Role, Workload, User],
+  resource: [Issue],
+  context: Context
+};
+</code></pre></div>
+<p>With this schema, you only need to provide the fields that are not automatically included. For instance, to define the <code>time</code> in the context:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nx">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="s2">&quot;time&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">1719266610.98636</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-21T12:08:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-21</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-17T04:37:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-17</span>
       
         <br>
         Created:
