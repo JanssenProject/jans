@@ -9,6 +9,8 @@
 
 mod create;
 mod trait_as_expression;
+mod user;
+mod workload;
 
 #[cfg(test)]
 mod test_create;
@@ -18,11 +20,13 @@ use crate::common::cedar_schema::CedarSchemaJson;
 use crate::common::policy_store::{ClaimMappings, PolicyStore, TokenKind};
 use crate::jwt::Token;
 use cedar_policy::EntityUid;
-pub use create::CreateCedarEntityError;
 use create::EntityParsedTypeName;
 use create::{build_entity_uid, create_entity, parse_namespace_and_typename, EntityMetadata};
 use std::collections::HashSet;
-use std::fmt;
+
+pub use create::CreateCedarEntityError;
+pub use user::*;
+pub use workload::*;
 
 const DEFAULT_TKN_PRINCIPAL_IDENTIFIER: &str = "jti";
 
@@ -30,74 +34,6 @@ pub struct DecodedTokens<'a> {
     pub access_token: Option<Token<'a>>,
     pub id_token: Option<Token<'a>>,
     pub userinfo_token: Option<Token<'a>>,
-}
-
-/// Create workload entity
-pub fn create_workload_entity(
-    entity_mapping: Option<&str>,
-    policy_store: &PolicyStore,
-    tokens: &DecodedTokens,
-) -> Result<cedar_policy::Entity, CreateWorkloadEntityError> {
-    let namespace = policy_store.namespace();
-    let schema = &policy_store.schema.json;
-    let mut errors = Vec::new();
-
-    if let Some(token) = tokens.id_token.as_ref() {
-        let claim_mapping = &token.claim_mapping();
-        let workload_entity_meta = EntityMetadata::new(
-            EntityParsedTypeName {
-                typename: entity_mapping.unwrap_or("Workload"),
-                namespace,
-            },
-            "aud",
-        );
-        match workload_entity_meta.create_entity(schema, token, HashSet::new(), claim_mapping) {
-            Ok(entity) => return Ok(entity),
-            Err(e) => errors.push((TokenKind::Id, e)),
-        }
-    }
-
-    if let Some(token) = tokens.access_token.as_ref() {
-        let claim_mapping = &token.claim_mapping();
-        let workload_entity_meta = EntityMetadata::new(
-            EntityParsedTypeName {
-                typename: entity_mapping.unwrap_or("Workload"),
-                namespace,
-            },
-            "client_id",
-        );
-        match workload_entity_meta.create_entity(schema, token, HashSet::new(), claim_mapping) {
-            Ok(entity) => return Ok(entity),
-            Err(e) => errors.push((TokenKind::Access, e)),
-        }
-    }
-
-    Err(CreateWorkloadEntityError { errors })
-}
-
-#[derive(Debug, thiserror::Error)]
-pub struct CreateWorkloadEntityError {
-    pub errors: Vec<(TokenKind, CreateCedarEntityError)>,
-}
-
-impl fmt::Display for CreateWorkloadEntityError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.errors.is_empty() {
-            writeln!(
-                f,
-                "Failed to create Workload Entity since no tokens were provided"
-            )?;
-        } else {
-            writeln!(
-                f,
-                "Failed to create Workload Entity due to the following errors:"
-            )?;
-            for (token_kind, error) in &self.errors {
-                writeln!(f, "- TokenKind {:?}: {}", token_kind, error)?;
-            }
-        }
-        Ok(())
-    }
 }
 
 /// Create access_token entity
@@ -143,90 +79,6 @@ pub fn create_id_token_entity(
         "jti",
     )
     .create_entity(schema, token, HashSet::new(), claim_mapping)
-}
-
-/// Create user entity
-pub fn create_user_entity(
-    entity_mapping: Option<&str>,
-    policy_store: &PolicyStore,
-    tokens: &DecodedTokens,
-    parents: HashSet<EntityUid>,
-) -> Result<cedar_policy::Entity, CreateUserEntityError> {
-    let schema: &CedarSchemaJson = &policy_store.schema.json;
-    let namespace = policy_store.namespace();
-    let mut errors = Vec::new();
-
-    if let Some(token) = tokens.id_token.as_ref() {
-        match EntityMetadata::new(
-            EntityParsedTypeName {
-                typename: entity_mapping.unwrap_or("User"),
-                namespace,
-            },
-            token.user_mapping(),
-        )
-        .create_entity(schema, token, parents.clone(), token.claim_mapping())
-        {
-            Ok(entity) => return Ok(entity),
-            Err(e) => errors.push((TokenKind::Id, e)),
-        }
-    }
-
-    if let Some(token) = tokens.access_token.as_ref() {
-        match EntityMetadata::new(
-            EntityParsedTypeName {
-                typename: entity_mapping.unwrap_or("User"),
-                namespace,
-            },
-            token.user_mapping(),
-        )
-        .create_entity(schema, token, parents.clone(), token.claim_mapping())
-        {
-            Ok(entity) => return Ok(entity),
-            Err(e) => errors.push((TokenKind::Access, e)),
-        }
-    }
-
-    if let Some(token) = tokens.userinfo_token.as_ref() {
-        match EntityMetadata::new(
-            EntityParsedTypeName {
-                typename: entity_mapping.unwrap_or("User"),
-                namespace,
-            },
-            token.user_mapping(),
-        )
-        .create_entity(schema, token, parents.clone(), token.claim_mapping())
-        {
-            Ok(entity) => return Ok(entity),
-            Err(e) => errors.push((TokenKind::Userinfo, e)),
-        }
-    }
-
-    Err(CreateUserEntityError { errors })
-}
-
-#[derive(Debug, thiserror::Error)]
-pub struct CreateUserEntityError {
-    pub errors: Vec<(TokenKind, CreateCedarEntityError)>,
-}
-
-impl fmt::Display for CreateUserEntityError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.errors.is_empty() {
-            writeln!(
-                f,
-                "Failed to create User Entity since no tokens were provided"
-            )?;
-        } else {
-            writeln!(
-                f,
-                "Failed to create User Entity due to the following errors:"
-            )?;
-            for (token_kind, error) in &self.errors {
-                writeln!(f, "- TokenKind {:?}: {}", token_kind, error)?;
-            }
-        }
-        Ok(())
-    }
 }
 
 /// Create `Userinfo_token` entity
