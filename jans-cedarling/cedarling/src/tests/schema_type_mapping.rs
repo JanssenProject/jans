@@ -126,7 +126,7 @@ fn check_mapping_tokens_data() {
     let expected_user = json!({"attrs":{"email":{"domain":"example.com", "uid":"user"},"role":["Manager","Support"],"sub":"J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg"},"parents":[{"id":"Manager","type":"Test::Role"},{"id":"Support","type":"Test::Role"}],"uid":{"id":"J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg","type":"Test::User"}}).sorted();
     assert_eq!(
         expected_user,
-        entities.user.unwrap().to_json_value().unwrap().sorted(),
+        entities.user.to_json_value().unwrap().sorted(),
         "derived user_entity is not equal to the expected"
     );
 }

@@ -21,6 +21,7 @@ use crate::common::policy_store::{ClaimMappings, PolicyStore, TokenKind};
 use crate::jwt::Token;
 use cedar_policy::EntityUid;
 use create::EntityParsedTypeName;
+pub use create::CEDAR_POLICY_SEPARATOR;
 use create::{build_entity_uid, create_entity, parse_namespace_and_typename, EntityMetadata};
 use std::collections::HashSet;
 

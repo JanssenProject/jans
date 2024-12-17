@@ -122,9 +122,9 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    MissingPrincipalError,
+    AddEntitiesIntoContextError,
     AuthorizeError,
-    "Could not authorize since an Entity for the principal was not created."
+    "Error encountered while adding entities into context"
 );
 
 #[pyclass]
@@ -177,9 +177,9 @@ errors_functions! {
     CreateContext => CreateContextError,
     WorkloadRequestValidation => WorkloadRequestValidationError,
     UserRequestValidation => UserRequestValidationError,
+    BuildContext => AddEntitiesIntoContextError,
     Entities => EntitiesError,
-    EntitiesToJson => EntitiesToJsonError,
-    MissingPrincipal => MissingPrincipalError
+    EntitiesToJson => EntitiesToJsonError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {
