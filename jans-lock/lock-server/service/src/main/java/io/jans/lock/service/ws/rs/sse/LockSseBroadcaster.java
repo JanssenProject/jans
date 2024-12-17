@@ -32,7 +32,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.sse.OutboundSseEvent;
 import jakarta.ws.rs.sse.Sse;
 import jakarta.ws.rs.sse.SseBroadcaster;
@@ -65,14 +64,6 @@ public class LockSseBroadcaster {
 	public void init() {
 		log.info("Initializing Token SSE broadcaster ...");
 		this.isActive = new AtomicBoolean(false);
-	}
-	
-	@Context
-	public void initSse(Sse sse) {
-        log.debug("initSse broadcaster");
-	    this.sse = sse;
-//	    this.eventBuilder = sse.newEventBuilder();
-	    this.sseBroadcaster = sse.newBroadcaster();
 	}
 
 	public void initTimer() {

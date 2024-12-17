@@ -560,6 +560,8 @@ components:
           type: array
           items:
             type: string
+        superGluuEnabled:
+          type: boolean
         sessionIdPersistInCache:
           type: boolean
         errorReasonEnabled:
@@ -584,7 +586,7 @@ components:
         unfinishedRequestExpiration:
           type: integer
           format: int32
-        metadataRefreshInterval:
+        authenticationHistoryExpiration:
           type: integer
           format: int32
         serverMetadataFolder:
@@ -593,39 +595,24 @@ components:
           type: array
           items:
             type: string
-        metadataServers:
-          type: array
-          items:
-            $ref: '#/components/schemas/MetadataServer'
-        disableMetadataService:
-          type: boolean
-        hints:
-          type: array
-          items:
-            type: string
-        enterpriseAttestation:
-          type: boolean
-        attestationMode:
-          type: string
         rp:
           type: array
           items:
             $ref: '#/components/schemas/RequestedParty'
-    MetadataServer:
-      type: object
-      properties:
-        url:
+        metadataUrlsProvider:
           type: string
-        certificateDocumentInum:
-          type: array
-          items:
-            type: string
+        disableMetadataService:
+          type: boolean
+        skipValidateMdsInAttestationEnabled:
+          type: boolean
+        assertionOptionsGenerateEndpointEnabled:
+          type: boolean
     RequestedParty:
       type: object
       properties:
-        id:
+        name:
           type: string
-        origins:
+        domains:
           type: array
           items:
             type: string
@@ -688,15 +675,15 @@ components:
           type: string
         username:
           type: string
-        origin:
+        domain:
           type: string
         userId:
           type: string
         challenge:
           type: string
-        attestationRequest:
+        attenstationRequest:
           type: string
-        attestationResponse:
+        attenstationResponse:
           type: string
         uncompressedECPoint:
           type: string
@@ -719,28 +706,8 @@ components:
         signatureAlgorithm:
           type: integer
           format: int32
-        rpId:
+        applicationId:
           type: string
-        backupStateFlag:
-          type: boolean
-        backupEligibilityFlag:
-          type: boolean
-        attestedCredentialDataFlag:
-          type: boolean
-        extensionDataFlag:
-          type: boolean
-        userVerifiedFlag:
-          type: boolean
-        userPresentFlag:
-          type: boolean
-        authentictatorAttachment:
-          type: string
-        credId:
-          type: string
-        transports:
-          type: array
-          items:
-            type: string
     Fido2RegistrationEntry:
       type: object
       properties:

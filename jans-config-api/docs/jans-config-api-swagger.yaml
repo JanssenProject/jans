@@ -9303,11 +9303,7 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        adminCanView:
-          type: boolean
-        userCanAccess:
+        whitePagesCanView:
           type: boolean
         adminCanEdit:
           type: boolean
@@ -9315,7 +9311,11 @@ components:
           type: boolean
         userCanEdit:
           type: boolean
-        whitePagesCanView:
+        adminCanView:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -9690,9 +9690,6 @@ components:
         saveTokensInCacheAndDontSaveInPersistence:
           type: boolean
         accessTokenLifetime:
-          type: integer
-          format: int32
-        userInfoLifetime:
           type: integer
           format: int32
         cleanServiceInterval:
