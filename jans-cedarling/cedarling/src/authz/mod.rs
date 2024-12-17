@@ -287,22 +287,19 @@ impl Authz {
     
         // build access_token Entity
         let access_token = tokens.access_token.as_ref().map(|tkn| {
-            let tkns_metadata = tkn.iss().unwrap_or_default().tokens_metadata();
-             create_access_token(auth_conf.mapping_access_token.as_deref(), policy_store, tkn, tkns_metadata.access_tokens)
+             create_access_token(auth_conf.mapping_access_token.as_deref(), policy_store, tkn)
                 .map_err(AuthorizeError::CreateAccessTokenEntity)
         }).transpose()?;
 
         // build id_token Entity
         let id_token = tokens.id_token.as_ref().map(|tkn| {
-            let tkns_metadata = tkn.iss().unwrap_or_default().tokens_metadata();
-             create_id_token_entity(auth_conf.mapping_id_token.as_deref(), policy_store, tkn, &tkns_metadata.id_tokens.claim_mapping)
+             create_id_token_entity(auth_conf.mapping_id_token.as_deref(), policy_store, tkn)
                 .map_err(AuthorizeError::CreateIdTokenEntity)
         }).transpose()?;
 
         // build userinfo_token Entity
         let userinfo_token = tokens.userinfo_token.as_ref().map(|tkn| {
-            let tkns_metadata = tkn.iss().unwrap_or_default().tokens_metadata();
-             create_userinfo_token_entity(auth_conf.mapping_userinfo_token.as_deref(), policy_store, tkn, &tkns_metadata.userinfo_tokens.claim_mapping)
+             create_userinfo_token_entity(auth_conf.mapping_userinfo_token.as_deref(), policy_store, tkn)
                 .map_err(AuthorizeError::CreateUserinfoTokenEntity)
         }).transpose()?;
         

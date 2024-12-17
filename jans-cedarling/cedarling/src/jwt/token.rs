@@ -5,7 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use crate::common::policy_store::{ClaimMappings, TokenKind, TokensMetadata, TrustedIssuer};
+use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TokenKind, TrustedIssuer};
 use serde::Deserialize;
 use serde_json::Value;
 use std::collections::HashMap;
@@ -35,17 +35,11 @@ impl Token<'_> {
         }
     }
 
-    pub fn iss(&self) -> Option<&TrustedIssuer> {
+    pub fn metadata(&self) -> &TokenEntityMetadata {
         match self {
-            Token::Access(data) | Token::Id(data) | Token::Userinfo(data) => data.iss,
-        }
-    }
-
-    pub fn metadata(&self) -> TokensMetadata<'_> {
-        match self {
-            Token::Access(data) | Token::Id(data) | Token::Userinfo(data) => {
-                data.iss.unwrap_or_default().tokens_metadata()
-            },
+            Token::Access(data) => data.iss.unwrap_or_default().tokens_metadata().access_tokens,
+            Token::Id(data) => data.iss.unwrap_or_default().tokens_metadata().access_tokens,
+            Token::Userinfo(data) => data.iss.unwrap_or_default().tokens_metadata().access_tokens,
         }
     }
 
@@ -71,14 +65,7 @@ impl Token<'_> {
 
     pub fn claim_mapping(&self) -> &ClaimMappings {
         match self {
-            Token::Access(data) => {
-                &data
-                    .iss
-                    .unwrap_or_default()
-                    .access_tokens
-                    .entity_metadata
-                    .claim_mapping
-            },
+            Token::Access(data) => &data.iss.unwrap_or_default().access_tokens.claim_mapping,
             Token::Id(data) => &data.iss.unwrap_or_default().id_tokens.claim_mapping,
             Token::Userinfo(data) => &data.iss.unwrap_or_default().userinfo_tokens.claim_mapping,
         }

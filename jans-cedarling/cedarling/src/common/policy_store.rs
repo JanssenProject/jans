@@ -15,7 +15,7 @@ use cedar_policy::PolicyId;
 use semver::Version;
 use serde::{Deserialize, Deserializer};
 use std::{collections::HashMap, fmt, sync::LazyLock};
-pub use token_entity_metadata::{AccessTokenEntityMetadata, ClaimMappings, TokenEntityMetadata};
+pub use token_entity_metadata::{ClaimMappings, TokenEntityMetadata};
 
 /// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
 #[derive(Debug, Clone, serde::Deserialize, PartialEq)]
@@ -101,7 +101,7 @@ pub struct TrustedIssuer {
 
     /// Metadata for access tokens issued by the trusted issuer.
     #[serde(default)]
-    pub access_tokens: AccessTokenEntityMetadata,
+    pub access_tokens: TokenEntityMetadata,
 
     /// Metadata for ID tokens issued by the trusted issuer.
     #[serde(default)]
@@ -141,7 +141,7 @@ impl TrustedIssuer {
     /// Retrieves the claim that defines the `Role` for a given token type.
     pub fn role_mapping(&self, token_kind: TokenKind) -> Option<&str> {
         match token_kind {
-            TokenKind::Access => self.access_tokens.entity_metadata.role_mapping.as_deref(),
+            TokenKind::Access => self.access_tokens.role_mapping.as_deref(),
             TokenKind::Id => self.id_tokens.role_mapping.as_deref(),
             TokenKind::Userinfo => self.userinfo_tokens.role_mapping.as_deref(),
             TokenKind::Transaction => self.tx_tokens.role_mapping.as_deref(),
@@ -151,7 +151,7 @@ impl TrustedIssuer {
     /// Retrieves the claim that defines the `User` for a given token type.
     pub fn user_mapping(&self, token_kind: TokenKind) -> Option<&str> {
         match token_kind {
-            TokenKind::Access => self.access_tokens.entity_metadata.user_id.as_deref(),
+            TokenKind::Access => self.access_tokens.user_id.as_deref(),
             TokenKind::Id => self.id_tokens.user_id.as_deref(),
             TokenKind::Userinfo => self.userinfo_tokens.user_id.as_deref(),
             TokenKind::Transaction => self.tx_tokens.user_id.as_deref(),
@@ -171,7 +171,7 @@ impl TrustedIssuer {
 // Hold reference to tokens metadata
 pub struct TokensMetadata<'a> {
     /// Metadata for access tokens issued by the trusted issuer.
-    pub access_tokens: &'a AccessTokenEntityMetadata,
+    pub access_tokens: &'a TokenEntityMetadata,
 
     /// Metadata for ID tokens issued by the trusted issuer.
     pub id_tokens: &'a TokenEntityMetadata,

@@ -13,10 +13,9 @@ mod trait_as_expression;
 #[cfg(test)]
 mod test_create;
 
+use super::request::ResourceData;
 use crate::common::cedar_schema::CedarSchemaJson;
-use crate::common::policy_store::{
-    AccessTokenEntityMetadata, ClaimMappings, PolicyStore, TokenKind,
-};
+use crate::common::policy_store::{ClaimMappings, PolicyStore, TokenKind};
 use crate::jwt::Token;
 use cedar_policy::EntityUid;
 pub use create::CreateCedarEntityError;
@@ -25,7 +24,7 @@ use create::{build_entity_uid, create_entity, parse_namespace_and_typename, Enti
 use std::collections::HashSet;
 use std::fmt;
 
-use super::request::ResourceData;
+const DEFAULT_TKN_PRINCIPAL_IDENTIFIER: &str = "jti";
 
 pub struct DecodedTokens<'a> {
     pub access_token: Option<Token<'a>>,
@@ -44,8 +43,7 @@ pub fn create_workload_entity(
     let mut errors = Vec::new();
 
     if let Some(token) = tokens.id_token.as_ref() {
-        let meta = token.metadata();
-        let claim_mapping = &meta.id_tokens.claim_mapping;
+        let claim_mapping = &token.claim_mapping();
         let workload_entity_meta = EntityMetadata::new(
             EntityParsedTypeName {
                 typename: entity_mapping.unwrap_or("Workload"),
@@ -60,8 +58,7 @@ pub fn create_workload_entity(
     }
 
     if let Some(token) = tokens.access_token.as_ref() {
-        let meta = token.metadata();
-        let claim_mapping = &meta.id_tokens.claim_mapping;
+        let claim_mapping = &token.claim_mapping();
         let workload_entity_meta = EntityMetadata::new(
             EntityParsedTypeName {
                 typename: entity_mapping.unwrap_or("Workload"),
@@ -107,33 +104,36 @@ impl fmt::Display for CreateWorkloadEntityError {
 pub fn create_access_token(
     entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
-    data: &Token,
-    meta: &AccessTokenEntityMetadata,
+    token: &Token,
 ) -> Result<cedar_policy::Entity, CreateCedarEntityError> {
     let schema = &policy_store.schema.json;
     let namespace = policy_store.namespace();
-    let claim_mapping = &meta.entity_metadata.claim_mapping;
+    let claim_mapping = token.claim_mapping();
 
     let access_entity_meta = EntityMetadata::new(
         EntityParsedTypeName {
             typename: entity_mapping.unwrap_or("Access_token"),
             namespace,
         },
-        meta.principal_identifier.as_deref().unwrap_or("jti"),
+        token
+            .metadata()
+            .principal_identifier
+            .as_deref()
+            .unwrap_or(DEFAULT_TKN_PRINCIPAL_IDENTIFIER),
     );
 
-    access_entity_meta.create_entity(schema, data, HashSet::new(), claim_mapping)
+    access_entity_meta.create_entity(schema, token, HashSet::new(), claim_mapping)
 }
 
 /// Create id_token entity
 pub fn create_id_token_entity(
     entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
-    data: &Token,
-    claim_mapping: &ClaimMappings,
+    token: &Token,
 ) -> Result<cedar_policy::Entity, CreateCedarEntityError> {
     let schema = &policy_store.schema.json;
     let namespace = policy_store.namespace();
+    let claim_mapping = token.claim_mapping();
 
     EntityMetadata::new(
         EntityParsedTypeName {
@@ -142,7 +142,7 @@ pub fn create_id_token_entity(
         },
         "jti",
     )
-    .create_entity(schema, data, HashSet::new(), claim_mapping)
+    .create_entity(schema, token, HashSet::new(), claim_mapping)
 }
 
 /// Create user entity
@@ -234,10 +234,10 @@ pub fn create_userinfo_token_entity(
     entity_mapping: Option<&str>,
     policy_store: &PolicyStore,
     token: &Token,
-    claim_mapping: &ClaimMappings,
 ) -> Result<cedar_policy::Entity, CreateCedarEntityError> {
     let schema = &policy_store.schema.json;
     let namespace = policy_store.namespace();
+    let claim_mapping = token.claim_mapping();
 
     EntityMetadata::new(
         EntityParsedTypeName {
