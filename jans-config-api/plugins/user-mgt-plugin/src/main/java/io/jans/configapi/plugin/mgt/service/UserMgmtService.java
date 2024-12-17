@@ -239,24 +239,23 @@ public class UserMgmtService {
     }
 
     private User updateCustomAttributes(User user, List<CustomObjectAttribute> customAttributes) {
-        logger.info("Custom Attributes to update for - user:{}, customAttributes:{} ", user, customAttributes);
+        logger.info("Custom Attributes to update for - user:{} ", user);
 
         if (customAttributes == null || customAttributes.isEmpty()) {
             return user;
         }
-
         //validate custom attribute validation
         validateAttributes(customAttributes);
         
         for (CustomObjectAttribute attribute : customAttributes) {
             CustomObjectAttribute existingAttribute = userService.getCustomAttribute(user, attribute.getName());
-            logger.debug("Existing CustomAttributes with existingAttribute:{} ", existingAttribute);
+            logger.debug("Existing CustomAttributes with existingAttribute.getName():{} ", existingAttribute.getName());
 
             // add
             if (existingAttribute == null) {
                 boolean result = userService.addUserAttribute(user, attribute.getName(), attribute.getValues(),
                         attribute.isMultiValued());
-                logger.debug("Result of adding CustomAttributes attribute:{} , result:{} ", attribute, result);
+                logger.debug("Result of adding CustomAttributes attribute.getName():{} , result:{} ", attribute.getName(), result);
             }
             // remove attribute
             else if (attribute.getValue() == null || attribute.getValues() == null) {
@@ -268,9 +267,6 @@ public class UserMgmtService {
                 existingAttribute.setMultiValued(attribute.isMultiValued());
                 existingAttribute.setValues(attribute.getValues());
             }
-            // Final attribute
-            logger.info("Finally user CustomAttributes user.getCustomAttributes:{} ", user.getCustomAttributes());
-
         }
 
         return user;
@@ -442,8 +438,7 @@ public class UserMgmtService {
     }
 
     public User addUser(User user, boolean active) {
-        logger.info("\n Creating user:{}, user.getCustomAttributes():{}, active:{}", user, user.getCustomAttributes(),
-                active);
+        logger.info("\n Creating user:{}, active:{}", user, active);
         user = userService.addUser(user, active);
         logger.info("New user:{}\n", user);
         // remove inactive claims
@@ -459,7 +454,7 @@ public class UserMgmtService {
     }
 
     public User updateUser(User user) {
-        logger.info("\n Updating user:{}, user.getCustomAttributes():{}", user, user.getCustomAttributes());
+        logger.info("\n Updating user:{}", user);
         user = userService.updateUser(user);
         logger.info("Updated user:{} \n", user);
         // remove inactive claims
@@ -481,7 +476,6 @@ public class UserMgmtService {
         }
         for (User user : users) {
             List<CustomObjectAttribute> customAttributes = user.getCustomAttributes();
-            logger.debug("customAttributes: {}", customAttributes);
             // remove inactive attributes
             removeInActiveCustomAttribute(customAttributes);
         }
@@ -489,7 +483,7 @@ public class UserMgmtService {
     }
 
     public List<CustomObjectAttribute> removeInActiveCustomAttribute(List<CustomObjectAttribute> customAttributes) {
-        logger.info("User customAttributes: {}", customAttributes);
+
         if (customAttributes == null || customAttributes.isEmpty()) {
             return customAttributes;
         }
@@ -525,7 +519,6 @@ public class UserMgmtService {
     }
 
     public void validateAttributes(List<CustomObjectAttribute> customAttributes) {
-        logger.info("\n **** Validate customAttributes: {}", customAttributes);
         if (customAttributes == null || customAttributes.isEmpty()) {
             return;
         }
@@ -559,8 +552,8 @@ public class UserMgmtService {
 
     private String validateCustomAttributes(CustomObjectAttribute customObjectAttribute,
             AttributeValidation attributeValidation) {
-        logger.info("Validate customObjectAttribute:{}, attributeValidation:{}", customObjectAttribute,
-                attributeValidation);
+        logger.info("Validate attributeValidation:{}", attributeValidation);
+        
         StringBuilder sb = new StringBuilder();
         if (customObjectAttribute == null || attributeValidation == null) {
             return sb.toString();
@@ -568,9 +561,7 @@ public class UserMgmtService {
 
         String attributeName = customObjectAttribute.getName();
         try {
-
             String attributeValue = String.valueOf(customObjectAttribute.getValue());
-            logger.info("Validate attributeName:{}, attributeValue:{}", attributeName, attributeValue);
             if (StringUtils.isBlank(attributeValue)) {
                 return sb.toString();
 
@@ -579,8 +570,8 @@ public class UserMgmtService {
             Integer maxValue = attributeValidation.getMaxLength();
             String regexpValue = attributeValidation.getRegexp();
             logger.info(
-                    "Validate attributeValue:{}, attributeValue.length():{}, attributeValidation.getMinLength():{}, attributeValidation.getMaxLength():{}, attributeValidation.getRegexp():{}",
-                    attributeValue, attributeValue.length(), attributeValidation.getMinLength(),
+                    "Validate attributeValue.length():{}, attributeValidation.getMinLength():{}, attributeValidation.getMaxLength():{}, attributeValidation.getRegexp():{}",
+                    attributeValue.length(), attributeValidation.getMinLength(),
                     attributeValidation.getMaxLength(), attributeValidation.getRegexp());
 
             // minvalue Validation
