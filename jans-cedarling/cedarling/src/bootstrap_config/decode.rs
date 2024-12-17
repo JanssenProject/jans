@@ -422,6 +422,10 @@ pub struct ParseFeatureToggleError {
 impl BootstrapConfig {
     /// Construct an instance from BootstrapConfigRaw
     pub fn from_raw_config(raw: &BootstrapConfigRaw) -> Result<Self, BootstrapConfigLoadingError> {
+        if !raw.workload_authz.is_enabled() && !raw.user_authz.is_enabled() {
+            return Err(BootstrapConfigLoadingError::BothPrincipalsDisabled);
+        }
+
         // Decode LogCofig
         let log_type = match raw.log_type {
             LoggerType::Off => LogTypeConfig::Off,
