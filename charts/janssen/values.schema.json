@@ -953,6 +953,7 @@
                                     "description": "SCIM ingress resource additional annotations.",
                                     "type": "object"
                                 }
+                                }
                             }
                     }
                 },
