@@ -39,8 +39,8 @@ use init::ServiceFactory;
 use common::app_types;
 use log::interface::LogWriter;
 use log::LogEntry;
-pub use log::LogStorage;
 use log::LogType;
+pub use log::{LogLevel, LogStorage};
 
 pub use crate::authz::entities::CreateCedarEntityError;
 
@@ -85,6 +85,7 @@ impl Cedarling {
             .inspect(|_| {
                 log.log(
                     LogEntry::new_with_data(pdp_id, None, LogType::System)
+                        .set_level(LogLevel::DEBUG)
                         .set_message("configuration parsed successfully".to_string()),
                 )
             })
@@ -92,6 +93,7 @@ impl Cedarling {
                 log.log(
                     LogEntry::new_with_data(pdp_id, None, LogType::System)
                         .set_error(err.to_string())
+                        .set_level(LogLevel::ERROR)
                         .set_message("configuration parsed with error".to_string()),
                 )
             })?;
