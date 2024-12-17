@@ -102,16 +102,22 @@ class CedarlingInstance:
             result_dict["decision"] = False
             person_result = authorize_result.person()
             workload_result = authorize_result.workload()
+            person_value = None
+            workload_value = None
+            if person_result is not None:
+                person_value = person_result.decision.value
+            if workload_result is not None:
+                workload_value = workload_result.decision.value
             person_diagnostic = self.generate_report(person_result, "reason")
             person_error = self.generate_report(person_result, "error")
             workload_diagnostic = self.generate_report(workload_result, "reason")
             workload_error = self.generate_report(workload_result, "error")
             result_dict["context"] = {
                 "reason_admin": {
-                    "person evaluation": authorize_result.person().decision.value,
+                    "person evaluation": person_value,
                     "person diagnostics": person_diagnostic,
                     "person error": person_error,
-                    "workload evaluation": authorize_result.workload().decision.value,
+                    "workload evaluation": workload_value,
                     "workload diagnostics": workload_diagnostic,
                     "workload_error": workload_error
                 }

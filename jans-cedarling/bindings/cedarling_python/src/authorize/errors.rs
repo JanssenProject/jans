@@ -120,6 +120,13 @@ create_exception!(
     "Error encountered while parsing all entities to json for logging"
 );
 
+create_exception!(
+    authorize_errors,
+    AddEntitiesIntoContextError,
+    AuthorizeError,
+    "Error encountered while adding entities into context"
+);
+
 #[pyclass]
 #[derive()]
 pub struct ErrorPayload(CedarlingAuthorizeError);
@@ -170,6 +177,7 @@ errors_functions! {
     CreateContext => CreateContextError,
     CreateRequestWorkloadEntity => CreateRequestWorkloadEntityError,
     CreateRequestUserEntity => CreateRequestUserEntityError,
+    BuildContext => AddEntitiesIntoContextError,
     Entities => EntitiesError,
     EntitiesToJson => EntitiesToJsonError
 }
