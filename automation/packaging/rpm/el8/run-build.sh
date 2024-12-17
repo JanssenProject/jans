@@ -7,7 +7,7 @@ sed -i "s/%VER%/$VERSION/g" jans.spec
 if [ -z "$REL" ]; then
         RELEASE="el8"
 else
-        RELEASE="$REL.el8"
+        RELEASE="$REL-el8"
 fi
 sed -i "s/%RELEASE%/$RELEASE/g" jans.spec
 rpmbuild_path="$current_dir/rpmbuild"
