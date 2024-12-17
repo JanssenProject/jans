@@ -162,7 +162,8 @@ fn test_custom_mapping() {
 fn test_failed_user_mapping() {
     let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
 
-    raw_config.mapping_user = Some("MappedUserNotExist".to_string());
+    let entity_type = "MappedUserNotExist".to_string();
+    raw_config.mapping_user = Some(entity_type.to_string());
 
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
@@ -175,14 +176,39 @@ fn test_failed_user_mapping() {
         .authorize(request)
         .expect_err("request should be parsed with mapping error");
 
-    assert!(
-        matches!(
-            err,
-            AuthorizeError::CreateUserEntity(CreateCedarEntityError::CouldNotFindEntity(ref err)) if err == "MappedUserNotExist"
-        ),
-        "should be error CreateUserEntity(MissingClaim(\"MappedUserNotExist\")), got: {:?}",
-        err
-    );
+    match err {
+        AuthorizeError::CreateUserEntity(error) => {
+            assert_eq!(error.errors.len(), 3, "there should be 3 errors");
+
+            let (token_kind, err) = &error.errors[0];
+            assert_eq!(token_kind, &TokenKind::Id);
+            assert!(
+                matches!(err, CreateCedarEntityError::CouldNotFindEntity(ref err) if err == &entity_type),
+                "expected CouldNotFindEntity({}), got: {:?}",
+                &entity_type,
+                err,
+            );
+
+            let (token_kind, err) = &error.errors[1];
+            assert_eq!(token_kind, &TokenKind::Access);
+            assert!(
+                matches!(err, CreateCedarEntityError::MissingClaim(claim) if claim == "sub"),
+                "expected CouldNotFindEntity({}), got: {:?}",
+                &entity_type,
+                err,
+            );
+
+            let (token_kind, err) = &error.errors[2];
+            assert_eq!(token_kind, &TokenKind::Userinfo);
+            assert!(
+                matches!(err, CreateCedarEntityError::CouldNotFindEntity(ref err) if err == &entity_type),
+                "expected CouldNotFindEntity({}), got: {:?}",
+                &entity_type,
+                err,
+            );
+        },
+        _ => panic!("expected error CreateWorkloadEntity"),
+    }
 }
 
 /// Check if we get error on mapping workload to undefined entity
@@ -204,21 +230,21 @@ fn test_failed_workload_mapping() {
         .expect_err("request should be parsed with mapping error");
 
     match err {
-        AuthorizeError::CreateWorkloadEntity(mut error) => {
+        AuthorizeError::CreateWorkloadEntity(error) => {
             assert_eq!(error.errors.len(), 2, "there should be 2 errors");
 
-            // check for second error
-            let (token_kind, err) = error.errors.pop().unwrap();
-            assert_eq!(token_kind, TokenKind::Access);
+            // check for first error
+            let (token_kind, err) = &error.errors[0];
+            assert_eq!(token_kind, &TokenKind::Id);
             assert!(
                 matches!(err, CreateCedarEntityError::CouldNotFindEntity(ref err) if err == &entity_type),
                 "expected CouldNotFindEntity({})",
                 &entity_type
             );
 
-            // check for first error
-            let (token_kind, err) = error.errors.pop().unwrap();
-            assert_eq!(token_kind, TokenKind::Id);
+            // check for second error
+            let (token_kind, err) = &error.errors[1];
+            assert_eq!(token_kind, &TokenKind::Access);
             assert!(
                 matches!(err, CreateCedarEntityError::CouldNotFindEntity(ref err) if err == &entity_type),
                 "expected CouldNotFindEntity({})",

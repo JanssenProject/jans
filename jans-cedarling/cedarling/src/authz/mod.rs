@@ -30,7 +30,7 @@ pub(crate) mod request;
 pub use authorize_result::AuthorizeResult;
 
 use cedar_policy::{Entities, Entity, EntityUid};
-use entities::{create_resource_entity, CreateWorkloadEntityError, DecodedTokens};
+use entities::{create_resource_entity, CreateUserEntityError, CreateWorkloadEntityError, DecodedTokens};
 use entities::CreateCedarEntityError;
 use entities::ResourceEntityError;
 use entities::{
@@ -280,7 +280,7 @@ impl Authz {
                 policy_store,
                 tokens,
                 HashSet::from_iter(role.iter().map(|e| e.uid())),
-            ).map_err(AuthorizeError::CreateUserEntity)?)
+            )?)
         } else {
             None
         };
@@ -390,7 +390,7 @@ pub enum AuthorizeError {
     CreateAccessTokenEntity(CreateCedarEntityError),
     /// Error encountered while creating user entity
     #[error("could not create User entity: {0}")]
-    CreateUserEntity(CreateCedarEntityError),
+    CreateUserEntity(#[from] CreateUserEntityError),
     /// Error encountered while creating workload
     #[error(transparent)]
     CreateWorkloadEntity(#[from] CreateWorkloadEntityError),

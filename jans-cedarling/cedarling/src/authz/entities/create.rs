@@ -66,7 +66,6 @@ impl<'a> EntityMetadata<'a> {
                 .as_str()?,
         )?;
 
-        println!("type: {:?}", self.entity_type);
         create_entity(
             entity_uid,
             &self.entity_type,

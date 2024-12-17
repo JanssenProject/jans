@@ -151,52 +151,82 @@ pub fn create_user_entity(
     policy_store: &PolicyStore,
     tokens: &DecodedTokens,
     parents: HashSet<EntityUid>,
-) -> Result<cedar_policy::Entity, CreateCedarEntityError> {
-    println!("parents: {:?}", parents);
+) -> Result<cedar_policy::Entity, CreateUserEntityError> {
     let schema: &CedarSchemaJson = &policy_store.schema.json;
     let namespace = policy_store.namespace();
+    let mut errors = Vec::new();
 
-    // We attempt to create the User entity using the first available token that also
-    // has an assigned claim to get the User Entity's id from.
-
-    // (token, user_mapping, claim_mapping)
-    let mut token: Option<&Token> = None;
-
-    if let Some(tkn) = tokens.userinfo_token.as_ref() {
-        let user_mapping = tkn.user_mapping();
-        if tkn.has_claim(user_mapping) {
-            token = Some(tkn);
+    if let Some(token) = tokens.id_token.as_ref() {
+        match EntityMetadata::new(
+            EntityParsedTypeName {
+                typename: entity_mapping.unwrap_or("User"),
+                namespace,
+            },
+            token.user_mapping(),
+        )
+        .create_entity(schema, token, parents.clone(), token.claim_mapping())
+        {
+            Ok(entity) => return Ok(entity),
+            Err(e) => errors.push((TokenKind::Id, e)),
         }
     }
 
-    if token.is_none() {
-        if let Some(tkn) = tokens.id_token.as_ref() {
-            let user_mapping = tkn.user_mapping();
-            if tkn.has_claim(user_mapping) {
-                token = Some(tkn);
+    if let Some(token) = tokens.access_token.as_ref() {
+        match EntityMetadata::new(
+            EntityParsedTypeName {
+                typename: entity_mapping.unwrap_or("User"),
+                namespace,
+            },
+            token.user_mapping(),
+        )
+        .create_entity(schema, token, parents.clone(), token.claim_mapping())
+        {
+            Ok(entity) => return Ok(entity),
+            Err(e) => errors.push((TokenKind::Access, e)),
+        }
+    }
+
+    if let Some(token) = tokens.userinfo_token.as_ref() {
+        match EntityMetadata::new(
+            EntityParsedTypeName {
+                typename: entity_mapping.unwrap_or("User"),
+                namespace,
+            },
+            token.user_mapping(),
+        )
+        .create_entity(schema, token, parents.clone(), token.claim_mapping())
+        {
+            Ok(entity) => return Ok(entity),
+            Err(e) => errors.push((TokenKind::Userinfo, e)),
+        }
+    }
+
+    Err(CreateUserEntityError { errors })
+}
+
+#[derive(Debug, thiserror::Error)]
+pub struct CreateUserEntityError {
+    pub errors: Vec<(TokenKind, CreateCedarEntityError)>,
+}
+
+impl fmt::Display for CreateUserEntityError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.errors.is_empty() {
+            writeln!(
+                f,
+                "Failed to create User Entity since no tokens were provided"
+            )?;
+        } else {
+            writeln!(
+                f,
+                "Failed to create User Entity due to the following errors:"
+            )?;
+            for (token_kind, error) in &self.errors {
+                writeln!(f, "- TokenKind {:?}: {}", token_kind, error)?;
             }
         }
+        Ok(())
     }
-
-    if token.is_none() {
-        if let Some(tkn) = tokens.userinfo_token.as_ref() {
-            let user_mapping = tkn.user_mapping();
-            if tkn.has_claim(user_mapping) {
-                token = Some(tkn);
-            }
-        }
-    }
-
-    let token = token.ok_or(CreateCedarEntityError::UnavailableToken("User".to_string()))?;
-
-    EntityMetadata::new(
-        EntityParsedTypeName {
-            typename: entity_mapping.unwrap_or("User"),
-            namespace,
-        },
-        token.user_mapping(),
-    )
-    .create_entity(schema, token, parents, token.claim_mapping())
 }
 
 /// Create `Userinfo_token` entity
