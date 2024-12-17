@@ -5,7 +5,7 @@ REL=$(echo "%VERSION%" | sed "s/^${VERSION}//g" | sed "s/^-//g")
 if [ -z "$REL" ]; then
         RELEASE="suse15"
 else
-        RELEASE="$REL-suse15"
+        RELEASE="$REL.suse15"
 fi
 pushd rpmbuild/RPMS/x86_64
 echo "VERSION: $VERSION"
