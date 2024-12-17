@@ -117,9 +117,9 @@ impl Authz {
         let entities = entities_data.clone().entities(Some(&schema.schema))?;
 
         // Check authorize where principal is `"Jans::Workload"` from cedar-policy schema.
-        let workload_result = if self.config.authorization.use_workload_principal {
+        let (workload_authz_result, workload_authz_info, workload_entity_claims) = if self.config.authorization.use_workload_principal {
             let principal = entities_data.workload.ok_or(AuthorizeError::MissingPrincipal("Workload".to_string()))?.uid();
-            
+
             let authz_result = self.execute_authorize(ExecuteAuthorizeParameters { entities: &entities, principal: principal.clone(), action: action.clone(), resource: resource_uid.clone(), context: context.clone() }).map_err(AuthorizeError::WorkloadRequestValidation)?;
 
             let authz_info = WorkloadAuthorizeInfo {
@@ -132,13 +132,13 @@ impl Authz {
             };
 
             let workload_entity_claims = get_entity_claims( self.config.authorization.decision_log_workload_claims.as_slice(),&entities, principal);
-            Some((authz_result, authz_info, workload_entity_claims))
+            (Some(authz_result), Some(authz_info), Some(workload_entity_claims))
         } else {
-            None
+            (None, None, None)
         };
 
         // Check authorize where principal is `"Jans::User"` from cedar-policy schema.
-        let user_result = if self.config.authorization.use_user_principal {
+        let (user_authz_result, user_authz_info, user_entity_claims) = if self.config.authorization.use_user_principal {
             let principal = entities_data.user.ok_or(AuthorizeError::MissingPrincipal("User".to_string()))?.uid();
             
             let authz_result = self.execute_authorize(ExecuteAuthorizeParameters { entities: &entities, principal: principal.clone(), action: action.clone(), resource: resource_uid.clone(), context: context.clone() }).map_err(AuthorizeError::UserRequestValidation)?;
@@ -152,16 +152,16 @@ impl Authz {
                 decision: authz_result.decision().into(),
             };
 
-            let person_entity_claims = get_entity_claims(self.config.authorization.decision_log_user_claims.as_slice(),&entities, principal);
-            Some((authz_result, authz_info, person_entity_claims))
+            let user_entity_claims = get_entity_claims(self.config.authorization.decision_log_user_claims.as_slice(),&entities, principal);
+            (Some(authz_result), Some(authz_info), Some(user_entity_claims))
         } else {
-            None
+            (None, None, None)
         };
 
         let result = AuthorizeResult::new(
             self.config.authorization.user_workload_operator,
-            workload_result.clone().map(|x| x.0),
-            user_result.clone().map(|x| x.0),
+            workload_authz_result,
+            user_authz_result,
         );
 
         // measure time how long request executes
@@ -191,9 +191,8 @@ impl Authz {
                 context: request.context.clone(),
                 resource: resource_uid.to_string(),
                 entities: entities_json,
-
-                person_authorize_info: user_result.clone().map(|x| x.1),
-                workload_authorize_info: workload_result.clone().map(|x| x.1),
+                person_authorize_info: user_authz_info,
+                workload_authorize_info: workload_authz_info,
                 authorized: result.is_allowed(),
             })
             .set_message("Result of authorize.".to_string()),
@@ -210,8 +209,8 @@ impl Authz {
             policystore_id: self.config.policy_store.id.as_str(),
             policystore_version: self.config.policy_store.get_store_version(),
             principal: PrincipalLogEntry::new(&self.config.authorization),
-            user: user_result.map(|res| res.2),
-            workload: workload_result.map(|res| res.2),
+            user: user_entity_claims,
+            workload: workload_entity_claims,
             lock_client_id: None,
             action: request.action.clone(),
             resource: resource_uid.to_string(),
