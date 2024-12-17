@@ -189,7 +189,7 @@ def test_resource_entity_error():
     try:
         raise_authorize_error(load_bootstrap_config())
     except authorize_errors.ResourceEntityError as e:
-        assert str(e) == "could not create resource entity: could not get attribute value from payload: could not convert json field with key: org_id to: String, got: number"
+        assert str(e) == "could not create resource entity: could not get attribute value from payload: Type mismatch for key 'org_id': expected: 'String', but found: 'number'"
 
 
 def test_authorize_error():
@@ -201,4 +201,4 @@ def test_authorize_error():
     try:
         raise_authorize_error(load_bootstrap_config())
     except authorize_errors.AuthorizeError as e:
-        assert str(e) == "could not create resource entity: could not get attribute value from payload: could not convert json field with key: org_id to: String, got: number"
+        assert str(e) == "could not create resource entity: could not get attribute value from payload: Type mismatch for key 'org_id': expected: 'String', but found: 'number'"
