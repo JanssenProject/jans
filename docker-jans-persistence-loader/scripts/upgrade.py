@@ -510,40 +510,6 @@ class Upgrade:
             entry.attrs["jansAuthMode"] = "simple_password_auth"
             should_update = True
 
-        # default smtp config
-        default_smtp_conf = {
-            "key_store": "/etc/certs/smtp-keys.pkcs12",
-            "key_store_password": self.manager.secret.get("smtp_jks_pass_enc"),
-            "key_store_alias": self.manager.config.get("smtp_alias"),
-            "signing_algorithm": self.manager.config.get("smtp_signing_alg"),
-        }
-
-        # set jansSmtpConf if still empty
-        smtp_conf = entry.attrs.get("jansSmtpConf")
-
-        if not self.backend.client.use_simple_json:
-            if not smtp_conf["v"]:
-                entry.attrs["jansSmtpConf"]["v"].append(json.dumps(default_smtp_conf))
-                should_update = True
-            else:
-                if new_smtp_conf := _transform_smtp_config(default_smtp_conf, smtp_conf["v"]):
-                    entry.attrs["jansSmtpConf"]["v"][0] = json.dumps(new_smtp_conf)
-                    should_update = True
-
-        # other persistence backends
-        else:
-            # ensure smtp_conf is a list
-            if not isinstance(smtp_conf, list):
-                smtp_conf = [smtp_conf]
-
-            if not smtp_conf:
-                entry.attrs["jansSmtpConf"].append(json.dumps(default_smtp_conf))
-                should_update = True
-            else:
-                if new_smtp_conf := _transform_smtp_config(default_smtp_conf, smtp_conf):
-                    entry.attrs["jansSmtpConf"][0] = json.dumps(new_smtp_conf)
-                    should_update = True
-
         # scim support
         scim_enabled = as_boolean(os.environ.get("CN_SCIM_ENABLED", False))
         if as_boolean(entry.attrs["jansScimEnabled"]) != scim_enabled:
@@ -574,22 +540,6 @@ class Upgrade:
             revision = entry.attrs.get("jansRevision") or 1
             entry.attrs["jansRevision"] = revision + 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
-
-
-def _transform_smtp_config(default_smtp_conf, smtp_conf):
-    old_smtp_conf = json.loads(smtp_conf[0])
-    new_smtp_conf = {}
-
-    for k, v in default_smtp_conf.items():
-        if k in old_smtp_conf:
-            continue
-
-        # rename key and migrate the value (fallback to default value)
-        new_smtp_conf[k] = old_smtp_conf.pop(
-            # old key uses `-` instead of `_` char
-            k.replace("_", "-"), ""
-        ) or v
-    return new_smtp_conf
 
 
 def _transform_message_config(conf):
