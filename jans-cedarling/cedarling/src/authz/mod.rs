@@ -367,46 +367,38 @@ pub struct AuthorizeEntitiesData {
 impl AuthorizeEntitiesData {
     /// Create iterator to get all entities
     fn into_iter(self) -> impl Iterator<Item = Entity> {
-        let mut entities = vec![
+        vec![
             self.resource,
             self.user,
             self.workload,
-        ];
-
-        if let Some(entity) = self.access_token {
-            entities.push(entity);
-        }
-        if let Some(entity) = self.userinfo_token {
-            entities.push(entity);
-        }
-        if let Some(entity) = self.id_token {
-            entities.push(entity);
-        }
-
-        entities.into_iter()
+        ]
+        .into_iter()
         .chain(self.role)
+        .chain(vec![
+            self.access_token, 
+            self.userinfo_token, 
+            self.id_token
+        ]
+        .into_iter()
+        .filter_map(|x| x))
     }
 
     /// Create iterator to get all entities
     fn iter(&self) -> impl Iterator<Item = &Entity> {
-        let mut entities = vec![
+        vec![
             &self.resource,
             &self.user,
             &self.workload,
-        ];
-
-        if let Some(entity) = self.access_token.as_ref() {
-            entities.push(entity);
-        }
-        if let Some(entity) = self.userinfo_token.as_ref() {
-            entities.push(entity);
-        }
-        if let Some(entity) = self.id_token.as_ref() {
-            entities.push(entity);
-        }
-
-        entities.into_iter()
+        ]
+        .into_iter()
         .chain(self.role.iter())
+        .chain(vec![
+            self.access_token.as_ref(), 
+            self.userinfo_token.as_ref(), 
+            self.id_token.as_ref()
+        ]
+        .into_iter()
+        .filter_map(|x| x))
     }
 
     /// Collect all entities to [`cedar_policy::Entities`]
