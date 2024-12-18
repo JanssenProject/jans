@@ -127,8 +127,6 @@ fn fetch_schema_record<'a>(
             entity_info.typename.to_string(),
         ))?;
 
-    // just to check if the entity is a record to be sure
-    // if shape not empty
     if let Some(entity_record) = &entity_shape.shape {
         if !entity_record.is_record() {
             return Err(CreateCedarEntityError::NotRecord(
