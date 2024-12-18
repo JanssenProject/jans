@@ -833,6 +833,14 @@
                                     "description": "Enable endpoint /.well-known/fido2-configuration",
                                     "type": "boolean"
                                 },
+                                "fido2Enabled": {
+                                    "description": "Enable endpoint /jans-fido2",
+                                    "type": "boolean"
+                                },
+                                "fido2WebauthnEnabled": {
+                                    "description": "Enable endpoint /.well-known/webauthn",
+                                    "type": "boolean"
+                                },
                                 "fido2ConfigLabels": {
                                     "description": "fido2 config ingress resource labels. key app is taken",
                                     "type": "object"
@@ -848,7 +856,15 @@
                                 "fido2AdditionalAnnotations": {
                                     "description": "fido2 ingress resource additional annotations.",
                                     "type": "object"
-                                }                                
+                                },
+                                "fido2WebauthnLabels": {
+                                    "description": "fido2 webauthn ingress resource labels. key app is taken",
+                                    "type": "object"
+                                },
+                                "fido2WebauthnAdditionalAnnotations": {
+                                    "description": "fido2 webauthn ingress resource additional annotations.",
+                                    "type": "object"
+                                }
                             }
                     }
                     }
