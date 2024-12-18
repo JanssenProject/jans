@@ -20,12 +20,12 @@ use serde_pyobject::from_pyobject;
 ///
 /// Attributes
 /// ----------
-/// :param access_token: The access token string.
-/// :param id_token: The id token string.
-/// :param userinfo_token: The userinfo token string.
 /// :param action: The action to be authorized.
 /// :param resource: Resource data (wrapped `ResourceData` object).
 /// :param context: Python dictionary with additional context.
+/// :param access_token: (Optional) The access token string.
+/// :param id_token: (Optional) The id token string.
+/// :param userinfo_token: (Optional) The userinfo token string.
 ///
 /// Example
 /// -------
@@ -36,11 +36,11 @@ use serde_pyobject::from_pyobject;
 #[pyclass(get_all, set_all)]
 pub struct Request {
     /// Access token raw value
-    pub access_token: String,
+    pub access_token: Option<String>,
     /// Id token raw value
-    pub id_token: String,
+    pub id_token: Option<String>,
     /// Userinfo token raw value
-    pub userinfo_token: String,
+    pub userinfo_token: Option<String>,
     /// cedar_policy action
     pub action: String,
     /// cedar_policy resource data
@@ -52,13 +52,14 @@ pub struct Request {
 #[pymethods]
 impl Request {
     #[new]
+    #[pyo3(signature = (action, resource, context, access_token=None, id_token=None, userinfo_token=None))]
     fn new(
-        access_token: String,
-        id_token: String,
-        userinfo_token: String,
         action: String,
         resource: ResourceData,
         context: Py<PyDict>,
+        access_token: Option<String>,
+        id_token: Option<String>,
+        userinfo_token: Option<String>,
     ) -> Self {
         Self {
             access_token,
@@ -81,9 +82,9 @@ impl Request {
         })?;
 
         Ok(cedarling::Request {
-            access_token: Some(self.access_token.clone()),
-            id_token: Some(self.id_token.clone()),
-            userinfo_token: Some(self.userinfo_token.clone()),
+            access_token: self.access_token.clone(),
+            id_token: self.id_token.clone(),
+            userinfo_token: self.userinfo_token.clone(),
             action: self.action.clone(),
             resource: self.resource.clone().into(),
             context,

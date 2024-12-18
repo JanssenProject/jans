@@ -115,11 +115,13 @@ def test_authorize_ok():
     })
 
     request = Request(
-        ACCESS_TOKEN,
-        ID_TOKEN,
-        USERINFO_TOKEN,
+        access_token=ACCESS_TOKEN,
+        id_token=ID_TOKEN,
+        userinfo_token=USERINFO_TOKEN,
         action='Jans::Action::"Update"',
-        context={}, resource=resource)
+        context={}, 
+        resource=resource,
+    )
 
     authorize_result = instance.authorize(request)
     assert authorize_result.is_allowed(), "request should be allowed"
@@ -170,9 +172,9 @@ def raise_authorize_error(bootstrap_config):
     })
 
     request = Request(
-        ACCESS_TOKEN,
-        ID_TOKEN,
-        USERINFO_TOKEN,
+        access_token=ACCESS_TOKEN,
+        id_token=ID_TOKEN,
+        userinfo_token=USERINFO_TOKEN,
         action='Jans::Action::"Update"',
         context={}, resource=resource)
 
