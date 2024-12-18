@@ -238,8 +238,10 @@ COPY templates /app/templates/
 RUN cp /app/templates/jans-config-api/jans-config-api.xml ${JETTY_BASE}/jans-config-api/webapps/
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
-RUN chmod +x /app/scripts/external_healthcheck.py \
-    && ln -s /app/scripts/external_healthcheck.py /opt/jans/bin/jans_services_status.py
+
+# drop-replacement for jans-linux-setup jans_services_status.py script
+COPY contrib/external_healthcheck.py /opt/jans/bin/jans_services_status.py
+RUN chmod +x /opt/jans/bin/jans_services_status.py
 
 # unquote apiApprovedIssuer
 RUN sed -i 's/"${apiApprovedIssuer}"/${apiApprovedIssuer}/g' /app/templates/jans-config-api/dynamic-conf.json
