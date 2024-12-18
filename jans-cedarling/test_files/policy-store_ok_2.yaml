@@ -89,6 +89,12 @@ policy_stores:
           id_token: id_token,
           userinfo_token: Userinfo_token,
         };
+        type ContextWithoutUser = {
+          workload: Workload,
+          access_token: Access_token,
+          id_token: id_token,
+          userinfo_token: Userinfo_token,
+        };
         action "Update" appliesTo {
           principal: [Workload, User],
           resource: [Issue],
@@ -97,7 +103,7 @@ policy_stores:
         action "UpdateForWorkload" appliesTo {
           principal: [Workload, User],
           resource: [Issue],
-          context: Context
+          context: ContextWithoutUser
         };
         action "UpdateForUser" appliesTo {
           principal: [Workload, User],

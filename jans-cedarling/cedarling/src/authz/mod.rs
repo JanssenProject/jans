@@ -147,32 +147,49 @@ impl Authz {
                     decision: authz_result.decision().into(),
                 };
 
-                let workload_entity_claims = get_entity_claims( self.config.authorization.decision_log_workload_claims.as_slice(),&entities, principal);
+                let workload_entity_claims = get_entity_claims( 
+                    self.config.authorization.decision_log_workload_claims.as_slice(),
+                    &entities, 
+                    principal
+                );
+
                 (Some(authz_result), Some(authz_info), Some(workload_entity_claims))
             } else {
                 (None, None, None)
             };
 
         // Check authorize where principal is `"Jans::User"` from cedar-policy schema.
-        let (user_authz_result, user_authz_info, user_entity_claims) = if self.config.authorization.use_user_principal {
-            let principal = entities_data.user.uid();
-            
-            let authz_result = self.execute_authorize(ExecuteAuthorizeParameters { entities: &entities, principal: principal.clone(), action: action.clone(), resource: resource_uid.clone(), context: context.clone() }).map_err(AuthorizeError::UserRequestValidation)?;
+        let (user_authz_result, user_authz_info, user_entity_claims) = 
+            if let Some(user) = entities_data.user {
+                let principal = user.uid();
+                
+                let authz_result = self.execute_authorize(ExecuteAuthorizeParameters { 
+                    entities: &entities, 
+                    principal: principal.clone(), 
+                    action: action.clone(), 
+                    resource: resource_uid.clone(), 
+                    context: context.clone() 
+                }).map_err(AuthorizeError::UserRequestValidation)?;
 
-            let authz_info = UserAuthorizeInfo {
-                principal: principal.to_string(),
-                diagnostics: Diagnostics::new(
-                    authz_result.diagnostics(),
-                    &self.config.policy_store.policies,
-                ),
-                decision: authz_result.decision().into(),
+                let authz_info = UserAuthorizeInfo {
+                    principal: principal.to_string(),
+                    diagnostics: Diagnostics::new(
+                        authz_result.diagnostics(),
+                        &self.config.policy_store.policies,
+                    ),
+                    decision: authz_result.decision().into(),
+                };
+
+                let user_entity_claims = get_entity_claims(
+                    self.config.authorization.decision_log_user_claims.as_slice(),
+                    &entities, 
+                    principal
+                );
+
+                (Some(authz_result), Some(authz_info), Some(user_entity_claims))
+            } else {
+                (None, None, None)
             };
-
-            let user_entity_claims = get_entity_claims(self.config.authorization.decision_log_user_claims.as_slice(),&entities, principal);
-            (Some(authz_result), Some(authz_info), Some(user_entity_claims))
-        } else {
-            (None, None, None)
-        };
 
         let result = AuthorizeResult::new(
             self.config.authorization.user_workload_operator,
@@ -285,12 +302,18 @@ impl Authz {
 
         // build role entity
         let role = create_role_entities(policy_store, tokens)?;
-    
+        
         // build user entity
-        let user = create_user_entity(auth_conf.mapping_user.as_deref(),
-                policy_store,
-                tokens,
-                HashSet::from_iter(role.iter().map(|e| e.uid())))?;
+        let user = if self.config.authorization.use_user_principal {
+            Some(create_user_entity(
+                auth_conf.mapping_user.as_deref(), 
+                policy_store, 
+                tokens, 
+                HashSet::from_iter(role.iter().map(|e| e.uid()))
+            )?)
+        } else {
+            None
+        };
     
         // build access_token Entity
         let access_token = tokens.access_token.as_ref().map(|tkn| {
@@ -376,7 +399,7 @@ struct ExecuteAuthorizeParameters<'a> {
 #[derive(Clone)]
 pub struct AuthorizeEntitiesData {
     pub workload: Option<Entity>,
-    pub user: Entity,
+    pub user: Option<Entity>,
     pub access_token: Option<Entity>,
     pub id_token: Option<Entity>,
     pub userinfo_token: Option<Entity>,
@@ -389,11 +412,11 @@ impl AuthorizeEntitiesData {
     fn into_iter(self) -> impl Iterator<Item = Entity> {
         vec![
             self.resource,
-            self.user,
         ]
         .into_iter()
         .chain(self.role)
         .chain(vec![
+            self.user,
             self.workload,
             self.access_token, 
             self.userinfo_token, 
@@ -407,11 +430,11 @@ impl AuthorizeEntitiesData {
     fn iter(&self) -> impl Iterator<Item = &Entity> {
         vec![
             &self.resource,
-            &self.user,
         ]
         .into_iter()
         .chain(self.role.iter())
         .chain(vec![
+            self.user.as_ref(),
             self.workload.as_ref(),
             self.access_token.as_ref(), 
             self.userinfo_token.as_ref(), 
