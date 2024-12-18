@@ -25,7 +25,8 @@ use crate::jwt;
 use cedar_policy::EntityUid;
 pub use create::CedarPolicyCreateTypeError;
 use create::EntityParsedTypeName;
-use create::{EntityMetadata, build_entity_uid, create_entity, parse_namespace_and_typename};
+pub use create::CEDAR_POLICY_SEPARATOR;
+use create::{build_entity_uid, create_entity, parse_namespace_and_typename, EntityMetadata};
 
 use super::request::ResourceData;
 use super::token_data::TokenPayload;
