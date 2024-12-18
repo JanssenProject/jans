@@ -35,3 +35,6 @@ class EvaluationRequestSchema(BaseSchema):
 class DecisionSchema(BaseSchema):
     decision = ma.fields.Bool(required=True)
     context = ma.fields.Dict()
+
+class WellKnownSchema(BaseSchema):
+    access_evaluation_v1_endpoint = ma.fields.Str()
