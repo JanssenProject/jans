@@ -30,7 +30,7 @@
 		<jans-fido2.version>${project.version}</jans-fido2.version>
 
 		<jakarta.jms.api.version>2.0.3</jakarta.jms.api.version>
-		<activemq.version>5.15.16</activemq.version>
+		<activemq.version>6.1.4</activemq.version>
 
 		<jettison.version>1.5.4</jettison.version>
 
