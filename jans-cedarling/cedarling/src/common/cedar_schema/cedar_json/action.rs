@@ -5,27 +5,216 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use crate::{
+    authz::entities::CEDAR_POLICY_SEPARATOR, common::cedar_schema::cedar_json::SchemaDefinedType,
+};
+
 use super::{
     entity_types::{
         CedarSchemaEntityAttribute, CedarSchemaEntityType, PrimitiveType, PrimitiveTypeKind,
     },
-    CedarSchemaRecord,
+    CedarSchemaEntities, CedarSchemaJson, CedarSchemaRecord, CedarType, GetCedarTypeError,
 };
 use serde::{de, ser::SerializeMap, Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
 
-pub type EntityRef = String;
+type AttrName = String;
+
+#[derive(Debug, Eq, Hash, PartialEq)]
+pub struct CtxAttribute {
+    pub namespace: String,
+    pub key: String,
+    pub kind: CedarType,
+}
+
+pub struct Action<'a> {
+    pub principal_entities: HashSet<String>,
+    pub resource_entities: HashSet<String>,
+    pub context_entities: Option<HashSet<CtxAttribute>>,
+    pub schema_entities: &'a CedarSchemaEntities,
+    pub schema: &'a ActionSchema,
+}
+
+impl Action<'_> {
+    /// Builds the JSON representation of context entities for a given action.
+    ///
+    /// This method processes the context attributes of the action and generates a
+    /// corresponding JSON value. The context may include entity references (with
+    /// `type` and `id`) and other values, which can be mapped through the provided
+    /// `id_mapping` and `value_mapping`.
+    ///
+    /// The `id_mapping` param is a A `HashMap` that maps context attribute keys
+    /// (like `"access_token"`) to their corresponding `id`s (like `"acs-tkn-1"`).
+    ///
+    /// # Usage Example
+    ///
+    /// ```rs
+    /// let id_mapping = HashMap::from([("access_token".to_string(), "acs-tkn-1".to_string())]);
+    /// let json = action.build_ctx_entities_json(id_mapping, value_mapping);
+    /// ```
+    pub fn build_ctx_entity_refs_json(
+        &self,
+        id_mapping: HashMap<String, String>,
+    ) -> Result<Value, BuildJsonCtxError> {
+        let mut json = json!({});
+
+        if let Some(ctx_entities) = &self.context_entities {
+            for attr in ctx_entities.iter() {
+                if let CedarType::TypeName(type_name) = &attr.kind {
+                    let id = match id_mapping.get(&attr.key) {
+                        Some(val) => val,
+                        None => Err(BuildJsonCtxError::MissingIdMapping(attr.key.clone()))?,
+                    };
+                    let type_name =
+                        [attr.namespace.as_str(), type_name].join(CEDAR_POLICY_SEPARATOR);
+                    json[attr.key.as_str()] = json!({"type": type_name, "id": id});
+                }
+            }
+        }
+
+        Ok(json)
+    }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum BuildJsonCtxError {
+    /// If an entity reference is provided but the ID is missing from `id_mapping`.
+    #[error("An entity reference for `{0}` is required by the schema but an ID was not provided via the `id_mapping`")]
+    MissingIdMapping(String),
+    /// If a non-entity attribute is provided but the value is missing from `value_mapping`.
+    #[error("A non-entity attribute for `{0}` is required by the schema but a value was not provided via the `value_mapping`")]
+    MissingValueMapping(String),
+}
+
+impl CedarSchemaJson {
+    /// Find the action in the schema
+    pub fn find_action(
+        &self,
+        action_name: &str,
+        namespace: &str,
+    ) -> Result<Option<Action>, FindActionError> {
+        let schema_entities = match self.namespace.get(namespace) {
+            Some(entities) => entities,
+            None => return Ok(None),
+        };
+
+        let action_schema = match schema_entities.actions.get(action_name) {
+            Some(schema) => schema,
+            None => return Ok(None),
+        };
+
+        let principal_entities = HashSet::from_iter(
+            action_schema
+                .principal_types
+                .iter()
+                .map(|principal_type| [namespace, principal_type].join(CEDAR_POLICY_SEPARATOR)),
+        );
+        let resource_entities = HashSet::from_iter(
+            action_schema
+                .resource_types
+                .iter()
+                .map(|resource_type| [namespace, resource_type].join(CEDAR_POLICY_SEPARATOR)),
+        );
+        let context_entities = action_schema
+            .context
+            .as_ref()
+            .map(|ctx| self.process_action_context(ctx, namespace))
+            .transpose()?;
+
+        Ok(Some(Action {
+            principal_entities,
+            resource_entities,
+            context_entities,
+            schema_entities,
+            schema: action_schema,
+        }))
+    }
+
+    fn process_action_context(
+        &self,
+        ctx: &RecordOrType,
+        namespace: &str,
+    ) -> Result<HashSet<CtxAttribute>, FindActionError> {
+        let mut entities = HashSet::<CtxAttribute>::new();
+
+        match ctx {
+            // Case: the context is defined as a record in the schema
+            // for example:
+            // Jans {
+            //     action View appliesTo {
+            //         principal: [User],
+            //         resource: [File],
+            //         context: {
+            //             "status": String,
+            //             "id_token": Id_token,
+            //         },
+            //     };
+            // }
+            RecordOrType::Record(record) => {
+                for (key, attr) in record.attributes.iter() {
+                    entities.insert(CtxAttribute {
+                        namespace: namespace.to_string(),
+                        key: key.to_string(),
+                        kind: attr.get_type()?,
+                    });
+                }
+            },
+            // Case: the context is defined as a type in the schema
+            // for example:
+            // Jans {
+            //     type Context = {
+            //         "status": String,
+            //         "id_token": Id_token,
+            //     };
+            //     action View appliesTo {
+            //         principal: [User],
+            //         resource: [File],
+            //         context: Context,
+            //     };
+            // }
+            RecordOrType::Type(entity_type) => match entity_type {
+                CedarSchemaEntityType::Primitive(primitive_type) => {
+                    if let PrimitiveTypeKind::TypeName(type_name) = &primitive_type.kind {
+                        let cedar_type = self.find_type(type_name, namespace).unwrap();
+                        match cedar_type {
+                            SchemaDefinedType::CommonType(common) => {
+                                for (key, attr) in common.attributes.iter() {
+                                    entities.insert(CtxAttribute {
+                                        namespace: namespace.to_string(),
+                                        key: key.to_string(),
+                                        kind: attr.get_type()?,
+                                    });
+                                }
+                            },
+                            SchemaDefinedType::Entity(_) => {
+                                Err(FindActionError::EntityContext(entity_type.clone()))?
+                            },
+                        }
+                    }
+                },
+                CedarSchemaEntityType::Set(_) => {
+                    Err(FindActionError::SetContext(entity_type.clone()))?
+                },
+                CedarSchemaEntityType::Typed(_) => {
+                    Err(FindActionError::TypedContext(entity_type.clone()))?
+                },
+            },
+        }
+
+        Ok(entities)
+    }
+}
 
 /// Represents an action in the Cedar JSON schema
 #[derive(Default, Debug, PartialEq, Clone)]
-pub struct Action {
-    pub resource_types: HashSet<EntityRef>,
-    pub principal_types: HashSet<EntityRef>,
+pub struct ActionSchema {
+    pub resource_types: HashSet<String>,
+    pub principal_types: HashSet<String>,
     pub context: Option<RecordOrType>,
 }
 
-impl Serialize for Action {
+impl Serialize for ActionSchema {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -43,7 +232,7 @@ impl Serialize for Action {
     }
 }
 
-impl<'de> Deserialize<'de> for Action {
+impl<'de> Deserialize<'de> for ActionSchema {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -78,10 +267,7 @@ impl<'de> Deserialize<'de> for Action {
     }
 }
 
-type AttrName = String;
-
 #[derive(Debug, PartialEq, Clone, Serialize)]
-#[allow(dead_code)]
 pub enum RecordOrType {
     Record(CedarSchemaRecord),
     Type(CedarSchemaEntityType),
@@ -123,9 +309,21 @@ impl<'de> Deserialize<'de> for RecordOrType {
     }
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum FindActionError {
+    #[error("Error while collecting entities from action schema: {0}")]
+    CollectEntities(#[from] GetCedarTypeError),
+    #[error("Using `Set` as the context type is unsupported: {0:#?}")]
+    SetContext(CedarSchemaEntityType),
+    #[error("Using `Entity` as the context type is unsupported: {0:#?}")]
+    EntityContext(CedarSchemaEntityType),
+    #[error("Using `Typed` as the context type is unsupported: {0:#?}")]
+    TypedContext(CedarSchemaEntityType),
+}
+
 #[cfg(test)]
 mod test {
-    use super::Action;
+    use super::ActionSchema;
     use crate::common::cedar_schema::cedar_json::{
         action::RecordOrType,
         entity_types::{
@@ -141,7 +339,7 @@ mod test {
     type ActionType = String;
     #[derive(Deserialize, Debug, PartialEq)]
     struct MockJsonSchema {
-        actions: HashMap<ActionType, Action>,
+        actions: HashMap<ActionType, ActionSchema>,
     }
 
     fn build_schema(ctx: Option<Value>) -> Value {
@@ -165,7 +363,7 @@ mod test {
         MockJsonSchema {
             actions: HashMap::from([(
                 "Update".to_string(),
-                Action {
+                ActionSchema {
                     resource_types: HashSet::from(["Issue"].map(|s| s.to_string())),
                     principal_types: HashSet::from(["Workload", "User"].map(|s| s.to_string())),
                     context: ctx,
