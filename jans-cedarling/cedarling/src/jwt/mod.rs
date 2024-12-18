@@ -58,8 +58,6 @@ pub enum JwtProcessingError {
     MissingClaimsInStrictMode(&'static str, &'static str),
     #[error("Failed to deserialize from Value to String: {0}")]
     StringDeserialization(#[from] serde_json::Error),
-    #[error("{0}")]
-    Unimplemented(String),
 }
 
 #[derive(Debug, thiserror::Error)]
