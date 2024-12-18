@@ -439,8 +439,9 @@ fn test_where_principal_user_cant_be_applied() {
         .authorize(request)
         .expect_err("request should be parsed with error");
 
-    assert!(matches!(
-        result,
-        crate::AuthorizeError::UserRequestValidation(_)
-    ))
+    assert!(
+        matches!(result, crate::AuthorizeError::UserRequestValidation(_)),
+        "expected error UserRequestValidation, got: {}",
+        result
+    )
 }

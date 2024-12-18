@@ -83,6 +83,12 @@ policy_stores:
           id_token: id_token,
           userinfo_token: Userinfo_token,
         };
+        type ContextWithoutWorkload = {
+          user: User,
+          access_token: Access_token,
+          id_token: id_token,
+          userinfo_token: Userinfo_token,
+        };
         action "Update" appliesTo {
           principal: [Workload, User],
           resource: [Issue],
@@ -96,7 +102,7 @@ policy_stores:
         action "UpdateForUser" appliesTo {
           principal: [Workload, User],
           resource: [Issue],
-          context: Context
+          context: ContextWithoutWorkload
         };
         action "UpdateForRole" appliesTo {
           principal: [Role],
@@ -106,7 +112,7 @@ policy_stores:
         action "UpdateForUserAndRole" appliesTo {
           principal: [Workload, User],
           resource: [Issue],
-          context: Context
+          context: ContextWithoutWorkload
         };
         action "UpdateForWorkloadAndRole" appliesTo {
           principal: [Workload, User],
@@ -116,7 +122,7 @@ policy_stores:
         action "NoApplies" appliesTo {
           principal: [Empty],
           resource: [Issue],
-          context: Context
+          context: ContextWithoutWorkload
         };
         action "AlwaysDeny" appliesTo {
           principal:  [Workload, User],

@@ -97,9 +97,7 @@ impl Authz {
     /// - evaluate if authorization is granted for *workload*
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
         let start_time = Instant::now();
-
         let schema = &self.config.policy_store.schema;
-
         let tokens = self.decode_tokens(&request)?;
 
         // Parse action UID.
@@ -107,7 +105,10 @@ impl Authz {
             .map_err(AuthorizeError::Action)?;
 
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
-        let entities_data: AuthorizeEntitiesData = self.build_entities(&request, &tokens)?;
+        let entities_data: AuthorizeEntitiesData = self.build_entities(
+            &request, 
+            &tokens
+        )?;
 
         // Get entity UIDs what we will be used on authorize check
         let resource_uid = entities_data.resource.uid();
@@ -124,26 +125,33 @@ impl Authz {
         // hold all entities that will be used on authorize check.
         let entities = entities_data.clone().entities(Some(&schema.schema))?;
 
-        // Check authorize where principal is `"Jans::Workload"` from cedar-policy schema.
-        let (workload_authz_result, workload_authz_info, workload_entity_claims) = if self.config.authorization.use_workload_principal {
-            let principal = entities_data.workload.uid();
+        let (workload_authz_result, workload_authz_info, workload_entity_claims) = 
+            if let Some(workload) = entities_data.workload {
+                let principal = workload.uid();
 
-            let authz_result = self.execute_authorize(ExecuteAuthorizeParameters { entities: &entities, principal: principal.clone(), action: action.clone(), resource: resource_uid.clone(), context: context.clone() }).map_err(AuthorizeError::WorkloadRequestValidation)?;
+                let authz_result = self.execute_authorize(
+                    ExecuteAuthorizeParameters { 
+                        entities: &entities, 
+                        principal: principal.clone(), 
+                        action: action.clone(), 
+                        resource: resource_uid.clone(), 
+                        context: context.clone() 
+                    }).map_err(AuthorizeError::WorkloadRequestValidation)?;
 
-            let authz_info = WorkloadAuthorizeInfo {
-                principal: principal.to_string(),
-                diagnostics: Diagnostics::new(
-                    authz_result.diagnostics(),
-                    &self.config.policy_store.policies,
-                ),
-                decision: authz_result.decision().into(),
+                let authz_info = WorkloadAuthorizeInfo {
+                    principal: principal.to_string(),
+                    diagnostics: Diagnostics::new(
+                        authz_result.diagnostics(),
+                        &self.config.policy_store.policies,
+                    ),
+                    decision: authz_result.decision().into(),
+                };
+
+                let workload_entity_claims = get_entity_claims( self.config.authorization.decision_log_workload_claims.as_slice(),&entities, principal);
+                (Some(authz_result), Some(authz_info), Some(workload_entity_claims))
+            } else {
+                (None, None, None)
             };
-
-            let workload_entity_claims = get_entity_claims( self.config.authorization.decision_log_workload_claims.as_slice(),&entities, principal);
-            (Some(authz_result), Some(authz_info), Some(workload_entity_claims))
-        } else {
-            (None, None, None)
-        };
 
         // Check authorize where principal is `"Jans::User"` from cedar-policy schema.
         let (user_authz_result, user_authz_info, user_entity_claims) = if self.config.authorization.use_user_principal {
@@ -265,11 +273,15 @@ impl Authz {
         let auth_conf = &self.config.authorization;
         
         // build workload entity
-        let workload = create_workload_entity(
-                    auth_conf.mapping_workload.as_deref(),
-                    policy_store,
-                    tokens,
-                )?;
+        let workload = if self.config.authorization.use_workload_principal {
+            Some(create_workload_entity(
+                auth_conf.mapping_workload.as_deref(),
+                policy_store,
+                tokens,
+            )?)
+        } else {
+            None
+        };
 
         // build role entity
         let role = create_role_entities(policy_store, tokens)?;
@@ -297,14 +309,22 @@ impl Authz {
              create_userinfo_token_entity(auth_conf.mapping_userinfo_token.as_deref(), policy_store, tkn)
                 .map_err(AuthorizeError::CreateUserinfoTokenEntity)
         }).transpose()?;
-        
+
         // build resource entity
         let resource = create_resource_entity(
                 request.resource.clone(),
                 &self.config.policy_store.schema.json,
             )?;
 
-        Ok(AuthorizeEntitiesData { workload, access_token, id_token, userinfo_token, user, resource, role })
+        Ok(AuthorizeEntitiesData { 
+            workload, 
+            access_token, 
+            id_token, 
+            userinfo_token, 
+            user, 
+            resource, 
+            role 
+        })
     }
 }
 
@@ -355,7 +375,7 @@ struct ExecuteAuthorizeParameters<'a> {
 /// Structure to hold entites created from tokens
 #[derive(Clone)]
 pub struct AuthorizeEntitiesData {
-    pub workload: Entity,
+    pub workload: Option<Entity>,
     pub user: Entity,
     pub access_token: Option<Entity>,
     pub id_token: Option<Entity>,
@@ -370,11 +390,11 @@ impl AuthorizeEntitiesData {
         vec![
             self.resource,
             self.user,
-            self.workload,
         ]
         .into_iter()
         .chain(self.role)
         .chain(vec![
+            self.workload,
             self.access_token, 
             self.userinfo_token, 
             self.id_token
@@ -388,11 +408,11 @@ impl AuthorizeEntitiesData {
         vec![
             &self.resource,
             &self.user,
-            &self.workload,
         ]
         .into_iter()
         .chain(self.role.iter())
         .chain(vec![
+            self.workload.as_ref(),
             self.access_token.as_ref(), 
             self.userinfo_token.as_ref(), 
             self.id_token.as_ref()

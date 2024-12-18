@@ -61,6 +61,7 @@ impl Action<'_> {
 
         if let Some(ctx_entities) = &self.context_entities {
             for attr in ctx_entities.iter() {
+                println!("attr: {:?}", attr);
                 if let CedarType::TypeName(type_name) = &attr.kind {
                     let id = match id_mapping.get(&attr.key) {
                         Some(val) => val,
