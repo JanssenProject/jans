@@ -18,13 +18,15 @@ from java.util import Arrays
 from java.util.concurrent.locks import ReentrantLock
 from jakarta.ws.rs import ClientErrorException
 from jakarta.ws.rs.core import Response
-
-
+from io.jans.fido2.model.assertion import AssertionOptions
+from io.jans.fido2.model.attestation import AttestationOptions
+from io.jans.fido2.model.assertion import AssertionResult
+from io.jans.fido2.model.attestation import AttestationResult
 from io.jans.jsf2.message import FacesMessages
 from io.jans.jsf2.service import FacesService
 from jakarta.faces.context import FacesContext
 from jakarta.faces.application import FacesMessage
-
+from com.fasterxml.jackson.databind import ObjectMapper
 from jakarta.servlet.http import Cookie
 
 
@@ -76,7 +78,7 @@ class PersonAuthentication(PersonAuthenticationType):
         authenticationService = CdiUtil.bean(AuthenticationService)
         identity = CdiUtil.bean(Identity)
         
-
+        mapper = ObjectMapper()
         token_response = ServerUtil.getFirstValue(requestParameters, "tokenResponse")
         
         if step == 1:
@@ -96,10 +98,10 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
 
                 if auth_method == 'authenticate':
-                    print "Fido2. Prepare for step 2. Call Fido2 in order to finish authentication flow"
+                    print "Fido2. Authenticate step 2. Call Fido2 in order to finish authentication flow"
                     assertionService = Fido2ClientFactory.instance().createAssertionService(self.metaDataConfiguration)
-                    
-                    assertionStatus = assertionService.verify(token_response)
+                    assertionResult = mapper.readValue(token_response, AssertionResult)
+                    assertionStatus = assertionService.verify(assertionResult)
                     authenticationStatusEntity = assertionStatus.readEntity(java.lang.String)
                     print "token_response %s " % token_response
                     print "assertionStatus: %s" % assertionStatus
@@ -132,7 +134,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return True
         elif step == 2:
             print "Fido2. Authenticate for step 2"
-
+            
             token_response = ServerUtil.getFirstValue(requestParameters, "tokenResponse")
             if token_response == None:
                 print "Fido2. Authenticate for step 2. tokenResponse is empty"
@@ -152,8 +154,9 @@ class PersonAuthentication(PersonAuthenticationType):
             if auth_method == 'authenticate':
                 print "Fido2. Prepare for step 2. Call Fido2 in order to finish authentication flow"
                 assertionService = Fido2ClientFactory.instance().createAssertionService(self.metaDataConfiguration)
-                
-                assertionStatus = assertionService.verify(token_response)
+                assertionResult = mapper.readValue(token_response, AssertionResult)
+
+                assertionStatus = assertionService.verify(assertionResult)
                 authenticationStatusEntity = assertionStatus.readEntity(java.lang.String)
                 print "token_response %s " % token_response
                 print "assertionStatus: %s" % assertionStatus
@@ -167,8 +170,9 @@ class PersonAuthentication(PersonAuthenticationType):
             elif auth_method == 'enroll':
                 print "Fido2. Prepare for step 2. Call Fido2 in order to finish registration flow"
                 attestationService = Fido2ClientFactory.instance().createAttestationService(self.metaDataConfiguration)
-                
-                attestationStatus = attestationService.verify(token_response)
+                attestationResult = mapper.readValue(token_response, AttestationResult)
+                attestationStatus = attestationService.verify(attestationResult)
+
                 print "Fido2. token_response %s " % token_response
                 print "Fido2. attestationStatus: %s" % attestationStatus
                 print "Fido2. attestationStatus.getStatus() : %s" % attestationStatus.getStatus() 
@@ -204,9 +208,12 @@ class PersonAuthentication(PersonAuthenticationType):
         if step == 1:
             try:
                 print "Fido2. Prepare for step 1. Call Fido2 endpoint in order to start assertion flow"
-                assertionRequest = json.dumps({ 'origin': domain, 'allowCredentials': allowList}, separators=(',', ':'))
-                print ("Assertion Request : %s" % assertionRequest)
+                
+                assertionRequest = AssertionOptions()
+                assertionRequest.setOrigin(domain)
+                assertionRequest.setAllowCredentials(Arrays.asList(allowList))
                 assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
+                
                 print "assertionResponse %s " % assertionResponse
                 identity.setWorkingParameter("fido2_assertion_request", ServerUtil.asJson(assertionResponse))
 
@@ -237,7 +244,10 @@ class PersonAuthentication(PersonAuthenticationType):
             if count > 0:
                 print "Fido2. Prepare for step 2. Call Fido2 endpoint in order to start assertion flow"
                 try:
-                    assertionRequest = json.dumps({'username': userName, 'origin': domain}, separators=(',', ':'))
+                    
+                    assertionRequest = AssertionOptions()
+                    assertionRequest.setUsername(userName)
+                    assertionRequest.setOrigin(domain)
                     assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
                     print "assertionResponse %s " % assertionResponse
                     
@@ -249,10 +259,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 try:
                     attestationService = Fido2ClientFactory.instance().createAttestationService(metaDataConfiguration)
-                    basic_json = {'username': userName, 'displayName': userName, 'origin': domain}
-                    print " basic_json %s" % basic_json
-
-                    attestationRequest = json.dumps(basic_json)
+                    
+                    attestationRequest = AttestationOptions()
+                    attestationRequest.setUsername(userName)
+                    attestationRequest.setOrigin(domain)
+                    attestationRequest.setDisplayName(userName)
                     attestationResponse = attestationService.register(attestationRequest).readEntity(java.lang.String)
                 except ClientErrorException, ex:
                     print "Fido2. Prepare for step 2. Failed to start attestation flow. Exception:", sys.exc_info()[1]

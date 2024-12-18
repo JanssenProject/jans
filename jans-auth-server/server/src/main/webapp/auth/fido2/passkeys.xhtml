@@ -10,9 +10,9 @@
                         if="#{not identity.loggedIn}" />
         </f:metadata>
         <ui:define name="head">
-                <script src="/jans-auth/ext/resources/js/base64js.js" />
-				<script src="/jans-auth/ext/resources/js/base64url.js" />
-				<script src="/jans-auth/ext/resources/js/webauthn.js" />
+                <script src="js/base64js.js" />
+				<script src="js/base64url.js" />
+				<script src="js/webauthn.js" />
 
                 <script>
                         var assertion_request = ${identity.getWorkingParameter('fido2_assertion_request')};
