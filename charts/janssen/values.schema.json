@@ -263,29 +263,29 @@
                             "type": "object",
                             "properties": {
                                 "destinationRule": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "podDisruptionBudget": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "virtualService": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "pod": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "deployment": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "horizontalPodAutoscaler": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "service": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "secret": {
-                                    "type": "object"                                    
-                                }                              
+                                    "type": "object"
+                                }
                             }
                         },
                         "enabled": {
@@ -420,7 +420,7 @@
                                 "webfingerAdditionalAnnotations": {
                                     "description": "webfinger ingress resource additional annotations.",
                                     "type": "object"
-                                },                                    
+                                },
                                 "webdiscoveryLabels": {
                                     "description": "webdiscovery ingress resource labels. key app is taken",
                                     "type": "object"
@@ -504,7 +504,7 @@
                                 "authServerProtectedRegister": {
                                     "description": "Enable mTLS onn Auth server endpoint /jans-auth/restv1/register",
                                     "type": "boolean"
-                                } 
+                                }
                             }
                         },
                         "lockEnabled": {
@@ -520,14 +520,14 @@
                             "type": "object",
                             "properties": {
                                 "cronjob": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "service": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "secret": {
-                                    "type": "object"                                    
-                                }                             
+                                    "type": "object"
+                                }
                             }
                         },
                         "enabled": {
@@ -577,28 +577,28 @@
                             "type": "object",
                             "properties": {
                                 "clusterRoleBinding": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "configMap": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "job": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "roleBinding": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "role": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "secret": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "service": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "serviceAccount": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 }
                             }
                         },
@@ -630,28 +630,28 @@
                             "type": "object",
                             "properties": {
                                 "destinationRule": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "podDisruptionBudget": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "virtualService": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "pod": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "deployment": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "horizontalPodAutoscaler": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "service": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "secret": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 }
                             }
                         },
@@ -691,25 +691,25 @@
                             "type": "object",
                             "properties": {
                                 "destinationRule": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "podDisruptionBudget": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "virtualService": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "pod": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "deployment": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "horizontalPodAutoscaler": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "service": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 }
                             }
                         },
@@ -753,7 +753,7 @@
                                     "type": "object"
                                 }
                             }
-                    }
+                        }
                     }
                 },
                 "fqdn": {
@@ -767,28 +767,28 @@
                             "type": "object",
                             "properties": {
                                 "destinationRule": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "podDisruptionBudget": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "virtualService": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "pod": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "deployment": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "horizontalPodAutoscaler": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "service": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "secret": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 }
                             }
                         },
@@ -866,7 +866,7 @@
                                     "type": "object"
                                 }
                             }
-                    }
+                        }
                     }
                 },
                 "gcePdStorageType": {
@@ -916,14 +916,14 @@
                             "type": "object",
                             "properties": {
                                 "job": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "service": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "secret": {
-                                    "type": "object"                                    
-                                }                             
+                                    "type": "object"
+                                }
                             }
                         },
                         "enabled": {
@@ -939,28 +939,28 @@
                             "type": "object",
                             "properties": {
                                 "destinationRule": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "podDisruptionBudget": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "virtualService": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "pod": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "deployment": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "horizontalPodAutoscaler": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "service": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "secret": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 }
                             }
                         },
@@ -1046,7 +1046,7 @@
                                     "type": "object"
                                 }
                             }
-                    }
+                        }
                     }
                 },
                 "storageClass": {
@@ -1106,25 +1106,25 @@
                             "type": "object",
                             "properties": {
                                 "destinationRule": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "podDisruptionBudget": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "virtualService": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "pod": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "deployment": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "horizontalPodAutoscaler": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "service": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 }
                             }
                         },
@@ -1186,28 +1186,28 @@
                             "type": "object",
                             "properties": {
                                 "destinationRule": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "podDisruptionBudget": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "virtualService": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "pod": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "deployment": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "horizontalPodAutoscaler": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "service": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 },
                                 "secret": {
-                                    "type": "object"                                    
+                                    "type": "object"
                                 }
                             }
                         },
