@@ -231,7 +231,7 @@ impl TokenClaim<'_> {
 }
 
 #[derive(Debug, thiserror::Error)]
-#[error("Type mismatch for key '{key}': expected: '{expected_type}', but found: '{actual_type}'")]
+#[error("type mismatch for key '{key}'. expected: '{expected_type}', but found: '{actual_type}'")]
 pub struct TokenClaimTypeError {
     pub key: String,
     pub expected_type: String,
