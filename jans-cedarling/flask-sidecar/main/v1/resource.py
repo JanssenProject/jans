@@ -1,6 +1,7 @@
 from main.extensions import BlueprintApi
 from main.v1.schema import EvaluationRequestSchema, DecisionSchema, WellKnownSchema
 from flask.views import MethodView
+from flask import request
 from main.extensions import cedarling
 
 blp = BlueprintApi("Evaluate",
@@ -31,6 +32,6 @@ class WellKnown(MethodView):
         Returns authzen configuration endpoint
         """
         response = {
-            "access_evaluation_v1_endpoint": "http://127.0.0.1:5000/cedarling/evaluation"
+            "access_evaluation_v1_endpoint": f"{request.host_url}cedarling/evaluation"
         }
         return response
