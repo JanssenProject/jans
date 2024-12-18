@@ -11,20 +11,12 @@ use std::{
 };
 
 use super::trait_as_expression::AsExpression;
-use crate::jwt::{TokenClaim, TokenClaimTypeError, TokenData};
-use crate::{
-    common::{
-        cedar_schema::{
-            cedar_json::{
-                CedarSchemaEntityShape, CedarSchemaRecord, CedarType, GetCedarTypeError,
-                SchemaDefinedType,
-            },
-            CedarSchemaJson,
-        },
-        policy_store::ClaimMappings,
-    },
-    jwt::Token,
+use crate::common::cedar_schema::cedar_json::{
+    CedarSchemaEntityShape, CedarSchemaRecord, CedarType, GetCedarTypeError, SchemaDefinedType,
 };
+use crate::common::{cedar_schema::CedarSchemaJson, policy_store::ClaimMappings};
+use crate::jwt::Token;
+use crate::jwt::{TokenClaim, TokenClaimTypeError, TokenData};
 use cedar_policy::{EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 
 pub const CEDAR_POLICY_SEPARATOR: &str = "::";
