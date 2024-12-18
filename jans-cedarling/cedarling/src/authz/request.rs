@@ -13,11 +13,11 @@ use cedar_policy::{EntityId, EntityTypeName, EntityUid, ParseErrors};
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct Request {
     /// Access token raw value
-    pub access_token: String,
+    pub access_token: Option<String>,
     /// Id Token raw value
-    pub id_token: String,
+    pub id_token: Option<String>,
     /// Userinfo Token raw value
-    pub userinfo_token: String,
+    pub userinfo_token: Option<String>,
     /// cedar_policy action
     pub action: String,
     /// cedar_policy resource data

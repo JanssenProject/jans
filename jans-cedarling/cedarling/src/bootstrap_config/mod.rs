@@ -134,6 +134,11 @@ pub enum BootstrapConfigLoadingError {
     /// Error returned when failing to load a local JWKS
     #[error("Failed to load local JWKS from {0}: {1}")]
     LoadLocalJwks(String, std::io::Error),
+
+    /// Error returned when both `CEDARLING_USER_AUTHZ` and `CEDARLING_WORKLOAD_AUTHZ` are disabled.
+    /// These two authentication configurations cannot be disabled at the same time.
+    #[error("Both `CEDARLING_USER_AUTHZ` and `CEDARLING_WORKLOAD_AUTHZ` cannot be disabled simultaneously.")]
+    BothPrincipalsDisabled,
 }
 
 #[cfg(test)]

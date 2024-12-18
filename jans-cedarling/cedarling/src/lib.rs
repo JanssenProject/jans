@@ -42,7 +42,7 @@ use log::LogEntry;
 use log::LogType;
 pub use log::{LogLevel, LogStorage};
 
-pub use crate::authz::entities::CedarPolicyCreateTypeError;
+pub use crate::authz::entities::CreateCedarEntityError;
 
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
@@ -120,7 +120,7 @@ impl Cedarling {
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         let tokens = self.authz.decode_tokens(request)?;
-        self.authz.authorize_entities_data(request, &tokens)
+        self.authz.build_entities(request, &tokens)
     }
 }
 

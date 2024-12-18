@@ -61,6 +61,7 @@ impl Action<'_> {
 
         if let Some(ctx_entities) = &self.context_entities {
             for attr in ctx_entities.iter() {
+                println!("attr: {:?}", attr);
                 if let CedarType::TypeName(type_name) = &attr.kind {
                     let id = match id_mapping.get(&attr.key) {
                         Some(val) => val,
@@ -80,6 +81,10 @@ impl Action<'_> {
 #[derive(Debug, thiserror::Error)]
 pub enum BuildJsonCtxError {
     /// If an entity reference is provided but the ID is missing from `id_mapping`.
+    ///
+    /// This is usually caused by:
+    /// - disabling workload AuthZ but having a Workload entity in the context schema
+    /// - disabling user AuthZ but referencing User entity in the context schema
     #[error("An entity reference for `{0}` is required by the schema but an ID was not provided via the `id_mapping`")]
     MissingIdMapping(String),
     /// If a non-entity attribute is provided but the value is missing from `value_mapping`.

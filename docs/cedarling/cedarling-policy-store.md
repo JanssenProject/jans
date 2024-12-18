@@ -178,11 +178,7 @@ This record contains the information needed to validate tokens from this issuer:
 - **description** : (*String*) A brief description of the trusted issuer, providing context for administrators.
 - **openid_configuration_endpoint** : (*String*) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at `/.well-known/openid-configuration`).
 - **identity_source** : (*Object*, *optional*) Metadata related to the tokens issued by this issuer.
-
-**Notes**:
-
-- The `access_tokens`, `id_tokens`, `userinfo_tokens`, and `tx_tokens` fields will follow the [Token Metadata Schema](#token-metadata-schema).
-- The `access_tokens` will contain a `trusted` and `principal_identifier` field in addition to the fields from the `Token Metadata Schema`.
+- **`access_tokens`, `id_tokens`, `userinfo_tokens`, and `tx_tokens`**: See: [Token Metadata Schema](#token-metadata-schema).
 
 ### Token Metadata Schema
 
@@ -190,6 +186,8 @@ The Token Entity Metadata Schema defines how tokens are mapped, parsed, and tran
 
 ```json
 {
+  "trusted": bool,
+  "principal_identifier": "str",
   "user_id": "<field name in token (e.g., 'email', 'sub', 'uid', etc.) or '' if not used>",
   "role_mapping": "<field for role assignment (e.g., 'role', 'memberOf', etc.) or '' if not used>",
   "claim_mapping": {
