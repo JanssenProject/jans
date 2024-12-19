@@ -178,7 +178,7 @@ fn test_failed_user_mapping() {
 
     match err {
         AuthorizeError::CreateUserEntity(error) => {
-            assert_eq!(error.errors.len(), 3, "there should be 3 errors");
+            assert_eq!(error.errors.len(), 2, "there should be 2 errors");
 
             let (token_kind, err) = &error.errors[0];
             assert_eq!(token_kind, &TokenKind::Id);
@@ -190,15 +190,6 @@ fn test_failed_user_mapping() {
             );
 
             let (token_kind, err) = &error.errors[1];
-            assert_eq!(token_kind, &TokenKind::Access);
-            assert!(
-                matches!(err, CreateCedarEntityError::MissingClaim(claim) if claim == "sub"),
-                "expected CouldNotFindEntity({}), got: {:?}",
-                &entity_type,
-                err,
-            );
-
-            let (token_kind, err) = &error.errors[2];
             assert_eq!(token_kind, &TokenKind::Userinfo);
             assert!(
                 matches!(err, CreateCedarEntityError::CouldNotFindEntity(ref err) if err == &entity_type),

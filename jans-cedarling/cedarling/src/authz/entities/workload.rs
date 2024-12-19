@@ -25,14 +25,14 @@ pub fn create_workload_entity(
     let try_create_entity = |token_kind: TokenKind, token: Option<&Token>, key: &str| {
         if let Some(token) = token {
             let claim_mapping = token.claim_mapping();
-            let workload_entity_meta = EntityMetadata::new(
+            let entity_metadta = EntityMetadata::new(
                 EntityParsedTypeName {
                     type_name: entity_mapping.unwrap_or("Workload"),
                     namespace,
                 },
                 key,
             );
-            workload_entity_meta
+            entity_metadta
                 .create_entity(schema, token, HashSet::new(), &claim_mapping)
                 .map_err(|e| (token_kind, e))
         } else {
@@ -40,7 +40,7 @@ pub fn create_workload_entity(
         }
     };
 
-    // Attempt entity creation for each token type
+    // attempt entity creation for each token type
     for (token_kind, token, key) in [
         (TokenKind::Access, tokens.access_token.as_ref(), "client_id"),
         (TokenKind::Id, tokens.id_token.as_ref(), "aud"),

@@ -8,6 +8,7 @@
 use super::{CreateCedarEntityError, DecodedTokens, EntityMetadata, EntityParsedTypeName};
 use crate::common::cedar_schema::CedarSchemaJson;
 use crate::common::policy_store::{PolicyStore, TokenKind};
+use crate::jwt::Token;
 use cedar_policy::EntityUid;
 use std::collections::HashSet;
 use std::fmt;
@@ -23,58 +24,35 @@ pub fn create_user_entity(
     let namespace = policy_store.namespace();
     let mut errors = Vec::new();
 
-    if let Some(token) = tokens.id_token.as_ref() {
-        match EntityMetadata::new(
-            EntityParsedTypeName {
-                type_name: entity_mapping.unwrap_or("User"),
-                namespace,
-            },
-            token.user_mapping(),
-        )
-        .create_entity(schema, token, parents.clone(), token.claim_mapping())
-        {
-            Ok(entity) => return Ok(entity),
-            Err(e) => errors.push((TokenKind::Id, e)),
+    // helper closure to attempt entity creation from a token
+    let try_create_entity = |token_kind: TokenKind, token: Option<&Token>| {
+        if let Some(token) = token {
+            let claim_mapping = token.claim_mapping();
+            let user_mapping = token.user_mapping();
+            let entity_metadata = EntityMetadata::new(
+                EntityParsedTypeName {
+                    type_name: entity_mapping.unwrap_or("User"),
+                    namespace,
+                },
+                user_mapping,
+            );
+            entity_metadata
+                .create_entity(schema, token, parents.clone(), &claim_mapping)
+                .map_err(|e| (token_kind, e))
+        } else {
+            Err((token_kind, CreateCedarEntityError::UnavailableToken))
         }
-    } else {
-        errors.push((TokenKind::Id, CreateCedarEntityError::UnavailableToken));
-    }
+    };
 
-    if let Some(token) = tokens.access_token.as_ref() {
-        match EntityMetadata::new(
-            EntityParsedTypeName {
-                type_name: entity_mapping.unwrap_or("User"),
-                namespace,
-            },
-            token.user_mapping(),
-        )
-        .create_entity(schema, token, parents.clone(), token.claim_mapping())
-        {
+    // attempt entity creation for each token type that contains user info
+    for (token_kind, token) in [
+        (TokenKind::Id, tokens.id_token.as_ref()),
+        (TokenKind::Userinfo, tokens.userinfo_token.as_ref()),
+    ] {
+        match try_create_entity(token_kind, token) {
             Ok(entity) => return Ok(entity),
-            Err(e) => errors.push((TokenKind::Access, e)),
+            Err(e) => errors.push(e),
         }
-    } else {
-        errors.push((TokenKind::Access, CreateCedarEntityError::UnavailableToken));
-    }
-
-    if let Some(token) = tokens.userinfo_token.as_ref() {
-        match EntityMetadata::new(
-            EntityParsedTypeName {
-                type_name: entity_mapping.unwrap_or("User"),
-                namespace,
-            },
-            token.user_mapping(),
-        )
-        .create_entity(schema, token, parents.clone(), token.claim_mapping())
-        {
-            Ok(entity) => return Ok(entity),
-            Err(e) => errors.push((TokenKind::Userinfo, e)),
-        }
-    } else {
-        errors.push((
-            TokenKind::Userinfo,
-            CreateCedarEntityError::UnavailableToken,
-        ));
     }
 
     Err(CreateUserEntityError { errors })
@@ -142,47 +120,6 @@ mod test {
                 .into(),
                 None,
             )),
-            userinfo_token: None,
-        };
-        let result = create_user_entity(entity_mapping, &policy_store, &tokens, HashSet::new())
-            .expect("expected to create user entity");
-        assert_eq!(
-            result,
-            Entity::new(
-                "Jans::User::\"user-1\""
-                    .parse()
-                    .expect("expected to create user UID"),
-                HashMap::from([(
-                    "country".to_string(),
-                    RestrictedExpression::new_string("US".to_string())
-                )]),
-                HashSet::new(),
-            )
-            .expect("should create expected user entity")
-        )
-    }
-
-    #[test]
-    fn can_create_from_access_token() {
-        let entity_mapping = None;
-        let policy_store = load_policy_store(&PolicyStoreConfig {
-            source: PolicyStoreSource::FileYaml(
-                Path::new("../test_files/policy-store_ok_2.yaml").into(),
-            ),
-        })
-        .expect("Should load policy store")
-        .store;
-
-        let tokens = DecodedTokens {
-            access_token: Some(Token::new_access(
-                HashMap::from([
-                    ("sub".to_string(), json!("user-1")),
-                    ("country".to_string(), json!("US")),
-                ])
-                .into(),
-                None,
-            )),
-            id_token: None,
             userinfo_token: None,
         };
         let result = create_user_entity(entity_mapping, &policy_store, &tokens, HashSet::new())
@@ -303,7 +240,7 @@ mod test {
         let result = create_user_entity(entity_mapping, &policy_store, &tokens, HashSet::new())
             .expect_err("expected to error while creating user entity");
 
-        assert_eq!(result.errors.len(), 3);
+        assert_eq!(result.errors.len(), 2);
         for (_tkn_kind, err) in result.errors.iter() {
             assert!(
                 matches!(err, CreateCedarEntityError::UnavailableToken),
