@@ -138,6 +138,7 @@ impl Default for &TrustedIssuer {
 }
 
 /// Structure define the source from where role mappings are retrieved.
+#[derive(Debug)]
 pub struct RoleMapping<'a> {
     pub kind: TokenKind,
     pub mapping_field: &'a str,
@@ -172,43 +173,43 @@ impl Default for UserMapping<'_> {
 impl TrustedIssuer {
     /// Retrieves the available `RoleMapping` from the token metadata.
     ///
-    /// Checks each token metadata and returns the first one found with a `role_mapping` field.
-    ///
-    /// The checks happen in this order:
-    ///     1. access_token
-    ///     2. id_token
-    ///     3. userinfo_token
-    ///     4. tx_token
-    pub fn get_role_mapping(&self) -> Option<RoleMapping> {
+    /// Checks each token metadata and returns all  found in a `role_mapping` field.
+    pub fn get_role_mapping(&self) -> Option<Vec<RoleMapping>> {
+        let mut role_mapping_vec = Vec::new();
+
         if let Some(role_mapping) = &self.access_tokens.entity_metadata.role_mapping {
-            return Some(RoleMapping {
+            role_mapping_vec.push(RoleMapping {
                 kind: TokenKind::Access,
                 mapping_field: role_mapping.as_str(),
             });
         }
 
         if let Some(role_mapping) = &self.id_tokens.role_mapping {
-            return Some(RoleMapping {
+            role_mapping_vec.push(RoleMapping {
                 kind: TokenKind::Id,
                 mapping_field: role_mapping.as_str(),
             });
         }
 
         if let Some(role_mapping) = &self.userinfo_tokens.role_mapping {
-            return Some(RoleMapping {
+            role_mapping_vec.push(RoleMapping {
                 kind: TokenKind::Userinfo,
                 mapping_field: role_mapping.as_str(),
             });
         }
 
         if let Some(role_mapping) = &self.tx_tokens.role_mapping {
-            return Some(RoleMapping {
+            role_mapping_vec.push(RoleMapping {
                 kind: TokenKind::Transaction,
                 mapping_field: role_mapping.as_str(),
             });
-        }
+        };
 
-        None
+        if !role_mapping_vec.is_empty() {
+            Some(role_mapping_vec)
+        } else {
+            None
+        }
     }
 
     /// Retrieves the available `user id` mapping from the token metadata.
@@ -315,10 +316,11 @@ impl<'de> Deserialize<'de> for TokenKind {
             "id_token" => Ok(TokenKind::Id),
             "userinfo_token" => Ok(TokenKind::Userinfo),
             "access_token" => Ok(TokenKind::Access),
-            _ => Err(serde::de::Error::unknown_variant(
-                &token_kind,
-                &["access_token", "id_token", "userinfo_token"],
-            )),
+            _ => Err(serde::de::Error::unknown_variant(&token_kind, &[
+                "access_token",
+                "id_token",
+                "userinfo_token",
+            ])),
         }
     }
 }
