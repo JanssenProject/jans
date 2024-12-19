@@ -5,7 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::policy_store::{load_policy_store, PolicyStoreLoadError};
+use super::policy_store::{PolicyStoreLoadError, load_policy_store};
 use crate::bootstrap_config;
 use crate::common::policy_store::PolicyStoreWithID;
 use bootstrap_config::BootstrapConfig;
@@ -24,8 +24,8 @@ pub enum ServiceConfigError {
 }
 
 impl ServiceConfig {
-    pub fn new(bootstrap: &BootstrapConfig) -> Result<Self, ServiceConfigError> {
-        let policy_store = load_policy_store(&bootstrap.policy_store_config)?;
+    pub async fn new(bootstrap: &BootstrapConfig) -> Result<Self, ServiceConfigError> {
+        let policy_store = load_policy_store(&bootstrap.policy_store_config).await?;
 
         Ok(Self { policy_store })
     }

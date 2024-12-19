@@ -7,4 +7,5 @@ edition = "2021"
 crate-type = ["cdylib"] # Required for WASM output
 
 [dependencies]
-wasm-bindgen = "0.2" # Common dependency for WASM interop
+wasm-bindgen = "0.2"             # Common dependency for WASM interop
+cedarling = { workspace = true }

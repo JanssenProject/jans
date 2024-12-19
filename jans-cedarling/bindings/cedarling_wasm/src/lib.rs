@@ -1,4 +1,8 @@
-#![cfg(target_arch = "wasm32")]
+#![cfg(
+    target_arch = "wasm32",
+    target_vendor = "unknown",
+    target_os = "unknown"
+)]
 
 use wasm_bindgen::prelude::*;
 

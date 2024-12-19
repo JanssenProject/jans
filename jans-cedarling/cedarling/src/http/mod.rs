@@ -5,37 +5,74 @@
 * Copyright (c) 2024, Gluu, Inc.
 cfg*/
 
-#[cfg(not(target_family = "wasm"))]
-mod blocking;
-#[cfg(target_family = "wasm")]
-mod wasm;
-
+use reqwest::Client;
 use serde::Deserialize;
 use std::time::Duration;
 
-trait HttpGet {
-    /// Sends a GET request to the specified URI
-    fn get(&self, uri: &str) -> Result<Response, HttpClientError>;
-}
-
+/// A wrapper around `reqwest::blocking::Client` providing HTTP request functionality
+/// with retry logic.
+///
+/// The `HttpClient` struct allows for sending GET requests with a retry mechanism
+/// that attempts to fetch the requested resource up to a maximum number of times
+/// if an error occurs.
+#[derive(Debug)]
 pub struct HttpClient {
-    client: Box<dyn HttpGet>,
+    client: reqwest::Client,
+    max_retries: u32,
+    retry_delay: Duration,
 }
 
 impl HttpClient {
     pub fn new(max_retries: u32, retry_delay: Duration) -> Result<Self, HttpClientError> {
-        #[cfg(not(target_family = "wasm"))]
-        let client = blocking::BlockingHttpClient::new(max_retries, retry_delay)?;
-        #[cfg(target_family = "wasm")]
-        let client = wasm::WasmHttpClient::new(max_retries, retry_delay)?;
+        let client = Client::builder()
+            .build()
+            .map_err(HttpClientError::Initialization)?;
 
         Ok(Self {
-            client: Box::new(client),
+            client,
+            max_retries,
+            retry_delay,
         })
     }
+}
 
-    pub fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
-        self.client.get(uri)
+impl HttpClient {
+    /// Sends a GET request to the specified URI with retry logic.
+    ///
+    /// This method will attempt to fetch the resource up to 3 times, with an increasing delay
+    /// between each attempt.
+    pub async fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
+        // Fetch the JWKS from the jwks_uri
+        let mut attempts = 0;
+        let response = loop {
+            match self.client.get(uri).send().await {
+                // Exit loop on success
+                Ok(response) => break response,
+
+                Err(e) if attempts < self.max_retries => {
+                    attempts += 1;
+                    // TODO: pass this message to the logger
+                    eprintln!(
+                        "Request failed (attempt {} of {}): {}. Retrying...",
+                        attempts, self.max_retries, e
+                    );
+                    tokio::time::sleep(self.retry_delay * attempts).await;
+                },
+                // Exit if max retries exceeded
+                Err(e) => return Err(HttpClientError::MaxHttpRetriesReached(e)),
+            }
+        };
+
+        let response = response
+            .error_for_status()
+            .map_err(HttpClientError::HttpStatus)?;
+
+        Ok(Response {
+            text: response
+                .text()
+                .await
+                .map_err(HttpClientError::DecodeResponseUtf8)?,
+        })
     }
 }
 
@@ -82,9 +119,10 @@ mod test {
     use serde_json::json;
     use std::time::Duration;
     use test_utils::assert_eq;
+    use tokio;
 
-    #[test]
-    fn can_fetch() {
+    #[tokio::test]
+    async fn can_fetch() {
         let mut mock_server = Server::new();
 
         let expected = json!({
@@ -108,6 +146,7 @@ mod test {
                 "{}/.well-known/openid-configuration",
                 mock_server.url()
             ))
+            .await
             .expect("Should get response")
             .json::<serde_json::Value>()
             .expect("Should deserialize JSON response.");
@@ -120,11 +159,11 @@ mod test {
         mock_endpoint.assert();
     }
 
-    #[test]
-    fn errors_when_max_http_retries_exceeded() {
+    #[tokio::test]
+    async fn errors_when_max_http_retries_exceeded() {
         let client =
             HttpClient::new(3, Duration::from_millis(1)).expect("Should create HttpClient");
-        let response = client.get("0.0.0.0");
+        let response = client.get("0.0.0.0").await;
 
         assert!(
             matches!(response, Err(HttpClientError::MaxHttpRetriesReached(_))),
@@ -132,8 +171,8 @@ mod test {
         );
     }
 
-    #[test]
-    fn errors_on_http_error_status() {
+    #[tokio::test]
+    async fn errors_on_http_error_status() {
         let mut mock_server = Server::new();
 
         let mock_endpoint = mock_server
@@ -145,10 +184,12 @@ mod test {
         let client =
             HttpClient::new(3, Duration::from_millis(1)).expect("Should create HttpClient.");
 
-        let response = client.get(&format!(
-            "{}/.well-known/openid-configuration",
-            mock_server.url()
-        ));
+        let response = client
+            .get(&format!(
+                "{}/.well-known/openid-configuration",
+                mock_server.url()
+            ))
+            .await;
 
         assert!(
             matches!(response, Err(HttpClientError::HttpStatus(_))),

@@ -21,7 +21,8 @@ use std::env;
 // `test_files\policy-store_ok`
 static POLICY_STORE_RAW: &str = include_str!("../../test_files/policy-store_ok.yaml");
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Collect command-line arguments
     let args: Vec<String> = env::args().collect();
 
@@ -62,7 +63,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             user_workload_operator: WorkloadBoolOp::And,
             ..Default::default()
         },
-    })?;
+    })
+    .await?;
 
     println!("Stage 1:");
     let logs_ids = cedarling.get_log_ids();

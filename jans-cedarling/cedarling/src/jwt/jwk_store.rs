@@ -8,8 +8,8 @@
 use super::{KeyId, TrustedIssuerId};
 use crate::common::policy_store::TrustedIssuer;
 use crate::http::{HttpClient, HttpClientError};
-use jsonwebtoken::jwk::Jwk;
 use jsonwebtoken::DecodingKey;
+use jsonwebtoken::jwk::Jwk;
 use serde::Deserialize;
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
@@ -152,19 +152,21 @@ impl JwkStore {
     }
 
     /// Creates a JwkStore by fetching the keys from the given [`TrustedIssuer`].
-    pub fn new_from_trusted_issuer(
+    pub async fn new_from_trusted_issuer(
         store_id: TrustedIssuerId,
         issuer: &TrustedIssuer,
         http_client: &HttpClient,
     ) -> Result<Self, JwkStoreError> {
         // fetch openid configuration
-        let response = http_client.get(&issuer.openid_configuration_endpoint)?;
+        let response = http_client
+            .get(&issuer.openid_configuration_endpoint)
+            .await?;
         let openid_config = response
             .json::<OpenIdConfig>()
             .map_err(JwkStoreError::FetchOpenIdConfig)?;
 
         // fetch jwks
-        let response = http_client.get(&openid_config.jwks_uri)?;
+        let response = http_client.get(&openid_config.jwks_uri).await?;
 
         let mut store = Self::new_from_jwks_str(store_id, response.text())?;
         store.issuer = Some(openid_config.issuer.into());
@@ -230,7 +232,7 @@ struct IntermediateJwks {
 #[cfg(test)]
 mod test {
     use crate::{common::policy_store::TrustedIssuer, http::HttpClient, jwt::jwk_store::JwkStore};
-    use jsonwebtoken::{jwk::JwkSet, DecodingKey};
+    use jsonwebtoken::{DecodingKey, jwk::JwkSet};
     use mockito::Server;
     use serde_json::json;
     use std::{collections::HashMap, time::Duration};
@@ -306,8 +308,8 @@ mod test {
         );
     }
 
-    #[test]
-    fn can_load_from_trusted_issuers() {
+    #[tokio::test]
+    async fn can_load_from_trusted_issuers() {
         let mut mock_server = Server::new();
 
         // Setup OpenId config endpoint
@@ -368,6 +370,7 @@ mod test {
 
         let mut result =
             JwkStore::new_from_trusted_issuer("test".into(), &source_iss, &http_client)
+                .await
                 .expect("Should load JwkStore from Trusted Issuer");
         // We edit the `last_updated` from the result so that the comparison
         // wont fail because of the timestamp.

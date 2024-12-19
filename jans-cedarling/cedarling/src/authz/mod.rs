@@ -87,7 +87,7 @@ impl Authz {
     }
 
     // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
-    pub (crate) fn decode_tokens<'a>(&'a self, request: &'a Request) -> Result<ProcessTokensResult<'a>, AuthorizeError> {
+    pub (crate) async fn decode_tokens<'a>(&'a self, request: &'a Request) -> Result<ProcessTokensResult<'a>, AuthorizeError> {
             // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
         Ok(self
             .config
@@ -96,18 +96,18 @@ impl Authz {
                 &request.access_token,
                 &request.id_token,
                 Some(&request.userinfo_token),
-        )?)
+        ).await?)
     }
 
     /// Evaluate Authorization Request
     /// - evaluate if authorization is granted for *person*
     /// - evaluate if authorization is granted for *workload*
-    pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
+    pub async  fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
         let start_time = Instant::now();
 
         let schema = &self.config.policy_store.schema;
 
-        let tokens = self.decode_tokens(&request)?;
+        let tokens = self.decode_tokens(&request).await?;
 
 
         // Parse action UID.
@@ -115,7 +115,7 @@ impl Authz {
             .map_err(AuthorizeError::Action)?;
 
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
-        let entities_data: AuthorizeEntitiesData = self.authorize_entities_data(&request,&tokens)?;
+        let entities_data: AuthorizeEntitiesData = self.authorize_entities_data(&request,&tokens).await?;
 
         // Get entity UIDs what we will be used on authorize check
         let principal_workload_uid = entities_data.workload_entity.uid();
@@ -273,10 +273,10 @@ impl Authz {
     }
 
     /// Create all [`Entity`]-s from [`Request`]
-    pub fn authorize_entities_data(
+    pub async fn authorize_entities_data(
         &self,
         request: &Request,
-        tokens: &ProcessTokensResult,
+        tokens: &ProcessTokensResult<'_>,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         let policy_store = &self.config.policy_store;
         let auth_conf = &self.config.authorization;
@@ -289,7 +289,7 @@ impl Authz {
             &request.access_token,
             &request.id_token,
             Some(&request.userinfo_token),
-        )?;
+        ).await?;
 
         let trusted_issuer = tokens.trusted_issuer.unwrap_or_default();
         let tokens_metadata = trusted_issuer.tokens_metadata();

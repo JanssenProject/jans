@@ -44,15 +44,21 @@ pub enum JwtProcessingError {
     InvalidIdToken(#[source] JwtValidatorError),
     #[error("Invalid Userinfo token: {0}")]
     InvalidUserinfoToken(#[source] JwtValidatorError),
-    #[error("Validation failed: id_token audience does not match the access_token client_id. id_token.aud: {0:?}, access_token.client_id: {1:?}")]
+    #[error(
+        "Validation failed: id_token audience does not match the access_token client_id. id_token.aud: {0:?}, access_token.client_id: {1:?}"
+    )]
     IdTokenAudienceMismatch(String, String),
-    #[error("Validation failed: Userinfo token subject does not match the id_token subject. userinfo_token.sub: {0:?}, id_token.sub: {1:?}")]
+    #[error(
+        "Validation failed: Userinfo token subject does not match the id_token subject. userinfo_token.sub: {0:?}, id_token.sub: {1:?}"
+    )]
     UserinfoSubMismatch(String, String),
     #[error(
         "Validation failed: Userinfo token audience ({0}) does not match the access_token client_id ({1})."
     )]
     UserinfoAudienceMismatch(String, String),
-    #[error("CEDARLING_ID_TOKEN_TRUST_MODE is set to 'Strict', but the {0} is missing a required claim: {1}")]
+    #[error(
+        "CEDARLING_ID_TOKEN_TRUST_MODE is set to 'Strict', but the {0} is missing a required claim: {1}"
+    )]
     MissingClaimsInStrictMode(&'static str, &'static str),
     #[error("Failed to deserialize from Value to String: {0}")]
     StringDeserialization(#[from] serde_json::Error),
@@ -60,9 +66,13 @@ pub enum JwtProcessingError {
 
 #[derive(Debug, thiserror::Error)]
 pub enum JwtServiceInitError {
-    #[error("Failed to initialize Key Service for JwtService due to a conflictig config: both a local JWKS and trusted issuers was provided.")]
+    #[error(
+        "Failed to initialize Key Service for JwtService due to a conflictig config: both a local JWKS and trusted issuers was provided."
+    )]
     ConflictingJwksConfig,
-    #[error("Failed to initialize Key Service for JwtService due to a missing config: no local JWKS or trusted issuers was provided.")]
+    #[error(
+        "Failed to initialize Key Service for JwtService due to a missing config: no local JWKS or trusted issuers was provided."
+    )]
     MissingJwksConfig,
     #[error("Failed to initialize Key Service: {0}")]
     KeyService(#[from] KeyServiceError),
@@ -80,7 +90,7 @@ pub struct JwtService {
 }
 
 impl JwtService {
-    pub fn new(
+    pub async fn new(
         config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
     ) -> Result<Self, JwtServiceInitError> {
@@ -91,6 +101,7 @@ impl JwtService {
                 // Case: Trusted issuers provided
                 (true, None, Some(issuers)) => Some(
                     KeyService::new_from_trusted_issuers(issuers)
+                        .await
                         .map_err(JwtServiceInitError::KeyService)?,
                 ),
                 // Case: Local JWKS provided
@@ -158,7 +169,10 @@ impl JwtService {
         })
     }
 
-    pub fn process_tokens<'a, A, I, U>(
+    // We use this function as async because in future it may use some async delayed tasks.
+    // For example, update keys for decoding JWT tokens.
+    // But note. This function should not delay processing of tokens.
+    pub async fn process_tokens<'a, A, I, U>(
         &'a self,
         access_token: &'a str,
         id_token: &'a str,
@@ -258,18 +272,18 @@ pub struct ProcessTokensResult<'a, A, I, U> {
 
 #[cfg(test)]
 mod test {
-    use super::test_utils::*;
     use super::JwtService;
+    use super::test_utils::*;
     use crate::IdTokenTrustMode;
     use crate::JwtConfig;
     use crate::TokenValidationConfig;
     use jsonwebtoken::Algorithm;
-    use serde_json::json;
     use serde_json::Value;
+    use serde_json::json;
     use std::collections::HashSet;
 
-    #[test]
-    pub fn can_validate_tokens() {
+    #[tokio::test]
+    pub async fn can_validate_tokens() {
         // Generate token
         let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
         let access_tkn_claims = json!({
@@ -316,10 +330,12 @@ mod test {
             },
             None,
         )
+        .await
         .expect("Should create JwtService");
 
         jwt_service
             .process_tokens::<Value, Value, Value>(&access_tkn, &id_tkn, Some(&userinfo_tkn))
+            .await
             .expect("Should process JWTs");
     }
 }

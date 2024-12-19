@@ -28,18 +28,18 @@ mod tests;
 
 use std::sync::Arc;
 
-pub use authz::request::{Request, ResourceData};
 use authz::Authz;
+pub use authz::request::{Request, ResourceData};
 pub use authz::{AuthorizeError, AuthorizeResult};
 pub use bootstrap_config::*;
+use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
-use init::ServiceFactory;
 
 use common::app_types;
-use log::interface::LogWriter;
 use log::LogEntry;
 use log::LogType;
+use log::interface::LogWriter;
 pub use log::{LogLevel, LogStorage};
 
 pub use crate::authz::entities::CedarPolicyCreateTypeError;
@@ -77,11 +77,12 @@ pub struct Cedarling {
 
 impl Cedarling {
     /// Create a new instance of the Cedarling application.
-    pub fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
+    pub async fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
         let log = log::init_logger(&config.log_config);
         let pdp_id = app_types::PdpID::new();
 
         let service_config = ServiceConfig::new(config)
+            .await
             .inspect(|_| {
                 log.log(
                     LogEntry::new_with_data(pdp_id, None, LogType::System)
@@ -102,25 +103,25 @@ impl Cedarling {
 
         Ok(Cedarling {
             log,
-            authz: service_factory.authz_service()?,
+            authz: service_factory.authz_service().await?,
         })
     }
 
     /// Authorize request
     /// makes authorization decision based on the [`Request`]
-    pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        self.authz.authorize(request)
+    pub async fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
+        self.authz.authorize(request).await
     }
 
     /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.
     #[doc(hidden)]
     #[cfg(test)]
-    pub fn authorize_entities_data(
+    pub async fn authorize_entities_data(
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
-        let tokens = self.authz.decode_tokens(request)?;
-        self.authz.authorize_entities_data(request, &tokens)
+        let tokens = self.authz.decode_tokens(request).await?;
+        self.authz.authorize_entities_data(request, &tokens).await
     }
 }
 
