@@ -6,14 +6,15 @@
  */
 
 use super::utils::*;
-use test_utils::{assert_eq, SortedJson};
+use test_utils::{SortedJson, assert_eq};
+use tokio::test;
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/agama-store_2.yaml");
 
 /// Test loading policy store with mappings JWT payload to custom `cedar-entities` types in schema
 #[test]
-fn check_mapping_tokens_data() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+async fn check_mapping_tokens_data() {
+    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
 
     // deserialize `Request` from json
     // JWT tokens payload from using `tarp` with `https://test-casa.gluu.info/.well-known/openid-configuration`
@@ -108,7 +109,7 @@ fn check_mapping_tokens_data() {
     .expect("Request should be deserialized from json");
 
     let entities = cedarling
-        .authorize_entities_data(&request)
+        .authorize_entities_data(&request).await
         // log err to be human readable
         .inspect_err(|err| println!("Error: {}", err.to_string()))
         .expect("request should be parsed without errors");

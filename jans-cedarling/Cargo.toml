@@ -13,7 +13,7 @@ test_utils = { path = "test_utils" }
 
 [profile.release]
 strip = "symbols"
-debug-assertions = true
+debug-assertions = false
 lto = "thin"
 opt-level = "s"
 codegen-units = 1

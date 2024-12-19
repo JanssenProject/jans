@@ -120,10 +120,11 @@ mod test {
     use std::time::Duration;
     use test_utils::assert_eq;
     use tokio;
+    use tokio::join;
 
     #[tokio::test]
     async fn can_fetch() {
-        let mut mock_server = Server::new();
+        let mut mock_server = Server::new_async().await;
 
         let expected = json!({
             "issuer": mock_server.url(),
@@ -136,17 +137,16 @@ mod test {
             .with_header("content-type", "application/json")
             .with_body(expected.to_string())
             .expect(1)
-            .create();
+            .create_async();
 
         let client =
             HttpClient::new(3, Duration::from_millis(1)).expect("Should create HttpClient.");
 
-        let response = client
-            .get(&format!(
-                "{}/.well-known/openid-configuration",
-                mock_server.url()
-            ))
-            .await
+        let link = &format!("{}/.well-known/openid-configuration", mock_server.url());
+        let req_fut = client.get(link);
+        let (req_result, mock_result) = join!(req_fut, mock_endpoint);
+
+        let response = req_result
             .expect("Should get response")
             .json::<serde_json::Value>()
             .expect("Should deserialize JSON response.");
@@ -156,7 +156,7 @@ mod test {
             "Expected: {expected:?}\nBut got: {response:?}"
         );
 
-        mock_endpoint.assert();
+        mock_result.assert();
     }
 
     #[tokio::test]
@@ -173,23 +173,21 @@ mod test {
 
     #[tokio::test]
     async fn errors_on_http_error_status() {
-        let mut mock_server = Server::new();
+        let mut mock_server = Server::new_async().await;
 
-        let mock_endpoint = mock_server
+        let mock_endpoint_fut = mock_server
             .mock("GET", "/.well-known/openid-configuration")
             .with_status(500)
             .expect(1)
-            .create();
+            .create_async();
 
         let client =
             HttpClient::new(3, Duration::from_millis(1)).expect("Should create HttpClient.");
 
-        let response = client
-            .get(&format!(
-                "{}/.well-known/openid-configuration",
-                mock_server.url()
-            ))
-            .await;
+        let link = &format!("{}/.well-known/openid-configuration", mock_server.url());
+        let client_fut = client.get(link);
+
+        let (mock_endpoint, response) = join!(mock_endpoint_fut, client_fut);
 
         assert!(
             matches!(response, Err(HttpClientError::HttpStatus(_))),

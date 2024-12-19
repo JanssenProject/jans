@@ -8,6 +8,7 @@
 use super::utils::*;
 use crate::{cmp_decision, cmp_policy}; // macros is defined in the cedarling\src\tests\utils\cedarling_util.rs
 use test_utils::assert_eq;
+use tokio::test;
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/policy-store_ok_2.yaml");
 static POLICY_STORE_ABAC_YAML: &str = include_str!("../../../test_files/policy-store_ok_abac.yaml");
@@ -19,8 +20,8 @@ static POLICY_STORE_ABAC_YAML: &str = include_str!("../../../test_files/policy-s
 /// we check here that field are parsed from JWT tokens
 /// and correctly executed using correct cedar-policy id
 #[test]
-fn success_test_role_string() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+async fn success_test_role_string() {
+    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
 
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
@@ -60,6 +61,7 @@ fn success_test_role_string() {
 
     let result = cedarling
         .authorize(request)
+        .await
         .expect("request should be parsed without errors");
 
     cmp_decision!(
@@ -95,8 +97,8 @@ fn success_test_role_string() {
 /// we check here that field are parsed from JWT tokens
 /// and correctly executed using correct cedar-policy id
 #[test]
-fn forbid_test_role_guest() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+async fn forbid_test_role_guest() {
+    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
 
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
@@ -136,6 +138,7 @@ fn forbid_test_role_guest() {
 
     let result = cedarling
         .authorize(request)
+        .await
         .expect("request should be parsed without errors");
 
     cmp_decision!(
@@ -171,8 +174,8 @@ fn forbid_test_role_guest() {
 /// we check here that field are parsed from JWT tokens
 /// and correctly executed using correct cedar-policy id
 #[test]
-fn success_test_role_array() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+async fn success_test_role_array() {
+    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
 
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
@@ -212,6 +215,7 @@ fn success_test_role_array() {
 
     let result = cedarling
         .authorize(request)
+        .await
         .expect("request should be parsed without errors");
 
     cmp_decision!(
@@ -248,8 +252,8 @@ fn success_test_role_array() {
 /// and correctly executed using correct cedar-policy id
 /// if role field is not present, just ignore role check
 #[test]
-fn success_test_no_role() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+async fn success_test_no_role() {
+    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
 
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
@@ -290,6 +294,7 @@ fn success_test_no_role() {
 
     let result = cedarling
         .authorize(request)
+        .await
         .expect("request should be parsed without errors");
 
     cmp_decision!(
@@ -327,8 +332,8 @@ fn success_test_no_role() {
 /// we check here that field for `Jans::User` is present in `id_token`
 /// it is `country` field of `Jans::User` and role field is present
 #[test]
-fn success_test_user_data_in_id_token() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+async fn success_test_user_data_in_id_token() {
+    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
 
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
@@ -369,6 +374,7 @@ fn success_test_user_data_in_id_token() {
 
     let result = cedarling
         .authorize(request)
+        .await
         .expect("request should be parsed without errors");
 
     cmp_decision!(
@@ -400,8 +406,8 @@ fn success_test_user_data_in_id_token() {
 
 // check all forbid
 #[test]
-fn all_forbid() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+async fn all_forbid() {
+    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
 
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
@@ -445,6 +451,7 @@ fn all_forbid() {
 
     let result = cedarling
         .authorize(request)
+        .await
         .expect("request should be parsed without errors");
 
     cmp_decision!(
@@ -476,8 +483,8 @@ fn all_forbid() {
 
 // check only workload permit and other not
 #[test]
-fn only_workload_permit() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+async fn only_workload_permit() {
+    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
 
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
@@ -519,6 +526,7 @@ fn only_workload_permit() {
 
     let result = cedarling
         .authorize(request)
+        .await
         .expect("request should be parsed without errors");
 
     cmp_decision!(
@@ -556,8 +564,8 @@ fn only_workload_permit() {
 
 // check only person permit and other not
 #[test]
-fn only_person_permit() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+async fn only_person_permit() {
+    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
 
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
@@ -600,6 +608,7 @@ fn only_person_permit() {
 
     let result = cedarling
         .authorize(request)
+        .await
         .expect("request should be parsed without errors");
 
     cmp_decision!(
@@ -631,8 +640,8 @@ fn only_person_permit() {
 
 // check only user role permit and other not
 #[test]
-fn only_user_role_permit() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+async fn only_user_role_permit() {
+    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
 
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
@@ -674,6 +683,7 @@ fn only_user_role_permit() {
 
     let result = cedarling
         .authorize(request)
+        .await
         .expect("request should be parsed without errors");
 
     cmp_decision!(
@@ -705,8 +715,8 @@ fn only_user_role_permit() {
 
 // check only workload and person permit and role not
 #[test]
-fn only_workload_and_person_permit() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+async fn only_workload_and_person_permit() {
+    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
 
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
@@ -747,6 +757,7 @@ fn only_workload_and_person_permit() {
 
     let result = cedarling
         .authorize(request)
+        .await
         .expect("request should be parsed without errors");
 
     cmp_decision!(
@@ -778,8 +789,8 @@ fn only_workload_and_person_permit() {
 
 // check only workload and role permit and user not
 #[test]
-fn only_workload_and_role_permit() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+async fn only_workload_and_role_permit() {
+    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
 
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
@@ -820,6 +831,7 @@ fn only_workload_and_role_permit() {
 
     let result = cedarling
         .authorize(request)
+        .await
         .expect("request should be parsed without errors");
 
     cmp_decision!(
@@ -850,8 +862,9 @@ fn only_workload_and_role_permit() {
 }
 
 #[test]
-fn success_test_role_string_with_abac() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_ABAC_YAML.to_string()));
+async fn success_test_role_string_with_abac() {
+    let cedarling =
+        get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_ABAC_YAML.to_string())).await;
 
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
@@ -902,6 +915,7 @@ fn success_test_role_string_with_abac() {
 
     let result = cedarling
         .authorize(request)
+        .await
         .expect("request should be parsed without errors");
 
     cmp_decision!(

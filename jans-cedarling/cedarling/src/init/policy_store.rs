@@ -144,7 +144,7 @@ mod test {
 
     #[tokio::test]
     async fn can_load_from_lock_master() {
-        let mut mock_server = Server::new();
+        let mut mock_server = Server::new_async().await;
 
         let policy_store_json =
             include_str!("../../../test_files/policy-store_lock_master_ok.json").to_string();

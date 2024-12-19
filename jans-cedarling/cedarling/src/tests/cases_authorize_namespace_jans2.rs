@@ -8,6 +8,7 @@
 use super::utils::*;
 use crate::{cmp_decision, cmp_policy}; // macros is defined in the cedarling\src\tests\utils\cedarling_util.rs
 use test_utils::assert_eq;
+use tokio::test;
 
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../../test_files/policy-store_ok_namespace_Jans2.yaml");
@@ -16,8 +17,8 @@ static POLICY_STORE_RAW_YAML: &str =
 /// In previous we hardcoded creating entities in namespace `Jans`
 /// in `POLICY_STORE_RAW_YAML` is used namespace `Jans2`
 #[test]
-fn test_namespace_jans2() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
+async fn test_namespace_jans2() {
+    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
 
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
@@ -57,6 +58,7 @@ fn test_namespace_jans2() {
 
     let result = cedarling
         .authorize(request)
+        .await
         .expect("request should be parsed without errors");
 
     cmp_decision!(

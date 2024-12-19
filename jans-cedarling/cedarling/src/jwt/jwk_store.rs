@@ -310,7 +310,7 @@ mod test {
 
     #[tokio::test]
     async fn can_load_from_trusted_issuers() {
-        let mut mock_server = Server::new();
+        let mut mock_server = Server::new_async().await;
 
         // Setup OpenId config endpoint
         let openid_config_json = json!({
@@ -344,10 +344,8 @@ mod test {
             "alg": "RS256",
             "kty": "RSA",
             "kid": kid2,
-        }
+        }]});
 
-        ]
-        });
         let jwks_endpoint = mock_server
             .mock("GET", "/jwks")
             .with_status(200)

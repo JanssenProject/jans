@@ -176,7 +176,7 @@ mod test {
         let kid1 = "a50f6e70ef4b548a5fd9142eecd1fb8f54dce9ee";
         let kid2 = "73e25f9789119c7875d58087a78ac23f5ef2eda3";
 
-        let mut mock_server = Server::new();
+        let mut mock_server = Server::new_async().await;
 
         // Setup first OpenID config endpoint
         let openid_config_endpoint1 = mock_server
