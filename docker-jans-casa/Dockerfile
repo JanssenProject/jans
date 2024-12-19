@@ -6,7 +6,7 @@ FROM bellsoft/liberica-openjre-alpine:17.0.12@sha256:29cb2ee552c7c7a924b6a1b5980
 
 RUN apk update \
     && apk upgrade --available \
-    && apk add --no-cache python3 openssl tini py3-cryptography py3-psycopg2 py3-grpcio \
+    && apk add --no-cache python3 openssl tini py3-cryptography py3-psycopg2 py3-grpcio curl \
     && apk add --no-cache --virtual .build-deps git wget zip
 
 # =====
