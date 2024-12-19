@@ -134,6 +134,7 @@
                 <version>1.6.0</version>
             </dependency>
 
+
 			<!-- Weld -->
 			<dependency>
 				<groupId>org.jboss.weld</groupId>
