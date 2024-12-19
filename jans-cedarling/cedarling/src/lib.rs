@@ -22,6 +22,10 @@ mod jwt;
 mod lock;
 mod log;
 
+#[cfg(not(target_arch = "wasm32"))]
+#[cfg(feature = "blocking")]
+pub mod blocking;
+
 #[doc(hidden)]
 #[cfg(test)]
 mod tests;

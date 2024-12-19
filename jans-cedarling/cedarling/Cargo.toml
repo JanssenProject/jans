@@ -3,6 +3,13 @@ name = "cedarling"
 version = "0.0.0-nightly"
 edition = "2021"
 
+[features]
+# blocking with default is used only for local testing, next line should be commented
+# default = ["blocking"]
+
+# blocking feature allows to use blocking cedarling client
+blocking = ["tokio/rt-multi-thread"]
+
 [dependencies]
 serde = { workspace = true }
 serde_json = { workspace = true }

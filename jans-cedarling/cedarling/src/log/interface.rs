@@ -54,6 +54,8 @@ pub(crate) trait Loggable: serde::Serialize {
 
 /// Log Storage
 /// interface for getting log entries from the storage
+//
+// TODO: return json value, because `LogEntry` don't cover all log entries
 pub trait LogStorage {
     /// return logs and remove them from the storage
     fn pop_logs(&self) -> Vec<LogEntry>;
