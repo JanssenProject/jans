@@ -104,11 +104,30 @@ components:
       - id
       - type
       type: object
+    WellKnown:
+      properties:
+        access_evaluation_v1_endpoint:
+          type: string
+      type: object
 info:
   title: Cedarling Sidecar
   version: v1
 openapi: 3.0.0
 paths:
+  /.well-known/authzen-configuration:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WellKnown'
+          description: OK
+        default:
+          $ref: '#/components/responses/DEFAULT_ERROR'
+      summary: Returns authzen configuration endpoint
+      tags:
+      - Evaluate
   /cedarling/evaluation:
     post:
       requestBody:
