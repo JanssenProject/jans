@@ -7,6 +7,7 @@
 
 use super::{CreateCedarEntityError, DecodedTokens, EntityMetadata, EntityParsedTypeName};
 use crate::common::policy_store::{PolicyStore, TokenKind};
+use crate::jwt::Token;
 use std::collections::HashSet;
 use std::fmt;
 
@@ -20,38 +21,35 @@ pub fn create_workload_entity(
     let schema = &policy_store.schema.json;
     let mut errors = Vec::new();
 
-    if let Some(token) = tokens.id_token.as_ref() {
-        let claim_mapping = &token.claim_mapping();
-        let workload_entity_meta = EntityMetadata::new(
-            EntityParsedTypeName {
-                typename: entity_mapping.unwrap_or("Workload"),
-                namespace,
-            },
-            "aud",
-        );
-        match workload_entity_meta.create_entity(schema, token, HashSet::new(), claim_mapping) {
-            Ok(entity) => return Ok(entity),
-            Err(e) => errors.push((TokenKind::Id, e)),
+    // helper closure to attempt entity creation from a token
+    let try_create_entity = |token_kind: TokenKind, token: Option<&Token>, key: &str| {
+        if let Some(token) = token {
+            let claim_mapping = token.claim_mapping();
+            let workload_entity_meta = EntityMetadata::new(
+                EntityParsedTypeName {
+                    type_name: entity_mapping.unwrap_or("Workload"),
+                    namespace,
+                },
+                key,
+            );
+            workload_entity_meta
+                .create_entity(schema, token, HashSet::new(), &claim_mapping)
+                .map_err(|e| (token_kind, e))
+        } else {
+            Err((token_kind, CreateCedarEntityError::UnavailableToken))
         }
-    } else {
-        errors.push((TokenKind::Id, CreateCedarEntityError::UnavailableToken));
-    }
+    };
 
-    if let Some(token) = tokens.access_token.as_ref() {
-        let claim_mapping = &token.claim_mapping();
-        let workload_entity_meta = EntityMetadata::new(
-            EntityParsedTypeName {
-                typename: entity_mapping.unwrap_or("Workload"),
-                namespace,
-            },
-            "client_id",
-        );
-        match workload_entity_meta.create_entity(schema, token, HashSet::new(), claim_mapping) {
+    // Attempt entity creation for each token type
+    for (token_kind, token, key) in [
+        (TokenKind::Access, tokens.access_token.as_ref(), "client_id"),
+        (TokenKind::Id, tokens.id_token.as_ref(), "aud"),
+        (TokenKind::Userinfo, tokens.userinfo_token.as_ref(), "aud"),
+    ] {
+        match try_create_entity(token_kind, token, key) {
             Ok(entity) => return Ok(entity),
-            Err(e) => errors.push((TokenKind::Access, e)),
+            Err(e) => errors.push(e),
         }
-    } else {
-        errors.push((TokenKind::Access, CreateCedarEntityError::UnavailableToken));
     }
 
     Err(CreateWorkloadEntityError { errors })
@@ -230,20 +228,13 @@ mod test {
         let tokens = DecodedTokens {
             access_token: None,
             id_token: None,
-            userinfo_token: Some(Token::new_userinfo(
-                HashMap::from([
-                    ("aud".to_string(), json!("workload-1")),
-                    ("org_id".to_string(), json!("some-org-123")),
-                ])
-                .into(),
-                None,
-            )),
+            userinfo_token: None,
         };
 
         let result = create_workload_entity(entity_mapping, &policy_store, &tokens)
             .expect_err("expected to error while creating workload entity");
 
-        assert_eq!(result.errors.len(), 2);
+        assert_eq!(result.errors.len(), 3);
         for (_tkn_kind, err) in result.errors.iter() {
             assert!(
                 matches!(err, CreateCedarEntityError::UnavailableToken),

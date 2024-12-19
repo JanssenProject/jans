@@ -38,8 +38,7 @@ use cedar_policy::ContextJsonError;
 use entities::CEDAR_POLICY_SEPARATOR;
 use entities::ResourceEntityError;
 use entities::{
-    create_access_token, create_id_token_entity, create_role_entities, create_user_entity,
-    create_userinfo_token_entity, create_workload_entity, RoleEntityError,
+    create_token_entities, create_role_entities, create_user_entity, create_workload_entity, RoleEntityError,
 };
 use merge_json::{merge_json_values, MergeError};
 use request::Request;
@@ -314,24 +313,26 @@ impl Authz {
         } else {
             None
         };
+
+        let (access_token, id_token, userinfo_token) = create_token_entities(auth_conf, policy_store, tokens)?;
     
-        // build access_token Entity
-        let access_token = tokens.access_token.as_ref().map(|tkn| {
-             create_access_token(auth_conf.mapping_access_token.as_deref(), policy_store, tkn)
-                .map_err(AuthorizeError::CreateAccessTokenEntity)
-        }).transpose()?;
-
-        // build id_token Entity
-        let id_token = tokens.id_token.as_ref().map(|tkn| {
-             create_id_token_entity(auth_conf.mapping_id_token.as_deref(), policy_store, tkn)
-                .map_err(AuthorizeError::CreateIdTokenEntity)
-        }).transpose()?;
-
-        // build userinfo_token Entity
-        let userinfo_token = tokens.userinfo_token.as_ref().map(|tkn| {
-             create_userinfo_token_entity(auth_conf.mapping_userinfo_token.as_deref(), policy_store, tkn)
-                .map_err(AuthorizeError::CreateUserinfoTokenEntity)
-        }).transpose()?;
+        // // build access_token Entity
+        // let access_token = tokens.access_token.as_ref().map(|tkn| {
+        //      create_access_token(auth_conf.mapping_access_token.as_deref(), policy_store, tkn)
+        //         .map_err(AuthorizeError::CreateAccessTokenEntity)
+        // }).transpose()?;
+        //
+        // // build id_token Entity
+        // let id_token = tokens.id_token.as_ref().map(|tkn| {
+        //      create_id_token_entity(auth_conf.mapping_id_token.as_deref(), policy_store, tkn)
+        //         .map_err(AuthorizeError::CreateIdTokenEntity)
+        // }).transpose()?;
+        //
+        // // build userinfo_token Entity
+        // let userinfo_token = tokens.userinfo_token.as_ref().map(|tkn| {
+        //      create_userinfo_token_entity(auth_conf.mapping_userinfo_token.as_deref(), policy_store, tkn)
+        //         .map_err(AuthorizeError::CreateUserinfoTokenEntity)
+        // }).transpose()?;
 
         // build resource entity
         let resource = create_resource_entity(

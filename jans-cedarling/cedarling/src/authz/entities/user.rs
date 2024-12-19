@@ -26,7 +26,7 @@ pub fn create_user_entity(
     if let Some(token) = tokens.id_token.as_ref() {
         match EntityMetadata::new(
             EntityParsedTypeName {
-                typename: entity_mapping.unwrap_or("User"),
+                type_name: entity_mapping.unwrap_or("User"),
                 namespace,
             },
             token.user_mapping(),
@@ -43,7 +43,7 @@ pub fn create_user_entity(
     if let Some(token) = tokens.access_token.as_ref() {
         match EntityMetadata::new(
             EntityParsedTypeName {
-                typename: entity_mapping.unwrap_or("User"),
+                type_name: entity_mapping.unwrap_or("User"),
                 namespace,
             },
             token.user_mapping(),
@@ -60,7 +60,7 @@ pub fn create_user_entity(
     if let Some(token) = tokens.userinfo_token.as_ref() {
         match EntityMetadata::new(
             EntityParsedTypeName {
-                typename: entity_mapping.unwrap_or("User"),
+                type_name: entity_mapping.unwrap_or("User"),
                 namespace,
             },
             token.user_mapping(),

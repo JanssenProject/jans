@@ -87,22 +87,22 @@ pub(crate) fn build_entity_uid(
 /// Analog to the internal cedar_policy type `InternalName`
 #[derive(Debug)]
 pub(crate) struct EntityParsedTypeName<'a> {
-    pub typename: &'a str,
+    pub type_name: &'a str,
     pub namespace: &'a str,
 }
 impl<'a> EntityParsedTypeName<'a> {
     pub fn new(typename: &'a str, namespace: &'a str) -> Self {
         EntityParsedTypeName {
-            typename,
+            type_name: typename,
             namespace,
         }
     }
 
     pub fn full_type_name(&self) -> String {
         if self.namespace.is_empty() {
-            self.typename.to_string()
+            self.type_name.to_string()
         } else {
-            [self.namespace, self.typename].join(CEDAR_POLICY_SEPARATOR)
+            [self.namespace, self.type_name].join(CEDAR_POLICY_SEPARATOR)
         }
     }
 }
@@ -122,15 +122,15 @@ fn fetch_schema_record<'a>(
     schema: &'a CedarSchemaJson,
 ) -> Result<&'a CedarSchemaEntityShape, CreateCedarEntityError> {
     let entity_shape = schema
-        .entity_schema(entity_info.namespace, entity_info.typename)
+        .entity_schema(entity_info.namespace, entity_info.type_name)
         .ok_or(CreateCedarEntityError::CouldNotFindEntity(
-            entity_info.typename.to_string(),
+            entity_info.type_name.to_string(),
         ))?;
 
     if let Some(entity_record) = &entity_shape.shape {
         if !entity_record.is_record() {
             return Err(CreateCedarEntityError::NotRecord(
-                entity_info.typename.to_string(),
+                entity_info.type_name.to_string(),
             ));
         };
     }
