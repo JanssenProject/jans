@@ -120,3 +120,21 @@ policy_stores:
         };
 
         }
+    trusted_issuers:
+      3e59e1d6f009a16d40a33b2f10fc259d05a1a5d9a922:
+        name: TestAgama
+        description: TestAgama trusted issuer
+        openid_configuration_endpoint: https://test-casa.gluu.info/.well-known/openid-configuration
+        access_tokens:
+          trusted: true
+          principal_identifier: jti
+          user_id: ''
+          role_mapping: role
+          # claim_mapping: {}
+        id_tokens:
+          user_id: ''
+          role_mapping: role
+        userinfo_tokens:
+          user_id: ''
+          role_mapping: role
+          # claim_mapping: {}
