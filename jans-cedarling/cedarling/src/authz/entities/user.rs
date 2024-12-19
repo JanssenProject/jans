@@ -46,8 +46,8 @@ pub fn create_user_entity(
 
     // attempt entity creation for each token type that contains user info
     for (token_kind, token) in [
-        (TokenKind::Id, tokens.id_token.as_ref()),
         (TokenKind::Userinfo, tokens.userinfo_token.as_ref()),
+        (TokenKind::Id, tokens.id_token.as_ref()),
     ] {
         match try_create_entity(token_kind, token) {
             Ok(entity) => return Ok(entity),

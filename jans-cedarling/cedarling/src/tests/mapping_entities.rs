@@ -181,7 +181,7 @@ fn test_failed_user_mapping() {
             assert_eq!(error.errors.len(), 2, "there should be 2 errors");
 
             let (token_kind, err) = &error.errors[0];
-            assert_eq!(token_kind, &TokenKind::Id);
+            assert_eq!(token_kind, &TokenKind::Userinfo);
             assert!(
                 matches!(err, CreateCedarEntityError::CouldNotFindEntity(ref err) if err == &entity_type),
                 "expected CouldNotFindEntity({}), got: {:?}",
@@ -190,7 +190,7 @@ fn test_failed_user_mapping() {
             );
 
             let (token_kind, err) = &error.errors[1];
-            assert_eq!(token_kind, &TokenKind::Userinfo);
+            assert_eq!(token_kind, &TokenKind::Id);
             assert!(
                 matches!(err, CreateCedarEntityError::CouldNotFindEntity(ref err) if err == &entity_type),
                 "expected CouldNotFindEntity({}), got: {:?}",
