@@ -16,7 +16,7 @@ use crate::common::cedar_schema::cedar_json::{
 };
 use crate::common::{cedar_schema::CedarSchemaJson, policy_store::ClaimMappings};
 use crate::jwt::Token;
-use crate::jwt::{TokenClaim, TokenClaimTypeError, TokenData};
+use crate::jwt::{TokenClaim, TokenClaimTypeError, TokenClaims};
 use cedar_policy::{EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 
 pub const CEDAR_POLICY_SEPARATOR: &str = "::";
@@ -62,7 +62,7 @@ impl<'a> EntityMetadata<'a> {
             entity_uid,
             &self.entity_type,
             schema,
-            token.data(),
+            token.claims(),
             parents,
             claim_mapping,
         )
@@ -161,7 +161,7 @@ fn entity_meta_attributes(
 fn build_entity_attributes(
     schema: &CedarSchemaJson,
     parsed_typename: &EntityParsedTypeName,
-    tkn_data: &TokenData,
+    tkn_data: &TokenClaims,
     claim_mapping: &ClaimMappings,
 ) -> Result<HashMap<String, RestrictedExpression>, CreateCedarEntityError> {
     // fetch the schema entity shape from the json-schema.
@@ -201,7 +201,7 @@ pub fn create_entity(
     entity_uid: EntityUid,
     parsed_typename: &EntityParsedTypeName,
     schema: &CedarSchemaJson,
-    tkn_data: &TokenData,
+    tkn_data: &TokenClaims,
     parents: HashSet<EntityUid>,
     claim_mapping: &ClaimMappings,
 ) -> Result<cedar_policy::Entity, CreateCedarEntityError> {
@@ -226,7 +226,7 @@ pub struct EntityAttributeMetadata<'a> {
 /// Get the cedar policy expression value for a given type.
 fn token_attribute_to_cedar_exp(
     attribute_metadata: &EntityAttributeMetadata,
-    tkn_data: &TokenData,
+    tkn_data: &TokenClaims,
     entity_typename: &EntityParsedTypeName,
     schema: &CedarSchemaJson,
     claim_mapping: &ClaimMappings,
@@ -336,16 +336,16 @@ fn get_record_expression(
     claim_mapping: &ClaimMappings,
 ) -> Result<RestrictedExpression, CreateCedarEntityError> {
     // map json value of `token_claim` to TokenPayload object (HashMap)
-    let mapped_claim: TokenData =
+    let mapped_claim: TokenClaims =
         match claim_mapping.get_mapping(token_claim.key(), &cedar_record_type.full_type_name()) {
             Some(m) => m.apply_mapping(token_claim.value()).into(),
             // if we do not have mapping, and value is json object, return TokenPayload based on it.
             // if value is not json object, return empty value
             None => {
                 if let Some(map) = token_claim.value().as_object() {
-                    TokenData::from_json_map(map.to_owned())
+                    TokenClaims::from_json_map(map.to_owned())
                 } else {
-                    TokenData::default()
+                    TokenClaims::default()
                 }
             },
         };

@@ -87,7 +87,7 @@ mod test {
     use super::create_workload_entity;
     use crate::{
         authz::entities::DecodedTokens, common::policy_store::TokenKind,
-        init::policy_store::load_policy_store, jwt::TokenData, CreateCedarEntityError,
+        init::policy_store::load_policy_store, jwt::Token, CreateCedarEntityError,
         PolicyStoreConfig, PolicyStoreSource,
     };
     use cedar_policy::{Entity, RestrictedExpression};
@@ -111,13 +111,14 @@ mod test {
 
         let tokens = DecodedTokens {
             access_token: None,
-            id_token: Some(crate::jwt::Token::Id(TokenData::new(
+            id_token: Some(Token::new_id(
                 HashMap::from([
                     ("aud".to_string(), json!("workload-1")),
                     ("org_id".to_string(), json!("some-org-123")),
-                ]),
+                ])
+                .into(),
                 None,
-            ))),
+            )),
             userinfo_token: None,
         };
         let result = create_workload_entity(entity_mapping, &policy_store, &tokens)
@@ -150,13 +151,14 @@ mod test {
         .store;
 
         let tokens = DecodedTokens {
-            access_token: Some(crate::jwt::Token::Access(TokenData::new(
+            access_token: Some(Token::new_access(
                 HashMap::from([
                     ("client_id".to_string(), json!("workload-1")),
                     ("org_id".to_string(), json!("some-org-123")),
-                ]),
+                ])
+                .into(),
                 None,
-            ))),
+            )),
             id_token: None,
             userinfo_token: None,
         };
@@ -190,18 +192,9 @@ mod test {
         .store;
 
         let tokens = DecodedTokens {
-            access_token: Some(crate::jwt::Token::Access(TokenData::new(
-                HashMap::from([]),
-                None,
-            ))),
-            id_token: Some(crate::jwt::Token::Access(TokenData::new(
-                HashMap::from([]),
-                None,
-            ))),
-            userinfo_token: Some(crate::jwt::Token::Access(TokenData::new(
-                HashMap::from([]),
-                None,
-            ))),
+            access_token: Some(Token::new_access(HashMap::from([]).into(), None)),
+            id_token: Some(Token::new_id(HashMap::from([]).into(), None)),
+            userinfo_token: Some(Token::new_userinfo(HashMap::from([]).into(), None)),
         };
 
         let result = create_workload_entity(entity_mapping, &policy_store, &tokens)
@@ -237,13 +230,14 @@ mod test {
         let tokens = DecodedTokens {
             access_token: None,
             id_token: None,
-            userinfo_token: Some(crate::jwt::Token::Access(TokenData::new(
+            userinfo_token: Some(Token::new_userinfo(
                 HashMap::from([
                     ("aud".to_string(), json!("workload-1")),
                     ("org_id".to_string(), json!("some-org-123")),
-                ]),
+                ])
+                .into(),
                 None,
-            ))),
+            )),
         };
 
         let result = create_workload_entity(entity_mapping, &policy_store, &tokens)

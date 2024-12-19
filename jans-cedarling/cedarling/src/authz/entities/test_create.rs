@@ -11,7 +11,7 @@ use super::create::*;
 use crate::common::cedar_schema::CedarSchemaJson;
 use crate::jwt::Token;
 use crate::jwt::TokenClaimTypeError;
-use crate::jwt::TokenData;
+use crate::jwt::TokenClaims;
 use std::collections::HashSet;
 use test_utils::assert_eq;
 use test_utils::SortedJson;
@@ -41,12 +41,12 @@ fn successful_scenario_empty_namespace() {
         "set_set_key": [["some_string"]]
     });
 
-    let payload: TokenData = serde_json::from_value(json).unwrap();
+    let payload: TokenClaims = serde_json::from_value(json).unwrap();
 
     let entity = metadata
         .create_entity(
             &schema,
-            &Token::Access(payload),
+            &Token::new_id(payload, None),
             HashSet::new(),
             &Default::default(),
         )
@@ -101,12 +101,12 @@ fn successful_scenario_not_empty_namespace() {
         "bool_key": true,
     });
 
-    let payload: TokenData = serde_json::from_value(json).unwrap();
+    let payload: TokenClaims = serde_json::from_value(json).unwrap();
 
     let entity = metadata
         .create_entity(
             &schema,
-            &Token::Access(payload),
+            &Token::new_id(payload, None),
             HashSet::new(),
             &Default::default(),
         )
@@ -162,12 +162,12 @@ fn get_token_claim_type_string_error() {
         "set_set_key": [["some_string"]]
     });
 
-    let payload: TokenData = serde_json::from_value(json.clone()).unwrap();
+    let payload: TokenClaims = serde_json::from_value(json.clone()).unwrap();
 
     let entity_creation_error = metadata
         .create_entity(
             &schema,
-            &Token::Access(payload),
+            &Token::new_id(payload, None),
             HashSet::new(),
             &Default::default(),
         )
@@ -216,12 +216,12 @@ fn get_token_claim_type_long_error() {
         "set_set_key": [["some_string"]]
     });
 
-    let payload: TokenData = serde_json::from_value(json.clone()).unwrap();
+    let payload: TokenClaims = serde_json::from_value(json.clone()).unwrap();
 
     let entity_creation_error = metadata
         .create_entity(
             &schema,
-            &Token::Access(payload),
+            &Token::new_id(payload, None),
             HashSet::new(),
             &Default::default(),
         )
@@ -270,12 +270,12 @@ fn get_token_claim_type_entity_uid_error() {
         "set_set_key": [["some_string"]]
     });
 
-    let payload: TokenData = serde_json::from_value(json.clone()).unwrap();
+    let payload: TokenClaims = serde_json::from_value(json.clone()).unwrap();
 
     let entity_creation_error = metadata
         .create_entity(
             &schema,
-            &Token::Access(payload),
+            &Token::new_id(payload, None),
             HashSet::new(),
             &Default::default(),
         )
@@ -324,12 +324,12 @@ fn get_token_claim_type_boolean_error() {
         "set_set_key": [["some_string"]]
     });
 
-    let payload: TokenData = serde_json::from_value(json.clone()).unwrap();
+    let payload: TokenClaims = serde_json::from_value(json.clone()).unwrap();
 
     let entity_creation_error = metadata
         .create_entity(
             &schema,
-            &Token::Access(payload),
+            &Token::new_id(payload, None),
             HashSet::new(),
             &Default::default(),
         )
@@ -383,12 +383,12 @@ fn get_token_claim_type_set_error() {
         "set_set_key": [["some_string"]]
     });
 
-    let payload: TokenData = serde_json::from_value(json.clone()).unwrap();
+    let payload: TokenClaims = serde_json::from_value(json.clone()).unwrap();
 
     let entity_creation_error = metadata
         .create_entity(
             &schema,
-            &Token::Access(payload),
+            &Token::new_id(payload, None),
             HashSet::new(),
             &Default::default(),
         )
@@ -441,12 +441,12 @@ fn get_token_claim_type_set_of_set_error() {
         "set_set_key": ["some_string"]
     });
 
-    let payload: TokenData = serde_json::from_value(json.clone()).unwrap();
+    let payload: TokenClaims = serde_json::from_value(json.clone()).unwrap();
 
     let entity_creation_error = metadata
         .create_entity(
             &schema,
-            &Token::Access(payload),
+            &Token::new_id(payload, None),
             HashSet::new(),
             &Default::default(),
         )
@@ -502,12 +502,12 @@ fn get_token_claim_cedar_typename_error() {
         "bool_key": true,
     });
 
-    let payload: TokenData = serde_json::from_value(json).unwrap();
+    let payload: TokenClaims = serde_json::from_value(json).unwrap();
 
     let entity_creation_error = metadata
         .create_entity(
             &schema,
-            &Token::Access(payload),
+            &Token::new_id(payload, None),
             HashSet::new(),
             &Default::default(),
         )
@@ -553,12 +553,12 @@ fn get_token_claim_cedar_typename_in_attr_error() {
         "bool_key": true,
     });
 
-    let payload: TokenData = serde_json::from_value(json).unwrap();
+    let payload: TokenClaims = serde_json::from_value(json).unwrap();
 
     let entity_creation_error = metadata
         .create_entity(
             &schema,
-            &Token::Access(payload),
+            &Token::new_id(payload, None),
             HashSet::new(),
             &Default::default(),
         )

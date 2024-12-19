@@ -20,134 +20,105 @@ pub enum TokenStr<'a> {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Token<'a> {
-    Access(TokenData<'a>),
-    Id(TokenData<'a>),
-    Userinfo(TokenData<'a>),
+pub struct Token<'a> {
+    pub kind: TokenKind,
+    pub iss: Option<&'a TrustedIssuer>,
+    claims: TokenClaims,
 }
 
-impl Token<'_> {
-    pub fn kind(&self) -> TokenKind {
-        match self {
-            Token::Access(_) => TokenKind::Access,
-            Token::Id(_) => TokenKind::Id,
-            Token::Userinfo(_) => TokenKind::Userinfo,
+impl<'a> Token<'a> {
+    pub fn new_access(claims: TokenClaims, iss: Option<&'a TrustedIssuer>) -> Token<'a> {
+        Self {
+            kind: TokenKind::Access,
+            iss,
+            claims,
+        }
+    }
+
+    pub fn new_id(claims: TokenClaims, iss: Option<&'a TrustedIssuer>) -> Token<'a> {
+        Self {
+            kind: TokenKind::Id,
+            iss,
+            claims,
+        }
+    }
+
+    pub fn new_userinfo(claims: TokenClaims, iss: Option<&'a TrustedIssuer>) -> Token<'a> {
+        Self {
+            kind: TokenKind::Userinfo,
+            iss,
+            claims,
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn new_tx(claims: TokenClaims, iss: Option<&'a TrustedIssuer>) -> Token<'a> {
+        Self {
+            kind: TokenKind::Transaction,
+            iss,
+            claims,
         }
     }
 
     pub fn metadata(&self) -> &TokenEntityMetadata {
-        match self {
-            Token::Access(data) => data.iss.unwrap_or_default().tokens_metadata().access_tokens,
-            Token::Id(data) => data.iss.unwrap_or_default().tokens_metadata().access_tokens,
-            Token::Userinfo(data) => data.iss.unwrap_or_default().tokens_metadata().access_tokens,
-        }
+        self.iss.unwrap_or_default().token_metadata(self.kind)
     }
 
     pub fn user_mapping(&self) -> &str {
-        match self {
-            Token::Access(data) => data
-                .iss
-                .unwrap_or_default()
-                .user_mapping(TokenKind::Access)
-                .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM),
-            Token::Id(data) => data
-                .iss
-                .unwrap_or_default()
-                .user_mapping(TokenKind::Id)
-                .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM),
-            Token::Userinfo(data) => data
-                .iss
-                .unwrap_or_default()
-                .user_mapping(TokenKind::Userinfo)
-                .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM),
-        }
+        self.iss
+            .unwrap_or_default()
+            .user_mapping(self.kind)
+            .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM)
     }
 
     pub fn claim_mapping(&self) -> &ClaimMappings {
-        match self {
-            Token::Access(data) => &data.iss.unwrap_or_default().access_tokens.claim_mapping,
-            Token::Id(data) => &data.iss.unwrap_or_default().id_tokens.claim_mapping,
-            Token::Userinfo(data) => &data.iss.unwrap_or_default().userinfo_tokens.claim_mapping,
-        }
+        self.iss.unwrap_or_default().claim_mapping(self.kind)
     }
 
     pub fn role_mapping(&self) -> &str {
-        match self {
-            Token::Access(data) => data
-                .iss
-                .unwrap_or_default()
-                .role_mapping(TokenKind::Access)
-                .unwrap_or(DEFAULT_ROLE_SRC_CLAIM),
-            Token::Id(data) => data
-                .iss
-                .unwrap_or_default()
-                .role_mapping(TokenKind::Id)
-                .unwrap_or(DEFAULT_ROLE_SRC_CLAIM),
-            Token::Userinfo(data) => data
-                .iss
-                .unwrap_or_default()
-                .role_mapping(TokenKind::Userinfo)
-                .unwrap_or(DEFAULT_ROLE_SRC_CLAIM),
-        }
+        self.iss
+            .unwrap_or_default()
+            .role_mapping(self.kind)
+            .unwrap_or(DEFAULT_ROLE_SRC_CLAIM)
     }
 
     pub fn get_claim(&self, name: &str) -> Option<TokenClaim> {
-        match self {
-            Token::Access(data) | Token::Id(data) | Token::Userinfo(data) => data.get_claim(name),
-        }
+        self.claims.get_claim(name)
     }
 
     pub fn has_claim(&self, name: &str) -> bool {
-        match self {
-            Token::Access(data) | Token::Id(data) | Token::Userinfo(data) => data.has_claim(name),
-        }
+        self.claims.has_claim(name)
     }
 
-    pub fn data(&self) -> &TokenData {
-        match self {
-            Token::Access(data) | Token::Id(data) | Token::Userinfo(data) => data,
-        }
+    pub fn logging_info(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
+        self.claims.logging_info(claim)
     }
 
-    pub fn logging_info<'a>(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
-        match self {
-            Token::Access(data) | Token::Id(data) | Token::Userinfo(data) => {
-                data.get_logging_info(claim)
-            },
-        }
+    pub fn claims(&self) -> &TokenClaims {
+        &self.claims
     }
 }
 
 /// A struct holding information on a decoded JWT.
-#[derive(Debug, PartialEq, Default)]
-pub struct TokenData<'a> {
+#[derive(Debug, PartialEq, Default, Deserialize)]
+pub struct TokenClaims {
+    #[serde(flatten)]
     claims: HashMap<String, Value>,
-    pub iss: Option<&'a TrustedIssuer>,
 }
 
-impl<'de> Deserialize<'de> for TokenData<'_> {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let claims = HashMap::<String, Value>::deserialize(deserializer)?;
-        Ok(Self { claims, iss: None })
-    }
-}
-
-impl From<HashMap<String, Value>> for TokenData<'_> {
+impl From<HashMap<String, Value>> for TokenClaims {
     fn from(claims: HashMap<String, Value>) -> Self {
-        Self { claims, iss: None }
+        Self { claims }
     }
 }
 
-impl<'a> TokenData<'a> {
-    pub fn new(claims: HashMap<String, serde_json::Value>, iss: Option<&'a TrustedIssuer>) -> Self {
-        Self { claims, iss }
+impl TokenClaims {
+    pub fn new(claims: HashMap<String, serde_json::Value>) -> Self {
+        Self { claims }
     }
 
     pub fn from_json_map(map: serde_json::Map<String, serde_json::Value>) -> Self {
-        Self::new(HashMap::from_iter(map), None)
+        Self::new(HashMap::from_iter(map))
     }
 
     pub fn has_claim(&self, name: &str) -> bool {
@@ -161,7 +132,7 @@ impl<'a> TokenData<'a> {
         })
     }
 
-    pub fn get_logging_info(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
+    pub fn logging_info<'a>(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
         let claim = if !claim.is_empty() { claim } else { "jti" };
 
         let iter = [self.claims.get(claim).map(|value| (claim, value))]

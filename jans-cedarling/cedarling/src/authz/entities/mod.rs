@@ -199,7 +199,7 @@ pub fn create_role_entities(
             build_entity_uid(role_entity_type.as_str(), payload_str).map_err(|err| {
                 RoleEntityError::Create {
                     error: err,
-                    token_kind: token.kind(),
+                    token_kind: token.kind,
                 }
             })?;
         vec![entity_uid]
@@ -216,13 +216,13 @@ pub fn create_role_entities(
                         // get each element of array as `str`
                         payload_el.as_str().map_err(|err| RoleEntityError::Create {
                             error: err.into(),
-                            token_kind: token.kind(),
+                            token_kind: token.kind,
                         })
                         // build entity uid 
                         .and_then(|name| build_entity_uid(role_entity_type.as_str(), name)
                         .map_err(|err| RoleEntityError::Create {
                             error: err,
-                            token_kind: token.kind(),
+                            token_kind: token.kind,
                         }))
                     })
                     .collect::<Result<Vec<_>, _>>()?
@@ -231,7 +231,7 @@ pub fn create_role_entities(
                 // Handle the case where the payload is neither a string nor an array
                 return Err(RoleEntityError::Create {
                     error: err.into(),
-                    token_kind: token.kind(),
+                    token_kind: token.kind,
                 });
             },
         }
@@ -247,13 +247,13 @@ pub fn create_role_entities(
                 entity_uid,
                 &parsed_typename,
                 schema,
-                token.data(),
+                token.claims(),
                 HashSet::new(),
                 token.claim_mapping(),
             )
             .map_err(|err| RoleEntityError::Create {
                 error: err,
-                token_kind: token.kind(),
+                token_kind: token.kind,
             })
         })
         .collect::<Result<Vec<_>, _>>()

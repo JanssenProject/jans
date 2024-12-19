@@ -22,7 +22,7 @@ use std::sync::Arc;
 use url::Url;
 
 type IssuerId = String;
-pub type TokenClaims = Value;
+type TokenClaims = Value;
 
 /// Validates Json Web Tokens.
 pub struct JwtValidator {

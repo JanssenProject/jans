@@ -158,6 +158,24 @@ impl TrustedIssuer {
         }
     }
 
+    pub fn claim_mapping(&self, token_kind: TokenKind) -> &ClaimMappings {
+        match token_kind {
+            TokenKind::Access => &self.access_tokens.claim_mapping,
+            TokenKind::Id => &self.id_tokens.claim_mapping,
+            TokenKind::Userinfo => &self.userinfo_tokens.claim_mapping,
+            TokenKind::Transaction => &self.tx_tokens.claim_mapping,
+        }
+    }
+
+    pub fn token_metadata(&self, token_kind: TokenKind) -> &TokenEntityMetadata {
+        match token_kind {
+            TokenKind::Access => self.tokens_metadata().access_tokens,
+            TokenKind::Id => self.tokens_metadata().id_tokens,
+            TokenKind::Userinfo => self.tokens_metadata().userinfo_tokens,
+            TokenKind::Transaction => self.tokens_metadata().tx_tokens,
+        }
+    }
+
     pub fn tokens_metadata(&self) -> TokensMetadata<'_> {
         TokensMetadata {
             access_tokens: &self.access_tokens,

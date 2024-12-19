@@ -110,7 +110,7 @@ mod test {
     use super::create_user_entity;
     use crate::{
         authz::entities::DecodedTokens, common::policy_store::TokenKind,
-        init::policy_store::load_policy_store, jwt::TokenData, CreateCedarEntityError,
+        init::policy_store::load_policy_store, jwt::Token, CreateCedarEntityError,
         PolicyStoreConfig, PolicyStoreSource,
     };
     use cedar_policy::{Entity, RestrictedExpression};
@@ -134,13 +134,14 @@ mod test {
 
         let tokens = DecodedTokens {
             access_token: None,
-            id_token: Some(crate::jwt::Token::Id(TokenData::new(
+            id_token: Some(Token::new_id(
                 HashMap::from([
                     ("sub".to_string(), json!("user-1")),
                     ("country".to_string(), json!("US")),
-                ]),
+                ])
+                .into(),
                 None,
-            ))),
+            )),
             userinfo_token: None,
         };
         let result = create_user_entity(entity_mapping, &policy_store, &tokens, HashSet::new())
@@ -173,13 +174,14 @@ mod test {
         .store;
 
         let tokens = DecodedTokens {
-            access_token: Some(crate::jwt::Token::Access(TokenData::new(
+            access_token: Some(Token::new_access(
                 HashMap::from([
                     ("sub".to_string(), json!("user-1")),
                     ("country".to_string(), json!("US")),
-                ]),
+                ])
+                .into(),
                 None,
-            ))),
+            )),
             id_token: None,
             userinfo_token: None,
         };
@@ -215,13 +217,14 @@ mod test {
         let tokens = DecodedTokens {
             id_token: None,
             access_token: None,
-            userinfo_token: Some(crate::jwt::Token::Userinfo(TokenData::new(
+            userinfo_token: Some(Token::new_userinfo(
                 HashMap::from([
                     ("sub".to_string(), json!("user-1")),
                     ("country".to_string(), json!("US")),
-                ]),
+                ])
+                .into(),
                 None,
-            ))),
+            )),
         };
         let result = create_user_entity(entity_mapping, &policy_store, &tokens, HashSet::new())
             .expect("expected to create user entity");
@@ -253,18 +256,9 @@ mod test {
         .store;
 
         let tokens = DecodedTokens {
-            access_token: Some(crate::jwt::Token::Access(TokenData::new(
-                HashMap::from([]),
-                None,
-            ))),
-            id_token: Some(crate::jwt::Token::Access(TokenData::new(
-                HashMap::from([]),
-                None,
-            ))),
-            userinfo_token: Some(crate::jwt::Token::Access(TokenData::new(
-                HashMap::from([]),
-                None,
-            ))),
+            access_token: Some(Token::new_access(HashMap::from([]).into(), None)),
+            id_token: Some(Token::new_id(HashMap::from([]).into(), None)),
+            userinfo_token: Some(Token::new_userinfo(HashMap::from([]).into(), None)),
         };
 
         let result = create_user_entity(entity_mapping, &policy_store, &tokens, HashSet::new())
