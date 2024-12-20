@@ -4,11 +4,7 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
-#![cfg(not(all(
-    target_arch = "wasm32",
-    target_vendor = "unknown",
-    target_os = "unknown"
-)))]
+#![cfg(not(target_arch = "wasm32"))]
 
 use pyo3::Bound;
 use pyo3::prelude::*;
