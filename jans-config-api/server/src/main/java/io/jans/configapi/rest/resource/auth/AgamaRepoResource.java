@@ -16,6 +16,7 @@ import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,8 +24,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
 
-import jakarta.inject.Inject;
+import static io.jans.as.model.util.Util.escapeLog;
 
+import java.io.IOException;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -68,5 +71,29 @@ public class AgamaRepoResource extends ConfigBaseResource {
     public Response getAllAgamaRepositories() {
         return Response.ok(agamaRepoService.getAllAgamaRepositories()).build();
     }
-  
+
+    @Operation(summary = "Download agama project.", description = "Download agama project.", operationId = "get-agama-project", tags = {
+            "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.AGAMA_REPO_READ_ACCESS, ApiAccessConstants.AGAMA_REPO_WRITE_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Agama project", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = String.class, format = "binary"))),
+            @ApiResponse(responseCode = "204", description = "No Content"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_REPO_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.AGAMA_REPO_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/download")
+    public Response getAgamaProject(
+            @Parameter(description = "Agama project download Link") @QueryParam(value = "downloadLink") String downloadLink)
+            throws IOException {
+        if (logger.isInfoEnabled()) {
+            logger.info(" Agama Project File downloadLink :{}", escapeLog(downloadLink));
+        }
+        return Response.ok(agamaRepoService.getAgamaProject(downloadLink)).build();
+    }
+
 }
