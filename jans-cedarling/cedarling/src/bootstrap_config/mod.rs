@@ -12,6 +12,7 @@ pub(crate) mod jwt_config;
 pub(crate) mod log_config;
 pub(crate) mod policy_store_config;
 
+#[cfg(not(target_arch = "wasm32"))]
 use std::{fs, io, path::Path};
 
 pub use authorization_config::AuthorizationConfig;
@@ -55,6 +56,7 @@ impl BootstrapConfig {
     ///     BootstrapConfig::load_from_file("../test_files/bootstrap_props.json")
     ///         .unwrap();
     /// ```
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn load_from_file(path: &str) -> Result<Self, BootstrapConfigLoadingError> {
         let file_ext = Path::new(path)
             .extension()
@@ -96,12 +98,14 @@ pub enum BootstrapConfigLoadingError {
     /// Supported formats include:
     /// - `.json`
     /// - `.yaml` or `.yml`
+    #[cfg(not(target_arch = "wasm32"))]
     #[error(
         "Unsupported bootstrap config file format for: {0}. Supported formats include: JSON, YAML"
     )]
     InvalidFileFormat(String),
 
     /// Error returned when the file cannot be read.
+    #[cfg(not(target_arch = "wasm32"))]
     #[error("Failed to read {0}: {1}")]
     ReadFile(String, io::Error),
 
@@ -114,11 +118,15 @@ pub enum BootstrapConfigLoadingError {
     DecodingYAML(#[from] serde_yml::Error),
 
     /// Error returned when the boostrap property `CEDARLING_LOG_TTL` is missing.
-    #[error("Missing bootstrap property: `CEDARLING_LOG_TTL`. This property is required if `CEDARLING_LOG_TYPE` is set to Memory.")]
+    #[error(
+        "Missing bootstrap property: `CEDARLING_LOG_TTL`. This property is required if `CEDARLING_LOG_TYPE` is set to Memory."
+    )]
     MissingLogTTL,
 
     /// Error returned when multiple policy store sources were provided.
-    #[error("Multiple store options were provided. Make sure you only one of these properties is set: `CEDARLING_POLICY_STORE_URI` or `CEDARLING_LOCAL_POLICY_STORE`")]
+    #[error(
+        "Multiple store options were provided. Make sure you only one of these properties is set: `CEDARLING_POLICY_STORE_URI` or `CEDARLING_LOCAL_POLICY_STORE`"
+    )]
     ConflictingPolicyStores,
 
     /// Error returned when no policy store source was provided.
@@ -126,14 +134,12 @@ pub enum BootstrapConfigLoadingError {
     MissingPolicyStore,
 
     /// Error returned when the policy store file is in an unsupported format.
-    #[error(
-        "Unsupported policy store file format for: {0}. Supported formats include: JSON, YAML"
-    )]
+    #[error("Unsupported policy store file format for: {0}. Supported formats include: JSON, YAML")]
     UnsupportedPolicyStoreFileFormat(String),
 
     /// Error returned when failing to load a local JWKS
     #[error("Failed to load local JWKS from {0}: {1}")]
-    LoadLocalJwks(String, std::io::Error),
+    LoadLocalJwks(String, String),
 }
 
 #[cfg(test)]

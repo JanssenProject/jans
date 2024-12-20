@@ -5,12 +5,13 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::interface::{LogStorage, LogWriter, Loggable};
 use super::LogEntry;
 use super::LogLevel;
+use super::interface::{LogStorage, LogWriter, Loggable};
 use crate::bootstrap_config::log_config::MemoryLogConfig;
+use chrono::Duration;
 use sparkv::{Config as ConfigSparKV, SparKV};
-use std::{sync::Mutex, time::Duration};
+use std::sync::Mutex;
 
 const STORAGE_MUTEX_EXPECT_MESSAGE: &str = "MemoryLogger storage mutex should unlock";
 const STORAGE_JSON_PARSE_EXPECT_MESSAGE: &str =
@@ -25,7 +26,11 @@ pub(crate) struct MemoryLogger {
 impl MemoryLogger {
     pub fn new(config: MemoryLogConfig, log_level: LogLevel) -> Self {
         let sparkv_config = ConfigSparKV {
-            default_ttl: Duration::from_secs(config.log_ttl),
+            default_ttl: Duration::new(
+                config.log_ttl.try_into().expect("u64 that fits in a i64"),
+                0,
+            )
+            .expect("a valid duration"),
             ..Default::default()
         };
 

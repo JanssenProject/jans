@@ -69,6 +69,9 @@ pub enum InitCedarlingError {
     /// Error while initializing a Service
     #[error(transparent)]
     ServiceInit(#[from] ServiceInitError),
+    /// Error while parse [`BootstrapConfigRaw`]
+    #[error(transparent)]
+    BootstrapConfigLoading(#[from] BootstrapConfigLoadingError),
 }
 
 /// The instance of the Cedarling application.

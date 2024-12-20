@@ -14,15 +14,15 @@ use std::fmt::Display;
 
 use std::hash::Hash;
 
-use uuid7::uuid7;
 use uuid7::Uuid;
+use uuid7::uuid7;
 
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types::{self, ApplicationName};
 use crate::common::policy_store::PoliciesContainer;
 
-use super::interface::Loggable;
 use super::LogLevel;
+use super::interface::Loggable;
 
 /// ISO-8601 time format for [`chrono`]
 /// example: 2024-11-27T10:10:50.654Z
@@ -299,7 +299,7 @@ pub struct DecisionLogEntry<'a> {
     /// Dictionary with the token type and claims which should be included in the log
     pub tokens: LogTokensInfo<'a>,
     /// time in milliseconds spent for decision
-    pub decision_time_ms: u128,
+    pub decision_time_ms: i64,
 }
 
 impl Loggable for &DecisionLogEntry<'_> {
@@ -310,6 +310,15 @@ impl Loggable for &DecisionLogEntry<'_> {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }
+}
+
+/// custom uuid generation function to avoid using std::time because it makes panic in WASM
+fn gen_uuid7() -> Uuid {
+    use uuid7::V7Generator;
+
+    let mut g = V7Generator::with_rand08(rand::rngs::OsRng);
+    let custom_unix_ts_ms = chrono::Utc::now().timestamp_millis();
+    g.generate_or_reset_core(custom_unix_ts_ms as u64, 10_000 as u64)
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -343,7 +352,7 @@ impl BaseLogEntry {
             // We use uuid v7 because it is generated based on the time and sortable.
             // and we need sortable ids to use it in the sparkv database.
             // Sparkv store data in BTree. So we need have correct order of ids.
-            request_id: uuid7(),
+            request_id: gen_uuid7(),
             timestamp: Some(local_time_string),
             log_kind: log_type,
             pdp_id: pdp_id.0,

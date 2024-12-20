@@ -26,7 +26,7 @@ sparkv.set("your-key", "your-value"); // write
 let value = sparkv.get("your-key").unwrap(); // read
 
 // Write with unique TTL
-sparkv.set_with_ttl("diff-ttl", "your-value", std::time::Duration::from_secs(60));
+sparkv.set_with_ttl("diff-ttl", "your-value", chrono::Duration::new(60, 0));
 ```
 
 See `config.rs` for more configuration options.

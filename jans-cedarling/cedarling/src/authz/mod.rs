@@ -44,8 +44,8 @@ use entities::{
 use merge_json::{merge_json_values, MergeError};
 use request::Request;
 use serde_json::Value;
-use std::time::Instant;
 use token_data::{AccessTokenData, IdTokenData, UserInfoTokenData};
+use chrono::Utc;
 
 /// Configuration to Authz to initialize service without errors
 pub(crate) struct AuthzConfig {
@@ -103,7 +103,7 @@ impl Authz {
     /// - evaluate if authorization is granted for *person*
     /// - evaluate if authorization is granted for *workload*
     pub async  fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        let start_time = Instant::now();
+        let start_time = Utc::now();
 
         let schema = &self.config.policy_store.schema;
 
@@ -174,7 +174,7 @@ impl Authz {
         );
 
         // measure time how long request executes
-        let elapsed_ms = start_time.elapsed().as_millis();
+        let elapsed_ms = Utc::now().signed_duration_since(start_time).num_milliseconds();
 
         // FROM THIS POINT WE ONLY MAKE LOGS
 
