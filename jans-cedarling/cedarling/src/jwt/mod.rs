@@ -162,7 +162,7 @@ impl JwtService {
         })
     }
 
-    pub fn process_token<'a>(&'a self, token: TokenStr<'a>) -> Result<Token, JwtProcessingError> {
+    pub fn process_token<'a>(&'a self, token: TokenStr<'a>) -> Result<Token<'a>, JwtProcessingError> {
         match token {
             TokenStr::Access(tkn_str) => {
                 let token = self

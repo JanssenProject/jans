@@ -37,7 +37,7 @@ pub fn create_user_entity(
                 user_mapping,
             );
             entity_metadata
-                .create_entity(schema, token, parents.clone(), &claim_mapping)
+                .create_entity(schema, token, parents.clone(), claim_mapping)
                 .map_err(|e| (token_kind, e))
         } else {
             Err((token_kind, CreateCedarEntityError::UnavailableToken))

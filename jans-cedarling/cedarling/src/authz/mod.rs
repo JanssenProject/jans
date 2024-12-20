@@ -314,7 +314,7 @@ impl Authz {
             None
         };
 
-        let (access_token, id_token, userinfo_token) = create_token_entities(auth_conf, policy_store, tokens)?;
+        let token_entities = create_token_entities(auth_conf, policy_store, tokens)?;
 
         // build resource entity
         let resource = create_resource_entity(
@@ -324,9 +324,9 @@ impl Authz {
 
         Ok(AuthorizeEntitiesData { 
             workload, 
-            access_token, 
-            id_token, 
-            userinfo_token, 
+            access_token: token_entities.access, 
+            id_token: token_entities.id, 
+            userinfo_token: token_entities.userinfo, 
             user, 
             resource, 
             roles: role 
@@ -406,7 +406,7 @@ impl AuthorizeEntitiesData {
             self.id_token
         ]
         .into_iter()
-        .filter_map(|x| x))
+        .flatten())
     }
 
     /// Create iterator to get all entities
@@ -424,7 +424,7 @@ impl AuthorizeEntitiesData {
             self.id_token.as_ref()
         ]
         .into_iter()
-        .filter_map(|x| x))
+        .flatten())
     }
 
     /// Collect all entities to [`cedar_policy::Entities`]

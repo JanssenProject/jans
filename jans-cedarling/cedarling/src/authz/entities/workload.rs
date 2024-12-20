@@ -33,7 +33,7 @@ pub fn create_workload_entity(
                 key,
             );
             entity_metadta
-                .create_entity(schema, token, HashSet::new(), &claim_mapping)
+                .create_entity(schema, token, HashSet::new(), claim_mapping)
                 .map_err(|e| (token_kind, e))
         } else {
             Err((token_kind, CreateCedarEntityError::UnavailableToken))

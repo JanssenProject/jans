@@ -51,20 +51,26 @@ impl DecodedTokens<'_> {
             self.userinfo_token.as_ref(),
         ]
         .into_iter()
-        .filter_map(|x| x)
+        .flatten()
     }
+}
+
+pub struct TokenEntities {
+    pub access: Option<Entity>,
+    pub id: Option<Entity>,
+    pub userinfo: Option<Entity>,
 }
 
 pub fn create_token_entities(
     conf: &AuthorizationConfig,
     policy_store: &PolicyStore,
     tokens: &DecodedTokens,
-) -> Result<(Option<Entity>, Option<Entity>, Option<Entity>), AuthorizeError> {
+) -> Result<TokenEntities, AuthorizeError> {
     let schema = &policy_store.schema.json;
     let namespace = policy_store.namespace();
 
     // create access token entity
-    let access_tkn = if let Some(token) = tokens.access_token.as_ref() {
+    let access = if let Some(token) = tokens.access_token.as_ref() {
         let type_name = conf
             .mapping_access_token
             .as_deref()
@@ -78,7 +84,7 @@ pub fn create_token_entities(
     };
 
     // create id token entity
-    let id_tkn = if let Some(token) = tokens.id_token.as_ref() {
+    let id = if let Some(token) = tokens.id_token.as_ref() {
         let type_name = conf
             .mapping_id_token
             .as_deref()
@@ -92,7 +98,7 @@ pub fn create_token_entities(
     };
 
     // create userinfo token entity
-    let userinfo_tkn = if let Some(token) = tokens.userinfo_token.as_ref() {
+    let userinfo = if let Some(token) = tokens.userinfo_token.as_ref() {
         let type_name = conf
             .mapping_userinfo_token
             .as_deref()
@@ -105,7 +111,11 @@ pub fn create_token_entities(
         None
     };
 
-    Ok((access_tkn, id_tkn, userinfo_tkn))
+    Ok(TokenEntities {
+        access,
+        id,
+        userinfo,
+    })
 }
 
 fn create_token_entity(
@@ -126,7 +136,7 @@ fn create_token_entity(
             .as_deref()
             .unwrap_or(DEFAULT_TKN_PRINCIPAL_IDENTIFIER),
     );
-    tkn_metadata.create_entity(schema, &token, HashSet::new(), claim_mapping)
+    tkn_metadata.create_entity(schema, token, HashSet::new(), claim_mapping)
 }
 
 /// Describe errors on creating resource entity
