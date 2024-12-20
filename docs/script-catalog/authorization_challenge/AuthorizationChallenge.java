@@ -1,5 +1,6 @@
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.session.AuthorizationChallengeSession;
+import io.jans.as.server.auth.DpopService;
 import io.jans.as.server.authorize.ws.rs.AuthorizationChallengeSessionService;
 import io.jans.as.server.service.UserService;
 import io.jans.as.server.service.external.context.ExternalScriptContext;
@@ -128,8 +129,14 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
         AuthorizationChallengeSessionService authorizationChallengeSessionService = CdiUtil.bean(AuthorizationChallengeSessionService.class);
         boolean newSave = authorizationChallengeSessionObject == null;
         if (newSave) {
-//            authorizationChallengeSessionObject = authorizationChallengeSessionService.newAuthorizationChallengeSession();
+            authorizationChallengeSessionObject = authorizationChallengeSessionService.newAuthorizationChallengeSession();
         }
+
+        final String dpop = context.getHttpRequest().getHeader(DpopService.DPOP);
+        if (StringUtils.isNotBlank(dpop)) {
+            authorizationChallengeSessionObject.getAttributes().setJkt(getDpopJkt(dpop));
+        }
+
 
         String username = context.getHttpRequest().getParameter(USERNAME_PARAMETER);
         if (StringUtils.isNotBlank(username)) {
@@ -158,6 +165,19 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
         }
 
         return authorizationChallengeSessionObject;
+    }
+
+    public String getDpopJkt(String dpop) {
+        if (StringUtils.isBlank(dpop)) {
+            return null;
+        }
+
+        try {
+            return DpopService.getDpopJwkThumbprint(dpop);
+        } catch (Exception e) {
+            scriptLogger.error("Failed to get jkt from DPoP: " + dpop,e);
+            return null;
+        }
     }
 
     private String getParameterFromAuthorizationChallengeSession(ExternalScriptContext context, String parameterName) {
