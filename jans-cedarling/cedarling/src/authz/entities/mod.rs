@@ -21,7 +21,8 @@ use crate::common::cedar_schema::CedarSchemaJson;
 use crate::common::policy_store::{ClaimMappings, PolicyStore, TokenKind};
 use crate::jwt::Token;
 use crate::AuthorizationConfig;
-use cedar_policy::{Entity, EntityUid};
+use cedar_policy::Entity;
+use cedar_policy::EntityUid;
 use create::EntityParsedTypeName;
 pub use create::CEDAR_POLICY_SEPARATOR;
 use create::{build_entity_uid, create_entity, parse_namespace_and_typename, EntityMetadata};
@@ -40,6 +41,18 @@ pub struct DecodedTokens<'a> {
     pub access_token: Option<Token<'a>>,
     pub id_token: Option<Token<'a>>,
     pub userinfo_token: Option<Token<'a>>,
+}
+
+impl DecodedTokens<'_> {
+    pub fn iter(&self) -> impl Iterator<Item = &Token> {
+        [
+            self.access_token.as_ref(),
+            self.id_token.as_ref(),
+            self.userinfo_token.as_ref(),
+        ]
+        .into_iter()
+        .filter_map(|x| x)
+    }
 }
 
 pub fn create_token_entities(
@@ -159,44 +172,26 @@ pub enum RoleEntityError {
     UnavailableToken,
 }
 
-/// Create `Role` entity from based on `TrustedIssuer` or default value of `RoleMapping`
+/// Create `Role` entites from based on `TrustedIssuer` role mapping for each token or default value of `RoleMapping`
 pub fn create_role_entities(
     policy_store: &PolicyStore,
     tokens: &DecodedTokens,
 ) -> Result<Vec<cedar_policy::Entity>, RoleEntityError> {
-    let mut token: Option<&Token> = None;
+    let mut role_entities = Vec::new();
 
-    if let Some(tkn) = tokens.access_token.as_ref() {
-        let role_mapping = tkn.role_mapping();
-        if tkn.has_claim(role_mapping) {
-            token = Some(tkn);
-        }
+    for token in tokens.iter() {
+        let mut entities = extract_roles_from_token(policy_store, token)?;
+        role_entities.append(&mut entities);
     }
 
-    if token.is_none() {
-        if let Some(tkn) = tokens.id_token.as_ref() {
-            let role_mapping = tkn.role_mapping();
-            if tkn.has_claim(role_mapping) {
-                token = Some(tkn);
-            }
-        }
-    }
+    Ok(role_entities)
+}
 
-    if token.is_none() {
-        if let Some(tkn) = tokens.userinfo_token.as_ref() {
-            let role_mapping = tkn.role_mapping();
-            if tkn.has_claim(role_mapping) {
-                token = Some(tkn);
-            }
-        }
-    }
-
-    // (token_kind, token_data, role_mapping, token_mapping)
-    let token = match token {
-        Some(token) => token,
-        None => return Ok(Vec::new()),
-    };
-
+/// Extract `Role` entites based on single `RoleMapping`
+fn extract_roles_from_token(
+    policy_store: &PolicyStore,
+    token: &Token,
+) -> Result<Vec<cedar_policy::Entity>, RoleEntityError> {
     let parsed_typename = EntityParsedTypeName::new("Role", policy_store.namespace());
     let role_entity_type = parsed_typename.full_type_name();
 

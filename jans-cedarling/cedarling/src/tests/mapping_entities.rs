@@ -13,10 +13,14 @@
 //! CEDARLING_MAPPING_USERINFO_TOKEN
 
 use super::utils::*;
+use crate::cmp_decision;
+use crate::cmp_policy;
 use crate::common::policy_store::TokenKind;
-use crate::{cmp_decision, cmp_policy, CreateCedarEntityError};
-use crate::{AuthorizeError, Cedarling};
+use crate::AuthorizeError;
+use crate::Cedarling;
+use crate::CreateCedarEntityError;
 use cedarling_util::get_raw_config;
+use std::collections::HashSet;
 use std::sync::LazyLock;
 use test_utils::assert_eq;
 
@@ -338,4 +342,81 @@ fn test_failed_userinfo_token_mapping() {
         ),
         "should be error CouldNotFindEntity"
     );
+}
+
+/// Check if we get roles mapping from all tokens.
+/// Because we specify mapping from each token in policy store
+/// We use iss in JWT tokens to enable mapping for trusted issuer in policy store
+#[test]
+fn test_role_many_tokens_mapping() {
+    let raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
+
+    let config = crate::BootstrapConfig::from_raw_config(&raw_config)
+        .expect("raw config should parse without errors");
+
+    let cedarling = Cedarling::new(&config).expect("could be created without error");
+
+    let request = // deserialize `Request` from json
+    Request::deserialize(serde_json::json!(
+        {
+            "access_token": generate_token_using_claims(json!({
+                    "org_id": "some_long_id",
+                    "jti": "some_jti",
+                    "client_id": "some_client_id",
+                    "iss": "https://test-casa.gluu.info",
+                    "aud": "some_aud",
+                    "role": "Guest",
+                  })),
+            "id_token": generate_token_using_claims(json!({
+                    "jti": "some_jti",
+                    "iss": "https://test-casa.gluu.info",
+                    "aud": "some_aud",
+                    "sub": "some_sub",
+                    "role": "User",
+                  })),
+            "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
+                    "country": "US",
+                    "sub": "some_sub",
+                    "iss": "https://test-casa.gluu.info",
+                    "client_id": "some_client_id",
+                    "role": "Admin",
+                  })),
+            "action": "Jans::Action::\"Update\"",
+            "resource": {
+                "id": "random_id",
+                "type": "Jans::Issue",
+                "org_id": "some_long_id",
+                "country": "US"
+            },
+            "context": {},
+        }
+    ))
+    .expect("Request should be deserialized from json");
+
+    // HashSet of expected roles
+    let mut expected_role_ids: HashSet<String> =
+        HashSet::from_iter(["Guest", "User", "Admin"].into_iter().map(String::from));
+
+    // iterate over roles that created and filter expected roles
+    let roles_left = cedarling
+        .authorize_entities_data(&request)
+        .expect("should get authorize_entities_data without errors")
+        .roles
+        .into_iter()
+        .map(|entity| entity.uid().id().escaped())
+        // if role successfully removed from `expected_role_ids` we filter it
+        .filter(|uid| !expected_role_ids.remove(uid.as_str()))
+        .map(|v| v.to_string())
+        .collect::<Vec<_>>();
+
+    assert!(
+        expected_role_ids.is_empty(),
+        "HashSet `expected_role_ids` should be empty, not created roles: {expected_role_ids:?}"
+    );
+
+    assert!(
+        roles_left.is_empty(),
+        "list `roles_left` should be empty, additional created roles: {roles_left:?}"
+    )
 }

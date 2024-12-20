@@ -86,10 +86,6 @@ impl<'a> Token<'a> {
         self.claims.get_claim(name)
     }
 
-    pub fn has_claim(&self, name: &str) -> bool {
-        self.claims.has_claim(name)
-    }
-
     pub fn logging_info(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
         self.claims.logging_info(claim)
     }
@@ -119,10 +115,6 @@ impl TokenClaims {
 
     pub fn from_json_map(map: serde_json::Map<String, serde_json::Value>) -> Self {
         Self::new(HashMap::from_iter(map))
-    }
-
-    pub fn has_claim(&self, name: &str) -> bool {
-        self.claims.contains_key(name)
     }
 
     pub fn get_claim(&self, name: &str) -> Option<TokenClaim> {

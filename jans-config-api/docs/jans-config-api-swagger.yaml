@@ -497,6 +497,40 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/agama.readonly
+  /api/v1/agama-repo/download:
+    get:
+      tags:
+      - Agama
+      summary: Download agama project.
+      description: Download agama project.
+      operationId: get-agama-project
+      parameters:
+      - name: downloadLink
+        in: query
+        description: Agama project download Link
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Agama project
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/agama-repo.readonly
+        - https://jans.io/oauth/config/agama-repo.write
+        - https://jans.io/oauth/config/read-all
   /api/v1/agama-repo:
     get:
       tags:
@@ -9305,17 +9339,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanEdit:
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanView:
           type: boolean
         userCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanView:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
+        adminCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -9690,6 +9724,9 @@ components:
         saveTokensInCacheAndDontSaveInPersistence:
           type: boolean
         accessTokenLifetime:
+          type: integer
+          format: int32
+        userInfoLifetime:
           type: integer
           format: int32
         cleanServiceInterval:
@@ -10951,10 +10988,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:

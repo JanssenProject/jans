@@ -329,7 +329,7 @@ impl Authz {
             userinfo_token, 
             user, 
             resource, 
-            role 
+            roles: role 
         })
     }
 }
@@ -387,7 +387,7 @@ pub struct AuthorizeEntitiesData {
     pub id_token: Option<Entity>,
     pub userinfo_token: Option<Entity>,
     pub resource: Entity,
-    pub role: Vec<Entity>,
+    pub roles: Vec<Entity>,
 }
 
 impl AuthorizeEntitiesData {
@@ -397,7 +397,7 @@ impl AuthorizeEntitiesData {
             self.resource,
         ]
         .into_iter()
-        .chain(self.role)
+        .chain(self.roles)
         .chain(vec![
             self.user,
             self.workload,
@@ -415,7 +415,7 @@ impl AuthorizeEntitiesData {
             &self.resource,
         ]
         .into_iter()
-        .chain(self.role.iter())
+        .chain(self.roles.iter())
         .chain(vec![
             self.user.as_ref(),
             self.workload.as_ref(),
