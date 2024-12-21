@@ -29,7 +29,6 @@ pub struct LogEntry {
     /// it is unwrap to flatten structure
     #[serde(flatten)]
     pub base: BaseLogEntry,
-
     /// message of the event
     pub msg:                String,
     /// name of application from [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
@@ -143,13 +142,13 @@ pub struct AuthorizationLogInfo {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct UserAuthorizeInfo {
     /// cedar-policy user/person principal
-    #[serde(rename = "user_principal")]
+    #[serde(rename = "person_principal")]
     pub principal:   String,
     /// cedar-policy user/person diagnostics information
-    #[serde(rename = "user_diagnostics")]
+    #[serde(rename = "person_diagnostics")]
     pub diagnostics: Diagnostics,
     /// cedar-policy user/person decision
-    #[serde(rename = "user_decision")]
+    #[serde(rename = "person_decision")]
     pub decision:    Decision,
 }
 
