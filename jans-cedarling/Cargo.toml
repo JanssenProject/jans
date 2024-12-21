@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["bindings/*", "cedarling", "sparkv", "test_utils"]
+members = ["bindings/*", "cedarling", "cli", "sparkv", "test_utils"]
 
 [workspace.dependencies]
 serde = { version = "1.0", features = ["derive"] }
