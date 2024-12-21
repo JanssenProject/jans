@@ -51,15 +51,6 @@ impl<'a> Token<'a> {
         }
     }
 
-    #[allow(dead_code)]
-    pub fn new_tx(claims: TokenClaims, iss: Option<&'a TrustedIssuer>) -> Token<'a> {
-        Self {
-            kind: TokenKind::Transaction,
-            iss,
-            claims,
-        }
-    }
-
     pub fn metadata(&self) -> &TokenEntityMetadata {
         self.iss.unwrap_or_default().token_metadata(self.kind)
     }
