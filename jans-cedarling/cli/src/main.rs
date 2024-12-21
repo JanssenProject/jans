@@ -36,6 +36,7 @@ fn main() {
                 Some(var) => println!("{input} = {var}"),
                 None => println!("Unknown command or variable: {input}"),
             },
+            ParseResult::EmptyString => {},
         }
     }
 }

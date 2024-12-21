@@ -22,6 +22,7 @@ pub enum ParseResult {
     Quit,
     UnknownCommand(String),
     VariableAssignment(String, String),
+    EmptyString,
 }
 
 impl Parser {
@@ -39,6 +40,10 @@ impl Parser {
         let input = input.trim();
 
         // -=-=- parsing the input -=-=-
+
+        if input.is_empty() {
+            return Ok(ParseResult::EmptyString);
+        }
 
         if input == "quit()" {
             return Ok(ParseResult::Quit);
