@@ -1,21 +1,21 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-use super::{KeyId, TrustedIssuerId};
-use crate::common::policy_store::TrustedIssuer;
-use crate::http::{HttpClient, HttpClientError};
+use std::collections::{HashMap, HashSet};
+use std::fmt::Debug;
+use std::sync::Arc;
+
 use jsonwebtoken::jwk::Jwk;
 use jsonwebtoken::DecodingKey;
 use serde::Deserialize;
 use serde_json::Value;
-use std::collections::{HashMap, HashSet};
-use std::fmt::Debug;
-use std::sync::Arc;
 use time::OffsetDateTime;
+
+use super::{KeyId, TrustedIssuerId};
+use crate::common::policy_store::TrustedIssuer;
+use crate::http::{HttpClient, HttpClientError};
 
 #[derive(Deserialize)]
 struct OpenIdConfig {
@@ -88,6 +88,7 @@ impl JwkStore {
             serde_json::from_value::<IntermediateJwks>(jwks).map_err(JwkStoreError::DecodeJwk)?;
         Self::new_from_jwks(store_id, jwks)
     }
+
     /// Creates a JwkStore from a [`String`]
     pub fn new_from_jwks_str(store_id: Arc<str>, jwks: &str) -> Result<Self, JwkStoreError> {
         let jwks =
@@ -229,12 +230,18 @@ struct IntermediateJwks {
 
 #[cfg(test)]
 mod test {
-    use crate::{common::policy_store::TrustedIssuer, http::HttpClient, jwt::jwk_store::JwkStore};
-    use jsonwebtoken::{jwk::JwkSet, DecodingKey};
+    use std::collections::HashMap;
+    use std::time::Duration;
+
+    use jsonwebtoken::jwk::JwkSet;
+    use jsonwebtoken::DecodingKey;
     use mockito::Server;
     use serde_json::json;
-    use std::{collections::HashMap, time::Duration};
     use time::OffsetDateTime;
+
+    use crate::common::policy_store::TrustedIssuer;
+    use crate::http::HttpClient;
+    use crate::jwt::jwk_store::JwkStore;
 
     #[test]
     fn can_load_from_jwkset() {

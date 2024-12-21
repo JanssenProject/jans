@@ -1,9 +1,7 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 // The following macro uses conditional compilation to include this file code
 // only when the target platform is NOT WebAssembly. This is not required to
@@ -11,11 +9,12 @@
 // and `use std::env` prevents that compilation.
 #![cfg(not(target_family = "wasm"))]
 
+use std::env;
+
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogLevel, LogStorage,
     LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, WorkloadBoolOp,
 };
-use std::env;
 
 // The human-readable policy and schema file is located in next folder:
 // `test_files\policy-store_ok`

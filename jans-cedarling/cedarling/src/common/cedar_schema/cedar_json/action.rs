@@ -1,23 +1,22 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-use crate::{
-    authz::entities::CEDAR_POLICY_SEPARATOR, common::cedar_schema::cedar_json::SchemaDefinedType,
+use std::collections::{HashMap, HashSet};
+
+use serde::ser::SerializeMap;
+use serde::{de, Deserialize, Serialize};
+use serde_json::{json, Value};
+
+use super::entity_types::{
+    CedarSchemaEntityAttribute, CedarSchemaEntityType, PrimitiveType, PrimitiveTypeKind,
 };
-
 use super::{
-    entity_types::{
-        CedarSchemaEntityAttribute, CedarSchemaEntityType, PrimitiveType, PrimitiveTypeKind,
-    },
     CedarSchemaEntities, CedarSchemaJson, CedarSchemaRecord, CedarType, GetCedarTypeError,
 };
-use serde::{de, ser::SerializeMap, Deserialize, Serialize};
-use serde_json::{json, Value};
-use std::collections::{HashMap, HashSet};
+use crate::authz::entities::CEDAR_POLICY_SEPARATOR;
+use crate::common::cedar_schema::cedar_json::SchemaDefinedType;
 
 type AttrName = String;
 
@@ -61,6 +60,7 @@ impl Action<'_> {
 
         if let Some(ctx_entities) = &self.context_entities {
             for attr in ctx_entities.iter() {
+                println!("attr: {:?}", attr);
                 if let CedarType::TypeName(type_name) = &attr.kind {
                     let id = match id_mapping.get(&attr.key) {
                         Some(val) => val,
@@ -80,10 +80,20 @@ impl Action<'_> {
 #[derive(Debug, thiserror::Error)]
 pub enum BuildJsonCtxError {
     /// If an entity reference is provided but the ID is missing from `id_mapping`.
-    #[error("An entity reference for `{0}` is required by the schema but an ID was not provided via the `id_mapping`")]
+    ///
+    /// This is usually caused by:
+    /// - disabling workload AuthZ but having a Workload entity in the context schema
+    /// - disabling user AuthZ but referencing User entity in the context schema
+    #[error(
+        "An entity reference for `{0}` is required by the schema but an ID was not provided via \
+         the `id_mapping`"
+    )]
     MissingIdMapping(String),
     /// If a non-entity attribute is provided but the value is missing from `value_mapping`.
-    #[error("A non-entity attribute for `{0}` is required by the schema but a value was not provided via the `value_mapping`")]
+    #[error(
+        "A non-entity attribute for `{0}` is required by the schema but a value was not provided \
+         via the `value_mapping`"
+    )]
     MissingValueMapping(String),
 }
 
@@ -323,18 +333,18 @@ pub enum FindActionError {
 
 #[cfg(test)]
 mod test {
-    use super::ActionSchema;
-    use crate::common::cedar_schema::cedar_json::{
-        action::RecordOrType,
-        entity_types::{
-            CedarSchemaEntityAttribute, CedarSchemaEntityType, EntityType, PrimitiveType,
-            PrimitiveTypeKind,
-        },
-        CedarSchemaRecord,
-    };
+    use std::collections::{HashMap, HashSet};
+
     use serde::Deserialize;
     use serde_json::{json, Value};
-    use std::collections::{HashMap, HashSet};
+
+    use super::ActionSchema;
+    use crate::common::cedar_schema::cedar_json::action::RecordOrType;
+    use crate::common::cedar_schema::cedar_json::entity_types::{
+        CedarSchemaEntityAttribute, CedarSchemaEntityType, EntityType, PrimitiveType,
+        PrimitiveTypeKind,
+    };
+    use crate::common::cedar_schema::cedar_json::CedarSchemaRecord;
 
     type ActionType = String;
     #[derive(Deserialize, Debug, PartialEq)]

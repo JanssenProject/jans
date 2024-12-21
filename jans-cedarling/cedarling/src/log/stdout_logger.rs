@@ -1,16 +1,13 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::io::Write;
+use std::sync::{Arc, Mutex};
 
 use super::interface::{LogWriter, Loggable};
 use super::LogLevel;
-use std::{
-    io::Write,
-    sync::{Arc, Mutex},
-};
 
 /// A logger that write to std output.
 pub(crate) struct StdOutLogger {
@@ -94,12 +91,11 @@ impl Write for TestWriter {
 
 #[cfg(test)]
 mod tests {
-    use crate::common::app_types::PdpID;
+    use std::io::Write;
 
     use super::super::{LogEntry, LogType};
-
     use super::*;
-    use std::io::Write;
+    use crate::common::app_types::PdpID;
 
     #[test]
     fn write_log_ok() {

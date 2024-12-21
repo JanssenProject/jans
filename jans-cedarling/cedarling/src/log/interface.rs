@@ -1,16 +1,14 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 //! Log interface
 //! Contains the interface for logging. And getting log information from storage.
 
-use super::LogEntry;
-use super::LogLevel;
 use uuid7::Uuid;
+
+use super::{LogEntry, LogLevel};
 
 /// Log Writer
 /// interface for logging events
@@ -32,7 +30,6 @@ pub(crate) trait Loggable: serde::Serialize {
     fn get_log_level(&self) -> Option<LogLevel>;
 
     /// check if entry can log to logger
-    ///
     // default implementation of method
     // is used to avoid boilerplate code
     fn can_log(&self, logger_level: LogLevel) -> bool {

@@ -113,12 +113,12 @@ authorization data with access token, action, resource, and context.
 
 Attributes
 ----------  
-:param access_token: The access token string.  
-:param id_token: The id token string.  
-:param userinfo_token: The userinfo token string.  
 :param action: The action to be authorized.  
 :param resource: Resource data (wrapped `ResourceData` object).  
-:param context: Python dictionary with additional context.
+:param context: Python dictionary with additional context.  
+:param access_token: (Optional) The access token string.  
+:param id_token: (Optional) The id token string.  
+:param userinfo_token: (Optional) The userinfo token string.
 
 Example
 -------
@@ -203,6 +203,10 @@ ___
 Error encountered while parsing Action to EntityUid
 ___
 
+# authorize_errors.AddEntitiesIntoContextError
+Error encountered while adding entities into context
+___
+
 # authorize_errors.AuthorizeError
 Exception raised by authorize_errors
 ___
@@ -217,14 +221,6 @@ ___
 
 # authorize_errors.CreateIdTokenEntityError
 Error encountered while creating id token entities
-___
-
-# authorize_errors.CreateRequestUserEntityError
-Error encountered while creating cedar_policy::Request for user entity principal
-___
-
-# authorize_errors.CreateRequestWorkloadEntityError
-Error encountered while creating cedar_policy::Request for workload entity principal
 ___
 
 # authorize_errors.CreateUserEntityError
@@ -257,5 +253,13 @@ ___
 
 # authorize_errors.RoleEntityError
 Error encountered while creating role entity
+___
+
+# authorize_errors.UserRequestValidationError
+Error encountered while creating cedar_policy::Request for user entity principal
+___
+
+# authorize_errors.WorkloadRequestValidationError
+Error encountered while creating cedar_policy::Request for workload entity principal
 ___
 

@@ -1,21 +1,23 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 mod claim_mapping;
 #[cfg(test)]
 mod test;
 mod token_entity_metadata;
 
-use super::cedar_schema::CedarSchema;
+use std::collections::HashMap;
+use std::fmt;
+use std::sync::LazyLock;
+
 use cedar_policy::PolicyId;
 use semver::Version;
 use serde::{Deserialize, Deserializer};
-use std::{collections::HashMap, fmt, sync::LazyLock};
-pub use token_entity_metadata::{AccessTokenEntityMetadata, ClaimMappings, TokenEntityMetadata};
+pub use token_entity_metadata::{ClaimMappings, TokenEntityMetadata};
+
+use super::cedar_schema::CedarSchema;
 
 /// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
 #[derive(Debug, Clone, serde::Deserialize, PartialEq)]
@@ -101,7 +103,7 @@ pub struct TrustedIssuer {
 
     /// Metadata for access tokens issued by the trusted issuer.
     #[serde(default)]
-    pub access_tokens: AccessTokenEntityMetadata,
+    pub access_tokens: TokenEntityMetadata,
 
     /// Metadata for ID tokens issued by the trusted issuer.
     #[serde(default)]
@@ -137,120 +139,43 @@ impl Default for &TrustedIssuer {
     }
 }
 
-/// Structure define the source from where role mappings are retrieved.
-#[derive(Debug)]
-pub struct RoleMapping<'a> {
-    pub kind: TokenKind,
-    pub mapping_field: &'a str,
-}
-
-// By default we will search role in the User token
-impl Default for RoleMapping<'_> {
-    fn default() -> Self {
-        Self {
-            kind: TokenKind::Userinfo,
-            mapping_field: "role",
-        }
-    }
-}
-
-/// Structure define the source from where user mappings are retrieved.
-pub struct UserMapping<'a> {
-    pub kind: TokenKind,
-    pub mapping_field: &'a str,
-}
-
-// By default we will search role in the User token
-impl Default for UserMapping<'_> {
-    fn default() -> Self {
-        Self {
-            kind: TokenKind::Userinfo,
-            mapping_field: "sub",
-        }
-    }
-}
-
 impl TrustedIssuer {
-    /// Retrieves the available `RoleMapping` from the token metadata.
-    ///
-    /// Checks each token metadata and returns all  found in a `role_mapping` field.
-    pub fn get_role_mapping(&self) -> Option<Vec<RoleMapping>> {
-        let mut role_mapping_vec = Vec::new();
-
-        if let Some(role_mapping) = &self.access_tokens.entity_metadata.role_mapping {
-            role_mapping_vec.push(RoleMapping {
-                kind: TokenKind::Access,
-                mapping_field: role_mapping.as_str(),
-            });
-        }
-
-        if let Some(role_mapping) = &self.id_tokens.role_mapping {
-            role_mapping_vec.push(RoleMapping {
-                kind: TokenKind::Id,
-                mapping_field: role_mapping.as_str(),
-            });
-        }
-
-        if let Some(role_mapping) = &self.userinfo_tokens.role_mapping {
-            role_mapping_vec.push(RoleMapping {
-                kind: TokenKind::Userinfo,
-                mapping_field: role_mapping.as_str(),
-            });
-        }
-
-        if let Some(role_mapping) = &self.tx_tokens.role_mapping {
-            role_mapping_vec.push(RoleMapping {
-                kind: TokenKind::Transaction,
-                mapping_field: role_mapping.as_str(),
-            });
-        };
-
-        if !role_mapping_vec.is_empty() {
-            Some(role_mapping_vec)
-        } else {
-            None
+    /// Retrieves the claim that defines the `Role` for a given token type.
+    pub fn role_mapping(&self, token_kind: TokenKind) -> Option<&str> {
+        match token_kind {
+            TokenKind::Access => self.access_tokens.role_mapping.as_deref(),
+            TokenKind::Id => self.id_tokens.role_mapping.as_deref(),
+            TokenKind::Userinfo => self.userinfo_tokens.role_mapping.as_deref(),
+            TokenKind::Transaction => self.tx_tokens.role_mapping.as_deref(),
         }
     }
 
-    /// Retrieves the available `user id` mapping from the token metadata.
-    ///
-    /// Checks each token metadata and returns the first one found with a `role_mapping` field.
-    ///
-    /// The checks happen in this order:
-    ///     1. access_token
-    ///     2. id_token
-    ///     3. userinfo_token
-    ///     4. tx_token
-    pub fn get_user_id_mapping(&self) -> Option<UserMapping> {
-        if let Some(user_mapping) = &self.access_tokens.entity_metadata.user_id {
-            return Some(UserMapping {
-                kind: TokenKind::Access,
-                mapping_field: user_mapping.as_str(),
-            });
+    /// Retrieves the claim that defines the `User` for a given token type.
+    pub fn user_mapping(&self, token_kind: TokenKind) -> Option<&str> {
+        match token_kind {
+            TokenKind::Access => self.access_tokens.user_id.as_deref(),
+            TokenKind::Id => self.id_tokens.user_id.as_deref(),
+            TokenKind::Userinfo => self.userinfo_tokens.user_id.as_deref(),
+            TokenKind::Transaction => self.tx_tokens.user_id.as_deref(),
         }
+    }
 
-        if let Some(user_mapping) = &self.id_tokens.user_id {
-            return Some(UserMapping {
-                kind: TokenKind::Id,
-                mapping_field: user_mapping.as_str(),
-            });
+    pub fn claim_mapping(&self, token_kind: TokenKind) -> &ClaimMappings {
+        match token_kind {
+            TokenKind::Access => &self.access_tokens.claim_mapping,
+            TokenKind::Id => &self.id_tokens.claim_mapping,
+            TokenKind::Userinfo => &self.userinfo_tokens.claim_mapping,
+            TokenKind::Transaction => &self.tx_tokens.claim_mapping,
         }
+    }
 
-        if let Some(user_mapping) = &self.userinfo_tokens.user_id {
-            return Some(UserMapping {
-                kind: TokenKind::Userinfo,
-                mapping_field: user_mapping.as_str(),
-            });
+    pub fn token_metadata(&self, token_kind: TokenKind) -> &TokenEntityMetadata {
+        match token_kind {
+            TokenKind::Access => self.tokens_metadata().access_tokens,
+            TokenKind::Id => self.tokens_metadata().id_tokens,
+            TokenKind::Userinfo => self.tokens_metadata().userinfo_tokens,
+            TokenKind::Transaction => self.tokens_metadata().tx_tokens,
         }
-
-        if let Some(user_mapping) = &self.tx_tokens.user_id {
-            return Some(UserMapping {
-                kind: TokenKind::Transaction,
-                mapping_field: user_mapping.as_str(),
-            });
-        }
-
-        None
     }
 
     pub fn tokens_metadata(&self) -> TokensMetadata<'_> {
@@ -266,7 +191,7 @@ impl TrustedIssuer {
 // Hold reference to tokens metadata
 pub struct TokensMetadata<'a> {
     /// Metadata for access tokens issued by the trusted issuer.
-    pub access_tokens: &'a AccessTokenEntityMetadata,
+    pub access_tokens: &'a TokenEntityMetadata,
 
     /// Metadata for ID tokens issued by the trusted issuer.
     pub id_tokens: &'a TokenEntityMetadata,
@@ -316,11 +241,10 @@ impl<'de> Deserialize<'de> for TokenKind {
             "id_token" => Ok(TokenKind::Id),
             "userinfo_token" => Ok(TokenKind::Userinfo),
             "access_token" => Ok(TokenKind::Access),
-            _ => Err(serde::de::Error::unknown_variant(&token_kind, &[
-                "access_token",
-                "id_token",
-                "userinfo_token",
-            ])),
+            _ => Err(serde::de::Error::unknown_variant(
+                &token_kind,
+                &["access_token", "id_token", "userinfo_token"],
+            )),
         }
     }
 }
@@ -451,7 +375,6 @@ struct RawPolicy {
 pub struct PoliciesContainer {
     /// HasMap to store raw policy info
     /// Is used to get policy description by ID
-    //
     // In HasMap ID is ID of policy
     raw_policy_info: HashMap<String, RawPolicy>,
 

@@ -1,9 +1,7 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 //! Module contains the JSON representation of a [cedar_policy::Schema]  
 //! Support translated schema from human representation to JSON via CLI version `cedar-policy-cli 4.1`.  
@@ -14,11 +12,11 @@
 mod action;
 mod entity_types;
 
-use action::ActionSchema;
-use derive_more::derive::Display;
 use std::collections::HashMap;
 
+use action::ActionSchema;
 pub use action::{BuildJsonCtxError, FindActionError};
+use derive_more::derive::Display;
 pub use entity_types::{CedarSchemaEntityShape, CedarSchemaRecord};
 
 /// Represent `cedar-policy` schema type for external usage.
@@ -92,7 +90,6 @@ impl CedarSchemaJson {
 }
 
 /// CedarSchemaEntities hold all entities and their shapes in the namespace.
-//
 // It may contain more fields, but we don't need all of them.
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq)]
 pub struct CedarSchemaEntities {
@@ -105,13 +102,14 @@ pub struct CedarSchemaEntities {
 
 #[cfg(test)]
 mod tests {
-    use super::entity_types::*;
-    use super::*;
+    use std::collections::HashSet;
+
     use action::CtxAttribute;
     use serde_json::json;
-    use std::collections::HashSet;
-    use test_utils::assert_eq;
-    use test_utils::SortedJson;
+    use test_utils::{assert_eq, SortedJson};
+
+    use super::entity_types::*;
+    use super::*;
 
     /// Test to parse the cedar json schema
     /// to debug deserialize the schema
@@ -272,7 +270,11 @@ mod tests {
 
         let parse_error =
             serde_json::from_str::<CedarSchemaJson>(json_value).expect_err("should fail to parse");
-        assert_eq!(parse_error.to_string(),"could not deserialize CedarSchemaEntityType: failed to deserialize EntityOrCommon: missing field `name` at line 17 column 1")
+        assert_eq!(
+            parse_error.to_string(),
+            "could not deserialize CedarSchemaEntityType: failed to deserialize EntityOrCommon: \
+             missing field `name` at line 17 column 1"
+        )
     }
 
     /// test to check if we get error on parsing invalid `PrimitiveType` type
@@ -283,7 +285,11 @@ mod tests {
 
         let parse_error =
             serde_json::from_str::<CedarSchemaJson>(json_value).expect_err("should fail to parse");
-        assert_eq!(parse_error.to_string(),"could not deserialize CedarSchemaEntityType: invalid type: integer `123`, expected a string at line 17 column 1")
+        assert_eq!(
+            parse_error.to_string(),
+            "could not deserialize CedarSchemaEntityType: invalid type: integer `123`, expected a \
+             string at line 17 column 1"
+        )
     }
 
     /// test to check if we get error on parsing invalid nested Sets :`Set<Set<EntityOrCommon>>` type
@@ -294,7 +300,12 @@ mod tests {
 
         let parse_error =
             serde_json::from_str::<CedarSchemaJson>(json_value).expect_err("should fail to parse");
-        assert_eq!(parse_error.to_string(),"could not deserialize CedarSchemaEntityType: failed to deserialize Set: failed to deserialize Set: failed to deserialize EntityOrCommon: missing field `name` at line 24 column 1")
+        assert_eq!(
+            parse_error.to_string(),
+            "could not deserialize CedarSchemaEntityType: failed to deserialize Set: failed to \
+             deserialize Set: failed to deserialize EntityOrCommon: missing field `name` at line \
+             24 column 1"
+        )
     }
 
     /// test to check if we get error on parsing invalid type in field `is_required`
@@ -305,7 +316,11 @@ mod tests {
 
         let parse_error =
             serde_json::from_str::<CedarSchemaJson>(json_value).expect_err("should fail to parse");
-        assert_eq!(parse_error.to_string(),"could not deserialize CedarSchemaEntityAttribute, field 'is_required': invalid type: integer `1234`, expected a boolean at line 22 column 1")
+        assert_eq!(
+            parse_error.to_string(),
+            "could not deserialize CedarSchemaEntityAttribute, field 'is_required': invalid type: \
+             integer `1234`, expected a boolean at line 22 column 1"
+        )
     }
 
     #[test]

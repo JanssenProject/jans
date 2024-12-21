@@ -1,28 +1,22 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 //! # Log entry
 //! The module contains structs for logging events.
 
-use std::collections::HashMap;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fmt::Display;
-
 use std::hash::Hash;
 
-use uuid7::uuid7;
-use uuid7::Uuid;
-
-use crate::bootstrap_config::AuthorizationConfig;
-use crate::common::app_types::{self, ApplicationName};
-use crate::common::policy_store::PoliciesContainer;
+use uuid7::{uuid7, Uuid};
 
 use super::interface::Loggable;
 use super::LogLevel;
+use crate::bootstrap_config::AuthorizationConfig;
+use crate::common::app_types::{self, ApplicationName};
+use crate::common::policy_store::PoliciesContainer;
 
 /// ISO-8601 time format for [`chrono`]
 /// example: 2024-11-27T10:10:50.654Z
@@ -35,7 +29,6 @@ pub struct LogEntry {
     /// it is unwrap to flatten structure
     #[serde(flatten)]
     pub base: BaseLogEntry,
-
     /// message of the event
     pub msg: String,
     /// name of application from [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
@@ -136,7 +129,7 @@ pub struct AuthorizationLogInfo {
     // It allow deserialize json to flatten structure.
     /// Person authorize info
     #[serde(flatten)]
-    pub person_authorize_info: Option<PersonAuthorizeInfo>,
+    pub person_authorize_info: Option<UserAuthorizeInfo>,
     /// Workload authorize info
     #[serde(flatten)]
     pub workload_authorize_info: Option<WorkloadAuthorizeInfo>,
@@ -147,24 +140,30 @@ pub struct AuthorizationLogInfo {
 
 /// Person authorize info
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-pub struct PersonAuthorizeInfo {
+pub struct UserAuthorizeInfo {
     /// cedar-policy user/person principal
-    pub person_principal: String,
+    #[serde(rename = "person_principal")]
+    pub principal: String,
     /// cedar-policy user/person diagnostics information
-    pub person_diagnostics: Diagnostics,
+    #[serde(rename = "person_diagnostics")]
+    pub diagnostics: Diagnostics,
     /// cedar-policy user/person decision
-    pub person_decision: Decision,
+    #[serde(rename = "person_decision")]
+    pub decision: Decision,
 }
 
 /// Workload authorize info
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct WorkloadAuthorizeInfo {
     /// cedar-policy workload principal
-    pub workload_principal: String,
+    #[serde(rename = "workload_principal")]
+    pub principal: String,
+    #[serde(rename = "workload_diagnostics")]
     /// cedar-policy workload diagnostics information
-    pub workload_diagnostics: Diagnostics,
+    pub diagnostics: Diagnostics,
     /// cedar-policy workload decision
-    pub workload_decision: Decision,
+    #[serde(rename = "workload_decision")]
+    pub decision: Decision,
 }
 
 /// Cedar-policy decision of the authorization
@@ -281,12 +280,12 @@ pub struct DecisionLogEntry<'a> {
     pub principal: PrincipalLogEntry,
     /// A list of claims, specified by the CEDARLING_DECISION_LOG_USER_CLAIMS property, that must be present in the Cedar User entity
     #[serde(rename = "User")]
-    #[serde(skip_serializing_if = "HashMap::is_empty")]
-    pub user: HashMap<String, serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user: Option<HashMap<String, serde_json::Value>>,
     /// A list of claims, specified by the CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS property, that must be present in the Cedar Workload entity
     #[serde(rename = "Workload")]
-    #[serde(skip_serializing_if = "HashMap::is_empty")]
-    pub workload: HashMap<String, serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workload: Option<HashMap<String, serde_json::Value>>,
     /// If this Cedarling has registered with a Lock Server, what is the client_id it received
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lock_client_id: Option<String>,
@@ -363,7 +362,6 @@ impl Loggable for BaseLogEntry {
 }
 
 /// Describes what principal is was executed
-//
 // is used only for logging
 #[derive(Debug, Clone, PartialEq)]
 pub enum PrincipalLogEntry {
@@ -417,8 +415,8 @@ impl serde::Serialize for PrincipalLogEntry {
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct LogTokensInfo<'a> {
-    pub id_token: HashMap<&'a str, &'a serde_json::Value>,
+    pub id_token: Option<HashMap<&'a str, &'a serde_json::Value>>,
     #[serde(rename = "Userinfo")]
-    pub userinfo: HashMap<&'a str, &'a serde_json::Value>,
-    pub access: HashMap<&'a str, &'a serde_json::Value>,
+    pub userinfo: Option<HashMap<&'a str, &'a serde_json::Value>>,
+    pub access: Option<HashMap<&'a str, &'a serde_json::Value>>,
 }

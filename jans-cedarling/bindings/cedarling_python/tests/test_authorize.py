@@ -115,11 +115,13 @@ def test_authorize_ok():
     })
 
     request = Request(
-        ACCESS_TOKEN,
-        ID_TOKEN,
-        USERINFO_TOKEN,
+        access_token=ACCESS_TOKEN,
+        id_token=ID_TOKEN,
+        userinfo_token=USERINFO_TOKEN,
         action='Jans::Action::"Update"',
-        context={}, resource=resource)
+        context={}, 
+        resource=resource,
+    )
 
     authorize_result = instance.authorize(request)
     assert authorize_result.is_allowed(), "request should be allowed"
@@ -170,9 +172,9 @@ def raise_authorize_error(bootstrap_config):
     })
 
     request = Request(
-        ACCESS_TOKEN,
-        ID_TOKEN,
-        USERINFO_TOKEN,
+        access_token=ACCESS_TOKEN,
+        id_token=ID_TOKEN,
+        userinfo_token=USERINFO_TOKEN,
         action='Jans::Action::"Update"',
         context={}, resource=resource)
 
@@ -189,7 +191,7 @@ def test_resource_entity_error():
     try:
         raise_authorize_error(load_bootstrap_config())
     except authorize_errors.ResourceEntityError as e:
-        assert str(e) == "could not create resource entity: could not get attribute value from payload: could not convert json field with key: org_id to: String, got: number"
+        assert str(e) == "could not create resource entity: could not get attribute value from payload: type mismatch for key 'org_id'. expected: 'String', but found: 'number'"
 
 
 def test_authorize_error():
@@ -201,4 +203,4 @@ def test_authorize_error():
     try:
         raise_authorize_error(load_bootstrap_config())
     except authorize_errors.AuthorizeError as e:
-        assert str(e) == "could not create resource entity: could not get attribute value from payload: could not convert json field with key: org_id to: String, got: number"
+        assert str(e) == "could not create resource entity: could not get attribute value from payload: type mismatch for key 'org_id'. expected: 'String', but found: 'number'"

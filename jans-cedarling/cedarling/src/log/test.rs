@@ -1,16 +1,22 @@
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
 //! Log unit test module
 //! Contains unit tests for the main code flow with the `LogStrategy``
 //! `LogStrategy` wraps all other logger implementations.
 
 use std::io::Write;
 
-use super::*;
-use crate::{common::app_types, log::stdout_logger::TestWriter};
 use interface::{LogWriter, Loggable};
 use nop_logger::NopLogger;
 use stdout_logger::StdOutLogger;
 
+use super::*;
 use crate::bootstrap_config::log_config;
+use crate::common::app_types;
+use crate::log::stdout_logger::TestWriter;
 
 #[test]
 fn test_new_log_strategy_off() {

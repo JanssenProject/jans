@@ -1,16 +1,16 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::sync::Mutex;
+use std::time::Duration;
+
+use sparkv::{Config as ConfigSparKV, SparKV};
 
 use super::interface::{LogStorage, LogWriter, Loggable};
-use super::LogEntry;
-use super::LogLevel;
+use super::{LogEntry, LogLevel};
 use crate::bootstrap_config::log_config::MemoryLogConfig;
-use sparkv::{Config as ConfigSparKV, SparKV};
-use std::{sync::Mutex, time::Duration};
 
 const STORAGE_MUTEX_EXPECT_MESSAGE: &str = "MemoryLogger storage mutex should unlock";
 const STORAGE_JSON_PARSE_EXPECT_MESSAGE: &str =
@@ -93,10 +93,11 @@ impl LogStorage for MemoryLogger {
 
 #[cfg(test)]
 mod tests {
+    use test_utils::assert_eq;
+
     use super::super::{AuthorizationLogInfo, LogEntry, LogType};
     use super::*;
     use crate::common::app_types;
-    use test_utils::assert_eq;
 
     fn create_memory_logger() -> MemoryLogger {
         let config = MemoryLogConfig { log_ttl: 60 };
