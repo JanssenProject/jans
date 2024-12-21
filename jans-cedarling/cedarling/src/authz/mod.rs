@@ -377,7 +377,7 @@ impl Authz {
         };
 
         // build role entity
-        let role = create_role_entities(policy_store, tokens)?;
+        let roles = create_role_entities(policy_store, tokens)?;
 
         // build user entity
         let user = if self.config.authorization.use_user_principal {
@@ -385,7 +385,7 @@ impl Authz {
                 auth_conf.mapping_user.as_deref(),
                 policy_store,
                 tokens,
-                HashSet::from_iter(role.iter().map(|e| e.uid())),
+                HashSet::from_iter(roles.iter().map(|e| e.uid())),
             )?)
         } else {
             None
@@ -406,7 +406,7 @@ impl Authz {
             userinfo_token: token_entities.userinfo,
             user,
             resource,
-            roles: role,
+            roles,
         })
     }
 }
