@@ -149,11 +149,13 @@ pub struct AuthorizationLogInfo {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct UserAuthorizeInfo {
     /// cedar-policy user/person principal
-    #[serde(rename = "person_principal")]
+    #[serde(rename = "user_principal")]
     pub principal: String,
     /// cedar-policy user/person diagnostics information
+    #[serde(rename = "user_diagnostics")]
     pub diagnostics: Diagnostics,
     /// cedar-policy user/person decision
+    #[serde(rename = "user_decision")]
     pub decision: Decision,
 }
 
@@ -163,9 +165,11 @@ pub struct WorkloadAuthorizeInfo {
     /// cedar-policy workload principal
     #[serde(rename = "workload_principal")]
     pub principal: String,
+    #[serde(rename = "workload_diagnostics")]
     /// cedar-policy workload diagnostics information
     pub diagnostics: Diagnostics,
     /// cedar-policy workload decision
+    #[serde(rename = "workload_decision")]
     pub decision: Decision,
 }
 
