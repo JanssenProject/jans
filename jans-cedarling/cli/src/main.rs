@@ -34,7 +34,7 @@ fn main() {
             },
             ParseResult::UnknownCommand(input) => match cli.variables.get(&input) {
                 Some(var) => println!("{input} = {var}"),
-                None => println!("Unknown command or variable: {input}"),
+                None => println!("Invalid command or variable: {input}"),
             },
             ParseResult::EmptyString => {},
         }
