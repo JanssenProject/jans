@@ -1,12 +1,11 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
 
 /// Log levels
 /// Fatal level is the highest, trace is lowest
@@ -30,9 +29,9 @@ pub enum LogLevel {
     ERROR = 4,
     /// Warn level
     #[default]
-    WARN = 3,
+    WARN  = 3,
     /// Info level
-    INFO = 2,
+    INFO  = 2,
     /// Debug level
     DEBUG = 1,
     /// Trace level

@@ -1,14 +1,10 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 use lazy_static::lazy_static;
-
-use jsonwebkey as jwk;
-use jsonwebtoken as jwt;
+use {jsonwebkey as jwk, jsonwebtoken as jwt};
 
 // Represent meta information about entity from cedar-policy schema.
 lazy_static! {
@@ -16,7 +12,7 @@ lazy_static! {
 }
 
 pub(crate) struct GeneratedKeys {
-    pub private_key_id: String,
+    pub private_key_id:       String,
     pub private_encoding_key: jwt::EncodingKey,
 }
 
@@ -47,7 +43,7 @@ pub fn generate_keys() -> GeneratedKeys {
     let _public_keys = serde_json::to_string(&public_keys).expect("should serialize keyset");
 
     GeneratedKeys {
-        private_key_id: kid.to_string(),
+        private_key_id:       kid.to_string(),
         private_encoding_key: private_key,
     }
 }

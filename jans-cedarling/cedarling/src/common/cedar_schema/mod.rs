@@ -1,9 +1,7 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 pub(crate) use cedar_json::CedarSchemaJson;
 pub(crate) mod cedar_json;
@@ -14,9 +12,9 @@ pub(crate) mod cedar_json;
 /// content_type is one of cedar or cedar-json#[derive(Debug, Clone, serde::Deserialize)]
 #[derive(Debug, Clone, serde::Deserialize)]
 struct EncodedSchema {
-    pub encoding: super::Encoding,
+    pub encoding:     super::Encoding,
     pub content_type: super::ContentType,
-    pub body: String,
+    pub body:         String,
 }
 
 /// Intermediate struct to handle both kinds of cedar_schema values.
@@ -37,7 +35,7 @@ enum MaybeEncoded {
 #[derive(Debug, Clone)]
 pub struct CedarSchema {
     pub schema: cedar_policy::Schema,
-    pub json: cedar_json::CedarSchemaJson,
+    pub json:   cedar_json::CedarSchemaJson,
 }
 
 impl PartialEq for CedarSchema {
@@ -87,12 +85,13 @@ impl<'de> serde::Deserialize<'de> for CedarSchema {
         //  Read the next thing as either a String or a Map, using the MaybeEncoded enum to distinguish
         let encoded_schema = match <MaybeEncoded as serde::Deserialize>::deserialize(deserializer)?
         {
-            MaybeEncoded::Plain(body) => EncodedSchema {
-                // These are the default if the encoding is not specified.
-                encoding: super::Encoding::Base64,
-                content_type: super::ContentType::CedarJson,
-                body,
-            },
+            MaybeEncoded::Plain(body) =>
+                EncodedSchema {
+                    // These are the default if the encoding is not specified.
+                    encoding: super::Encoding::Base64,
+                    content_type: super::ContentType::CedarJson,
+                    body,
+                },
             MaybeEncoded::Tagged(encoded_schema) => encoded_schema,
         };
 
@@ -198,10 +197,8 @@ mod deserialize {
     mod tests {
         use test_utils::assert_eq;
 
-        use crate::common::policy_store::AgamaPolicyStore;
-        use crate::common::policy_store::PolicyStore;
-
         use super::*;
+        use crate::common::policy_store::{AgamaPolicyStore, PolicyStore};
 
         #[test]
         fn test_read_ok() {
@@ -292,7 +289,10 @@ mod deserialize {
             let err = policy_result.unwrap_err();
             let msg = err.to_string();
             assert!(
-                msg.contains("unable to parse cedar policy schema: error parsing schema: unexpected end of input"),
+                msg.contains(
+                    "unable to parse cedar policy schema: error parsing schema: unexpected end of \
+                     input"
+                ),
                 "{err:?}"
             );
         }
@@ -306,7 +306,8 @@ mod deserialize {
             let err_msg = policy_result.unwrap_err().to_string();
             assert_eq!(
                 err_msg,
-                "policy_stores.a1bf93115de86de760ee0bea1d529b521489e5a11747: unable to parse cedar policy schema: failed to resolve type: User_TypeNotExist at line 8 column 5"
+                "policy_stores.a1bf93115de86de760ee0bea1d529b521489e5a11747: unable to parse \
+                 cedar policy schema: failed to resolve type: User_TypeNotExist at line 8 column 5"
             );
         }
     }

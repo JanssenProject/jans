@@ -1,20 +1,17 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-use jsonwebkey as jwk;
-use jsonwebtoken as jwt;
 use serde::Serialize;
+use {jsonwebkey as jwk, jsonwebtoken as jwt};
 
 /// A pair of encoding and decoding keys.
 pub struct KeyPair {
-    kid: Option<String>,
+    kid:          Option<String>,
     encoding_key: jwt::EncodingKey,
     decoding_key: jwt::jwk::Jwk,
-    alg: jwt::Algorithm,
+    alg:          jwt::Algorithm,
 }
 
 #[derive(Debug, thiserror::Error)]

@@ -1,14 +1,13 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::collections::HashSet;
 
 use cedar_policy::Decision;
 use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
-use std::collections::HashSet;
 
 use crate::bootstrap_config::WorkloadBoolOp;
 
@@ -19,10 +18,10 @@ pub struct AuthorizeResult {
     user_workload_operator: WorkloadBoolOp,
     /// Result of authorization where principal is `Jans::Workload`
     #[serde(serialize_with = "serialize_opt_response")]
-    pub workload: Option<cedar_policy::Response>,
+    pub workload:           Option<cedar_policy::Response>,
     /// Result of authorization where principal is `Jans::User`
     #[serde(serialize_with = "serialize_opt_response")]
-    pub person: Option<cedar_policy::Response>,
+    pub person:             Option<cedar_policy::Response>,
 }
 
 /// Custom serializer for an Option<String> which converts `None` to an empty string and vice versa.

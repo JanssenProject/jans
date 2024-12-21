@@ -1,12 +1,11 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use test_utils::{SortedJson, assert_eq};
 
 use super::utils::*;
-use test_utils::{assert_eq, SortedJson};
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/agama-store_2.yaml");
 

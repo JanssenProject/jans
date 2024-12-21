@@ -1,19 +1,19 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::collections::HashSet;
+use std::sync::Arc;
+
+use jsonwebtoken::Algorithm;
+use serde_json::json;
+use test_utils::assert_eq;
 
 use super::super::test_utils::*;
 use super::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
 use crate::jwt::key_service::KeyService;
 use crate::jwt::validator::ProcessedJwt;
-use jsonwebtoken::Algorithm;
-use serde_json::json;
-use std::collections::HashSet;
-use std::sync::Arc;
-use test_utils::assert_eq;
 
 #[test]
 fn can_decode_jwt() {
@@ -29,13 +29,13 @@ fn can_decode_jwt() {
 
     let validator = JwtValidator::new(
         JwtValidatorConfig {
-            sig_validation: false.into(),
+            sig_validation:    false.into(),
             status_validation: false.into(),
-            trusted_issuers: None.into(),
-            algs_supported: HashSet::from([Algorithm::HS256]).into(),
-            required_claims: HashSet::new(),
-            validate_exp: true,
-            validate_nbf: true,
+            trusted_issuers:   None.into(),
+            algs_supported:    HashSet::from([Algorithm::HS256]).into(),
+            required_claims:   HashSet::new(),
+            validate_exp:      true,
+            validate_nbf:      true,
         },
         None.into(),
     )
@@ -75,13 +75,13 @@ fn can_decode_and_validate_jwt() {
 
     let validator = JwtValidator::new(
         JwtValidatorConfig {
-            sig_validation: true.into(),
+            sig_validation:    true.into(),
             status_validation: false.into(),
-            trusted_issuers: None.into(),
-            algs_supported: HashSet::from([Algorithm::HS256]).into(),
-            required_claims: HashSet::new(),
-            validate_exp: true,
-            validate_nbf: true,
+            trusted_issuers:   None.into(),
+            algs_supported:    HashSet::from([Algorithm::HS256]).into(),
+            required_claims:   HashSet::new(),
+            validate_exp:      true,
+            validate_nbf:      true,
         },
         Some(key_service).into(),
     )
@@ -125,13 +125,13 @@ fn errors_on_invalid_iss_scheme() {
 
     let validator = JwtValidator::new(
         JwtValidatorConfig {
-            sig_validation: true.into(),
+            sig_validation:    true.into(),
             status_validation: false.into(),
-            trusted_issuers: None.into(),
-            algs_supported: HashSet::from([Algorithm::HS256]).into(),
-            required_claims: HashSet::from(["iss".into()]),
-            validate_exp: true,
-            validate_nbf: true,
+            trusted_issuers:   None.into(),
+            algs_supported:    HashSet::from([Algorithm::HS256]).into(),
+            required_claims:   HashSet::from(["iss".into()]),
+            validate_exp:      true,
+            validate_nbf:      true,
         },
         Some(key_service).into(),
     )
@@ -170,13 +170,13 @@ fn errors_on_expired_token() {
 
     let validator = JwtValidator::new(
         JwtValidatorConfig {
-            sig_validation: true.into(),
+            sig_validation:    true.into(),
             status_validation: false.into(),
-            trusted_issuers: None.into(),
-            algs_supported: HashSet::from([Algorithm::HS256]).into(),
-            required_claims: HashSet::new(),
-            validate_exp: true,
-            validate_nbf: true,
+            trusted_issuers:   None.into(),
+            algs_supported:    HashSet::from([Algorithm::HS256]).into(),
+            required_claims:   HashSet::new(),
+            validate_exp:      true,
+            validate_nbf:      true,
         },
         Some(key_service).into(),
     )
@@ -215,13 +215,13 @@ fn errors_on_immature_token() {
 
     let validator = JwtValidator::new(
         JwtValidatorConfig {
-            sig_validation: true.into(),
+            sig_validation:    true.into(),
             status_validation: false.into(),
-            trusted_issuers: None.into(),
-            algs_supported: HashSet::from([Algorithm::HS256]).into(),
-            required_claims: HashSet::new(),
-            validate_exp: true,
-            validate_nbf: true,
+            trusted_issuers:   None.into(),
+            algs_supported:    HashSet::from([Algorithm::HS256]).into(),
+            required_claims:   HashSet::new(),
+            validate_exp:      true,
+            validate_nbf:      true,
         },
         Some(key_service).into(),
     )
@@ -263,13 +263,13 @@ fn can_check_missing_claims() {
     // Base case where all required claims are present
     let validator = JwtValidator::new(
         JwtValidatorConfig {
-            sig_validation: true.into(),
+            sig_validation:    true.into(),
             status_validation: false.into(),
-            trusted_issuers: None.into(),
-            algs_supported: HashSet::from([Algorithm::HS256]).into(),
-            required_claims: HashSet::from(["sub", "name", "iat"].map(|x| x.into())),
-            validate_exp: true,
-            validate_nbf: true,
+            trusted_issuers:   None.into(),
+            algs_supported:    HashSet::from([Algorithm::HS256]).into(),
+            required_claims:   HashSet::from(["sub", "name", "iat"].map(|x| x.into())),
+            validate_exp:      true,
+            validate_nbf:      true,
         },
         key_service.clone(),
     )
@@ -288,13 +288,13 @@ fn can_check_missing_claims() {
     // Error case where `nbf` is missing from the token.
     let validator = JwtValidator::new(
         JwtValidatorConfig {
-            sig_validation: true.into(),
+            sig_validation:    true.into(),
             status_validation: false.into(),
-            trusted_issuers: None.into(),
-            algs_supported: HashSet::from([Algorithm::HS256]).into(),
-            required_claims: HashSet::from(["sub", "name", "iat", "nbf"].map(|x| x.into())),
-            validate_exp: true,
-            validate_nbf: true,
+            trusted_issuers:   None.into(),
+            algs_supported:    HashSet::from([Algorithm::HS256]).into(),
+            required_claims:   HashSet::from(["sub", "name", "iat", "nbf"].map(|x| x.into())),
+            validate_exp:      true,
+            validate_nbf:      true,
         },
         key_service.clone(),
     )

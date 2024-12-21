@@ -1,9 +1,7 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 //! Module for creating cedar-policy entities
 
@@ -15,22 +13,26 @@ mod workload;
 #[cfg(test)]
 mod test_create;
 
-use super::request::ResourceData;
+use std::collections::HashSet;
+
+use cedar_policy::{Entity, EntityUid};
+pub use create::{CEDAR_POLICY_SEPARATOR, CreateCedarEntityError};
+use create::{
+    EntityMetadata,
+    EntityParsedTypeName,
+    build_entity_uid,
+    create_entity,
+    parse_namespace_and_typename,
+};
+pub use user::*;
+pub use workload::*;
+
 use super::AuthorizeError;
+use super::request::ResourceData;
+use crate::AuthorizationConfig;
 use crate::common::cedar_schema::CedarSchemaJson;
 use crate::common::policy_store::{ClaimMappings, PolicyStore, TokenKind};
 use crate::jwt::Token;
-use crate::AuthorizationConfig;
-use cedar_policy::Entity;
-use cedar_policy::EntityUid;
-use create::EntityParsedTypeName;
-pub use create::CEDAR_POLICY_SEPARATOR;
-use create::{build_entity_uid, create_entity, parse_namespace_and_typename, EntityMetadata};
-use std::collections::HashSet;
-
-pub use create::CreateCedarEntityError;
-pub use user::*;
-pub use workload::*;
 
 const DEFAULT_ACCESS_TKN_ENTITY_TYPE_NAME: &str = "Access_token";
 const DEFAULT_ID_TKN_ENTITY_TYPE_NAME: &str = "id_token";
@@ -38,8 +40,8 @@ const DEFAULT_USERINFO_TKN_ENTITY_TYPE_NAME: &str = "Userinfo_token";
 const DEFAULT_TKN_PRINCIPAL_IDENTIFIER: &str = "jti";
 
 pub struct DecodedTokens<'a> {
-    pub access_token: Option<Token<'a>>,
-    pub id_token: Option<Token<'a>>,
+    pub access_token:   Option<Token<'a>>,
+    pub id_token:       Option<Token<'a>>,
     pub userinfo_token: Option<Token<'a>>,
 }
 
@@ -56,8 +58,8 @@ impl DecodedTokens<'_> {
 }
 
 pub struct TokenEntities {
-    pub access: Option<Entity>,
-    pub id: Option<Entity>,
+    pub access:   Option<Entity>,
+    pub id:       Option<Entity>,
     pub userinfo: Option<Entity>,
 }
 
@@ -173,7 +175,7 @@ pub fn create_resource_entity(
 pub enum RoleEntityError {
     #[error("could not create Jans::Role entity from {token_kind} token: {error}")]
     Create {
-        error: CreateCedarEntityError,
+        error:      CreateCedarEntityError,
         token_kind: TokenKind,
     },
 
@@ -217,7 +219,7 @@ fn extract_roles_from_token(
         let entity_uid =
             build_entity_uid(role_entity_type.as_str(), payload_str).map_err(|err| {
                 RoleEntityError::Create {
-                    error: err,
+                    error:      err,
                     token_kind: token.kind,
                 }
             })?;
@@ -249,7 +251,7 @@ fn extract_roles_from_token(
             Err(err) => {
                 // Handle the case where the payload is neither a string nor an array
                 return Err(RoleEntityError::Create {
-                    error: err.into(),
+                    error:      err.into(),
                     token_kind: token.kind,
                 });
             },
@@ -270,9 +272,11 @@ fn extract_roles_from_token(
                 HashSet::new(),
                 token.claim_mapping(),
             )
-            .map_err(|err| RoleEntityError::Create {
-                error: err,
-                token_kind: token.kind,
+            .map_err(|err| {
+                RoleEntityError::Create {
+                    error:      err,
+                    token_kind: token.kind,
+                }
             })
         })
         .collect::<Result<Vec<_>, _>>()

@@ -1,9 +1,7 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 //! In this test cases we check mapping entities using Bootstrap properties:
 //! CEDARLING_MAPPING_USER
@@ -12,17 +10,15 @@
 //! CEDARLING_MAPPING_ACCESS_TOKEN
 //! CEDARLING_MAPPING_USERINFO_TOKEN
 
-use super::utils::*;
-use crate::cmp_decision;
-use crate::cmp_policy;
-use crate::common::policy_store::TokenKind;
-use crate::AuthorizeError;
-use crate::Cedarling;
-use crate::CreateCedarEntityError;
-use cedarling_util::get_raw_config;
 use std::collections::HashSet;
 use std::sync::LazyLock;
+
+use cedarling_util::get_raw_config;
 use test_utils::assert_eq;
+
+use super::utils::*;
+use crate::common::policy_store::TokenKind;
+use crate::{AuthorizeError, Cedarling, CreateCedarEntityError, cmp_decision, cmp_policy};
 
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../../test_files/policy-store_entity_mapping.yaml");

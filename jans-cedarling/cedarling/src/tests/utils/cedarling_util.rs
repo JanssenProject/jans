@@ -1,14 +1,18 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 use crate::{AuthorizationConfig, JwtConfig, WorkloadBoolOp};
 pub use crate::{
-    BootstrapConfig, BootstrapConfigRaw, Cedarling, FeatureToggle, LogConfig, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource,
+    BootstrapConfig,
+    BootstrapConfigRaw,
+    Cedarling,
+    FeatureToggle,
+    LogConfig,
+    LogTypeConfig,
+    PolicyStoreConfig,
+    PolicyStoreSource,
 };
 
 /// fixture for [`BootstrapConfigRaw`]
@@ -33,15 +37,15 @@ pub fn get_raw_config(local_policy_store: &str) -> BootstrapConfigRaw {
 /// fixture for [`BootstrapConfig`]
 pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
     BootstrapConfig {
-        application_name: "test_app".to_string(),
-        log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
+        application_name:     "test_app".to_string(),
+        log_config:           LogConfig {
+            log_type:  LogTypeConfig::StdOut,
             log_level: crate::LogLevel::DEBUG,
         },
-        policy_store_config: PolicyStoreConfig {
+        policy_store_config:  PolicyStoreConfig {
             source: policy_source,
         },
-        jwt_config: JwtConfig::new_without_validation(),
+        jwt_config:           JwtConfig::new_without_validation(),
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
@@ -63,15 +67,15 @@ pub fn get_cedarling_with_authorization_conf(
     auth_conf: AuthorizationConfig,
 ) -> Cedarling {
     Cedarling::new(&BootstrapConfig {
-        application_name: "test_app".to_string(),
-        log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
+        application_name:     "test_app".to_string(),
+        log_config:           LogConfig {
+            log_type:  LogTypeConfig::StdOut,
             log_level: crate::LogLevel::DEBUG,
         },
-        policy_store_config: PolicyStoreConfig {
+        policy_store_config:  PolicyStoreConfig {
             source: policy_source,
         },
-        jwt_config: JwtConfig::new_without_validation(),
+        jwt_config:           JwtConfig::new_without_validation(),
         authorization_config: auth_conf,
     })
     .expect("bootstrap config should initialize correctly")

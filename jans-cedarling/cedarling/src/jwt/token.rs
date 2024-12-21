@@ -1,14 +1,14 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TokenKind, TrustedIssuer};
+use std::collections::HashMap;
+
 use serde::Deserialize;
 use serde_json::Value;
-use std::collections::HashMap;
+
+use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TokenKind, TrustedIssuer};
 
 const DEFAULT_USER_ID_SRC_CLAIM: &str = "sub";
 const DEFAULT_ROLE_SRC_CLAIM: &str = "role";
@@ -22,8 +22,8 @@ pub enum TokenStr<'a> {
 #[derive(Debug, PartialEq)]
 pub struct Token<'a> {
     pub kind: TokenKind,
-    pub iss: Option<&'a TrustedIssuer>,
-    claims: TokenClaims,
+    pub iss:  Option<&'a TrustedIssuer>,
+    claims:   TokenClaims,
 }
 
 impl<'a> Token<'a> {
@@ -118,9 +118,11 @@ impl TokenClaims {
     }
 
     pub fn get_claim(&self, name: &str) -> Option<TokenClaim> {
-        self.claims.get(name).map(|value| TokenClaim {
-            key: name.to_string(),
-            value,
+        self.claims.get(name).map(|value| {
+            TokenClaim {
+                key: name.to_string(),
+                value,
+            }
         })
     }
 
@@ -136,7 +138,7 @@ impl TokenClaims {
 }
 
 pub struct TokenClaim<'a> {
-    key: String,
+    key:   String,
     value: &'a serde_json::Value,
 }
 
@@ -180,10 +182,12 @@ impl TokenClaim<'_> {
                 array
                     .iter()
                     .enumerate()
-                    .map(|(i, v)| TokenClaim {
-                        // show current key and index in array
-                        key: format!("{}[{}]", self.key, i),
-                        value: v,
+                    .map(|(i, v)| {
+                        TokenClaim {
+                            // show current key and index in array
+                            key:   format!("{}[{}]", self.key, i),
+                            value: v,
+                        }
                     })
                     .collect()
             })
@@ -196,9 +200,9 @@ impl TokenClaim<'_> {
 #[derive(Debug, thiserror::Error)]
 #[error("type mismatch for key '{key}'. expected: '{expected_type}', but found: '{actual_type}'")]
 pub struct TokenClaimTypeError {
-    pub key: String,
+    pub key:           String,
     pub expected_type: String,
-    pub actual_type: String,
+    pub actual_type:   String,
 }
 
 impl TokenClaimTypeError {
@@ -219,9 +223,9 @@ impl TokenClaimTypeError {
         let got_value_type_name = Self::json_value_type_name(got_value);
 
         Self {
-            key: key.to_string(),
+            key:           key.to_string(),
             expected_type: expected_type_name.to_string(),
-            actual_type: got_value_type_name,
+            actual_type:   got_value_type_name,
         }
     }
 }

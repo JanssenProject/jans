@@ -1,17 +1,17 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::collections::HashSet;
+use std::fmt;
+
+use cedar_policy::EntityUid;
 
 use super::{CreateCedarEntityError, DecodedTokens, EntityMetadata, EntityParsedTypeName};
 use crate::common::cedar_schema::CedarSchemaJson;
 use crate::common::policy_store::{PolicyStore, TokenKind};
 use crate::jwt::Token;
-use cedar_policy::EntityUid;
-use std::collections::HashSet;
-use std::fmt;
 
 /// Create user entity
 pub fn create_user_entity(
@@ -85,19 +85,19 @@ impl fmt::Display for CreateUserEntityError {
 
 #[cfg(test)]
 mod test {
-    use super::create_user_entity;
-    use crate::{
-        authz::entities::DecodedTokens, common::policy_store::TokenKind,
-        init::policy_store::load_policy_store, jwt::Token, CreateCedarEntityError,
-        PolicyStoreConfig, PolicyStoreSource,
-    };
+    use std::collections::{HashMap, HashSet};
+    use std::path::Path;
+
     use cedar_policy::{Entity, RestrictedExpression};
     use serde_json::json;
-    use std::{
-        collections::{HashMap, HashSet},
-        path::Path,
-    };
     use test_utils::assert_eq;
+
+    use super::create_user_entity;
+    use crate::authz::entities::DecodedTokens;
+    use crate::common::policy_store::TokenKind;
+    use crate::init::policy_store::load_policy_store;
+    use crate::jwt::Token;
+    use crate::{CreateCedarEntityError, PolicyStoreConfig, PolicyStoreSource};
 
     #[test]
     fn can_create_from_id_token() {
@@ -111,8 +111,8 @@ mod test {
         .store;
 
         let tokens = DecodedTokens {
-            access_token: None,
-            id_token: Some(Token::new_id(
+            access_token:   None,
+            id_token:       Some(Token::new_id(
                 HashMap::from([
                     ("sub".to_string(), json!("user-1")),
                     ("country".to_string(), json!("US")),
@@ -152,8 +152,8 @@ mod test {
         .store;
 
         let tokens = DecodedTokens {
-            id_token: None,
-            access_token: None,
+            id_token:       None,
+            access_token:   None,
             userinfo_token: Some(Token::new_userinfo(
                 HashMap::from([
                     ("sub".to_string(), json!("user-1")),
@@ -193,8 +193,8 @@ mod test {
         .store;
 
         let tokens = DecodedTokens {
-            access_token: Some(Token::new_access(HashMap::from([]).into(), None)),
-            id_token: Some(Token::new_id(HashMap::from([]).into(), None)),
+            access_token:   Some(Token::new_access(HashMap::from([]).into(), None)),
+            id_token:       Some(Token::new_id(HashMap::from([]).into(), None)),
             userinfo_token: Some(Token::new_userinfo(HashMap::from([]).into(), None)),
         };
 
@@ -203,18 +203,21 @@ mod test {
 
         for (tkn_kind, err) in result.errors.iter() {
             match tkn_kind {
-                TokenKind::Access => assert!(
-                    matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "sub"),
-                    "expected error MissingClaim(\"sub\")"
-                ),
-                TokenKind::Id => assert!(
-                    matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "sub"),
-                    "expected error MissingClaim(\"sub\")"
-                ),
-                TokenKind::Userinfo => assert!(
-                    matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "sub"),
-                    "expected error MissingClaim(\"sub\")"
-                ),
+                TokenKind::Access =>
+                    assert!(
+                        matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "sub"),
+                        "expected error MissingClaim(\"sub\")"
+                    ),
+                TokenKind::Id =>
+                    assert!(
+                        matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "sub"),
+                        "expected error MissingClaim(\"sub\")"
+                    ),
+                TokenKind::Userinfo =>
+                    assert!(
+                        matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "sub"),
+                        "expected error MissingClaim(\"sub\")"
+                    ),
                 TokenKind::Transaction => (), // we don't support these yet
             }
         }
@@ -232,8 +235,8 @@ mod test {
         .store;
 
         let tokens = DecodedTokens {
-            access_token: None,
-            id_token: None,
+            access_token:   None,
+            id_token:       None,
             userinfo_token: None,
         };
 

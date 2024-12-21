@@ -1,25 +1,25 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::collections::{HashMap, HashSet};
+use std::fmt::Debug;
+use std::sync::Arc;
+
+use jsonwebtoken::DecodingKey;
+use jsonwebtoken::jwk::Jwk;
+use serde::Deserialize;
+use serde_json::Value;
+use time::OffsetDateTime;
 
 use super::{KeyId, TrustedIssuerId};
 use crate::common::policy_store::TrustedIssuer;
 use crate::http::{HttpClient, HttpClientError};
-use jsonwebtoken::jwk::Jwk;
-use jsonwebtoken::DecodingKey;
-use serde::Deserialize;
-use serde_json::Value;
-use std::collections::{HashMap, HashSet};
-use std::fmt::Debug;
-use std::sync::Arc;
-use time::OffsetDateTime;
 
 #[derive(Deserialize)]
 struct OpenIdConfig {
-    issuer: String,
+    issuer:   String,
     jwks_uri: String,
 }
 
@@ -30,17 +30,17 @@ struct OpenIdConfig {
 /// not provided.
 pub struct JwkStore {
     /// A unique identifier for the store.
-    store_id: Arc<str>,
+    store_id:        Arc<str>,
     /// The issuer response from the IDP.
-    issuer: Option<Box<str>>,
+    issuer:          Option<Box<str>>,
     /// A map of keys indexed by their `KeyId`.
-    keys: HashMap<KeyId, DecodingKey>,
+    keys:            HashMap<KeyId, DecodingKey>,
     /// A collection of keys that do not have an associated ID.
     keys_without_id: Vec<DecodingKey>,
     /// The timestamp indicating when the store was last updated.
-    last_updated: OffsetDateTime,
+    last_updated:    OffsetDateTime,
     /// From which TrustedIssuer this struct was built (if applicable).
-    source_iss: Option<TrustedIssuer>,
+    source_iss:      Option<TrustedIssuer>,
 }
 
 // We cannot derive from Debug directly because DecodingKey does not implement Debug.
@@ -88,6 +88,7 @@ impl JwkStore {
             serde_json::from_value::<IntermediateJwks>(jwks).map_err(JwkStoreError::DecodeJwk)?;
         Self::new_from_jwks(store_id, jwks)
     }
+
     /// Creates a JwkStore from a [`String`]
     pub fn new_from_jwks_str(store_id: Arc<str>, jwks: &str) -> Result<Self, JwkStoreError> {
         let jwks =
@@ -229,12 +230,18 @@ struct IntermediateJwks {
 
 #[cfg(test)]
 mod test {
-    use crate::{common::policy_store::TrustedIssuer, http::HttpClient, jwt::jwk_store::JwkStore};
-    use jsonwebtoken::{jwk::JwkSet, DecodingKey};
+    use std::collections::HashMap;
+    use std::time::Duration;
+
+    use jsonwebtoken::DecodingKey;
+    use jsonwebtoken::jwk::JwkSet;
     use mockito::Server;
     use serde_json::json;
-    use std::{collections::HashMap, time::Duration};
     use time::OffsetDateTime;
+
+    use crate::common::policy_store::TrustedIssuer;
+    use crate::http::HttpClient;
+    use crate::jwt::jwk_store::JwkStore;
 
     #[test]
     fn can_load_from_jwkset() {
@@ -271,22 +278,25 @@ mod test {
         let expected_keys = expected_jwkset
             .keys
             .iter()
-            .filter_map(|key| match &key.common.key_id {
-                Some(key_id) => Some((
-                    key_id.as_str().into(),
-                    DecodingKey::from_jwk(key).expect("Should create DecodingKey from Jwk"),
-                )),
-                None => None,
+            .filter_map(|key| {
+                match &key.common.key_id {
+                    Some(key_id) =>
+                        Some((
+                            key_id.as_str().into(),
+                            DecodingKey::from_jwk(key).expect("Should create DecodingKey from Jwk"),
+                        )),
+                    None => None,
+                }
             })
             .collect::<HashMap<Box<str>, DecodingKey>>();
 
         let expected = JwkStore {
-            store_id: "test".into(),
-            issuer: None,
-            keys: expected_keys,
+            store_id:        "test".into(),
+            issuer:          None,
+            keys:            expected_keys,
             keys_without_id: Vec::new(),
-            last_updated: OffsetDateTime::from_unix_timestamp(0).unwrap(),
-            source_iss: None,
+            last_updated:    OffsetDateTime::from_unix_timestamp(0).unwrap(),
+            source_iss:      None,
         };
 
         assert_eq!(expected, result);
@@ -378,21 +388,24 @@ mod test {
         let expected_keys = jwkset
             .keys
             .iter()
-            .filter_map(|key| match &key.common.key_id {
-                Some(key_id) => Some((
-                    key_id.as_str().into(),
-                    DecodingKey::from_jwk(key).expect("Should create DecodingKey from Jwk"),
-                )),
-                None => None,
+            .filter_map(|key| {
+                match &key.common.key_id {
+                    Some(key_id) =>
+                        Some((
+                            key_id.as_str().into(),
+                            DecodingKey::from_jwk(key).expect("Should create DecodingKey from Jwk"),
+                        )),
+                    None => None,
+                }
             })
             .collect::<HashMap<Box<str>, DecodingKey>>();
         let expected = JwkStore {
-            store_id: "test".into(),
-            issuer: Some(mock_server.url().into()),
-            keys: expected_keys,
+            store_id:        "test".into(),
+            issuer:          Some(mock_server.url().into()),
+            keys:            expected_keys,
             keys_without_id: Vec::new(),
-            last_updated: OffsetDateTime::from_unix_timestamp(0).unwrap(),
-            source_iss: Some(source_iss),
+            last_updated:    OffsetDateTime::from_unix_timestamp(0).unwrap(),
+            source_iss:      Some(source_iss),
         };
 
         assert_eq!(expected, result);
@@ -450,12 +463,12 @@ mod test {
             .collect::<Vec<DecodingKey>>();
 
         let expected = JwkStore {
-            store_id: "test".into(),
-            issuer: None,
-            keys: HashMap::new(),
+            store_id:        "test".into(),
+            issuer:          None,
+            keys:            HashMap::new(),
             keys_without_id: expected_keys,
-            last_updated: OffsetDateTime::from_unix_timestamp(0).unwrap(),
-            source_iss: None,
+            last_updated:    OffsetDateTime::from_unix_timestamp(0).unwrap(),
+            source_iss:      None,
         };
 
         assert_eq!(expected, result);
@@ -558,22 +571,25 @@ mod test {
         let expected_keys = expected_jwkset
             .keys
             .iter()
-            .filter_map(|key| match &key.common.key_id {
-                Some(key_id) => Some((
-                    key_id.as_str().into(),
-                    DecodingKey::from_jwk(key).expect("Should create DecodingKey from Jwk"),
-                )),
-                None => None,
+            .filter_map(|key| {
+                match &key.common.key_id {
+                    Some(key_id) =>
+                        Some((
+                            key_id.as_str().into(),
+                            DecodingKey::from_jwk(key).expect("Should create DecodingKey from Jwk"),
+                        )),
+                    None => None,
+                }
             })
             .collect::<HashMap<Box<str>, DecodingKey>>();
 
         let expected = JwkStore {
-            store_id: "test".into(),
-            issuer: None,
-            keys: expected_keys,
+            store_id:        "test".into(),
+            issuer:          None,
+            keys:            expected_keys,
             keys_without_id: Vec::new(),
-            last_updated: OffsetDateTime::from_unix_timestamp(0).unwrap(),
-            source_iss: None,
+            last_updated:    OffsetDateTime::from_unix_timestamp(0).unwrap(),
+            source_iss:      None,
         };
 
         assert_eq!(expected, result);

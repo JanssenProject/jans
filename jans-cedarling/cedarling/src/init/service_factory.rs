@@ -1,30 +1,27 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 //! Module to lazily initialize internal cedarling services
 
 use std::sync::Arc;
 
-use crate::bootstrap_config::BootstrapConfig;
-use crate::common::policy_store::PolicyStoreWithID;
-use crate::jwt::{JwtService, JwtServiceInitError};
-
 use super::service_config::ServiceConfig;
 use crate::authz::{Authz, AuthzConfig};
+use crate::bootstrap_config::BootstrapConfig;
 use crate::common::app_types;
+use crate::common::policy_store::PolicyStoreWithID;
+use crate::jwt::{JwtService, JwtServiceInitError};
 use crate::log;
 
 #[derive(Clone)]
 pub(crate) struct ServiceFactory<'a> {
     bootstrap_config: &'a BootstrapConfig,
-    service_config: ServiceConfig,
+    service_config:   ServiceConfig,
     // it is initialized before ServiceFactory is created
-    pdp_id: app_types::PdpID,
-    log_service: log::Logger,
+    pdp_id:           app_types::PdpID,
+    log_service:      log::Logger,
 
     container: SingletonContainer,
 }
@@ -32,7 +29,7 @@ pub(crate) struct ServiceFactory<'a> {
 /// Structure to store singleton of entities.
 #[derive(Clone, Default)]
 struct SingletonContainer {
-    jwt_service: Option<Arc<JwtService>>,
+    jwt_service:   Option<Arc<JwtService>>,
     authz_service: Option<Arc<Authz>>,
 }
 
@@ -92,12 +89,12 @@ impl<'a> ServiceFactory<'a> {
             Ok(authz.clone())
         } else {
             let config = AuthzConfig {
-                log_service: self.log_service(),
-                pdp_id: self.pdp_id(),
+                log_service:      self.log_service(),
+                pdp_id:           self.pdp_id(),
                 application_name: self.application_name(),
-                policy_store: self.policy_store(),
-                jwt_service: self.jwt_service()?,
-                authorization: self.bootstrap_config.authorization_config.clone(),
+                policy_store:     self.policy_store(),
+                jwt_service:      self.jwt_service()?,
+                authorization:    self.bootstrap_config.authorization_config.clone(),
             };
             let service = Arc::new(Authz::new(config));
             self.container.authz_service = Some(service.clone());

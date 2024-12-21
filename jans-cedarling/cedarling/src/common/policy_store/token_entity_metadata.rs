@@ -1,14 +1,13 @@
-/*
-* This software is available under the Apache-2.0 license.
+// This software is available under the Apache-2.0 license.
+//
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-* See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
-*
-* Copyright (c) 2024, Gluu, Inc.
-*/
+use serde::Deserialize;
 
 pub use super::claim_mapping::ClaimMappings;
 use super::parse_option_string;
-use serde::Deserialize;
 
 ///  Structure for storing mapping JWT claims to `cedar-policy` custom defined types in the `schema`.
 ///
@@ -19,27 +18,28 @@ use serde::Deserialize;
 pub struct TokenEntityMetadata {
     /// Indicates if the access token is trusted.
     #[serde(default)]
-    pub trusted: bool,
+    pub trusted:              bool,
     #[serde(default, deserialize_with = "parse_option_string")]
     /// An optional string representing the principal identifier (e.g., `jti`).
     pub principal_identifier: Option<String>,
     /// The claim used to create the user id
     #[serde(deserialize_with = "parse_option_string", default)]
-    pub user_id: Option<String>,
+    pub user_id:              Option<String>,
     /// An optional string indicating the role mapping for the user.
     #[serde(deserialize_with = "parse_option_string", default)]
-    pub role_mapping: Option<String>,
+    pub role_mapping:         Option<String>,
     /// An optional mapping of claims to their values. Each claim is represented
     /// by a key-value pair where the key is the claim name and the value is
     /// a `ClaimMapping` struct.
     #[serde(default)]
-    pub claim_mapping: ClaimMappings,
+    pub claim_mapping:        ClaimMappings,
 }
 
 #[cfg(test)]
 mod test {
-    use super::TokenEntityMetadata;
     use serde_json::json;
+
+    use super::TokenEntityMetadata;
 
     /// Test deserialization of `TokenEntityMetadata` from JSON.
     #[test]
@@ -63,13 +63,14 @@ mod test {
             "Failed to parse JSON object with user_id and role_mapping into TokenEntityMetadata",
         );
         assert_eq!(
-            parsed, 
-            TokenEntityMetadata { 
-                user_id: Some("sub".into()), 
-                role_mapping: None, 
+            parsed,
+            TokenEntityMetadata {
+                user_id: Some("sub".into()),
+                role_mapping: None,
                 ..Default::default()
-            }, 
-            "Expected JSON with user_id and empty role_mapping to be parsed into TokenEntityMetadata"
+            },
+            "Expected JSON with user_id and empty role_mapping to be parsed into \
+             TokenEntityMetadata"
         );
     }
 
@@ -95,13 +96,14 @@ mod test {
             "Failed to parse YAML object with user_id and role_mapping into TokenEntityMetadata",
         );
         assert_eq!(
-            parsed, 
-            TokenEntityMetadata { 
-                user_id: Some("sub".into()), 
-                role_mapping: None, 
+            parsed,
+            TokenEntityMetadata {
+                user_id: Some("sub".into()),
+                role_mapping: None,
                 ..Default::default()
-            }, 
-            "Expected YAML with user_id and empty role_mapping to be parsed into TokenEntityMetadata"
+            },
+            "Expected YAML with user_id and empty role_mapping to be parsed into \
+             TokenEntityMetadata"
         );
     }
 }

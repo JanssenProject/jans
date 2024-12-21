@@ -1,9 +1,8 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
 //! Module for bootstrap configuration types
 //! to configure [`Cedarling`](crate::Cedarling)
 
@@ -12,7 +11,8 @@ pub(crate) mod jwt_config;
 pub(crate) mod log_config;
 pub(crate) mod policy_store_config;
 
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 pub use authorization_config::AuthorizationConfig;
 // reimport to useful import values in root module
@@ -28,13 +28,13 @@ pub use decode::{BootstrapConfigRaw, FeatureToggle, LoggerType, WorkloadBoolOp};
 #[derive(Debug, PartialEq)]
 pub struct BootstrapConfig {
     /// `CEDARLING_APPLICATION_NAME` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
-    pub application_name: String,
+    pub application_name:     String,
     /// A set of properties used to configure logging in the `Cedarling` application.
-    pub log_config: LogConfig,
+    pub log_config:           LogConfig,
     /// A set of properties used to load `PolicyStore` in the `Cedarling` application.
-    pub policy_store_config: PolicyStoreConfig,
+    pub policy_store_config:  PolicyStoreConfig,
     /// A set of properties used to configure JWT in the `Cedarling` application.
-    pub jwt_config: JwtConfig,
+    pub jwt_config:           JwtConfig,
     /// A set of properties used to configure authorization workflow in the `Cedarling` application.
     pub authorization_config: AuthorizationConfig,
 }
@@ -51,9 +51,7 @@ impl BootstrapConfig {
     /// ```rust
     /// use cedarling::BootstrapConfig;
     ///
-    /// let config =
-    ///     BootstrapConfig::load_from_file("../test_files/bootstrap_props.json")
-    ///         .unwrap();
+    /// let config = BootstrapConfig::load_from_file("../test_files/bootstrap_props.json").unwrap();
     /// ```
     pub fn load_from_file(path: &str) -> Result<Self, BootstrapConfigLoadingError> {
         let file_ext = Path::new(path)
@@ -73,9 +71,10 @@ impl BootstrapConfig {
                 let raw = serde_yml::from_str::<decode::BootstrapConfigRaw>(&config_json)?;
                 BootstrapConfig::from_raw_config(&raw)?
             },
-            _ => Err(BootstrapConfigLoadingError::InvalidFileFormat(
-                path.to_string(),
-            ))?,
+            _ =>
+                Err(BootstrapConfigLoadingError::InvalidFileFormat(
+                    path.to_string(),
+                ))?,
         };
 
         Ok(config)
@@ -114,11 +113,17 @@ pub enum BootstrapConfigLoadingError {
     DecodingYAML(#[from] serde_yml::Error),
 
     /// Error returned when the boostrap property `CEDARLING_LOG_TTL` is missing.
-    #[error("Missing bootstrap property: `CEDARLING_LOG_TTL`. This property is required if `CEDARLING_LOG_TYPE` is set to Memory.")]
+    #[error(
+        "Missing bootstrap property: `CEDARLING_LOG_TTL`. This property is required if \
+         `CEDARLING_LOG_TYPE` is set to Memory."
+    )]
     MissingLogTTL,
 
     /// Error returned when multiple policy store sources were provided.
-    #[error("Multiple store options were provided. Make sure you only one of these properties is set: `CEDARLING_POLICY_STORE_URI` or `CEDARLING_LOCAL_POLICY_STORE`")]
+    #[error(
+        "Multiple store options were provided. Make sure you only one of these properties is set: \
+         `CEDARLING_POLICY_STORE_URI` or `CEDARLING_LOCAL_POLICY_STORE`"
+    )]
     ConflictingPolicyStores,
 
     /// Error returned when no policy store source was provided.
@@ -126,9 +131,7 @@ pub enum BootstrapConfigLoadingError {
     MissingPolicyStore,
 
     /// Error returned when the policy store file is in an unsupported format.
-    #[error(
-        "Unsupported policy store file format for: {0}. Supported formats include: JSON, YAML"
-    )]
+    #[error("Unsupported policy store file format for: {0}. Supported formats include: JSON, YAML")]
     UnsupportedPolicyStoreFileFormat(String),
 
     /// Error returned when failing to load a local JWKS
@@ -137,19 +140,24 @@ pub enum BootstrapConfigLoadingError {
 
     /// Error returned when both `CEDARLING_USER_AUTHZ` and `CEDARLING_WORKLOAD_AUTHZ` are disabled.
     /// These two authentication configurations cannot be disabled at the same time.
-    #[error("Both `CEDARLING_USER_AUTHZ` and `CEDARLING_WORKLOAD_AUTHZ` cannot be disabled simultaneously.")]
+    #[error(
+        "Both `CEDARLING_USER_AUTHZ` and `CEDARLING_WORKLOAD_AUTHZ` cannot be disabled \
+         simultaneously."
+    )]
     BothPrincipalsDisabled,
 }
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::bootstrap_config::decode::BootstrapConfigRaw;
-    use std::{collections::HashSet, path::Path};
+    use std::collections::HashSet;
+    use std::path::Path;
 
-    use crate::{BootstrapConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig};
     use jsonwebtoken::Algorithm;
     use test_utils::assert_eq;
+
+    use super::*;
+    use crate::bootstrap_config::decode::BootstrapConfigRaw;
+    use crate::{BootstrapConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig};
 
     #[test]
     fn can_deserialize_from_json() {
@@ -159,27 +167,27 @@ mod test {
             .expect("Should deserialize bootstrap config from JSON");
 
         let expected = BootstrapConfig {
-            application_name: "My App".to_string(),
-            log_config: LogConfig {
-                log_type: LogTypeConfig::StdOut,
+            application_name:     "My App".to_string(),
+            log_config:           LogConfig {
+                log_type:  LogTypeConfig::StdOut,
                 log_level: crate::LogLevel::DEBUG,
             },
-            policy_store_config: PolicyStoreConfig {
+            policy_store_config:  PolicyStoreConfig {
                 source: crate::PolicyStoreSource::FileJson(
                     Path::new("../test_files/policy-store_blobby.json").into(),
                 ),
             },
-            jwt_config: JwtConfig {
-                jwks: None,
-                jwt_sig_validation: true,
-                jwt_status_validation: false,
-                id_token_trust_mode: IdTokenTrustMode::Strict,
+            jwt_config:           JwtConfig {
+                jwks:                           None,
+                jwt_sig_validation:             true,
+                jwt_status_validation:          false,
+                id_token_trust_mode:            IdTokenTrustMode::Strict,
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
-                access_token_config: TokenValidationConfig {
+                access_token_config:            TokenValidationConfig {
                     exp_validation: true,
                     ..Default::default()
                 },
-                id_token_config: TokenValidationConfig {
+                id_token_config:                TokenValidationConfig {
                     iss_validation: true,
                     sub_validation: true,
                     exp_validation: true,
@@ -187,7 +195,7 @@ mod test {
                     aud_validation: true,
                     ..Default::default()
                 },
-                userinfo_token_config: TokenValidationConfig {
+                userinfo_token_config:          TokenValidationConfig {
                     iss_validation: true,
                     sub_validation: true,
                     aud_validation: true,
@@ -214,27 +222,27 @@ mod test {
             .expect("Should deserialize bootstrap config from YAML");
 
         let expected = BootstrapConfig {
-            application_name: "My App".to_string(),
-            log_config: LogConfig {
-                log_type: LogTypeConfig::Memory(MemoryLogConfig { log_ttl: 60 }),
+            application_name:     "My App".to_string(),
+            log_config:           LogConfig {
+                log_type:  LogTypeConfig::Memory(MemoryLogConfig { log_ttl: 60 }),
                 log_level: crate::LogLevel::DEBUG,
             },
-            policy_store_config: PolicyStoreConfig {
+            policy_store_config:  PolicyStoreConfig {
                 source: crate::PolicyStoreSource::FileJson(
                     Path::new("../test_files/policy-store_blobby.json").into(),
                 ),
             },
-            jwt_config: JwtConfig {
-                jwks: None,
-                jwt_sig_validation: true,
-                jwt_status_validation: false,
-                id_token_trust_mode: IdTokenTrustMode::Strict,
+            jwt_config:           JwtConfig {
+                jwks:                           None,
+                jwt_sig_validation:             true,
+                jwt_status_validation:          false,
+                id_token_trust_mode:            IdTokenTrustMode::Strict,
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
-                access_token_config: TokenValidationConfig {
+                access_token_config:            TokenValidationConfig {
                     exp_validation: true,
                     ..Default::default()
                 },
-                id_token_config: TokenValidationConfig {
+                id_token_config:                TokenValidationConfig {
                     iss_validation: true,
                     sub_validation: true,
                     exp_validation: true,
@@ -242,7 +250,7 @@ mod test {
                     aud_validation: true,
                     ..Default::default()
                 },
-                userinfo_token_config: TokenValidationConfig {
+                userinfo_token_config:          TokenValidationConfig {
                     iss_validation: true,
                     sub_validation: true,
                     aud_validation: true,

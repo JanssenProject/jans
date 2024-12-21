@@ -1,13 +1,13 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::collections::HashSet;
+use std::str::FromStr;
 
 use jsonwebtoken::Algorithm;
 use serde::Deserialize;
-use std::{collections::HashSet, str::FromStr};
 
 /// The set of Bootstrap properties related to JWT validation.
 #[derive(Debug, PartialEq)]
@@ -16,7 +16,7 @@ pub struct JwtConfig {
     ///
     /// If this is used, Cedarling will no longer try to fetch JWK Stores from
     /// a trustede identity provider and stick to using the local JWKS.
-    pub jwks: Option<String>,
+    pub jwks:                           Option<String>,
     /// Check the signature for all the Json Web Tokens.
     ///
     /// This Requires the `iss` claim to be present in all the tokens and
@@ -27,7 +27,7 @@ pub struct JwtConfig {
     /// - `access_token_config`
     /// - `id_token_config`
     /// - `userinfo_token_config`
-    pub jwt_sig_validation: bool,
+    pub jwt_sig_validation:             bool,
     /// Whether to check the status of the JWT.
     ///
     /// On startup, the Cedarling will fetch and retreive the latest Status List
@@ -37,7 +37,7 @@ pub struct JwtConfig {
     /// See the [`IETF Draft`] for more info.
     ///
     /// [`IETF Draft`]: https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/
-    pub jwt_status_validation: bool,
+    pub jwt_status_validation:          bool,
     /// Sets the validation level for ID tokens.
     ///
     /// The available levels are [`None`] and [`Strict`].
@@ -54,15 +54,15 @@ pub struct JwtConfig {
     ///
     /// [`None`]: IdTokenTrustMode::None
     /// [`Strict`]: IdTokenTrustMode::Strict
-    pub id_token_trust_mode: IdTokenTrustMode,
+    pub id_token_trust_mode:            IdTokenTrustMode,
     /// Only tokens signed with algorithms in this list can be valid.
     pub signature_algorithms_supported: HashSet<Algorithm>,
     /// Validation options related to the Access token
-    pub access_token_config: TokenValidationConfig,
+    pub access_token_config:            TokenValidationConfig,
     /// Validation options related to the Id token
-    pub id_token_config: TokenValidationConfig,
+    pub id_token_config:                TokenValidationConfig,
     /// Validation options related to the Userinfo token
-    pub userinfo_token_config: TokenValidationConfig,
+    pub userinfo_token_config:          TokenValidationConfig,
 }
 
 /// Validation options related to JSON Web Tokens (JWT).
@@ -219,14 +219,14 @@ impl Default for JwtConfig {
     /// Cedarling will use the strictest validation options by default.
     fn default() -> Self {
         Self {
-            jwks: None,
-            jwt_sig_validation: true,
-            jwt_status_validation: true,
-            id_token_trust_mode: IdTokenTrustMode::Strict,
+            jwks:                           None,
+            jwt_sig_validation:             true,
+            jwt_status_validation:          true,
+            id_token_trust_mode:            IdTokenTrustMode::Strict,
             signature_algorithms_supported: HashSet::new(),
-            access_token_config: TokenValidationConfig::access_token(),
-            id_token_config: TokenValidationConfig::id_token(),
-            userinfo_token_config: TokenValidationConfig::userinfo_token(),
+            access_token_config:            TokenValidationConfig::access_token(),
+            id_token_config:                TokenValidationConfig::id_token(),
+            userinfo_token_config:          TokenValidationConfig::userinfo_token(),
         }
     }
 }
@@ -235,14 +235,14 @@ impl JwtConfig {
     /// Creates a new `JwtConfig` instance with validation turned off for all tokens.
     pub fn new_without_validation() -> Self {
         Self {
-            jwks: None,
-            jwt_sig_validation: false,
-            jwt_status_validation: false,
-            id_token_trust_mode: IdTokenTrustMode::None,
+            jwks:                           None,
+            jwt_sig_validation:             false,
+            jwt_status_validation:          false,
+            id_token_trust_mode:            IdTokenTrustMode::None,
             signature_algorithms_supported: HashSet::new(),
-            access_token_config: TokenValidationConfig::default(),
-            id_token_config: TokenValidationConfig::default(),
-            userinfo_token_config: TokenValidationConfig::default(),
+            access_token_config:            TokenValidationConfig::default(),
+            id_token_config:                TokenValidationConfig::default(),
+            userinfo_token_config:          TokenValidationConfig::default(),
         }
         .allow_all_algorithms()
     }

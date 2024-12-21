@@ -1,19 +1,31 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-use super::{
-    authorization_config::AuthorizationConfig, BootstrapConfig, BootstrapConfigLoadingError,
-    IdTokenTrustMode, JwtConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig,
-    PolicyStoreSource, TokenValidationConfig,
-};
-use crate::log::LogLevel;
+use std::collections::HashSet;
+use std::fmt::Display;
+use std::fs;
+use std::path::Path;
+use std::str::FromStr;
+
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
-use std::{collections::HashSet, fmt::Display, fs, path::Path, str::FromStr};
+
+use super::authorization_config::AuthorizationConfig;
+use super::{
+    BootstrapConfig,
+    BootstrapConfigLoadingError,
+    IdTokenTrustMode,
+    JwtConfig,
+    LogConfig,
+    LogTypeConfig,
+    MemoryLogConfig,
+    PolicyStoreConfig,
+    PolicyStoreSource,
+    TokenValidationConfig,
+};
+use crate::log::LogLevel;
 
 #[derive(Deserialize, PartialEq, Debug, Default)]
 /// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
@@ -434,11 +446,12 @@ impl BootstrapConfig {
         // Decode LogCofig
         let log_type = match raw.log_type {
             LoggerType::Off => LogTypeConfig::Off,
-            LoggerType::Memory => LogTypeConfig::Memory(MemoryLogConfig {
-                log_ttl: raw
-                    .log_ttl
-                    .ok_or(BootstrapConfigLoadingError::MissingLogTTL)?,
-            }),
+            LoggerType::Memory =>
+                LogTypeConfig::Memory(MemoryLogConfig {
+                    log_ttl: raw
+                        .log_ttl
+                        .ok_or(BootstrapConfigLoadingError::MissingLogTTL)?,
+                }),
             LoggerType::StdOut => LogTypeConfig::StdOut,
             LoggerType::Lock => LogTypeConfig::Lock,
         };
@@ -456,13 +469,15 @@ impl BootstrapConfig {
             // Case: no policy store provided
             (None, None, None) => Err(BootstrapConfigLoadingError::MissingPolicyStore)?,
             // Case: get the policy store from a JSON string
-            (Some(policy_store), None, None) => PolicyStoreConfig {
-                source: PolicyStoreSource::Json(policy_store),
-            },
+            (Some(policy_store), None, None) =>
+                PolicyStoreConfig {
+                    source: PolicyStoreSource::Json(policy_store),
+                },
             // Case: get the policy store from the lock master
-            (None, Some(policy_store_uri), None) => PolicyStoreConfig {
-                source: PolicyStoreSource::LockMaster(policy_store_uri),
-            },
+            (None, Some(policy_store_uri), None) =>
+                PolicyStoreConfig {
+                    source: PolicyStoreSource::LockMaster(policy_store_uri),
+                },
             // Case: get the policy store from a local JSON file
             (None, None, Some(raw_path)) => {
                 let path = Path::new(&raw_path);
@@ -474,9 +489,10 @@ impl BootstrapConfig {
                 let source = match file_ext.as_deref() {
                     Some("json") => PolicyStoreSource::FileJson(path.into()),
                     Some("yaml") | Some("yml") => PolicyStoreSource::FileYaml(path.into()),
-                    _ => Err(
-                        BootstrapConfigLoadingError::UnsupportedPolicyStoreFileFormat(raw_path),
-                    )?,
+                    _ =>
+                        Err(
+                            BootstrapConfigLoadingError::UnsupportedPolicyStoreFileFormat(raw_path),
+                        )?,
                 };
                 PolicyStoreConfig { source }
             },
@@ -526,17 +542,17 @@ impl BootstrapConfig {
         };
 
         let authorization_config = AuthorizationConfig {
-            use_user_principal: raw.user_authz.is_enabled(),
-            use_workload_principal: raw.workload_authz.is_enabled(),
-            user_workload_operator: raw.usr_workload_bool_op,
-            decision_log_user_claims: raw.decision_log_user_claims.clone(),
+            use_user_principal:           raw.user_authz.is_enabled(),
+            use_workload_principal:       raw.workload_authz.is_enabled(),
+            user_workload_operator:       raw.usr_workload_bool_op,
+            decision_log_user_claims:     raw.decision_log_user_claims.clone(),
             decision_log_workload_claims: raw.decision_log_workload_claims.clone(),
-            decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
-            mapping_user: raw.mapping_user.clone(),
-            mapping_workload: raw.mapping_workload.clone(),
-            mapping_id_token: raw.mapping_id_token.clone(),
-            mapping_access_token: raw.mapping_access_token.clone(),
-            mapping_userinfo_token: raw.mapping_userinfo_token.clone(),
+            decision_log_default_jwt_id:  raw.decision_log_default_jwt_id.clone(),
+            mapping_user:                 raw.mapping_user.clone(),
+            mapping_workload:             raw.mapping_workload.clone(),
+            mapping_id_token:             raw.mapping_id_token.clone(),
+            mapping_access_token:         raw.mapping_access_token.clone(),
+            mapping_userinfo_token:       raw.mapping_userinfo_token.clone(),
         };
 
         Ok(Self {

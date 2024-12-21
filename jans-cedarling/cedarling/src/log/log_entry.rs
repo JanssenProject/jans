@@ -1,28 +1,22 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 //! # Log entry
 //! The module contains structs for logging events.
 
-use std::collections::HashMap;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fmt::Display;
-
 use std::hash::Hash;
 
-use uuid7::uuid7;
-use uuid7::Uuid;
+use uuid7::{Uuid, uuid7};
 
+use super::LogLevel;
+use super::interface::Loggable;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types::{self, ApplicationName};
 use crate::common::policy_store::PoliciesContainer;
-
-use super::interface::Loggable;
-use super::LogLevel;
 
 /// ISO-8601 time format for [`chrono`]
 /// example: 2024-11-27T10:10:50.654Z
@@ -37,22 +31,22 @@ pub struct LogEntry {
     pub base: BaseLogEntry,
 
     /// message of the event
-    pub msg: String,
+    pub msg:                String,
     /// name of application from [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub application_id: Option<ApplicationName>,
+    pub application_id:     Option<ApplicationName>,
     /// authorization information of the event
     #[serde(flatten)]
-    pub auth_info: Option<AuthorizationLogInfo>,
+    pub auth_info:          Option<AuthorizationLogInfo>,
     /// error message
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub error_msg: Option<String>,
+    pub error_msg:          Option<String>,
     /// cedar-policy language  version
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cedar_lang_version: Option<semver::Version>,
     /// cedar-policy sdk  version
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub cedar_sdk_version: Option<semver::Version>,
+    pub cedar_sdk_version:  Option<semver::Version>,
 }
 
 impl LogEntry {
@@ -124,11 +118,11 @@ pub enum LogType {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct AuthorizationLogInfo {
     /// cedar-policy action
-    pub action: String,
+    pub action:   String,
     /// cedar-policy resource
     pub resource: String,
     /// cedar-policy context
-    pub context: serde_json::Value,
+    pub context:  serde_json::Value,
     /// cedar-policy entities json presentation for forensic analysis
     pub entities: serde_json::Value,
 
@@ -136,7 +130,7 @@ pub struct AuthorizationLogInfo {
     // It allow deserialize json to flatten structure.
     /// Person authorize info
     #[serde(flatten)]
-    pub person_authorize_info: Option<UserAuthorizeInfo>,
+    pub person_authorize_info:   Option<UserAuthorizeInfo>,
     /// Workload authorize info
     #[serde(flatten)]
     pub workload_authorize_info: Option<WorkloadAuthorizeInfo>,
@@ -150,13 +144,13 @@ pub struct AuthorizationLogInfo {
 pub struct UserAuthorizeInfo {
     /// cedar-policy user/person principal
     #[serde(rename = "user_principal")]
-    pub principal: String,
+    pub principal:   String,
     /// cedar-policy user/person diagnostics information
     #[serde(rename = "user_diagnostics")]
     pub diagnostics: Diagnostics,
     /// cedar-policy user/person decision
     #[serde(rename = "user_decision")]
-    pub decision: Decision,
+    pub decision:    Decision,
 }
 
 /// Workload authorize info
@@ -164,13 +158,13 @@ pub struct UserAuthorizeInfo {
 pub struct WorkloadAuthorizeInfo {
     /// cedar-policy workload principal
     #[serde(rename = "workload_principal")]
-    pub principal: String,
+    pub principal:   String,
     #[serde(rename = "workload_diagnostics")]
     /// cedar-policy workload diagnostics information
     pub diagnostics: Diagnostics,
     /// cedar-policy workload decision
     #[serde(rename = "workload_decision")]
-    pub decision: Decision,
+    pub decision:    Decision,
 }
 
 /// Cedar-policy decision of the authorization
@@ -206,7 +200,7 @@ impl From<cedar_policy::Decision> for Decision {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct PolicyEvaluationError {
     /// Id of the policy with an error
-    pub id: String,
+    pub id:    String,
     /// Underlying evaluation error string representation
     pub error: String,
 }
@@ -215,12 +209,11 @@ pub struct PolicyEvaluationError {
 impl From<&cedar_policy::AuthorizationError> for PolicyEvaluationError {
     fn from(value: &cedar_policy::AuthorizationError) -> Self {
         match value {
-            cedar_policy::AuthorizationError::PolicyEvaluationError(policy_evaluation_error) => {
+            cedar_policy::AuthorizationError::PolicyEvaluationError(policy_evaluation_error) =>
                 Self {
-                    id: policy_evaluation_error.policy_id().to_string(),
+                    id:    policy_evaluation_error.policy_id().to_string(),
                     error: policy_evaluation_error.inner().to_string(),
-                }
-            },
+                },
         }
     }
 }
@@ -239,7 +232,7 @@ pub struct Diagnostics {
 /// Policy diagnostic info
 #[derive(Debug, Default, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct PolicyInfo {
-    pub id: String,
+    pub id:          String,
     pub description: Option<String>,
 }
 
@@ -264,7 +257,7 @@ impl Diagnostics {
                 description: policies
                     .get_policy_description(id.as_str())
                     .map(|v| v.to_string()),
-                id: policy_id.to_string(),
+                id:          policy_id.to_string(),
             }
         }));
 
@@ -278,34 +271,34 @@ pub struct DecisionLogEntry<'a> {
     /// base information of entry
     /// it is unwrap to flatten structure
     #[serde(flatten)]
-    pub base: BaseLogEntry,
+    pub base:                BaseLogEntry,
     /// id of policy store
-    pub policystore_id: &'a str,
+    pub policystore_id:      &'a str,
     /// version of policy store
     pub policystore_version: &'a str,
     /// describe what principal was active on authorization request
-    pub principal: PrincipalLogEntry,
+    pub principal:           PrincipalLogEntry,
     /// A list of claims, specified by the CEDARLING_DECISION_LOG_USER_CLAIMS property, that must be present in the Cedar User entity
     #[serde(rename = "User")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub user: Option<HashMap<String, serde_json::Value>>,
+    pub user:                Option<HashMap<String, serde_json::Value>>,
     /// A list of claims, specified by the CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS property, that must be present in the Cedar Workload entity
     #[serde(rename = "Workload")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub workload: Option<HashMap<String, serde_json::Value>>,
+    pub workload:            Option<HashMap<String, serde_json::Value>>,
     /// If this Cedarling has registered with a Lock Server, what is the client_id it received
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub lock_client_id: Option<String>,
+    pub lock_client_id:      Option<String>,
     /// action UID for request
-    pub action: String,
+    pub action:              String,
     /// resource UID for request
-    pub resource: String,
+    pub resource:            String,
     /// decision for request
-    pub decision: Decision,
+    pub decision:            Decision,
     /// Dictionary with the token type and claims which should be included in the log
-    pub tokens: LogTokensInfo<'a>,
+    pub tokens:              LogTokensInfo<'a>,
     /// time in milliseconds spent for decision
-    pub decision_time_ms: u128,
+    pub decision_time_ms:    u128,
 }
 
 impl Loggable for &DecisionLogEntry<'_> {
@@ -325,14 +318,14 @@ pub struct BaseLogEntry {
     /// Time of decision, in ISO-8601 time format
     /// This field is optional. Can be none if we can't have access to clock (WASM)
     /// or it is not specified in context
-    pub timestamp: Option<String>,
+    pub timestamp:  Option<String>,
     /// kind of log entry
-    pub log_kind: LogType,
+    pub log_kind:   LogType,
     /// unique id of cedarling
-    pub pdp_id: Uuid,
+    pub pdp_id:     Uuid,
     /// log level of entry
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub level: Option<LogLevel>,
+    pub level:      Option<LogLevel>,
 }
 
 impl BaseLogEntry {
@@ -350,10 +343,10 @@ impl BaseLogEntry {
             // and we need sortable ids to use it in the sparkv database.
             // Sparkv store data in BTree. So we need have correct order of ids.
             request_id: uuid7(),
-            timestamp: Some(local_time_string),
-            log_kind: log_type,
-            pdp_id: pdp_id.0,
-            level: default_log_level,
+            timestamp:  Some(local_time_string),
+            log_kind:   log_type,
+            pdp_id:     pdp_id.0,
+            level:      default_log_level,
         }
     }
 }
@@ -369,7 +362,6 @@ impl Loggable for BaseLogEntry {
 }
 
 /// Describes what principal is was executed
-//
 // is used only for logging
 #[derive(Debug, Clone, PartialEq)]
 pub enum PrincipalLogEntry {
@@ -426,5 +418,5 @@ pub struct LogTokensInfo<'a> {
     pub id_token: Option<HashMap<&'a str, &'a serde_json::Value>>,
     #[serde(rename = "Userinfo")]
     pub userinfo: Option<HashMap<&'a str, &'a serde_json::Value>>,
-    pub access: Option<HashMap<&'a str, &'a serde_json::Value>>,
+    pub access:   Option<HashMap<&'a str, &'a serde_json::Value>>,
 }

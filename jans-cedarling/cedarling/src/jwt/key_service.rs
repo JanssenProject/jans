@@ -1,23 +1,23 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-use super::{
-    jwk_store::{JwkStore, JwkStoreError},
-    TrustedIssuerId,
-};
+use std::collections::HashMap;
+use std::sync::Arc;
+use std::time::Duration;
+
+use jsonwebtoken::DecodingKey;
+use serde_json::{Value, json};
+
+use super::TrustedIssuerId;
+use super::jwk_store::{JwkStore, JwkStoreError};
 use crate::common::policy_store::TrustedIssuer;
 use crate::http::{HttpClient, HttpClientError};
-use jsonwebtoken::DecodingKey;
-use serde_json::{json, Value};
-use std::{collections::HashMap, sync::Arc, time::Duration};
 
 pub struct DecodingKeyWithIss<'a> {
     /// The decoding key used to validate JWT signatures.
-    pub key: &'a DecodingKey,
+    pub key:     &'a DecodingKey,
     /// The Trusted Issuer where the Key was fetched.
     pub key_iss: Option<&'a TrustedIssuer>,
 }
@@ -127,9 +127,11 @@ pub enum KeyServiceError {
 mod test {
     use std::collections::HashMap;
 
-    use crate::{common::policy_store::TrustedIssuer, jwt::key_service::KeyService};
     use mockito::Server;
     use serde_json::json;
+
+    use crate::common::policy_store::TrustedIssuer;
+    use crate::jwt::key_service::KeyService;
 
     #[test]
     fn can_load_from_str() {
@@ -245,30 +247,24 @@ mod test {
             .create();
 
         let key_service = KeyService::new_from_trusted_issuers(&HashMap::from([
-            (
-                "first".to_string(),
-                TrustedIssuer {
-                    name: "First IDP".to_string(),
-                    description: "".to_string(),
-                    openid_configuration_endpoint: format!(
-                        "{}/first/.well-known/openid-configuration",
-                        mock_server.url()
-                    ),
-                    ..Default::default()
-                },
-            ),
-            (
-                "second".to_string(),
-                TrustedIssuer {
-                    name: "Second IDP".to_string(),
-                    description: "".to_string(),
-                    openid_configuration_endpoint: format!(
-                        "{}/second/.well-known/openid-configuration",
-                        mock_server.url()
-                    ),
-                    ..Default::default()
-                },
-            ),
+            ("first".to_string(), TrustedIssuer {
+                name: "First IDP".to_string(),
+                description: "".to_string(),
+                openid_configuration_endpoint: format!(
+                    "{}/first/.well-known/openid-configuration",
+                    mock_server.url()
+                ),
+                ..Default::default()
+            }),
+            ("second".to_string(), TrustedIssuer {
+                name: "Second IDP".to_string(),
+                description: "".to_string(),
+                openid_configuration_endpoint: format!(
+                    "{}/second/.well-known/openid-configuration",
+                    mock_server.url()
+                ),
+                ..Default::default()
+            }),
         ]))
         .expect("Should load KeyService from trusted issuers");
 

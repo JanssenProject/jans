@@ -1,20 +1,17 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 //! Testing the creating entities
 
+use std::collections::HashSet;
+
+use test_utils::{SortedJson, assert_eq};
+
 use super::create::*;
 use crate::common::cedar_schema::CedarSchemaJson;
-use crate::jwt::Token;
-use crate::jwt::TokenClaimTypeError;
-use crate::jwt::TokenClaims;
-use std::collections::HashSet;
-use test_utils::assert_eq;
-use test_utils::SortedJson;
+use crate::jwt::{Token, TokenClaimTypeError, TokenClaims};
 
 // test all successful cases
 // with empty namespace
@@ -350,7 +347,8 @@ fn get_token_claim_type_boolean_error() {
         );
         assert!(
             actual_type == origin_type,
-            "expected type: {origin_type}, but got: {actual_type} with schema expected_type: {expected_type}"
+            "expected type: {origin_type}, but got: {actual_type} with schema expected_type: \
+             {expected_type}"
         );
     } else {
         panic!("expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
@@ -409,7 +407,8 @@ fn get_token_claim_type_set_error() {
         );
         assert!(
             actual_type == origin_type,
-            "expected type: {origin_type}, but got: {actual_type} with schema expected_type: {expected_type}"
+            "expected type: {origin_type}, but got: {actual_type} with schema expected_type: \
+             {expected_type}"
         );
     } else {
         panic!("expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
@@ -471,7 +470,8 @@ fn get_token_claim_type_set_of_set_error() {
         );
         assert!(
             actual_type == origin_type,
-            "expected type: {origin_type}, but got: {actual_type} with schema expected_type: {expected_type}"
+            "expected type: {origin_type}, but got: {actual_type} with schema expected_type: \
+             {expected_type}"
         );
     } else {
         panic!("expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");

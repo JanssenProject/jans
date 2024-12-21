@@ -1,21 +1,18 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-use super::interface::{LogWriter, Loggable};
+use std::io::Write;
+use std::sync::{Arc, Mutex};
+
 use super::LogLevel;
-use std::{
-    io::Write,
-    sync::{Arc, Mutex},
-};
+use super::interface::{LogWriter, Loggable};
 
 /// A logger that write to std output.
 pub(crate) struct StdOutLogger {
     // we use `dyn Write`` trait to make it testable and mockable.
-    writer: Mutex<Box<dyn Write + Send + Sync>>,
+    writer:    Mutex<Box<dyn Write + Send + Sync>>,
     log_level: LogLevel,
 }
 
@@ -94,24 +91,23 @@ impl Write for TestWriter {
 
 #[cfg(test)]
 mod tests {
-    use crate::common::app_types::PdpID;
+    use std::io::Write;
 
     use super::super::{LogEntry, LogType};
-
     use super::*;
-    use std::io::Write;
+    use crate::common::app_types::PdpID;
 
     #[test]
     fn write_log_ok() {
         // Create a log entry
         let log_entry = LogEntry {
-            base: crate::log::BaseLogEntry::new(PdpID::new(), LogType::Decision),
-            application_id: Some("test_app".to_string().into()),
-            auth_info: None,
-            msg: "Test message".to_string(),
-            error_msg: None,
+            base:               crate::log::BaseLogEntry::new(PdpID::new(), LogType::Decision),
+            application_id:     Some("test_app".to_string().into()),
+            auth_info:          None,
+            msg:                "Test message".to_string(),
+            error_msg:          None,
             cedar_lang_version: None,
-            cedar_sdk_version: None,
+            cedar_sdk_version:  None,
         };
 
         // Serialize the log entry to JSON

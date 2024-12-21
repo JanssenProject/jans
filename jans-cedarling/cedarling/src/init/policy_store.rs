@@ -1,16 +1,15 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::path::Path;
+use std::time::Duration;
+use std::{fs, io};
 
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
 use crate::common::policy_store::{AgamaPolicyStore, PolicyStoreWithID};
 use crate::http::{HttpClient, HttpClientError};
-use std::path::Path;
-use std::time::Duration;
-use std::{fs, io};
 
 /// Errors that can occur when loading a policy store.
 #[derive(Debug, thiserror::Error)]
@@ -45,17 +44,20 @@ fn extract_first_policy_store(
         .policy_stores
         .iter()
         .take(1)
-        .map(|(k, v)| PolicyStoreWithID {
-            id: k.to_owned(),
-            store: v.to_owned(),
+        .map(|(k, v)| {
+            PolicyStoreWithID {
+                id:    k.to_owned(),
+                store: v.to_owned(),
+            }
         })
         .next();
 
     match policy_store_option {
         Some(policy_store) => Ok(policy_store.clone()),
-        None => Err(PolicyStoreLoadError::InvalidStore(
-            "error retrieving first policy_stores element".into(),
-        )),
+        None =>
+            Err(PolicyStoreLoadError::InvalidStore(
+                "error retrieving first policy_stores element".into(),
+            )),
     }
 }
 
@@ -76,9 +78,8 @@ pub(crate) fn load_policy_store(
                 .map_err(PolicyStoreLoadError::ParseYaml)?;
             extract_first_policy_store(&agama_policy_store)?
         },
-        PolicyStoreSource::LockMaster(policy_store_uri) => {
-            load_policy_store_from_lock_master(policy_store_uri)?
-        },
+        PolicyStoreSource::LockMaster(policy_store_uri) =>
+            load_policy_store_from_lock_master(policy_store_uri)?,
         PolicyStoreSource::FileJson(path) => {
             let policy_json = fs::read_to_string(path)
                 .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone(), e))?;

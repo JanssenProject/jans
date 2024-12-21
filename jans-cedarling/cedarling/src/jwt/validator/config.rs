@@ -1,17 +1,15 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
+
+use jsonwebtoken::Algorithm;
 
 use super::IssuerId;
 use crate::common::policy_store::TrustedIssuer;
-use jsonwebtoken::Algorithm;
-use std::{
-    collections::{HashMap, HashSet},
-    sync::Arc,
-};
 
 /// Validation options related to JSON Web Tokens (JWT).
 ///
@@ -23,7 +21,7 @@ use std::{
 #[derive(Default)]
 pub struct JwtValidatorConfig {
     /// Validate the signature of the JWT.
-    pub sig_validation: Arc<bool>,
+    pub sig_validation:    Arc<bool>,
     /// Validate the status of the JWT.
     ///
     /// The JWT status could be obatained from the `.well-known/openid-configuration` via
@@ -33,19 +31,19 @@ pub struct JwtValidatorConfig {
     #[allow(dead_code)]
     pub status_validation: Arc<bool>,
     /// List of trusted issuers used to check the JWT status.
-    pub trusted_issuers: Arc<Option<HashMap<IssuerId, TrustedIssuer>>>,
+    pub trusted_issuers:   Arc<Option<HashMap<IssuerId, TrustedIssuer>>>,
     /// Algorithms supported as defined in the Bootstrap properties.
     ///
     /// Tokens not signed with an algorithm within this HashSet will immediately be invalid.
-    pub algs_supported: Arc<HashSet<Algorithm>>,
+    pub algs_supported:    Arc<HashSet<Algorithm>>,
     /// Required claims that the JWTs are required to have.
     //
     /// Tokens with a missing required claim will immediately be invalid.
-    pub required_claims: HashSet<Box<str>>,
+    pub required_claims:   HashSet<Box<str>>,
     /// Validate the `exp` (Expiration) claim of the token if it's present.
-    pub validate_exp: bool,
+    pub validate_exp:      bool,
     /// Validate the `nbf` (Not Before) claim of the token if it's present.
-    pub validate_nbf: bool,
+    pub validate_nbf:      bool,
 }
 
 #[allow(dead_code)]

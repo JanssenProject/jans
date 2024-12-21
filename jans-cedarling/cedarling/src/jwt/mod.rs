@@ -1,9 +1,7 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 //! # `JwtEngine`
 //!
@@ -21,15 +19,16 @@ mod test_utils;
 mod token;
 mod validator;
 
-use crate::common::policy_store::TrustedIssuer;
-use crate::{IdTokenTrustMode, JwtConfig};
-use key_service::{KeyService, KeyServiceError};
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
-use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
 
 pub use jsonwebtoken::Algorithm;
+use key_service::{KeyService, KeyServiceError};
 pub use token::{Token, TokenClaim, TokenClaimTypeError, TokenClaims, TokenStr};
+use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
+
+use crate::common::policy_store::TrustedIssuer;
+use crate::{IdTokenTrustMode, JwtConfig};
 
 /// Type alias for Trusted Issuers' ID.
 type TrustedIssuerId = Arc<str>;
@@ -45,15 +44,25 @@ pub enum JwtProcessingError {
     InvalidIdToken(#[source] JwtValidatorError),
     #[error("Invalid Userinfo token: {0}")]
     InvalidUserinfoToken(#[source] JwtValidatorError),
-    #[error("Validation failed: id_token audience does not match the access_token client_id. id_token.aud: {0:?}, access_token.client_id: {1:?}")]
+    #[error(
+        "Validation failed: id_token audience does not match the access_token client_id. \
+         id_token.aud: {0:?}, access_token.client_id: {1:?}"
+    )]
     IdTokenAudienceMismatch(String, String),
-    #[error("Validation failed: Userinfo token subject does not match the id_token subject. userinfo_token.sub: {0:?}, id_token.sub: {1:?}")]
+    #[error(
+        "Validation failed: Userinfo token subject does not match the id_token subject. \
+         userinfo_token.sub: {0:?}, id_token.sub: {1:?}"
+    )]
     UserinfoSubMismatch(String, String),
     #[error(
-        "Validation failed: Userinfo token audience ({0}) does not match the access_token client_id ({1})."
+        "Validation failed: Userinfo token audience ({0}) does not match the access_token \
+         client_id ({1})."
     )]
     UserinfoAudienceMismatch(String, String),
-    #[error("CEDARLING_ID_TOKEN_TRUST_MODE is set to 'Strict', but the {0} is missing a required claim: {1}")]
+    #[error(
+        "CEDARLING_ID_TOKEN_TRUST_MODE is set to 'Strict', but the {0} is missing a required \
+         claim: {1}"
+    )]
     MissingClaimsInStrictMode(&'static str, &'static str),
     #[error("Failed to deserialize from Value to String: {0}")]
     StringDeserialization(#[from] serde_json::Error),
@@ -61,9 +70,15 @@ pub enum JwtProcessingError {
 
 #[derive(Debug, thiserror::Error)]
 pub enum JwtServiceInitError {
-    #[error("Failed to initialize Key Service for JwtService due to a conflictig config: both a local JWKS and trusted issuers was provided.")]
+    #[error(
+        "Failed to initialize Key Service for JwtService due to a conflictig config: both a local \
+         JWKS and trusted issuers was provided."
+    )]
     ConflictingJwksConfig,
-    #[error("Failed to initialize Key Service for JwtService due to a missing config: no local JWKS or trusted issuers was provided.")]
+    #[error(
+        "Failed to initialize Key Service for JwtService due to a missing config: no local JWKS \
+         or trusted issuers was provided."
+    )]
     MissingJwksConfig,
     #[error("Failed to initialize Key Service: {0}")]
     KeyService(#[from] KeyServiceError),
@@ -74,13 +89,13 @@ pub enum JwtServiceInitError {
 }
 
 pub struct JwtService {
-    access_tkn_validator: JwtValidator,
-    id_tkn_validator: JwtValidator,
+    access_tkn_validator:   JwtValidator,
+    id_tkn_validator:       JwtValidator,
     userinfo_tkn_validator: JwtValidator,
     // TODO: implement the usage of this bootstrap property in
     // the authz module.
     #[allow(dead_code)]
-    id_token_trust_mode: IdTokenTrustMode,
+    id_token_trust_mode:    IdTokenTrustMode,
 }
 
 impl JwtService {
@@ -93,14 +108,14 @@ impl JwtService {
                 // Case: no JWKS provided
                 (true, None, None) => Err(JwtServiceInitError::MissingJwksConfig)?,
                 // Case: Trusted issuers provided
-                (true, None, Some(issuers)) => Some(
-                    KeyService::new_from_trusted_issuers(issuers)
-                        .map_err(JwtServiceInitError::KeyService)?,
-                ),
+                (true, None, Some(issuers)) =>
+                    Some(
+                        KeyService::new_from_trusted_issuers(issuers)
+                            .map_err(JwtServiceInitError::KeyService)?,
+                    ),
                 // Case: Local JWKS provided
-                (true, Some(jwks), None) => {
-                    Some(KeyService::new_from_str(jwks).map_err(JwtServiceInitError::KeyService)?)
-                },
+                (true, Some(jwks), None) =>
+                    Some(KeyService::new_from_str(jwks).map_err(JwtServiceInitError::KeyService)?),
                 // Case: Both a local JWKS and trusted issuers were provided
                 (true, Some(_), Some(_)) => Err(JwtServiceInitError::ConflictingJwksConfig)?,
                 // Case: Signature validation is Off so no key service is needed.
@@ -117,39 +132,39 @@ impl JwtService {
 
         let access_tkn_validator = JwtValidator::new(
             JwtValidatorConfig {
-                sig_validation: sig_validation.clone(),
+                sig_validation:    sig_validation.clone(),
                 status_validation: status_validation.clone(),
-                trusted_issuers: trusted_issuers.clone(),
-                algs_supported: algs_supported.clone(),
-                required_claims: config.access_token_config.required_claims(),
-                validate_exp: config.access_token_config.exp_validation,
-                validate_nbf: config.access_token_config.nbf_validation,
+                trusted_issuers:   trusted_issuers.clone(),
+                algs_supported:    algs_supported.clone(),
+                required_claims:   config.access_token_config.required_claims(),
+                validate_exp:      config.access_token_config.exp_validation,
+                validate_nbf:      config.access_token_config.nbf_validation,
             },
             key_service.clone(),
         )?;
 
         let id_tkn_validator = JwtValidator::new(
             JwtValidatorConfig {
-                sig_validation: sig_validation.clone(),
+                sig_validation:    sig_validation.clone(),
                 status_validation: status_validation.clone(),
-                trusted_issuers: trusted_issuers.clone(),
-                algs_supported: algs_supported.clone(),
-                required_claims: config.id_token_config.required_claims(),
-                validate_exp: config.id_token_config.exp_validation,
-                validate_nbf: config.id_token_config.nbf_validation,
+                trusted_issuers:   trusted_issuers.clone(),
+                algs_supported:    algs_supported.clone(),
+                required_claims:   config.id_token_config.required_claims(),
+                validate_exp:      config.id_token_config.exp_validation,
+                validate_nbf:      config.id_token_config.nbf_validation,
             },
             key_service.clone(),
         )?;
 
         let userinfo_tkn_validator = JwtValidator::new(
             JwtValidatorConfig {
-                sig_validation: sig_validation.clone(),
+                sig_validation:    sig_validation.clone(),
                 status_validation: status_validation.clone(),
-                trusted_issuers: trusted_issuers.clone(),
-                algs_supported: algs_supported.clone(),
-                required_claims: config.userinfo_token_config.required_claims(),
-                validate_exp: config.userinfo_token_config.exp_validation,
-                validate_nbf: config.userinfo_token_config.nbf_validation,
+                trusted_issuers:   trusted_issuers.clone(),
+                algs_supported:    algs_supported.clone(),
+                required_claims:   config.userinfo_token_config.required_claims(),
+                validate_exp:      config.userinfo_token_config.exp_validation,
+                validate_nbf:      config.userinfo_token_config.nbf_validation,
             },
             key_service.clone(),
         )?;
@@ -162,7 +177,10 @@ impl JwtService {
         })
     }
 
-    pub fn process_token<'a>(&'a self, token: TokenStr<'a>) -> Result<Token<'a>, JwtProcessingError> {
+    pub fn process_token<'a>(
+        &'a self,
+        token: TokenStr<'a>,
+    ) -> Result<Token<'a>, JwtProcessingError> {
         match token {
             TokenStr::Access(tkn_str) => {
                 let token = self
@@ -194,16 +212,15 @@ impl JwtService {
 
 #[cfg(test)]
 mod test {
-    use super::test_utils::*;
-    use super::JwtService;
-    use super::{Token, TokenClaims, TokenStr};
-    use crate::IdTokenTrustMode;
-    use crate::JwtConfig;
-    use crate::TokenValidationConfig;
+    use std::collections::HashSet;
+
     use jsonwebtoken::Algorithm;
     use serde_json::json;
-    use std::collections::HashSet;
     use test_utils::assert_eq;
+
+    use super::test_utils::*;
+    use super::{JwtService, Token, TokenClaims, TokenStr};
+    use crate::{IdTokenTrustMode, JwtConfig, TokenValidationConfig};
 
     #[test]
     pub fn can_validate_token() {
@@ -242,14 +259,14 @@ mod test {
 
         let jwt_service = JwtService::new(
             &JwtConfig {
-                jwks: Some(local_jwks),
-                jwt_sig_validation: true,
-                jwt_status_validation: false,
-                id_token_trust_mode: IdTokenTrustMode::Strict,
+                jwks:                           Some(local_jwks),
+                jwt_sig_validation:             true,
+                jwt_status_validation:          false,
+                id_token_trust_mode:            IdTokenTrustMode::Strict,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
-                access_token_config: TokenValidationConfig::access_token(),
-                id_token_config: TokenValidationConfig::id_token(),
-                userinfo_token_config: TokenValidationConfig::userinfo_token(),
+                access_token_config:            TokenValidationConfig::access_token(),
+                id_token_config:                TokenValidationConfig::id_token(),
+                userinfo_token_config:          TokenValidationConfig::userinfo_token(),
             },
             None,
         )

@@ -1,17 +1,14 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
+use super::LogEntry;
 use super::interface::{LogStorage, LogWriter, Loggable};
 use super::memory_logger::MemoryLogger;
 use super::nop_logger::NopLogger;
 use super::stdout_logger::StdOutLogger;
-use super::LogEntry;
-use crate::bootstrap_config::log_config::LogConfig;
-use crate::bootstrap_config::log_config::LogTypeConfig;
+use crate::bootstrap_config::log_config::{LogConfig, LogTypeConfig};
 
 /// LogStrategy implements strategy pattern for logging.
 /// It is used to provide a single point of access for logging and same api for different loggers.
@@ -27,9 +24,8 @@ impl LogStrategy {
     pub fn new(config: &LogConfig) -> Self {
         match config.log_type {
             LogTypeConfig::Off => Self::Off(NopLogger),
-            LogTypeConfig::Memory(memory_config) => {
-                Self::MemoryLogger(MemoryLogger::new(memory_config, config.log_level))
-            },
+            LogTypeConfig::Memory(memory_config) =>
+                Self::MemoryLogger(MemoryLogger::new(memory_config, config.log_level)),
             LogTypeConfig::StdOut => Self::StdOut(StdOutLogger::new(config.log_level)),
             LogTypeConfig::Lock => todo!(),
         }

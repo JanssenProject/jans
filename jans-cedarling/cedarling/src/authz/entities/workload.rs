@@ -1,15 +1,14 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::collections::HashSet;
+use std::fmt;
 
 use super::{CreateCedarEntityError, DecodedTokens, EntityMetadata, EntityParsedTypeName};
 use crate::common::policy_store::{PolicyStore, TokenKind};
 use crate::jwt::Token;
-use std::collections::HashSet;
-use std::fmt;
 
 /// Create workload entity
 pub fn create_workload_entity(
@@ -82,19 +81,19 @@ impl fmt::Display for CreateWorkloadEntityError {
 
 #[cfg(test)]
 mod test {
-    use super::create_workload_entity;
-    use crate::{
-        authz::entities::DecodedTokens, common::policy_store::TokenKind,
-        init::policy_store::load_policy_store, jwt::Token, CreateCedarEntityError,
-        PolicyStoreConfig, PolicyStoreSource,
-    };
+    use std::collections::{HashMap, HashSet};
+    use std::path::Path;
+
     use cedar_policy::{Entity, RestrictedExpression};
     use serde_json::json;
-    use std::{
-        collections::{HashMap, HashSet},
-        path::Path,
-    };
     use test_utils::assert_eq;
+
+    use super::create_workload_entity;
+    use crate::authz::entities::DecodedTokens;
+    use crate::common::policy_store::TokenKind;
+    use crate::init::policy_store::load_policy_store;
+    use crate::jwt::Token;
+    use crate::{CreateCedarEntityError, PolicyStoreConfig, PolicyStoreSource};
 
     #[test]
     fn can_create_from_id_token() {
@@ -108,8 +107,8 @@ mod test {
         .store;
 
         let tokens = DecodedTokens {
-            access_token: None,
-            id_token: Some(Token::new_id(
+            access_token:   None,
+            id_token:       Some(Token::new_id(
                 HashMap::from([
                     ("aud".to_string(), json!("workload-1")),
                     ("org_id".to_string(), json!("some-org-123")),
@@ -149,7 +148,7 @@ mod test {
         .store;
 
         let tokens = DecodedTokens {
-            access_token: Some(Token::new_access(
+            access_token:   Some(Token::new_access(
                 HashMap::from([
                     ("client_id".to_string(), json!("workload-1")),
                     ("org_id".to_string(), json!("some-org-123")),
@@ -157,7 +156,7 @@ mod test {
                 .into(),
                 None,
             )),
-            id_token: None,
+            id_token:       None,
             userinfo_token: None,
         };
         let result = create_workload_entity(entity_mapping, &policy_store, &tokens)
@@ -190,8 +189,8 @@ mod test {
         .store;
 
         let tokens = DecodedTokens {
-            access_token: Some(Token::new_access(HashMap::from([]).into(), None)),
-            id_token: Some(Token::new_id(HashMap::from([]).into(), None)),
+            access_token:   Some(Token::new_access(HashMap::from([]).into(), None)),
+            id_token:       Some(Token::new_id(HashMap::from([]).into(), None)),
             userinfo_token: Some(Token::new_userinfo(HashMap::from([]).into(), None)),
         };
 
@@ -200,14 +199,16 @@ mod test {
 
         for (tkn_kind, err) in result.errors.iter() {
             match tkn_kind {
-                TokenKind::Access => assert!(
-                    matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "client_id"),
-                    "expected error MissingClaim(\"client_id\")"
-                ),
-                TokenKind::Id => assert!(
-                    matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "aud"),
-                    "expected error MissingClaim(\"aud\")"
-                ),
+                TokenKind::Access =>
+                    assert!(
+                        matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "client_id"),
+                        "expected error MissingClaim(\"client_id\")"
+                    ),
+                TokenKind::Id =>
+                    assert!(
+                        matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "aud"),
+                        "expected error MissingClaim(\"aud\")"
+                    ),
                 _ => (), // we don't create workload tokens using other tokens
             }
         }
@@ -226,8 +227,8 @@ mod test {
 
         // we can only create the workload from the access_token and id_token
         let tokens = DecodedTokens {
-            access_token: None,
-            id_token: None,
+            access_token:   None,
+            id_token:       None,
             userinfo_token: None,
         };
 
