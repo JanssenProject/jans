@@ -1,61 +1,169 @@
 use anyhow::{anyhow, Result};
+use crossterm::{
+    cursor,
+    event::{self, KeyEvent},
+    terminal, ExecutableCommand,
+};
 use regex::Regex;
-use std::io::{self, Write};
+use std::io::{Stdout, Write};
 
+mod hist;
 mod variable_assignment;
 
+use hist::*;
 use variable_assignment::*;
 
-pub struct Parser {
+const PROMPT: &str = "~~>";
+
+pub struct Parser<'a> {
     var_name_regex: Regex,
+    stdout: &'a Stdout,
+    hist: InputHistory,
 }
 
-impl Default for Parser {
-    fn default() -> Self {
+impl<'a> Parser<'a> {
+    pub fn new(std_out: &'a Stdout) -> Self {
         let var_name_regex =
             Regex::new(VAR_NAME_REGEX_SRC).expect("Failed to compile regex for variable names");
-        Self { var_name_regex }
+        Self {
+            var_name_regex,
+            stdout: std_out,
+            hist: InputHistory::default(),
+        }
     }
 }
 
-pub enum ParseResult {
+pub enum ParsedCommand {
     Quit,
     UnknownCommand(String),
     VariableAssignment(String, String),
-    EmptyString,
+    NoOp,
 }
 
-impl Parser {
-    pub fn parse(&self) -> Result<ParseResult> {
-        // print the prompt
-        print!("~~> ");
-        io::stdout()
+impl Parser<'_> {
+    pub fn parse(&mut self) -> Result<ParsedCommand> {
+        self.print_prompt()?;
+
+        let mut current_input = String::new();
+        loop {
+            if let Some(event) = event::read().ok() {
+                match event {
+                    event::Event::Key(key_event) => {
+                        if let Some(cmd) = self.handle_key_event(&mut current_input, key_event)? {
+                            self.print_input(&current_input)?;
+                            self.hist.push(current_input);
+                            return Ok(cmd);
+                        }
+                    },
+                    event::Event::Paste(pasted) => {
+                        self.handle_paste_event(&mut current_input, pasted)?;
+                    },
+                    _ => {},
+                }
+            }
+        }
+    }
+
+    fn print_prompt(&mut self) -> Result<()> {
+        self.move_cursor_to_start()?;
+        print!("{PROMPT} ");
+        self.flush()?;
+
+        Ok(())
+    }
+
+    // prints the prompt and the given current input, overwriting the previous line
+    fn print_input(&mut self, input: &str) -> Result<()> {
+        self.clear_line()?;
+        print!("{PROMPT} {input}");
+        self.flush()?;
+        self.move_cursor_to_start()?;
+
+        Ok(())
+    }
+
+    fn handle_key_event(
+        &mut self,
+        input: &mut String,
+        key_event: KeyEvent,
+    ) -> Result<Option<ParsedCommand>> {
+        match key_event.code {
+            event::KeyCode::Char(c) => {
+                input.push(c);
+                self.print_input(&input)?;
+            },
+            event::KeyCode::Backspace => {
+                if !input.is_empty() {
+                    input.pop();
+                    self.print_input(&input)?;
+                }
+            },
+            event::KeyCode::Enter => {
+                let mut cmd = ParsedCommand::UnknownCommand(input.to_string());
+
+                if input.is_empty() {
+                    cmd = ParsedCommand::NoOp;
+                }
+
+                if input == "quit()" {
+                    cmd = ParsedCommand::Quit;
+                }
+
+                if let Some((var_name, value)) =
+                    parse_variable_assignment(input, &self.var_name_regex)
+                {
+                    cmd = ParsedCommand::VariableAssignment(var_name.clone(), value.to_string());
+                }
+
+                return Ok(Some(cmd));
+            },
+            event::KeyCode::Up => {
+                if let Some(prev) = self.hist.prev() {
+                    *input = prev.to_string();
+                    self.print_input(&input)?;
+                }
+            },
+            event::KeyCode::Down => {
+                if let Some(next) = self.hist.next() {
+                    *input = next.to_string();
+                } else {
+                    input.clear();
+                }
+                self.print_input(&input)?;
+            },
+            _ => {},
+        }
+
+        Ok(None)
+    }
+
+    fn handle_paste_event(&mut self, input: &mut String, pasted: String) -> Result<()> {
+        input.push_str(&pasted);
+        self.print_input(&input)?;
+        Ok(())
+    }
+
+    fn clear_line(&mut self) -> Result<()> {
+        self.stdout
+            .execute(cursor::MoveToColumn(0))
+            .map_err(|e| anyhow!("Failed to move cursor to start: {e}"))?;
+        self.stdout
+            .execute(terminal::Clear(terminal::ClearType::CurrentLine))
+            .map_err(|e| anyhow!("Failed to clear line: {e}"))?;
+        Ok(())
+    }
+
+    fn move_cursor_to_start(&mut self) -> Result<()> {
+        self.stdout
+            .execute(cursor::MoveToColumn(0))
+            .map_err(|e| anyhow!("Failed to move cursor: {e}"))?;
+        Ok(())
+    }
+
+    fn flush(&mut self) -> Result<()> {
+        self.stdout
             .flush()
             .map_err(|e| anyhow!("Failed to flush stdout: {e}"))?;
-
-        let mut input = String::new();
-        io::stdin()
-            .read_line(&mut input)
-            .map_err(|e| anyhow!("Failed to read input: {e}"))?;
-        let input = input.trim();
-
-        // -=-=- parsing the input -=-=-
-
-        if input.is_empty() {
-            return Ok(ParseResult::EmptyString);
-        }
-
-        if input == "quit()" {
-            return Ok(ParseResult::Quit);
-        }
-
-        if let Some((var_name, value)) = parse_variable_assignment(&input, &self.var_name_regex) {
-            return Ok(ParseResult::VariableAssignment(
-                var_name.clone(),
-                value.to_string(),
-            ));
-        } else {
-            return Ok(ParseResult::UnknownCommand(input.to_string()));
-        }
+        Ok(())
     }
 }

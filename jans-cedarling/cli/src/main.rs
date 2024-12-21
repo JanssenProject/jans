@@ -1,7 +1,8 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, io};
 
 mod parsing;
 
+use crossterm::{cursor, terminal, ExecutableCommand};
 use parsing::*;
 
 #[derive(Default)]
@@ -10,15 +11,20 @@ struct Context {
 }
 
 fn main() {
-    let parser = Parser::default();
-    let mut cli = Context::default();
+    let mut ctx = Context::default();
 
     println!("===== Cedarling CLI =====");
     println!("Type `quit()` to exit the program.");
     println!("To assign a variable, use: <variable_name> = <value>\n");
 
+    terminal::enable_raw_mode().unwrap();
+    let mut stdout = io::stdout();
+    stdout.execute(cursor::Hide).unwrap();
+
+    let mut parser = Parser::new(&stdout);
+
     loop {
-        let parse_result = match parser.parse() {
+        let parsed_cmd = match parser.parse() {
             Ok(result) => result,
             Err(e) => {
                 eprintln!("[ERROR]: {e}");
@@ -26,17 +32,20 @@ fn main() {
             },
         };
 
-        match parse_result {
-            ParseResult::Quit => break,
-            ParseResult::VariableAssignment(name, val) => {
+        match parsed_cmd {
+            ParsedCommand::Quit => break,
+            ParsedCommand::VariableAssignment(name, val) => {
                 println!("set `{name}` to `{val}`");
-                cli.variables.insert(name, val);
+                ctx.variables.insert(name, val);
             },
-            ParseResult::UnknownCommand(input) => match cli.variables.get(&input) {
+            ParsedCommand::UnknownCommand(input) => match ctx.variables.get(&input) {
                 Some(var) => println!("{input} = {var}"),
                 None => println!("Invalid command or variable: {input}"),
             },
-            ParseResult::EmptyString => {},
+            ParsedCommand::NoOp => {},
         }
     }
+
+    terminal::disable_raw_mode().unwrap();
+    stdout.execute(cursor::Show).unwrap();
 }
