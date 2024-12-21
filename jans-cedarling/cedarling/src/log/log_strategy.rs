@@ -3,11 +3,11 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::LogEntry;
 use super::interface::{LogStorage, LogWriter, Loggable};
 use super::memory_logger::MemoryLogger;
 use super::nop_logger::NopLogger;
 use super::stdout_logger::StdOutLogger;
+use super::LogEntry;
 use crate::bootstrap_config::log_config::{LogConfig, LogTypeConfig};
 
 /// LogStrategy implements strategy pattern for logging.
@@ -24,8 +24,9 @@ impl LogStrategy {
     pub fn new(config: &LogConfig) -> Self {
         match config.log_type {
             LogTypeConfig::Off => Self::Off(NopLogger),
-            LogTypeConfig::Memory(memory_config) =>
-                Self::MemoryLogger(MemoryLogger::new(memory_config, config.log_level)),
+            LogTypeConfig::Memory(memory_config) => {
+                Self::MemoryLogger(MemoryLogger::new(memory_config, config.log_level))
+            },
             LogTypeConfig::StdOut => Self::StdOut(StdOutLogger::new(config.log_level)),
             LogTypeConfig::Lock => todo!(),
         }

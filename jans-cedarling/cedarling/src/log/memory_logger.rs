@@ -18,7 +18,7 @@ const STORAGE_JSON_PARSE_EXPECT_MESSAGE: &str =
 
 /// A logger that store logs in-memory.
 pub(crate) struct MemoryLogger {
-    storage:   Mutex<SparKV>,
+    storage: Mutex<SparKV>,
     log_level: LogLevel,
 }
 
@@ -116,13 +116,13 @@ mod tests {
         )
         .set_message("some message".to_string())
         .set_auth_info(AuthorizationLogInfo {
-            action:                  "test_action".to_string(),
-            resource:                "test_resource".to_string(),
-            context:                 serde_json::json!({}),
-            person_authorize_info:   Default::default(),
+            action: "test_action".to_string(),
+            resource: "test_resource".to_string(),
+            context: serde_json::json!({}),
+            person_authorize_info: Default::default(),
             workload_authorize_info: Default::default(),
-            authorized:              true,
-            entities:                serde_json::json!({}),
+            authorized: true,
+            entities: serde_json::json!({}),
         });
         let entry2 = LogEntry::new_with_data(
             app_types::PdpID::new(),

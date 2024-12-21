@@ -8,16 +8,16 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use jsonwebtoken::DecodingKey;
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 
-use super::TrustedIssuerId;
 use super::jwk_store::{JwkStore, JwkStoreError};
+use super::TrustedIssuerId;
 use crate::common::policy_store::TrustedIssuer;
 use crate::http::{HttpClient, HttpClientError};
 
 pub struct DecodingKeyWithIss<'a> {
     /// The decoding key used to validate JWT signatures.
-    pub key:     &'a DecodingKey,
+    pub key: &'a DecodingKey,
     /// The Trusted Issuer where the Key was fetched.
     pub key_iss: Option<&'a TrustedIssuer>,
 }
@@ -247,24 +247,30 @@ mod test {
             .create();
 
         let key_service = KeyService::new_from_trusted_issuers(&HashMap::from([
-            ("first".to_string(), TrustedIssuer {
-                name: "First IDP".to_string(),
-                description: "".to_string(),
-                openid_configuration_endpoint: format!(
-                    "{}/first/.well-known/openid-configuration",
-                    mock_server.url()
-                ),
-                ..Default::default()
-            }),
-            ("second".to_string(), TrustedIssuer {
-                name: "Second IDP".to_string(),
-                description: "".to_string(),
-                openid_configuration_endpoint: format!(
-                    "{}/second/.well-known/openid-configuration",
-                    mock_server.url()
-                ),
-                ..Default::default()
-            }),
+            (
+                "first".to_string(),
+                TrustedIssuer {
+                    name: "First IDP".to_string(),
+                    description: "".to_string(),
+                    openid_configuration_endpoint: format!(
+                        "{}/first/.well-known/openid-configuration",
+                        mock_server.url()
+                    ),
+                    ..Default::default()
+                },
+            ),
+            (
+                "second".to_string(),
+                TrustedIssuer {
+                    name: "Second IDP".to_string(),
+                    description: "".to_string(),
+                    openid_configuration_endpoint: format!(
+                        "{}/second/.well-known/openid-configuration",
+                        mock_server.url()
+                    ),
+                    ..Default::default()
+                },
+            ),
         ]))
         .expect("Should load KeyService from trusted issuers");
 

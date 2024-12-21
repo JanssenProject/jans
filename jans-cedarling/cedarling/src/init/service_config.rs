@@ -5,7 +5,7 @@
 
 use bootstrap_config::BootstrapConfig;
 
-use super::policy_store::{PolicyStoreLoadError, load_policy_store};
+use super::policy_store::{load_policy_store, PolicyStoreLoadError};
 use crate::bootstrap_config;
 use crate::common::policy_store::PolicyStoreWithID;
 

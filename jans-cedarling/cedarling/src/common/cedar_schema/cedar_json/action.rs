@@ -6,21 +6,14 @@
 use std::collections::{HashMap, HashSet};
 
 use serde::ser::SerializeMap;
-use serde::{Deserialize, Serialize, de};
-use serde_json::{Value, json};
+use serde::{de, Deserialize, Serialize};
+use serde_json::{json, Value};
 
 use super::entity_types::{
-    CedarSchemaEntityAttribute,
-    CedarSchemaEntityType,
-    PrimitiveType,
-    PrimitiveTypeKind,
+    CedarSchemaEntityAttribute, CedarSchemaEntityType, PrimitiveType, PrimitiveTypeKind,
 };
 use super::{
-    CedarSchemaEntities,
-    CedarSchemaJson,
-    CedarSchemaRecord,
-    CedarType,
-    GetCedarTypeError,
+    CedarSchemaEntities, CedarSchemaJson, CedarSchemaRecord, CedarType, GetCedarTypeError,
 };
 use crate::authz::entities::CEDAR_POLICY_SEPARATOR;
 use crate::common::cedar_schema::cedar_json::SchemaDefinedType;
@@ -30,16 +23,16 @@ type AttrName = String;
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub struct CtxAttribute {
     pub namespace: String,
-    pub key:       String,
-    pub kind:      CedarType,
+    pub key: String,
+    pub kind: CedarType,
 }
 
 pub struct Action<'a> {
     pub principal_entities: HashSet<String>,
-    pub resource_entities:  HashSet<String>,
-    pub context_entities:   Option<HashSet<CtxAttribute>>,
-    pub schema_entities:    &'a CedarSchemaEntities,
-    pub schema:             &'a ActionSchema,
+    pub resource_entities: HashSet<String>,
+    pub context_entities: Option<HashSet<CtxAttribute>>,
+    pub schema_entities: &'a CedarSchemaEntities,
+    pub schema: &'a ActionSchema,
 }
 
 impl Action<'_> {
@@ -168,14 +161,15 @@ impl CedarSchemaJson {
             //         },
             //     };
             // }
-            RecordOrType::Record(record) =>
+            RecordOrType::Record(record) => {
                 for (key, attr) in record.attributes.iter() {
                     entities.insert(CtxAttribute {
                         namespace: namespace.to_string(),
-                        key:       key.to_string(),
-                        kind:      attr.get_type()?,
+                        key: key.to_string(),
+                        kind: attr.get_type()?,
                     });
-                },
+                }
+            },
             // Case: the context is defined as a type in the schema
             // for example:
             // Jans {
@@ -189,30 +183,33 @@ impl CedarSchemaJson {
             //         context: Context,
             //     };
             // }
-            RecordOrType::Type(entity_type) =>
-                match entity_type {
-                    CedarSchemaEntityType::Primitive(primitive_type) =>
-                        if let PrimitiveTypeKind::TypeName(type_name) = &primitive_type.kind {
-                            let cedar_type = self.find_type(type_name, namespace).unwrap();
-                            match cedar_type {
-                                SchemaDefinedType::CommonType(common) => {
-                                    for (key, attr) in common.attributes.iter() {
-                                        entities.insert(CtxAttribute {
-                                            namespace: namespace.to_string(),
-                                            key:       key.to_string(),
-                                            kind:      attr.get_type()?,
-                                        });
-                                    }
-                                },
-                                SchemaDefinedType::Entity(_) =>
-                                    Err(FindActionError::EntityContext(entity_type.clone()))?,
-                            }
-                        },
-                    CedarSchemaEntityType::Set(_) =>
-                        Err(FindActionError::SetContext(entity_type.clone()))?,
-                    CedarSchemaEntityType::Typed(_) =>
-                        Err(FindActionError::TypedContext(entity_type.clone()))?,
+            RecordOrType::Type(entity_type) => match entity_type {
+                CedarSchemaEntityType::Primitive(primitive_type) => {
+                    if let PrimitiveTypeKind::TypeName(type_name) = &primitive_type.kind {
+                        let cedar_type = self.find_type(type_name, namespace).unwrap();
+                        match cedar_type {
+                            SchemaDefinedType::CommonType(common) => {
+                                for (key, attr) in common.attributes.iter() {
+                                    entities.insert(CtxAttribute {
+                                        namespace: namespace.to_string(),
+                                        key: key.to_string(),
+                                        kind: attr.get_type()?,
+                                    });
+                                }
+                            },
+                            SchemaDefinedType::Entity(_) => {
+                                Err(FindActionError::EntityContext(entity_type.clone()))?
+                            },
+                        }
+                    }
                 },
+                CedarSchemaEntityType::Set(_) => {
+                    Err(FindActionError::SetContext(entity_type.clone()))?
+                },
+                CedarSchemaEntityType::Typed(_) => {
+                    Err(FindActionError::TypedContext(entity_type.clone()))?
+                },
+            },
         }
 
         Ok(entities)
@@ -222,9 +219,9 @@ impl CedarSchemaJson {
 /// Represents an action in the Cedar JSON schema
 #[derive(Default, Debug, PartialEq, Clone)]
 pub struct ActionSchema {
-    pub resource_types:  HashSet<String>,
+    pub resource_types: HashSet<String>,
     pub principal_types: HashSet<String>,
-    pub context:         Option<RecordOrType>,
+    pub context: Option<RecordOrType>,
 }
 
 impl Serialize for ActionSchema {
@@ -313,12 +310,11 @@ impl<'de> Deserialize<'de> for RecordOrType {
                     attributes,
                 }))
             },
-            type_name =>
-                Ok(RecordOrType::Type(CedarSchemaEntityType::Primitive(
-                    PrimitiveType {
-                        kind: PrimitiveTypeKind::TypeName(type_name.to_string()),
-                    },
-                ))),
+            type_name => Ok(RecordOrType::Type(CedarSchemaEntityType::Primitive(
+                PrimitiveType {
+                    kind: PrimitiveTypeKind::TypeName(type_name.to_string()),
+                },
+            ))),
         }
     }
 }
@@ -340,18 +336,15 @@ mod test {
     use std::collections::{HashMap, HashSet};
 
     use serde::Deserialize;
-    use serde_json::{Value, json};
+    use serde_json::{json, Value};
 
     use super::ActionSchema;
-    use crate::common::cedar_schema::cedar_json::CedarSchemaRecord;
     use crate::common::cedar_schema::cedar_json::action::RecordOrType;
     use crate::common::cedar_schema::cedar_json::entity_types::{
-        CedarSchemaEntityAttribute,
-        CedarSchemaEntityType,
-        EntityType,
-        PrimitiveType,
+        CedarSchemaEntityAttribute, CedarSchemaEntityType, EntityType, PrimitiveType,
         PrimitiveTypeKind,
     };
+    use crate::common::cedar_schema::cedar_json::CedarSchemaRecord;
 
     type ActionType = String;
     #[derive(Deserialize, Debug, PartialEq)]
@@ -378,11 +371,14 @@ mod test {
 
     fn build_expected(ctx: Option<RecordOrType>) -> MockJsonSchema {
         MockJsonSchema {
-            actions: HashMap::from([("Update".to_string(), ActionSchema {
-                resource_types:  HashSet::from(["Issue"].map(|s| s.to_string())),
-                principal_types: HashSet::from(["Workload", "User"].map(|s| s.to_string())),
-                context:         ctx,
-            })]),
+            actions: HashMap::from([(
+                "Update".to_string(),
+                ActionSchema {
+                    resource_types: HashSet::from(["Issue"].map(|s| s.to_string())),
+                    principal_types: HashSet::from(["Workload", "User"].map(|s| s.to_string())),
+                    context: ctx,
+                },
+            )]),
         }
     }
 
@@ -419,21 +415,27 @@ mod test {
 
         let expected = build_expected(Some(RecordOrType::Record(CedarSchemaRecord {
             entity_type: "Record".to_string(),
-            attributes:  HashMap::from([
-                ("token".to_string(), CedarSchemaEntityAttribute {
-                    cedar_type: CedarSchemaEntityType::Typed(EntityType {
-                        kind: "EntityOrCommon".to_string(),
-                        name: "Access_token".to_string(),
-                    }),
-                    required:   true,
-                }),
-                ("username".to_string(), CedarSchemaEntityAttribute {
-                    cedar_type: CedarSchemaEntityType::Typed(EntityType {
-                        kind: "EntityOrCommon".to_string(),
-                        name: "String".to_string(),
-                    }),
-                    required:   true,
-                }),
+            attributes: HashMap::from([
+                (
+                    "token".to_string(),
+                    CedarSchemaEntityAttribute {
+                        cedar_type: CedarSchemaEntityType::Typed(EntityType {
+                            kind: "EntityOrCommon".to_string(),
+                            name: "Access_token".to_string(),
+                        }),
+                        required: true,
+                    },
+                ),
+                (
+                    "username".to_string(),
+                    CedarSchemaEntityAttribute {
+                        cedar_type: CedarSchemaEntityType::Typed(EntityType {
+                            kind: "EntityOrCommon".to_string(),
+                            name: "String".to_string(),
+                        }),
+                        required: true,
+                    },
+                ),
             ]),
         })));
 

@@ -12,7 +12,7 @@ use std::sync::Arc;
 
 use base64::prelude::*;
 pub use config::*;
-use jsonwebtoken::{self as jwt, Algorithm, Validation, decode_header};
+use jsonwebtoken::{self as jwt, decode_header, Algorithm, Validation};
 use serde_json::Value;
 use url::Url;
 
@@ -25,15 +25,15 @@ type TokenClaims = Value;
 
 /// Validates Json Web Tokens.
 pub struct JwtValidator {
-    config:      JwtValidatorConfig,
+    config: JwtValidatorConfig,
     key_service: Arc<Option<KeyService>>,
-    validators:  HashMap<Algorithm, Validation>,
-    iss_store:   TrustedIssuersStore,
+    validators: HashMap<Algorithm, Validation>,
+    iss_store: TrustedIssuersStore,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct ProcessedJwt<'a> {
-    pub claims:      TokenClaims,
+    pub claims: TokenClaims,
     pub trusted_iss: Option<&'a TrustedIssuer>,
 }
 
@@ -148,26 +148,30 @@ impl JwtValidator {
         )?;
 
         let decoding_key = match header.kid {
-            Some(kid) =>
-                key_service
-                    .get_key(&kid)
-                    .ok_or(JwtValidatorError::MissingDecodingKey(kid))?,
+            Some(kid) => key_service
+                .get_key(&kid)
+                .ok_or(JwtValidatorError::MissingDecodingKey(kid))?,
             None => unimplemented!("Handling JWTs without `kid`s hasn't been implemented yet."),
         };
 
         let decode_result = jsonwebtoken::decode::<TokenClaims>(jwt, decoding_key.key, validation)
             .map_err(|e| {
                 match e.kind() {
-                    jsonwebtoken::errors::ErrorKind::InvalidToken =>
-                        JwtValidatorError::InvalidShape,
-                    jsonwebtoken::errors::ErrorKind::InvalidSignature =>
-                        JwtValidatorError::InvalidSignature(e),
-                    jsonwebtoken::errors::ErrorKind::ExpiredSignature =>
-                        JwtValidatorError::ExpiredToken,
-                    jsonwebtoken::errors::ErrorKind::ImmatureSignature =>
-                        JwtValidatorError::ImmatureToken,
-                    jsonwebtoken::errors::ErrorKind::Base64(decode_error) =>
-                        JwtValidatorError::DecodeJwt(decode_error.to_string()),
+                    jsonwebtoken::errors::ErrorKind::InvalidToken => {
+                        JwtValidatorError::InvalidShape
+                    },
+                    jsonwebtoken::errors::ErrorKind::InvalidSignature => {
+                        JwtValidatorError::InvalidSignature(e)
+                    },
+                    jsonwebtoken::errors::ErrorKind::ExpiredSignature => {
+                        JwtValidatorError::ExpiredToken
+                    },
+                    jsonwebtoken::errors::ErrorKind::ImmatureSignature => {
+                        JwtValidatorError::ImmatureToken
+                    },
+                    jsonwebtoken::errors::ErrorKind::Base64(decode_error) => {
+                        JwtValidatorError::DecodeJwt(decode_error.to_string())
+                    },
                     // the jsonwebtoken crate placed all it's errors onto a single enum, even the errors
                     // that wouldn't be returned when we call `decode`.
                     _ => JwtValidatorError::Unexpected(e),
@@ -175,7 +179,7 @@ impl JwtValidator {
             })?;
 
         Ok(ProcessedJwt {
-            claims:      decode_result.claims,
+            claims: decode_result.claims,
             trusted_iss: decoding_key.key_iss,
         })
     }

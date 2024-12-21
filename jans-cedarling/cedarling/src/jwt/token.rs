@@ -22,8 +22,8 @@ pub enum TokenStr<'a> {
 #[derive(Debug, PartialEq)]
 pub struct Token<'a> {
     pub kind: TokenKind,
-    pub iss:  Option<&'a TrustedIssuer>,
-    claims:   TokenClaims,
+    pub iss: Option<&'a TrustedIssuer>,
+    claims: TokenClaims,
 }
 
 impl<'a> Token<'a> {
@@ -109,11 +109,9 @@ impl TokenClaims {
     }
 
     pub fn get_claim(&self, name: &str) -> Option<TokenClaim> {
-        self.claims.get(name).map(|value| {
-            TokenClaim {
-                key: name.to_string(),
-                value,
-            }
+        self.claims.get(name).map(|value| TokenClaim {
+            key: name.to_string(),
+            value,
         })
     }
 
@@ -129,7 +127,7 @@ impl TokenClaims {
 }
 
 pub struct TokenClaim<'a> {
-    key:   String,
+    key: String,
     value: &'a serde_json::Value,
 }
 
@@ -176,7 +174,7 @@ impl TokenClaim<'_> {
                     .map(|(i, v)| {
                         TokenClaim {
                             // show current key and index in array
-                            key:   format!("{}[{}]", self.key, i),
+                            key: format!("{}[{}]", self.key, i),
                             value: v,
                         }
                     })
@@ -191,9 +189,9 @@ impl TokenClaim<'_> {
 #[derive(Debug, thiserror::Error)]
 #[error("type mismatch for key '{key}'. expected: '{expected_type}', but found: '{actual_type}'")]
 pub struct TokenClaimTypeError {
-    pub key:           String,
+    pub key: String,
     pub expected_type: String,
-    pub actual_type:   String,
+    pub actual_type: String,
 }
 
 impl TokenClaimTypeError {
@@ -214,9 +212,9 @@ impl TokenClaimTypeError {
         let got_value_type_name = Self::json_value_type_name(got_value);
 
         Self {
-            key:           key.to_string(),
+            key: key.to_string(),
             expected_type: expected_type_name.to_string(),
-            actual_type:   got_value_type_name,
+            actual_type: got_value_type_name,
         }
     }
 }

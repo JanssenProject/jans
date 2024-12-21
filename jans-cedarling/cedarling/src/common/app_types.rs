@@ -5,7 +5,7 @@
 
 //! Module that contains structures used as configuration internally in the application
 //! It is usefull to use it with DI container
-use uuid7::{Uuid, uuid4};
+use uuid7::{uuid4, Uuid};
 
 /// Value is used as ID for application
 /// represents a unique ID for application

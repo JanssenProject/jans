@@ -16,23 +16,20 @@ mod test_create;
 use std::collections::HashSet;
 
 use cedar_policy::{Entity, EntityUid};
-pub use create::{CEDAR_POLICY_SEPARATOR, CreateCedarEntityError};
 use create::{
-    EntityMetadata,
+    build_entity_uid, create_entity, parse_namespace_and_typename, EntityMetadata,
     EntityParsedTypeName,
-    build_entity_uid,
-    create_entity,
-    parse_namespace_and_typename,
 };
+pub use create::{CreateCedarEntityError, CEDAR_POLICY_SEPARATOR};
 pub use user::*;
 pub use workload::*;
 
-use super::AuthorizeError;
 use super::request::ResourceData;
-use crate::AuthorizationConfig;
+use super::AuthorizeError;
 use crate::common::cedar_schema::CedarSchemaJson;
 use crate::common::policy_store::{ClaimMappings, PolicyStore, TokenKind};
 use crate::jwt::Token;
+use crate::AuthorizationConfig;
 
 const DEFAULT_ACCESS_TKN_ENTITY_TYPE_NAME: &str = "Access_token";
 const DEFAULT_ID_TKN_ENTITY_TYPE_NAME: &str = "id_token";
@@ -40,8 +37,8 @@ const DEFAULT_USERINFO_TKN_ENTITY_TYPE_NAME: &str = "Userinfo_token";
 const DEFAULT_TKN_PRINCIPAL_IDENTIFIER: &str = "jti";
 
 pub struct DecodedTokens<'a> {
-    pub access_token:   Option<Token<'a>>,
-    pub id_token:       Option<Token<'a>>,
+    pub access_token: Option<Token<'a>>,
+    pub id_token: Option<Token<'a>>,
     pub userinfo_token: Option<Token<'a>>,
 }
 
@@ -58,8 +55,8 @@ impl DecodedTokens<'_> {
 }
 
 pub struct TokenEntities {
-    pub access:   Option<Entity>,
-    pub id:       Option<Entity>,
+    pub access: Option<Entity>,
+    pub id: Option<Entity>,
     pub userinfo: Option<Entity>,
 }
 
@@ -175,7 +172,7 @@ pub fn create_resource_entity(
 pub enum RoleEntityError {
     #[error("could not create Jans::Role entity from {token_kind} token: {error}")]
     Create {
-        error:      CreateCedarEntityError,
+        error: CreateCedarEntityError,
         token_kind: TokenKind,
     },
 
@@ -219,7 +216,7 @@ fn extract_roles_from_token(
         let entity_uid =
             build_entity_uid(role_entity_type.as_str(), payload_str).map_err(|err| {
                 RoleEntityError::Create {
-                    error:      err,
+                    error: err,
                     token_kind: token.kind,
                 }
             })?;
@@ -251,7 +248,7 @@ fn extract_roles_from_token(
             Err(err) => {
                 // Handle the case where the payload is neither a string nor an array
                 return Err(RoleEntityError::Create {
-                    error:      err.into(),
+                    error: err.into(),
                     token_kind: token.kind,
                 });
             },
@@ -272,11 +269,9 @@ fn extract_roles_from_token(
                 HashSet::new(),
                 token.claim_mapping(),
             )
-            .map_err(|err| {
-                RoleEntityError::Create {
-                    error:      err,
-                    token_kind: token.kind,
-                }
+            .map_err(|err| RoleEntityError::Create {
+                error: err,
+                token_kind: token.kind,
             })
         })
         .collect::<Result<Vec<_>, _>>()

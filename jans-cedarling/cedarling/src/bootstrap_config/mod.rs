@@ -28,13 +28,13 @@ pub use decode::{BootstrapConfigRaw, FeatureToggle, LoggerType, WorkloadBoolOp};
 #[derive(Debug, PartialEq)]
 pub struct BootstrapConfig {
     /// `CEDARLING_APPLICATION_NAME` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
-    pub application_name:     String,
+    pub application_name: String,
     /// A set of properties used to configure logging in the `Cedarling` application.
-    pub log_config:           LogConfig,
+    pub log_config: LogConfig,
     /// A set of properties used to load `PolicyStore` in the `Cedarling` application.
-    pub policy_store_config:  PolicyStoreConfig,
+    pub policy_store_config: PolicyStoreConfig,
     /// A set of properties used to configure JWT in the `Cedarling` application.
-    pub jwt_config:           JwtConfig,
+    pub jwt_config: JwtConfig,
     /// A set of properties used to configure authorization workflow in the `Cedarling` application.
     pub authorization_config: AuthorizationConfig,
 }
@@ -71,10 +71,9 @@ impl BootstrapConfig {
                 let raw = serde_yml::from_str::<decode::BootstrapConfigRaw>(&config_json)?;
                 BootstrapConfig::from_raw_config(&raw)?
             },
-            _ =>
-                Err(BootstrapConfigLoadingError::InvalidFileFormat(
-                    path.to_string(),
-                ))?,
+            _ => Err(BootstrapConfigLoadingError::InvalidFileFormat(
+                path.to_string(),
+            ))?,
         };
 
         Ok(config)
@@ -131,7 +130,9 @@ pub enum BootstrapConfigLoadingError {
     MissingPolicyStore,
 
     /// Error returned when the policy store file is in an unsupported format.
-    #[error("Unsupported policy store file format for: {0}. Supported formats include: JSON, YAML")]
+    #[error(
+        "Unsupported policy store file format for: {0}. Supported formats include: JSON, YAML"
+    )]
     UnsupportedPolicyStoreFileFormat(String),
 
     /// Error returned when failing to load a local JWKS
@@ -167,27 +168,27 @@ mod test {
             .expect("Should deserialize bootstrap config from JSON");
 
         let expected = BootstrapConfig {
-            application_name:     "My App".to_string(),
-            log_config:           LogConfig {
-                log_type:  LogTypeConfig::StdOut,
+            application_name: "My App".to_string(),
+            log_config: LogConfig {
+                log_type: LogTypeConfig::StdOut,
                 log_level: crate::LogLevel::DEBUG,
             },
-            policy_store_config:  PolicyStoreConfig {
+            policy_store_config: PolicyStoreConfig {
                 source: crate::PolicyStoreSource::FileJson(
                     Path::new("../test_files/policy-store_blobby.json").into(),
                 ),
             },
-            jwt_config:           JwtConfig {
-                jwks:                           None,
-                jwt_sig_validation:             true,
-                jwt_status_validation:          false,
-                id_token_trust_mode:            IdTokenTrustMode::Strict,
+            jwt_config: JwtConfig {
+                jwks: None,
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                id_token_trust_mode: IdTokenTrustMode::Strict,
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
-                access_token_config:            TokenValidationConfig {
+                access_token_config: TokenValidationConfig {
                     exp_validation: true,
                     ..Default::default()
                 },
-                id_token_config:                TokenValidationConfig {
+                id_token_config: TokenValidationConfig {
                     iss_validation: true,
                     sub_validation: true,
                     exp_validation: true,
@@ -195,7 +196,7 @@ mod test {
                     aud_validation: true,
                     ..Default::default()
                 },
-                userinfo_token_config:          TokenValidationConfig {
+                userinfo_token_config: TokenValidationConfig {
                     iss_validation: true,
                     sub_validation: true,
                     aud_validation: true,
@@ -222,27 +223,27 @@ mod test {
             .expect("Should deserialize bootstrap config from YAML");
 
         let expected = BootstrapConfig {
-            application_name:     "My App".to_string(),
-            log_config:           LogConfig {
-                log_type:  LogTypeConfig::Memory(MemoryLogConfig { log_ttl: 60 }),
+            application_name: "My App".to_string(),
+            log_config: LogConfig {
+                log_type: LogTypeConfig::Memory(MemoryLogConfig { log_ttl: 60 }),
                 log_level: crate::LogLevel::DEBUG,
             },
-            policy_store_config:  PolicyStoreConfig {
+            policy_store_config: PolicyStoreConfig {
                 source: crate::PolicyStoreSource::FileJson(
                     Path::new("../test_files/policy-store_blobby.json").into(),
                 ),
             },
-            jwt_config:           JwtConfig {
-                jwks:                           None,
-                jwt_sig_validation:             true,
-                jwt_status_validation:          false,
-                id_token_trust_mode:            IdTokenTrustMode::Strict,
+            jwt_config: JwtConfig {
+                jwks: None,
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                id_token_trust_mode: IdTokenTrustMode::Strict,
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
-                access_token_config:            TokenValidationConfig {
+                access_token_config: TokenValidationConfig {
                     exp_validation: true,
                     ..Default::default()
                 },
-                id_token_config:                TokenValidationConfig {
+                id_token_config: TokenValidationConfig {
                     iss_validation: true,
                     sub_validation: true,
                     exp_validation: true,
@@ -250,7 +251,7 @@ mod test {
                     aud_validation: true,
                     ..Default::default()
                 },
-                userinfo_token_config:          TokenValidationConfig {
+                userinfo_token_config: TokenValidationConfig {
                     iss_validation: true,
                     sub_validation: true,
                     aud_validation: true,

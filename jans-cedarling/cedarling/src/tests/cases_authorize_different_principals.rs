@@ -13,7 +13,7 @@ use lazy_static::lazy_static;
 use test_utils::assert_eq;
 
 use super::utils::*;
-use crate::{WorkloadBoolOp, cmp_decision, cmp_policy}; /* macros is defined in the cedarling\src\tests\utils\cedarling_util.rs */
+use crate::{cmp_decision, cmp_policy, WorkloadBoolOp}; /* macros is defined in the cedarling\src\tests\utils\cedarling_util.rs */
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/policy-store_ok_2.yaml");
 

@@ -107,8 +107,8 @@ mod test {
         .store;
 
         let tokens = DecodedTokens {
-            access_token:   None,
-            id_token:       Some(Token::new_id(
+            access_token: None,
+            id_token: Some(Token::new_id(
                 HashMap::from([
                     ("aud".to_string(), json!("workload-1")),
                     ("org_id".to_string(), json!("some-org-123")),
@@ -148,7 +148,7 @@ mod test {
         .store;
 
         let tokens = DecodedTokens {
-            access_token:   Some(Token::new_access(
+            access_token: Some(Token::new_access(
                 HashMap::from([
                     ("client_id".to_string(), json!("workload-1")),
                     ("org_id".to_string(), json!("some-org-123")),
@@ -156,7 +156,7 @@ mod test {
                 .into(),
                 None,
             )),
-            id_token:       None,
+            id_token: None,
             userinfo_token: None,
         };
         let result = create_workload_entity(entity_mapping, &policy_store, &tokens)
@@ -189,8 +189,8 @@ mod test {
         .store;
 
         let tokens = DecodedTokens {
-            access_token:   Some(Token::new_access(HashMap::from([]).into(), None)),
-            id_token:       Some(Token::new_id(HashMap::from([]).into(), None)),
+            access_token: Some(Token::new_access(HashMap::from([]).into(), None)),
+            id_token: Some(Token::new_id(HashMap::from([]).into(), None)),
             userinfo_token: Some(Token::new_userinfo(HashMap::from([]).into(), None)),
         };
 
@@ -199,16 +199,14 @@ mod test {
 
         for (tkn_kind, err) in result.errors.iter() {
             match tkn_kind {
-                TokenKind::Access =>
-                    assert!(
-                        matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "client_id"),
-                        "expected error MissingClaim(\"client_id\")"
-                    ),
-                TokenKind::Id =>
-                    assert!(
-                        matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "aud"),
-                        "expected error MissingClaim(\"aud\")"
-                    ),
+                TokenKind::Access => assert!(
+                    matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "client_id"),
+                    "expected error MissingClaim(\"client_id\")"
+                ),
+                TokenKind::Id => assert!(
+                    matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "aud"),
+                    "expected error MissingClaim(\"aud\")"
+                ),
                 _ => (), // we don't create workload tokens using other tokens
             }
         }
@@ -227,8 +225,8 @@ mod test {
 
         // we can only create the workload from the access_token and id_token
         let tokens = DecodedTokens {
-            access_token:   None,
-            id_token:       None,
+            access_token: None,
+            id_token: None,
             userinfo_token: None,
         };
 

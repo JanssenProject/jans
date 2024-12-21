@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use test_utils::{SortedJson, assert_eq};
+use test_utils::{assert_eq, SortedJson};
 
 use super::utils::*;
 

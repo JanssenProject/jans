@@ -29,9 +29,9 @@ pub enum LogLevel {
     ERROR = 4,
     /// Warn level
     #[default]
-    WARN  = 3,
+    WARN = 3,
     /// Info level
-    INFO  = 2,
+    INFO = 2,
     /// Debug level
     DEBUG = 1,
     /// Trace level

@@ -7,7 +7,7 @@ use std::collections::HashMap;
 
 use regex;
 use regex::Regex;
-use serde::{Deserialize, de};
+use serde::{de, Deserialize};
 use serde_json::Value;
 
 /// Structure for storing `claim mappings`
@@ -18,13 +18,14 @@ pub struct ClaimMappings(HashMap<String, ClaimMapping>);
 
 impl ClaimMappings {
     pub fn get_mapping(&self, field: &str, cedar_policy_type: &str) -> Option<&ClaimMapping> {
-        self.0.get(field).filter(|claim_mapping| {
-            match claim_mapping {
-                ClaimMapping::Regex(regexp_mapping) =>
-                    regexp_mapping.cedar_policy_type == cedar_policy_type,
+        self.0
+            .get(field)
+            .filter(|claim_mapping| match claim_mapping {
+                ClaimMapping::Regex(regexp_mapping) => {
+                    regexp_mapping.cedar_policy_type == cedar_policy_type
+                },
                 ClaimMapping::Json { r#type } => r#type == cedar_policy_type,
-            }
-        })
+            })
     }
 }
 
@@ -73,8 +74,8 @@ impl ClaimMapping {
 #[derive(Debug, Clone)]
 pub struct RegexMapping {
     cedar_policy_type: String,
-    regex_expression:  String,
-    regex:             Regex,
+    regex_expression: String,
+    regex: Regex,
 
     // hashmap key is name of regex group
     // hashmap value describe how to map field found in group
@@ -226,7 +227,7 @@ impl<'de> Deserialize<'de> for ClaimMapping {
 #[derive(Debug, PartialEq, Deserialize, Clone)]
 
 pub struct RegexFieldMapping {
-    pub attr:   String,
+    pub attr: String,
     pub r#type: RegexFieldMappingType,
 }
 
@@ -280,14 +281,20 @@ mod test {
             "Acme::Email".to_string(),
             r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
             HashMap::from([
-                ("UID".to_string(), RegexFieldMapping {
-                    attr:   "uid".to_string(),
-                    r#type: RegexFieldMappingType::String,
-                }),
-                ("DOMAIN".to_string(), RegexFieldMapping {
-                    attr:   "domain".to_string(),
-                    r#type: RegexFieldMappingType::String,
-                }),
+                (
+                    "UID".to_string(),
+                    RegexFieldMapping {
+                        attr: "uid".to_string(),
+                        r#type: RegexFieldMappingType::String,
+                    },
+                ),
+                (
+                    "DOMAIN".to_string(),
+                    RegexFieldMapping {
+                        attr: "domain".to_string(),
+                        r#type: RegexFieldMappingType::String,
+                    },
+                ),
             ]),
         )
         .expect("regexp should parse correctly");
@@ -354,15 +361,21 @@ mod test {
             "Acme::Email".to_string(),
             r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
             HashMap::from([
-                ("UID".to_string(), RegexFieldMapping {
-                    attr:   "uid".to_string(),
-                    r#type: RegexFieldMappingType::String,
-                }),
-                ("DOMAIN".to_string(), RegexFieldMapping {
-                    attr: "domain".to_string(),
+                (
+                    "UID".to_string(),
+                    RegexFieldMapping {
+                        attr: "uid".to_string(),
+                        r#type: RegexFieldMappingType::String,
+                    },
+                ),
+                (
+                    "DOMAIN".to_string(),
+                    RegexFieldMapping {
+                        attr: "domain".to_string(),
 
-                    r#type: RegexFieldMappingType::String,
-                }),
+                        r#type: RegexFieldMappingType::String,
+                    },
+                ),
             ]),
         )
         .expect("regexp should parse correctly");

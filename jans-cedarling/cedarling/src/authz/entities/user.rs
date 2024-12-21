@@ -111,8 +111,8 @@ mod test {
         .store;
 
         let tokens = DecodedTokens {
-            access_token:   None,
-            id_token:       Some(Token::new_id(
+            access_token: None,
+            id_token: Some(Token::new_id(
                 HashMap::from([
                     ("sub".to_string(), json!("user-1")),
                     ("country".to_string(), json!("US")),
@@ -152,8 +152,8 @@ mod test {
         .store;
 
         let tokens = DecodedTokens {
-            id_token:       None,
-            access_token:   None,
+            id_token: None,
+            access_token: None,
             userinfo_token: Some(Token::new_userinfo(
                 HashMap::from([
                     ("sub".to_string(), json!("user-1")),
@@ -193,8 +193,8 @@ mod test {
         .store;
 
         let tokens = DecodedTokens {
-            access_token:   Some(Token::new_access(HashMap::from([]).into(), None)),
-            id_token:       Some(Token::new_id(HashMap::from([]).into(), None)),
+            access_token: Some(Token::new_access(HashMap::from([]).into(), None)),
+            id_token: Some(Token::new_id(HashMap::from([]).into(), None)),
             userinfo_token: Some(Token::new_userinfo(HashMap::from([]).into(), None)),
         };
 
@@ -203,21 +203,18 @@ mod test {
 
         for (tkn_kind, err) in result.errors.iter() {
             match tkn_kind {
-                TokenKind::Access =>
-                    assert!(
-                        matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "sub"),
-                        "expected error MissingClaim(\"sub\")"
-                    ),
-                TokenKind::Id =>
-                    assert!(
-                        matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "sub"),
-                        "expected error MissingClaim(\"sub\")"
-                    ),
-                TokenKind::Userinfo =>
-                    assert!(
-                        matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "sub"),
-                        "expected error MissingClaim(\"sub\")"
-                    ),
+                TokenKind::Access => assert!(
+                    matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "sub"),
+                    "expected error MissingClaim(\"sub\")"
+                ),
+                TokenKind::Id => assert!(
+                    matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "sub"),
+                    "expected error MissingClaim(\"sub\")"
+                ),
+                TokenKind::Userinfo => assert!(
+                    matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "sub"),
+                    "expected error MissingClaim(\"sub\")"
+                ),
                 TokenKind::Transaction => (), // we don't support these yet
             }
         }
@@ -235,8 +232,8 @@ mod test {
         .store;
 
         let tokens = DecodedTokens {
-            access_token:   None,
-            id_token:       None,
+            access_token: None,
+            id_token: None,
             userinfo_token: None,
         };
 

@@ -18,10 +18,10 @@ use crate::log;
 #[derive(Clone)]
 pub(crate) struct ServiceFactory<'a> {
     bootstrap_config: &'a BootstrapConfig,
-    service_config:   ServiceConfig,
+    service_config: ServiceConfig,
     // it is initialized before ServiceFactory is created
-    pdp_id:           app_types::PdpID,
-    log_service:      log::Logger,
+    pdp_id: app_types::PdpID,
+    log_service: log::Logger,
 
     container: SingletonContainer,
 }
@@ -29,7 +29,7 @@ pub(crate) struct ServiceFactory<'a> {
 /// Structure to store singleton of entities.
 #[derive(Clone, Default)]
 struct SingletonContainer {
-    jwt_service:   Option<Arc<JwtService>>,
+    jwt_service: Option<Arc<JwtService>>,
     authz_service: Option<Arc<Authz>>,
 }
 
@@ -89,12 +89,12 @@ impl<'a> ServiceFactory<'a> {
             Ok(authz.clone())
         } else {
             let config = AuthzConfig {
-                log_service:      self.log_service(),
-                pdp_id:           self.pdp_id(),
+                log_service: self.log_service(),
+                pdp_id: self.pdp_id(),
                 application_name: self.application_name(),
-                policy_store:     self.policy_store(),
-                jwt_service:      self.jwt_service()?,
-                authorization:    self.bootstrap_config.authorization_config.clone(),
+                policy_store: self.policy_store(),
+                jwt_service: self.jwt_service()?,
+                authorization: self.bootstrap_config.authorization_config.clone(),
             };
             let service = Arc::new(Authz::new(config));
             self.container.authz_service = Some(service.clone());

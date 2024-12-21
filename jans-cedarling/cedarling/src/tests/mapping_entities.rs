@@ -18,7 +18,7 @@ use test_utils::assert_eq;
 
 use super::utils::*;
 use crate::common::policy_store::TokenKind;
-use crate::{AuthorizeError, Cedarling, CreateCedarEntityError, cmp_decision, cmp_policy};
+use crate::{cmp_decision, cmp_policy, AuthorizeError, Cedarling, CreateCedarEntityError};
 
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../../test_files/policy-store_entity_mapping.yaml");

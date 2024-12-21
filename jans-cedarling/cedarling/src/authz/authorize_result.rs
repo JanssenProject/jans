@@ -18,10 +18,10 @@ pub struct AuthorizeResult {
     user_workload_operator: WorkloadBoolOp,
     /// Result of authorization where principal is `Jans::Workload`
     #[serde(serialize_with = "serialize_opt_response")]
-    pub workload:           Option<cedar_policy::Response>,
+    pub workload: Option<cedar_policy::Response>,
     /// Result of authorization where principal is `Jans::User`
     #[serde(serialize_with = "serialize_opt_response")]
-    pub person:             Option<cedar_policy::Response>,
+    pub person: Option<cedar_policy::Response>,
 }
 
 /// Custom serializer for an Option<String> which converts `None` to an empty string and vice versa.

@@ -6,20 +6,9 @@
 use std::collections::{HashMap, HashSet};
 
 use cedarling::{
-    AuthorizationConfig,
-    BootstrapConfig,
-    Cedarling,
-    IdTokenTrustMode,
-    JwtConfig,
-    LogConfig,
-    LogLevel,
-    LogTypeConfig,
-    PolicyStoreConfig,
-    PolicyStoreSource,
-    Request,
-    ResourceData,
-    TokenValidationConfig,
-    WorkloadBoolOp,
+    AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LogConfig,
+    LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
+    TokenValidationConfig, WorkloadBoolOp,
 };
 use jsonwebtoken::Algorithm;
 
@@ -31,14 +20,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // using specific algorithms: `HS256` and `RS256`. Only tokens signed with these algorithms
     // will be accepted; others will be marked as invalid during validation.
     let jwt_config = JwtConfig {
-        jwks:                           None,
-        jwt_sig_validation:             true,
-        jwt_status_validation:          false,
-        id_token_trust_mode:            IdTokenTrustMode::None,
+        jwks: None,
+        jwt_sig_validation: true,
+        jwt_status_validation: false,
+        id_token_trust_mode: IdTokenTrustMode::None,
         signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
-        access_token_config:            TokenValidationConfig::access_token(),
-        id_token_config:                TokenValidationConfig::id_token(),
-        userinfo_token_config:          TokenValidationConfig::userinfo_token(),
+        access_token_config: TokenValidationConfig::access_token(),
+        id_token_config: TokenValidationConfig::id_token(),
+        userinfo_token_config: TokenValidationConfig::userinfo_token(),
     };
 
     // You must change this with your own tokens
@@ -52,7 +41,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cedarling = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
-            log_type:  LogTypeConfig::StdOut,
+            log_type: LogTypeConfig::StdOut,
             log_level: LogLevel::INFO,
         },
         policy_store_config: PolicyStoreConfig {
@@ -72,15 +61,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // on a specific resource. Each token (access, ID, and userinfo) is required for the
     // authorization process, alongside resource and action details.
     let result = cedarling.authorize(Request {
-        access_token:   Some(access_token),
-        id_token:       Some(id_token),
+        access_token: Some(access_token),
+        id_token: Some(id_token),
         userinfo_token: Some(userinfo_token),
-        action:         "Jans::Action::\"Update\"".to_string(),
-        context:        serde_json::json!({}),
-        resource:       ResourceData {
-            id:            "random_id".to_string(),
+        action: "Jans::Action::\"Update\"".to_string(),
+        context: serde_json::json!({}),
+        resource: ResourceData {
+            id: "random_id".to_string(),
             resource_type: "Jans::Issue".to_string(),
-            payload:       HashMap::from_iter([(
+            payload: HashMap::from_iter([(
                 "org_id".to_string(),
                 serde_json::Value::String("some_long_id".to_string()),
             )]),

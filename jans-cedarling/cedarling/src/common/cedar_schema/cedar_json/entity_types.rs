@@ -22,7 +22,7 @@ pub struct CedarSchemaRecord {
     // represent RecordAttr
     // RecordAttr ::= STR ': {' Type [',' '"required"' ':' ( true | false )] '}'
     // attributes as key is used attribute name
-    pub attributes:  HashMap<String, CedarSchemaEntityAttribute>,
+    pub attributes: HashMap<String, CedarSchemaEntityAttribute>,
 }
 
 impl CedarSchemaRecord {
@@ -37,7 +37,7 @@ impl CedarSchemaRecord {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, Hash)]
 pub struct CedarSchemaEntityAttribute {
     pub cedar_type: CedarSchemaEntityType,
-    pub required:   bool,
+    pub required: bool,
 }
 
 impl CedarSchemaEntityAttribute {
@@ -120,27 +120,28 @@ impl<'de> serde::Deserialize<'de> for CedarSchemaEntityType {
             .type_name
             .as_str()
         {
-            "Set" =>
+            "Set" => {
                 CedarSchemaEntityType::Set(Box::new(SetEntityType::deserialize(&value).map_err(
                     |err| serde::de::Error::custom(format!("failed to deserialize Set: {}", err)),
-                )?)),
-            "EntityOrCommon" =>
+                )?))
+            },
+            "EntityOrCommon" => {
                 CedarSchemaEntityType::Typed(EntityType::deserialize(&value).map_err(|err| {
                     serde::de::Error::custom(format!(
                         "failed to deserialize EntityOrCommon: {}",
                         err
                     ))
-                })?),
-            _ =>
-                CedarSchemaEntityType::Primitive(PrimitiveType::deserialize(&value).map_err(
-                    |err| {
-                        // will newer happen because we know that field "type" is string
-                        serde::de::Error::custom(format!(
-                            "failed to deserialize PrimitiveType: {}",
-                            err
-                        ))
-                    },
-                )?),
+                })?)
+            },
+            _ => CedarSchemaEntityType::Primitive(PrimitiveType::deserialize(&value).map_err(
+                |err| {
+                    // will newer happen because we know that field "type" is string
+                    serde::de::Error::custom(format!(
+                        "failed to deserialize PrimitiveType: {}",
+                        err
+                    ))
+                },
+            )?),
         };
 
         Ok(entity_type)

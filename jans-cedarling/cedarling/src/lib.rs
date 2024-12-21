@@ -27,16 +27,16 @@ mod tests;
 
 use std::sync::Arc;
 
+pub use authz::request::{Request, ResourceData};
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
 use authz::Authz;
-pub use authz::request::{Request, ResourceData};
 pub use authz::{AuthorizeError, AuthorizeResult};
 pub use bootstrap_config::*;
 use common::app_types;
-use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
+use init::ServiceFactory;
 use log::interface::LogWriter;
 use log::{LogEntry, LogType};
 pub use log::{LogLevel, LogStorage};
@@ -48,11 +48,7 @@ pub mod bindings {
     pub use cedar_policy;
 
     pub use super::log::{
-        AuthorizationLogInfo,
-        Decision,
-        Diagnostics,
-        LogEntry,
-        PolicyEvaluationError,
+        AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
     };
     pub use crate::common::policy_store::PolicyStore;
 }
@@ -72,7 +68,7 @@ pub enum InitCedarlingError {
 /// It is safe to share between threads.
 #[derive(Clone)]
 pub struct Cedarling {
-    log:   log::Logger,
+    log: log::Logger,
     authz: Arc<Authz>,
 }
 

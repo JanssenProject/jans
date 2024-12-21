@@ -7,7 +7,7 @@
 
 use std::collections::HashSet;
 
-use test_utils::{SortedJson, assert_eq};
+use test_utils::{assert_eq, SortedJson};
 
 use super::create::*;
 use crate::common::cedar_schema::CedarSchemaJson;

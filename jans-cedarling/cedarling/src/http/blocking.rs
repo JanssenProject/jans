@@ -18,7 +18,7 @@ use super::{HttpClientError, HttpGet, Response};
 /// if an error occurs.
 #[derive(Debug)]
 pub struct BlockingHttpClient {
-    client:      reqwest::blocking::Client,
+    client: reqwest::blocking::Client,
     max_retries: u32,
     retry_delay: Duration,
 }

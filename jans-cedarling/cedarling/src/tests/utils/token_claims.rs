@@ -12,7 +12,7 @@ lazy_static! {
 }
 
 pub(crate) struct GeneratedKeys {
-    pub private_key_id:       String,
+    pub private_key_id: String,
     pub private_encoding_key: jwt::EncodingKey,
 }
 
@@ -43,7 +43,7 @@ pub fn generate_keys() -> GeneratedKeys {
     let _public_keys = serde_json::to_string(&public_keys).expect("should serialize keyset");
 
     GeneratedKeys {
-        private_key_id:       kid.to_string(),
+        private_key_id: kid.to_string(),
         private_encoding_key: private_key,
     }
 }

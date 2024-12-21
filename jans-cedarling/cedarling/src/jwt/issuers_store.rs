@@ -30,15 +30,14 @@ impl TrustedIssuersStore {
     pub fn new(source: Arc<Option<HashMap<IssuerId, TrustedIssuer>>>) -> Self {
         let issuers = match source.as_ref() {
             None => HashMap::new(),
-            Some(issuers) =>
-                issuers
-                    .values()
-                    .map(|iss| {
-                        let endpoint = Url::parse(&iss.openid_configuration_endpoint).unwrap();
-                        let iss_origin: IssuerOrigin = endpoint.origin().ascii_serialization();
-                        (iss_origin, iss.clone())
-                    })
-                    .collect::<HashMap<IssuerOrigin, TrustedIssuer>>(),
+            Some(issuers) => issuers
+                .values()
+                .map(|iss| {
+                    let endpoint = Url::parse(&iss.openid_configuration_endpoint).unwrap();
+                    let iss_origin: IssuerOrigin = endpoint.origin().ascii_serialization();
+                    (iss_origin, iss.clone())
+                })
+                .collect::<HashMap<IssuerOrigin, TrustedIssuer>>(),
         };
 
         Self { issuers }

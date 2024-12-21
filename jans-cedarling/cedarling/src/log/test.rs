@@ -22,7 +22,7 @@ use crate::log::stdout_logger::TestWriter;
 fn test_new_log_strategy_off() {
     // Arrange
     let config = LogConfig {
-        log_type:  log_config::LogTypeConfig::Off,
+        log_type: log_config::LogTypeConfig::Off,
         log_level: crate::LogLevel::DEBUG,
     };
 
@@ -37,7 +37,7 @@ fn test_new_log_strategy_off() {
 fn test_new_log_strategy_memory() {
     // Arrange
     let config = LogConfig {
-        log_type:  log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
+        log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
         log_level: crate::LogLevel::DEBUG,
     };
 
@@ -52,7 +52,7 @@ fn test_new_log_strategy_memory() {
 fn test_new_logstrategy_stdout() {
     // Arrange
     let config = LogConfig {
-        log_type:  log_config::LogTypeConfig::StdOut,
+        log_type: log_config::LogTypeConfig::StdOut,
         log_level: crate::LogLevel::DEBUG,
     };
 
@@ -67,18 +67,18 @@ fn test_new_logstrategy_stdout() {
 fn test_log_memory_logger() {
     // Arrange
     let config = LogConfig {
-        log_type:  log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
+        log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
         log_level: crate::LogLevel::TRACE,
     };
     let strategy = LogStrategy::new(&config);
     let entry = LogEntry {
-        base:               BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision),
-        application_id:     Some("test_app".to_string().into()),
-        auth_info:          None,
-        msg:                "Test message".to_string(),
-        error_msg:          None,
+        base: BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision),
+        application_id: Some("test_app".to_string().into()),
+        auth_info: None,
+        msg: "Test message".to_string(),
+        error_msg: None,
         cedar_lang_version: None,
-        cedar_sdk_version:  None,
+        cedar_sdk_version: None,
     };
 
     // Act
@@ -149,13 +149,13 @@ fn test_log_memory_logger() {
 fn test_log_stdout_logger() {
     // Arrange
     let log_entry = LogEntry {
-        base:               BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision),
-        application_id:     Some("test_app".to_string().into()),
-        auth_info:          None,
-        msg:                "Test message".to_string(),
-        error_msg:          None,
+        base: BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision),
+        application_id: Some("test_app".to_string().into()),
+        auth_info: None,
+        msg: "Test message".to_string(),
+        error_msg: None,
         cedar_lang_version: None,
-        cedar_sdk_version:  None,
+        cedar_sdk_version: None,
     };
     // Serialize the log entry to JSON
     let json_str = serde_json::json!(&log_entry).to_string();

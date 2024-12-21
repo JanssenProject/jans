@@ -9,14 +9,10 @@ use std::str::FromStr;
 use cedar_policy::{EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 
 use super::trait_as_expression::AsExpression;
-use crate::common::cedar_schema::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::{
-    CedarSchemaEntityShape,
-    CedarSchemaRecord,
-    CedarType,
-    GetCedarTypeError,
-    SchemaDefinedType,
+    CedarSchemaEntityShape, CedarSchemaRecord, CedarType, GetCedarTypeError, SchemaDefinedType,
 };
+use crate::common::cedar_schema::CedarSchemaJson;
 use crate::common::policy_store::ClaimMappings;
 use crate::jwt::{Token, TokenClaim, TokenClaimTypeError, TokenClaims};
 
@@ -26,7 +22,7 @@ pub const CEDAR_POLICY_SEPARATOR: &str = "::";
 /// Is used to store in `static` variable.
 #[derive(Debug)]
 pub(crate) struct EntityMetadata<'a> {
-    pub entity_type:        EntityParsedTypeName<'a>,
+    pub entity_type: EntityParsedTypeName<'a>,
     pub entity_id_data_key: &'a str,
 }
 
@@ -146,13 +142,13 @@ fn entity_meta_attributes(
         .attributes
         .iter()
         .map(|(attribute_name, attribute)| {
-            attribute.get_type().map(|attr_type| {
-                EntityAttributeMetadata {
-                    attribute_name:    attribute_name.as_str(),
+            attribute
+                .get_type()
+                .map(|attr_type| EntityAttributeMetadata {
+                    attribute_name: attribute_name.as_str(),
                     cedar_policy_type: attr_type,
-                    is_required:       attribute.is_required(),
-                }
-            })
+                    is_required: attribute.is_required(),
+                })
         })
         .collect::<Result<Vec<_>, _>>()
 }
@@ -216,11 +212,11 @@ pub fn create_entity(
 pub struct EntityAttributeMetadata<'a> {
     // The name of the attribute in the cedar policy
     // mapped one-to-one with the attribute in the token data.
-    pub attribute_name:    &'a str,
+    pub attribute_name: &'a str,
     // The type of the cedar policy attribute.
     pub cedar_policy_type: CedarType,
     // if this attribute is required
-    pub is_required:       bool,
+    pub is_required: bool,
 }
 
 /// Get the cedar policy expression value for a given type.
@@ -263,8 +259,9 @@ fn get_expression(
         CedarType::Boolean => Ok(claim.as_bool()?.to_expression()),
         CedarType::TypeName(cedar_typename) => {
             match schema.find_type(cedar_typename, base_entity_typename.namespace) {
-                Some(SchemaDefinedType::Entity(_)) =>
-                    get_entity_expression(cedar_typename, base_entity_typename, claim),
+                Some(SchemaDefinedType::Entity(_)) => {
+                    get_entity_expression(cedar_typename, base_entity_typename, claim)
+                },
                 Some(SchemaDefinedType::CommonType(record)) => {
                     let record_typename =
                         EntityParsedTypeName::new(cedar_typename, base_entity_typename.namespace);
@@ -277,11 +274,10 @@ fn get_expression(
                             )
                         })
                 },
-                None =>
-                    Err(CreateCedarEntityError::FindType(
-                        EntityParsedTypeName::new(cedar_typename, base_entity_typename.namespace)
-                            .full_type_name(),
-                    )),
+                None => Err(CreateCedarEntityError::FindType(
+                    EntityParsedTypeName::new(cedar_typename, base_entity_typename.namespace)
+                        .full_type_name(),
+                )),
             }
         },
         CedarType::Set(cedar_type) => {
@@ -341,12 +337,13 @@ fn get_record_expression(
             Some(m) => m.apply_mapping(token_claim.value()).into(),
             // if we do not have mapping, and value is json object, return TokenPayload based on it.
             // if value is not json object, return empty value
-            None =>
+            None => {
                 if let Some(map) = token_claim.value().as_object() {
                     TokenClaims::from_json_map(map.to_owned())
                 } else {
                     TokenClaims::default()
-                },
+                }
+            },
         };
 
     let mut record_restricted_exps = Vec::new();

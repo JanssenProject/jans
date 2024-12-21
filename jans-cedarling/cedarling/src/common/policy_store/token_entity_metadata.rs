@@ -18,21 +18,21 @@ use super::parse_option_string;
 pub struct TokenEntityMetadata {
     /// Indicates if the access token is trusted.
     #[serde(default)]
-    pub trusted:              bool,
+    pub trusted: bool,
     #[serde(default, deserialize_with = "parse_option_string")]
     /// An optional string representing the principal identifier (e.g., `jti`).
     pub principal_identifier: Option<String>,
     /// The claim used to create the user id
     #[serde(deserialize_with = "parse_option_string", default)]
-    pub user_id:              Option<String>,
+    pub user_id: Option<String>,
     /// An optional string indicating the role mapping for the user.
     #[serde(deserialize_with = "parse_option_string", default)]
-    pub role_mapping:         Option<String>,
+    pub role_mapping: Option<String>,
     /// An optional mapping of claims to their values. Each claim is represented
     /// by a key-value pair where the key is the claim name and the value is
     /// a `ClaimMapping` struct.
     #[serde(default)]
-    pub claim_mapping:        ClaimMappings,
+    pub claim_mapping: ClaimMappings,
 }
 
 #[cfg(test)]

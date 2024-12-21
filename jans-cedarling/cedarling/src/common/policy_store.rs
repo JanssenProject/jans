@@ -78,7 +78,7 @@ impl PolicyStore {
 #[derive(Clone, derive_more::Deref)]
 pub struct PolicyStoreWithID {
     /// ID of policy store
-    pub id:    String,
+    pub id: String,
     /// Policy store value
     #[deref]
     pub store: PolicyStore,
@@ -121,13 +121,13 @@ pub struct TrustedIssuer {
 impl Default for TrustedIssuer {
     fn default() -> Self {
         Self {
-            name:                          "Jans".to_string(),
-            description:                   Default::default(),
+            name: "Jans".to_string(),
+            description: Default::default(),
             openid_configuration_endpoint: Default::default(),
-            access_tokens:                 Default::default(),
-            id_tokens:                     Default::default(),
-            userinfo_tokens:               Default::default(),
-            tx_tokens:                     Default::default(),
+            access_tokens: Default::default(),
+            id_tokens: Default::default(),
+            userinfo_tokens: Default::default(),
+            tx_tokens: Default::default(),
         }
     }
 }
@@ -180,10 +180,10 @@ impl TrustedIssuer {
 
     pub fn tokens_metadata(&self) -> TokensMetadata<'_> {
         TokensMetadata {
-            access_tokens:   &self.access_tokens,
-            id_tokens:       &self.id_tokens,
+            access_tokens: &self.access_tokens,
+            id_tokens: &self.id_tokens,
             userinfo_tokens: &self.userinfo_tokens,
-            tx_tokens:       &self.tx_tokens,
+            tx_tokens: &self.tx_tokens,
         }
     }
 }
@@ -194,7 +194,7 @@ pub struct TokensMetadata<'a> {
     pub access_tokens: &'a TokenEntityMetadata,
 
     /// Metadata for ID tokens issued by the trusted issuer.
-    pub id_tokens:       &'a TokenEntityMetadata,
+    pub id_tokens: &'a TokenEntityMetadata,
     /// Metadata for userinfo tokens issued by the trusted issuer.
     pub userinfo_tokens: &'a TokenEntityMetadata,
 
@@ -241,12 +241,10 @@ impl<'de> Deserialize<'de> for TokenKind {
             "id_token" => Ok(TokenKind::Id),
             "userinfo_token" => Ok(TokenKind::Userinfo),
             "access_token" => Ok(TokenKind::Access),
-            _ =>
-                Err(serde::de::Error::unknown_variant(&token_kind, &[
-                    "access_token",
-                    "id_token",
-                    "userinfo_token",
-                ])),
+            _ => Err(serde::de::Error::unknown_variant(
+                &token_kind,
+                &["access_token", "id_token", "userinfo_token"],
+            )),
         }
     }
 }
@@ -340,9 +338,9 @@ enum PolicyContentType {
 /// content_type is one of cedar or cedar-json
 #[derive(Debug, Clone, PartialEq, serde::Deserialize)]
 struct EncodedPolicy {
-    pub encoding:     super::Encoding,
+    pub encoding: super::Encoding,
     pub content_type: PolicyContentType,
-    pub body:         String,
+    pub body: String,
 }
 
 /// Intermediate struct to handler both kinds of policy_content values.
@@ -461,12 +459,11 @@ where
 {
     let policy_with_metadata = match &policy_raw.policy_content {
         // It's a plain string, so assume its cedar inside base64
-        MaybeEncoded::Plain(base64_encoded) =>
-            &EncodedPolicy {
-                encoding:     super::Encoding::Base64,
-                content_type: PolicyContentType::Cedar,
-                body:         base64_encoded.to_owned(),
-            },
+        MaybeEncoded::Plain(base64_encoded) => &EncodedPolicy {
+            encoding: super::Encoding::Base64,
+            content_type: PolicyContentType::Cedar,
+            body: base64_encoded.to_owned(),
+        },
         MaybeEncoded::Tagged(policy_with_metadata) => policy_with_metadata,
     };
 
@@ -488,10 +485,11 @@ where
 
     let policy = match policy_with_metadata.content_type {
         // see comments for PolicyContentType
-        PolicyContentType::Cedar =>
+        PolicyContentType::Cedar => {
             cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_body).map_err(|err| {
                 serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HumanReadable))
-            })?,
+            })?
+        },
     };
 
     Ok(policy)
