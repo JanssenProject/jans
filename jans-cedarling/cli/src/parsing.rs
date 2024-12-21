@@ -20,7 +20,7 @@ impl Default for Parser {
 
 pub enum ParseResult {
     Quit,
-    InvalidInput,
+    UnknownCommand(String),
     VariableAssignment(String, String),
 }
 
@@ -50,8 +50,7 @@ impl Parser {
                 value.to_string(),
             ));
         } else {
-            println!("Invalid input or variable name.");
-            return Ok(ParseResult::InvalidInput);
+            return Ok(ParseResult::UnknownCommand(input.to_string()));
         }
     }
 }

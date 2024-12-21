@@ -1,9 +1,17 @@
+use std::collections::HashMap;
+
 mod parsing;
 
 use parsing::*;
 
+#[derive(Default)]
+struct Context {
+    variables: HashMap<String, String>,
+}
+
 fn main() {
     let parser = Parser::default();
+    let mut cli = Context::default();
 
     println!("===== Cedarling CLI =====");
     println!("Type `quit()` to exit the program.");
@@ -21,9 +29,13 @@ fn main() {
         match parse_result {
             ParseResult::Quit => break,
             ParseResult::VariableAssignment(name, val) => {
-                println!("set `{name}` to `{val}`")
+                println!("set `{name}` to `{val}`");
+                cli.variables.insert(name, val);
             },
-            _ => {},
+            ParseResult::UnknownCommand(input) => match cli.variables.get(&input) {
+                Some(var) => println!("{input} = {var}"),
+                None => println!("Unknown command or variable: {input}"),
+            },
         }
     }
 }
