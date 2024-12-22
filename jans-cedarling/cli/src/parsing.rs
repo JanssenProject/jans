@@ -106,46 +106,58 @@ impl Parser<'_> {
                 }
             },
             event::KeyCode::Enter => {
-                let mut cmd = ParsedCommand::UnknownCommand(input.to_string());
-
-                if input.is_empty() {
-                    cmd = ParsedCommand::NoOp;
-                }
-
-                if input == "quit()" {
-                    cmd = ParsedCommand::Quit;
-                }
-
-                if let Some((var_name, value)) =
-                    parse_variable_assignment(input, &self.var_name_regex)
-                {
-                    cmd = ParsedCommand::VariableAssignment(var_name.clone(), value.to_string());
-                }
-
-                if let Some(args) = parse_authz(input, &self.fn_authz_regex, &self.var_name_regex) {
-                    cmd = ParsedCommand::FnAuthz(args);
-                }
-
-                return Ok(Some(cmd));
+                return Ok(Some(self.parse_cmd(input)));
             },
             event::KeyCode::Up => {
-                if let Some(prev) = self.hist.prev() {
-                    *input = prev.to_string();
-                    self.print_input(&input)?;
-                }
+                self.scrub_hist_prev(input)?;
             },
             event::KeyCode::Down => {
-                if let Some(next) = self.hist.next() {
-                    *input = next.to_string();
-                } else {
-                    input.clear();
-                }
-                self.print_input(&input)?;
+                self.scrub_hist_next(input)?;
             },
             _ => {},
         }
 
         Ok(None)
+    }
+
+    fn parse_cmd(&self, input: &str) -> ParsedCommand {
+        let mut cmd = ParsedCommand::UnknownCommand(input.to_string());
+
+        if input.is_empty() {
+            cmd = ParsedCommand::NoOp;
+        }
+
+        if input == "quit()" {
+            cmd = ParsedCommand::Quit;
+        }
+
+        if let Some((var_name, value)) = parse_variable_assignment(input, &self.var_name_regex) {
+            cmd = ParsedCommand::VariableAssignment(var_name.clone(), value.to_string());
+        }
+
+        if let Some(args) = parse_authz(input, &self.fn_authz_regex, &self.var_name_regex) {
+            cmd = ParsedCommand::FnAuthz(args);
+        }
+
+        cmd
+    }
+
+    fn scrub_hist_prev(&mut self, input: &mut String) -> Result<()> {
+        if let Some(prev) = self.hist.prev() {
+            *input = prev.to_string();
+            self.print_input(&input)?;
+        }
+        Ok(())
+    }
+
+    fn scrub_hist_next(&mut self, input: &mut String) -> Result<()> {
+        if let Some(next) = self.hist.next() {
+            *input = next.to_string();
+        } else {
+            input.clear();
+        }
+        self.print_input(&input)?;
+        Ok(())
     }
 
     fn handle_paste_event(&mut self, input: &mut String, pasted: String) -> Result<()> {
