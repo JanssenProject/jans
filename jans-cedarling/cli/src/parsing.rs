@@ -1,11 +1,7 @@
-use anyhow::{anyhow, Result};
-use crossterm::{
-    cursor,
-    event::{self, KeyEvent},
-    terminal, ExecutableCommand,
-};
+use anyhow::Result;
+use crossterm::event::{self, KeyEvent};
 use regex::Regex;
-use std::io::{Stdout, Write};
+use std::sync::mpsc::Sender;
 
 mod hist;
 mod parse_authz;
@@ -15,17 +11,17 @@ use hist::*;
 use parse_authz::*;
 use variable_assignment::*;
 
-const PROMPT: &str = "~~>";
+use crate::RenderEvent;
 
-pub struct Parser<'a> {
+pub struct Parser {
     var_name_regex: Regex,
     fn_authz_regex: Regex,
-    stdout: &'a Stdout,
     hist: InputHistory,
+    renderer_tx: Sender<RenderEvent>,
 }
 
-impl<'a> Parser<'a> {
-    pub fn new(std_out: &'a Stdout) -> Self {
+impl Parser {
+    pub fn new(renderer_tx: Sender<RenderEvent>) -> Self {
         let var_name_regex =
             Regex::new(VAR_NAME_REGEX_SRC).expect("Failed to compile regex for variable names");
         let fn_authz_regex =
@@ -33,8 +29,8 @@ impl<'a> Parser<'a> {
         Self {
             var_name_regex,
             fn_authz_regex,
-            stdout: std_out,
             hist: InputHistory::default(),
+            renderer_tx,
         }
     }
 }
@@ -47,17 +43,14 @@ pub enum ParsedCommand {
     FnAuthz(Vec<String>),
 }
 
-impl Parser<'_> {
+impl Parser {
     pub fn parse(&mut self) -> Result<ParsedCommand> {
-        self.print_prompt()?;
-
         let mut current_input = String::new();
         loop {
             if let Some(event) = event::read().ok() {
                 match event {
                     event::Event::Key(key_event) => {
                         if let Some(cmd) = self.handle_key_event(&mut current_input, key_event)? {
-                            self.print_input(&current_input)?;
                             self.hist.push(current_input);
                             return Ok(cmd);
                         }
@@ -71,24 +64,6 @@ impl Parser<'_> {
         }
     }
 
-    fn print_prompt(&mut self) -> Result<()> {
-        self.move_cursor_to_start()?;
-        print!("{PROMPT} ");
-        self.flush()?;
-
-        Ok(())
-    }
-
-    // prints the prompt and the given current input, overwriting the previous line
-    fn print_input(&mut self, input: &str) -> Result<()> {
-        self.clear_line()?;
-        print!("{PROMPT} {input}");
-        self.flush()?;
-        self.move_cursor_to_start()?;
-
-        Ok(())
-    }
-
     fn handle_key_event(
         &mut self,
         input: &mut String,
@@ -97,15 +72,17 @@ impl Parser<'_> {
         match key_event.code {
             event::KeyCode::Char(c) => {
                 input.push(c);
-                self.print_input(&input)?;
             },
             event::KeyCode::Backspace => {
                 if !input.is_empty() {
                     input.pop();
-                    self.print_input(&input)?;
                 }
             },
             event::KeyCode::Enter => {
+                self.renderer_tx
+                    .send(RenderEvent::UpdateLine(input.clone()))?;
+                // self.renderer_tx
+                //     .send(RenderEvent::WriteNewline(input.clone()))?;
                 return Ok(Some(self.parse_cmd(input)));
             },
             event::KeyCode::Up => {
@@ -116,6 +93,10 @@ impl Parser<'_> {
             },
             _ => {},
         }
+
+        // send update to the renderer
+        self.renderer_tx
+            .send(RenderEvent::UpdateLine(input.clone()))?;
 
         Ok(None)
     }
@@ -145,7 +126,6 @@ impl Parser<'_> {
     fn scrub_hist_prev(&mut self, input: &mut String) -> Result<()> {
         if let Some(prev) = self.hist.prev() {
             *input = prev.to_string();
-            self.print_input(&input)?;
         }
         Ok(())
     }
@@ -156,37 +136,11 @@ impl Parser<'_> {
         } else {
             input.clear();
         }
-        self.print_input(&input)?;
         Ok(())
     }
 
     fn handle_paste_event(&mut self, input: &mut String, pasted: String) -> Result<()> {
         input.push_str(&pasted);
-        self.print_input(&input)?;
-        Ok(())
-    }
-
-    fn clear_line(&mut self) -> Result<()> {
-        self.stdout
-            .execute(cursor::MoveToColumn(0))
-            .map_err(|e| anyhow!("Failed to move cursor to start: {e}"))?;
-        self.stdout
-            .execute(terminal::Clear(terminal::ClearType::CurrentLine))
-            .map_err(|e| anyhow!("Failed to clear line: {e}"))?;
-        Ok(())
-    }
-
-    fn move_cursor_to_start(&mut self) -> Result<()> {
-        self.stdout
-            .execute(cursor::MoveToColumn(0))
-            .map_err(|e| anyhow!("Failed to move cursor: {e}"))?;
-        Ok(())
-    }
-
-    fn flush(&mut self) -> Result<()> {
-        self.stdout
-            .flush()
-            .map_err(|e| anyhow!("Failed to flush stdout: {e}"))?;
         Ok(())
     }
 }
