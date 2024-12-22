@@ -8,15 +8,18 @@ use regex::Regex;
 use std::io::{Stdout, Write};
 
 mod hist;
+mod parse_authz;
 mod variable_assignment;
 
 use hist::*;
+use parse_authz::*;
 use variable_assignment::*;
 
 const PROMPT: &str = "~~>";
 
 pub struct Parser<'a> {
     var_name_regex: Regex,
+    fn_authz_regex: Regex,
     stdout: &'a Stdout,
     hist: InputHistory,
 }
@@ -25,8 +28,11 @@ impl<'a> Parser<'a> {
     pub fn new(std_out: &'a Stdout) -> Self {
         let var_name_regex =
             Regex::new(VAR_NAME_REGEX_SRC).expect("Failed to compile regex for variable names");
+        let fn_authz_regex =
+            Regex::new(FN_AUTHZ_REGEX_SRC).expect("Failed to compile regex for authz(...)");
         Self {
             var_name_regex,
+            fn_authz_regex,
             stdout: std_out,
             hist: InputHistory::default(),
         }
@@ -38,6 +44,7 @@ pub enum ParsedCommand {
     UnknownCommand(String),
     VariableAssignment(String, String),
     NoOp,
+    FnAuthz(Vec<String>),
 }
 
 impl Parser<'_> {
@@ -113,6 +120,10 @@ impl Parser<'_> {
                     parse_variable_assignment(input, &self.var_name_regex)
                 {
                     cmd = ParsedCommand::VariableAssignment(var_name.clone(), value.to_string());
+                }
+
+                if let Some(args) = parse_authz(input, &self.fn_authz_regex, &self.var_name_regex) {
+                    cmd = ParsedCommand::FnAuthz(args);
                 }
 
                 return Ok(Some(cmd));

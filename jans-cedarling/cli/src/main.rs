@@ -43,6 +43,7 @@ fn main() {
                 None => println!("Invalid command or variable: {input}"),
             },
             ParsedCommand::NoOp => {},
+            ParsedCommand::FnAuthz(vec) => println!("Calling authz with params: {vec:?}"),
         }
     }
 
