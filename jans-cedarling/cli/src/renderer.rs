@@ -2,24 +2,28 @@ use anyhow::{anyhow, Result};
 use crossterm::{cursor, execute, terminal};
 use std::{cell::RefCell, io::Write, sync::mpsc::Receiver};
 
-const PROMPT: &str = "~~>";
+pub const PROMPT: &str = "~~>";
 
 #[derive(Debug)]
-pub enum RenderEvent {
+pub enum RenderRequest {
     WriteNewline(String),
     UpdateLine(String),
+    Backspace(String),
+    MoveCursorLeft,
+    MoveCursorRight,
+    SetCursorPos(u16),
 }
 
 pub struct Renderer<W: Write> {
     buffer: RefCell<W>,
-    event_rx: Receiver<RenderEvent>,
+    event_rx: Receiver<RenderRequest>,
 }
 
 impl<W> Renderer<W>
 where
     W: Write,
 {
-    pub fn new(buffer: W, event_rx: Receiver<RenderEvent>) -> Self {
+    pub fn new(buffer: W, event_rx: Receiver<RenderRequest>) -> Self {
         Self {
             buffer: RefCell::new(buffer),
             event_rx,
@@ -37,20 +41,36 @@ where
         Ok(())
     }
 
-    fn handle_event(&self, event: RenderEvent) -> Result<()> {
+    fn handle_event(&self, event: RenderRequest) -> Result<()> {
         let mut buf = self.buffer.borrow_mut();
         match event {
-            RenderEvent::WriteNewline(message) => {
+            RenderRequest::WriteNewline(message) => {
                 Self::move_cursor_to_start(&mut buf)?;
                 Self::clear_line(&mut buf)?;
                 write!(buf, "{message}\n")?;
                 Self::move_cursor_to_start(&mut buf)?;
                 write!(buf, "{PROMPT} ")?;
             },
-            RenderEvent::UpdateLine(input) => {
+            RenderRequest::UpdateLine(input) => {
                 Self::move_cursor_to_start(&mut buf)?;
                 Self::clear_line(&mut buf)?;
                 write!(buf, "{PROMPT} {input}").unwrap();
+            },
+            RenderRequest::Backspace(input) => {
+                execute!(buf, cursor::SavePosition)?;
+                Self::move_cursor_to_start(&mut buf)?;
+                Self::clear_line(&mut buf)?;
+                write!(buf, "{PROMPT} {input}").unwrap();
+                execute!(buf, cursor::RestorePosition)?;
+                execute!(buf, cursor::MoveLeft(1))?;
+            },
+            RenderRequest::MoveCursorLeft => Self::move_cursor_left(&mut buf)?,
+            RenderRequest::MoveCursorRight => Self::move_cursor_right(&mut buf)?,
+            RenderRequest::SetCursorPos(pos) => {
+                let pos = u16::try_from(PROMPT.len())
+                    .unwrap_or(u16::MAX)
+                    .saturating_add(pos);
+                execute!(buf, cursor::MoveToColumn(pos))?;
             },
         }
         buf.flush()?;
@@ -74,6 +94,18 @@ where
         Ok(())
     }
 
+    fn move_cursor_left(buf: &mut W) -> Result<()> {
+        execute!(buf, cursor::MoveLeft(1))
+            .map_err(|e| anyhow!("Failed to move cursor to the left: {e}"))?;
+        Ok(())
+    }
+
+    fn move_cursor_right(buf: &mut W) -> Result<()> {
+        execute!(buf, cursor::MoveRight(1))
+            .map_err(|e| anyhow!("Failed to move cursor to the left: {e}"))?;
+        Ok(())
+    }
+
     #[allow(dead_code)]
     fn move_cursor_down(buf: &mut W) -> Result<()> {
         execute!(buf, cursor::MoveDown(1))
@@ -94,7 +126,7 @@ mod tests {
 
         let renderer = Renderer::new(buffer, rx);
 
-        tx.send(RenderEvent::WriteNewline("Hello, world!".to_string()))
+        tx.send(RenderRequest::WriteNewline("Hello, world!".to_string()))
             .unwrap();
 
         renderer.listen().unwrap();
@@ -110,10 +142,10 @@ mod tests {
 
         let renderer = Renderer::new(buffer, rx);
 
-        tx.send(RenderEvent::UpdateLine("Hello, world!".to_string()))
+        tx.send(RenderRequest::UpdateLine("Hello, world!".to_string()))
             .unwrap();
 
-        tx.send(RenderEvent::UpdateLine("Goodbye, world!".to_string()))
+        tx.send(RenderRequest::UpdateLine("Goodbye, world!".to_string()))
             .unwrap();
 
         renderer.listen().unwrap();

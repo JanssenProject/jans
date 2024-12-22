@@ -15,11 +15,11 @@ use renderer::*;
 
 struct Context {
     variables: HashMap<String, String>,
-    renderer_tx: Sender<RenderEvent>,
+    renderer_tx: Sender<RenderRequest>,
 }
 
 impl Context {
-    fn new(renderer_tx: Sender<RenderEvent>) -> Self {
+    fn new(renderer_tx: Sender<RenderRequest>) -> Self {
         Self {
             variables: HashMap::new(),
             renderer_tx,
@@ -29,9 +29,9 @@ impl Context {
     fn try_print_var(&self, name: &str) -> Result<()> {
         if let Some(val) = self.variables.get(name) {
             self.renderer_tx
-                .send(RenderEvent::WriteNewline(format!("{name} = {val}")))?;
+                .send(RenderRequest::WriteNewline(format!("{name} = {val}")))?;
         } else {
-            self.renderer_tx.send(RenderEvent::WriteNewline(format!(
+            self.renderer_tx.send(RenderRequest::WriteNewline(format!(
                 "Invalid command or variable: {name}"
             )))?;
         }
@@ -39,7 +39,7 @@ impl Context {
     }
 
     fn set_var(&mut self, name: String, val: String) -> Result<()> {
-        self.renderer_tx.send(RenderEvent::WriteNewline(format!(
+        self.renderer_tx.send(RenderRequest::WriteNewline(format!(
             "set `{name}` to `{val}`"
         )))?;
         self.variables.insert(name, val);
@@ -66,7 +66,7 @@ fn main() {
     .into_iter()
     .for_each(|s| {
         renderer_tx
-            .send(RenderEvent::WriteNewline(s.to_string()))
+            .send(RenderRequest::WriteNewline(s.to_string()))
             .unwrap()
     });
 
