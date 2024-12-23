@@ -15,7 +15,6 @@ use std::fmt::Display;
 use std::hash::Hash;
 
 use uuid7::Uuid;
-use uuid7::uuid7;
 
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types::{self, ApplicationName};
