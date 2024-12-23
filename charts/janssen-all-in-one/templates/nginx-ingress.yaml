@@ -611,7 +611,54 @@ spec:
                 port:
                   number: 8080
 {{- end }}
+---
 
+{{ if .Values.link.ingress.linkEnabled -}}
+{{ $fullName := include "janssen-all-in-one.fullname" . -}}
+{{- $ingressPath := index .Values "nginx-ingress" "ingress" "path" -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-link
+  labels:
+    app: {{ $fullName }}-link
+{{- if index .Values "nginx-ingress" "ingress" "additionalLabels" }}
+{{ toYaml (index .Values "nginx-ingress" "ingress" "additionalLabels") | indent 4 }}
+{{- end }}
+{{- if .Values.link.ingress.linkLabels }}
+{{ toYaml .Values.link.ingress.linkLabels | indent 4 }}
+{{- end }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+{{- if .Values.link.ingress.linkAdditionalAnnotations }}
+{{ toYaml .Values.link.ingress.linkAdditionalAnnotations | indent 4 }}
+{{- end }}
+{{- if index .Values "nginx-ingress" "ingress" "additionalAnnotations" }}
+{{ toYaml (index .Values "nginx-ingress" "ingress" "additionalAnnotations") | indent 4 }}
+{{- end }}
+spec:
+  ingressClassName: {{ index .Values "nginx-ingress" "ingress" "ingressClassName" }}
+{{- if index .Values "nginx-ingress" "ingress" "tlsSecretName" }}
+  tls:
+    - hosts:
+        - {{ .Values.fqdn | quote }}
+      secretName: {{ index .Values "nginx-ingress" "ingress" "tlsSecretName" }}
+{{- end }}
+  rules:
+    - host: {{ .Values.fqdn | quote }}
+      http:
+        paths:
+          - path: /jans-link
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.link.linkServiceName }}
+                port:
+                  number: 9091
+  {{- end }}
+  {{- end }}
+{{- end }}
 ---
 
 {{ if index .Values "auth-server" "ingress" "authServerEnabled" -}}

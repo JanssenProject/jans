@@ -489,7 +489,7 @@ scim:
     scimConfigLabels: { }
     # -- SCIM config ingress resource additional annotations.
     scimConfigAdditionalAnnotations: { }
-    # -- SCIM config ingress resource labels. key app is taken
+    # -- SCIM ingress resource labels. key app is taken
     scimLabels: { }
     # -- SCIM ingress resource additional annotations.
     scimAdditionalAnnotations: { }
@@ -522,6 +522,10 @@ link:
   ingress:
     # Enable link endpoints /jans-link
     linkEnabled: true
+    # -- link ingress resource labels. key app is taken
+    linkLabels: { }
+    # -- link ingress resource additional annotations.
+    linkAdditionalAnnotations: { }
 saml:
   # -- Name of the saml service. Please keep it as default.
   samlServiceName: saml
