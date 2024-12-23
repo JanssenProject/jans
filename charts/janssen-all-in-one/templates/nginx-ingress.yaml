@@ -611,6 +611,7 @@ spec:
                 port:
                   number: 8080
 {{- end }}
+
 ---
 
 {{ if .Values.link.ingress.linkEnabled -}}
@@ -657,6 +658,7 @@ spec:
                 port:
                   number: 8080
 {{- end }}
+
 ---
 
 {{ if index .Values "auth-server" "ingress" "authServerEnabled" -}}

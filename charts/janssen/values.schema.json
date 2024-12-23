@@ -1184,9 +1184,9 @@
                                 "linkAdditionalAnnotations": {
                                     "description": "link ingress resource additional annotations.",
                                     "type": "object"
-                                }                                
+                                }
+                            }
                         }
-                    }
                     }
                 },
                 "saml": {

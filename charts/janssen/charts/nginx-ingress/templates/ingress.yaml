@@ -782,6 +782,7 @@ spec:
   {{- end }}
   {{- end }}
 {{- end }}
+
 ---
 
 {{ if index .Values "global" "auth-server" "ingress" "authServerEnabled" -}}
