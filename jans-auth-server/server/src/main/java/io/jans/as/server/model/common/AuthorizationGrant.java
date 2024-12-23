@@ -201,6 +201,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         }
 
         token.getAttributes().setAuthorizationDetails(getAuthzDetailsAsString());
+        token.getAttributes().setAuthorizationChallenge(isAuthorizationChallenge());
         token.setScope(getScopesAsString());
         token.setAuthMode(getAcrValues());
         token.setSessionDn(getSessionDn());
