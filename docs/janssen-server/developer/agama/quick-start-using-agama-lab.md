@@ -7,7 +7,7 @@ tags:
   - quick start
 ---
 
-# Quick Start Using Agama Lab
+# Quick start using Agama Lab
 
 In this quick start guide, we will build, deploy and test a simple Agama 
 project using the [Agama Lab](https://cloud.gluu.org/agama-lab). 
@@ -34,14 +34,14 @@ account can be a personal account or an organizational account. For this guide
 we will assume that a personal account is being used.
 - Two new public GitHub repositories in your GitHub Account. These repositories
 will be used as [development repository](https://github.com/GluuFederation/private/wiki/Flow-Designer#development-repository) and [release repository](https://github.com/GluuFederation/private/wiki/Flow-Designer#release-repository). Each repository should have at least one 
-commit. A commit that creates a README file is also sufficient.
+commit. 
 
 
-## Create A New Agama Project
+## Create a new Agama project
 
 We will use [Agama Lab](https://cloud.gluu.org/agama-lab/) to create a simple 
-username-password based user authentication project. The will be similar to 
-the one shown below.
+username-password based user authentication project. The authentication flow 
+will be similar to the one shown below.
 
 ![](../../../assets/agama-lab-flow-quick-start-guide.png)
 
@@ -49,12 +49,12 @@ An Agama project may include multiple components. For example, an authentication
 flow, a user interface, assets like organization's logo, external libraries, etc. 
 In this project, we will see how to  
 
-- Define the authentication steps in for of a flow
+- Define the authentication steps of a flow
 - Design the user interface to capture user inputs
 
 Let's get started.
 
-### Log Into Agama Lab
+### Log into the Agama Lab
 
 
 1. Go to [Agama Lab](https://cloud.gluu.org/agama-lab) login page. Sign in using
@@ -74,13 +74,13 @@ the project. Select the `development` repository by clicking on
     ![](../../../assets/agama-lab-add-git-repo.png)
 
 
-4. Project dashboard with all the existing projects(if any) from the GitHub
+4. Project dashboard with all the existing projects (if any) from the GitHub
 repository will be shown. New projects can be created, edited, and deleted 
 from this project listing page.
 
     ![](../../../assets/agamalab-project-page.png)
 
-### Create A New Project
+### Create a new project
 
 1. To create a new project, click on the `New Project` button.
    Enter the name and the description for the new project and click the `Create` button.
@@ -91,9 +91,9 @@ from this project listing page.
 
     ![](../../../assets/agamalab-project-listing.png)
 
-### Defining The Authentication Flow
+### Defining the authentication flow
 
-1. Create A Flow File
+1. Create a flow file
 
     Open the newly created project by clicking on :material-arrow-top-right:.
     This will open the project in the [project editor](https://github.com/GluuFederation/private/wiki/Project-Editor). 
@@ -115,7 +115,7 @@ from this project listing page.
     flow editor. Refer to [this](https://github.com/GluuFederation/private/wiki/Project-Editor#working-with-the-flow-editor) guide if you need to understand how 
     to create, delete and configure nodes.
 
-2. Create _AuthenticationService_ Call block
+2. Create `AuthenticationService` Call block
 
     Drag the colored dot available on the right edge of the `start` node to 
     create the next node in the flow. A list of available node types will be
@@ -130,22 +130,23 @@ from this project listing page.
 
     Click the `Call` block and then click :material-pencil: to open the 
     configuration screen. Add configuration values as shown below.  
-    This configuration will create a new instance of 
-    `AuthenticationService` class to 
-    authenticate the user. The new instance will be 
-    stored in a variable called `authService`.
+    This configuration will fetch a reference of the 
+    `AuthenticationService` class and 
+    store the reference in a variable called `authService`. This reference will 
+    be used to validate the user credentials in the subsequent steps.
    
     ![](../../../assets/agamalab-flow-passwd-edit-call.png)
 
-3.  Create _CdiUtil_ Call block
+3.  Create `CdiUtil` Call block
 
-    To perform authentication we will also need a bean instance of `CdiUtil` class. It 
-    takes `AuthenticationService` instance that we created in the previous step as an input.
+    To perform authentication we will also need a reference of the `CdiUtil` class. To fetch a `CdiUtil`
+    reference from the IDP, we will need to pass `AuthenticationService` reference 
+    as an input. Use the steps and configuration below to do this.
 
-    After the `AuthenticationService` create new `Call` node 
+    After the `AuthenticationService` create a new `Call` node.
    
-    _Click on the newly created `Call` block and by clicking :material-pencil: open the configuration page.
-    Input values as shown below in the configuration screen_
+    Click on the newly created `Call` block and by clicking :material-pencil: open the configuration page.
+    Input values as shown below in the configuration screen.
 
     ![](../../../assets/agamalab-flow-passwd-edit-cdiutil.png)
 
@@ -164,7 +165,7 @@ from this project listing page.
     Repeat block creates a loop to iterate over certain steps(blocks). We will create a repeat loop that allows
     3 retries if the authentication fails.
     
-    Create a repeate block after the `Result Object` block 
+    Create a Repeat block after the `Result Object` block 
 
     ![](../../../assets/agama-create-repeat.png)
 
@@ -173,7 +174,7 @@ from this project listing page.
 
     ![](../../../assets/agamalab-flow-passwd-edit-repeat.png)
 
-6. Create An RRF block
+6. Create an RRF block
 
     `RRF` block represents the [RRF](../../../agama/language-reference.md#rrf)
    instruction of Agama DSL.
@@ -189,7 +190,7 @@ from this project listing page.
      repeated as configured in the `Repeat` block.
     - Second path originates from the colored dot on the right edge of the 
     `Repeat` block. This path is labeled as `Continue`. These blocks will be 
-    executed after `repeate` path completes the execution.
+    executed after `repeat` path completes the execution.
 
     The new `RRF` block should be created on the `Repeat` path. 
 
@@ -203,7 +204,7 @@ from this project listing page.
     
     With this configuration, the RRF block will 
 
-    - Present an input form to the user. We will build the `login.ftlh` in the [later section](#design-user-interface)
+    - Present an input form to the user. We will build the `login.ftlh` in a [later section](#design-user-interface)
     - Capture and store user inputs like the user-name and password into the
      `creds` variable
 
@@ -213,7 +214,7 @@ from this project listing page.
 7. Create a Call block
 
     Create a `Call` block to process the username and password received from the user (in RRF) and
-    validate them. The result of validation should be stored in a variable.
+    validate them. The result of the validation is stored in a variable.
     
     Create a new call block after the `Login page` block.
 
@@ -225,9 +226,9 @@ from this project listing page.
 
     ![](../../../assets/agamalab-flow-passwd-edit-cdiutil-instance.png)
 
-8. Create An Assignment block
+8. Create an Assignment block
 
-    In case of authentication failure, user will be prompted for reentering the
+    In case of authentication failure, the user will be prompted for reentering the
     credentials on the sign in page. We want to show the username to the user while reentering the
     password on the web page. For this, we will save the username in a variable using the `Assignment` block.
 
@@ -240,7 +241,7 @@ from this project listing page.
 
     ![](../../../assets/agamalab-flow-passwd-edit-assignment-uid.png)
 
-9. Create A Conditional When block
+9. Create a conditional When block
 
     `When` block represents the [When](../../../agama/language-reference.md#conditionals-and-branching)
    instruction of Agama DSL.
@@ -257,7 +258,7 @@ from this project listing page.
 
     ![](../../../assets/agama-lab-flow-password-edit-when.png)
 
-10. Create [finish]() blocks
+10. Create Finish blocks
 
      The `Finish` block represents the [Flow finish](../../../agama/language-reference.md#flow-finish) instruction of Agama DSL.
 
@@ -283,7 +284,7 @@ from this project listing page.
     Let's create a second finish block that will terminate the flow when all 3
     authentication attempts have failed. 
     
-    Create a `Finsh` block on the `Continue` branch of the `Repeat` block. 
+    Create a `Finish` block on the `Continue` branch of the `Repeat` block. 
 
      ![](../../../assets/agamalab-flow-passwd-create-fail-finish.png)
 
@@ -298,18 +299,18 @@ from this project listing page.
 
      ![](../../../assets/agama-lab-flow-quick-start-guide.png)
 
-11. Check Generated code
+11. Check generated code
 
-    Agama Lab flow gets translated in [Agama DSL](../../../agama/language-reference.md). Click the `Code` button to see the code
-    generated by the flow.
+    The flow is translated into [Agama DSL](../../../agama/language-reference.md). Click the `Code` button to see the 
+    generated code.
 
     ```
     Flow co.acme.password
         Basepath ""
-    // Create new  authentication service instance
-    authService = Call io.jans.server.service.authenticationService#class 
-    // Create new CdiUtil object
-    cdiUtil = Call io.jans.service.cdi.uti.CdUtil#bean authService
+    // Get Authentication service reference from the IDP
+    authServiceRef = Call io.jans.server.service.AuthenticationService#class 
+    // Get CdiUtil reference from the IDP
+    cdiUtilRef = Call io.jans.service.cdi.util.CdiUtil#bean authService
     // Empty result object 
     authResult = "{}"
     // Retry 3 times to get correct username and password 
@@ -317,21 +318,17 @@ from this project listing page.
         // Loads the login page for username and password input 
         creds = RRF "login.ftlh" authResult
         // Validate username and password 
-        authResult.success = Call cdiUtil authenticate creds.username creds.password
-        // Keep the username in the user needs to retry authentication 
-        authResult.uid = "creds.uername"
-        When 
+        authResult.success = Call cdiUtil#authenticate creds.username creds.password
+        // Keep the username if the user needs to retry authentication 
+        authResult.uid = "creds.username"
+        When authResult.uid is true
               // Return username in case of successful authentication 
-              it_oghyk = {success:true, data: { userId: "as9233Qz", property1: "value1"}}
-              Finish it_oghyk
-        Otherwise
-              RRF "__________" 
-        Finish __________
+              Finish authResult.uid
     // Max number of failed authentication attempts reached. Return False to end the flow
     Finish false
     ```
 
-### Design User Interface
+### Design user interface
 
 In the RRF configuration step, we mentioned `login.ftlh` to render the login page elements.
 We need to add `login.ftlh` to the Agama project so that the flow can use during the flow execution.
@@ -418,7 +415,7 @@ _This will render the page in the visual editor_.
 
 ![](../../../assets/agama-lab-flow-render-template.png)
 
-### Release The Project
+### Release the project
 
 At this point we have all the components of an Agama project ready and they are 
 stored in
@@ -444,7 +441,7 @@ Download the `.gama` file from here to deploy on to the Janssen Server.
 
 ![](../../../assets/agama-lab-flow-passwd-release-list-gh.png)
 
-## Deploy Agama Project
+## Deploy Agama project
 
 1. Download the `.gama` file from the `releases` section of the release repository
    
