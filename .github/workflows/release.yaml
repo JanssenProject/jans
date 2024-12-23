@@ -5,7 +5,7 @@ permissions:
   contents: read
 
 jobs:
-  release-docker-pr:
+  release-mega-pr:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
