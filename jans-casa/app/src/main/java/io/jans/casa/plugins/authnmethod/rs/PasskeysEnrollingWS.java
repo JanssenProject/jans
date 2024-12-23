@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 @ProtectedApi(scopes = "https://jans.io/casa.enroll")
 @Path("/enrollment/fido2")
 @Produces(MediaType.APPLICATION_JSON)
-public class SecurityKey2EnrollingWS {
+public class PasskeysEnrollingWS {
 
     private static final String USERS_PENDING_REG_PREFIX = "casa_upreg_";    //Users with pending registrations
     private static final String RECENT_DEVICES_PREFIX = "casa_recdev_";     //Recently enrolled devices
@@ -52,8 +52,7 @@ public class SecurityKey2EnrollingWS {
 
     @GET
     @Path("attestation")
-    public Response getAttestationMessage(@QueryParam("userid") String userId,
-                                          @QueryParam("platformAuthn") boolean platformAuthenticatorAvailable) {
+    public Response getAttestationMessage(@QueryParam("userid") String userId) {
 
         String request = null;
         RegisterMessageCode result;
@@ -69,7 +68,7 @@ public class SecurityKey2EnrollingWS {
                 try {
                     String userName = person.getUid();
                     request = fido2Service.doRegister(userName,
-                                Optional.ofNullable(person.getGivenName()).orElse(userName), platformAuthenticatorAvailable);
+                                Optional.ofNullable(person.getGivenName()).orElse(userName));
                     result = RegisterMessageCode.SUCCESS;
                     cacheProvider.put(EXPIRATION, USERS_PENDING_REG_PREFIX + userId, "");
                 } catch (Exception e) {
@@ -100,7 +99,7 @@ public class SecurityKey2EnrollingWS {
             } else {
                 try {
                     if (fido2Service.verifyRegistration(body)) {
-                        newDevice = fido2Service.getLatestSecurityKey(userId, System.currentTimeMillis());
+                        newDevice = fido2Service.getLatestPasskey(userId, System.currentTimeMillis());
 
                         if (newDevice == null){
                             logger.info("Entry of recently registered fido 2 key could not be found for user {}", userId);
