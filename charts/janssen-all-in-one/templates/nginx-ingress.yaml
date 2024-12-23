@@ -653,9 +653,9 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ .Values.link.linkServiceName }}
+                name: {{ .Values.service.name }}
                 port:
-                  number: 9091
+                  number: 8080
 {{- end }}
 ---
 
