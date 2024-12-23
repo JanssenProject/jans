@@ -6,7 +6,7 @@ import (
 )
 
 type RequestedParties struct {
-	Id    string   `schema:"name" json:"name"`
+	Id      string   `schema:"name" json:"name"`
 	Origins []string `schema:"domains" json:"domains"`
 }
 
@@ -17,10 +17,10 @@ type Fido2Configuration struct {
 	MdsTocsFolder                   string             `schema:"mds_tocs_folder" json:"mdsTocsFolder"`
 	ServerMetadataFolder            string             `schema:"server_metadata_folder" json:"serverMetadataFolder"`
 	RequestedParties                []RequestedParties `schema:"requested_parties" json:"requestedParties"`
-	debugUserAutoEnrollment         bool                `schema:"user_auto_enrollment" json:"userAutoEnrollment"`
 	UnfinishedRequestExpiration     int                `schema:"unfinished_request_expiration" json:"unfinishedRequestExpiration"`
 	AuthenticationHistoryExpiration int                `schema:"authentication_history_expiration" json:"authenticationHistoryExpiration"`
-	enabledFidoAlgorithms           []string           `schema:"requested_credential_types" json:"enabledFidoAlgorithms"`
+	DebugUserAutoEnrollment         bool               `schema:"user_auto_enrollment" json:"userAutoEnrollment"`
+	EnabledFidoAlgorithms           []string           `schema:"requested_credential_types" json:"enabledFidoAlgorithms"`
 }
 
 // JansFido2DynConfiguration defines the Fido2 dynamic configuration

@@ -221,7 +221,7 @@ public class DpopService {
         return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(type, reason));
     }
 
-    public String getDpopJwkThumbprint(String dpopStr) throws InvalidJwtException, NoSuchAlgorithmException, JWKException, NoSuchProviderException {
+    public static String getDpopJwkThumbprint(String dpopStr) throws InvalidJwtException, NoSuchAlgorithmException, JWKException, NoSuchProviderException {
         final Jwt dpop = Jwt.parseOrThrow(dpopStr);
         JSONWebKey jwk = JSONWebKey.fromJSONObject(dpop.getHeader().getJwk());
         return jwk.getJwkThumbprint();
