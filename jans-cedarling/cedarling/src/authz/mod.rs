@@ -34,12 +34,12 @@ use std::time::Instant;
 pub use authorize_result::AuthorizeResult;
 use cedar_policy::{ContextJsonError, Entities, Entity, EntityUid};
 use entities::{
-    create_resource_entity, create_role_entities, create_token_entities, create_user_entity,
-    create_workload_entity, CreateCedarEntityError, CreateUserEntityError,
+    CEDAR_POLICY_SEPARATOR, CreateCedarEntityError, CreateUserEntityError,
     CreateWorkloadEntityError, DecodedTokens, ResourceEntityError, RoleEntityError,
-    CEDAR_POLICY_SEPARATOR,
+    create_resource_entity, create_role_entities, create_token_entities, create_user_entity,
+    create_workload_entity,
 };
-use merge_json::{merge_json_values, MergeError};
+use merge_json::{MergeError, merge_json_values};
 use request::Request;
 use serde_json::Value;
 
@@ -139,13 +139,16 @@ impl Authz {
             &action,
         )?;
 
+        let workload_principal = entities_data.workload.as_ref().map(|e| e.uid()).to_owned();
+        let user_principal = entities_data.user.as_ref().map(|e| e.uid()).to_owned();
+
         // Convert [`AuthorizeEntitiesData`] to  [`cedar_policy::Entities`] structure,
         // hold all entities that will be used on authorize check.
-        let entities = entities_data.clone().entities(Some(&schema.schema))?;
+        let entities = entities_data.entities(Some(&schema.schema))?;
 
         let (workload_authz_result, workload_authz_info, workload_entity_claims) =
-            if let Some(workload) = entities_data.workload {
-                let principal = workload.uid();
+            if let Some(workload) = workload_principal {
+                let principal = workload;
 
                 let authz_result = self
                     .execute_authorize(ExecuteAuthorizeParameters {
@@ -186,8 +189,8 @@ impl Authz {
 
         // Check authorize where principal is `"Jans::User"` from cedar-policy schema.
         let (user_authz_result, user_authz_info, user_entity_claims) =
-            if let Some(user) = entities_data.user {
-                let principal = user.uid();
+            if let Some(user) = user_principal {
+                let principal = user;
 
                 let authz_result = self
                     .execute_authorize(ExecuteAuthorizeParameters {
