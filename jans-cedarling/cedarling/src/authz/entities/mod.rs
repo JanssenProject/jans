@@ -19,12 +19,13 @@ use crate::common::cedar_schema::CedarSchemaJson;
 
 use crate::authz::token_data::{AccessTokenData, IdTokenData, UserInfoTokenData};
 use crate::common::policy_store::{
-    AccessTokenEntityMetadata, ClaimMappings, PolicyStore, TokenKind, TrustedIssuer,
+    AccessTokenEntityMetadata, ClaimMappings, PolicyStore, RoleMapping, TokenKind, TrustedIssuer,
 };
 use crate::jwt;
 use cedar_policy::EntityUid;
 pub use create::CedarPolicyCreateTypeError;
 use create::EntityParsedTypeName;
+pub use create::CEDAR_POLICY_SEPARATOR;
 use create::{build_entity_uid, create_entity, parse_namespace_and_typename, EntityMetadata};
 
 use super::request::ResourceData;
@@ -193,15 +194,36 @@ pub enum RoleEntityError {
     },
 }
 
-/// Create `Role` entity from based on `TrustedIssuer` or default value of `RoleMapping`
+/// Create `Role` entites from based on `TrustedIssuer` role mapping for each token or default value of `RoleMapping`
 pub fn create_role_entities(
     policy_store: &PolicyStore,
     tokens: &ProcessTokensResult,
     trusted_issuer: &TrustedIssuer,
 ) -> Result<Vec<cedar_policy::Entity>, RoleEntityError> {
-    // get role mapping or default value
-    let role_mapping = trusted_issuer.get_role_mapping().unwrap_or_default();
+    let mut role_entities = Vec::new();
 
+    // Iterate via role mappings for each token or default `RoleMapping` value
+    let role_mappings = trusted_issuer
+        .get_role_mapping()
+        .unwrap_or(vec![RoleMapping::default()]);
+
+    for role_mapping in role_mappings {
+        let mut entities =
+            extract_roles_from_tokens(policy_store, role_mapping, tokens, trusted_issuer)?;
+        // Moves all the elements to `role_entities`
+        role_entities.append(&mut entities);
+    }
+
+    Ok(role_entities)
+}
+
+/// Extract `Role` entites based on single `RoleMapping`
+fn extract_roles_from_tokens(
+    policy_store: &PolicyStore,
+    role_mapping: RoleMapping,
+    tokens: &ProcessTokensResult,
+    trusted_issuer: &TrustedIssuer,
+) -> Result<Vec<cedar_policy::Entity>, RoleEntityError> {
     let parsed_typename = EntityParsedTypeName::new("Role", policy_store.namespace());
     let role_entity_type = parsed_typename.full_type_name();
 
@@ -214,7 +236,7 @@ pub fn create_role_entities(
             return Err(RoleEntityError::Create {
                 error: CedarPolicyCreateTypeError::TransactionToken,
                 token_kind: TokenKind::Transaction,
-            })
+            });
         },
     };
 
@@ -227,7 +249,7 @@ pub fn create_role_entities(
             return Err(RoleEntityError::Create {
                 error: CedarPolicyCreateTypeError::TransactionToken,
                 token_kind: TokenKind::Transaction,
-            })
+            });
         },
     };
 

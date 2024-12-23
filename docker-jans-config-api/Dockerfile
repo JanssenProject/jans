@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2024-11-15 09:19'
+ENV CN_BUILD_DATE='2024-12-20 09:07'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
@@ -70,7 +70,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=26713a82b14a67d5e65b9a7e72d6f1403314f679
+ENV JANS_SOURCE_VERSION=b0a7da353d4ef298e5216ed75148da66b2d6b411
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -102,6 +102,7 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/dynamic-conf.json /app/templates/jans-config-api/ \
     && cp ${JANS_SETUP_DIR}/setup_app/utils/printVersion.py /opt/jans/bin/printVersion.py \
+    && chmod +x /opt/jans/bin/printVersion.py \
     && ln -s /opt/jans/bin/printVersion.py /opt/jans/bin/show_version.py \
     && cp ${JANS_CONFIG_API_RESOURCES}/config-api-rs-protect.json /app/templates/jans-config-api/ \
     && mkdir -p org/eclipse/jetty \
@@ -237,6 +238,10 @@ COPY templates /app/templates/
 RUN cp /app/templates/jans-config-api/jans-config-api.xml ${JETTY_BASE}/jans-config-api/webapps/
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
+
+# drop-replacement for jans-linux-setup jans_services_status.py script
+COPY contrib/external_healthcheck.py /opt/jans/bin/jans_services_status.py
+RUN chmod +x /opt/jans/bin/jans_services_status.py
 
 # unquote apiApprovedIssuer
 RUN sed -i 's/"${apiApprovedIssuer}"/${apiApprovedIssuer}/g' /app/templates/jans-config-api/dynamic-conf.json

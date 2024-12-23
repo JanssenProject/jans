@@ -21,22 +21,38 @@ Entry = namedtuple("Entry", ["id", "attrs"])
 def _transform_fido2_dynamic_config(conf):
     should_update = False
 
-    # add missing config (if not exist)
+    # add missing top-level config (if not exist)
     for k, v in [
-        ("superGluuEnabled", False),
-        ("metadataUrlsProvider", ""),
         ("errorReasonEnabled", False),
-        ("skipDownloadMdsEnabled", False),
-        ("attestationMode", "monitor"),
         ("sessionIdPersistInCache", False),
-        ("assertionOptionsGenerateEndpointEnabled", True),
     ]:
-        # dont update if key exists
-        if k in conf:
-            continue
+        # update if key not exist
+        if k not in conf:
+            conf[k] = v
+            should_update = True
 
-        conf[k] = v
-        should_update = True
+    # add missing fido2Configuration config (if not exist)
+    for k, v in [
+        ("metadataUrlsProvider", conf.pop("metadataUrlsProvider", "")),
+        ("skipDownloadMdsEnabled", conf.pop("skipDownloadMdsEnabled", False)),
+        ("attestationMode", conf.pop("attestationMode", "monitor")),
+        ("enabledFidoAlgorithms", conf["fido2Configuration"].pop("requestedCredentialTypes", ["RS256", "ES256"])),
+        ("metadataServers", [{"url": "https://mds.fidoalliance.org/"}]),
+        ("enterpriseAttestation", False),
+        ("hints", ["security-key", "client-device", "hybrid"]),
+        ("rp", conf["fido2Configuration"].pop("requestedParties", [])),
+    ]:
+        # update if key not exist
+        if k not in conf["fido2Configuration"]:
+            conf["fido2Configuration"][k] = v
+            should_update = True
+
+    # rename name and domains attributes of fido2Configuration.rp (if any)
+    for rp in conf["fido2Configuration"]["rp"]:
+        if not all(["id" in rp, "origins" in rp]):
+            rp["id"] = rp.pop("name", "")
+            rp["origins"] = rp.pop("domains", [])
+            should_update = True
 
     # return modified config (if any) and update flag
     return conf, should_update
@@ -176,7 +192,7 @@ class Upgrade:
 def main():  # noqa: D103
     manager = get_manager()
 
-    with manager.lock.create_lock("fido2-upgrade"):
+    with manager.create_lock("fido2-upgrade"):
         upgrade = Upgrade(manager)
         upgrade.invoke()
 

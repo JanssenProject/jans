@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Extension
-public class SecurityKey2Extension implements AuthnMethod {
+public class PasskeysExtension implements AuthnMethod {
 
     public static final String ACR = "io.jans.casa.authn.fido2";
 
@@ -21,7 +21,7 @@ public class SecurityKey2Extension implements AuthnMethod {
 
     private Fido2Service fido2Service;
 
-    public SecurityKey2Extension() {
+    public PasskeysExtension() {
         fido2Service = Utils.managedBean(Fido2Service.class);
     }
 

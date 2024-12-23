@@ -79,6 +79,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     private String acrValues;
     private String sessionDn;
+    private boolean isAuthorizationChallenge;
 
     protected final ConcurrentMap<String, TxToken> txTokens = new ConcurrentHashMap<>();
     protected final ConcurrentMap<String, AccessToken> accessTokens = new ConcurrentHashMap<>();
@@ -108,6 +109,15 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     public void setReferenceId(String referenceId) {
         this.referenceId = referenceId;
+    }
+
+    public boolean isAuthorizationChallenge() {
+        return isAuthorizationChallenge;
+    }
+
+    public AbstractAuthorizationGrant setAuthorizationChallenge(boolean authorizationChallenge) {
+        isAuthorizationChallenge = authorizationChallenge;
+        return this;
     }
 
     public Integer getStatusListIndex() {

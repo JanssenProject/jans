@@ -244,13 +244,16 @@ Kubernetes: `>=v1.22.0-0`
 | fido2.appLoggers.scriptLogTarget | string | `"FILE"` | fido2_script.log target |
 | fido2.enabled | bool | `true` | Boolean flag to enable/disable the fido2 chart. |
 | fido2.fido2ServiceName | string | `"fido2"` | Name of the fido2 service. Please keep it as default. |
-| fido2.ingress | object | `{"fido2AdditionalAnnotations":{},"fido2ConfigAdditionalAnnotations":{},"fido2ConfigEnabled":false,"fido2ConfigLabels":{},"fido2Enabled":false,"fido2Labels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
+| fido2.ingress | object | `{"fido2AdditionalAnnotations":{},"fido2ConfigAdditionalAnnotations":{},"fido2ConfigEnabled":false,"fido2ConfigLabels":{},"fido2Enabled":false,"fido2Labels":{},"fido2WebauthnAdditionalAnnotations":{},"fido2WebauthnEnabled":false,"fido2WebauthnLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
 | fido2.ingress.fido2AdditionalAnnotations | object | `{}` | fido2 ingress resource additional annotations. |
 | fido2.ingress.fido2ConfigAdditionalAnnotations | object | `{}` | fido2 config ingress resource additional annotations. |
 | fido2.ingress.fido2ConfigEnabled | bool | `false` | Enable endpoint /.well-known/fido2-configuration |
 | fido2.ingress.fido2ConfigLabels | object | `{}` | fido2 config ingress resource labels. key app is taken |
 | fido2.ingress.fido2Enabled | bool | `false` | Enable endpoint /jans-fido2 |
 | fido2.ingress.fido2Labels | object | `{}` | fido2 ingress resource labels. key app is taken |
+| fido2.ingress.fido2WebauthnAdditionalAnnotations | object | `{}` | fido2 webauthn ingress resource additional annotations. |
+| fido2.ingress.fido2WebauthnEnabled | bool | `false` | Enable endpoint /.well-known/webauthn |
+| fido2.ingress.fido2WebauthnLabels | object | `{}` | fido2 webauthn ingress resource labels. key app is taken |
 | fqdn | string | `"demoexample.jans.io"` | Fully qualified domain name to be used for Janssen installation. This address will be used to reach Janssen services. |
 | fullNameOverride | string | `""` |  |
 | hpa | object | `{"behavior":{},"enabled":true,"maxReplicas":10,"metrics":[],"minReplicas":1,"targetCPUUtilizationPercentage":50}` | Configure the HorizontalPodAutoscaler |

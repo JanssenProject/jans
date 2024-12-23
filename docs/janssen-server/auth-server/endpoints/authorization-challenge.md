@@ -11,7 +11,7 @@ tags:
 Authorization Challenge Endpoint allows first-party native client obtain authorization code which later can be exchanged on access token.
 This can provide an entirely browserless OAuth 2.0 experience suited for native applications.
 
-This endpoint conforms to [OAuth 2.0 for First-Party Native Applications](https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-native-apps-02.html) specifications.
+This endpoint conforms to [OAuth 2.0 for First-Party Applications](https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-apps-02.html) specifications.
 
 URL to access authorization challenge endpoint on Janssen Server is listed in the response of Janssen Server's well-known
 [configuration endpoint](./configuration.md) given below.
@@ -151,6 +151,15 @@ Example
 String clientId = context.getHttpRequest().getParameter("client_id");
 authorizationChallengeSessionObject.getAttributes().getAttributes().put("client_id", clientId);
 ``` 
+
+AS automatically validates DPoP if it is set during auth session creation.
+Thus it's recommended to set `jkt` of the auth session if DPoP is used.
+```java
+final String dpop = context.getHttpRequest().getHeader(DpopService.DPOP);
+if (StringUtils.isNotBlank(dpop)) {
+    authorizationChallengeSessionObject.getAttributes().setJkt(getDpopJkt(dpop));
+}
+```
 
 Full sample script can be found [here](../../../script-catalog/authorization_challenge/AuthorizationChallenge.java)
 

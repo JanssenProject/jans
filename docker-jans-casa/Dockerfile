@@ -6,7 +6,7 @@ FROM bellsoft/liberica-openjre-alpine:17.0.12@sha256:29cb2ee552c7c7a924b6a1b5980
 
 RUN apk update \
     && apk upgrade --available \
-    && apk add --no-cache python3 openssl tini py3-cryptography py3-psycopg2 py3-grpcio \
+    && apk add --no-cache python3 openssl tini py3-cryptography py3-psycopg2 py3-grpcio curl \
     && apk add --no-cache --virtual .build-deps git wget zip
 
 # =====
@@ -30,7 +30,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ====
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2024-10-27 08:51'
+ENV CN_BUILD_DATE='2024-12-20 09:16'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/casa/${CN_VERSION}/casa-${CN_VERSION}.war
 
@@ -60,7 +60,7 @@ RUN mkdir -p /usr/share/java \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=871c36da8a2550ee2febd7c0d72c521898b226c3
+ENV JANS_SOURCE_VERSION=b0a7da353d4ef298e5216ed75148da66b2d6b411
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
