@@ -656,8 +656,6 @@ spec:
                 name: {{ .Values.link.linkServiceName }}
                 port:
                   number: 9091
-  {{- end }}
-  {{- end }}
 {{- end }}
 ---
 
