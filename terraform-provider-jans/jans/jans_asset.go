@@ -16,20 +16,19 @@ type PagedResult[T any] struct {
 }
 
 type Document struct {
-	Dn                 string   `schema:"dn" json:"dn"`
-	Inum               string   `schema:"inum" json:"inum"`
-	DisplayName        string   `schema:"display_name" json:"displayName"`
-	Description        string   `schema:"description" json:"description"`
-	Document           string   `schema:"document" json:"document"`
-	CreationDate       string   `schema:"creation_date" json:"creationDate"`
-	JansFilePath       string   `schema:"jans_file_path" json:"jansFilePath"`
-	JansModuleProperty []string `schema:"jans_module_property" json:"jansModuleProperty"`
-	JansLevel          string   `schema:"jans_level" json:"jansLevel"`
-	JansRevision       string   `schema:"jans_revision" json:"jansRevision"`
-	JansEnabled        bool     `schema:"jans_enabled" json:"jansEnabled"`
-	JansAlias          string   `schema:"jans_alias" json:"jansAlias"`
-	Selected           bool     `schema:"selected" json:"selected"`
-	BaseDn             string   `schema:"base_dn" json:"baseDn"`
+	Dn           string `schema:"dn" json:"dn"`
+	Inum         string `schema:"inum" json:"inum"`
+	FileName     string `schema:"file_name" json:"fileName"`
+	FilePath     string `schema:"file_path" json:"filePath"`
+	Description  string `schema:"description" json:"description"`
+	Document     string `schema:"document" json:"document"`
+	CreationDate string `schema:"creation_date" json:"creationDate"`
+	Service      string `schema:"service" json:"service"`
+	Level        string `schema:"level" json:"level"`
+	Revision     string `schema:"revision" json:"revision"`
+	Enabled      bool   `schema:"enabled" json:"enabled"`
+	Alias        string `schema:"alias" json:"alias"`
+	BaseDn       string `schema:"base_dn" json:"baseDn"`
 }
 
 type AssetForm struct {
