@@ -14,7 +14,7 @@ pub(crate) mod cedar_schema;
 pub mod policy_store;
 
 /// Used for decoding the policy and schema metadata
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, serde::Deserialize)]
 enum Encoding {
     /// indicates that the related value is base64 encoded
     #[serde(rename = "base64")]

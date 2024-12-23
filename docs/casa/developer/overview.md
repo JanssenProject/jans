@@ -41,7 +41,7 @@ Acquaintance with the following technologies is recommended:
 ### Sample plugins
 
 The best way to start learning Casa plugin development is by playing with the sample plugins you can find [here](
-https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples). Clone the repository ( a shallow clone of `main` branch is fine), `cd` to one of the directories in the folder and run `mvn package`, then upload the resulting `jar-with-dependencies` through the administration console.
+https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples). Clone the repository (a shallow clone of `main` branch is fine), `cd` to one of the directories in the folder and run `mvn package`, then upload the resulting `jar-with-dependencies` through the administration console.
 
 ## Configuration management
 
@@ -93,13 +93,15 @@ Extract [the Agama project](https://maven.jans.io/maven/io/jans/casa-agama/repla
 
 ### Page customizations
 
-The UI pages of the default Casa flow resemble the design of the Casa app itself. Also, modifications applied through the "custom branding" functionalities are automatically reflected in flow pages without any sort of intervention. This is neat, but if you need radical changes, you will have to code the UI pages your own based on the existing ones.
+The UI pages of the default Casa flow resemble the design of the Casa app itself. Also, modifications applied through the "custom branding" functionalities are automatically reflected in flow pages without any sort of intervention. This is neat, but if you need to go further, you will have to code the UI pages your own based on the existing ones.
 
-For this purpose, create a new Agama project with one flow in it. Pick one of the pages you want to change from the original project and build your own - initially keep it really simple: a dummy page is OK. From your new flow, use the `Trigger` directive to launch `io.jans.casa.authn.main` found in the original project. Add an `Override templates` directive to your `Trigger` so the page in Casa project is superseded by the page you are creating. This is explained [here](../../janssen-server/developer/agama/advanced-usages.md#template-overrides).
+For this purpose, create a new Agama project with one flow in it. Pick one of the pages you want to change from the original project and build your own - initially keep it really simple: a dummy page is OK. From your new flow, use the `Trigger` directive to launch flow `io.jans.casa.authn.main`. Add an `Override templates` directive to your `Trigger` so the page in Casa project is superseded by the page you are creating. This is explained [here](../../janssen-server/developer/agama/advanced-usages.md#template-overrides).
 
 Pack your new project and deploy it. Wait for around 30 seconds and try to log into Casa to see the changes. Note you have to configure casa so your flow is launched, not the default one, ie. `io.jans.casa.authn.main`. This was explained [earlier](#casa-acr-update).
 
 Do as many changes as needed to your page. Then pick another page to alter and feed your `Override templates` accordingly. Repeat until your are done. Recall there is no need to restart `jans-auth` or `casa`.
+
+In some cases, the original look-and-feel may be satisfying but it's the text content what you would like to change. Agama engine supports localization and internationalization as explained [here](../../janssen-server/developer/agama/advanced-usages.md#localization-and-internationalization) so you can supply  translated messages in your own project and make templates use those. Note Casa is only bundled with a set of "default" labels out-of-the box and thus pages don't change content regardless of browser's language or location. By overriding templates and providing labels in several languages, you can achieve full localization/internationalization in the authentication UI.
 
 ### Support more authentication methods
 

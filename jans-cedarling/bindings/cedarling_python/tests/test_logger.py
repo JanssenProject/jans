@@ -1,24 +1,27 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+
 from cedarling_python import Cedarling
-from config import sample_bootstrap_config
+from config import load_bootstrap_config
 
 
 # In python unit tests we not cover all possible scenarios, but most common.
 
-def test_invalid_log_config(sample_bootstrap_config):
-    # map fixture to variable with shorter name for readability
-    config = sample_bootstrap_config
+def test_invalid_log_config():
     try:
         # when we set invalid log configuration it should raise ValueError
-        config.log_type = "String"
-    except TypeError:
+        load_bootstrap_config(log_type="String")
+    except ValueError:
         pass
+    else:
+        assert False, "ValueError was not raised when setting invalid log_type"
 
 
-def test_memory_logger(sample_bootstrap_config):
+def test_memory_logger():
     # map fixture to variable with shorter name for readability
-    config = sample_bootstrap_config
-
-    config.log_type = "memory"
+    config = load_bootstrap_config(log_type="memory", log_ttl=60)
 
     # on initialize Cedarling we should have logs
     cedarling = Cedarling(config)
@@ -39,11 +42,9 @@ def test_memory_logger(sample_bootstrap_config):
     assert len(cedarling.pop_logs()) == 0
 
 
-def test_off_logger(sample_bootstrap_config):
+def test_off_logger():
     # map fixture to variable with shorter name for readability
-    config = sample_bootstrap_config
-
-    config.log_type = "off"
+    config = load_bootstrap_config(log_type="off")
 
     cedarling = Cedarling(config)
 
@@ -52,10 +53,9 @@ def test_off_logger(sample_bootstrap_config):
     assert len(cedarling.pop_logs()) == 0
 
 
-def test_stdout_logger(sample_bootstrap_config):
+def test_stdout_logger():
     # Map fixture to variable with shorter name for readability
-    config = sample_bootstrap_config
-    config.log_type = "std_out"
+    config = load_bootstrap_config(log_type="std_out")
 
     cedarling = Cedarling(config)
 

@@ -76,6 +76,8 @@ func resourceScript() *schema.Resource {
 						"uma_rpt_policy",
 						"uma_rpt_claims",
 						"uma_claims_gathering",
+						"access_evaluation",
+						"access_evaluation_discovery",
 						"consent_gathering",
 						"dynamic_scope",
 						"spontaneous_scope",

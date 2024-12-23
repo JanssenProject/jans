@@ -24,9 +24,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class LocalResponseCache {
 
     public static final int DEFAULT_DISCOVERY_LIFETIME = 60;
+    public static final int DEFAULT_ACCESS_EVALUTION_DISCOVERY_LIFETIME = 5;
     public static final int DEFAULT_SECTOR_IDENTIFIER_LIFETIME = 1440; // 1 day
 
     private static final String DISCOVERY_CACHE_KEY = "DISCOVERY_CACHE_KEY";
+    private static final String ACCESS_EVALUATION_DISCOVERY_CACHE_KEY = "ACCESS_EVALUATION_DISCOVERY_CACHE_KEY";
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -36,12 +38,19 @@ public class LocalResponseCache {
             .expireAfterWrite(DEFAULT_DISCOVERY_LIFETIME, TimeUnit.MINUTES).build();
     private Cache<String, List<String>> sectorIdentifierCache = CacheBuilder.newBuilder()
             .expireAfterWrite(DEFAULT_SECTOR_IDENTIFIER_LIFETIME, TimeUnit.MINUTES).build();
+    private Cache<String, JSONObject> accessEvaluationDiscoveryCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(DEFAULT_ACCESS_EVALUTION_DISCOVERY_LIFETIME, TimeUnit.MINUTES).build();
 
     private int currentDiscoveryLifetime = DEFAULT_DISCOVERY_LIFETIME;
+    private int currentAccessEvaluationDiscoveryLifetime = DEFAULT_ACCESS_EVALUTION_DISCOVERY_LIFETIME;
     private int currentSectorIdentifierLifetime = DEFAULT_SECTOR_IDENTIFIER_LIFETIME;
 
     public void invalidateDiscoveryCache() {
         discoveryCache.invalidate(DISCOVERY_CACHE_KEY);
+    }
+
+    public void invalidateAccessEvaluationDiscoveryCache() {
+        accessEvaluationDiscoveryCache.invalidate(ACCESS_EVALUATION_DISCOVERY_CACHE_KEY);
     }
 
     @Asynchronous
@@ -56,6 +65,12 @@ public class LocalResponseCache {
                 currentDiscoveryLifetime = appConfiguration.getDiscoveryCacheLifetimeInMinutes();
                 discoveryCache = CacheBuilder.newBuilder()
                         .expireAfterWrite(appConfiguration.getDiscoveryCacheLifetimeInMinutes(), TimeUnit.MINUTES).build();
+            }
+            if (currentAccessEvaluationDiscoveryLifetime != appConfiguration.getAccessEvaluationDiscoveryCacheLifetimeInMinutes()) {
+                currentAccessEvaluationDiscoveryLifetime = appConfiguration.getAccessEvaluationDiscoveryCacheLifetimeInMinutes();
+                accessEvaluationDiscoveryCache = CacheBuilder.newBuilder()
+                        .expireAfterWrite(appConfiguration.getAccessEvaluationDiscoveryCacheLifetimeInMinutes(), TimeUnit.MINUTES).build();
+
             }
             if (currentSectorIdentifierLifetime != appConfiguration.getSectorIdentifierCacheLifetimeInMinutes()) {
                 currentSectorIdentifierLifetime = appConfiguration.getSectorIdentifierCacheLifetimeInMinutes();
@@ -91,5 +106,18 @@ public class LocalResponseCache {
             return;
 
         discoveryCache.put(DISCOVERY_CACHE_KEY, response);
+    }
+
+    public JSONObject getAccessEvaluationDiscoveryResponse() {
+        if (accessEvaluationDiscoveryCache == null || rebuilding.get())
+            return null;
+        return accessEvaluationDiscoveryCache.getIfPresent(ACCESS_EVALUATION_DISCOVERY_CACHE_KEY);
+    }
+
+    public void putAccessEvaluationDiscoveryResponse(JSONObject response) {
+        if (accessEvaluationDiscoveryCache == null || rebuilding.get())
+            return;
+
+        accessEvaluationDiscoveryCache.put(ACCESS_EVALUATION_DISCOVERY_CACHE_KEY, response);
     }
 }

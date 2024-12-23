@@ -24,6 +24,7 @@ class JansAuthInstaller(JettyInstaller):
                     (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar'.format(base.current_app.app_info['jans_version']))),
                     (os.path.join(Config.dist_jans_dir, 'jans-fido2-client.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-client/{0}/jans-fido2-client-{0}.jar'.format(base.current_app.app_info['jans_version']))),
                     (os.path.join(Config.dist_app_dir, 'twilio.jar'), os.path.join(base.current_app.app_info['TWILIO_MAVEN'], '{0}/twilio-{0}.jar'.format(base.current_app.app_info['TWILIO_VERSION']))),
+                    (os.path.join(Config.dist_jans_dir, 'jans-fido2-model.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-model/{0}/jans-fido2-model-{0}.jar'.format(base.current_app.app_info['jans_version']))),
                    ]
 
     def __init__(self):
@@ -198,7 +199,7 @@ class JansAuthInstaller(JettyInstaller):
             self.import_key_cert_into_keystore('obsigning', self.jans_auth_openid_jks_fn, Config.jans_auth_openid_jks_pass, Config.ob_key_fn, Config.ob_cert_fn, Config.ob_alias)
 
     def external_libs(self):
-        for extra_lib in (self.source_files[2][0], self.source_files[3][0]):
+        for extra_lib in (self.source_files[2][0], self.source_files[3][0], self.source_files[4][0]):
             self.copyFile(extra_lib, self.custom_lib_dir)
             extra_lib_path = os.path.join(self.custom_lib_dir, os.path.basename(extra_lib))
             self.chown(extra_lib_path, Config.jetty_user, Config.jetty_group)

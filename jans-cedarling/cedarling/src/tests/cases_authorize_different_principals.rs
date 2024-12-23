@@ -103,6 +103,7 @@ fn success_test_for_principal_workload() {
             use_user_principal: false,
             use_workload_principal: true,
             user_workload_operator: Default::default(),
+            ..Default::default()
         },
     );
 
@@ -138,6 +139,7 @@ fn success_test_for_principal_user() {
             use_user_principal: true,
             use_workload_principal: false,
             user_workload_operator: Default::default(),
+            ..Default::default()
         },
     );
 
@@ -177,6 +179,7 @@ fn success_test_for_principal_person_role() {
             use_user_principal: true,
             use_workload_principal: false,
             user_workload_operator: Default::default(),
+            ..Default::default()
         },
     );
 
@@ -216,6 +219,7 @@ fn success_test_for_principal_workload_role() {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::And,
+            ..Default::default()
         },
     );
 
@@ -261,6 +265,7 @@ fn success_test_for_principal_workload_true_or_user_false() {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::Or,
+            ..Default::default()
         },
     );
 
@@ -306,6 +311,7 @@ fn success_test_for_principal_workload_false_or_user_true() {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::Or,
+            ..Default::default()
         },
     );
 
@@ -351,6 +357,7 @@ fn success_test_for_principal_workload_false_or_user_false() {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::Or,
+            ..Default::default()
         },
     );
 
@@ -395,6 +402,7 @@ fn test_where_principal_workload_cant_be_applied() {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: Default::default(),
+            ..Default::default()
         },
     );
 
@@ -420,6 +428,7 @@ fn test_where_principal_user_cant_be_applied() {
             use_user_principal: true,
             use_workload_principal: false,
             user_workload_operator: Default::default(),
+            ..Default::default()
         },
     );
 

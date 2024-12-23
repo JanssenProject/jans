@@ -101,13 +101,16 @@ public class PersistenceService implements IPersistenceService {
     }
 
     public <T> List<T> find(Class<T> clazz, String baseDn, Filter filter) {
-
+    	logger.debug(baseDn);
+    	logger.debug(clazz.toString());
+    	logger.debug(filter.toString());
         try {
             return entryManager.findEntries(baseDn, clazz, filter);
         } catch (Exception e) {
             //logger.error(e.getMessage(), e);
             //TODO: uncomment the above once https://github.com/GluuFederation/oxCore/issues/160 is solved
             logger.error(e.getMessage());
+            e.printStackTrace();
             return Collections.emptyList();
         }
 

@@ -9,7 +9,7 @@
 
     <h:title self="@define(title)">${zkService.appName} - ${labels.usr.fido2_title}</h:title>
 
-    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.ui.vm.user.SecurityKey2ViewModel')"
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.ui.vm.user.PasskeysViewModel')"
            self="@define(maincontent)">
 
         <z:include src="/back-home.zul" />
@@ -33,10 +33,13 @@
                                 <zk:zk if="${FidoDevice.isPlatformAuthenticator(each)}">
 								    <img src="${zkService.contextPath}${assetsService.prefix}/images/touchid.png" />
 								</zk:zk>
-								<zk:zk unless="${FidoDevice.isPlatformAuthenticator(each)}">
+								<zk:zk if="${FidoDevice.isMultideviceAuthenticator(each)}">
+								    <img src="${zkService.contextPath}${assetsService.prefix}/images/passkey.png" />
+								</zk:zk>
+								<zk:zk if="${FidoDevice.isSecurityKey(each)}">
 								    <img src="${zkService.contextPath}${assetsService.prefix}/images/u2fkey.png" />
 								</zk:zk>
-
+								
                                 <p class="ml3 mb0">
                                     <z:label sclass="f5 dark-blue2" value="@load(empty each.nickName ? c:l('general.no_named') : each.nickName)" />
                                     <br />
@@ -86,32 +89,7 @@
                 </div>
                 
                 
-                <!-- loaded when platform Authenticator exists -->
-                 <z:div class="${css.panel} bg-near-white" id="platformAuthenticator" visible="@load(vm.showUIPlatformAuthenticator)">
-                    <h2 class="f5 dark-blue2 pt1">${labels.usr.fido2_add_touchId}</h2>
-                    <div class="alert alert-success dn" id="feedback-key-platform" role="alert" />
-					
-                    <div class="pb2">
-                        <span class="mr2">${labels.usr.fido2_pressready_touchId}</span>
-                        <span class="mr2">${labels.usr.fido2_enroll_fingerprint_apple_help}</span>
-                        
-                        <z:image src="${assetsService.prefix}/images/throbber.gif" visible="@load(vm.uiAwaitingPlatformAuthenticator)" />
-                    </div> 
-                    <z:button id="readyPlatformButton" label="${labels.general.ready}" sclass="${css.primaryButton}"
-                              w:onClick="alertRef = $('#feedback-key-platform'); initialize(this)" onClick="@('triggerAttestationRequestPlatformAuthenticator')" />
-					
-                    <z:div sclass="flex flex-wrap pt2" visible="@load(vm.uiEnrolledPlatformAuthenticator)">
-                        <div class="relative w5 mt3 pr3">
-                            <z:textbox sclass="focused-text w-100 pb1" onOK="@('add')" value="@bind(vm.newTouchId.nickName)" ca:required="required" />
-                            <label class="focused-label">${labels.usr.enter_nick}</label>
-                        </div>
-
-                        <div class="pt2">
-                            <z:button label="${labels.general.add}" sclass="${css.primaryButton} mr2" onClick="@('add')"/>
-                            <z:button label="${labels.general.cancel}" sclass="${css.tertiaryButton}" onClick="@('cancel')"/>
-                        </div>
-                    </z:div>
-                </z:div>
+                
             </section>
         </div>
 
@@ -137,25 +115,5 @@
     <z:div self="@define(extra)">
         <z:script src="/scripts/gluu/fido2-util.js" />
     </z:div>
-    <z:div self="@define(extra)">
-        <script>
-        <![CDATA[ 
-           $( document ).ready( function() {
-        	   
-        	   if(!(zAu && zAu.send)) {alert ("zAu not initialized"); return;}
-    			PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
-				  .then(function(available){
-					  
-					  zAu.send(new zk.Event(zk.Widget.$(jq('$platformAuthenticator')[0]), "onData", available, {toServer:true}));
-				    
-				  }).catch(function(err){
-				    console.error("Error in detecting platform authenticator : "+err);
-				  });
-				  
-	         		
-	          	
-           });
-           ]]>
-        </script>
-    </z:div>
+   
 </zk:zk>

@@ -157,7 +157,7 @@ fn test_broken_policy_parsing_error_in_policy_store() {
     // TODO: this isn't really a human readable format but the current plan is to fetch it from
     // a which will respond with the policy encoded in base64. This could probably be improved
     // in the future once the structure of the project is clearer.
-    assert_eq!(err_msg, "policy_stores.ba1f39115ed86ed760ee0bea1d529b52189e5a117474: Errors encountered while parsing policies: [Error(\"unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)`\")] at line 4 column 5")
+    assert_eq!(err_msg, "policy_stores.ba1f39115ed86ed760ee0bea1d529b52189e5a117474: Errors encountered while parsing policies: [Error(\"unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)`\")] at line 8 column 5")
 }
 
 /// Tests that a valid version string is accepted.

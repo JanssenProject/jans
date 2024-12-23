@@ -1250,12 +1250,12 @@ class JCA_CLI:
             if not item['path'].startswith('/'):
                 item['path'] = '/' + item['path']
 
-        check_list = data if self.my_op_mode != 'scim' else data['Operations']
-
-        for item in check_list:
-            check_op_mode(item)
-            if self.my_op_mode != 'scim':
-                fix_path(item)
+        if not 'jsonPatchString' in data:
+            check_list = data if self.my_op_mode != 'scim' else data['Operations']
+            for item in check_list:
+                check_op_mode(item)
+                if self.my_op_mode != 'scim':
+                    fix_path(item)
 
 
         response = self.patch_requests(endpoint, suffix_param, data)

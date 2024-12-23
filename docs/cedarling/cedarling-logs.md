@@ -30,6 +30,17 @@ There are three different log records produced by the Cedarling:
 * `System` - Startup, debug and other Cedarling messages not related to authz
 * `Metric`- Performance and usage data
 
+### System Log Levels
+
+This is set by `CEDARLING_LOG_LEVEL`
+
+* `FATAL`: Indicates very severe error events that will likely lead the application to abort. These are the most critical issues.
+* `ERROR`: Designates error events that might still allow the application to continue running but indicate a significant problem.
+* `WARN`: Designates potentially harmful situations that should be addressed to prevent future issues.
+* `INFO`: Provides informational messages that highlight the progress of the application at a coarse-grained level.
+* `DEBUG`: Designates fine-grained informational events useful for debugging the application.
+* `TRACE`: Provides finer-grained informational events than DEBUG. It is often used for detailed tracing of program execution.
+
 ## Jans Lock Server
 
 In enterprise deployments, [Janssen Lock Server](../janssen-server/lock/) collects Cedarling
@@ -37,17 +48,199 @@ logs and can stream to a database or S3 bucket. The Cedarling decision logs prov
 evidence of usage of the domain's externalized policies. The logs are also useful for forensic
 analysis to show everything the attacker attempted, both allowed and denied.
 
-## Startup Message
+## Sample logs
+
+The JSON in this document is formatted for readability but is not prettified in the actual implementation.  
+
+### Startup Message
 
 ```json
 {
-    "id": "01937359-8968-766e-bc4a-82df4aa1f4bf",
-    "time": 1732807068,
+    "request_id": "0193b8a8-efc0-77ce-bd90-4a62a2998462",
+    "timestamp": "2024-12-12T04:18:19.456Z",
     "log_kind": "System",
-    "pdp_id": "b862f21f-bcb1-4618-995d-ba7041e9bd16",
+    "pdp_id": "d47e245e-beaa-4ea4-b899-b8184cd3eb7e",
+    "level": "DEBUG",
+    "msg": "configuration parsed successfully"
+}
+{
+    "request_id": "0193b8a8-efc1-7e42-9678-b2480268b91f",
+    "timestamp": "2024-12-12T04:18:19.457Z",
+    "log_kind": "System",
+    "pdp_id": "d47e245e-beaa-4ea4-b899-b8184cd3eb7e",
+    "level": "INFO",
     "msg": "Cedarling Authz initialized successfully",
-    "application_id": "TestApp",
+    "application_id": "My App",
     "cedar_lang_version": "4.1.0",
     "cedar_sdk_version": "4.2.2"
+}
+```
+
+### Decision Log
+
+Example of decision log.
+
+```json
+{
+    "request_id": "019394db-f52b-7b06-88b8-a288670a32c2",
+    "timestamp": "2024-12-05T05:27:43.403Z",
+    "log_type": "Decision",
+    "pdp_id": "9e189c4b-96ae-4818-8e7f-75a42186af15",
+    "policystore_id": "a1bf93115de86de760ee0bea1d529b521489e5a11747",
+    "policystore_version": "undefined",
+    "principal": "User & Workload",
+    "User": {
+        "username": "admin@gluu.org"
+    },
+    "Workload": {
+        "org_id": "some_long_id"
+    },
+    "lock_client_id": null,
+    "action": "Jans::Action::\"Update\"",
+    "resource": "Jans::Issue::\"random_id\"",
+    "decision": "ALLOW",
+    "tokens": {
+        "id_token": {
+            "jti": "id_tkn_jti"
+        },
+        "Userinfo": {
+            "jti": "usrinfo_tkn_jti"
+        },
+        "access": {
+            "jti": "access_tkn_jti"
+        }
+    },
+    "decision_time_ms": 3
+}
+```
+
+#### Field Definitions
+
+* `request_id`: unique identifier for the decision request
+* `timestamp`: Derived if possible from the system or context--may be empty in cases where WASM can't access the system clock, and the time wasn't sent in the context.
+* `pdp_id`: unique identifier for the Cedarling
+* `policystore_id`: What policystore this Cedarling instance is using
+* `policystore_version`: What version of the policystore the Cedarling is using
+* `principal`: `User` | `Workload`
+* `User`: A list of claims, specified by the `CEDARLING_DECISION_LOG_USER_CLAIMS` property, that must be present in the Cedar User entity
+* `Workload`:  A list of claims, specified by the `CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS` property, that must be present in the Cedar Workload entity
+* `lock_client_id`: If this Cedarling has registered with a Lock Server, what is the client_id it received
+* `action`: From the request
+* `resource`: From the Request
+* `decision`: `ALLOW` or `DENY`
+* `tokens`: Dictionary with the token type and claims which should be included in the log
+* `decision_time_ms`: how long the decision took
+
+### Debug Log Sample
+
+The result of the authorization is quite extensive because we log all `cedar-policy` entity information for forensic analysis. We cannot truncate the data, as it may contain critical information.
+
+```json
+{
+    "id": "01937015-4649-7aad-8df8-4976e4bd8565",
+    "time": 1732752262,
+    "log_type": "Decision",
+    "level": "DEBUG",
+    "pdp_id": "75f0dc93-0a90-4076-95fa-dc16d3f00375",
+    "msg": "Result of authorize.",
+    "application_id": "TestApp",
+    "action": "Jans::Action::\"Read\"",
+    "resource": "Jans::Application::\"some_id\"",
+    "context": {
+        "user_agent": "Linux",
+        "operating_system": "Linux",
+        "network_type": "Local",
+        "network": "127.0.0.1",
+        "geolocation": [
+            "America"
+        ],
+        "fraud_indicators": [
+            "Allowed"
+        ],
+        "device_health": [
+            "Healthy"
+        ],
+        "current_time": 1732752262
+    },
+    "entities": [
+        {
+            "uid": {
+                "type": "Jans::User",
+                "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+            },
+            "attrs": {
+                "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+                "role": [
+                    "CasaAdmin"
+                ],
+                "email": {
+                    "domain": "jans.test",
+                    "uid": "admin"
+                }
+            },
+            "parents": [
+                {
+                    "type": "Jans::Role",
+                    "id": "CasaAdmin"
+                }
+            ]
+        },
+        {
+            "uid": {
+                "type": "Jans::id_token",
+                "id": "ijLZO1ooRyWrgIn7cIdNyA"
+            },
+            "attrs": {
+                "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+                "acr": "simple_password_auth",
+                "exp": 1731956630,
+                "jti": "ijLZO1ooRyWrgIn7cIdNyA",
+                "amr": [],
+                "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
+                "iss": {
+                    "__entity": {
+                        "type": "Jans::TrustedIssuer",
+                        "id": "https://account.gluu.org"
+                    }
+                },
+                "iat": 1731953030
+            },
+            "parents": []
+        },
+
+        ...
+
+        {
+            "uid": {
+                "type": "Jans::Action",
+                "id": "Tag"
+            },
+            "attrs": {},
+            "parents": []
+        }
+    ],
+    "person_principal": "Jans::User::\"qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0\"",
+    "person_diagnostics": {
+        "reason": [
+            {
+                "id": "840da5d85403f35ea76519ed1a18a33989f855bf1cf8",
+                "description": "simple policy example for principal user"
+            }
+        ],
+        "errors": []
+    },
+    "person_decision": "ALLOW",
+    "workload_principal": "Jans::Workload::\"d7f71bea-c38d-4caf-a1ba-e43c74a11a62\"",
+    "workload_diagnostics": {
+        "reason": [
+            {
+                "id": "444da5d85403f35ea76519ed1a18a33989f855bf1cf8",
+                "description": "simple policy example for principal workload"
+            }
+        ],
+        "errors": []
+    },
+    "workload_decision": "ALLOW",
+    "authorized": true
 }
 ```

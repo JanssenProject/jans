@@ -18,7 +18,7 @@ The Cedarling Policy Store uses a JSON file named `cedarling_store.json` to stor
 
 **Note:** The `cedarling_store.json` file is only needed if the bootstrap properties: `CEDARLING_LOCK`; `CEDARLING_POLICY_STORE_URI`; and `CEDARLING_POLICY_STORE_ID` are not set to a local location. If you're fetching the policies remotely, you don't need a `cedarling_store.json` file.
 
-### JSON Schema
+## JSON Schema
 
 The JSON Schema accepted by cedarling is defined as follows:
 
@@ -206,12 +206,8 @@ The Token Entity Metadata Schema defines how tokens are mapped, parsed, and tran
 
 - **role_mapping**: (String OR Array of String, *Optional*) Indicates which field in the token should be used for role-based access control. If not needed, set to an empty string (`""`).
 
-You can include a `role_mapping` in each token but only the first one that get parsed will be recognized by Cedarling. Cedarling parses the `role_mapping`s for each token in this order:
-
-1. `access_tokens`
-2. `id_tokens`
-3. `userinfo_tokens`
-4. `tx_tokens`
+You can include a `role_mapping` in each token, all of them will be executed by Cedarling.
+If none `role_mapping` defined the `Cedarling` will try to find role in `userinfo` token in field `role`.
 
 #### Claim mapping
 

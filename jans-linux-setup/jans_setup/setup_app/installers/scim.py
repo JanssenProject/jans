@@ -12,6 +12,7 @@ class ScimInstaller(JettyInstaller):
 
     source_files = [
             (os.path.join(Config.dist_jans_dir, 'jans-scim.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-scim-server/{0}/jans-scim-server-{0}.war').format(base.current_app.app_info['jans_version'])),
+            (os.path.join(Config.dist_jans_dir, 'scim-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/scim-plugin/{0}/scim-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
             ]
 
     def __init__(self):
@@ -46,9 +47,6 @@ class ScimInstaller(JettyInstaller):
         self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name,  'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
-
-        if Config.installed_instance and Config.install_config_api:
-            base.current_app.ConfigApiInstaller.install_plugin('scim-plugin')
 
         self.enable()
 
@@ -167,3 +165,6 @@ class ScimInstaller(JettyInstaller):
 
     def update_backend(self):
         self.dbUtils.enable_service('jansScimEnabled')
+
+    def service_post_install_tasks(self):
+        base.current_app.ConfigApiInstaller.install_plugin('scim')

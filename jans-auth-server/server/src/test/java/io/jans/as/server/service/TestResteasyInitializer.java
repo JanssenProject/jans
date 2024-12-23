@@ -8,6 +8,8 @@ package io.jans.as.server.service;
 
 import io.jans.as.server.authorize.ws.rs.AuthorizationChallengeEndpoint;
 import io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceImpl;
+import io.jans.as.server.authzen.ws.rs.AccessEvaluationDiscoveryWS;
+import io.jans.as.server.authzen.ws.rs.AccessEvaluationRestWebServiceImplV1;
 import io.jans.as.server.clientinfo.ws.rs.ClientInfoRestWebServiceImpl;
 import io.jans.as.server.introspection.ws.rs.IntrospectionWebService;
 import io.jans.as.server.jans.ws.rs.JansConfigurationWS;
@@ -58,6 +60,9 @@ public class TestResteasyInitializer extends Application {
         classes.add(UmaScopeWS.class);
         classes.add(UmaMetadataWS.class);
         classes.add(UmaGatheringWS.class);
+
+        classes.add(AccessEvaluationRestWebServiceImplV1.class);
+        classes.add(AccessEvaluationDiscoveryWS.class);
 
         classes.add(JansConfigurationWS.class);
         return classes;

@@ -16,3 +16,7 @@ install: build
 
 generate-docs:
 	tfplugindocs generate
+
+sanitize:
+	go fmt ./...
+	go vet ./...

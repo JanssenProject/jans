@@ -182,10 +182,6 @@ class JansSamlInstaller(BaseInstaller, SetupUtils):
 
     def config_api_idp_plugin_config(self):
 
-        # deploy config-api plugin
-        base.current_app.ConfigApiInstaller.source_files.append(self.source_files[2])
-        base.current_app.ConfigApiInstaller.install_plugin('kc-saml-plugin')
-
         # Render templates
         self.update_rendering_dict()
         jans_api_tmp_dir = os.path.join(self.templates_folder, 'kc_jans_api')
@@ -347,3 +343,6 @@ class JansSamlInstaller(BaseInstaller, SetupUtils):
 
     def installed(self):
         return os.path.exists(self.idp_config_data_dir)
+
+    def service_post_install_tasks(self):
+        base.current_app.ConfigApiInstaller.install_plugin('kc-saml')

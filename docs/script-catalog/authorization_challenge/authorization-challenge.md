@@ -9,7 +9,7 @@ tags:
 
 ## Overview
 
-The Jans-Auth server implements [OAuth 2.0 for First-Party Native Applications](https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-native-apps-02.html).
+The Jans-Auth server implements [OAuth 2.0 for First-Party Applications](https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-apps-02.html).
 This script is used to control/customize Authorization Challenge Endpoint.
 
 ## Behavior

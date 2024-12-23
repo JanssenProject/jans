@@ -6,14 +6,13 @@
  */
 
 use super::interface::LogWriter;
-use super::LogEntry;
 
 /// A logger that do nothing.
 pub(crate) struct NopLogger;
 
 // Implementation of LogWriter
 impl LogWriter for NopLogger {
-    fn log(&self, _entry: LogEntry) {
+    fn log_any<T: serde::Serialize>(&self, _entry: T) {
         // Do nothing
     }
 }

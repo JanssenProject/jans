@@ -134,6 +134,13 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             )
 
         if Config.rdbm_type in ('mysql', 'pgsql'):
+            if Config.rdbm_type == 'mysql':
+                Config.templateRenderingDict['rdbm_schema_name'] = Config.rdbm_db
+                Config.templateRenderingDict['rdbm_name_str'] = Config.rdbm_type
+            else:
+                Config.templateRenderingDict['rdbm_schema_name'] = 'public'
+                Config.templateRenderingDict['rdbm_name_str'] = 'postgresql'
+
             template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-jans-auth-test-sql.properties.nrnd'))
             rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
             config_jans_auth_test_properties += '\n#sql\n' +  rendered_text

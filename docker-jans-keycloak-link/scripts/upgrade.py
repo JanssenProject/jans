@@ -69,7 +69,7 @@ class Upgrade:
 def main():
     manager = get_manager()
 
-    with manager.lock.create_lock("keycloak-link-upgrade"):
+    with manager.create_lock("keycloak-link-upgrade"):
         upgrade = Upgrade(manager)
         upgrade.invoke()
 

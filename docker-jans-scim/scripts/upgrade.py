@@ -138,7 +138,7 @@ class Upgrade:
 def main():
     manager = get_manager()
 
-    with manager.lock.create_lock("scim-upgrade"):
+    with manager.create_lock("scim-upgrade"):
         upgrade = Upgrade(manager)
         upgrade.invoke()
 

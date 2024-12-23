@@ -16,6 +16,7 @@
 mod authz;
 mod bootstrap_config;
 mod common;
+mod http;
 mod init;
 mod jwt;
 mod lock;
@@ -32,12 +33,16 @@ use authz::Authz;
 pub use authz::{AuthorizeError, AuthorizeResult};
 pub use bootstrap_config::*;
 use init::service_config::{ServiceConfig, ServiceConfigError};
+use init::service_factory::ServiceInitError;
 use init::ServiceFactory;
 
 use common::app_types;
+use log::interface::LogWriter;
 use log::LogEntry;
-pub use log::LogStorage;
 use log::LogType;
+pub use log::{LogLevel, LogStorage};
+
+pub use crate::authz::entities::CedarPolicyCreateTypeError;
 
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
@@ -57,6 +62,9 @@ pub enum InitCedarlingError {
     /// Error while preparing config for internal services
     #[error(transparent)]
     ServiceConfig(#[from] ServiceConfigError),
+    /// Error while initializing a Service
+    #[error(transparent)]
+    ServiceInit(#[from] ServiceInitError),
 }
 
 /// The instance of the Cedarling application.
@@ -64,20 +72,20 @@ pub enum InitCedarlingError {
 #[derive(Clone)]
 pub struct Cedarling {
     log: log::Logger,
-    #[allow(dead_code)]
     authz: Arc<Authz>,
 }
 
 impl Cedarling {
     /// Create a new instance of the Cedarling application.
-    pub fn new(config: BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
+    pub fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
         let log = log::init_logger(&config.log_config);
         let pdp_id = app_types::PdpID::new();
 
-        let service_config = ServiceConfig::new(&config)
+        let service_config = ServiceConfig::new(config)
             .inspect(|_| {
                 log.log(
                     LogEntry::new_with_data(pdp_id, None, LogType::System)
+                        .set_level(LogLevel::DEBUG)
                         .set_message("configuration parsed successfully".to_string()),
                 )
             })
@@ -85,15 +93,16 @@ impl Cedarling {
                 log.log(
                     LogEntry::new_with_data(pdp_id, None, LogType::System)
                         .set_error(err.to_string())
+                        .set_level(LogLevel::ERROR)
                         .set_message("configuration parsed with error".to_string()),
                 )
             })?;
 
-        let mut service_factory = ServiceFactory::new(&config, service_config, log.clone(), pdp_id);
+        let mut service_factory = ServiceFactory::new(config, service_config, log.clone(), pdp_id);
 
         Ok(Cedarling {
             log,
-            authz: service_factory.authz_service(),
+            authz: service_factory.authz_service()?,
         })
     }
 
@@ -110,7 +119,8 @@ impl Cedarling {
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
-        self.authz.authorize_entities_data(request)
+        let tokens = self.authz.decode_tokens(request)?;
+        self.authz.authorize_entities_data(request, &tokens)
     }
 }
 

@@ -5,7 +5,7 @@ JAVA_OPTIONS="-server -Xms%(jans-fido2_min_heap_mem)sm -Xmx%(jans-fido2_max_heap
 JETTY_HOME=%(jetty_home)s
 JETTY_BASE=%(jetty_base)s/jans-fido2
 JETTY_USER=%(jetty_user)s
-JETTY_ARGS="jetty.http.host=localhost jetty.http.port=8073"
+JETTY_ARGS="jetty.http.host=localhost jetty.http.port=%(jans_fido2_port)s"
 TMPDIR=%(jetty_dist)s/temp
 
 export PYTHON_HOME=%(jython_home)s

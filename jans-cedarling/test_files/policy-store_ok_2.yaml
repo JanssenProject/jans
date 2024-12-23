@@ -1,3 +1,7 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
 cedar_version: v4.0.0
 policy_stores:
   a1bf93115de86de760ee0bea1d529b521489e5a11747:
@@ -72,40 +76,47 @@ policy_stores:
         entity Access_token = {"aud": String,"iss": String, "jti": String, "client_id": String,"org_id": String};
         entity Userinfo_token  = {"iss": String, "jti": String, "client_id": String};
         entity Empty;
+        type Context = {
+          user: User,
+          workload: Workload,
+          access_token: Access_token,
+          id_token: id_token,
+          userinfo_token: Userinfo_token,
+        };
         action "Update" appliesTo {
           principal: [Workload, User],
           resource: [Issue],
-          context: {}
+          context: Context
         };
         action "UpdateForWorkload" appliesTo {
           principal: [Workload, User],
           resource: [Issue],
-          context: {}
+          context: Context
         };
         action "UpdateForUser" appliesTo {
           principal: [Workload, User],
           resource: [Issue],
-          context: {}
+          context: Context
         };
         action "UpdateForRole" appliesTo {
           principal: [Role],
           resource: [Issue],
-          context: {}
+          context: Context
         };
         action "UpdateForUserAndRole" appliesTo {
           principal: [Workload, User],
           resource: [Issue],
-          context: {}
+          context: Context
         };
         action "UpdateForWorkloadAndRole" appliesTo {
           principal: [Workload, User],
           resource: [Issue],
-          context: {}
+          context: Context
         };
         action "NoApplies" appliesTo {
           principal: [Empty],
           resource: [Issue],
-          context: {}
+          context: Context
         };
         action "AlwaysDeny" appliesTo {
           principal:  [Workload, User],

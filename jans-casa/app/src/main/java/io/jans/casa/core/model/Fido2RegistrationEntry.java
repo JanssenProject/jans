@@ -1,79 +1,77 @@
 package io.jans.casa.core.model;
+
+import java.util.Date;
+
 import io.jans.as.model.fido.u2f.protocol.DeviceData;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
-import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
-
-import java.util.Date;
 
 //Using Fido2RegistrationEntry directly from fido2-model artifact does not work well!
 @DataEntry
 @ObjectClass(value = "jansFido2RegistrationEntry")
 public class Fido2RegistrationEntry extends Entry {
 
-    @AttributeName
-    private String displayName;
+	@AttributeName
+	private String displayName;
 
-    @AttributeName
-    private Date creationDate;
+	@AttributeName
+	private Date creationDate;
 
-    @AttributeName(name = "jansId")
-    private String id;
-    
-    @AttributeName(name = "jansApp")
-    private String application;
+	@AttributeName(name = "jansId")
+	private String id;
 
-    @JsonObject
-    @AttributeName(name = "jansRegistrationData" , ignoreDuringUpdate = true)
-    private Fido2RegistrationData registrationData;
-    
-    @AttributeName(name = "jansCounter", ignoreDuringUpdate = true)
+	@AttributeName(name = "jansApp")
+	private String application;
+
+	@JsonObject
+	@AttributeName(name = "jansRegistrationData", ignoreDuringUpdate = true)
+	private Fido2RegistrationData registrationData;
+
+	@AttributeName(name = "jansCounter", ignoreDuringUpdate = true)
 	private int counter;
 
-    @JsonObject
-   	@AttributeName(name = "jansDeviceData", ignoreDuringUpdate = true)
-   	private DeviceData deviceData;
-       
-    
-    @JsonObject
-    @AttributeName(name = "jansStatus" , ignoreDuringUpdate = true)
-    private String registrationStatus;
+	@JsonObject
+	@AttributeName(name = "jansDeviceData", ignoreDuringUpdate = true)
+	private DeviceData deviceData;
 
-    
-   
-    public String getDisplayName() {
-            return displayName;
-    }
+	@JsonObject
+	@AttributeName(name = "jansStatus", ignoreDuringUpdate = true)
+	private String registrationStatus;
 
-    public void setDisplayName(String displayName) {
-            this.displayName = displayName;
-    }
+	public String getDisplayName() {
+		return displayName;
+	}
 
-    public Date getCreationDate() {
-            return creationDate;
-    }
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
 
-    public void setCreationDate(Date creationDate) {
-            this.creationDate = creationDate;
-    }
+	public Date getCreationDate() {
+		return creationDate;
+	}
 
-    public String getId() {
-            return id;
-    }
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
 
-    public void setId(String id) {
-            this.id = id;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public Fido2RegistrationData getRegistrationData() {
-            return registrationData;
-    }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-    public void setRegistrationData(Fido2RegistrationData registrationData) {
-            this.registrationData = registrationData;
-    }
+	public Fido2RegistrationData getRegistrationData() {
+		return registrationData;
+	}
+
+	public void setRegistrationData(Fido2RegistrationData registrationData) {
+		this.registrationData = registrationData;
+	}
 
 	public int getCounter() {
 		return counter;
@@ -106,7 +104,5 @@ public class Fido2RegistrationEntry extends Entry {
 	public void setApplication(String application) {
 		this.application = application;
 	}
-
-
 
 }

@@ -1,152 +1,116 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+
 from typing import Optional, List, final, Dict, Any
+
 
 @final
 class BootstrapConfig:
     """
     Represents the configuration options for bootstrapping the application.
 
-    Attributes:
-        application_name (str): The name of the application.
-        policy_store_id (str): The ID of the policy store.
-        log_type (str): Type of logging. Defaults to "memory".
-        log_ttl (int): Log time-to-live in seconds. Defaults to 60.
-        user_authz (str): User authorization status. Defaults to "enabled".
-        workload_authz (str): Workload authorization status. Defaults to "enabled".
-        usr_workload_bool_op (str): Logical operator for user workload. Defaults to "AND".
-        local_jwks (str or None): Local JWKS (JSON Web Key Set). Defaults to None.
-        local_policy_store (str or None): Local policy store configuration. Defaults to None.
-        policy_store_local_fn (str or None): Local policy store function. Defaults to None.
-        jwt_sig_validation (str): JWT signature validation status. Defaults to "enabled".
-        jwt_status_validation (str): JWT status validation status. Defaults to "enabled".
-        jwt_signature_algorithms_supported (list): Supported JWT signature algorithms. Defaults to an empty list.
-        at_iss_validation (str): Access token issuer validation status. Defaults to "enabled".
-        at_jti_validation (str): Access token JWT ID validation status. Defaults to "enabled".
-        at_nbf_validation (str): Access token "not before" validation status. Defaults to "enabled".
-        at_exp_validation (str): Access token expiration validation status. Defaults to "enabled".
-        idt_iss_validation (str): ID token issuer validation status. Defaults to "enabled".
-        idt_sub_validation (str): ID token subject validation status. Defaults to "enabled".
-        idt_exp_validation (str): ID token expiration validation status. Defaults to "enabled".
-        idt_iat_validation (str): ID token issued-at validation status. Defaults to "enabled".
-        idt_aud_validation (str): ID token audience validation status. Defaults to "enabled".
-        userinfo_iss_validation (str): User info issuer validation status. Defaults to "enabled".
-        userinfo_sub_validation (str): User info subject validation status. Defaults to "enabled".
-        userinfo_aud_validation (str): User info audience validation status. Defaults to "enabled".
-        userinfo_exp_validation (str): User info expiration validation status. Defaults to "enabled".
-        id_token_trust_mode (str): Trust mode for ID tokens. Defaults to "strict".
-        lock (str): Lock mechanism status. Defaults to "disabled".
-        lock_master_configuration_uri (str or None): Master configuration URI for locks. Defaults to None.
-        dynamic_configuration (str): Dynamic configuration status. Defaults to "disabled".
-        lock_ssa_jwt (str or None): JWT for SSA locks. Defaults to None.
-        audit_log_interval (int): Interval for audit logs in seconds. Defaults to 0.
-        audit_health_interval (int): Interval for health audit in seconds. Defaults to 0.
-        audit_health_telemetry_interval (int): Interval for telemetry health audit in seconds. Defaults to 0.
-        listen_sse (str): Server-Sent Events listening status. Defaults to "disabled".
-
     Example Usage:
         bootstrap_config = BootstrapConfig({
-            "application_name": "MyApp",
-            "policy_store_id": "12345",
-            "log_type": "memory",
-            "log_ttl": 30,
+            "CEDARLING_APPLICATION_NAME": "MyApp",
+            "CEDARLING_POLICY_STORE_ID": "12345",
+            "CEDARLING_LOG_TYPE": "memory",
+            "CEDARLING_LOG_TTL": 30,
         })
     """
-
-    application_name: str
-    policy_store_uri: str | None
-    policy_store_id: str | None
-    log_type: str | None
-    log_ttl: int | None
-    user_authz: bool | None
-    workload_authz: bool | None
-    usr_workload_bool_op: str | None
-    local_jwks: str | None
-    local_policy_store: str | None
-    policy_store_local_fn: str | None
-    jwt_sig_validation: str
-    jwt_status_validation: str
-    jwt_signature_algorithms_supported: List[str]
-    at_iss_validation: str
-    at_jti_validation: str
-    at_nbf_validation: str
-    at_exp_validation: str
-    idt_iss_validation: str
-    idt_sub_validation: str
-    idt_exp_validation: str
-    idt_iat_validation: str
-    idt_aud_validation: str
-    userinfo_iss_validation: str
-    userinfo_sub_validation: str
-    userinfo_aud_validation: str
-    userinfo_exp_validation: str
-    id_token_trust_mode: str | None
-    lock: str
-    lock_master_configuration_uri: str | None
-    dynamic_configuration: str
-    lock_ssa_jwt: str | None
-    audit_log_interval: int
-    audit_health_interval: int
-    audit_health_telemetry_interval: int
-    listen_sse: str
 
     def __init__(
         self,
         options: dict,
-    ) -> None: ...
-    """
-    Initialize a new instance of the class with configuration options.
+    ) -> None:
+        """
+        Initialize a new instance of the class with configuration options.
 
-    Args:
-        options (dict): A Python dictionary containing configuration key-value pairs. 
-            The following keys are required:
-            - "application_name" (str): The name of the application.
-            - "policy_store_id" (str): The ID of the policy store.
-            
-            Optional keys and their default values:
-            - "policy_store_uri" (str or None): URI of the policy store. Defaults to None.
-            - "log_type" (str): Type of logging. Defaults to "memory".
-            - "log_ttl" (int): Log time-to-live in seconds. Defaults to 60.
-            - "user_authz" (str): User authorization status. Defaults to "enabled".
-            - "workload_authz" (str): Workload authorization status. Defaults to "enabled".
-            - "usr_workload_bool_op" (str): Logical operator for user workload. Defaults to "AND".
-            - "local_jwks" (str or None): Local JWKS (JSON Web Key Set). Defaults to None.
-            - "local_policy_store" (str or None): Local policy store configuration. Defaults to None.
-            - "policy_store_local_fn" (str or None): Local policy store function. Defaults to None.
-            - "jwt_sig_validation" (str): JWT signature validation status. Defaults to "enabled".
-            - "jwt_status_validation" (str): JWT status validation status. Defaults to "enabled".
-            - "jwt_signature_algorithms_supported" (list): Supported JWT signature algorithms. Defaults to an empty list.
-            - "at_iss_validation" (str): Access token issuer validation status. Defaults to "enabled".
-            - "at_jti_validation" (str): Access token JWT ID validation status. Defaults to "enabled".
-            - "at_nbf_validation" (str): Access token "not before" validation status. Defaults to "enabled".
-            - "at_exp_validation" (str): Access token expiration validation status. Defaults to "enabled".
-            - "idt_iss_validation" (str): ID token issuer validation status. Defaults to "enabled".
-            - "idt_sub_validation" (str): ID token subject validation status. Defaults to "enabled".
-            - "idt_exp_validation" (str): ID token expiration validation status. Defaults to "enabled".
-            - "idt_iat_validation" (str): ID token issued-at validation status. Defaults to "enabled".
-            - "idt_aud_validation" (str): ID token audience validation status. Defaults to "enabled".
-            - "userinfo_iss_validation" (str): User info issuer validation status. Defaults to "enabled".
-            - "userinfo_sub_validation" (str): User info subject validation status. Defaults to "enabled".
-            - "userinfo_aud_validation" (str): User info audience validation status. Defaults to "enabled".
-            - "userinfo_exp_validation" (str): User info expiration validation status. Defaults to "enabled".
-            - "id_token_trust_mode" (str): Trust mode for ID tokens. Defaults to "strict".
-            - "lock" (str): Lock mechanism status. Defaults to "disabled".
-            - "lock_master_configuration_uri" (str or None): Master configuration URI for locks. Defaults to None.
-            - "dynamic_configuration" (str): Dynamic configuration status. Defaults to "disabled".
-            - "lock_ssa_jwt" (str or None): JWT for SSA locks. Defaults to None.
-            - "audit_log_interval" (int): Interval for audit logs in seconds. Defaults to 0.
-            - "audit_health_interval" (int): Interval for health audit in seconds. Defaults to 0.
-            - "audit_health_telemetry_interval" (int): Interval for telemetry health audit in seconds. Defaults to 0.
-            - "listen_sse" (str): Server-Sent Events listening status. Defaults to "disabled".
+        Args:
+            options (dict): A dictionary containing configuration key-value pairs.
 
-    Returns:
-        An instance of the class.
+                Required keys:
+                    - "CEDARLING_APPLICATION_NAME" (str): The name of the application.
+                    - "CEDARLING_POLICY_STORE_ID" (str): The ID of the policy store.
 
-    Raises:
-        KeyError: If any required configuration key is missing.
-        ValueError: If a provided value is invalid or extraction fails.
-    """
+                Optional keys:
+                    - "CEDARLING_POLICY_STORE_URI" (str, optional): URI of the policy store. Defaults to None.
+                    - "CEDARLING_LOG_TYPE" (str, optional): Type of logging. Defaults to "memory".
+                    - "CEDARLING_LOG_TTL" (int, optional): Log time-to-live in seconds. Defaults to 60.
+                    - "CEDARLING_USER_AUTHZ" (str, optional): User authorization status. Defaults to "enabled".
+                    - "CEDARLING_WORKLOAD_AUTHZ" (str, optional): Workload authorization status. Defaults to "enabled".
+                    - "CEDARLING_USR_WORKLOAD_BOOL_OP" (str, optional): Logical operator for user workload. Defaults to "AND".
+                    - "CEDARLING_LOCAL_JWKS" (str, optional): Local JWKS (JSON Web Key Set). Defaults to None.
+                    - "CEDARLING_LOCAL_POLICY_STORE" (str, optional): Local policy store configuration. Defaults to None.
+                    - "CEDARLING_POLICY_STORE_LOCAL_FN" (str, optional): Local policy store function. Defaults to None.
+                    - "CEDARLING_JWT_SIG_VALIDATION" (str, optional): JWT signature validation status. Defaults to "enabled".
+                    - "CEDARLING_JWT_STATUS_VALIDATION" (str, optional): JWT status validation status. Defaults to "enabled".
+                    - "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED" (list, optional): Supported JWT signature algorithms. Defaults to an empty list.
+                    - "CEDARLING_AT_ISS_VALIDATION" (str, optional): Access token issuer validation status. Defaults to "enabled".
+                    - "CEDARLING_AT_JTI_VALIDATION" (str, optional): Access token JWT ID validation status. Defaults to "enabled".
+                    - "CEDARLING_AT_NBF_VALIDATION" (str, optional): Access token "not before" validation status. Defaults to "enabled".
+                    - "CEDARLING_AT_EXP_VALIDATION" (str, optional): Access token expiration validation status. Defaults to "enabled".
+                    - "CEDARLING_IDT_ISS_VALIDATION" (str, optional): ID token issuer validation status. Defaults to "enabled".
+                    - "CEDARLING_IDT_SUB_VALIDATION" (str, optional): ID token subject validation status. Defaults to "enabled".
+                    - "CEDARLING_IDT_EXP_VALIDATION" (str, optional): ID token expiration validation status. Defaults to "enabled".
+                    - "CEDARLING_IDT_IAT_VALIDATION" (str, optional): ID token issued-at validation status. Defaults to "enabled".
+                    - "CEDARLING_IDT_AUD_VALIDATION" (str, optional): ID token audience validation status. Defaults to "enabled".
+                    - "CEDARLING_USERINFO_ISS_VALIDATION" (str, optional): User info issuer validation status. Defaults to "enabled".
+                    - "CEDARLING_USERINFO_SUB_VALIDATION" (str, optional): User info subject validation status. Defaults to "enabled".
+                    - "CEDARLING_USERINFO_AUD_VALIDATION" (str, optional): User info audience validation status. Defaults to "enabled".
+                    - "CEDARLING_USERINFO_EXP_VALIDATION" (str, optional): User info expiration validation status. Defaults to "enabled".
+                    - "CEDARLING_ID_TOKEN_TRUST_MODE" (str, optional): Trust mode for ID tokens. Defaults to "strict".
+                    - "CEDARLING_LOCK" (str, optional): Lock mechanism status. Defaults to "disabled".
+                    - "CEDARLING_LOCK_MASTER_CONFIGURATION_URI" (str, optional): Master configuration URI for locks. Defaults to None.
+                    - "CEDARLING_DYNAMIC_CONFIGURATION" (str, optional): Dynamic configuration status. Defaults to "disabled".
+                    - "CEDARLING_LOCK_SSA_JWT" (str, optional): JWT for SSA locks. Defaults to None.
+                    - "CEDARLING_AUDIT_LOG_INTERVAL" (int, optional): Interval for audit logs in seconds. Defaults to 0.
+                    - "CEDARLING_AUDIT_HEALTH_INTERVAL" (int, optional): Interval for health audit in seconds. Defaults to 0.
+                    - "CEDARLING_AUDIT_HEALTH_TELEMETRY_INTERVAL" (int, optional): Interval for telemetry health audit in seconds. Defaults to 0.
+                    - "CEDARLING_LISTEN_SSE" (str, optional): Server-Sent Events listening status. Defaults to "disabled".
 
-    def disable_all_jwt_validation(self) -> None: ...
+        Returns:
+            None: This method initializes the instance.
 
+        Raises:
+            KeyError: If any required configuration key is missing.
+            ValueError: If a provided value is invalid or extraction fails.
+        """
+        ...
+
+    @staticmethod
+    def load_from_file(path: str) -> BootstrapConfig:
+        """
+        Loads the configuration from a file.
+
+        Args:
+            path (str): The path to the configuration file.
+
+        Returns:
+            BootstrapConfig: An instance of the configuration class.
+
+        Raises:
+            ValueError: If a provided value is invalid or decoding fails.
+            OSError: If there is an error while reading the file.
+        """
+        ...
+
+    @staticmethod
+    def load_from_json(config_json: str) -> BootstrapConfig:
+        """
+        Loads the configuration from a JSON string.
+
+        Args:
+            config_json (str): The JSON string containing the configuration.
+
+        Returns:
+            BootstrapConfig: An instance of the configuration class.
+
+        Raises:
+            ValueError: If a provided value is invalid or extraction fails.
+        """
+        ...
 
 @final
 class Cedarling:

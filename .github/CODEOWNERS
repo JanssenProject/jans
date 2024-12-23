@@ -18,7 +18,7 @@
 /jans-core/ @yurem @yuriyz @yuriyzz
 /jans-orm/ @yurem @yuriyz
 /jans-auth-server/ @yurem @yuriyz @yuriyzz
-/jans-fido2/ @yurem @yackermann
+/jans-fido2/ @yurem
 /jans-lock/ @yurem
 /jans-scim/ @jgomer2001
 /jans-config-api/ @pujavs @yuriyz @yurem

@@ -68,11 +68,6 @@ class JansLockInstaller(JettyInstaller):
             self.dbUtils.set_jans_auth_conf_dynamic({'lockMessageConfig': {'enableTokenMessages': True, 'tokenMessagesChannel': 'jans_token'}})
             Config.lock_message_provider_type = 'POSTGRES'
 
-        # we don't need to install lock-plugin to jans-config-api for remote client
-        if hasattr(base.current_app, 'ConfigApiInstaller'):
-            # deploy config-api plugin
-            base.current_app.ConfigApiInstaller.source_files.append(self.source_files[3])
-            base.current_app.ConfigApiInstaller.install_plugin('lock-plugin')
 
         self.apache_lock_config()
 
@@ -180,3 +175,7 @@ class JansLockInstaller(JettyInstaller):
 
     def installed(self):
         return os.path.exists(self.jetty_service_webapps) or os.path.exists(os.path.join(base.current_app.JansAuthInstaller.custom_lib_dir, os.path.basename(self.source_files[1][0])))
+
+
+    def service_post_install_tasks(self):
+        base.current_app.ConfigApiInstaller.install_plugin('lock')

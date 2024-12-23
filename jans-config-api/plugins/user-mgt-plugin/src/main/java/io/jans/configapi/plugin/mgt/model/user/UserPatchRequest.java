@@ -34,6 +34,6 @@ public class UserPatchRequest implements Serializable {
 
     @Override
     public String toString() {
-        return "UserPatchRequest [jsonPatchString=" + jsonPatchString + ", customAttributes=" + customAttributes + "]";
+        return "UserPatchRequest [jsonPatchString=" + jsonPatchString + "]";
     }
 }

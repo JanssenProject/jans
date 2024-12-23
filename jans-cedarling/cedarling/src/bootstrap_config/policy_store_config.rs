@@ -32,8 +32,7 @@ pub enum PolicyStoreSource {
 
     /// Fetch the policies from the Lock Master service using a specified identifier.
     ///
-    /// The string contains the identifier of the policy store, which is set in the
-    /// `CEDARLING_POLICY_STORE_ID` bootstrap configuration.
+    /// The string contains a URI where the policy store can be retrieved.
     LockMaster(String),
 
     /// Read policy from a JSON File.

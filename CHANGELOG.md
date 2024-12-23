@@ -1,5 +1,64 @@
 # Changelog
 
+## [1.1.6](https://github.com/JanssenProject/jans/compare/v1.1.5...v1.1.6) (2024-11-20)
+### ⚠ BREAKING CHANGES
+* chore(charts)!: remove spanner support from Helm charts by @iromli in https://github.com/JanssenProject/jans/pull/10071
+* chore(cloud-native)!: remove spanner support from OCI images by @iromli in https://github.com/JanssenProject/jans/pull/10070
+* chore(jans-pycloudlib)!: remove couchbase support from pycloudlib by @iromli in https://github.com/JanssenProject/jans/pull/10129
+* chore(cloud-native)!: remove couchbase support from OCI images by @iromli in https://github.com/JanssenProject/jans/pull/10132
+* chore(charts)!: remove couchbase support from Helm charts by @iromli in https://github.com/JanssenProject/jans/pull/10138
+
+## What's Changed
+* chore(jans-linux-setup) remove spanner db by @devrimyatar in https://github.com/JanssenProject/jans/pull/10068
+* chore(charts)!: remove spanner support from Helm charts by @iromli in https://github.com/JanssenProject/jans/pull/10071
+* fix(config-api): date filter fix by @pujavs in https://github.com/JanssenProject/jans/pull/10075
+* chore(docs): docs remove spanner refs by @ossdhaval in https://github.com/JanssenProject/jans/pull/10076
+* feat(jans-cedarling): improve error handling for JWKS responses by @rmarinn in https://github.com/JanssenProject/jans/pull/9982
+* feat(jans-cedarling): ensure that all cedarling test fixture files are human-readable. by @djellemah in https://github.com/JanssenProject/jans/pull/10036
+* feat(jans-config-api): adding allowSmtpKeystoreEdit property in admin-ui configuration by @duttarnab in https://github.com/JanssenProject/jans/pull/10091
+* fix(jans-cli-tui): more verbose in smtp test response by @devrimyatar in https://github.com/JanssenProject/jans/pull/10090
+* fix(jans-bom): define plugins in base parent project by @yurem in https://github.com/JanssenProject/jans/pull/10087
+* fix(jans-orm): throw exception if table in DB is not exists by @yurem in https://github.com/JanssenProject/jans/pull/10096
+* fix(jans-casa): primary button not changing color when customized via custom branding plugin by @mjatin-dev in https://github.com/JanssenProject/jans/pull/10084
+* fix(jans-cli-tui): remove filePath when putting asset by @devrimyatar in https://github.com/JanssenProject/jans/pull/10107
+* fix(jans-lock): fix broken link in lock docs by @yurem in https://github.com/JanssenProject/jans/pull/10110
+* feat(jans-cedarling): add env variable for python by @SafinWasi in https://github.com/JanssenProject/jans/pull/10115
+* chore(cloud-native)!: remove spanner support from OCI images by @iromli in https://github.com/JanssenProject/jans/pull/10070
+* chore: upgrade javascript libraries to newer versions in HTML files by @mjatin-dev in https://github.com/JanssenProject/jans/pull/10108
+* fix: remove unnecessary mount for k8s setup by @moabu in https://github.com/JanssenProject/jans/pull/10112
+* docs(update): custom scripts docs update by @mmrraju in https://github.com/JanssenProject/jans/pull/10125
+* chore(jans-pycloudlib)!: remove couchbase support from pycloudlib by @iromli in https://github.com/JanssenProject/jans/pull/10129
+* fix(docs): fix docs link by @ossdhaval in https://github.com/JanssenProject/jans/pull/10123
+* chore(jans-linux-setup): drop couchbase support by @devrimyatar in https://github.com/JanssenProject/jans/pull/10133
+* fix(docs): remove Couchbase references by @ossdhaval in https://github.com/JanssenProject/jans/pull/10119
+* chore(jans-cedarling): remove ipaddr by @SafinWasi in https://github.com/JanssenProject/jans/pull/10140
+* ci: move jenkins operations to GH by @moabu in https://github.com/JanssenProject/jans/pull/10082
+* chore(cloud-native)!: remove couchbase support from OCI images by @iromli in https://github.com/JanssenProject/jans/pull/10132
+* feat(jans-cedarling): Implement check authorization principals based on the schema for action by @olehbozhok in https://github.com/JanssenProject/jans/pull/10126
+* fix(jans-orm): update SQL ORM tests to conform latest JSON Filter API by @yurem in https://github.com/JanssenProject/jans/pull/10150
+* fix(jans-link): add missing configuration providers by @yurem in https://github.com/JanssenProject/jans/pull/10124
+* feat(jans-cedarling): update Trusted Issuers schema in the policy store by @rmarinn in https://github.com/JanssenProject/jans/pull/10141
+* fix(jans-bom): update libs by @yurem in https://github.com/JanssenProject/jans/pull/10154
+* fix(config-api): adding missing scope in spec and udated example of search field by @pujavs in https://github.com/JanssenProject/jans/pull/10156
+* fix(jans-linux-setup): use sqlconnection instead of mysqlconnection by @devrimyatar in https://github.com/JanssenProject/jans/pull/10161
+* chore(cloud-native): upgrade libs to reduce vulnerabilities by @iromli in https://github.com/JanssenProject/jans/pull/10168
+* chore(charts)!: remove couchbase support from Helm charts by @iromli in https://github.com/JanssenProject/jans/pull/10138
+* fix(jans-linux-setup): missing scopes of api-admin by @devrimyatar in https://github.com/JanssenProject/jans/pull/10162
+* feat(jans-cli-tui): session management by @devrimyatar in https://github.com/JanssenProject/jans/pull/10164
+* feat: implement native internationalization for Agama projects by @jgomer2001 in https://github.com/JanssenProject/jans/pull/10165
+* ci: remove python3 ldap package by @moabu in https://github.com/JanssenProject/jans/pull/10172
+* chore: adjust projects that use localization labels by @jgomer2001 in https://github.com/JanssenProject/jans/pull/10174
+* feat(jans-cedarling): implement mapping JWT payload to `cedar-policy` entity by @olehbozhok in https://github.com/JanssenProject/jans/pull/10169
+* refactor(jans-cedarling): relax JWT validation to allow optional claims by @rmarinn in https://github.com/JanssenProject/jans/pull/10173
+* fix(jans-cli-tui): file type scripts by @devrimyatar in https://github.com/JanssenProject/jans/pull/10181
+* chore(jans-pycloudlib): remove ldap references from pycloudlib by @iromli in https://github.com/JanssenProject/jans/pull/10177
+* fix: admin-ui plugin should send appropriate message on expiry/ for inactive license. #10178 by @duttarnab in https://github.com/JanssenProject/jans/pull/10189
+* User auth test by @yurem in https://github.com/JanssenProject/jans/pull/10191
+* chore(jans-cedarling): update python example and docs by @SafinWasi in https://github.com/JanssenProject/jans/pull/10183
+* feat(jans-auth-server): openID AuthZEN implementation by @yuriyz in https://github.com/JanssenProject/jans/pull/10197
+* chore(release): release 1.1.6 by @moabu in https://github.com/JanssenProject/jans/pull/10201
+
+
 ## [1.0.21](https://github.com/JanssenProject/jans/compare/v1.0.21...v1.0.21) (2023-12-14)
 
 

@@ -49,6 +49,10 @@ Install Gluu Casa? [No] :
    
 5. Finally, review the summary screen that gives an overview of the selections made during the setup process.
 
+Note! After setup completed, you will be prompted to remove setup files (directories `/opt/dist` and `/opt/jans/jans-setup`).
+If you are not going to do any post-setup operations, type **yes** to remove setup files. If you don't respond in 10 seconds,
+setup files will be preserved.
+
 ### Avoiding common issues
 
 Avoid setup issues by acknowledging the following:

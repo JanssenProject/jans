@@ -247,7 +247,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                 self.chown(jetty_tmpfiles_dst, Config.root_user, Config.root_group)
                 self.run([paths.cmd_chmod, '644', jetty_tmpfiles_dst])
 
-            self.copyFile(self.jetty_bin_sh_fn, os.path.join(Config.distFolder, 'scripts', service_name), backup=False)
+            self.copyFile(self.jetty_bin_sh_fn, os.path.join(Config.jansOptFolder, 'scripts', service_name), backup=False)
 
         serviceConfiguration['installed'] = True
 

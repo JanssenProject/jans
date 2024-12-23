@@ -156,7 +156,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         # Create these folder on all instances
         for folder in (Config.jansOptFolder, Config.jansOptBinFolder, Config.jansOptSystemFolder,
                         Config.jansOptPythonFolder, Config.configFolder, Config.certFolder,
-                        Config.output_dir, Config.os_default, os.path.join(Config.distFolder, 'scripts')):
+                        Config.output_dir, Config.os_default, os.path.join(Config.jansOptFolder, 'scripts')):
 
             if not os.path.exists(folder):
                 self.run([paths.cmd_mkdir, '-p', folder])
@@ -264,10 +264,12 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.copyFile(script, Config.jansOptBinFolder)
             self.run([paths.cmd_chmod, '+x', script])
 
-
-        health_services_script_fn = os.path.join(Config.jansOptBinFolder, os.path.basename(Config.jansScriptFiles[3]))
-        self.chown(health_services_script_fn, user=Config.root_user, group=Config.jetty_user)
-        self.run([paths.cmd_chmod, '0750', health_services_script_fn])
+        # scripts that can be executed by user jetty
+        jetty_user_scripts = (Config.jansScriptFiles[3], Config.jansScriptFiles[4])
+        for script in jetty_user_scripts:
+            script_fn = os.path.join(Config.jansOptBinFolder, os.path.basename(script))
+            self.chown(script_fn, user=Config.root_user, group=Config.jetty_user)
+            self.run([paths.cmd_chmod, '0750', script_fn])
 
         self.logIt("Rendering encode.py")
         encode_script = self.readFile(os.path.join(Config.templateFolder, 'encode.py'))
@@ -308,7 +310,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 else:
                     scr_content.insert(0, first_line)
                 self.writeFile(scr_path, '\n'.join(scr_content), backup=False)
-            if scr.name in (show_version_s, os.path.basename(health_services_script_fn)):
+            if scr.name in [show_version_s] + [os.path.basename(_) for _ in jetty_user_scripts]:
                 continue
             self.run([paths.cmd_chmod, '700', scr_path])
 
@@ -511,6 +513,20 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         # Update jansServiceModule for config-api on DB
         base.current_app.ConfigApiInstaller.update_jansservicemodule()
+
+        self.call_service_post_install_tasks()
+
+    def call_service_post_install_tasks(self):
+
+        # call service_post_install_tasks before starting services
+        self.logIt("Calling service_post_install_tasks()")
+
+        for jans_service in jansProgress.services:
+            if 'object' in jans_service:
+                service_installer = jans_service['object']
+                service_install_var = getattr(service_installer, 'install_var', None)
+                if Config.get(service_install_var):
+                    service_installer.service_post_install_tasks()
 
     def secure_files(self):
         self.run([paths.cmd_chown, '-R', 'jetty:root', Config.certFolder])

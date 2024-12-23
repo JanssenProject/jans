@@ -87,7 +87,9 @@ public class CoseService {
         int keyToUse = uncompressedECPointNode.get("1").asInt();
         int algorithmToUse = uncompressedECPointNode.get("3").asInt();
         CoseKeyType keyType = CoseKeyType.fromNumericValue(keyToUse);
-
+        log.debug("keyToUse"+ keyToUse);
+        log.debug("algorithmToUse : "+ algorithmToUse);
+        log.debug("keyType"+keyType);
         switch (keyType) {
         case RSA: {
             CoseRSAAlgorithm coseRSAAlgorithm = CoseRSAAlgorithm.fromNumericValue(algorithmToUse);

@@ -231,15 +231,15 @@ Janssen's FIDO2 server -
 ### 3. Skip metadata validation
 
 Metadata validation is recommended but not mandatory as per FIDO2 specifications.
-In FIDO2 we can disable this validation by setting the `skipValidateMdsInAttestationEnabled` parameter (default is
-false).
+In FIDO2 we can disable this validation by setting the `attestionMode` parameter (default is
+monitor).
 
 It should look something like this:
 
 ```
 "fido2Configuration": {
   ...,
-  "skipValidateMdsInAttestationEnabled": true,
+  "attestationMode": "disabled",
   ...
 }
 ```

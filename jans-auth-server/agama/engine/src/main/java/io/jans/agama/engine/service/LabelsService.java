@@ -29,7 +29,7 @@ public class LabelsService implements TemplateMethodModelEx {
     //letters, digits, hypens, or sharp signs. Finally right bracket optionally followed by horizontal space
     //A string matching the regex is used mark the beginning of a specific-locale section in a labels file  
     private static final Pattern SECTION_PATT = Pattern.compile("^\\[[ \\t]*([\\w-#]+)[ \\t]*\\][ \\t]*$");
-    
+
     @Inject
     private Logger logger;
     
@@ -37,6 +37,18 @@ public class LabelsService implements TemplateMethodModelEx {
     private EngineConfig econf;
     
     private Map<String, Map<String, Properties>> labelsMap;     //Map<path id, Map<locale id, ....
+    
+    public String get(String key, Object... args) {
+
+        Pair<String, Locale> p = getLocalizedLabel(key, CdiUtil.bean(WebContext.class).getLocale());
+        String label = p.getFirst();
+        
+        if (label != null && args.length > 0) {
+            label = formatMessage(label, p.getSecond(), args);
+        }        
+        return Objects.toString(label);
+        
+    }
 
     public Object exec(List args) throws TemplateModelException {
         
@@ -77,14 +89,7 @@ public class LabelsService implements TemplateMethodModelEx {
                     subArgs[i] = arg;
                 }               
             }
-            try {
-                MessageFormat mf = new MessageFormat(label);
-                Optional.ofNullable(p.getSecond()).ifPresent(mf::setLocale);                    
-                label = mf.format(subArgs, new StringBuffer(), null).toString();
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-                label = "error!";
-            }
+            label = formatMessage(label, p.getSecond(), subArgs);
         }
         
         return new SimpleScalar(Objects.toString(label));   //return "null" to avoid template render crash
@@ -169,6 +174,19 @@ public class LabelsService implements TemplateMethodModelEx {
         } while (locCopy != null && label == null);
         
         return new Pair<>(label, locCopy);
+        
+    }
+    
+    private String formatMessage(String pattern, Locale locale, Object[] args) {
+        
+        try {
+            MessageFormat mf = new MessageFormat(pattern);
+            Optional.ofNullable(locale).ifPresent(mf::setLocale);                    
+            return mf.format(args, new StringBuffer(), null).toString();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return "error!";
+        }
         
     }
     

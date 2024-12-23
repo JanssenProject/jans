@@ -150,7 +150,7 @@ class BaseInstaller:
                         cmd_list.insert(-1, '--enable')
                     self.run(cmd_list, None, None, True)
                 elif base.systemctl:
-                    local_script = os.path.join(Config.distFolder, 'scripts', service)
+                    local_script = os.path.join(Config.jansOptFolder, 'scripts', service)
                     if os.path.exists(local_script):
                         self.run([local_script, operation], useWait=True)
                     else:
@@ -229,7 +229,7 @@ class BaseInstaller:
 
     def create_folders(self):
         pass
-    
+
     def copy_static(self):
         pass
 
@@ -240,4 +240,7 @@ class BaseInstaller:
         pass
 
     def service_post_setup(self):
+        pass
+
+    def service_post_install_tasks(self):
         pass

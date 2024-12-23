@@ -13,7 +13,7 @@ public class FidoDevice extends RegisteredCredential implements Comparable<FidoD
     private Date lastAccessTime;
     private String status;
     private String application;
-    
+    private String [] transports; 
     public String getId() {
         return id;
     }
@@ -62,6 +62,16 @@ public class FidoDevice extends RegisteredCredential implements Comparable<FidoD
         this.id = id;
     }
 
+    public String [] getTransports()
+    {
+    	return transports;
+    }
+    
+    public void setTransports(String t[])
+    {
+    	this.transports = t;
+    }
+    
     public int compareTo(FidoDevice k) {
         long date1 = getCreationDate().getTime();
         long date2 = k.getCreationDate().getTime();
@@ -70,6 +80,16 @@ public class FidoDevice extends RegisteredCredential implements Comparable<FidoD
     
     public static boolean isPlatformAuthenticator(FidoDevice device) {
         if (device instanceof PlatformAuthenticator)
+            return true;
+        return false;
+    }
+    public static boolean isMultideviceAuthenticator(FidoDevice device) {
+        if (device instanceof MultideviceAuthenticator)
+            return true;
+        return false;
+    }
+    public static boolean isSecurityKey(FidoDevice device) {
+        if (device instanceof SecurityKey)
             return true;
         return false;
     }

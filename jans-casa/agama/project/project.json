@@ -9,19 +9,19 @@
             "selector": {
                 "io.jans.casa.authn.otp": {
                     "icon": "<i class='fas fa-qrcode'></i>",
-                    "text": "A verification code from my OTP mobile app or hardware token"
+                    "textKey": "casa.selector.otp"
                 },
                 "io.jans.casa.authn.twilio_sms": {
                     "icon": "<i class='fas fa-sms'></i>",
-                    "text": "A verification code sent to my phone via text message"
+                    "textKey": "casa.selector.twilio"
                 },
                 "io.jans.casa.authn.fido2": {
                     "icon": "<span class='fa-layers fa-fw' style='bottom:-.6rem;left:-.4rem'><i class='fas fa-tablet' data-fa-transform='shrink-1'></i><i class='fas fa-mobile-alt' data-fa-transform='up-7 shrink-4'></i><i class='fas fa-stream' data-fa-transform='rotate--90 up-9 shrink-12'></i></span>",
-                    "text": "My Fido device (eg. security key)"
+                    "textKey": "casa.selector.fido"
                 },
                 "io.jans.casa.authn.super_gluu": {
                     "icon": "<i class='far fa-bell' data-fa-transform='shrink-1'></i>",
-                    "text": "A notification to my Super Gluu"
+                    "textKey": "casa.selector.sg"
                 }
             }
         },

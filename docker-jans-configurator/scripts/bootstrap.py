@@ -15,8 +15,6 @@ from cryptography.x509.oid import NameOID
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for
-from jans.pycloudlib.persistence.sql import sync_sql_password
-from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import get_sys_random_chars
 from jans.pycloudlib.utils import encode_text
@@ -509,13 +507,6 @@ def load(configuration_file, dump_file):
     deps = ["config_conn", "secret_conn"]
     wait_for(manager, deps=deps)
 
-    mapper = PersistenceMapper()
-    backend_type = mapper.mapping["default"]
-
-    match backend_type:
-        case "sql":
-            sync_sql_password(manager)
-
     # check whether config and secret in backend have been initialized
     should_skip = as_boolean(os.environ.get("CN_CONFIGURATOR_SKIP_INITIALIZED", False))
     if should_skip and manager.config.get("hostname") and manager.secret.get("ssl_cert"):
@@ -523,7 +514,7 @@ def load(configuration_file, dump_file):
         logger.info("Configmaps and secrets have been initialized")
         return
 
-    with manager.lock.create_lock("configurator-load"):
+    with manager.create_lock("configurator-load"):
         logger.info(f"Loading configmaps and secrets from {configuration_file}")
 
         params, err, code = load_schema_from_file(configuration_file)
@@ -552,13 +543,6 @@ def dump(dump_file):
     """
     deps = ["config_conn", "secret_conn"]
     wait_for(manager, deps=deps)
-
-    mapper = PersistenceMapper()
-    backend_type = mapper.mapping["default"]
-
-    match backend_type:
-        case "sql":
-            sync_sql_password(manager)
 
     # dump all configuration from remote backend to file
     dump_to_file(manager, dump_file)

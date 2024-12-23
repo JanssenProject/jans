@@ -17,8 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,11 +43,9 @@ import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.SortOrder;
-import io.jans.orm.model.base.LocalizedString;
 import io.jans.orm.reflect.property.PropertyAnnotation;
 import io.jans.orm.reflect.util.ReflectHelper;
 import io.jans.orm.search.filter.Filter;
-import io.jans.orm.search.filter.FilterProcessor;
 import io.jans.orm.sql.model.ConvertedExpression;
 import io.jans.orm.sql.model.SearchReturnDataType;
 import io.jans.orm.sql.model.TableMapping;
@@ -70,9 +66,6 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
     private static final Logger LOG = LoggerFactory.getLogger(SqlEntryManager.class);
 
     private static final String JSON_DATA_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS";
-
-    @Inject
-    private Logger log;
 
     private final SqlFilterConverter filterConverter;
 

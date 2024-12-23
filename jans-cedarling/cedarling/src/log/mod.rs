@@ -53,12 +53,14 @@
 
 pub mod interface;
 mod log_entry;
+mod log_level;
 pub(crate) mod log_strategy;
 mod memory_logger;
 mod nop_logger;
 mod stdout_logger;
 
 pub use log_entry::*;
+pub use log_level::*;
 
 #[cfg(test)]
 mod test;
@@ -70,7 +72,7 @@ pub use interface::LogStorage;
 pub(crate) use log_strategy::LogStrategy;
 
 /// Type alias for logger that is used in application
-pub(crate) type Logger = Arc<dyn interface::Log>;
+pub(crate) type Logger = Arc<LogStrategy>;
 
 /// Initialize logger.
 /// entry point for initialize logger

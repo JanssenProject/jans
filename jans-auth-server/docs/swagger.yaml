@@ -19,6 +19,47 @@ tags:
     description: Janssen Authorization Server is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens. Server currently implements all required aspects of the OpenID Connect stack, including an OAuth 2.0 authorization server, Simple Web Discovery, Dynamic Client Registration, JSON Web Tokens, JSON Web Keys, and User Info Endpoint.
 
 paths:
+  /.well-known/authzen-configuration:
+    get:
+      tags:
+        - AuthZEN Access Evaluation Discovery
+      summary: Gets Access Evaluation configuration data.
+      description: Gets Access Evaluation configuration data.
+      operationId: authzen-configuration
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description:  AuthZEN Access Evaluation Discovery
+                required:
+                  - access_evaluation_v1_endpoint
+                properties:
+                  access_evaluation_v1_endpoint:
+                    type: string
+                    description: "URL of the Access Evaluation endpoint."
+                    example: https://sample.com/jans-auth/restv1/evaluate
+        500:
+          description: Error during request processing endpoint.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - error
+                  - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                      - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string
   /evaluation:
     post:
       tags:
@@ -982,6 +1023,11 @@ paths:
                     type: string
                   introspection_endpoint:
                     type: string
+                    description: "URL of the Introspection endpoint."
+                  access_evaluation_v1_endpoint:
+                    type: string
+                    description: "URL of the Access Evaluation endpoint."
+                    example: https://sample.com/jans-auth/restv1/evaluate
                   auth_level_mapping:
                     type: object
                     additionalProperties:

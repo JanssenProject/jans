@@ -112,7 +112,10 @@ public class AuditLogInterceptor {
                         clazz.isPrimitive());
 
                 Object obj = ctxParameters[i];
-                AUDIT_LOG.info("RequestReaderInterceptor final - obj -  obj:{} ", obj);
+                if (obj != null && (!obj.toString().toUpperCase().contains("PASSWORD")
+                        || !obj.toString().toUpperCase().contains("SECRET"))) {
+                    AUDIT_LOG.info("RequestReaderInterceptor final - obj -  obj:{} ", obj);
+                }
 
             }
         }

@@ -22,7 +22,6 @@ import io.jans.service.cdi.event.ApplicationInitializedEvent;
 import io.jans.service.cdi.event.LdapConfigurationReload;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.service.custom.script.CustomScriptManager;
-import io.jans.service.document.store.manager.DocumentStoreManager;
 import io.jans.service.metric.inject.ReportMetric;
 import io.jans.util.StringHelper;
 import io.jans.orm.util.properties.FileConfiguration;
@@ -44,7 +43,6 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.ServletContext;
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -57,8 +55,6 @@ import java.util.Properties;
 @ApplicationScoped
 @Named
 public class AppInitializer {
-
-	private final static String DOCUMENT_STORE_MANAGER_JANS_FIDO2_TYPE = "jans-fido2"; // Module name
 
 	@Inject
 	private Logger log;
@@ -108,9 +104,6 @@ public class AppInitializer {
 	@Inject
 	private MDS3UpdateTimer mds3UpdateTimer;
 
-    @Inject
-    private DocumentStoreManager documentStoreManager;
-
 	@PostConstruct
 	public void createApplicationComponents() {
 		try {
@@ -146,9 +139,6 @@ public class AppInitializer {
 		cleanerTimer.initTimer();
 		mds3UpdateTimer.initTimer();
 		customScriptManager.initTimer(supportedCustomScriptTypes);
-
-        // Initialize Document Store Manager
-        documentStoreManager.initTimer(Arrays.asList(DOCUMENT_STORE_MANAGER_JANS_FIDO2_TYPE));
 
 		// Notify plugins about finish application initialization
 		eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)

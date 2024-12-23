@@ -1,6 +1,8 @@
 import os
 import glob
 import shutil
+import uuid
+
 from pathlib import Path
 
 from setup_app import paths
@@ -9,6 +11,8 @@ from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 
+Config.jans_fido2_port = '8073'
+
 class FidoInstaller(JettyInstaller):
 
     source_files = [
@@ -16,6 +20,7 @@ class FidoInstaller(JettyInstaller):
                 (os.path.join(Config.dist_app_dir, os.path.basename(base.current_app.app_info['APPLE_WEBAUTHN'])), base.current_app.app_info['APPLE_WEBAUTHN']),
                 (os.path.join(Config.dist_app_dir, 'fido2/mds/toc/toc.jwt'), 'https://mds.fidoalliance.org/'),
                 (os.path.join(Config.dist_app_dir, 'fido2/mds/cert/root-r3.crt'), 'https://secure.globalsign.com/cacert/root-r3.crt'),
+                (os.path.join(Config.dist_jans_dir, 'fido2-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/fido2-plugin/{0}/fido2-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
                 ]
 
     def __init__(self):
@@ -34,6 +39,10 @@ class FidoInstaller(JettyInstaller):
         self.fido2_error_json = os.path.join(self.output_folder, 'jans-fido2-errors.json')
         self.fido2_static_conf_json = os.path.join(self.output_folder, 'static-conf.json')
         self.ldif_fido2 = os.path.join(self.output_folder, 'fido2.ldif')
+        self.ldif_fido2_documents = os.path.join(self.output_folder, 'docuemts.ldif')
+
+        self.fido_document_certs_dir = os.path.join(self.fido2ConfigFolder, 'mds/cert')
+        self.fido_document_tocs_dir = os.path.join(self.fido2ConfigFolder, 'mds/toc')
 
     def install(self):
 
@@ -43,24 +52,33 @@ class FidoInstaller(JettyInstaller):
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
 
-        if Config.installed_instance and Config.install_config_api:
-            base.current_app.ConfigApiInstaller.install_plugin('fido2-plugin')
-
         self.enable()
+
+    def generate_configuration(self):
+        Config.fido_document_certs_inum = str(uuid.uuid4())
+        Config.fido_document_tocs_inum = str(uuid.uuid4())
+        self.fido_document_creation_date = self.get_ldap_time()
 
     def render_import_templates(self):
 
-        self.renderTemplateInOut(self.fido2_dynamic_conf_json, self.template_folder, self.output_folder)
-        self.renderTemplateInOut(self.fido2_error_json, self.template_folder, self.output_folder)
-        self.renderTemplateInOut(self.fido2_static_conf_json, self.template_folder, self.output_folder)
+        for tmp_ in (
+                self.fido2_dynamic_conf_json,
+                self.fido2_error_json,
+                self.fido2_static_conf_json,
+                ):
+            self.renderTemplateInOut(tmp_, self.template_folder, self.output_folder)
 
         Config.templateRenderingDict['fido2_dynamic_conf_base64'] = self.generate_base64_file(self.fido2_dynamic_conf_json, 1)
         Config.templateRenderingDict['fido2_error_base64'] = self.generate_base64_file(self.fido2_error_json, 1)
         Config.templateRenderingDict['fido2_static_conf_base64'] = self.generate_base64_file(self.fido2_static_conf_json, 1)
 
-        self.renderTemplateInOut(self.ldif_fido2, self.template_folder, self.output_folder)
+        Config.templateRenderingDict['fido_document_tocs_base64'] = self.generate_base64_file(self.source_files[2][0], 1)
+        Config.templateRenderingDict['fido_document_certs_base64'] = self.generate_base64_file(self.source_files[3][0], 1)
 
-        ldif_files = [self.ldif_fido2]
+        for tmp_ in (self.ldif_fido2, self.ldif_fido2_documents):
+            self.renderTemplateInOut(tmp_, self.template_folder, self.output_folder)
+
+        ldif_files = [self.ldif_fido2, self.ldif_fido2_documents]
         self.dbUtils.import_ldif(ldif_files)
 
 
@@ -88,7 +106,6 @@ class FidoInstaller(JettyInstaller):
             self.copyFile(self.source_files[1][0], target_dir)
 
         # copy external files
-        self.copy_tree(
-                os.path.join(Config.dist_app_dir, 'fido2'),
-                self.fido2ConfigFolder
-            )
+
+    def service_post_install_tasks(self):
+        base.current_app.ConfigApiInstaller.install_plugin('fido2')

@@ -4,8 +4,8 @@ After=%(order_jans_scim_service)s
 
 [Service]
 Type=forking
-ExecStart=/opt/dist/scripts/jans-scim start
-ExecStop=/opt/dist/scripts/jans-scim stop
+ExecStart=%(jans_scripts_dir)s/jans-scim start
+ExecStop=%(jans_scripts_dir)s/jans-scim stop
 User=jetty
 Group=jetty
 

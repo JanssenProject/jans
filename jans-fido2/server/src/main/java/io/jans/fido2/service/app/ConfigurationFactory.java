@@ -69,9 +69,6 @@ public class ConfigurationFactory {
 	@Inject
 	private Instance<Configuration> configurationInstance;
 
-	@Inject
-	private Instance<AbstractCryptoProvider> abstractCryptoProviderInstance;
-
 	private ErrorResponseFactory errorResponseFactory;
 
 	public final static String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
@@ -283,9 +280,6 @@ public class ConfigurationFactory {
 				if (this.loaded) {
 					destroy(AppConfiguration.class);
 					destroy(StaticConfiguration.class);
-//					destroy(Fido2ErrorResponseFactory.class);
-
-					destroyCryptoProviderInstance(AbstractCryptoProvider.class);
 				}
 
 				this.loaded = true;
@@ -303,11 +297,6 @@ public class ConfigurationFactory {
 	public void destroy(Class<? extends Configuration> clazz) {
 		Instance<? extends Configuration> confInstance = configurationInstance.select(clazz);
 		configurationInstance.destroy(confInstance.get());
-	}
-
-	public void destroyCryptoProviderInstance(Class<? extends AbstractCryptoProvider> clazz) {
-		AbstractCryptoProvider abstractCryptoProvider = abstractCryptoProviderInstance.get();
-		abstractCryptoProviderInstance.destroy(abstractCryptoProvider);
 	}
 
 	private Conf loadConfigurationFromLdap(String... returnAttributes) {

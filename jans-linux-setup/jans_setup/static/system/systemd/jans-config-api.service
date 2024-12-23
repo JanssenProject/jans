@@ -4,8 +4,8 @@ After=%(order_jans_config_api_service)s
 
 [Service]
 Type=forking
-ExecStart=/opt/dist/scripts/jans-config-api start
-ExecStop=/opt/dist/scripts/jans-config-api stop
+ExecStart=%(jans_scripts_dir)s/jans-config-api start
+ExecStop=%(jans_scripts_dir)s/jans-config-api stop
 User=jetty
 Group=jetty
 

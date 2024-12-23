@@ -6,7 +6,6 @@ import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.conf.AppConfiguration;
-import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
@@ -15,6 +14,7 @@ import io.jans.fido2.service.mds.AttestationCertificateService;
 import io.jans.fido2.service.util.AppleUtilService;
 import io.jans.fido2.service.util.CommonUtilService;
 import io.jans.fido2.service.verifier.CertificateVerifier;
+import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -73,6 +73,9 @@ class AppleAttestationProcessorTest {
     @Mock
     private AppleUtilService appleUtilService;
 
+    @Mock
+    private CommonVerifiers commonVerifiers;
+
     @Test
     void getAttestationFormat_valid_apple() {
         String fmt = appleAttestationProcessor.getAttestationFormat().getFmt();
@@ -121,9 +124,6 @@ class AppleAttestationProcessorTest {
         when(x5cNode.elements()).thenReturn(Collections.singletonList((JsonNode) new TextNode("x5c item")).iterator());
         X509Certificate credCert = mock(X509Certificate.class);
         when(certificateService.getCertificate(anyString())).thenReturn(credCert);
-        Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         when(attestationCertificateService.getRootCertificatesBySubjectDN(anyString())).thenThrow(new Fido2RuntimeException("test exception"));
         when(credCert.getIssuerDN()).thenReturn(new BasicUserPrincipal("test issuer dn"));
         when(errorResponseFactory.badRequestException(any(), anyString())).thenThrow(new WebApplicationException(Response.status(400).entity("test exception").build()));
@@ -136,7 +136,6 @@ class AppleAttestationProcessorTest {
 
         verify(log).info(eq("AttStmt: test_att_stmt"));
         verify(certificateService).getCertificate(eq("x5c item"));
-        verify(appConfiguration).getFido2Configuration();
         verify(attestationCertificateService).getRootCertificatesBySubjectDN(anyString());
         verify(log).warn(eq("Failed to find attestation validation signature public certificate with DN: '{}'"), eq("test issuer dn"));
         verify(errorResponseFactory).badRequestException(any(), eq("Failed to find attestation validation signature public certificate with DN: test issuer dn"));
@@ -159,9 +158,6 @@ class AppleAttestationProcessorTest {
         when(x5cNode.elements()).thenReturn(Collections.singletonList((JsonNode) new TextNode("x5c item")).iterator());
         X509Certificate credCert = mock(X509Certificate.class);
         when(certificateService.getCertificate(anyString())).thenReturn(credCert);
-        Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         List<X509Certificate> rootCertificates = Collections.singletonList(mock(X509Certificate.class));
         when(attestationCertificateService.getRootCertificatesBySubjectDN(anyString())).thenReturn(rootCertificates);
         when(certificateVerifier.verifyAttestationCertificates(anyList(), anyList())).thenReturn(mock(X509Certificate.class));
@@ -177,7 +173,6 @@ class AppleAttestationProcessorTest {
 
         verify(log).info(eq("AttStmt: test_att_stmt"));
         verify(certificateService).getCertificate(eq("x5c item"));
-        verify(appConfiguration).getFido2Configuration();
         verify(attestationCertificateService).getRootCertificatesBySubjectDN(anyString());
         verify(log).debug(eq("APPLE_WEBAUTHN_ROOT_CA root certificate: 1"));
         verify(certificateVerifier).verifyAttestationCertificates(anyList(), anyList());
@@ -203,9 +198,6 @@ class AppleAttestationProcessorTest {
         when(x5cNode.elements()).thenReturn(Collections.singletonList((JsonNode) new TextNode("x5c item")).iterator());
         X509Certificate credCert = mock(X509Certificate.class);
         when(certificateService.getCertificate(anyString())).thenReturn(credCert);
-        Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         List<X509Certificate> rootCertificates = Collections.singletonList(mock(X509Certificate.class));
         when(attestationCertificateService.getRootCertificatesBySubjectDN(anyString())).thenReturn(rootCertificates);
         when(certificateVerifier.verifyAttestationCertificates(anyList(), anyList())).thenReturn(mock(X509Certificate.class));
@@ -224,7 +216,6 @@ class AppleAttestationProcessorTest {
 
         verify(log).info(eq("AttStmt: test_att_stmt"));
         verify(certificateService).getCertificate(eq("x5c item"));
-        verify(appConfiguration).getFido2Configuration();
         verify(attestationCertificateService).getRootCertificatesBySubjectDN(anyString());
         verify(log).debug(eq("APPLE_WEBAUTHN_ROOT_CA root certificate: 1"));
         verify(certificateVerifier).verifyAttestationCertificates(anyList(), anyList());
@@ -253,9 +244,6 @@ class AppleAttestationProcessorTest {
         when(x5cNode.elements()).thenReturn(Collections.singletonList((JsonNode) new TextNode("x5c item")).iterator());
         X509Certificate credCert = mock(X509Certificate.class);
         when(certificateService.getCertificate(anyString())).thenReturn(credCert);
-        Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         List<X509Certificate> rootCertificates = Collections.singletonList(mock(X509Certificate.class));
         when(attestationCertificateService.getRootCertificatesBySubjectDN(anyString())).thenReturn(rootCertificates);
         when(certificateVerifier.verifyAttestationCertificates(anyList(), anyList())).thenReturn(mock(X509Certificate.class));
@@ -276,7 +264,6 @@ class AppleAttestationProcessorTest {
 
         verify(log).info(eq("AttStmt: test_att_stmt"));
         verify(certificateService).getCertificate(eq("x5c item"));
-        verify(appConfiguration).getFido2Configuration();
         verify(attestationCertificateService).getRootCertificatesBySubjectDN(anyString());
         verify(log).debug(eq("APPLE_WEBAUTHN_ROOT_CA root certificate: 1"));
         verify(certificateVerifier).verifyAttestationCertificates(anyList(), anyList());
@@ -307,9 +294,6 @@ class AppleAttestationProcessorTest {
         when(x5cNode.elements()).thenReturn(Collections.singletonList((JsonNode) new TextNode("x5c item")).iterator());
         X509Certificate credCert = mock(X509Certificate.class);
         when(certificateService.getCertificate(anyString())).thenReturn(credCert);
-        Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         List<X509Certificate> rootCertificates = Collections.singletonList(mock(X509Certificate.class));
         when(attestationCertificateService.getRootCertificatesBySubjectDN(anyString())).thenReturn(rootCertificates);
         when(certificateVerifier.verifyAttestationCertificates(anyList(), anyList())).thenReturn(mock(X509Certificate.class));
@@ -325,11 +309,14 @@ class AppleAttestationProcessorTest {
         when(authData.getCosePublicKey()).thenReturn("test_cose_public_key".getBytes());
         when(base64Service.urlEncodeToString(any(byte[].class))).thenReturn("test_cred_id", "test_uncompressed_ec_point");
 
+        when(attStmt.get("alg")).thenReturn(mock(JsonNode.class));
+        when(authData.getKeyType()).thenReturn(1);
+        when(commonVerifiers.verifyAlgorithm(any(JsonNode.class), anyInt())).thenReturn(1);
+
         appleAttestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters);
 
         verify(log).info(eq("AttStmt: test_att_stmt"));
         verify(certificateService).getCertificate(eq("x5c item"));
-        verify(appConfiguration).getFido2Configuration();
         verify(attestationCertificateService).getRootCertificatesBySubjectDN(anyString());
         verify(log).debug(eq("APPLE_WEBAUTHN_ROOT_CA root certificate: 1"));
         verify(certificateVerifier).verifyAttestationCertificates(anyList(), anyList());
@@ -342,6 +329,7 @@ class AppleAttestationProcessorTest {
         verify(appleUtilService).getExtension(any());
         verify(coseService).getPublicKeyFromUncompressedECPoint(any());
         verify(base64Service, times(2)).urlEncodeToString(any());
+        verify(commonVerifiers).verifyAlgorithm(any(JsonNode.class), eq(1));
         verifyNoMoreInteractions(log);
         verifyNoInteractions(errorResponseFactory);
     }

@@ -114,6 +114,7 @@ class Config:
         self.dist_app_dir = os.path.join(self.distFolder, 'app')
         self.dist_jans_dir = os.path.join(self.distFolder, 'jans')
         self.distTmpFolder = os.path.join(self.distFolder, 'tmp')
+        self.jans_scripts_dir = os.path.join(self.jansOptFolder, 'scripts')
 
         self.downloadWars = None
         self.templateRenderingDict = {
@@ -225,6 +226,7 @@ class Config:
                             os.path.join(self.install_dir, 'static/scripts/testBind.py'),
                             os.path.join(self.install_dir, 'static/scripts/jans'),
                             os.path.join(self.install_dir, 'static/scripts/jans_services_status.py'),
+                            os.path.join(self.install_dir, 'static/scripts/get_agama_lab_projects.py'),
                             ]
 
         self.redhat_services = ['httpd', 'rsyslog']

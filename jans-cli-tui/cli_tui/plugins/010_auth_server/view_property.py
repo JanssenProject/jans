@@ -10,7 +10,7 @@ from prompt_toolkit.layout.containers import HSplit, VSplit
 from prompt_toolkit.widgets import Button, Dialog, Label
 
 from cli import config_cli
-from utils.static import DialogResult, cli_style
+from utils.static import DialogResult, cli_style, common_strings
 from utils.utils import DialogUtils
 from utils.multi_lang import _
 from wui_components.jans_cli_dialog import JansGDialog
@@ -48,6 +48,7 @@ class ViewProperty(JansGDialog, DialogUtils):
         self.op_type = op_type
         self.value_content = HSplit([],width=D())
         self.tab_widget = None
+        self.check_json_types = []
         self.widgets = []
         self.buttons = [Button(text=_("Cancel"), handler=self.cancel), Button(text=_("Save"), handler=self.save)]
         self.prepare_properties()
@@ -59,6 +60,20 @@ class ViewProperty(JansGDialog, DialogUtils):
 
         self.future.set_result(DialogResult.CANCEL)
 
+
+    def check_json_type(self, data):
+        try:
+            json.loads(data)
+            return True
+        except Exception as _:
+            self.app.show_message(
+                title=common_strings.error,
+                message=f"Value should {data} be in correct JSON format.",
+                tobefocused=self.dialog.body
+                )
+            return False
+
+
     def save(self) -> None:
         """method to invoked when saving the dialog (Save button is pressed)
         """
@@ -66,6 +81,10 @@ class ViewProperty(JansGDialog, DialogUtils):
         if len(self.widgets) == 1:
             item_data = self.get_item_data(self.widgets[0])
             data = item_data['value']
+
+            if item_data['key'] in self.check_json_types:
+                if not self.check_json_type(data):
+                    return
 
         elif self.tab_widget:
             data = []
@@ -84,6 +103,9 @@ class ViewProperty(JansGDialog, DialogUtils):
                 item_data = self.get_item_data(widget)
                 if item_data:
                     data[item_data['key']] = item_data['value']
+                    if item_data['key'] in self.check_json_types:
+                        if not self.check_json_type(item_data['value']):
+                            return
 
         cli_args = {'operation_id': 'patch-properties', 'data': [ {'op':self.op_type, 'path': self.property_name, 'value': data } ]}
 
@@ -343,7 +365,12 @@ class ViewProperty(JansGDialog, DialogUtils):
                 self.buttons.append(Button(_("Delete"), handler=self.delete_tab_element))
 
         elif properties['type'] == 'object':
-            self.widgets = self.get_widgets(properties['properties'], values=self.value)
+
+            if 'properties' in properties:
+                self.widgets = self.get_widgets(properties['properties'], values=self.value)
+            else:
+                self.widgets = self.get_widgets({properties['title']: {'type': 'string'}}, values={properties['title']: self.value})
+                self.check_json_types.append(properties['title'])
 
         if not self.tab_widget:
             self.value_content = HSplit(self.widgets, width=D())

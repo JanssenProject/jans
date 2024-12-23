@@ -37,8 +37,6 @@ class JansKCLinkInstaller(JettyInstaller):
     def install(self):
         self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
         self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
-        base.current_app.ConfigApiInstaller.source_files.append(self.source_files[1])
-        base.current_app.ConfigApiInstaller.install_plugin('kc-link-plugin')
         self.enable()
 
     def render_import_templates(self):
@@ -59,3 +57,6 @@ class JansKCLinkInstaller(JettyInstaller):
     def create_folders(self):
         self.createDirs(self.snapshots_dir)
         self.chown(self.vendor_dir, Config.jetty_user, Config.jetty_group, recursive=True)
+
+    def service_post_install_tasks(self):
+        base.current_app.ConfigApiInstaller.install_plugin('kc-link')

@@ -39,5 +39,5 @@ if __name__ == "__main__":
     if as_boolean(os.environ.get("CN_SHARE_AUTH_CONF", "false")):
         manager = get_manager()
 
-        with manager.lock.create_lock("auth-share-conf"):
+        with manager.create_lock("auth-share-conf"):
             push_auth_conf(manager)

@@ -41,19 +41,19 @@ Response:
       "mdsCertsFolder":"/etc/jans/conf/fido2/mds/cert",
       "mdsTocsFolder":"/etc/jans/conf/fido2/mds/toc",
       "serverMetadataFolder":"/etc/jans/conf/fido2/server_metadata",
-      "requestedCredentialTypes":[
+      "enabledFidoAlgorithms":[
          "RS256",
          "ES256"
       ],
-      "requestedParties":[
+      "rp":[
          {
-            "name":"https://my-jans-server.jans.io",
-            "domains":[
+            "id":"https://my-jans-server.jans.io",
+            "origins":[
                "my-jans-server.jans.io"
             ]
          }
       ],
-      "userAutoEnrollment":false,
+      "debugUserAutoEnrollment":false,
       "unfinishedRequestExpiration":180,
       "authenticationHistoryExpiration":1296000
    }

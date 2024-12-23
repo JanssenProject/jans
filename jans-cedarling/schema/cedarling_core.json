@@ -6,44 +6,52 @@
                 "attributes": {
                     "current_time": {
                         "type": "EntityOrCommon",
-                        "name": "Long"
+                        "name": "Long",
+                        "required": false
                     },
                     "device_health": {
                         "type": "Set",
                         "element": {
                             "type": "EntityOrCommon",
                             "name": "String"
-                        }
+                        },
+                        "required": false
                     },
                     "fraud_indicators": {
                         "type": "Set",
                         "element": {
                             "type": "EntityOrCommon",
                             "name": "String"
-                        }
+                        },
+                        "required": false
                     },
                     "geolocation": {
                         "type": "Set",
                         "element": {
                             "type": "EntityOrCommon",
                             "name": "String"
-                        }
+                        },
+                        "required": false
                     },
                     "network": {
                         "type": "EntityOrCommon",
-                        "name": "String"
+                        "name": "String",
+                        "required": false
                     },
                     "network_type": {
                         "type": "EntityOrCommon",
-                        "name": "String"
+                        "name": "String",
+                        "required": false
                     },
                     "operating_system": {
                         "type": "EntityOrCommon",
-                        "name": "String"
+                        "name": "String",
+                        "required": false
                     },
                     "user_agent": {
                         "type": "EntityOrCommon",
-                        "name": "String"
+                        "name": "String",
+                        "required": false
                     }
                 }
             },
@@ -101,18 +109,21 @@
                         },
                         "jti": {
                             "type": "EntityOrCommon",
-                            "name": "String"
+                            "name": "String",
+                            "required": false
                         },
                         "nbf": {
                             "type": "EntityOrCommon",
-                            "name": "Long"
+                            "name": "Long",
+                            "required": false
                         },
                         "scope": {
                             "type": "Set",
                             "element": {
                                 "type": "EntityOrCommon",
                                 "name": "String"
-                            }
+                            },
+                            "required": false
                         }
                     }
                 }
@@ -182,7 +193,8 @@
                     "attributes": {
                         "email": {
                             "type": "EntityOrCommon",
-                            "name": "email_address"
+                            "name": "email_address",
+                            "required": false
                         },
                         "phone_number": {
                             "type": "EntityOrCommon",
@@ -242,7 +254,8 @@
                         },
                         "jti": {
                             "type": "EntityOrCommon",
-                            "name": "String"
+                            "name": "String",
+                            "required": false
                         },
                         "name": {
                             "type": "EntityOrCommon",
@@ -305,14 +318,16 @@
                     "attributes": {
                         "acr": {
                             "type": "EntityOrCommon",
-                            "name": "String"
+                            "name": "String",
+                            "required": false
                         },
                         "amr": {
                             "type": "Set",
                             "element": {
                                 "type": "EntityOrCommon",
                                 "name": "String"
-                            }
+                            },
+                            "required": false
                         },
                         "aud": {
                             "type": "EntityOrCommon",
@@ -347,7 +362,8 @@
                         },
                         "jti": {
                             "type": "EntityOrCommon",
-                            "name": "String"
+                            "name": "String",
+                            "required": false
                         },
                         "name": {
                             "type": "EntityOrCommon",
@@ -383,8 +399,8 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Role",
-                        "Workload"
+                        "Workload",
+                        "Role"
                     ],
                     "context": {
                         "type": "Context"
@@ -411,8 +427,8 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Role",
-                        "Workload"
+                        "Workload",
+                        "Role"
                     ],
                     "context": {
                         "type": "Context"
@@ -452,8 +468,8 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Role",
-                        "Workload"
+                        "Workload",
+                        "Role"
                     ],
                     "context": {
                         "type": "Context"
@@ -493,8 +509,8 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Role",
-                        "Workload"
+                        "Workload",
+                        "Role"
                     ],
                     "context": {
                         "type": "Context"
@@ -508,8 +524,8 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Role",
-                        "Workload"
+                        "Workload",
+                        "Role"
                     ],
                     "context": {
                         "type": "Context"
@@ -523,8 +539,8 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Role",
-                        "Workload"
+                        "Workload",
+                        "Role"
                     ],
                     "context": {
                         "type": "Context"
@@ -538,8 +554,8 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Role",
-                        "Workload"
+                        "Workload",
+                        "Role"
                     ],
                     "context": {
                         "type": "Context"
@@ -553,8 +569,8 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Role",
-                        "Workload"
+                        "Workload",
+                        "Role"
                     ],
                     "context": {
                         "type": "Context"

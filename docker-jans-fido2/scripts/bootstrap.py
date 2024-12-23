@@ -2,6 +2,9 @@ import json
 import logging.config
 import os
 import typing as _t
+import uuid
+from datetime import datetime
+from datetime import UTC
 from functools import cached_property
 from string import Template
 
@@ -10,7 +13,6 @@ from jans.pycloudlib import wait_for_persistence
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import render_sql_properties
-from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.sql import override_simple_json_property
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.persistence.utils import render_base_properties
@@ -43,7 +45,6 @@ def main():
             render_hybrid_properties(hybrid_prop)
 
     if "sql" in persistence_groups:
-        sync_sql_password(manager)
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
         render_sql_properties(
             manager,
@@ -71,7 +72,7 @@ def main():
 
     configure_logging()
 
-    with manager.lock.create_lock("fido2-setup"):
+    with manager.create_lock("fido2-setup"):
         persistence_setup = PersistenceSetup(manager)
         persistence_setup.import_ldif_files()
 
@@ -170,29 +171,59 @@ class PersistenceSetup:
         ctx = {
             "hostname": self.manager.config.get("hostname"),
             "fido2ConfigFolder": "/etc/jans/conf/fido2",
+            "fido_document_certs_dir": "/etc/jans/conf/fido2/mds/cert",
+            "fido_document_tocs_dir": "/etc/jans/conf/fido2/mds/toc",
         }
 
         # pre-populate fido2_dynamic_conf_base64
         with open("/app/templates/jans-fido2/dynamic-conf.json") as f:
             ctx["fido2_dynamic_conf_base64"] = generate_base64_contents(f.read() % ctx)
 
-        # pre-populate fido2_static_conf_base64
-        with open("/app/templates/jans-fido2/static-conf.json") as f:
-            ctx["fido2_static_conf_base64"] = generate_base64_contents(f.read())
+        # pre-populate static ctx
+        for tmpl, ctx_name, mode in [
+            ("/app/templates/jans-fido2/static-conf.json", "fido2_static_conf_base64", "r"),
+            ("/app/templates/jans-fido2/jans-fido2-errors.json", "fido2_error_base64", "r"),
+            ("/etc/jans/conf/fido2/mds/toc/toc.jwt", "fido_document_tocs_base64", "r"),
+            ("/etc/jans/conf/fido2/mds/cert/root-r3.crt", "fido_document_certs_base64", "rb"),
+        ]:
+            with open(tmpl, mode) as f:
+                ctx[ctx_name] = generate_base64_contents(f.read())
 
-        # pre-populate fido2_error_base64
-        with open("/app/templates/jans-fido2/jans-fido2-errors.json") as f:
-            ctx["fido2_error_base64"] = generate_base64_contents(f.read())
+        # docs inum
+        for inum in ["fido_document_certs_inum", "fido_document_tocs_inum"]:
+            ctx[inum] = self.manager.config.get(inum)
+
+            if not ctx[inum]:
+                ctx[inum] = str(uuid.uuid4())
+                self.manager.config.set(inum, ctx[inum])
+
+        ctx["fido_document_creation_date"] = generalized_time_utc()
+
+        # finalized ctx
         return ctx
 
     @cached_property
     def ldif_files(self) -> list[str]:
-        return ["/app/templates/jans-fido2/fido2.ldif"]
+        return [
+            "/app/templates/jans-fido2/fido2.ldif",
+            "/app/templates/jans-fido2/docuemts.ldif",
+        ]
 
     def import_ldif_files(self) -> None:
         for file_ in self.ldif_files:
             logger.info(f"Importing {file_}")
             self.client.create_from_ldif(file_, self.ctx)
+
+
+def utcnow():
+    return datetime.now(UTC)
+
+
+def generalized_time_utc(dtime=None):
+    """Calculate LDAP generalized time."""
+    if not dtime:
+        dtime = utcnow()
+    return dtime.strftime("%Y%m%d%H%M%SZ")
 
 
 if __name__ == "__main__":

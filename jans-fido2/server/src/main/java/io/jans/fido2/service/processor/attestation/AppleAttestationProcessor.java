@@ -11,7 +11,6 @@ import java.util.List;
 
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
-import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.util.AppleUtilService;
 import io.jans.fido2.service.util.CommonUtilService;
@@ -33,6 +32,7 @@ import io.jans.fido2.service.CoseService;
 import io.jans.fido2.service.mds.AttestationCertificateService;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
 import io.jans.fido2.service.verifier.CertificateVerifier;
+import io.jans.fido2.service.verifier.CommonVerifiers;
 
 /**
  * For Apple's anonymous attestation fmt="apple"
@@ -45,6 +45,9 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 	@Inject
 	private Logger log;
 
+	@Inject
+    private CommonVerifiers commonVerifiers;
+	
 	@Inject
 	private AttestationCertificateService attestationCertificateService;
 
@@ -59,9 +62,6 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 
 	@Inject
 	private CertificateService certificateService;
-
-	@Inject
-	private AppConfiguration appConfiguration;
 
 	@Inject
 	private ErrorResponseFactory errorResponseFactory;
@@ -84,6 +84,8 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			CredAndCounterData credIdAndCounters) {
 
 		log.info("AttStmt: " + attStmt.asText());
+		
+		
 		// Check attStmt and it contains "x5c" then its a FULL attestation.
 		if (attStmt.hasNonNull("x5c")) {
 
@@ -107,22 +109,19 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			// the first certificate in x5c
 			X509Certificate credCert = certificates.get(0);
 
-			if (appConfiguration.getFido2Configuration().isSkipValidateMdsInAttestationEnabled()) {
-				log.warn("SkipValidateMdsInAttestation is enabled");
-			} else {
-				try {
-					List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getRootCertificatesBySubjectDN(SUBJECT_DN);
-					log.debug("APPLE_WEBAUTHN_ROOT_CA root certificate: " + trustAnchorCertificates.size());
-					X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
-					log.info("Step 1 completed");
-				} catch (Fido2RuntimeException e) {
+			try {
+				List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getRootCertificatesBySubjectDN(SUBJECT_DN);
+				log.debug("APPLE_WEBAUTHN_ROOT_CA root certificate: " + trustAnchorCertificates.size());
+				X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
+				log.info("Step 1 completed");
+			} catch (Fido2RuntimeException e) {
 //					X509Certificate certificate = certificates.get(0);
-					String issuerDN = credCert.getIssuerDN().getName();
-					log.warn("Failed to find attestation validation signature public certificate with DN: '{}'", issuerDN);
-					throw errorResponseFactory.badRequestException(AttestationErrorResponseType.APPLE_ERROR,
-							"Failed to find attestation validation signature public certificate with DN: " + issuerDN);
-				}
+				String issuerDN = credCert.getIssuerDN().getName();
+				log.warn("Failed to find attestation validation signature public certificate with DN: '{}'", issuerDN);
+				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.APPLE_ERROR,
+						"Failed to find attestation validation signature public certificate with DN: " + issuerDN);
 			}
+
 
 			// 2. Concatenate |authenticatorData| and |clientDataHash| to form
 			// |nonceToHash|.
@@ -176,8 +175,9 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
 			credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
 			// log.info("attStmt.get(\"alg\")"+attStmt.get("alg"));
-			int alg = -7;// commonVerifiers.verifyAlgorithm(attStmt.get("alg"), authData.getKeyType());
+			int alg = commonVerifiers.verifyAlgorithm(attStmt.get("alg"), authData.getKeyType());
 			credIdAndCounters.setSignatureAlgorithm(alg);
+			credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
 		}
 	}
 }

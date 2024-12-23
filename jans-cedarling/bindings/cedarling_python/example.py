@@ -1,50 +1,14 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+
 from cedarling_python import BootstrapConfig
 from cedarling_python import Cedarling
 from cedarling_python import ResourceData, Request
-import os
 import time
 
-DEFAULT_POLICY_STORE_PATH = "example_files/policy-store.json"
-
-# Read policy store from file
-policy_store_location = os.getenv("CEDARLING_LOCAL_POLICY_STORE", None)
-if policy_store_location is None:
-    print("Policy store location not provided, use 'CEDARLING_LOCAL_POLICY_STORE' environment variable")
-    print(f"Used default policy store path: {DEFAULT_POLICY_STORE_PATH}\n")
-    policy_store_location = DEFAULT_POLICY_STORE_PATH
-
-# Initialize a BootstrapConfig instance with the default configuration
-bootstrap_config = BootstrapConfig(
-    {"application_name": "TestApp", "policy_store_id": "asdasd123123", "policy_store_local_fn": policy_store_location})
-
-# By default, JWT validation is enabled for security.
-# If you wish to disable all JWT validation checks,
-# use the `disable_all_jwt_validation` method:
-bootstrap_config.disable_all_jwt_validation()
-
-# Alternatively, you can disable specific JWT validation settings when
-# initializing the config:
-bootstrap_config = BootstrapConfig({
-    "application_name": "TestApp",
-    "policy_store_id": "asdasd123123",
-    "policy_store_local_fn": policy_store_location,
-    "jwt_sig_validation": "disabled",
-    "jwt_status_validation": "disabled",
-    "at_iss_validation": "disabled",
-    "at_jti_validation": "disabled",
-    "at_nbf_validation": "disabled",
-    "idt_iss_validation": "disabled",
-    "idt_sub_validation": "disabled",
-    "idt_exp_validation": "disabled",
-    "idt_iat_validation": "disabled",
-    "idt_aud_validation": "disabled",
-    "id_token_trust_mode": "none",
-    "userinfo_iss_validation": "disabled",
-    "userinfo_aud_validation": "disabled",
-    "userinfo_sub_validation": "disabled",
-    "userinfo_exp_validation": "disabled",
-    "log_type": "std_out"
-})
+bootstrap_config = BootstrapConfig.load_from_file("./example_files/sample_bootstrap_props.yaml")
 
 # initialize cedarling instance
 # all values in the bootstrap_config is parsed and validated at this step.

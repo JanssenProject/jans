@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
-import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -36,6 +35,8 @@ import org.apache.commons.codec.binary.Hex;
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
+import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.AttestationMode;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
@@ -58,6 +59,9 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
 
     @Inject
     private Logger log;
+    
+    @Inject
+	private AppConfiguration appConfiguration;
 
     @Inject
     private CommonVerifiers commonVerifiers;
@@ -80,8 +84,6 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
     @Inject
     private CertificateService certificateService;
 
-    @Inject
-    private AppConfiguration appConfiguration;
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
@@ -97,10 +99,11 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
         int alg = commonVerifiers.verifyAlgorithm(attStmt.get("alg"), authData.getKeyType());
         String signature = commonVerifiers.verifyBase64String(attStmt.get("sig"));
 
-        if (attStmt.hasNonNull("x5c")) {
-            if (appConfiguration.getFido2Configuration().isSkipValidateMdsInAttestationEnabled()) {
-                log.warn("SkipValidateMdsInAttestation is enabled");
-            } else {
+        // if attestation mode is enabled in the global config
+        if(appConfiguration.getFido2Configuration().getAttestationMode().equalsIgnoreCase(AttestationMode.DISABLED.getValue()) == false)
+        {
+        	if (attStmt.hasNonNull("x5c")) {
+
                 List<X509Certificate> attestationCertificates = getAttestationCertificates(attStmt);
                 X509TrustManager tm = attestationCertificateService.populateTrustManager(authData, attestationCertificates);
                 if ((tm == null) || (tm.getAcceptedIssuers().length == 0)) {
@@ -111,19 +114,27 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
                 if (certificateVerifier.isSelfSigned(verifiedCert)) {
                     throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, "Self signed certificate");
                 }
-            }
-            credIdAndCounters.setSignatureAlgorithm(alg);
 
-        } else if (attStmt.hasNonNull("ecdaaKeyId")) {
-            String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
-            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, ecdaaKeyId + " is not supported");
-        } else {
-            PublicKey publicKey = coseService.getPublicKeyFromUncompressedECPoint(authData.getCosePublicKey());
-            authenticatorDataVerifier.verifyPackedSurrogateAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, publicKey, alg);
+                
+
+            } else if (attStmt.hasNonNull("ecdaaKeyId")) {
+                String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
+                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, ecdaaKeyId + " is not supported");
+            } else {
+                PublicKey publicKey = coseService.getPublicKeyFromUncompressedECPoint(authData.getCosePublicKey());
+                authenticatorDataVerifier.verifyPackedSurrogateAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, publicKey, alg);
+            }
         }
+        else
+		{
+			log.debug("In Global fido configuration, AttestationMode is DISABLED, hence skipping the attestation check");
+		}
         credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
         credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
         credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
+        credIdAndCounters.setSignatureAlgorithm(alg);
+        //TODO: this should be set from authenticator data and not mds
+        // credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
     }
 
 	private List<X509Certificate> getAttestationCertificates(JsonNode attStmt) {

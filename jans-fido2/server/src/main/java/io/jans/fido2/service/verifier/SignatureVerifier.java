@@ -48,6 +48,7 @@ public class SignatureVerifier {
             signatureChecker.initVerify(publicKey);
             signatureChecker.update(signatureBase);
             if (!signatureChecker.verify(signature)) {
+            	log.error("Unable to verify signature");
                 throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Unable to verify signature");
             }
         } catch (IllegalArgumentException | InvalidKeyException | SignatureException e) {
@@ -58,62 +59,68 @@ public class SignatureVerifier {
 
     public Signature getSignatureChecker(int signatureAlgorithm) {
         Provider provider = SecurityProviderUtility.getBCProvider();
+        log.debug("Signature checker : "+ signatureAlgorithm );
 
         // https://www.iana.org/assignments/cose/cose.xhtml#algorithms
         try {
 
             switch (signatureAlgorithm) {
-            case -7: {
-                Signature signatureChecker = Signature.getInstance("SHA256withECDSA", provider);
-                return signatureChecker;
-            }
+                case -7: {
+                    Signature signatureChecker = Signature.getInstance("SHA256withECDSA", provider);
+                    return signatureChecker;
+                }
 
-            case -35: {
-                Signature signatureChecker = Signature.getInstance("SHA384withECDSA", provider);
-                return signatureChecker;
-            }
+                case -8: {
+                    Signature signatureChecker = Signature.getInstance("Ed25519");
+                    return signatureChecker;
+                }
 
-            case -36: {
-                Signature signatureChecker = Signature.getInstance("SHA512withECDSA", provider);
-                return signatureChecker;
-            }
+                case -35: {
+                    Signature signatureChecker = Signature.getInstance("SHA384withECDSA", provider);
+                    return signatureChecker;
+                }
 
-            case -37: {
-                Signature signatureChecker = Signature.getInstance("SHA256withRSA/PSS", provider);
-                signatureChecker.setParameter(new PSSParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-256"), 32, 1));
-                return signatureChecker;
-            }
-            case -38: {
-                Signature signatureChecker = Signature.getInstance("SHA384withRSA/PSS", provider);
-                signatureChecker.setParameter(new PSSParameterSpec("SHA-384", "MGF1", new MGF1ParameterSpec("SHA-384"), 32, 1));
-                return signatureChecker;
-            }
+                case -36: {
+                    Signature signatureChecker = Signature.getInstance("SHA512withECDSA", provider);
+                    return signatureChecker;
+                }
 
-            case -39: {
-                Signature signatureChecker = Signature.getInstance("SHA512withRSA/PSS", provider);
-                signatureChecker.setParameter(new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 32, 1));
-                return signatureChecker;
-            }
-            case -257: {
-                Signature signatureChecker = Signature.getInstance("SHA256withRSA");
-                return signatureChecker;
-            }
-            case -258: {
-                Signature signatureChecker = Signature.getInstance("SHA384withRSA", provider);
-                return signatureChecker;
-            }
-            case -259: {
-                Signature signatureChecker = Signature.getInstance("SHA512withRSA", provider);
-                return signatureChecker;
-            }
-            case -65535: {
-                Signature signatureChecker = Signature.getInstance("SHA1withRSA");
-                return signatureChecker;
-            }
+                case -37: {
+                    Signature signatureChecker = Signature.getInstance("SHA256withRSA/PSS", provider);
+                    signatureChecker.setParameter(new PSSParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-256"), 32, 1));
+                    return signatureChecker;
+                }
+                case -38: {
+                    Signature signatureChecker = Signature.getInstance("SHA384withRSA/PSS", provider);
+                    signatureChecker.setParameter(new PSSParameterSpec("SHA-384", "MGF1", new MGF1ParameterSpec("SHA-384"), 32, 1));
+                    return signatureChecker;
+                }
 
-            default: {
-                throw new Fido2RuntimeException("Unknown mapping");
-            }
+                case -39: {
+                    Signature signatureChecker = Signature.getInstance("SHA512withRSA/PSS", provider);
+                    signatureChecker.setParameter(new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 32, 1));
+                    return signatureChecker;
+                }
+                case -257: {
+                    Signature signatureChecker = Signature.getInstance("SHA256withRSA");
+                    return signatureChecker;
+                }
+                case -258: {
+                    Signature signatureChecker = Signature.getInstance("SHA384withRSA", provider);
+                    return signatureChecker;
+                }
+                case -259: {
+                    Signature signatureChecker = Signature.getInstance("SHA512withRSA", provider);
+                    return signatureChecker;
+                }
+                case -65535: {
+                    Signature signatureChecker = Signature.getInstance("SHA1withRSA");
+                    return signatureChecker;
+                }
+
+                default: {
+                    throw new Fido2RuntimeException("Unknown mapping");
+                }
 
             }
 
@@ -125,23 +132,27 @@ public class SignatureVerifier {
     public MessageDigest getDigest(int signatureAlgorithm) {
         // https://www.iana.org/assignments/cose/cose.xhtml#algorithms
         switch (signatureAlgorithm) {
-        case -257: {
-            return DigestUtils.getSha256Digest();
-        }
+            case -8:{
+                return DigestUtils.getSha512Digest();
+            }
 
-        case -65535: {
-            return DigestUtils.getSha1Digest();
-        }
+            case -257: {
+                return DigestUtils.getSha256Digest();
+            }
 
-        default: {
-            throw new Fido2RuntimeException("Unknown mapping");
-        }
+            case -65535: {
+                return DigestUtils.getSha1Digest();
+            }
+
+            default: {
+                throw new Fido2RuntimeException("Unknown mapping");
+            }
 
         }
     }
 
     public void verifySignature(byte[] signature, byte[] signatureBase, Certificate certificate, int signatureAlgorithm) {
-    	verifySignature(signature, signatureBase, certificate.getPublicKey(), signatureAlgorithm);
+        verifySignature(signature, signatureBase, certificate.getPublicKey(), signatureAlgorithm);
     }
 
 }

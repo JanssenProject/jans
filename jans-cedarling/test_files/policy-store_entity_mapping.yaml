@@ -1,0 +1,140 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+cedar_version: v4.0.0
+policy_stores:
+  a1bf93115de86de760ee0bea1d529b521489e5a11747:
+    cedar_version: v4.0.0
+    name: "Jans"
+    policies:
+      1:
+        description: simple policy example for principal workload, permit when workload org_id same with resource
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal is Jans::Workload,
+                action in [Jans::Action::"Update",Jans::Action::"UpdateForWorkload",Jans::Action::"UpdateForWorkloadAndRole"],
+                resource is Jans::Issue
+            )when{
+                principal.org_id == resource.org_id
+            };
+      2:
+        description: simple policy example for principal user, permit if user country same with the issue
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal is Jans::User,
+                action in [Jans::Action::"Update",Jans::Action::"UpdateForUser",Jans::Action::"UpdateForUserAndRole"],
+                resource is Jans::Issue
+            )when{
+                principal.country == resource.country
+            };
+      3:
+        description: simple policy example for principal role, permit when Admin
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal in Jans::Role::"Admin",
+                action in [Jans::Action::"Update",Jans::Action::"UpdateForRole",Jans::Action::"UpdateForUserAndRole",Jans::Action::"UpdateForWorkloadAndRole"],
+                resource is Jans::Issue
+            );
+      4:
+        description: simple policy example for principal role, forbid for Guest
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            forbid(
+                principal in Jans::Role::"Guest",
+                action in [Jans::Action::"Update",Jans::Action::"UpdateForRole",Jans::Action::"UpdateForUserAndRole",Jans::Action::"UpdateForWorkloadAndRole"],
+                resource is Jans::Issue
+            );
+
+      5:
+        description: simple policy for mapped user, permit for `Jans::MappedUser`
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal is Jans::MappedUser,
+                action in [Jans::Action::"UpdateMappedWorkloadAndUser"],
+                resource is Jans::Issue
+            );
+      6:
+        description: simple policy for mapped workload, permit for `MappedWorkload`
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal is Jans::MappedWorkload,
+                action in [Jans::Action::"UpdateMappedWorkloadAndUser"],
+                resource is Jans::Issue
+            );
+    schema:
+      encoding: none
+      content_type: cedar
+      body: |-
+        namespace Jans {
+        type Url = {"host": String, "path": String, "protocol": String};
+        entity TrustedIssuer = {"issuer_entity_id": Url};
+        entity Issue = {"country": String, "org_id": String};
+        entity id_token = {"aud": String,"iss": String, "sub": String};
+        entity Role;
+        entity User in [Role] = {"country": String};
+        entity Workload = {"org_id": String};
+        entity Access_token = {"aud": String,"iss": String, "jti": String, "client_id": String,"org_id": String};
+        entity Userinfo_token  = {"iss": String, "jti": String, "client_id": String};
+        entity Empty;
+
+        entity MappedUser in [Role] = {"country": String};
+        entity MappedWorkload = {"org_id": String};
+        entity MappedIdToken = {"aud": String,"iss": String, "sub": String};
+        entity MappedAccess_token = {"aud": String,"iss": String, "jti": String, "client_id": String,"org_id": String};
+        entity MappedUserinfo_token  = {"iss": String, "jti": String, "client_id": String};
+
+        action "Update" appliesTo {
+          principal: [Workload, User],
+          resource: [Issue],
+          context: {}
+        };
+
+        action "UpdateMappedWorkloadAndUser" appliesTo {
+          principal: [MappedWorkload, MappedUser],
+          resource: [Issue],
+          context: {}
+        };
+
+        }
+    trusted_issuers:
+      3e59e1d6f009a16d40a33b2f10fc259d05a1a5d9a922:
+        name: TestAgama
+        description: TestAgama trusted issuer
+        openid_configuration_endpoint: https://test-casa.gluu.info/.well-known/openid-configuration
+        access_tokens:
+          trusted: true
+          principal_identifier: jti
+          user_id: ''
+          role_mapping: role
+          # claim_mapping: {}
+        id_tokens:
+          user_id: ''
+          role_mapping: role
+        userinfo_tokens:
+          user_id: ''
+          role_mapping: role
+          # claim_mapping: {}

@@ -80,9 +80,10 @@ def download_jans_archive():
         print("Downloading {} as {}".format(jans_archive_url, jans_zip_file))
         request.urlretrieve(jans_archive_url, jans_zip_file)
     except Exception as e:
-        print(f"Failed to download from {jans_archive_url}, trying tags URL. Error: {e}")
-        jans_archive_url = 'https://github.com/JanssenProject/jans/archive/refs/tags/{}.zip'.format(
-            argsp.jans_branch)
+        print(f"Failed to download from {jans_archive_url}, error was {e}")
+        print("Trying tags URL")
+        jans_archive_url = f'https://github.com/JanssenProject/jans/archive/refs/tags/{argsp.setup_branch}.zip'
+        print(f"Downloading {jans_archive_url} as {jans_zip_file}")
         request.urlretrieve(jans_archive_url, jans_zip_file)
 
     if argsp.profile == 'openbanking':
