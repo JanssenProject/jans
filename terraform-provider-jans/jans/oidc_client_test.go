@@ -177,9 +177,9 @@ func TestOIDCClient(t *testing.T) {
 		Organization: "inum=1200.33AFBA,ou=scopes,o=jans",
 		// Groups:               []string{},
 		// Ttl:                  3600,
-		DisplayName:          "SCIM client",
-		BaseDn:               "inum=1201.d52300ed-8193-510e-b31d-5829f4af346e,ou=clients,o=jans",
-		Inum:                 "1201.d52300ed-8193-510e-b31d-5829f4af346e",
+		DisplayName: "SCIM client",
+		BaseDn:      "inum=1201.d52300ed-8193-510e-b31d-5829f4af346e,ou=clients,o=jans",
+		Inum:        "1201.d52300ed-8193-510e-b31d-5829f4af346e",
 		// TODO: Add new encryption algs
 	}
 

@@ -566,6 +566,54 @@ spec:
 
 ---
 
+{{ if .Values.fido2.ingress.fido2WebauthnEnabled -}}
+{{ $fullName := include "janssen-all-in-one.fullname" . -}}
+{{- $ingressPath := index .Values "nginx-ingress" "ingress" "path" -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-webauthn
+  labels:
+    app: {{ $fullName }}-fido2
+{{- if index .Values "nginx-ingress" "ingress" "additionalLabels" }}
+{{ toYaml (index .Values "nginx-ingress" "ingress" "additionalLabels") | indent 4 }}
+{{- end }}
+{{- if .Values.fido2.ingress.fido2WebauthnLabels }}
+{{ toYaml .Values.fido2.ingress.fido2WebauthnLabels | indent 4 }}
+{{- end }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-fido2/restv1/webauthn/configuration
+{{- if .Values.fido2.ingress.fido2WebauthnAdditionalAnnotations }}
+{{ toYaml .Values.fido2.ingress.fido2WebauthnAdditionalAnnotations | indent 4 }}
+{{- end }}
+{{- if index .Values "nginx-ingress" "ingress" "additionalAnnotations" }}
+{{ toYaml (index .Values "nginx-ingress" "ingress" "additionalAnnotations") | indent 4 }}
+{{- end }}
+spec:
+  ingressClassName: {{ index .Values "nginx-ingress" "ingress" "ingressClassName" }}
+{{- if index .Values "nginx-ingress" "ingress" "tlsSecretName" }}
+  tls:
+    - hosts:
+        - {{ .Values.fqdn | quote }}
+      secretName: {{ index .Values "nginx-ingress" "ingress" "tlsSecretName" }}
+{{- end }}
+  rules:
+    - host: {{ .Values.fqdn | quote }}
+      http:
+        paths:
+          - path: /.well-known/webauthn
+            pathType: Exact
+            backend:
+              service:
+                name: {{ .Values.service.name }}
+                port:
+                  number: 8080
+{{- end }}
+
+---
+
 {{ if index .Values "auth-server" "ingress" "authServerEnabled" -}}
 {{ $fullName := include "janssen-all-in-one.fullname" . -}}
 {{- $ingressPath := index .Values "nginx-ingress" "ingress" "path" -}}
@@ -797,6 +845,53 @@ spec:
       http:
         paths:
           - path: /jans-lock
+            pathType: Exact
+            backend:
+              service:
+                name: {{ .Values.service.name }}
+                port:
+                  number: 8080
+{{- end }}
+
+---
+{{ if index .Values "auth-server" "ingress" "authzenConfigEnabled" -}}
+{{ $fullName := include "janssen-all-in-one.fullname" . -}}
+{{- $ingressPath := index .Values "nginx-ingress" "ingress" "path" -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-authzen-config
+  labels:
+    app: {{ $fullName }}-authzen-config
+{{- if index .Values "nginx-ingress" "ingress" "additionalLabels" }}
+{{ toYaml (index .Values "nginx-ingress" "ingress" "additionalLabels") | indent 4 }}
+{{- end }}
+{{- if index .Values "auth-server" "ingress" "authzenConfigLabels" }}
+{{ toYaml (index .Values "auth-server" "ingress" "authzenConfigLabels") | indent 4 }}
+{{- end }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/restv1/authzen-configuration
+{{- if index .Values "auth-server" "ingress" "authzenAdditionalAnnotations" }}
+{{ toYaml (index .Values "auth-server" "ingress" "authzenAdditionalAnnotations") | indent 4 }}
+{{- end }}
+{{- if index .Values "nginx-ingress" "ingress" "additionalAnnotations" }}
+{{ toYaml (index .Values "nginx-ingress" "ingress" "additionalAnnotations") | indent 4 }}
+{{- end }}
+spec:
+  ingressClassName: {{ index .Values "nginx-ingress" "ingress" "ingressClassName" }}
+{{- if index .Values "nginx-ingress" "ingress" "tlsSecretName" }}
+  tls:
+    - hosts:
+        - {{ .Values.fqdn | quote }}
+      secretName: {{ index .Values "nginx-ingress" "ingress" "tlsSecretName" }}
+{{- end }}
+  rules:
+    - host: {{ .Values.fqdn | quote }}
+      http:
+        paths:
+          - path: /.well-known/authzen-configuration
             pathType: Exact
             backend:
               service:

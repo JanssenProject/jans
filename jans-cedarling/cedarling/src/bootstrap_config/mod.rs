@@ -20,7 +20,7 @@ pub use jwt_config::*;
 pub use log_config::*;
 pub use policy_store_config::*;
 mod decode;
-pub use decode::{BootstrapConfigRaw, FeatureToggle, LoggerType, TrustMode, WorkloadBoolOp};
+pub use decode::{BootstrapConfigRaw, FeatureToggle, LoggerType, WorkloadBoolOp};
 
 /// Bootstrap configuration
 /// properties for configuration [`Cedarling`](crate::Cedarling) application.
@@ -55,7 +55,7 @@ impl BootstrapConfig {
     ///     BootstrapConfig::load_from_file("../test_files/bootstrap_props.json")
     ///         .unwrap();
     /// ```
-    pub fn load_from_file(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn load_from_file(path: &str) -> Result<Self, BootstrapConfigLoadingError> {
         let file_ext = Path::new(path)
             .extension()
             .and_then(|ext| ext.to_str())
@@ -79,6 +79,12 @@ impl BootstrapConfig {
         };
 
         Ok(config)
+    }
+
+    /// Loads a `BootstrapConfig` from a JSON string
+    pub fn load_from_json(config: &str) -> Result<Self, BootstrapConfigLoadingError> {
+        let raw = serde_json::from_str::<decode::BootstrapConfigRaw>(config)?;
+        Self::from_raw_config(&raw)
     }
 }
 
@@ -106,6 +112,28 @@ pub enum BootstrapConfigLoadingError {
     /// Error returned when parsing the file as YAML fails.
     #[error("Failed to decode YAML string into BootstrapConfig: {0}")]
     DecodingYAML(#[from] serde_yml::Error),
+
+    /// Error returned when the boostrap property `CEDARLING_LOG_TTL` is missing.
+    #[error("Missing bootstrap property: `CEDARLING_LOG_TTL`. This property is required if `CEDARLING_LOG_TYPE` is set to Memory.")]
+    MissingLogTTL,
+
+    /// Error returned when multiple policy store sources were provided.
+    #[error("Multiple store options were provided. Make sure you only one of these properties is set: `CEDARLING_POLICY_STORE_URI` or `CEDARLING_LOCAL_POLICY_STORE`")]
+    ConflictingPolicyStores,
+
+    /// Error returned when no policy store source was provided.
+    #[error("No Policy store was provided.")]
+    MissingPolicyStore,
+
+    /// Error returned when the policy store file is in an unsupported format.
+    #[error(
+        "Unsupported policy store file format for: {0}. Supported formats include: JSON, YAML"
+    )]
+    UnsupportedPolicyStoreFileFormat(String),
+
+    /// Error returned when failing to load a local JWKS
+    #[error("Failed to load local JWKS from {0}: {1}")]
+    LoadLocalJwks(String, std::io::Error),
 }
 
 #[cfg(test)]
@@ -129,19 +157,44 @@ mod test {
             application_name: "My App".to_string(),
             log_config: LogConfig {
                 log_type: LogTypeConfig::StdOut,
+                log_level: crate::LogLevel::DEBUG,
             },
             policy_store_config: PolicyStoreConfig {
                 source: crate::PolicyStoreSource::FileJson(
                     Path::new("../test_files/policy-store_blobby.json").into(),
                 ),
             },
-            jwt_config: crate::JwtConfig::Enabled {
-                signature_algorithms: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
+            jwt_config: JwtConfig {
+                jwks: None,
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                id_token_trust_mode: IdTokenTrustMode::Strict,
+                signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
+                access_token_config: TokenValidationConfig {
+                    exp_validation: true,
+                    ..Default::default()
+                },
+                id_token_config: TokenValidationConfig {
+                    iss_validation: true,
+                    sub_validation: true,
+                    exp_validation: true,
+                    iat_validation: true,
+                    aud_validation: true,
+                    ..Default::default()
+                },
+                userinfo_token_config: TokenValidationConfig {
+                    iss_validation: true,
+                    sub_validation: true,
+                    aud_validation: true,
+                    exp_validation: true,
+                    ..Default::default()
+                },
             },
             authorization_config: AuthorizationConfig {
                 use_user_principal: true,
                 use_workload_principal: true,
                 user_workload_operator: WorkloadBoolOp::And,
+                ..Default::default()
             },
         };
 
@@ -159,19 +212,44 @@ mod test {
             application_name: "My App".to_string(),
             log_config: LogConfig {
                 log_type: LogTypeConfig::Memory(MemoryLogConfig { log_ttl: 60 }),
+                log_level: crate::LogLevel::DEBUG,
             },
             policy_store_config: PolicyStoreConfig {
                 source: crate::PolicyStoreSource::FileJson(
                     Path::new("../test_files/policy-store_blobby.json").into(),
                 ),
             },
-            jwt_config: crate::JwtConfig::Enabled {
-                signature_algorithms: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
+            jwt_config: JwtConfig {
+                jwks: None,
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                id_token_trust_mode: IdTokenTrustMode::Strict,
+                signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
+                access_token_config: TokenValidationConfig {
+                    exp_validation: true,
+                    ..Default::default()
+                },
+                id_token_config: TokenValidationConfig {
+                    iss_validation: true,
+                    sub_validation: true,
+                    exp_validation: true,
+                    iat_validation: true,
+                    aud_validation: true,
+                    ..Default::default()
+                },
+                userinfo_token_config: TokenValidationConfig {
+                    iss_validation: true,
+                    sub_validation: true,
+                    aud_validation: true,
+                    exp_validation: true,
+                    ..Default::default()
+                },
             },
             authorization_config: AuthorizationConfig {
                 use_user_principal: true,
                 use_workload_principal: true,
                 user_workload_operator: WorkloadBoolOp::And,
+                ..Default::default()
             },
         };
 

@@ -49,6 +49,25 @@ impl TokenPayload {
             })
             .ok_or(GetTokenClaimValue::KeyNotFound(key.to_string()))
     }
+
+    /// get tokens info claim for [`LogTokensInfo`] structure
+    /// if iterator is empty is used claim 'jti'
+    pub(crate) fn get_log_tokens_info<'a>(
+        &'a self,
+        decision_log_default_jwt_id: &'a str,
+    ) -> HashMap<&'a str, &'a serde_json::Value> {
+        let claim = if !decision_log_default_jwt_id.is_empty() {
+            decision_log_default_jwt_id
+        } else {
+            "jti"
+        };
+
+        let iter = [self.payload.get(claim).map(|value| (claim, value))]
+            .into_iter()
+            .flatten();
+
+        HashMap::from_iter(iter)
+    }
 }
 
 impl From<HashMap<String, serde_json::Value>> for TokenPayload {

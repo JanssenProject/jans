@@ -5,8 +5,9 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::interface::{LogStorage, LogWriter};
+use super::interface::{LogStorage, LogWriter, Loggable};
 use super::LogEntry;
+use super::LogLevel;
 use crate::bootstrap_config::log_config::MemoryLogConfig;
 use sparkv::{Config as ConfigSparKV, SparKV};
 use std::{sync::Mutex, time::Duration};
@@ -18,10 +19,11 @@ const STORAGE_JSON_PARSE_EXPECT_MESSAGE: &str =
 /// A logger that store logs in-memory.
 pub(crate) struct MemoryLogger {
     storage: Mutex<SparKV>,
+    log_level: LogLevel,
 }
 
 impl MemoryLogger {
-    pub fn new(config: MemoryLogConfig) -> Self {
+    pub fn new(config: MemoryLogConfig, log_level: LogLevel) -> Self {
         let sparkv_config = ConfigSparKV {
             default_ttl: Duration::from_secs(config.log_ttl),
             ..Default::default()
@@ -29,20 +31,26 @@ impl MemoryLogger {
 
         MemoryLogger {
             storage: Mutex::new(SparKV::with_config(sparkv_config)),
+            log_level,
         }
     }
 }
 
 // Implementation of LogWriter
 impl LogWriter for MemoryLogger {
-    fn log(&self, entry: LogEntry) {
+    fn log_any<T: Loggable>(&self, entry: T) {
+        if !entry.can_log(self.log_level) {
+            // do nothing
+            return;
+        }
+
         let json_string = serde_json::json!(entry).to_string();
 
         let result = self
             .storage
             .lock()
             .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
-            .set(entry.id.to_string().as_str(), &json_string);
+            .set(entry.get_request_id().to_string().as_str(), &json_string);
 
         if let Err(err) = result {
             // log error to stderr
@@ -92,7 +100,7 @@ mod tests {
 
     fn create_memory_logger() -> MemoryLogger {
         let config = MemoryLogConfig { log_ttl: 60 };
-        MemoryLogger::new(config)
+        MemoryLogger::new(config, LogLevel::TRACE)
     }
 
     #[test]
@@ -113,6 +121,7 @@ mod tests {
             person_authorize_info: Default::default(),
             workload_authorize_info: Default::default(),
             authorized: true,
+            entities: serde_json::json!({}),
         });
         let entry2 = LogEntry::new_with_data(
             app_types::PdpID::new(),
@@ -127,12 +136,16 @@ mod tests {
         // check that we have two entries in the log database
         assert_eq!(logger.get_log_ids().len(), 2);
         assert_eq!(
-            logger.get_log_by_id(&entry1.id.to_string()).unwrap(),
+            logger
+                .get_log_by_id(&entry1.get_request_id().to_string())
+                .unwrap(),
             entry1,
             "Failed to get log entry by id"
         );
         assert_eq!(
-            logger.get_log_by_id(&entry2.id.to_string()).unwrap(),
+            logger
+                .get_log_by_id(&entry2.get_request_id().to_string())
+                .unwrap(),
             entry2,
             "Failed to get log entry by id"
         );

@@ -25,9 +25,9 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    AccessTokenEntitiesError,
+    ProcessTokens,
     AuthorizeError,
-    "Error encountered while creating access token entities"
+    "Error encountered while processing JWT token data"
 );
 
 create_exception!(
@@ -43,12 +43,25 @@ create_exception!(
     AuthorizeError,
     "Error encountered while creating Userinfo_token entity"
 );
+create_exception!(
+    authorize_errors,
+    CreateAccessTokenEntityError,
+    AuthorizeError,
+    "Error encountered while creating access_token entity"
+);
 
 create_exception!(
     authorize_errors,
     CreateUserEntityError,
     AuthorizeError,
     "Error encountered while creating User entity"
+);
+
+create_exception!(
+    authorize_errors,
+    CreateWorkloadEntityError,
+    AuthorizeError,
+    "Error encountered while creating workload entity"
 );
 
 create_exception!(
@@ -100,6 +113,20 @@ create_exception!(
     "Error encountered while collecting all entities"
 );
 
+create_exception!(
+    authorize_errors,
+    EntitiesToJsonError,
+    AuthorizeError,
+    "Error encountered while parsing all entities to json for logging"
+);
+
+create_exception!(
+    authorize_errors,
+    AddEntitiesIntoContextError,
+    AuthorizeError,
+    "Error encountered while adding entities into context"
+);
+
 #[pyclass]
 #[derive()]
 pub struct ErrorPayload(CedarlingAuthorizeError);
@@ -138,18 +165,21 @@ macro_rules! errors_functions {
 // This function is used to convert `cedarling::AuthorizeError` to a Python exception.
 // For each possible case of `AuthorizeError`, we have created a corresponding Python exception that inherits from `cedarling::AuthorizeError`.
 errors_functions! {
-    DecodeTokens => DecodeTokens,
-    AccessTokenEntities => AccessTokenEntitiesError,
+    ProcessTokens => ProcessTokens,
     CreateIdTokenEntity => CreateIdTokenEntityError,
     CreateUserinfoTokenEntity => CreateUserinfoTokenEntityError,
+    CreateAccessTokenEntity => CreateAccessTokenEntityError,
     CreateUserEntity => CreateUserEntityError,
+    CreateWorkloadEntity => CreateWorkloadEntityError,
     ResourceEntity => ResourceEntityError,
     RoleEntity => RoleEntityError,
     Action => ActionError,
     CreateContext => CreateContextError,
     CreateRequestWorkloadEntity => CreateRequestWorkloadEntityError,
     CreateRequestUserEntity => CreateRequestUserEntityError,
-    Entities => EntitiesError
+    BuildContext => AddEntitiesIntoContextError,
+    Entities => EntitiesError,
+    EntitiesToJson => EntitiesToJsonError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {

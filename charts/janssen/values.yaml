@@ -778,6 +778,8 @@ global:
       lockConfigEnabled: false
       # -- Enable endpoint /jans-lock
       lockEnabled: false
+      # -- Enable endpoint /.well-known/authzen-configuration
+      authzenConfigEnabled: true
       # -- Lock config ingress resource labels. key app is taken
       lockConfigLabels: { }
       # -- Lock config ingress resource additional annotations.
@@ -814,11 +816,14 @@ global:
       u2fConfigLabels: { }
       # -- u2f config ingress resource additional annotations.
       u2fAdditionalAnnotations: { }
+      # -- authzen config ingress resource labels. key app is taken
+      authzenConfigLabels: { }
+      # -- authzen config ingress resource additional annotations.
+      authzenAdditionalAnnotations: { }
       # -- Auth server ingress resource labels. key app is taken
       authServerLabels: { }
       # -- Auth server ingress resource additional annotations.
       authServerAdditionalAnnotations: { }
-
 
     # -- Enable jans-lock as service running inside auth-server
     lockEnabled: false
@@ -1003,6 +1008,8 @@ global:
       fido2ConfigEnabled: false
       # -- Enable endpoint /jans-fido2
       fido2Enabled: false
+      # -- Enable endpoint /.well-known/webauthn
+      fido2WebauthnEnabled: false
       # -- fido2 config ingress resource labels. key app is taken
       fido2ConfigLabels: { }
       # -- fido2 config ingress resource additional annotations.
@@ -1011,6 +1018,10 @@ global:
       fido2Labels: { }
       # -- fido2 ingress resource additional annotations.
       fido2AdditionalAnnotations: { }
+      # -- fido2 webauthn ingress resource labels. key app is taken
+      fido2WebauthnLabels: { }
+      # -- fido2 webauthn ingress resource additional annotations.
+      fido2WebauthnAdditionalAnnotations: { }
   # -- GCE storage kind if using Google disks
   gcePdStorageType: pd-standard
   # -- Boolean flag to enable mapping global.lbIp  to global.fqdn inside pods on clouds that provide static ip for load balancers. On cloud that provide only addresses to the LB this flag will enable a script to actively scan config.configmap.lbAddr and update the hosts file inside the pods automatically.

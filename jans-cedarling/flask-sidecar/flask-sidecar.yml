@@ -1,0 +1,157 @@
+components:
+  responses:
+    DEFAULT_ERROR:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Default error response
+    UNPROCESSABLE_ENTITY:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unprocessable Entity
+  schemas:
+    Action:
+      properties:
+        name:
+          type: string
+        properties:
+          additionalProperties: {}
+          type: object
+      required:
+      - name
+      type: object
+    Decision:
+      properties:
+        context:
+          additionalProperties: {}
+          type: object
+        decision:
+          type: boolean
+      required:
+      - decision
+      type: object
+    Error:
+      properties:
+        code:
+          description: Error code
+          type: integer
+        errors:
+          additionalProperties: {}
+          description: Errors
+          type: object
+        message:
+          description: Error message
+          type: string
+        status:
+          description: Error name
+          type: string
+      type: object
+    EvaluationRequest:
+      properties:
+        action:
+          $ref: '#/components/schemas/Action'
+        context:
+          additionalProperties: {}
+          type: object
+        resource:
+          $ref: '#/components/schemas/Resource'
+        subject:
+          $ref: '#/components/schemas/Subject'
+      type: object
+    PaginationMetadata:
+      properties:
+        first_page:
+          type: integer
+        last_page:
+          type: integer
+        next_page:
+          type: integer
+        page:
+          type: integer
+        previous_page:
+          type: integer
+        total:
+          type: integer
+        total_pages:
+          type: integer
+      type: object
+    Resource:
+      properties:
+        id:
+          type: string
+        properties:
+          additionalProperties: {}
+          type: object
+        type:
+          type: string
+      required:
+      - id
+      - type
+      type: object
+    Subject:
+      properties:
+        id:
+          type: string
+        properties:
+          additionalProperties: {}
+          type: object
+        type:
+          type: string
+      required:
+      - id
+      - type
+      type: object
+    WellKnown:
+      properties:
+        access_evaluation_v1_endpoint:
+          type: string
+      type: object
+info:
+  title: Cedarling Sidecar
+  version: v1
+openapi: 3.0.0
+paths:
+  /.well-known/authzen-configuration:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WellKnown'
+          description: OK
+        default:
+          $ref: '#/components/responses/DEFAULT_ERROR'
+      summary: Returns authzen configuration endpoint
+      tags:
+      - Evaluate
+  /cedarling/evaluation:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvaluationRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Decision'
+          description: OK
+        '422':
+          $ref: '#/components/responses/UNPROCESSABLE_ENTITY'
+        default:
+          $ref: '#/components/responses/DEFAULT_ERROR'
+      summary: Evaluates whether a subject is authorized to perform a specific action
+        on a resource.
+      tags:
+      - Evaluate
+tags:
+- description: AuthZen evaluation endpoint
+  name: Evaluate
+x-internal-id: '1'

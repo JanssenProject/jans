@@ -5,8 +5,8 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::interface::LogWriter;
-use super::LogEntry;
+use super::interface::{LogWriter, Loggable};
+use super::LogLevel;
 use std::{
     io::Write,
     sync::{Arc, Mutex},
@@ -16,28 +16,36 @@ use std::{
 pub(crate) struct StdOutLogger {
     // we use `dyn Write`` trait to make it testable and mockable.
     writer: Mutex<Box<dyn Write + Send + Sync>>,
+    log_level: LogLevel,
 }
 
 impl StdOutLogger {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(log_level: LogLevel) -> Self {
         Self {
             writer: Mutex::new(Box::new(std::io::stdout())),
+            log_level,
         }
     }
 
     // Create a new StdOutLogger with custom writer.
     // is used in tests.
     #[allow(dead_code)]
-    pub(crate) fn new_with(writer: Box<dyn Write + Send + Sync>) -> Self {
+    pub(crate) fn new_with(writer: Box<dyn Write + Send + Sync>, log_level: LogLevel) -> Self {
         Self {
             writer: Mutex::new(Box::new(writer)),
+            log_level,
         }
     }
 }
 
 // Implementation of LogWriter
 impl LogWriter for StdOutLogger {
-    fn log(&self, entry: LogEntry) {
+    fn log_any<T: Loggable>(&self, entry: T) {
+        if !entry.can_log(self.log_level) {
+            // do nothing
+            return;
+        }
+
         let json_str = serde_json::json!(&entry).to_string();
         // we can't handle error here or test it so we just panic if it happens.
         // we should have specific platform to get error
@@ -86,27 +94,18 @@ impl Write for TestWriter {
 
 #[cfg(test)]
 mod tests {
-    use super::super::LogType;
+    use crate::common::app_types::PdpID;
+
+    use super::super::{LogEntry, LogType};
 
     use super::*;
-    use std::{
-        io::Write,
-        time::{SystemTime, UNIX_EPOCH},
-    };
-
-    use uuid7::uuid7;
+    use std::io::Write;
 
     #[test]
     fn write_log_ok() {
         // Create a log entry
         let log_entry = LogEntry {
-            id: uuid7(),
-            time: SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .expect("Time went backwards")
-                .as_secs(),
-            log_kind: LogType::Decision,
-            pdp_id: uuid7(),
+            base: crate::log::BaseLogEntry::new(PdpID::new(), LogType::Decision),
             application_id: Some("test_app".to_string().into()),
             auth_info: None,
             msg: "Test message".to_string(),
@@ -123,7 +122,7 @@ mod tests {
         let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
 
         // Create logger with test writer
-        let logger = StdOutLogger::new_with(buffer);
+        let logger = StdOutLogger::new_with(buffer, LogLevel::TRACE);
 
         // Log the entry
         logger.log(log_entry);

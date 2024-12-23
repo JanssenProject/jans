@@ -19,10 +19,7 @@ class ConfigApiInstaller(JettyInstaller):
 
     source_files = [
                 (os.path.join(Config.dist_jans_dir, 'jans-config-api.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api-server/{0}/jans-config-api-server-{0}.war').format(base.current_app.app_info['jans_version'])),
-                (os.path.join(Config.dist_jans_dir, 'scim-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/scim-plugin/{0}/scim-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
                 (os.path.join(Config.dist_jans_dir, 'user-mgt-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/user-mgt-plugin/{0}/user-mgt-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
-                (os.path.join(Config.dist_jans_dir, 'fido2-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/fido2-plugin/{0}/fido2-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
-                (os.path.join(Config.dist_jans_dir, 'jans-link-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/jans-link-plugin/{0}/jans-link-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
                 ]
 
     def __init__(self):
@@ -56,16 +53,7 @@ class ConfigApiInstaller(JettyInstaller):
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
 
-        self.install_plugin('user-mgt-plugin')
-
-        if Config.install_scim_server:
-            self.install_plugin('scim-plugin')
-
-        if Config.install_fido2:
-            self.install_plugin('fido2-plugin')
-
-        if Config.install_jans_ldap_link:
-            self.install_plugin('jans-link-plugin')
+        self.install_plugin('user-mgt')
 
         self.enable()
 
@@ -75,14 +63,23 @@ class ConfigApiInstaller(JettyInstaller):
         self.run([paths.cmd_chmod, '+x', target_fn])
 
     def install_plugin(self, plugin):
-        for source_file in self.source_files:
-            if plugin in source_file[0]:
-                self.logIt("Installing Jans Config Api Plugin {}".format(plugin))
-                self.copyFile(source_file[0], self.libDir)
-                plugin_path = os.path.join(self.libDir, os.path.basename(source_file[0]))
-                self.add_extra_class(plugin_path)
-                self.chown(plugin_path, Config.jetty_user, Config.jetty_group)
-                break
+        current_plugins = self.get_plugins()
+
+        if plugin in current_plugins:
+            self.logIt(f"Jans Config Api plugin {plugin} exists, not installing")
+            return
+
+        plugin_fn = os.path.join(Config.dist_jans_dir, plugin+'-plugin.jar')
+
+        if not os.path.exists(plugin_fn):
+            self.logIt(f"Jans Config Api plugin file {plugin_fn} does not exist")
+            return
+
+        self.logIt("Installing Jans Config Api plugin {}".format(plugin))
+        self.copyFile(plugin_fn, self.libDir)
+        plugin_path = os.path.join(self.libDir, os.path.basename(plugin_fn))
+        self.add_extra_class(plugin_path)
+        self.chown(plugin_path, Config.jetty_user, Config.jetty_group)
 
     def extract_files(self):
         base.extract_file(base.current_app.jans_zip, 'jans-config-api/server/src/main/resources/log4j2.xml', self.custom_config_dir)
