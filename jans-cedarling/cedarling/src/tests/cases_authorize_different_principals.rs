@@ -1,9 +1,7 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 //! In this module we test authorize different action
 //! where not all principals can be applied
@@ -11,10 +9,11 @@
 //! all case scenario should have `result.is_allowed() == true`
 //! because we have checked different scenarios in `cases_authorize_without_check_jwt.rs`
 
-use super::utils::*;
-use crate::{cmp_decision, cmp_policy, WorkloadBoolOp}; // macros is defined in the cedarling\src\tests\utils\cedarling_util.rs
 use lazy_static::lazy_static;
 use test_utils::assert_eq;
+
+use super::utils::*;
+use crate::{cmp_decision, cmp_policy, WorkloadBoolOp}; /* macros is defined in the cedarling\src\tests\utils\cedarling_util.rs */
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/policy-store_ok_2.yaml");
 
@@ -415,7 +414,7 @@ fn test_where_principal_workload_cant_be_applied() {
 
     assert!(matches!(
         result,
-        crate::AuthorizeError::CreateRequestWorkloadEntity(_)
+        crate::AuthorizeError::WorkloadRequestValidation(_)
     ))
 }
 
@@ -439,8 +438,9 @@ fn test_where_principal_user_cant_be_applied() {
         .authorize(request)
         .expect_err("request should be parsed with error");
 
-    assert!(matches!(
-        result,
-        crate::AuthorizeError::CreateRequestUserEntity(_)
-    ))
+    assert!(
+        matches!(result, crate::AuthorizeError::UserRequestValidation(_)),
+        "expected error UserRequestValidation, got: {}",
+        result
+    )
 }

@@ -1,11 +1,10 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-use std::{collections::HashMap, str::FromStr};
+use std::collections::HashMap;
+use std::str::FromStr;
 
 use cedar_policy::{EntityId, EntityTypeName, EntityUid, ParseErrors};
 
@@ -13,11 +12,11 @@ use cedar_policy::{EntityId, EntityTypeName, EntityUid, ParseErrors};
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct Request {
     /// Access token raw value
-    pub access_token: String,
+    pub access_token: Option<String>,
     /// Id Token raw value
-    pub id_token: String,
+    pub id_token: Option<String>,
     /// Userinfo Token raw value
-    pub userinfo_token: String,
+    pub userinfo_token: Option<String>,
     /// cedar_policy action
     pub action: String,
     /// cedar_policy resource data
