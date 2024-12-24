@@ -151,18 +151,14 @@
                 "shape": {
                     "type": "Record",
                     "attributes": {
-                        "accept": {
-                            "type": "Set",
-                            "element": {
-                                "type": "EntityOrCommon",
-                                "name": "String"
-                            }
-                        },
                         "header": {
-                            "type": "Set",
-                            "element": {
-                                "type": "EntityOrCommon",
-                                "name": "String"
+                            "type": "Record",
+                            "attributes": {
+                                "Accept": {
+                                    "type": "EntityOrCommon",
+                                    "name": "String",
+                                    "required": false
+                                }
                             }
                         },
                         "url": {
@@ -399,8 +395,7 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Workload",
-                        "Role"
+                        "Workload"
                     ],
                     "context": {
                         "type": "Context"
@@ -427,8 +422,7 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Workload",
-                        "Role"
+                        "Workload"
                     ],
                     "context": {
                         "type": "Context"
@@ -468,8 +462,7 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Workload",
-                        "Role"
+                        "Workload"
                     ],
                     "context": {
                         "type": "Context"
@@ -509,8 +502,7 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Workload",
-                        "Role"
+                        "Workload"
                     ],
                     "context": {
                         "type": "Context"
@@ -524,8 +516,7 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Workload",
-                        "Role"
+                        "Workload"
                     ],
                     "context": {
                         "type": "Context"
@@ -539,8 +530,7 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Workload",
-                        "Role"
+                        "Workload"
                     ],
                     "context": {
                         "type": "Context"
@@ -554,8 +544,7 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Workload",
-                        "Role"
+                        "Workload"
                     ],
                     "context": {
                         "type": "Context"
@@ -569,8 +558,7 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Workload",
-                        "Role"
+                        "Workload"
                     ],
                     "context": {
                         "type": "Context"

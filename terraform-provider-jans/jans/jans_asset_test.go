@@ -30,11 +30,11 @@ func TestCreateJansAsset(t *testing.T) {
 	})
 
 	doc, err := c.CreateJansAsset(ctx, Document{
-		DisplayName: "metadata.xml",
+		FileName:    "metadata.xml",
 		Description: "A document made for testing purposes",
 		Document:    "Doc",
 		BaseDn:      "RandomBaseDN",
-		JansLevel:   "1",
+		Level:       "1",
 	}, file)
 	if err != nil {
 		t.Fatal(err)

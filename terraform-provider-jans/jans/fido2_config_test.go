@@ -29,7 +29,7 @@ func TestFido2Config(t *testing.T) {
 	cfg.BaseEndpoint = "newbasepoint"
 
 	ret := &JansFido2DynConfiguration{
-		BaseEndpoint:           "newbasepoint",
+		BaseEndpoint: "newbasepoint",
 	}
 	updatedConfig, err := client.UpdateFido2Configuration(ctx, ret)
 	if err != nil {
