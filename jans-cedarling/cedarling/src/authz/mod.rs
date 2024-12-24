@@ -221,7 +221,7 @@ impl Authz {
                     }
                 }),
 
-                authorized: result.is_allowed(),
+                authorized: result.decision,
             })
             .set_message("Result of authorize.".to_string()),
         );
@@ -237,7 +237,7 @@ impl Authz {
             lock_client_id: None,
             action: request.action.clone(),
             resource: resource_uid.to_string(),
-            decision: result.decision().into(),
+            decision: result.cedar_decision().into(),
             tokens: LogTokensInfo{
                 access: tokens.access_token.get_log_tokens_info(self.config.authorization.decision_log_default_jwt_id.as_str()),
                 id_token: tokens.id_token.get_log_tokens_info(self.config.authorization.decision_log_default_jwt_id.as_str()),

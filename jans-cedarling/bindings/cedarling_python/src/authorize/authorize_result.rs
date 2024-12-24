@@ -30,7 +30,7 @@ pub struct AuthorizeResult {
 impl AuthorizeResult {
     /// Returns true if request is allowed
     fn is_allowed(&self) -> bool {
-        self.inner.is_allowed()
+        self.inner.decision
     }
 
     /// Get the decision value for workload
