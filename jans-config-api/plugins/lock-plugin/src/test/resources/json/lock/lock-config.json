@@ -1,0 +1,56 @@
+{
+    "baseEndpoint": "https://pujavs-witty-weasel.gluu.info/jans-auth/v1",
+    "openIdIssuer": "https://pujavs-witty-weasel.gluu.info",
+    "tokenChannels": [
+        "jans_token"
+    ],
+    "clientId": "2200.ea10b5a0-a6b7-45fd-ad0b-5e34f7f75fab",
+    "clientPassword": "zZn4wZAA+TU1OJ8s7z/l8g==",
+    "tokenUrl": "https://pujavs-witty-weasel.gluu.info/jans-auth/restv1/token",
+    "groupScopeEnabled": true,
+    "endpointGroups": {
+        "audit": [
+            "telemetry",
+            "telemetry/bulk",
+            "health",
+            "health/bulk",
+            "log",
+            "log/bulk"
+        ]
+    },
+    "endpointDetails": {
+        "jans-config-api/lock/audit/telemetry": [
+            "https://jans.io/oauth/lock/telemetry.readonly",
+            "https://jans.io/oauth/lock/telemetry.write"
+        ],
+        "jans-config-api/lock/audit/telemetry/bulk": [
+            "https://jans.io/oauth/lock/telemetry.readonly",
+            "https://jans.io/oauth/lock/telemetry.write"
+        ],
+        "jans-config-api/lock/audit/log": [
+            "https://jans.io/oauth/lock/log.write"
+        ],
+        "jans-config-api/lock/audit/log/bulk": [
+            "https://jans.io/oauth/lock/log.write"
+        ],
+        "jans-config-api/lock/audit/health": [
+            "https://jans.io/oauth/lock/health.readonly",
+            "https://jans.io/oauth/lock/health.write"
+        ],
+        "jans-config-api/lock/audit/health/bulk": [
+            "https://jans.io/oauth/lock/health.readonly",
+            "https://jans.io/oauth/lock/health.write"
+        ]
+    },
+    "disableJdkLogger": true,
+    "loggingLevel": "INFO",
+    "loggingLayout": "text",
+    "metricReporterInterval": 300,
+    "metricReporterKeepDataDays": 15,
+    "metricReporterEnabled": true,
+    "cleanServiceInterval": 60,
+    "opaConfiguration": {
+        "baseUrl": "http://localhost:8181/v1/"
+    },
+    "pdpType": "OPA"
+}

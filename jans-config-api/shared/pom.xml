@@ -15,6 +15,10 @@
 		<!-- jans -->
 		<dependency>
 			<groupId>io.jans</groupId>
+			<artifactId>jans-auth-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
 			<artifactId>jans-auth-common</artifactId>
 		</dependency>
 		<dependency>
@@ -53,6 +57,12 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
+		</dependency>
+		
+		<!-- Testing -->
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
 		</dependency>
 
 	</dependencies>

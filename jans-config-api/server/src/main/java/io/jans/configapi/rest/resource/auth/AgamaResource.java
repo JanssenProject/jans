@@ -55,7 +55,6 @@ public class AgamaResource extends ConfigBaseResource {
         }
         e.setStackTrace(new StackTraceElement[0]);
         return Response.ok().entity(e).build();
-
     }
 
 }
