@@ -16,7 +16,7 @@ image:
   # -- Image  to use for deploying.
   repository: ghcr.io/janssenproject/jans/kc-scheduler
   # -- Image  tag to use for deploying.
-  tag: 0.0.0-nightly
+  tag: 1.2.0-1
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Resource specs.
