@@ -14,8 +14,8 @@ import org.slf4j.Logger;
 
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.model.error.StatErrorResponseType;
 import io.jans.lock.service.stat.StatResponseService;
 import io.jans.lock.util.ServerUtil;
 import io.prometheus.client.CollectorRegistry;
@@ -129,7 +129,7 @@ public class StatRestWebServiceImpl implements StatRestWebService {
 		}
 
 		if (!appConfiguration.isStatEnabled()) {
-			throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, TokenErrorResponseType.ACCESS_DENIED, "Future stat is disabled on server.");
+			throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, StatErrorResponseType.ACCESS_DENIED, "Future stat is disabled on server.");
 		}
 
         final Set<String> months = validateMonths(monthsParam, startMonth, endMonth);
@@ -166,7 +166,7 @@ public class StatRestWebServiceImpl implements StatRestWebService {
 
     private Set<String> validateMonths(String months, String startMonth, String endMonth) {
         if (!Months.isValid(months, startMonth, endMonth)) {
-            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, TokenErrorResponseType.INVALID_REQUEST, "`month` or `start-month`/`end-month` parameter(s) can't be blank and should be in format yyyyMM (e.g. 202012)");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, StatErrorResponseType.INVALID_REQUEST, "`month` or `start-month`/`end-month` parameter(s) can't be blank and should be in format yyyyMM (e.g. 202012)");
         }
 
         months = ServerUtil.urlDecode(months);
@@ -174,7 +174,7 @@ public class StatRestWebServiceImpl implements StatRestWebService {
         Set<String> monthList = Months.getMonths(months, startMonth, endMonth);
 
         if (monthList.isEmpty()) {
-            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, TokenErrorResponseType.INVALID_REQUEST, "Unable to identify months. Check `month` or `start-month`/`end-month` parameter(s). It can't be blank and should be in format yyyyMM (e.g. 202012). start-month must be before end-month");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, StatErrorResponseType.INVALID_REQUEST, "Unable to identify months. Check `month` or `start-month`/`end-month` parameter(s). It can't be blank and should be in format yyyyMM (e.g. 202012). start-month must be before end-month");
         }
 
         return monthList;
