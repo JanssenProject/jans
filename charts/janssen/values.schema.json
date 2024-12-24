@@ -496,14 +496,6 @@
                                 "authzenConfigEnabled": {
                                     "description": "Enable endpoint /.well-known/authzen-configuration",
                                     "type": "boolean"
-                                },
-                                "authServerProtectedToken": {
-                                    "description": "Enable mTLS on Auth server endpoint /jans-auth/restv1/token",
-                                    "type": "boolean"
-                                },
-                                "authServerProtectedRegister": {
-                                    "description": "Enable mTLS onn Auth server endpoint /jans-auth/restv1/register",
-                                    "type": "boolean"
                                 }
                             }
                         },
@@ -886,7 +878,7 @@
                             "type": "boolean"
                         },
                         "ingress": {
-                            "description": "Boolean flag that enables using istio gateway for Gluu. This assumes istio ingress is installed and hence the LB is available.",
+                            "description": "Boolean flag that enables using istio gateway for Janssen. This assumes istio ingress is installed and hence the LB is available.",
                             "type": "boolean"
                         },
                         "namespace": {
@@ -1038,7 +1030,7 @@
                                     "type": "object"
                                 },
                                 "scimLabels": {
-                                    "description": "SCIM config ingress resource labels. key app is taken",
+                                    "description": "SCIM ingress resource labels. key app is taken",
                                     "type": "object"
                                 },
                                 "scimAdditionalAnnotations": {
@@ -1174,6 +1166,24 @@
                                     "description": "cacherefresh_script.log level",
                                     "type": "string",
                                     "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
+                                }
+                            }
+                        },
+                        "ingress": {
+                            "description": "Endpoint control",
+                            "type": "object",
+                            "properties": {
+                                "linkEnabled": {
+                                    "description": "Enable link endpoints /jans-link",
+                                    "type": "boolean"
+                                },
+                                "linkLabels": {
+                                    "description": "link ingress resource labels. key app is taken",
+                                    "type": "object"
+                                },
+                                "linkAdditionalAnnotations": {
+                                    "description": "link ingress resource additional annotations.",
+                                    "type": "object"
                                 }
                             }
                         }
