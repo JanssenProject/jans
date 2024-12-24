@@ -300,7 +300,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/certmanager
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.2.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -681,7 +681,7 @@ image:
   # -- Image  to use for deploying.
   repository: ghcr.io/janssenproject/jans/all-in-one
   # -- Image  tag to use for deploying.
-  tag: 0.0.0-nightly
+  tag: 1.2.0-1
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Service replica number.
@@ -761,7 +761,7 @@ kc-scheduler:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/kc-scheduler
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.2.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
