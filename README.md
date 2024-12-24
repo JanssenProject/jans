@@ -112,6 +112,9 @@ is the main channel for community support. There is also a
 ### Releases
 
 Below is the list of current mega releases that hold information about every single release of our services and modules:
+- [v1.2.0](https://github.com/JanssenProject/jans/releases/tag/v1.2.0)
+- [v1.1.6](https://github.com/JanssenProject/jans/releases/tag/v1.1.6)
+- [v1.1.5](https://github.com/JanssenProject/jans/releases/tag/v1.1.5)
 - [v1.1.4](https://github.com/JanssenProject/jans/releases/tag/v1.1.4)
 - [v1.1.3](https://github.com/JanssenProject/jans/releases/tag/v1.1.3)
 - [v1.1.2](https://github.com/JanssenProject/jans/releases/tag/v1.1.2)
