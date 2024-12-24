@@ -17,7 +17,7 @@ on:
       jans_version:
         description: 'Janssen helm chart version'
         required: true
-        default: '0.0.0-nightly'
+        default: '1.2.0'
 permissions:
   contents: read
 

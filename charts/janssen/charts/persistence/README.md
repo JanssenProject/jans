@@ -1,6 +1,6 @@
 # persistence
 
-![Version: 0.0.0-nightly](https://img.shields.io/badge/Version-0.0.0--nightly-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.0-nightly](https://img.shields.io/badge/AppVersion-0.0.0--nightly-informational?style=flat-square)
+![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.2.0](https://img.shields.io/badge/AppVersion-1.2.0-informational?style=flat-square)
 
 Job to generate data and initial config for Janssen Server persistence layer.
 
@@ -34,7 +34,7 @@ Kubernetes: `>=v1.22.0-0`
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
 | image.repository | string | `"janssenproject/persistence"` | Image  to use for deploying. |
-| image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
+| image.tag | string | `"1.2.0-1"` | Image  tag to use for deploying. |
 | imagePullSecrets | list | `[]` |  |
 | lifecycle | object | `{}` |  |
 | nameOverride | string | `""` |  |
