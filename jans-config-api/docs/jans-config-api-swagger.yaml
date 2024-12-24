@@ -9337,19 +9337,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
         adminCanAccess:
-          type: boolean
-        userCanAccess:
           type: boolean
         adminCanView:
           type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        whitePagesCanView:
           type: boolean
-        adminCanEdit:
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -11860,6 +11860,8 @@ components:
         x5cs256:
           type: string
         online_access:
+          type: boolean
+        authorization_challenge:
           type: boolean
         attributes:
           type: object
