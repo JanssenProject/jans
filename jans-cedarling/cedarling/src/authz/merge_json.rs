@@ -1,3 +1,8 @@
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
 use serde_json::Value;
 
 #[derive(Debug, thiserror::Error)]
@@ -22,9 +27,8 @@ pub fn merge_json_values(mut base: Value, other: Value) -> Result<Value, MergeEr
 mod test {
     use serde_json::json;
 
-    use crate::authz::merge_json::MergeError;
-
     use super::merge_json_values;
+    use crate::authz::merge_json::MergeError;
 
     #[test]
     fn can_merge_json_objects() {

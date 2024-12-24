@@ -1,9 +1,8 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
 //! Module for bootstrap configuration types
 //! to configure [`Cedarling`](crate::Cedarling)
 
@@ -12,7 +11,8 @@ pub(crate) mod jwt_config;
 pub(crate) mod log_config;
 pub(crate) mod policy_store_config;
 
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 pub use authorization_config::AuthorizationConfig;
 // reimport to useful import values in root module
@@ -51,9 +51,7 @@ impl BootstrapConfig {
     /// ```rust
     /// use cedarling::BootstrapConfig;
     ///
-    /// let config =
-    ///     BootstrapConfig::load_from_file("../test_files/bootstrap_props.json")
-    ///         .unwrap();
+    /// let config = BootstrapConfig::load_from_file("../test_files/bootstrap_props.json").unwrap();
     /// ```
     pub fn load_from_file(path: &str) -> Result<Self, BootstrapConfigLoadingError> {
         let file_ext = Path::new(path)
@@ -114,11 +112,17 @@ pub enum BootstrapConfigLoadingError {
     DecodingYAML(#[from] serde_yml::Error),
 
     /// Error returned when the boostrap property `CEDARLING_LOG_TTL` is missing.
-    #[error("Missing bootstrap property: `CEDARLING_LOG_TTL`. This property is required if `CEDARLING_LOG_TYPE` is set to Memory.")]
+    #[error(
+        "Missing bootstrap property: `CEDARLING_LOG_TTL`. This property is required if \
+         `CEDARLING_LOG_TYPE` is set to Memory."
+    )]
     MissingLogTTL,
 
     /// Error returned when multiple policy store sources were provided.
-    #[error("Multiple store options were provided. Make sure you only one of these properties is set: `CEDARLING_POLICY_STORE_URI` or `CEDARLING_LOCAL_POLICY_STORE`")]
+    #[error(
+        "Multiple store options were provided. Make sure you only one of these properties is set: \
+         `CEDARLING_POLICY_STORE_URI` or `CEDARLING_LOCAL_POLICY_STORE`"
+    )]
     ConflictingPolicyStores,
 
     /// Error returned when no policy store source was provided.
@@ -134,17 +138,27 @@ pub enum BootstrapConfigLoadingError {
     /// Error returned when failing to load a local JWKS
     #[error("Failed to load local JWKS from {0}: {1}")]
     LoadLocalJwks(String, std::io::Error),
+
+    /// Error returned when both `CEDARLING_USER_AUTHZ` and `CEDARLING_WORKLOAD_AUTHZ` are disabled.
+    /// These two authentication configurations cannot be disabled at the same time.
+    #[error(
+        "Both `CEDARLING_USER_AUTHZ` and `CEDARLING_WORKLOAD_AUTHZ` cannot be disabled \
+         simultaneously."
+    )]
+    BothPrincipalsDisabled,
 }
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::bootstrap_config::decode::BootstrapConfigRaw;
-    use std::{collections::HashSet, path::Path};
+    use std::collections::HashSet;
+    use std::path::Path;
 
-    use crate::{BootstrapConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig};
     use jsonwebtoken::Algorithm;
     use test_utils::assert_eq;
+
+    use super::*;
+    use crate::bootstrap_config::decode::BootstrapConfigRaw;
+    use crate::{BootstrapConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig};
 
     #[test]
     fn can_deserialize_from_json() {

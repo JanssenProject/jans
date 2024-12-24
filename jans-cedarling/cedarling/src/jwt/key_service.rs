@@ -1,19 +1,19 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-use super::{
-    jwk_store::{JwkStore, JwkStoreError},
-    TrustedIssuerId,
-};
-use crate::common::policy_store::TrustedIssuer;
-use crate::http::{HttpClient, HttpClientError};
+use std::collections::HashMap;
+use std::sync::Arc;
+use std::time::Duration;
+
 use jsonwebtoken::DecodingKey;
 use serde_json::{json, Value};
-use std::{collections::HashMap, sync::Arc, time::Duration};
+
+use super::jwk_store::{JwkStore, JwkStoreError};
+use super::TrustedIssuerId;
+use crate::common::policy_store::TrustedIssuer;
+use crate::http::{HttpClient, HttpClientError};
 
 pub struct DecodingKeyWithIss<'a> {
     /// The decoding key used to validate JWT signatures.
@@ -127,9 +127,11 @@ pub enum KeyServiceError {
 mod test {
     use std::collections::HashMap;
 
-    use crate::{common::policy_store::TrustedIssuer, jwt::key_service::KeyService};
     use mockito::Server;
     use serde_json::json;
+
+    use crate::common::policy_store::TrustedIssuer;
+    use crate::jwt::key_service::KeyService;
 
     #[test]
     fn can_load_from_str() {

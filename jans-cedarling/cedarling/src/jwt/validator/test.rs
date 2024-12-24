@@ -1,19 +1,19 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::collections::HashSet;
+use std::sync::Arc;
+
+use jsonwebtoken::Algorithm;
+use serde_json::json;
+use test_utils::assert_eq;
 
 use super::super::test_utils::*;
 use super::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
 use crate::jwt::key_service::KeyService;
 use crate::jwt::validator::ProcessedJwt;
-use jsonwebtoken::Algorithm;
-use serde_json::json;
-use std::collections::HashSet;
-use std::sync::Arc;
-use test_utils::assert_eq;
 
 #[test]
 fn can_decode_jwt() {

@@ -1,12 +1,11 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::collections::HashMap;
 
 use super::{CedarType, GetCedarTypeError};
-use std::collections::HashMap;
 
 /// CedarSchemaEntityShape hold shape of an entity.
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq)]
@@ -220,7 +219,6 @@ impl EntityType {
 
 /// Describes the Set element
 /// Set ::= '"type": "Set", "element": ' TypeJson
-//
 // "type": "Set" checked during deserialization
 #[derive(Debug, Clone, serde::Deserialize, PartialEq, serde::Serialize, Hash)]
 pub struct SetEntityType {
