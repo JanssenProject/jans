@@ -1,0 +1,25 @@
+Title UAF authentication workflow
+
+Person->Browser: Open RP URL
+Browser->RP: Protected resource
+RP->Gluu Server: Start AuthZ & AuthN
+Gluu Server->UAF Script: Start User/Password + UAF
+UAF Script->UAF Script: 1) Verify user/password
+UAF Script->Nok Nok Server: START_OOB
+Nok Nok Server->UAF Script: QR code for mobile application
+UAF Script->Browser: 2) Render UAF login page with QR code
+
+Person->UAF Mobile: Start UAF application
+UAF Mobile->Browser: Scan QR code
+UAF Mobile->Nok Nok Server: INIT_OBB
+Person->UAF Mobile: Biometric authentication
+UAF Mobile->Nok Nok Server: FINISH_OBB
+
+Browser->Nok Nok Server: STATUS_OBB with delay 5 seconds
+Browser->UAF Script: 3) Send response
+UAF Script->Nok Nok Server: STATUS_OBB
+UAF Script->Nok Nok Server: CANCEL_OBB if UAF authentication failed
+
+RP->Gluu Server: Request authorization
+RP->Gluu Server: Request tokens
+RP->Gluu Server: Request user_info

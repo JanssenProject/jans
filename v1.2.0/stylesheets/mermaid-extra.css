@@ -1,0 +1,8 @@
+.mermaid {
+	overflow: auto;
+}
+
+.mermaid svg {
+	width: 1315px;
+	height: 600px;
+}

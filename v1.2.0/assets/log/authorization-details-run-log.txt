@@ -1,0 +1,279 @@
+#######################################################
+TEST: OpenID Connect Discovery
+#######################################################
+-------------------------------------------------------
+REQUEST:
+-------------------------------------------------------
+GET /.well-known/webfinger HTTP/1.1?resource=acct%3Aadmin%40yuriyz-relaxed-jawfish.gluu.info&rel=http%3A%2F%2Fopenid.net%2Fspecs%2Fconnect%2F1.0%2Fissuer HTTP/1.1
+Host: yuriyz-relaxed-jawfish.gluu.info
+
+-------------------------------------------------------
+RESPONSE:
+-------------------------------------------------------
+HTTP/1.1 200
+Connection: Keep-Alive
+Content-Length: 209
+Content-Type: application/jrd+json;charset=iso-8859-1
+Date: Mon, 18 Dec 2023 17:59:12 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Keep-Alive: timeout=5, max=100
+Server: Apache/2.4.41 (Ubuntu)
+Set-Cookie: X-Correlation-Id=d049a147-bbc9-4622-bead-110efe63cdbc; Secure; HttpOnly;HttpOnly
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Xss-Protection: 1; mode=block
+
+{
+    "subject": "acct:admin@yuriyz-relaxed-jawfish.gluu.info",
+    "links": [{
+        "rel": "http://openid.net/specs/connect/1.0/issuer",
+        "href": "https://yuriyz-relaxed-jawfish.gluu.info"
+    }]
+}
+
+
+OpenID Connect Configuration
+-------------------------------------------------------
+REQUEST:
+-------------------------------------------------------
+GET /.well-known/openid-configuration HTTP/1.1 HTTP/1.1
+Host: yuriyz-relaxed-jawfish.gluu.info
+
+-------------------------------------------------------
+RESPONSE:
+-------------------------------------------------------
+HTTP/1.1 200
+Connection: Keep-Alive
+Content-Length: 6401
+Content-Type: application/json
+Date: Mon, 18 Dec 2023 17:59:12 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Keep-Alive: timeout=5, max=100
+Server: Apache/2.4.41 (Ubuntu)
+Set-Cookie: X-Correlation-Id=b3aee6ea-89bf-43e3-8d3f-241642402c65; Secure; HttpOnly;HttpOnly
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Xss-Protection: 1; mode=block
+
+{
+  "request_parameter_supported" : true,
+  "pushed_authorization_request_endpoint" : "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/restv1/par",
+  "introspection_endpoint" : "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/restv1/introspection",
+  "claims_parameter_supported" : false,
+  "issuer" : "https://yuriyz-relaxed-jawfish.gluu.info",
+  "userinfo_encryption_enc_values_supported" : [ "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM" ],
+  "id_token_encryption_enc_values_supported" : [ "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM" ],
+  "access_token_signing_alg_values_supported" : [ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
+  "authorization_endpoint" : "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/restv1/authorize",
+  "service_documentation" : "http://jans.org/docs",
+  "authorization_encryption_alg_values_supported" : [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ],
+  "claims_supported" : [ "street_address", "country", "zoneinfo", "birthdate", "role", "gender", "user_name", "formatted", "phone_mobile_number", "preferred_username", "locale", "inum", "updated_at", "post_office_box", "nickname", "preferred_language", "email", "website", "email_verified", "profile", "locality", "phone_number_verified", "room_number", "given_name", "middle_name", "picture", "name", "phone_number", "postal_code", "region", "family_name", "jansAdminUIRole" ],
+  "ssa_endpoint" : "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/restv1/ssa",
+  "token_endpoint_auth_methods_supported" : [ "client_secret_basic", "client_secret_post", "client_secret_jwt", "private_key_jwt", "tls_client_auth", "self_signed_tls_client_auth" ],
+  "tls_client_certificate_bound_access_tokens" : true,
+  "response_modes_supported" : [ "form_post.jwt", "query.jwt", "form_post", "fragment", "query", "jwt", "fragment.jwt" ],
+  "backchannel_logout_session_supported" : true,
+  "token_endpoint" : "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/restv1/token",
+  "response_types_supported" : [ "id_token token code", "token code", "id_token token", "id_token", "id_token code", "token", "code" ],
+  "authorization_encryption_enc_values_supported" : [ "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM" ],
+  "backchannel_token_delivery_modes_supported" : [ "poll", "ping", "push" ],
+  "dpop_signing_alg_values_supported" : [ "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
+  "request_uri_parameter_supported" : true,
+  "backchannel_user_code_parameter_supported" : false,
+  "grant_types_supported" : [ "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket", "password", "authorization_code", "urn:ietf:params:oauth:grant-type:token-exchange", "implicit", "client_credentials", "urn:ietf:params:oauth:grant-type:device_code" ],
+  "ui_locales_supported" : [ "en", "bg", "de", "es", "fr", "it", "ru", "tr" ],
+  "userinfo_endpoint" : "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/restv1/userinfo",
+  "authorization_challenge_endpoint" : "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/restv1/authorize-challenge",
+  "op_tos_uri" : "https://yuriyz-relaxed-jawfish.gluu.info/tos",
+  "require_request_uri_registration" : false,
+  "id_token_encryption_alg_values_supported" : [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ],
+  "frontchannel_logout_session_supported" : true,
+  "authorization_signing_alg_values_supported" : [ "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
+  "claims_locales_supported" : [ "en" ],
+  "clientinfo_endpoint" : "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/restv1/clientinfo",
+  "request_object_signing_alg_values_supported" : [ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
+  "request_object_encryption_alg_values_supported" : [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ],
+  "session_revocation_endpoint" : "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/restv1/revoke_session",
+  "check_session_iframe" : "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/opiframe.htm",
+  "scopes_supported" : [ "address", "introspection", "https://jans.io/auth/ssa.admin", "online_access", "user_name", "openid", "clientinfo", "profile", "uma_protection", "permission", "https://jans.io/scim/users.write", "revoke_any_token", "revoke_session", "device_sso", "https://jans.io/scim/users.read", "phone", "mobile_phone", "offline_access", "authorization_challenge", "email" ],
+  "backchannel_logout_supported" : true,
+  "acr_values_supported" : [ "simple_password_auth" ],
+  "request_object_encryption_enc_values_supported" : [ "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM" ],
+  "device_authorization_endpoint" : "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/restv1/device_authorization",
+  "display_values_supported" : [ "page", "popup" ],
+  "userinfo_signing_alg_values_supported" : [ "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
+  "require_pushed_authorization_requests" : false,
+  "claim_types_supported" : [ "normal" ],
+  "userinfo_encryption_alg_values_supported" : [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ],
+  "end_session_endpoint" : "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/restv1/end_session",
+  "authorization_details_types_supported" : [ "demo_authz_detail" ],
+  "revocation_endpoint" : "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/restv1/revoke",
+  "backchannel_authentication_endpoint" : "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/restv1/bc-authorize",
+  "token_endpoint_auth_signing_alg_values_supported" : [ "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
+  "frontchannel_logout_supported" : true,
+  "jwks_uri" : "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/restv1/jwks",
+  "subject_types_supported" : [ "public", "pairwise" ],
+  "id_token_signing_alg_values_supported" : [ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
+  "registration_endpoint" : "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/restv1/register",
+  "id_token_token_binding_cnf_values_supported" : [ "tbh" ]
+}
+
+
+#######################################################
+TEST: authorizationCodeFlow
+#######################################################
+-------------------------------------------------------
+REQUEST:
+-------------------------------------------------------
+POST /jans-auth/restv1/register HTTP/1.1
+Host: yuriyz-relaxed-jawfish.gluu.info
+Content-Type: application/json
+Accept: application/json
+
+{
+  "grant_types" : [ "authorization_code", "implicit" ],
+  "subject_type" : "public",
+  "application_type" : "web",
+  "authorization_details_types" : [ "demo_authz_detail" ],
+  "scope" : "openid profile address email phone user_name",
+  "minimum_acr_priority_list" : [ ],
+  "redirect_uris" : [ "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth-rp/home.htm", "https://client.example.com/cb", "https://client.example.com/cb1", "https://client.example.com/cb2" ],
+  "client_name" : "jans test app",
+  "additional_audience" : [ ],
+  "response_types" : [ "code" ]
+}
+
+-------------------------------------------------------
+RESPONSE:
+-------------------------------------------------------
+HTTP/1.1 201
+Cache-Control: no-store
+Connection: Keep-Alive
+Content-Length: 1653
+Content-Type: application/json
+Date: Mon, 18 Dec 2023 17:59:13 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Keep-Alive: timeout=5, max=100
+Pragma: no-cache
+Server: Apache/2.4.41 (Ubuntu)
+Set-Cookie: X-Correlation-Id=7b231c8f-5b2e-445d-b5ea-0f693c1cd7f2; Secure; HttpOnly;HttpOnly
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Xss-Protection: 1; mode=block
+
+{
+    "allow_spontaneous_scopes": false,
+    "application_type": "web",
+    "rpt_as_jwt": false,
+    "registration_client_uri": "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/restv1/register?client_id=7a29bf35-96ec-4bbd-a05c-15e1ff9f07cc",
+    "tls_client_auth_subject_dn": "",
+    "run_introspection_script_before_jwt_creation": false,
+    "registration_access_token": "92a40113-b27c-43b9-bf96-a222fcfe1c9c",
+    "client_id": "7a29bf35-96ec-4bbd-a05c-15e1ff9f07cc",
+    "token_endpoint_auth_method": "client_secret_basic",
+    "scope": "openid",
+    "client_secret": "1af17da1-57a3-416b-a358-c84bb0ef0fad",
+    "client_id_issued_at": 1702922353,
+    "backchannel_logout_uri": "",
+    "backchannel_logout_session_required": false,
+    "client_name": "jans test app",
+    "par_lifetime": 600,
+    "spontaneous_scopes": [],
+    "id_token_signed_response_alg": "RS256",
+    "access_token_as_jwt": false,
+    "grant_types": [
+        "authorization_code",
+        "implicit"
+    ],
+    "subject_type": "public",
+    "authorization_details_types": ["demo_authz_detail"],
+    "additional_token_endpoint_auth_methods": [],
+    "keep_client_authorization_after_expiration": false,
+    "require_par": false,
+    "redirect_uris": [
+        "https://client.example.com/cb2",
+        "https://client.example.com/cb1",
+        "https://yuriyz-relaxed-jawfish.gluu.info/jans-auth-rp/home.htm",
+        "https://client.example.com/cb"
+    ],
+    "redirect_uris_regex": "",
+    "additional_audience": [],
+    "frontchannel_logout_session_required": false,
+    "client_secret_expires_at": 0,
+    "access_token_signing_alg": "RS256",
+    "response_types": ["code"]
+}
+
+authenticateResourceOwnerAndGrantAccess: authorizationRequestUrl:https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/restv1/authorize?response_type=code&client_id=7a29bf35-96ec-4bbd-a05c-15e1ff9f07cc&scope=openid+profile+address+email+phone+user_name&redirect_uri=https%3A%2F%2Fyuriyz-relaxed-jawfish.gluu.info%2Fjans-auth-rp%2Fhome.htm&state=6cdc7701-178c-4653-adac-5c1e9c6c4aba&nonce=b9a1ecc4-548e-475c-8b29-f019417e1aef&prompt=&ui_locales=&claims_locales=&acr_values=&request_session_id=false&authorization_details=%5B%0A++%7B%0A++++%22type%22%3A+%22demo_authz_detail%22%2C%0A++++%22actions%22%3A+%5B%0A++++++%22list_accounts%22%2C%0A++++++%22read_balances%22%0A++++%5D%2C%0A++++%22locations%22%3A+%5B%0A++++++%22https%3A%2F%2Fexample.com%2Faccounts%22%0A++++%5D%2C%0A++++%22ui_representation%22%3A+%22Read+balances+and+list+accounts+at+https%3A%2F%2Fexample.com%2Faccounts%22%0A++%7D%0A%5D
+authenticateResourceOwnerAndGrantAccess: sessionState:d436addcb63f925ccbf6ab84ad247b443d68c8689cb45d936bb1e5e3f376395b.946acbad-c2b4-4ce7-a8f9-8fb9c9fa7ab5
+authenticateResourceOwnerAndGrantAccess: sessionId:465cad0c-5670-42c9-9aa6-575c632ebd18
+-------------------------------------------------------
+REQUEST:
+-------------------------------------------------------
+https://yuriyz-relaxed-jawfish.gluu.info/jans-auth/restv1/authorize?response_type=code&client_id=7a29bf35-96ec-4bbd-a05c-15e1ff9f07cc&scope=openid+profile+address+email+phone+user_name&redirect_uri=https%3A%2F%2Fyuriyz-relaxed-jawfish.gluu.info%2Fjans-auth-rp%2Fhome.htm&state=6cdc7701-178c-4653-adac-5c1e9c6c4aba&nonce=b9a1ecc4-548e-475c-8b29-f019417e1aef&prompt=&ui_locales=&claims_locales=&acr_values=&request_session_id=false&authorization_details=%5B%0A++%7B%0A++++%22type%22%3A+%22demo_authz_detail%22%2C%0A++++%22actions%22%3A+%5B%0A++++++%22list_accounts%22%2C%0A++++++%22read_balances%22%0A++++%5D%2C%0A++++%22locations%22%3A+%5B%0A++++++%22https%3A%2F%2Fexample.com%2Faccounts%22%0A++++%5D%2C%0A++++%22ui_representation%22%3A+%22Read+balances+and+list+accounts+at+https%3A%2F%2Fexample.com%2Faccounts%22%0A++%7D%0A%5D
+
+-------------------------------------------------------
+RESPONSE:
+-------------------------------------------------------
+HTTP/1.1 302 Found
+Location: https://yuriyz-relaxed-jawfish.gluu.info/jans-auth-rp/home.htm?code=e8ac07ed-450f-4120-aeb7-a7351f0642a4&scope=openid&state=6cdc7701-178c-4653-adac-5c1e9c6c4aba&session_state=d436addcb63f925ccbf6ab84ad247b443d68c8689cb45d936bb1e5e3f376395b.946acbad-c2b4-4ce7-a8f9-8fb9c9fa7ab5
+
+-------------------------------------------------------
+REQUEST:
+-------------------------------------------------------
+POST /jans-auth/restv1/token HTTP/1.1
+Host: yuriyz-relaxed-jawfish.gluu.info
+Content-Type: application/x-www-form-urlencoded
+Authorization: Basic N2EyOWJmMzUtOTZlYy00YmJkLWEwNWMtMTVlMWZmOWYwN2NjOjFhZjE3ZGExLTU3YTMtNDE2Yi1hMzU4LWM4NGJiMGVmMGZhZA==
+
+grant_type=authorization_code&code=e8ac07ed-450f-4120-aeb7-a7351f0642a4&redirect_uri=https%3A%2F%2Fyuriyz-relaxed-jawfish.gluu.info%2Fjans-auth-rp%2Fhome.htm&authorizationDetails=%5B%0A++%7B%0A++++%22type%22%3A+%22demo_authz_detail%22%2C%0A++++%22actions%22%3A+%5B%0A++++++%22list_accounts%22%2C%0A++++++%22read_balances%22%0A++++%5D%2C%0A++++%22locations%22%3A+%5B%0A++++++%22https%3A%2F%2Fexample.com%2Faccounts%22%0A++++%5D%2C%0A++++%22ui_representation%22%3A+%22Read+balances+and+list+accounts+at+https%3A%2F%2Fexample.com%2Faccounts%22%0A++%7D%0A%5D
+
+-------------------------------------------------------
+RESPONSE:
+-------------------------------------------------------
+HTTP/1.1 200
+Cache-Control: no-store
+Connection: Keep-Alive
+Content-Length: 1501
+Content-Type: application/json
+Date: Mon, 18 Dec 2023 17:59:20 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Keep-Alive: timeout=5, max=100
+Pragma: no-cache
+Server: Apache/2.4.41 (Ubuntu)
+Set-Cookie: X-Correlation-Id=b3eea320-c43d-4141-96de-e8b4b7c51e36; Secure; HttpOnly;HttpOnly
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Xss-Protection: 1; mode=block
+
+{"access_token":"549aa20a-f784-471f-a361-e01bafeeee8e","authorization_details":[{"locations":["https://example.com/accounts"],"ui_representation":"Read balances and list accounts at https://example.com/accounts","type":"demo_authz_detail","actions":["list_accounts","read_balances"]}],"id_token":"eyJraWQiOiJjb25uZWN0XzMyM2M5OGJlLWM5OWEtNDAzZi1hNzYwLTQ1YmRlZThlNWQ5ZV9zaWdfcnMyNTYiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiNEtVN3dnVXNMOGxhemh0TXN3cWdydyIsInN1YiI6Ijg4NWEwMmQwLTA5YjItNGZhNC04YTNiLWQzMTBiYjI2YWQ2MyIsImFtciI6WyItMSJdLCJpc3MiOiJodHRwczovL3l1cml5ei1yZWxheGVkLWphd2Zpc2guZ2x1dS5pbmZvIiwibm9uY2UiOiJiOWExZWNjNC01NDhlLTQ3NWMtOGIyOS1mMDE5NDE3ZTFhZWYiLCJzaWQiOiI4N2ZlNDg1Zi1mYWY4LTQwMmMtYjMyNC1mY2VmMjcxZWRkOTciLCJqYW5zT3BlbklEQ29ubmVjdFZlcnNpb24iOiJvcGVuaWRjb25uZWN0LTEuMCIsImF1ZCI6IjdhMjliZjM1LTk2ZWMtNGJiZC1hMDVjLTE1ZTFmZjlmMDdjYyIsInJhbmRvbSI6ImYwYjFiZTEwLTQ5Y2MtNDliNS1hNzg2LTM0MDg1ZGY3OWExZiIsImFjciI6InNpbXBsZV9wYXNzd29yZF9hdXRoIiwiY19oYXNoIjoiaVlMTndmUHF2S1oyNTd4U1dtSTZMQSIsImF1dGhfdGltZSI6MTcwMjkyMjM1OCwiZXhwIjoxNzAyOTI1OTYwLCJncmFudCI6ImF1dGhvcml6YXRpb25fY29kZSIsImlhdCI6MTcwMjkyMjM2MH0.HobzVNnM07ASUJibpgD5sOubtDBwHXvxVEJEl-ZtU2-78urvXLBcL2eMWHEkzvir95BN7y0O9OzJ6s5Vq-PEQYJOyBs9RQZB4RSkBzNlKsXKpOrOaWkqoZ7u6y-hUF7QsIPuRNNjXPV06ixkInLN6cdLyX-W0TfH_nxzqgBVH3tFF9fYURh6PVf2ExCqDdMW4OWo7Gh76MJcykRJrdP61Zx1zvgWnsbGCHimZkhTnNGdz4SJl-EgGDgMYKnVWOLC2SZ8PA_yMeNe6DGqquLfdDVi4DNukFOb_9MfGAIVIkacqjjpr8TQ-wU8JpmYopvYsg_siXBmt-fYR3E01BcBqA","token_type":"Bearer","expires_in":299}
+
+-------------------------------------------------------
+REQUEST:
+-------------------------------------------------------
+GET /jans-auth/restv1/userinfo HTTP/1.1 HTTP/1.1
+Host: yuriyz-relaxed-jawfish.gluu.info
+Authorization: Bearer 549aa20a-f784-471f-a361-e01bafeeee8e
+
+-------------------------------------------------------
+RESPONSE:
+-------------------------------------------------------
+HTTP/1.1 200
+Cache-Control: no-store, private
+Connection: Keep-Alive
+Content-Length: 46
+Content-Type: application/json;charset=utf-8
+Date: Mon, 18 Dec 2023 17:59:20 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Keep-Alive: timeout=5, max=100
+Pragma: no-cache
+Server: Apache/2.4.41 (Ubuntu)
+Set-Cookie: X-Correlation-Id=243d3a92-e7fd-4aa9-80b1-b6050e87b490; Secure; HttpOnly;HttpOnly
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Xss-Protection: 1; mode=block
+
+{"sub":"885a02d0-09b2-4fa4-8a3b-d310bb26ad63"}
+
+Introspection response for access_token: 549aa20a-f784-471f-a361-e01bafeeee8e
+IntrospectionResponse{active=true, scope=[openid], authorizationDetails=[{"locations":["https://example.com/accounts"],"ui_representation":"Read balances and list accounts at https://example.com/accounts","type":"demo_authz_detail","actions":["list_accounts","read_balances"]}], clientId='7a29bf35-96ec-4bbd-a05c-15e1ff9f07cc', username='admin', tokenType='Bearer', expiresAt=1702922660, issuedAt=1702922360, subject='885a02d0-09b2-4fa4-8a3b-d310bb26ad63', audience='7a29bf35-96ec-4bbd-a05c-15e1ff9f07cc', issuer='https://yuriyz-relaxed-jawfish.gluu.info', jti='null', acr='simple_password_auth', authTime='1702922358'}
