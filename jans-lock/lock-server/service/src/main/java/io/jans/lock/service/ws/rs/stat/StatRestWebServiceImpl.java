@@ -12,11 +12,11 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 
-import io.jans.as.model.config.Constants;
-import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.model.error.ErrorResponseFactory;
 import io.jans.lock.model.error.StatErrorResponseType;
 import io.jans.lock.service.stat.StatResponseService;
+import io.jans.lock.util.Constants;
 import io.jans.lock.util.ServerUtil;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
