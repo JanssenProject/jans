@@ -1,17 +1,16 @@
-/*
-* This software is available under the Apache-2.0 license.
-* See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
-*
-* Copyright (c) 2024, Gluu, Inc.
-cfg*/
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 #[cfg(not(target_family = "wasm"))]
 mod blocking;
 #[cfg(target_family = "wasm")]
 mod wasm;
 
-use serde::Deserialize;
 use std::time::Duration;
+
+use serde::Deserialize;
 
 trait HttpGet {
     /// Sends a GET request to the specified URI
@@ -76,12 +75,13 @@ pub enum HttpClientError {
 
 #[cfg(test)]
 mod test {
-    use crate::http::{HttpClient, HttpClientError};
+    use std::time::Duration;
 
     use mockito::Server;
     use serde_json::json;
-    use std::time::Duration;
     use test_utils::assert_eq;
+
+    use crate::http::{HttpClient, HttpClientError};
 
     #[test]
     fn can_fetch() {

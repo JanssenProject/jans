@@ -1,12 +1,11 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use test_utils::{assert_eq, SortedJson};
 
 use super::utils::*;
-use test_utils::{assert_eq, SortedJson};
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/agama-store_2.yaml");
 
@@ -117,7 +116,7 @@ fn check_mapping_tokens_data() {
     let expected_resource = json!({"uid":{"type":"Test::Application","id":"SomeID"},"attrs":{"url":{"host":"test-casa.gluu.info","path":"/","protocol":"https"},"app_id":"1234","name":"some_app"},"parents":[]}).sorted();
     assert_eq!(
         expected_resource,
-        entities.resource_entity.to_json_value().unwrap().sorted(),
+        entities.resource.to_json_value().unwrap().sorted(),
         "derived resource_entity is not equal to the expected"
     );
 
@@ -126,7 +125,7 @@ fn check_mapping_tokens_data() {
     let expected_user = json!({"attrs":{"email":{"domain":"example.com", "uid":"user"},"role":["Manager","Support"],"sub":"J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg"},"parents":[{"id":"Manager","type":"Test::Role"},{"id":"Support","type":"Test::Role"}],"uid":{"id":"J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg","type":"Test::User"}}).sorted();
     assert_eq!(
         expected_user,
-        entities.user_entity.to_json_value().unwrap().sorted(),
+        entities.user.unwrap().to_json_value().unwrap().sorted(),
         "derived user_entity is not equal to the expected"
     );
 }
