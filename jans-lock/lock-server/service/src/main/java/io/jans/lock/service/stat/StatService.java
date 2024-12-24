@@ -140,15 +140,14 @@ public class StatService {
 		}
 
 		setupCurrentEntryLock.lock();
-
-		// After getting lock check if another thread did initialization already
-		if (currentEntry != null && month.equals(currentEntry.getStat().getMonth())) {
-			return;
-		}
-
 		try {
+			// After getting lock check if another thread did initialization already
+			if (currentEntry != null && month.equals(currentEntry.getStat().getMonth())) {
+				return;
+			}
+
 			StatEntry entryFromPersistence = entryManager.find(StatEntry.class, dn);
-			if (entryFromPersistence != null && month.equals(entryFromPersistence.getStat().getMonth())) {
+			if ((entryFromPersistence != null) && month.equals(entryFromPersistence.getStat().getMonth())) {
 				userHll = HLL.fromBytes(Base64.getDecoder().decode(entryFromPersistence.getUserHllData()));
 				clientHll = HLL.fromBytes(Base64.getDecoder().decode(entryFromPersistence.getClientHllData()));
 				opearationCounters = new ConcurrentHashMap<>(entryFromPersistence.getStat().getOperationsByType());
@@ -306,7 +305,7 @@ public class StatService {
     	reportOpearation(operationGroup, RESULT_DENY);
     }
 
-    private void reportOpearation(String operationGroup, String operationType) {
+    public void reportOpearation(String operationGroup, String operationType) {
         if (!initialized) {
             return;
         }

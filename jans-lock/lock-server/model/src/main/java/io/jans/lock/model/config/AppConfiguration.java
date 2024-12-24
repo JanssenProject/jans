@@ -143,6 +143,9 @@ public class AppConfiguration implements Configuration {
     @Schema(description = "List of Zip Uris with policies")
     private List<String> policiesZipUris;
 
+    @DocProperty(description = "Boolean value specifying whether to return detailed reason of the error from AS. Default value is false", defaultValue = "false")
+    private Boolean errorReasonEnabled = false;
+
     public String getBaseDN() {
         return baseDN;
     }
@@ -359,6 +362,15 @@ public class AppConfiguration implements Configuration {
         this.policiesZipUris = policiesZipUris;
     }
 
+    public Boolean getErrorReasonEnabled() {
+        if (errorReasonEnabled == null) errorReasonEnabled = false;
+        return errorReasonEnabled;
+    }
+
+    public void setErrorReasonEnabled(Boolean errorReasonEnabled) {
+        this.errorReasonEnabled = errorReasonEnabled;
+    }
+
     @Override
 	public String toString() {
 		return "AppConfiguration [baseDN=" + baseDN + ", baseEndpoint=" + baseEndpoint + ", openIdIssuer="
@@ -373,7 +385,8 @@ public class AppConfiguration implements Configuration {
 				+ ", cleanServiceInterval=" + cleanServiceInterval + ", opaConfiguration=" + opaConfiguration
 				+ ", pdpType=" + pdpType + ", policiesJsonUrisAuthorizationToken=" + policiesJsonUrisAuthorizationToken
 				+ ", policiesJsonUris=" + policiesJsonUris + ", policiesZipUrisAuthorizationToken="
-				+ policiesZipUrisAuthorizationToken + ", policiesZipUris=" + policiesZipUris + "]";
+				+ policiesZipUrisAuthorizationToken + ", policiesZipUris=" + policiesZipUris + ", errorReasonEnabled="
+				+ errorReasonEnabled + "]";
 	}
 
 }
