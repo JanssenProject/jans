@@ -40,7 +40,7 @@ public class SseRestWebServiceImpl implements SseRestWebService {
 
 	@Override
 	public void subscribe(@Context Sse sse, @Context SseEventSink sseEventSink) {
-        log.info("Sibscribe broadcaster");
+        log.info("Subscribe broadcaster");
         if (lockSseBroadcater.getSseBroadcaster() == null) {
             log.info("Init broadcaster");
             lockSseBroadcater.setSse(sse);
