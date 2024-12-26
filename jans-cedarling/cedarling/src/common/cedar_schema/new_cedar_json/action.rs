@@ -4,12 +4,9 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::attr_kind::AttributeKind;
+use super::*;
 use serde::Deserialize;
 use std::collections::HashSet;
-
-pub type ActionName = String;
-pub type EntityName = String;
-pub type ActionGroupName = String;
 
 #[derive(Debug, Deserialize, PartialEq)]
 pub struct Action {

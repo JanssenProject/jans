@@ -3,6 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use super::*;
 use serde::{de, Deserialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -21,7 +22,7 @@ pub enum AttributeKind {
     },
     Record {
         required: bool,
-        attrs: HashMap<String, AttributeKind>,
+        attrs: HashMap<AttributeName, AttributeKind>,
     },
     Set {
         required: bool,
@@ -29,15 +30,15 @@ pub enum AttributeKind {
     },
     Entity {
         required: bool,
-        name: String,
+        name: EntityName,
     },
     Extension {
         required: bool,
-        name: String,
+        name: ExtensionName,
     },
     EntityOrCommon {
         required: bool,
-        name: String,
+        name: EntityOrCommonName,
     },
 }
 
@@ -70,7 +71,7 @@ impl AttributeKind {
         Self::Boolean { required: true }
     }
 
-    pub fn record(attrs: HashMap<String, Self>) -> Self {
+    pub fn record(attrs: HashMap<AttributeName, Self>) -> Self {
         Self::Record {
             required: true,
             attrs,
@@ -85,24 +86,24 @@ impl AttributeKind {
         }
     }
 
-    pub fn entity(name: impl ToString) -> Self {
+    pub fn entity(name: &str) -> Self {
         Self::Entity {
             required: true,
-            name: name.to_string(),
+            name: name.into(),
         }
     }
 
-    pub fn extension(name: impl ToString) -> Self {
+    pub fn extension(name: &str) -> Self {
         Self::Extension {
             required: true,
-            name: name.to_string(),
+            name: name.into(),
         }
     }
 
-    pub fn entity_or_common(name: impl ToString) -> Self {
+    pub fn entity_or_common(name: &str) -> Self {
         Self::EntityOrCommon {
             required: true,
-            name: name.to_string(),
+            name: name.into(),
         }
     }
 }
@@ -141,14 +142,14 @@ impl<'de> Deserialize<'de> for AttributeKind {
                     })?;
 
                 // loop through each attr then deserialize into Self
-                let mut attrs = HashMap::<String, AttributeKind>::new();
+                let mut attrs = HashMap::<AttributeName, AttributeKind>::new();
                 for (key, val) in attrs_json.into_iter() {
                     let val = serde_json::from_value::<AttributeKind>(val).map_err(|e| {
                         de::Error::custom(format!(
                             "error while deserializing cedar record attribute: {e}"
                         ))
                     })?;
-                    attrs.insert(key, val);
+                    attrs.insert(key.into(), val);
                 }
                 Self::Record { required, attrs }
             },
@@ -171,21 +172,21 @@ impl<'de> Deserialize<'de> for AttributeKind {
                 let name = attr
                     .remove("name")
                     .ok_or(de::Error::missing_field("name"))?;
-                let name = deserialize_to_string::<D>(name)?;
+                let name = deserialize_to_string::<D>(name)?.into();
                 Self::Entity { required, name }
             },
             "Extension" => {
                 let name = attr
                     .remove("name")
                     .ok_or(de::Error::missing_field("name"))?;
-                let name = deserialize_to_string::<D>(name)?;
+                let name = deserialize_to_string::<D>(name)?.into();
                 Self::Extension { required, name }
             },
             "EntityOrCommon" => {
                 let name = attr
                     .remove("name")
                     .ok_or(de::Error::missing_field("name"))?;
-                let name = deserialize_to_string::<D>(name)?;
+                let name = deserialize_to_string::<D>(name)?.into();
                 Self::EntityOrCommon { required, name }
             },
 
