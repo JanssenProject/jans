@@ -25,7 +25,6 @@ pub enum CedarRecordAttr {
     },
     Set {
         required: bool,
-
         element: Box<CedarRecordAttr>,
     },
     Entity {
@@ -59,26 +58,26 @@ impl CedarRecordAttr {
 #[allow(dead_code)]
 /// Helper methods to easily create required attributes
 impl CedarRecordAttr {
-    fn string() -> Self {
+    pub fn string() -> Self {
         Self::String { required: true }
     }
 
-    fn long() -> Self {
+    pub fn long() -> Self {
         Self::Long { required: true }
     }
 
-    fn boolean() -> Self {
+    pub fn boolean() -> Self {
         Self::Boolean { required: true }
     }
 
-    fn record(attrs: HashMap<String, Self>) -> Self {
+    pub fn record(attrs: HashMap<String, Self>) -> Self {
         Self::Record {
             required: true,
             attrs,
         }
     }
 
-    fn set(element: Self) -> Self {
+    pub fn set(element: Self) -> Self {
         Self::Set {
             required: true,
 
@@ -86,21 +85,21 @@ impl CedarRecordAttr {
         }
     }
 
-    fn entity(name: impl ToString) -> Self {
+    pub fn entity(name: impl ToString) -> Self {
         Self::Entity {
             required: true,
             name: name.to_string(),
         }
     }
 
-    fn extension(name: impl ToString) -> Self {
+    pub fn extension(name: impl ToString) -> Self {
         Self::Extension {
             required: true,
             name: name.to_string(),
         }
     }
 
-    fn entity_or_common(name: impl ToString) -> Self {
+    pub fn entity_or_common(name: impl ToString) -> Self {
         Self::EntityOrCommon {
             required: true,
             name: name.to_string(),
@@ -210,7 +209,7 @@ where
 }
 
 #[cfg(test)]
-mod test {
+mod test_deserialize_record_attr {
     use super::CedarRecordAttr;
     use serde_json::json;
     use std::collections::HashMap;

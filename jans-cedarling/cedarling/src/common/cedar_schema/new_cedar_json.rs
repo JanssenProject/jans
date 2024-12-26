@@ -6,3 +6,4 @@
 //! This module is responsible for deserializing the JSON Cedar schema
 
 mod record_attr;
+mod entity_type;
