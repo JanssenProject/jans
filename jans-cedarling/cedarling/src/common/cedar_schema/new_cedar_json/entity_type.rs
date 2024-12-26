@@ -3,24 +3,24 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::record_attr::CedarRecordAttr;
+use super::record_attr::RecordAttr;
 use serde::Deserialize;
 use std::collections::HashSet;
 
 pub type EntityTypeName = String;
 
 #[derive(Debug, PartialEq, Deserialize)]
-pub struct CedarEntityType {
+pub struct EntityType {
     #[serde(rename = "memberOfTypes")]
     member_of: Option<HashSet<EntityTypeName>>,
-    shape: CedarRecordAttr,
-    tags: Option<CedarRecordAttr>,
+    shape: RecordAttr,
+    tags: Option<RecordAttr>,
 }
 
 #[cfg(test)]
 mod test_deserialize_entity_type {
-    use super::super::record_attr::CedarRecordAttr;
-    use super::CedarEntityType;
+    use super::super::record_attr::RecordAttr;
+    use super::EntityType;
     use serde_json::json;
     use std::collections::{HashMap, HashSet};
     use test_utils::assert_eq;
@@ -36,14 +36,14 @@ mod test_deserialize_entity_type {
                 },
             },
         });
-        let entity_type = serde_json::from_value::<CedarEntityType>(entity_type).unwrap();
+        let entity_type = serde_json::from_value::<EntityType>(entity_type).unwrap();
         assert_eq!(
             entity_type,
-            CedarEntityType {
+            EntityType {
                 member_of: None,
-                shape: CedarRecordAttr::record(HashMap::from([
-                    ("name".into(), CedarRecordAttr::string()),
-                    ("age".into(), CedarRecordAttr::long())
+                shape: RecordAttr::record(HashMap::from([
+                    ("name".into(), RecordAttr::string()),
+                    ("age".into(), RecordAttr::long())
                 ])),
                 tags: None,
             }
@@ -62,14 +62,14 @@ mod test_deserialize_entity_type {
                 },
             },
         });
-        let with_member_of = serde_json::from_value::<CedarEntityType>(with_member_of).unwrap();
+        let with_member_of = serde_json::from_value::<EntityType>(with_member_of).unwrap();
         assert_eq!(
             with_member_of,
-            CedarEntityType {
+            EntityType {
                 member_of: Some(HashSet::from(["UserGroup".into()])),
-                shape: CedarRecordAttr::record(HashMap::from([
-                    ("name".into(), CedarRecordAttr::string()),
-                    ("age".into(), CedarRecordAttr::long())
+                shape: RecordAttr::record(HashMap::from([
+                    ("name".into(), RecordAttr::string()),
+                    ("age".into(), RecordAttr::long())
                 ])),
                 tags: None,
             }
@@ -94,18 +94,16 @@ mod test_deserialize_entity_type {
                 }
             }
         });
-        let with_tags = serde_json::from_value::<CedarEntityType>(with_tags).unwrap();
+        let with_tags = serde_json::from_value::<EntityType>(with_tags).unwrap();
         assert_eq!(
             with_tags,
-            CedarEntityType {
+            EntityType {
                 member_of: None,
-                shape: CedarRecordAttr::record(HashMap::from([
-                    ("name".into(), CedarRecordAttr::string()),
-                    ("age".into(), CedarRecordAttr::long())
+                shape: RecordAttr::record(HashMap::from([
+                    ("name".into(), RecordAttr::string()),
+                    ("age".into(), RecordAttr::long())
                 ])),
-                tags: Some(CedarRecordAttr::set(CedarRecordAttr::entity_or_common(
-                    "String",
-                )))
+                tags: Some(RecordAttr::set(RecordAttr::entity_or_common("String",)))
             }
         );
     }

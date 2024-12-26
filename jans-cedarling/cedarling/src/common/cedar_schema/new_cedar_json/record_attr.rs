@@ -9,7 +9,7 @@ use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
 #[allow(dead_code)]
-pub enum CedarRecordAttr {
+pub enum RecordAttr {
     String {
         required: bool,
     },
@@ -21,11 +21,11 @@ pub enum CedarRecordAttr {
     },
     Record {
         required: bool,
-        attrs: HashMap<String, CedarRecordAttr>,
+        attrs: HashMap<String, RecordAttr>,
     },
     Set {
         required: bool,
-        element: Box<CedarRecordAttr>,
+        element: Box<RecordAttr>,
     },
     Entity {
         required: bool,
@@ -41,7 +41,7 @@ pub enum CedarRecordAttr {
     },
 }
 
-impl CedarRecordAttr {
+impl RecordAttr {
     const ATTR_VARIANTS: [&str; 8] = [
         "String",
         "Long",
@@ -57,7 +57,7 @@ impl CedarRecordAttr {
 #[cfg(test)]
 #[allow(dead_code)]
 /// Helper methods to easily create required attributes
-impl CedarRecordAttr {
+impl RecordAttr {
     pub fn string() -> Self {
         Self::String { required: true }
     }
@@ -107,7 +107,7 @@ impl CedarRecordAttr {
     }
 }
 
-impl<'de> Deserialize<'de> for CedarRecordAttr {
+impl<'de> Deserialize<'de> for RecordAttr {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -126,9 +126,9 @@ impl<'de> Deserialize<'de> for CedarRecordAttr {
             .unwrap_or(true);
         let kind = deserialize_to_string::<D>(kind)?;
         let attr = match kind.as_str() {
-            "String" => CedarRecordAttr::String { required },
-            "Long" => CedarRecordAttr::Long { required },
-            "Boolean" => CedarRecordAttr::Boolean { required },
+            "String" => RecordAttr::String { required },
+            "Long" => RecordAttr::Long { required },
+            "Boolean" => RecordAttr::Boolean { required },
             "Record" => {
                 let record_attrs = attr
                     .remove("attributes")
@@ -141,9 +141,9 @@ impl<'de> Deserialize<'de> for CedarRecordAttr {
                     })?;
 
                 // loop through each attr then deserialize into Self
-                let mut attrs = HashMap::<String, CedarRecordAttr>::new();
+                let mut attrs = HashMap::<String, RecordAttr>::new();
                 for (key, val) in attrs_json.into_iter() {
-                    let val = serde_json::from_value::<CedarRecordAttr>(val).map_err(|e| {
+                    let val = serde_json::from_value::<RecordAttr>(val).map_err(|e| {
                         de::Error::custom(format!(
                             "error while deserializing cedar record attribute: {e}"
                         ))
@@ -156,7 +156,7 @@ impl<'de> Deserialize<'de> for CedarRecordAttr {
                 let element = attr
                     .remove("element")
                     .ok_or(de::Error::missing_field("element"))?;
-                let element = serde_json::from_value::<CedarRecordAttr>(element).map_err(|e| {
+                let element = serde_json::from_value::<RecordAttr>(element).map_err(|e| {
                     de::Error::custom(format!(
                         "error while deserializing cedar element attribute: {e}"
                     ))
@@ -210,29 +210,29 @@ where
 
 #[cfg(test)]
 mod test_deserialize_record_attr {
-    use super::CedarRecordAttr;
+    use super::RecordAttr;
     use serde_json::json;
     use std::collections::HashMap;
 
     #[test]
     fn can_deserialize_string() {
         let attr_json = json!({"type": "String"});
-        let deserialized = serde_json::from_value::<CedarRecordAttr>(attr_json).unwrap();
-        assert_eq!(deserialized, CedarRecordAttr::string());
+        let deserialized = serde_json::from_value::<RecordAttr>(attr_json).unwrap();
+        assert_eq!(deserialized, RecordAttr::string());
     }
 
     #[test]
     fn can_deserialize_long() {
         let attr_json = json!({"type": "Long"});
-        let deserialized = serde_json::from_value::<CedarRecordAttr>(attr_json).unwrap();
-        assert_eq!(deserialized, CedarRecordAttr::long());
+        let deserialized = serde_json::from_value::<RecordAttr>(attr_json).unwrap();
+        assert_eq!(deserialized, RecordAttr::long());
     }
 
     #[test]
     fn can_deserialize_boolean() {
         let attr_json = json!({"type": "Boolean"});
-        let deserialized = serde_json::from_value::<CedarRecordAttr>(attr_json).unwrap();
-        assert_eq!(deserialized, CedarRecordAttr::boolean());
+        let deserialized = serde_json::from_value::<RecordAttr>(attr_json).unwrap();
+        assert_eq!(deserialized, RecordAttr::boolean());
     }
 
     #[test]
@@ -244,12 +244,12 @@ mod test_deserialize_record_attr {
                 "secondary": { "type": "String" },
             },
         });
-        let deserialized = serde_json::from_value::<CedarRecordAttr>(attr_json).unwrap();
+        let deserialized = serde_json::from_value::<RecordAttr>(attr_json).unwrap();
         let expected = HashMap::from([
-            ("primary".into(), CedarRecordAttr::string()),
-            ("secondary".into(), CedarRecordAttr::string()),
+            ("primary".into(), RecordAttr::string()),
+            ("secondary".into(), RecordAttr::string()),
         ]);
-        assert_eq!(deserialized, CedarRecordAttr::record(expected));
+        assert_eq!(deserialized, RecordAttr::record(expected));
     }
 
     #[test]
@@ -261,10 +261,10 @@ mod test_deserialize_record_attr {
                 "name": "Subscription"
             }
         });
-        let deserialized = serde_json::from_value::<CedarRecordAttr>(attr_json).unwrap();
+        let deserialized = serde_json::from_value::<RecordAttr>(attr_json).unwrap();
         assert_eq!(
             deserialized,
-            CedarRecordAttr::set(CedarRecordAttr::entity_or_common("Subscription"))
+            RecordAttr::set(RecordAttr::entity_or_common("Subscription"))
         );
     }
 
@@ -274,8 +274,8 @@ mod test_deserialize_record_attr {
             "type": "Entity",
             "name": "Role",
         });
-        let deserialized = serde_json::from_value::<CedarRecordAttr>(attr_json).unwrap();
-        assert_eq!(deserialized, CedarRecordAttr::entity("Role"));
+        let deserialized = serde_json::from_value::<RecordAttr>(attr_json).unwrap();
+        assert_eq!(deserialized, RecordAttr::entity("Role"));
     }
 
     #[test]
@@ -284,8 +284,8 @@ mod test_deserialize_record_attr {
             "type": "Extension",
             "name": "decimal",
         });
-        let deserialized = serde_json::from_value::<CedarRecordAttr>(attr_json).unwrap();
-        assert_eq!(deserialized, CedarRecordAttr::extension("decimal"),);
+        let deserialized = serde_json::from_value::<RecordAttr>(attr_json).unwrap();
+        assert_eq!(deserialized, RecordAttr::extension("decimal"),);
     }
 
     #[test]
@@ -294,21 +294,21 @@ mod test_deserialize_record_attr {
             "type": "EntityOrCommon",
             "name": "String",
         });
-        let deserialized = serde_json::from_value::<CedarRecordAttr>(attr_json).unwrap();
-        assert_eq!(deserialized, CedarRecordAttr::entity_or_common("String"),);
+        let deserialized = serde_json::from_value::<RecordAttr>(attr_json).unwrap();
+        assert_eq!(deserialized, RecordAttr::entity_or_common("String"),);
     }
 
     #[test]
     fn can_deserialize_non_required_attr() {
         let attr_json = json!({"type": "String", "required": false});
-        let deserialized = serde_json::from_value::<CedarRecordAttr>(attr_json).unwrap();
-        assert_eq!(deserialized, CedarRecordAttr::String { required: false });
+        let deserialized = serde_json::from_value::<RecordAttr>(attr_json).unwrap();
+        assert_eq!(deserialized, RecordAttr::String { required: false });
     }
 
     #[test]
     fn errors_on_invalid_type() {
         let attr_json = json!({"type": "InvalidType"});
-        let err = serde_json::from_value::<CedarRecordAttr>(attr_json)
+        let err = serde_json::from_value::<RecordAttr>(attr_json)
             .unwrap_err()
             .to_string();
         assert!(
