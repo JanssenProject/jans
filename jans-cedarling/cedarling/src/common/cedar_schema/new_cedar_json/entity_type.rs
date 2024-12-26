@@ -4,17 +4,18 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::attr_kind::AttributeKind;
+use super::*;
 use serde::Deserialize;
 use std::collections::HashSet;
-
-pub type EntityTypeName = String;
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub struct EntityType {
     #[serde(rename = "memberOfTypes")]
-    member_of: Option<HashSet<EntityTypeName>>,
-    shape: AttributeKind,
-    tags: Option<AttributeKind>,
+    pub member_of: Option<HashSet<EntityTypeName>>,
+    #[serde(default)]
+    pub shape: Option<AttributeKind>,
+    #[serde(default)]
+    pub tags: Option<AttributeKind>,
 }
 
 #[cfg(test)]
@@ -41,10 +42,10 @@ mod test_deserialize_entity_type {
             entity_type,
             EntityType {
                 member_of: None,
-                shape: AttributeKind::record(HashMap::from([
+                shape: Some(AttributeKind::record(HashMap::from([
                     ("name".into(), AttributeKind::string()),
                     ("age".into(), AttributeKind::long())
-                ])),
+                ]))),
                 tags: None,
             }
         );
@@ -67,10 +68,10 @@ mod test_deserialize_entity_type {
             with_member_of,
             EntityType {
                 member_of: Some(HashSet::from(["UserGroup".into()])),
-                shape: AttributeKind::record(HashMap::from([
+                shape: Some(AttributeKind::record(HashMap::from([
                     ("name".into(), AttributeKind::string()),
                     ("age".into(), AttributeKind::long())
-                ])),
+                ]))),
                 tags: None,
             }
         );
@@ -99,10 +100,10 @@ mod test_deserialize_entity_type {
             with_tags,
             EntityType {
                 member_of: None,
-                shape: AttributeKind::record(HashMap::from([
+                shape: Some(AttributeKind::record(HashMap::from([
                     ("name".into(), AttributeKind::string()),
                     ("age".into(), AttributeKind::long())
-                ])),
+                ]))),
                 tags: Some(AttributeKind::set(AttributeKind::entity_or_common(
                     "String",
                 )))

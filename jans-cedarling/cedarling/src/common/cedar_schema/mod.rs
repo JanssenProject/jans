@@ -5,9 +5,7 @@
 
 pub(crate) use cedar_json::CedarSchemaJson;
 pub(crate) mod cedar_json;
-
-#[allow(dead_code)]
-mod new_cedar_json;
+pub(crate) mod new_cedar_json;
 
 /// cedar_schema value which specifies both encoding and content_type
 ///
