@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::record_attr::RecordAttr;
+use super::attr_kind::AttributeKind;
 use serde::Deserialize;
 use std::collections::HashSet;
 
@@ -13,13 +13,13 @@ pub type EntityTypeName = String;
 pub struct EntityType {
     #[serde(rename = "memberOfTypes")]
     member_of: Option<HashSet<EntityTypeName>>,
-    shape: RecordAttr,
-    tags: Option<RecordAttr>,
+    shape: AttributeKind,
+    tags: Option<AttributeKind>,
 }
 
 #[cfg(test)]
 mod test_deserialize_entity_type {
-    use super::super::record_attr::RecordAttr;
+    use super::super::attr_kind::AttributeKind;
     use super::EntityType;
     use serde_json::json;
     use std::collections::{HashMap, HashSet};
@@ -41,9 +41,9 @@ mod test_deserialize_entity_type {
             entity_type,
             EntityType {
                 member_of: None,
-                shape: RecordAttr::record(HashMap::from([
-                    ("name".into(), RecordAttr::string()),
-                    ("age".into(), RecordAttr::long())
+                shape: AttributeKind::record(HashMap::from([
+                    ("name".into(), AttributeKind::string()),
+                    ("age".into(), AttributeKind::long())
                 ])),
                 tags: None,
             }
@@ -67,9 +67,9 @@ mod test_deserialize_entity_type {
             with_member_of,
             EntityType {
                 member_of: Some(HashSet::from(["UserGroup".into()])),
-                shape: RecordAttr::record(HashMap::from([
-                    ("name".into(), RecordAttr::string()),
-                    ("age".into(), RecordAttr::long())
+                shape: AttributeKind::record(HashMap::from([
+                    ("name".into(), AttributeKind::string()),
+                    ("age".into(), AttributeKind::long())
                 ])),
                 tags: None,
             }
@@ -99,11 +99,13 @@ mod test_deserialize_entity_type {
             with_tags,
             EntityType {
                 member_of: None,
-                shape: RecordAttr::record(HashMap::from([
-                    ("name".into(), RecordAttr::string()),
-                    ("age".into(), RecordAttr::long())
+                shape: AttributeKind::record(HashMap::from([
+                    ("name".into(), AttributeKind::string()),
+                    ("age".into(), AttributeKind::long())
                 ])),
-                tags: Some(RecordAttr::set(RecordAttr::entity_or_common("String",)))
+                tags: Some(AttributeKind::set(AttributeKind::entity_or_common(
+                    "String",
+                )))
             }
         );
     }

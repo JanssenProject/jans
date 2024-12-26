@@ -9,7 +9,7 @@ use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
 #[allow(dead_code)]
-pub enum RecordAttr {
+pub enum AttributeKind {
     String {
         required: bool,
     },
@@ -21,11 +21,11 @@ pub enum RecordAttr {
     },
     Record {
         required: bool,
-        attrs: HashMap<String, RecordAttr>,
+        attrs: HashMap<String, AttributeKind>,
     },
     Set {
         required: bool,
-        element: Box<RecordAttr>,
+        element: Box<AttributeKind>,
     },
     Entity {
         required: bool,
@@ -41,7 +41,7 @@ pub enum RecordAttr {
     },
 }
 
-impl RecordAttr {
+impl AttributeKind {
     const ATTR_VARIANTS: [&str; 8] = [
         "String",
         "Long",
@@ -57,7 +57,7 @@ impl RecordAttr {
 #[cfg(test)]
 #[allow(dead_code)]
 /// Helper methods to easily create required attributes
-impl RecordAttr {
+impl AttributeKind {
     pub fn string() -> Self {
         Self::String { required: true }
     }
@@ -107,7 +107,7 @@ impl RecordAttr {
     }
 }
 
-impl<'de> Deserialize<'de> for RecordAttr {
+impl<'de> Deserialize<'de> for AttributeKind {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -126,9 +126,9 @@ impl<'de> Deserialize<'de> for RecordAttr {
             .unwrap_or(true);
         let kind = deserialize_to_string::<D>(kind)?;
         let attr = match kind.as_str() {
-            "String" => RecordAttr::String { required },
-            "Long" => RecordAttr::Long { required },
-            "Boolean" => RecordAttr::Boolean { required },
+            "String" => AttributeKind::String { required },
+            "Long" => AttributeKind::Long { required },
+            "Boolean" => AttributeKind::Boolean { required },
             "Record" => {
                 let record_attrs = attr
                     .remove("attributes")
@@ -141,9 +141,9 @@ impl<'de> Deserialize<'de> for RecordAttr {
                     })?;
 
                 // loop through each attr then deserialize into Self
-                let mut attrs = HashMap::<String, RecordAttr>::new();
+                let mut attrs = HashMap::<String, AttributeKind>::new();
                 for (key, val) in attrs_json.into_iter() {
-                    let val = serde_json::from_value::<RecordAttr>(val).map_err(|e| {
+                    let val = serde_json::from_value::<AttributeKind>(val).map_err(|e| {
                         de::Error::custom(format!(
                             "error while deserializing cedar record attribute: {e}"
                         ))
@@ -156,7 +156,7 @@ impl<'de> Deserialize<'de> for RecordAttr {
                 let element = attr
                     .remove("element")
                     .ok_or(de::Error::missing_field("element"))?;
-                let element = serde_json::from_value::<RecordAttr>(element).map_err(|e| {
+                let element = serde_json::from_value::<AttributeKind>(element).map_err(|e| {
                     de::Error::custom(format!(
                         "error while deserializing cedar element attribute: {e}"
                     ))
@@ -210,29 +210,29 @@ where
 
 #[cfg(test)]
 mod test_deserialize_record_attr {
-    use super::RecordAttr;
+    use super::AttributeKind;
     use serde_json::json;
     use std::collections::HashMap;
 
     #[test]
     fn can_deserialize_string() {
         let attr_json = json!({"type": "String"});
-        let deserialized = serde_json::from_value::<RecordAttr>(attr_json).unwrap();
-        assert_eq!(deserialized, RecordAttr::string());
+        let deserialized = serde_json::from_value::<AttributeKind>(attr_json).unwrap();
+        assert_eq!(deserialized, AttributeKind::string());
     }
 
     #[test]
     fn can_deserialize_long() {
         let attr_json = json!({"type": "Long"});
-        let deserialized = serde_json::from_value::<RecordAttr>(attr_json).unwrap();
-        assert_eq!(deserialized, RecordAttr::long());
+        let deserialized = serde_json::from_value::<AttributeKind>(attr_json).unwrap();
+        assert_eq!(deserialized, AttributeKind::long());
     }
 
     #[test]
     fn can_deserialize_boolean() {
         let attr_json = json!({"type": "Boolean"});
-        let deserialized = serde_json::from_value::<RecordAttr>(attr_json).unwrap();
-        assert_eq!(deserialized, RecordAttr::boolean());
+        let deserialized = serde_json::from_value::<AttributeKind>(attr_json).unwrap();
+        assert_eq!(deserialized, AttributeKind::boolean());
     }
 
     #[test]
@@ -244,12 +244,12 @@ mod test_deserialize_record_attr {
                 "secondary": { "type": "String" },
             },
         });
-        let deserialized = serde_json::from_value::<RecordAttr>(attr_json).unwrap();
+        let deserialized = serde_json::from_value::<AttributeKind>(attr_json).unwrap();
         let expected = HashMap::from([
-            ("primary".into(), RecordAttr::string()),
-            ("secondary".into(), RecordAttr::string()),
+            ("primary".into(), AttributeKind::string()),
+            ("secondary".into(), AttributeKind::string()),
         ]);
-        assert_eq!(deserialized, RecordAttr::record(expected));
+        assert_eq!(deserialized, AttributeKind::record(expected));
     }
 
     #[test]
@@ -261,10 +261,10 @@ mod test_deserialize_record_attr {
                 "name": "Subscription"
             }
         });
-        let deserialized = serde_json::from_value::<RecordAttr>(attr_json).unwrap();
+        let deserialized = serde_json::from_value::<AttributeKind>(attr_json).unwrap();
         assert_eq!(
             deserialized,
-            RecordAttr::set(RecordAttr::entity_or_common("Subscription"))
+            AttributeKind::set(AttributeKind::entity_or_common("Subscription"))
         );
     }
 
@@ -274,8 +274,8 @@ mod test_deserialize_record_attr {
             "type": "Entity",
             "name": "Role",
         });
-        let deserialized = serde_json::from_value::<RecordAttr>(attr_json).unwrap();
-        assert_eq!(deserialized, RecordAttr::entity("Role"));
+        let deserialized = serde_json::from_value::<AttributeKind>(attr_json).unwrap();
+        assert_eq!(deserialized, AttributeKind::entity("Role"));
     }
 
     #[test]
@@ -284,8 +284,8 @@ mod test_deserialize_record_attr {
             "type": "Extension",
             "name": "decimal",
         });
-        let deserialized = serde_json::from_value::<RecordAttr>(attr_json).unwrap();
-        assert_eq!(deserialized, RecordAttr::extension("decimal"),);
+        let deserialized = serde_json::from_value::<AttributeKind>(attr_json).unwrap();
+        assert_eq!(deserialized, AttributeKind::extension("decimal"),);
     }
 
     #[test]
@@ -294,21 +294,21 @@ mod test_deserialize_record_attr {
             "type": "EntityOrCommon",
             "name": "String",
         });
-        let deserialized = serde_json::from_value::<RecordAttr>(attr_json).unwrap();
-        assert_eq!(deserialized, RecordAttr::entity_or_common("String"),);
+        let deserialized = serde_json::from_value::<AttributeKind>(attr_json).unwrap();
+        assert_eq!(deserialized, AttributeKind::entity_or_common("String"),);
     }
 
     #[test]
     fn can_deserialize_non_required_attr() {
         let attr_json = json!({"type": "String", "required": false});
-        let deserialized = serde_json::from_value::<RecordAttr>(attr_json).unwrap();
-        assert_eq!(deserialized, RecordAttr::String { required: false });
+        let deserialized = serde_json::from_value::<AttributeKind>(attr_json).unwrap();
+        assert_eq!(deserialized, AttributeKind::String { required: false });
     }
 
     #[test]
     fn errors_on_invalid_type() {
         let attr_json = json!({"type": "InvalidType"});
-        let err = serde_json::from_value::<RecordAttr>(attr_json)
+        let err = serde_json::from_value::<AttributeKind>(attr_json)
             .unwrap_err()
             .to_string();
         assert!(

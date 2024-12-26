@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::record_attr::RecordAttr;
+use super::attr_kind::AttributeKind;
 use serde::Deserialize;
 use std::collections::HashSet;
 
@@ -36,12 +36,12 @@ pub struct AppliesTo {
     #[serde(rename = "resourceTypes", default)]
     resource_types: HashSet<EntityName>,
     #[serde(default)]
-    context: Option<RecordAttr>,
+    context: Option<AttributeKind>,
 }
 
 #[cfg(test)]
 mod test_deserialize_action {
-    use super::super::record_attr::RecordAttr;
+    use super::super::attr_kind::AttributeKind;
     use super::{Action, ActionGroup, AppliesTo};
     use serde_json::json;
     use std::collections::{HashMap, HashSet};
@@ -188,10 +188,10 @@ mod test_deserialize_action {
                 applies_to: AppliesTo {
                     principal_types: HashSet::from(["PrincipalEntityType1".into()]),
                     resource_types: HashSet::from(["ResourceEntityType1".into()]),
-                    context: Some(RecordAttr::record(HashMap::from([
-                        ("field1".into(), RecordAttr::boolean()),
-                        ("field2".into(), RecordAttr::long()),
-                        ("field3".into(), RecordAttr::String { required: false })
+                    context: Some(AttributeKind::record(HashMap::from([
+                        ("field1".into(), AttributeKind::boolean()),
+                        ("field2".into(), AttributeKind::long()),
+                        ("field3".into(), AttributeKind::String { required: false })
                     ]))),
                 },
             }
