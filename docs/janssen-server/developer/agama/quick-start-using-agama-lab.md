@@ -454,8 +454,8 @@ Download the `.gama` file from here to deploy on to the Janssen Server.
 ## Testing using Janssen Tarp
 
 We will use the [Jans Tarp](https://github.com/JanssenProject/jans/tree/main/demos/jans-tarp), 
-a browser extension from Janssen Project, 
-to test this project. 
+a browser extension based tool from the Janssen Project, 
+to test this Agama project. 
 
 - [Install Jans Tarp browser plug-in](https://github.com/JanssenProject/jans/tree/main/demos/jans-tarp#installation-in-browser)
 - Follow [these instructions](https://github.com/JanssenProject/jans/tree/main/demos/jans-tarp#testing-using-jans-tarp) to test using Jans Tarp. Remember that the `ACR value` is the composed of fully qualified name
