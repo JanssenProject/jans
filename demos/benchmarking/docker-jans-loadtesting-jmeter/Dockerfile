@@ -61,7 +61,7 @@ RUN mkdir -p /root/.bzt/jmeter-taurus \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/loadtesting-jmeter" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="0.0.0-nightly" \
+    org.opencontainers.image.version="1.2.0-1" \
     org.opencontainers.image.title="Janssen Jmeter tests" \
     org.opencontainers.image.description="Janssen Jmeter and user loader image"
 

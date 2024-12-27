@@ -267,6 +267,12 @@ auth-server:
     u2fConfigLabels: { }
     # -- u2f config ingress resource additional annotations.
     u2fAdditionalAnnotations: { }
+    # -- Enable endpoint /.well-known/authzen-configuration
+    authzenConfigEnabled: true
+    # -- authzen config ingress resource labels. key app is taken
+    authzenConfigLabels: { }
+    # -- authzen config ingress resource additional annotations.
+    authzenAdditionalAnnotations: { }
     # -- Auth server ingress resource labels. key app is taken
     authServerLabels: { }
     # -- Auth server ingress resource additional annotations.
@@ -294,7 +300,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/certmanager
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.2.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -434,6 +440,8 @@ fido2:
     fido2ConfigEnabled: false
     # -- Enable endpoint /jans-fido2
     fido2Enabled: false
+    # -- Enable endpoint /.well-known/webauthn
+    fido2WebauthnEnabled: false
     # -- fido2 config ingress resource labels. key app is taken
     fido2ConfigLabels: { }
     # -- fido2 config ingress resource additional annotations.
@@ -442,6 +450,10 @@ fido2:
     fido2Labels: { }
     # -- fido2 ingress resource additional annotations.
     fido2AdditionalAnnotations: { }
+    # -- fido2 webauthn ingress resource labels. key app is taken
+    fido2WebauthnLabels: { }
+    # -- fido2 webauthn ingress resource additional annotations.
+    fido2WebauthnAdditionalAnnotations: { }
 scim:
   # -- Name of the scim service. Please keep it as default.
   scimServiceName: scim
@@ -477,7 +489,7 @@ scim:
     scimConfigLabels: { }
     # -- SCIM config ingress resource additional annotations.
     scimConfigAdditionalAnnotations: { }
-    # -- SCIM config ingress resource labels. key app is taken
+    # -- SCIM ingress resource labels. key app is taken
     scimLabels: { }
     # -- SCIM ingress resource additional annotations.
     scimAdditionalAnnotations: { }
@@ -510,6 +522,10 @@ link:
   ingress:
     # Enable link endpoints /jans-link
     linkEnabled: true
+    # -- link ingress resource labels. key app is taken
+    linkLabels: { }
+    # -- link ingress resource additional annotations.
+    linkAdditionalAnnotations: { }
 saml:
   # -- Name of the saml service. Please keep it as default.
   samlServiceName: saml
@@ -665,7 +681,7 @@ image:
   # -- Image  to use for deploying.
   repository: ghcr.io/janssenproject/jans/all-in-one
   # -- Image  tag to use for deploying.
-  tag: 0.0.0-nightly
+  tag: 1.2.0-1
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Service replica number.
@@ -745,7 +761,7 @@ kc-scheduler:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/kc-scheduler
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.2.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.

@@ -5,7 +5,7 @@
 	<artifactId>jans-bom</artifactId>
 	<packaging>pom</packaging>
 	<name>jans-bom</name>
-	<version>0.0.0-nightly</version>
+	<version>1.2.0</version>
 
     <distributionManagement>
 	  <repository>
@@ -424,7 +424,7 @@
 			<!-- <dependency>
 				<groupId>javax.persistence</groupId>
 				<artifactId>persistence-api</artifactId>
-				<version>0.0.0-nightly</version>
+				<version>1.2.0</version>
 			</dependency> -->
 
 			<!-- hibernate -->
@@ -760,14 +760,14 @@
 			<dependency>
 			    <groupId>org.postgresql</groupId>
 			    <artifactId>postgresql</artifactId>
-			    <version>42.7.4</version>
+			    <version>42.6.1</version>
 			</dependency>
 
 			<!-- SQL Query -->
 			<dependency>
 			    <groupId>com.querydsl</groupId>
 			    <artifactId>querydsl-sql</artifactId>
-			    <version>4.4.0</version>
+			    <version>5.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.jsqlparser</groupId>
@@ -922,16 +922,10 @@
 				<scope>test</scope>
 			</dependency>
 
-			<!-- Use compatible with selenium-htmlunit-driver version -->
-			<dependency>
-				<groupId>net.sourceforge.htmlunit</groupId>
-				<artifactId>htmlunit</artifactId>
-				<version>2.44.0</version>
-			</dependency>
 			<dependency>
 				<groupId>org.seleniumhq.selenium</groupId>
 				<artifactId>htmlunit-driver</artifactId>
-				<version>2.44.0</version>
+				<version>4.13.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.w3c.css</groupId>
@@ -942,7 +936,7 @@
 			<dependency>
 				<groupId>org.seleniumhq.selenium</groupId>
 				<artifactId>htmlunit3-driver</artifactId>
-				<version>4.26.0</version>
+				<version>4.27.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

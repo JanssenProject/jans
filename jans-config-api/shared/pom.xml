@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-config-api-parent</artifactId>
-		<version>0.0.0-nightly</version>
+		<version>1.2.0</version>
 	</parent>
 
 	<dependencies>

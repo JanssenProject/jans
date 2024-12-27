@@ -47,7 +47,7 @@ auth-server:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/auth-server
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.2.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -126,7 +126,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/certmanager
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.2.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -326,7 +326,7 @@ config:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/configurator
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.2.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Organization name. Used for certificate creation.
@@ -420,7 +420,7 @@ config-api:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/config-api
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.2.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -525,7 +525,7 @@ fido2:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/fido2
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.2.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -635,7 +635,7 @@ casa:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/casa
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.2.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -778,6 +778,8 @@ global:
       lockConfigEnabled: false
       # -- Enable endpoint /jans-lock
       lockEnabled: false
+      # -- Enable endpoint /.well-known/authzen-configuration
+      authzenConfigEnabled: true
       # -- Lock config ingress resource labels. key app is taken
       lockConfigLabels: { }
       # -- Lock config ingress resource additional annotations.
@@ -814,11 +816,14 @@ global:
       u2fConfigLabels: { }
       # -- u2f config ingress resource additional annotations.
       u2fAdditionalAnnotations: { }
+      # -- authzen config ingress resource labels. key app is taken
+      authzenConfigLabels: { }
+      # -- authzen config ingress resource additional annotations.
+      authzenAdditionalAnnotations: { }
       # -- Auth server ingress resource labels. key app is taken
       authServerLabels: { }
       # -- Auth server ingress resource additional annotations.
       authServerAdditionalAnnotations: { }
-
 
     # -- Enable jans-lock as service running inside auth-server
     lockEnabled: false
@@ -1003,6 +1008,8 @@ global:
       fido2ConfigEnabled: false
       # -- Enable endpoint /jans-fido2
       fido2Enabled: false
+      # -- Enable endpoint /.well-known/webauthn
+      fido2WebauthnEnabled: false
       # -- fido2 config ingress resource labels. key app is taken
       fido2ConfigLabels: { }
       # -- fido2 config ingress resource additional annotations.
@@ -1011,6 +1018,10 @@ global:
       fido2Labels: { }
       # -- fido2 ingress resource additional annotations.
       fido2AdditionalAnnotations: { }
+      # -- fido2 webauthn ingress resource labels. key app is taken
+      fido2WebauthnLabels: { }
+      # -- fido2 webauthn ingress resource additional annotations.
+      fido2WebauthnAdditionalAnnotations: { }
   # -- GCE storage kind if using Google disks
   gcePdStorageType: pd-standard
   # -- Boolean flag to enable mapping global.lbIp  to global.fqdn inside pods on clouds that provide static ip for load balancers. On cloud that provide only addresses to the LB this flag will enable a script to actively scan config.configmap.lbAddr and update the hosts file inside the pods automatically.
@@ -1090,7 +1101,7 @@ global:
       scimConfigLabels: { }
       # -- SCIM config ingress resource additional annotations.
       scimConfigAdditionalAnnotations: { }
-      # -- SCIM config ingress resource labels. key app is taken
+      # -- SCIM ingress resource labels. key app is taken
       scimLabels: { }
       # -- SCIM ingress resource additional annotations.
       scimAdditionalAnnotations: { }
@@ -1150,6 +1161,10 @@ global:
     ingress:
       # Enable link endpoints /jans-link
       linkEnabled: true
+      # -- link ingress resource labels. key app is taken
+      linkLabels: { }
+      # -- link ingress resource additional annotations.
+      linkAdditionalAnnotations: { }
   saml:
     # — Add custom annotations for kubernetes resources for the service
     customAnnotations:
@@ -1235,7 +1250,7 @@ persistence:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/persistence-loader
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.2.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -1321,7 +1336,7 @@ scim:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/scim
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.2.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1431,7 +1446,7 @@ link:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/link
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.2.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1540,7 +1555,7 @@ saml:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/saml
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.2.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1621,7 +1636,7 @@ kc-scheduler:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/kc-scheduler
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.2.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.

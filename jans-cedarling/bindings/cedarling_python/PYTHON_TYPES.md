@@ -4,136 +4,36 @@
 This document describes the Cedarling Python bindings types.
 Documentation was generated from python types.
 
-MemoryLogConfig
-===============
-
-A Python wrapper for the Rust `cedarling::LogTypeConfig`, used to configure memory-based logging.
-
-Attributes
-----------  
-:param log_ttl: Optional TTL for log entries (in seconds), default is `60`.
-
-Example
--------
-```
-# Initialize with default TTL
-config = MemoryLogConfig()              
-# Initialize with custom TTL
-config = MemoryLogConfig(log_ttl=120)   
-print(config.log_ttl)                    # Accessing TTL
-config.log_ttl = 300                     # Updating TTL
-```
-___
-
-DisabledLoggingConfig
-======================
-
-A Python wrapper for the Rust `cedarling::LogTypeConfig` struct.
-This class configures logging to be disabled, meaning no log entries are captured.
-
-Attributes
-----------
-- `None`: This class has no attributes.
-
-Example
--------
-```
-# Disable logging
-config = DisabledLoggingConfig()
-```
-___
-
-StdOutLogConfig
-================
-
-A Python wrapper for the Rust `cedarling::LogTypeConfig` struct.
-Represents the configuration for logging to the standard output stream.
-
-Attributes
-----------
-This configuration is constant and cannot be modified.
-
-Example
--------
-```
-# Create an instance for logging to standard output
-config = StdOutLogConfig()
-```
-___
-
-PolicyStoreSource
-=================
-
-A Python wrapper for the Rust `cedarling::PolicyStoreSource` struct.
-This class specifies the source for reading policy data, currently supporting
-JSON strings.
-
-Attributes
-----------  
-:param json: Optional JSON string for policy data.
-
-Example
--------
-```
-# Initialize with a JSON string
-config = PolicyStoreSource(json='{...}')
-```
-___
-
-PolicyStoreConfig
-=================
-
-A Python wrapper for the Rust `cedarling::PolicyStoreConfig` struct.
-Configures how and where policies are loaded, specifying the source and optional store ID.
-
-Attributes
-----------  
-:param source: Optional `PolicyStoreSource` for the policy location.  
-:param store_id: Optional store ID; assumes one store if not provided.
-
-Example
--------
-```
-# Create a PolicyStoreConfig with a source and store_id
-source = PolicyStoreSource(json='{...')
-config = PolicyStoreConfig(source=source, store_id="store1")
-
-# Create without store_id
-config_without_store_id = PolicyStoreConfig(source=source)
-
-# Access attributes
-print(config.source)
-print(config.store_id)
-```
-___
-
 BootstrapConfig
-===============
+=========
 
 A Python wrapper for the Rust `cedarling::BootstrapConfig` struct.
 Configures the `Cedarling` application, including authorization, logging, and policy store settings.
 
-Attributes
-----------  
-:param application_name: The name of this application.  
-:param authz_config: An `AuthzConfig` object for authorization settings.  
-:param log_config: A logging configuration (can be `DisabledLoggingConfig`, `MemoryLogConfig`, or `StdOutLogConfig`).  
-:param policy_store_config: A `PolicyStoreConfig` object for the policy store configuration.  
-:param jwt_config: A `JwtConfig` object for JWT validation settings.
-
-Example
+Methods
 -------
-```
-from cedarling import BootstrapConfig, AuthzConfig, MemoryLogConfig, PolicyStoreConfig
+.. method:: __init__(self, options)
 
-# Create a BootstrapConfig with memory logging
-authz = AuthzConfig(application_name="MyApp")
-log_config = MemoryLogConfig(log_ttl=300)
-policy_store = PolicyStoreConfig(source=PolicyStoreSource(json='{...}'))
-jwt_config = JwtConfig(enabled=False)
+    Initializes the Cedarling instance with the provided configuration.
 
-bootstrap_config = BootstrapConfig(application_name="MyApp",authz_config=authz, log_config=log_config, policy_store_config=policy_store, jwt_config=jwt_config)
-```
+    :param options: A `dict` with startup settings.
+
+.. method:: load_from_file(str) -> BootstrapConfig
+
+    Loads the bootstrap config from a file.
+
+    :returns: A BootstrapConfig instance
+
+    :raises ValueError: If a provided value is invalid or decoding fails.
+    :raises OSError: If there is an error reading while the file.
+
+.. method:: load_from_json(str) -> BootstrapConfig
+
+    Loads the bootstrap config from a JSON string.
+
+    :returns: A BootstrapConfig instance
+
+    :raises ValueError: If a provided value is invalid or decoding fails.
 ___
 
 Cedarling
@@ -213,12 +113,12 @@ authorization data with access token, action, resource, and context.
 
 Attributes
 ----------  
-:param access_token: The access token string.  
-:param id_token: The id token string.  
-:param userinfo_token: The user info token string.  
 :param action: The action to be authorized.  
 :param resource: Resource data (wrapped `ResourceData` object).  
-:param context: Python dictionary with additional context.
+:param context: Python dictionary with additional context.  
+:param access_token: (Optional) The access token string.  
+:param id_token: (Optional) The id token string.  
+:param userinfo_token: (Optional) The userinfo token string.
 
 Example
 -------
@@ -299,16 +199,20 @@ error : str
     The error message describing the evaluation failure.
 ___
 
-# authorize_errors.AccessTokenEntitiesError
-Error encountered while creating access token entities
-___
-
 # authorize_errors.ActionError
 Error encountered while parsing Action to EntityUid
 ___
 
+# authorize_errors.AddEntitiesIntoContextError
+Error encountered while adding entities into context
+___
+
 # authorize_errors.AuthorizeError
 Exception raised by authorize_errors
+___
+
+# authorize_errors.CreateAccessTokenEntityError
+Error encountered while creating access_token entity
 ___
 
 # authorize_errors.CreateContextError
@@ -319,27 +223,43 @@ ___
 Error encountered while creating id token entities
 ___
 
-# authorize_errors.CreateRequestUserEntityError
-Error encountered while creating cedar_policy::Request for user entity principal
-___
-
-# authorize_errors.CreateRequestWorkloadEntityError
-Error encountered while creating cedar_policy::Request for workload entity principal
-___
-
 # authorize_errors.CreateUserEntityError
-Error encountered while creating id token entities
+Error encountered while creating User entity
 ___
 
-# authorize_errors.DecodeTokens
-Error encountered while decoding JWT token data
+# authorize_errors.CreateUserinfoTokenEntityError
+Error encountered while creating Userinfo_token entity
+___
+
+# authorize_errors.CreateWorkloadEntityError
+Error encountered while creating workload entity
 ___
 
 # authorize_errors.EntitiesError
 Error encountered while collecting all entities
 ___
 
+# authorize_errors.EntitiesToJsonError
+Error encountered while parsing all entities to json for logging
+___
+
+# authorize_errors.ProcessTokens
+Error encountered while processing JWT token data
+___
+
 # authorize_errors.ResourceEntityError
 Error encountered while creating resource entity
+___
+
+# authorize_errors.RoleEntityError
+Error encountered while creating role entity
+___
+
+# authorize_errors.UserRequestValidationError
+Error encountered while creating cedar_policy::Request for user entity principal
+___
+
+# authorize_errors.WorkloadRequestValidationError
+Error encountered while creating cedar_policy::Request for workload entity principal
 ___
 

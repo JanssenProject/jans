@@ -55,6 +55,7 @@ public class AuthzRequest {
     private String claims;
     private String authReqId;
     private String dpopJkt;
+    private String dpop;
     private String authzDetailsString;
     private AuthzDetails authzDetails;
     private String httpMethod;
@@ -93,6 +94,15 @@ public class AuthzRequest {
 
     public void setDpopJkt(String dpopJkt) {
         this.dpopJkt = dpopJkt;
+    }
+
+    public String getDpop() {
+        return dpop;
+    }
+
+    public AuthzRequest setDpop(String dpop) {
+        this.dpop = dpop;
+        return this;
     }
 
     public AuthorizationChallengeSession getAuthorizationChallengeSessionObject() {

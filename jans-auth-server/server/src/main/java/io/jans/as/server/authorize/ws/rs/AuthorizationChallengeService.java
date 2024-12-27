@@ -117,6 +117,8 @@ public class AuthorizationChallengeService {
         if (StringUtils.isNotBlank(authzRequest.getAuthorizationChallengeSession())) {
             final AuthorizationChallengeSession session = authorizationChallengeSessionService.getAuthorizationChallengeSession(authzRequest.getAuthorizationChallengeSession());
 
+            authorizationChallengeValidator.validateDpopJkt(session, authzRequest.getDpop());
+
             authzRequest.setAuthorizationChallengeSessionObject(session);
             if (session != null) {
                 final Map<String, String> attributes = session.getAttributes().getAttributes();
@@ -188,6 +190,7 @@ public class AuthorizationChallengeService {
         authorizationGrant.setClaims(authzRequest.getClaims());
         authorizationGrant.setSessionDn(sessionUser != null ? sessionUser.getDn() : "no_session_for_authorization_challenge"); // no need for session as at Authorization Endpoint
         authorizationGrant.setAcrValues(grantAcr);
+        authorizationGrant.setAuthorizationChallenge(true);
         authorizationGrant.save();
 
         String authorizationCode = authorizationGrant.getAuthorizationCode().getCode();

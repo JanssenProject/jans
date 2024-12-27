@@ -1,15 +1,14 @@
-/*
-* This software is available under the Apache-2.0 license.
-* See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
-*
-* Copyright (c) 2024, Gluu, Inc.
-*/
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::collections::HashMap;
 
 use regex;
 use regex::Regex;
 use serde::{de, Deserialize};
 use serde_json::Value;
-use std::collections::HashMap;
 
 /// Structure for storing `claim mappings`
 ///
@@ -57,10 +56,10 @@ impl ClaimMapping {
             ClaimMapping::Regex(regexp_mapping) => regexp_mapping.apply_mapping(value),
             ClaimMapping::Json { r#type: _ } => {
                 // convert JSON object to HashMap or return empty HashMap
-                return value
+                value
                     .as_object()
                     .map(|v| HashMap::from_iter(v.to_owned()))
-                    .unwrap_or_default();
+                    .unwrap_or_default()
             },
         }
     }
@@ -266,12 +265,13 @@ impl RegexFieldMappingType {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use super::{ClaimMapping, RegexMapping};
-    use crate::common::policy_store::claim_mapping::RegexFieldMapping;
-    use serde_json::json;
     use std::collections::HashMap;
+
+    use serde_json::json;
     use test_utils::assert_eq;
+
+    use super::{ClaimMapping, RegexMapping, *};
+    use crate::common::policy_store::claim_mapping::RegexFieldMapping;
 
     /// Tests if a token entity metadata with a RegEx parser can be parsed
     /// from a JSON string

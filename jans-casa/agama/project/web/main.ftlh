@@ -4,7 +4,7 @@
     <#assign assets=cache.casa_assets grabLocation=(captureLocation!false)>
 
     <section class="pa4 shadow-4 bg-blank gray cust-section">
-        <h2 class="f3 dark-blue2">Welcome</h2>
+        <h2 class="f3 dark-blue2">${labels("casa.welcome")}</h2>
         
         <#if message??>
             <p class="w5 dark-red tc pv2 ph0 ma0 f6">${message}</p>
@@ -13,15 +13,15 @@
         <form name="login" method="post" enctype="application/x-www-form-urlencoded" class="pt2">
             <div class="relative w5 mt4 pb2">
                 <input name="username" value="${username!}" type="text" class="focused-text w-100 pb1 dark-gray" required>
-                <label class="focused-label-big">Username</label>
+                <label class="focused-label-big">${labels("casa.username")}</label>
             </div>
             <div class="relative w5 mt4 pb1">
                 <input name="password" type="password" class="focused-text w-100 pb1 dark-gray" required>
-                <label class="focused-label-big">Password</label>
+                <label class="focused-label-big">${labels("casa.password")}</label>
             </div>
             <div class="mt5">
-                <input type="submit" value="Login"
-                    class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success text-white hover-bg-success hover-text-white cust-primary-button">
+                <input type="submit" value="${labels("casa.login")}"
+                    class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white cust-primary-button">
             </div>
 
             <input name="device" type="hidden">

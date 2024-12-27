@@ -50,8 +50,8 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # Auth server
 # ===========
 
-ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2024-11-15 08:48'
+ENV CN_VERSION=1.2.0
+ENV CN_BUILD_DATE='2024-12-20 08:35'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
@@ -75,22 +75,13 @@ RUN mkdir -p /usr/share/java \
 
 ARG TWILIO_VERSION=7.17.0
 ARG JSMPP_VERSION=2.3.7
-ARG CASA_CONFIG_VERSION=${CN_VERSION}
-ARG CASA_CONFIG_BUILD_DATE=${CN_BUILD_DATE}
-ARG FIDO2_CLIENT_VERSION=${CN_VERSION}
-ARG FIDO2_CLIENT_BUILD_DATE=${CN_BUILD_DATE}
-ARG AGAMA_INBOUND_VERSION=${CN_VERSION}
-ARG AGAMA_INBOUND_BUILD_DATE=${CN_BUILD_DATE}
-ARG JANS_LOCK_VERSION=${CN_VERSION}
-ARG JANS_LOCK_BUILD_DATE=${CN_BUILD_DATE}
 
 RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
     && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
-    && wget -q https://jenkins.jans.io/maven/io/jans/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
-    && wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
-    && wget -q https://jenkins.jans.io/maven/io/jans/agama-inbound/${AGAMA_INBOUND_VERSION}/agama-inbound-${AGAMA_INBOUND_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
-    && wget -q https://jenkins.jans.io/maven/io/jans/jans-lock-service/${JANS_LOCK_VERSION}/jans-lock-service-${JANS_LOCK_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
-    && wget -q https://jenkins.jans.io/maven/io/jans/jans-lock-model/${JANS_LOCK_VERSION}/jans-lock-model-${JANS_LOCK_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs
+    && for custom_lib in casa-config jans-fido2-client jans-fido2-model agama-inbound jans-lock-service jans-lock-model; \
+    do \
+        wget -nv "https://jenkins.jans.io/maven/io/jans/${custom_lib}/${CN_VERSION}/${custom_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/_libs"; \
+    done
 
 # ===========
 # Assets sync
@@ -103,7 +94,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=871c36da8a2550ee2febd7c0d72c521898b226c3
+ENV JANS_SOURCE_VERSION=2779a7e70e23be1c0afc810abd27910c60fcd9b1
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -251,7 +242,7 @@ EXPOSE $CN_AUTH_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/auth-server" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="0.0.0-nightly" \
+    org.opencontainers.image.version="1.2.0-1" \
     org.opencontainers.image.title="Janssen Authorization Server" \
     org.opencontainers.image.description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
 

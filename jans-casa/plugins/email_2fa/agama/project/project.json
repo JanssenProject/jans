@@ -1,0 +1,15 @@
+{
+    "projectName": "email_2fa",
+    "author": "jgomer2001",
+    "type": "Community",
+    "version": "1.2.0",
+    "noDirectLaunch": [],
+    "configs": {
+        "io.jans.casa.authn.emailotp": {
+            "otp_length": 6,
+            "otp_lifetime": 2,
+            "subject": "Here's your passcode",
+            "message": "%s is the passcode to continue with your verification process at dummy.foobar.co"
+        }        
+    }
+}

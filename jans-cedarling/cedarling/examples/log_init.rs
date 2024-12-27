@@ -1,15 +1,20 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+// The following macro uses conditional compilation to include this file code
+// only when the target platform is NOT WebAssembly. This is not required to
+// use the library but is needed here since Cedarling compiles binding to WASM
+// and `use std::env` prevents that compilation.
+#![cfg(not(target_family = "wasm"))]
+
+use std::env;
 
 use cedarling::{
-    BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig,
-    PolicyStoreConfig, PolicyStoreSource,
+    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogLevel, LogStorage,
+    LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, WorkloadBoolOp,
 };
-use std::env;
 
 // The human-readable policy and schema file is located in next folder:
 // `test_files\policy-store_ok`
@@ -40,13 +45,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     println!("Cedarling initialized with log type: {:?}", log_type);
-    let cedarling = Cedarling::new(BootstrapConfig {
+    let cedarling = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
-        log_config: LogConfig { log_type },
+        log_config: LogConfig {
+            log_type,
+            log_level: LogLevel::INFO,
+        },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
         },
-        jwt_config: JwtConfig::Disabled,
+        jwt_config: JwtConfig::new_without_validation(),
+        authorization_config: AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: true,
+            user_workload_operator: WorkloadBoolOp::And,
+            ..Default::default()
+        },
     })?;
 
     println!("Stage 1:");

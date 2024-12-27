@@ -24,11 +24,32 @@ The endpoint's responses are typically concise, aiming to provide a rapid decisi
 The goal is to provide a scalable, secure interface for dynamic and fine-grained access control across applications.
 
 
-URL to access access evaluation endpoint on Janssen Server is listed in the response of Janssen Server's well-known
-[configuration endpoint](./configuration.md) given below.
+URL to access access evaluation endpoint on Janssen Server is listed in both:
+ - the response of Janssen Server's well-known [configuration endpoint](./configuration.md) given below.
+ - the response of Janssen Server's `/.well-known/authzen-configuration` endpoint.
 
+**OpenID Discovery**
 ```text
 https://janssen.server.host/jans-auth/.well-known/openid-configuration
+```
+
+**AuthZEN Discovery**
+```text
+https://janssen.server.host/jans-auth/.well-known/authzen-configuration
+```
+
+`/.well-known/authzen-configuration` allows to publish data specific to AuthZEN only. Response of AuthZEN discovery endpoint can be 
+changed via `AccessEvaluationDiscoveryType` custom script. 
+
+**Snippet of AccessEvaluationDiscoveryType**
+```java
+    @Override
+    public boolean modifyResponse(Object responseAsJsonObject, Object context) {
+        scriptLogger.info("write to script logger");
+        JSONObject response = (JSONObject) responseAsJsonObject;
+        response.accumulate("key_from_java", "value_from_script_on_java");
+        return true;
+    }
 ```
 
 `access_evaluation_v1_endpoint` claim in the response specifies the URL for access evaluation endpoint. By default, access 

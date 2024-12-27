@@ -73,10 +73,18 @@ def check_install_dependencies():
         os.system('{} install -y {}'.format(package_installer, ' '.join(package_dependencies)))
 
 
-def download_jans_acrhieve():
-    jans_acrhieve_url = 'https://github.com/JanssenProject/jans/archive/refs/heads/{}.zip'.format(argsp.setup_branch)
-    print("Downloading {} as {}".format(jans_acrhieve_url, jans_zip_file))
-    request.urlretrieve(jans_acrhieve_url, jans_zip_file)
+def download_jans_archive():
+    jans_archive_url = 'https://github.com/JanssenProject/jans/archive/refs/heads/{}.zip'.format(argsp.setup_branch)
+    try:
+        print("Trying /refs/heads url")
+        print("Downloading {} as {}".format(jans_archive_url, jans_zip_file))
+        request.urlretrieve(jans_archive_url, jans_zip_file)
+    except Exception as e:
+        print(f"Failed to download from {jans_archive_url}, error was {e}")
+        print("Trying tags URL")
+        jans_archive_url = f'https://github.com/JanssenProject/jans/archive/refs/tags/{argsp.setup_branch}.zip'
+        print(f"Downloading {jans_archive_url} as {jans_zip_file}")
+        request.urlretrieve(jans_archive_url, jans_zip_file)
 
     if argsp.profile == 'openbanking':
         access_token = argsp.github_access_token
@@ -343,7 +351,7 @@ def main():
         check_install_dependencies()
 
     if not (argsp.use_downloaded or argsp.uninstall or os.environ.get('JANS_INSTALLER')):
-        download_jans_acrhieve()
+        download_jans_archive()
 
     if argsp.lock_setup:
         lock_setup()

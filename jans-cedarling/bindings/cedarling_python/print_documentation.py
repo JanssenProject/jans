@@ -1,7 +1,11 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+
 import inspect
 from types import ModuleType
-from cedarling_python import MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
-from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig
+from cedarling_python import BootstrapConfig
 from cedarling_python import Cedarling
 from cedarling_python import ResourceData, Request, AuthorizeResult, AuthorizeResultResponse, Decision, Diagnostics, PolicyEvaluationError
 from cedarling_python import authorize_errors
@@ -91,8 +95,8 @@ def print_module_doc(module: ModuleType):
         print_doc(getattr(module, attr), module.__name__)
 
 
-types = [MemoryLogConfig, DisabledLoggingConfig,
-         StdOutLogConfig, PolicyStoreSource, PolicyStoreConfig, BootstrapConfig,
+types = [
+         BootstrapConfig,
          Cedarling,
          ResourceData, Request, AuthorizeResult, AuthorizeResultResponse, Decision, Diagnostics, PolicyEvaluationError,
          authorize_errors

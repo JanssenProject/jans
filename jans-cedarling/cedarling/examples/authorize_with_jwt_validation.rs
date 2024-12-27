@@ -1,15 +1,16 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::collections::{HashMap, HashSet};
 
 use cedarling::{
-    BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogTypeConfig, PolicyStoreConfig,
-    PolicyStoreSource, Request, ResourceData,
+    AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LogConfig,
+    LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
+    TokenValidationConfig, WorkloadBoolOp,
 };
-use std::collections::HashMap;
+use jsonwebtoken::Algorithm;
 
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../test_files/policy-store_with_trusted_issuers_ok.yaml");
@@ -18,8 +19,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Configure JWT validation settings. Enable the JwtService to validate JWT tokens
     // using specific algorithms: `HS256` and `RS256`. Only tokens signed with these algorithms
     // will be accepted; others will be marked as invalid during validation.
-    let jwt_config = JwtConfig::Enabled {
-        signature_algorithms: vec!["HS256".to_string(), "RS256".to_string()],
+    let jwt_config = JwtConfig {
+        jwks: None,
+        jwt_sig_validation: true,
+        jwt_status_validation: false,
+        id_token_trust_mode: IdTokenTrustMode::None,
+        signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
+        access_token_config: TokenValidationConfig::access_token(),
+        id_token_config: TokenValidationConfig::id_token(),
+        userinfo_token_config: TokenValidationConfig::userinfo_token(),
     };
 
     // You must change this with your own tokens
@@ -30,15 +38,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Initialize the main Cedarling instance, responsible for policy-based authorization.
     // This setup includes basic application information, logging configuration, and
     // policy store configuration.
-    let cedarling = Cedarling::new(BootstrapConfig {
+    let cedarling = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
             log_type: LogTypeConfig::StdOut,
+            log_level: LogLevel::INFO,
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
         },
         jwt_config,
+        authorization_config: AuthorizationConfig {
+            use_user_principal: true,
+            use_workload_principal: true,
+            user_workload_operator: WorkloadBoolOp::And,
+            ..Default::default()
+        },
     })?;
 
     // Perform an authorization request to Cedarling.
@@ -46,9 +61,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // on a specific resource. Each token (access, ID, and userinfo) is required for the
     // authorization process, alongside resource and action details.
     let result = cedarling.authorize(Request {
-        access_token,
-        id_token,
-        userinfo_token,
+        access_token: Some(access_token),
+        id_token: Some(id_token),
+        userinfo_token: Some(userinfo_token),
         action: "Jans::Action::\"Update\"".to_string(),
         context: serde_json::json!({}),
         resource: ResourceData {

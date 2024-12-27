@@ -9,7 +9,7 @@
   <parent>
     <groupId>io.jans</groupId>
     <artifactId>jans-kc-parent</artifactId>
-    <version>0.0.0-nightly</version>
+    <version>1.2.0</version>
   </parent>
 
   <prerequisites>
@@ -111,6 +111,13 @@
       <scope>provided</scope>
     </dependency>
     <!-- end jboss dependencies -->
+
+    <!-- commons beanutils dependency -->
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+    </dependency>
+    <!-- commons beanutils dependency -->
   </dependencies>
 
   <build>

@@ -33,7 +33,7 @@ RUN systemctl set-default multi-user.target \
 RUN rm -f /lib/systemd/system/systemd*udev* \
     && rm -f /lib/systemd/system/getty.target
 
-HEALTHCHECK --interval=35s --timeout=4s CMD /opt/dist/scripts/jans-auth check | grep "Jetty running pid" || exit 1
+HEALTHCHECK --interval=35s --timeout=4s CMD /opt/jans/scripts/jans-auth check | grep "Jetty running pid" || exit 1
 
 # Ports required by jetty
 EXPOSE 443 8080 1636
@@ -42,7 +42,7 @@ EXPOSE 443 8080 1636
 # jans-linux-setup
 # =====================
 
-ENV JANS_SOURCE_VERSION=871c36da8a2550ee2febd7c0d72c521898b226c3
+ENV JANS_SOURCE_VERSION=2779a7e70e23be1c0afc810abd27910c60fcd9b1
 
 # cleanup
 RUN rm -rf /tmp/jans
@@ -92,7 +92,7 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/monolith" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="0.0.0-nightly" \
+    org.opencontainers.image.version="1.2.0-1" \
     org.opencontainers.image.title="Janssen Monolith Image" \
     org.opencontainers.image.description="Janssen Authorization server"
 

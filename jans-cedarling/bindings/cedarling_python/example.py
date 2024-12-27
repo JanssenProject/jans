@@ -1,54 +1,20 @@
-from cedarling_python import MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
-from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig, JwtConfig
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+
+from cedarling_python import BootstrapConfig
 from cedarling_python import Cedarling
 from cedarling_python import ResourceData, Request
-import os
 import time
 
-DEFAULT_POLICY_STORE_PATH = "example_files/policy-store.json"
-
-# use log config to store logs in memory with a time-to-live of 120 seconds
-# by default it is 60 seconds
-log_config = MemoryLogConfig(log_ttl=100)
-# we can also set value to as property
-# log_config.log_ttl = 120
-
-# use disabled log config to ignore all logging
-# log_config = DisabledLoggingConfig()
-
-# use log config to print logs to stdout
-log_config = StdOutLogConfig()
-
-# Read policy store from file
-policy_store_location = os.getenv("CEDARLING_LOCAL_POLICY_STORE", None)
-if policy_store_location is None:
-    print("Policy store location not provided, use 'CEDARLING_LOCAL_POLICY_STORE' environment variable")
-    print(f"Used default policy store path: {DEFAULT_POLICY_STORE_PATH}\n")
-    policy_store_location = DEFAULT_POLICY_STORE_PATH
-with open(policy_store_location, "r") as f:
-    policy_raw_json = f.read()
-
-# for now we support only json source
-policy_source = PolicyStoreSource(json=policy_raw_json)
-
-policy_store_config = PolicyStoreConfig(source=policy_source)
-
-# Create jwt configuration
-# do not validate JWT tokens
-jwt_config = JwtConfig(enabled=False)
-
-# collect all in the BootstrapConfig
-bootstrap_config = BootstrapConfig(
-    application_name="TestApp",
-    log_config=log_config,
-    policy_store_config=policy_store_config,
-    jwt_config=jwt_config
-)
+bootstrap_config = BootstrapConfig.load_from_file("./example_files/sample_bootstrap_props.yaml")
 
 # initialize cedarling instance
 # all values in the bootstrap_config is parsed and validated at this step.
 instance = Cedarling(bootstrap_config)
 
+# Getting logs from memory available only when `"log_type": "memory"`
 # returns a list of all active log ids
 # active_log_ids = instance.get_log_ids()
 

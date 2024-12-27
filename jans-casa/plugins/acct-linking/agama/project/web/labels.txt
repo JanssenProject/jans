@@ -1,0 +1,1 @@
+acctlinking.useExternal=OR use an external service to sign in:
