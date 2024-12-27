@@ -232,7 +232,7 @@ mod test {
         let result = create_workload_entity(entity_mapping, &policy_store, &tokens)
             .expect_err("expected to error while creating workload entity");
 
-        assert_eq!(result.errors.len(), 3);
+        assert_eq!(result.errors.len(), 2);
         for (_tkn_kind, err) in result.errors.iter() {
             assert!(
                 matches!(err, CreateCedarEntityError::UnavailableToken),
