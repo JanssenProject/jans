@@ -4,7 +4,7 @@
     <groupId>io.jans</groupId>
     <artifactId>jans-kc-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.2.0</version>
+    <version>0.0.0-nightly</version>
     <name>keycloak-integration-parent</name>
 
     <distributionManagement>

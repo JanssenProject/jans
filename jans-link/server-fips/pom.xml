@@ -17,7 +17,7 @@
 	<parent>
 		<artifactId>jans-link-server-parent</artifactId>
 		<groupId>io.jans</groupId>
-		<version>1.2.0</version>
+		<version>0.0.0-nightly</version>
 	</parent>
 
 	<prerequisites>
