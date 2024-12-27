@@ -43,7 +43,6 @@ pub fn create_workload_entity(
     for (token_kind, token, key) in [
         (TokenKind::Access, tokens.access_token.as_ref(), "client_id"),
         (TokenKind::Id, tokens.id_token.as_ref(), "aud"),
-        (TokenKind::Userinfo, tokens.userinfo_token.as_ref(), "aud"),
     ] {
         match try_create_entity(token_kind, token, key) {
             Ok(entity) => return Ok(entity),
