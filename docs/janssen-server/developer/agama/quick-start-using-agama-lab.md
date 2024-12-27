@@ -29,11 +29,11 @@ This guide covers steps above in the following sections.
 - We will use the [Janssen Server](https://jans.io) to deploy the Agama project.
 Follow the instructions [here](https://docs.jans.io/head/janssen-server/install/)
 to install the Janssen Server.
-- You will need a GitHub account where Agama Lab GitHub app has been [integrated](https://github.com/GluuFederation/private/wiki/Sign-Up---Sign-In#need-for-github-account). GitHub
+- You will need a GitHub account where Agama Lab GitHub app has been [integrated](https://gluu.org/agama/sign-up-sign-in/). GitHub
 account can be a personal account or an organizational account. For this guide
 we will assume that a personal account is being used.
 - Two new public GitHub repositories in your GitHub Account. These repositories
-will be used as [development repository](https://github.com/GluuFederation/private/wiki/Flow-Designer#development-repository) and [release repository](https://github.com/GluuFederation/private/wiki/Flow-Designer#release-repository). Each repository should have at least one 
+will be used as [development repository](https://gluu.org/agama/flow-designer/) and [release repository](https://gluu.org/agama/flow-designer/). Each repository should have at least one 
 commit. 
 
 
@@ -66,7 +66,7 @@ GitHub.
 
     ![](../../../assets/agama-lab-git-login.png)
 
-3. After successful sign in, the [project dashboard](https://github.com/GluuFederation/private/wiki/Agama-Lab-Project-Dashboard)
+3. After successful sign in, the [project dashboard](https://gluu.org/agama/agama-lab-project-dashboard/)
 will be shown. Next step is to select the repository where you want to create 
 the project. Select the `development` repository by clicking on 
 `Change Repository` -> `Your Repositories` -> select the repository -> `Select`.
@@ -96,7 +96,7 @@ from this project listing page.
 1. Create a flow file
 
     Open the newly created project by clicking on :material-arrow-top-right:.
-    This will open the project in the [project editor](https://github.com/GluuFederation/private/wiki/Project-Editor). 
+    This will open the project in the [project editor](https://gluu.org/agama/project-editor/). 
     
     To start creating the flow, right-click on the `code` directory > `New` > `Flow File`.
 
@@ -112,7 +112,7 @@ from this project listing page.
     
 
     In the subsequent steps, we are going to create nodes in the flow using the
-    flow editor. Refer to [this](https://github.com/GluuFederation/private/wiki/Project-Editor#working-with-the-flow-editor) guide if you need to understand how 
+    flow editor. Refer to [this](https://gluu.org/agama/project-editor/) guide if you need to understand how 
     to create, delete and configure nodes.
 
 2. Create `AuthenticationService` Call block
@@ -229,7 +229,7 @@ from this project listing page.
 8. Create an Assignment block
 
     In case of authentication failure, the user will be prompted for reentering the
-    credentials on the sign in page. We want to show the username to the user while reentering the
+    credentials on the sign-in page. We want to show the username to the user while reentering the
     password on the web page. For this, we will save the username in a variable using the `Assignment` block.
 
     Create a new assignment block after the `Validate Credentials` block.
@@ -417,7 +417,7 @@ _This will render the page in the visual editor_.
 
 ### Release the project
 
-At this point we have all the components of an Agama project ready and they are 
+At this point we have all the components of an Agama project ready, and they are 
 stored in
 the development repository. In order to deploy the project on an IDP, 
 We need to build a `.gama` package from these components. We can build a `.gama`
