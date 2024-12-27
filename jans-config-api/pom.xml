@@ -30,7 +30,7 @@
 		<resteasy.version>6.0.3.Final</resteasy.version>
 		<jackson.version>2.13.2</jackson.version>
 		<jetty.version>11.0.15</jetty.version>
-		<weld.version>4.0.3.Final</weld.version>	
+		<weld.version>6.0.0.Final</weld.version>	
 
 		<microprofile.config.version>3.1</microprofile.config.version>
 		<microprofile.health.version>4.0</microprofile.health.version>
