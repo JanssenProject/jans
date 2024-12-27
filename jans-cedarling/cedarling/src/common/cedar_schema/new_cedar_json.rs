@@ -10,6 +10,7 @@ use std::collections::HashMap;
 
 mod action;
 mod attr_kind;
+mod deserialize;
 mod entity_type;
 
 use action::*;
@@ -107,7 +108,7 @@ mod test_deserialize_json_cedar_schema {
                     "User".into(),
                     EntityType {
                         member_of: Some(HashSet::from(["UserGroup".into()])),
-                        shape: Some(AttributeKind::record(HashMap::from([
+                        shape: Some(EntityShape::required(HashMap::from([
                             ("department".into(), AttributeKind::string()),
                             ("jobLevel".into(), AttributeKind::long()),
                         ]))),

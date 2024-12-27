@@ -3,6 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use super::deserialize::*;
 use super::*;
 use serde::{de, Deserialize};
 use serde_json::Value;
@@ -131,26 +132,10 @@ impl<'de> Deserialize<'de> for AttributeKind {
             "Long" => AttributeKind::Long { required },
             "Boolean" => AttributeKind::Boolean { required },
             "Record" => {
-                let record_attrs = attr
+                let attrs = attr
                     .remove("attributes")
                     .ok_or(de::Error::missing_field("attributes"))?;
-                let attrs_json = serde_json::from_value::<HashMap<String, Value>>(record_attrs)
-                    .map_err(|e| {
-                        de::Error::custom(format!(
-                            "error while deserializing cedar record attribute: {e}"
-                        ))
-                    })?;
-
-                // loop through each attr then deserialize into Self
-                let mut attrs = HashMap::<AttributeName, AttributeKind>::new();
-                for (key, val) in attrs_json.into_iter() {
-                    let val = serde_json::from_value::<AttributeKind>(val).map_err(|e| {
-                        de::Error::custom(format!(
-                            "error while deserializing cedar record attribute: {e}"
-                        ))
-                    })?;
-                    attrs.insert(key.into(), val);
-                }
+                let attrs = deserialize_record_attrs::<D>(attrs)?;
                 Self::Record { required, attrs }
             },
             "Set" => {
@@ -195,18 +180,6 @@ impl<'de> Deserialize<'de> for AttributeKind {
 
         Ok(attr)
     }
-}
-
-/// Deserializes a [`Value`] to a String
-fn deserialize_to_string<'de, D>(value: Value) -> Result<String, D::Error>
-where
-    D: serde::Deserializer<'de>,
-{
-    serde_json::from_value::<String>(value).map_err(|e| {
-        de::Error::custom(format!(
-            "error while desrializing JSON Value to a String: {e}"
-        ))
-    })
 }
 
 #[cfg(test)]
