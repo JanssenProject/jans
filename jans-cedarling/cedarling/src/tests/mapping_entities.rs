@@ -28,27 +28,29 @@ static REQUEST: LazyLock<Request> = LazyLock::new(|| {
     // deserialize `Request` from json
     Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
                     "iss": "some_iss",
                     "aud": "some_aud",
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "iss": "some_iss",
                     "aud": "some_aud",
                     "sub": "some_sub",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
                     "client_id": "some_client_id",
                     "role": "Admin",
-                  })),
+                })),
+            },
             "action": "Jans::Action::\"Update\"",
             "resource": {
                 "id": "random_id",
@@ -355,29 +357,31 @@ fn test_role_many_tokens_mapping() {
     let request = // deserialize `Request` from json
     Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
                     "iss": "https://test-casa.gluu.info",
                     "aud": "some_aud",
                     "role": "Guest",
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "iss": "https://test-casa.gluu.info",
                     "aud": "some_aud",
                     "sub": "some_sub",
                     "role": "User",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "https://test-casa.gluu.info",
                     "client_id": "some_client_id",
                     "role": "Admin",
-                  })),
+                })),
+            },
             "action": "Jans::Action::\"Update\"",
             "resource": {
                 "id": "random_id",

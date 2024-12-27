@@ -22,6 +22,7 @@ pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<decision::Decision>()?;
     m.add_class::<resource_data::ResourceData>()?;
     m.add_class::<request::Request>()?;
+    m.add_class::<request::Tokens>()?;
     m.add_class::<authorize_result_response::AuthorizeResultResponse>()?;
     m.add_class::<authorize_result::AuthorizeResult>()?;
 

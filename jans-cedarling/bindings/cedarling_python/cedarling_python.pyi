@@ -128,6 +128,7 @@ class Cedarling:
 
 @final
 class Request:
+    tokens: Tokens
     action: str
     resource: ResourceData
     context: Dict[str, Any]
@@ -136,12 +137,21 @@ class Request:
     userinfo_token: str | None
 
     def __init__(self,
-                 access_token: str,
-                 id_token: str,
-                 userinfo_token: str,
+                 tokens: Tokens,
                  action: str,
                  resource: ResourceData,
                  context: Dict[str, Any]) -> None: ...
+
+@final
+class Tokens:
+    access_token: str | None
+    id_token: str | None
+    userinfo_token: str | None
+
+    def __init__(self,
+                 access_token: str | None,
+                 id_token: str | None,
+                 userinfo_token: str | None) -> None: ...
 
 
 @final
