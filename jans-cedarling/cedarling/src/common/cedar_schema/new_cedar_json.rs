@@ -17,48 +17,15 @@ use action::*;
 use attr_kind::*;
 use entity_type::*;
 
-/// A macro to define a newtype wrapping a `String` with automatic implementations for
-/// converting from `&str` and `String`.
-///
-/// # Usage
-///
-/// ```rust,ignore
-/// define_newtype!(AttributeName);
-/// define_newtype!(ActionName);
-///
-/// let attr: AttributeName = "example_attr".into();
-/// let action: ActionName = String::from("example_action").into();
-///
-/// println!("{:?}, {:?}", attr, action);
-/// ```
-macro_rules! define_newtype {
-    ($name:ident) => {
-        #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize)]
-        pub struct $name(pub String);
-
-        impl From<&str> for $name {
-            fn from(value: &str) -> Self {
-                $name(value.to_string())
-            }
-        }
-
-        impl From<String> for $name {
-            fn from(value: String) -> Self {
-                $name(value)
-            }
-        }
-    };
-}
-
-define_newtype!(ActionName);
-define_newtype!(ActionGroupName);
-define_newtype!(AttributeName);
-define_newtype!(CommonTypeName);
-define_newtype!(EntityName);
-define_newtype!(EntityTypeName);
-define_newtype!(EntityOrCommonName);
-define_newtype!(ExtensionName);
-define_newtype!(NamespaceName);
+pub type ActionName = String;
+pub type ActionGroupName = String;
+pub type AttributeName = String;
+pub type CommonTypeName = String;
+pub type EntityName = String;
+pub type EntityTypeName = String;
+pub type EntityOrCommonName = String;
+pub type ExtensionName = String;
+pub type NamespaceName = String;
 
 #[derive(Debug, Deserialize, PartialEq)]
 pub struct CedarSchemaJson {
