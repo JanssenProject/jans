@@ -132,9 +132,6 @@ class Request:
     action: str
     resource: ResourceData
     context: Dict[str, Any]
-    access_token: str | None
-    id_token: str | None
-    userinfo_token: str | None
 
     def __init__(self,
                  tokens: Tokens,
