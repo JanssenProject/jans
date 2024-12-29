@@ -3,7 +3,7 @@ astroid==2.12.5
 asttokens==2.0.8
 async-generator==1.10
 attrs==22.1.0
-Authlib==1.2.0
+Authlib==1.4.0
 autopep8==1.7.0
 backcall==0.2.0
 bandit==1.7.4
