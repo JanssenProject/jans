@@ -9,6 +9,7 @@ tags:
 # Ubuntu Janssen Installation
 
 ## Supported Versions
+
 - Ubuntu 22.04
 - Ubuntu 20.04
 
