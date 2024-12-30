@@ -7,9 +7,7 @@ import io.jans.model.custom.script.type.BaseExternalType;
  */
 public interface TokenExchangeType extends BaseExternalType {
 
-    boolean modifyResponse(Object context);
+    ScriptTokenExchangeControl validate(Object context);
 
-    void validate(Object context);
-
-    boolean skipBuiltinValidation(Object context);
+    boolean modifyResponse(Object responseAsJsonObject, Object context);
 }

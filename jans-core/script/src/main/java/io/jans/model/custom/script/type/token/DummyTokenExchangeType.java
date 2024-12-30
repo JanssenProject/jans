@@ -9,19 +9,15 @@ import java.util.Map;
  * @author Yuriy Z
  */
 public class DummyTokenExchangeType implements TokenExchangeType {
+
     @Override
-    public boolean modifyResponse(Object context) {
+    public boolean modifyResponse(Object responseAsJsonObject, Object context) {
         return false;
     }
 
     @Override
-    public void validate(Object context) {
-        // dummy
-    }
-
-    @Override
-    public boolean skipBuiltinValidation(Object context) {
-        return false;
+    public ScriptTokenExchangeControl validate(Object context) {
+        return ScriptTokenExchangeControl.fail();
     }
 
     @Override
