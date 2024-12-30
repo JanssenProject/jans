@@ -132,8 +132,19 @@ from this project listing page.
     configuration screen. Add configuration values as shown below.  
     This configuration will fetch a reference of the 
     `AuthenticationService` class and 
-    store the reference in a variable called `authService`. This reference will 
+    store the reference in a variable called `authServiceRef`. This reference will 
     be used to validate the user credentials in the subsequent steps.
+
+    `class name`: `io,jans.server.service.AuthenticationService`
+
+    `method name`: `class`
+
+    `assign result to`: `authServiceRef`
+
+    `title`: `Get authentication service reference`
+
+    `description`: `Get authentication service reference from the IDP`
+
    
     ![](../../../assets/agamalab-flow-passwd-edit-call.png)
 
@@ -148,13 +159,25 @@ from this project listing page.
     Click on the newly created `Call` block and by clicking :material-pencil: open the configuration page.
     Input values as shown below in the configuration screen.
 
+    `class name`: `io.jans.service.cdi.util.CdiUtil`
+
+    `method name`: `bean`
+
+    `arguments`: `authServiceRef`
+
+    `assign result to`: `cdiUtilRef`
+
+    `title`: `Get authentication service reference`
+    
+    `description`: `Get authentication service reference from the IDP`
+
     ![](../../../assets/agamalab-flow-passwd-edit-cdiutil.png)
 
 4. Create Assignment block
 
     Next, we need to create an empty variable that the flow will use in the future to store authentication results. 
 
-    Create an `Assignment` block and configure it as shown below.
+    Create an `Assignment` block after the `CdiUtil` call block and configure it as shown below.
 
     ![](../../../assets/agamalab-flow-passwd-edit-assignment.png)
 
@@ -236,8 +259,14 @@ from this project listing page.
 
     ![](../../../assets/agama-lab-create-assignment-uid.png)
 
-    Click on the newly created `Call` block. Click :material-pencil:.
-    Input values as shown below in the configuration screen
+    Click on the newly created `Assignment` block. Click :material-pencil:.
+    Input values as shown below in the configuration screen.
+
+    `Resultant variable`: `authResult.uid`
+    
+    `Value/literal`: `creds.username`
+
+    
 
     ![](../../../assets/agamalab-flow-passwd-edit-assignment-uid.png)
 
@@ -312,7 +341,7 @@ from this project listing page.
     // Get CdiUtil reference from the IDP
     cdiUtilRef = Call io.jans.service.cdi.util.CdiUtil#bean authService
     // Empty result object 
-    authResult = "{}"
+    authResult = {}
     // Retry 3 times to get correct username and password 
     Repeat 3 times max
         // Loads the login page for username and password input 
@@ -321,7 +350,7 @@ from this project listing page.
         authResult.success = Call cdiUtil#authenticate creds.username creds.password
         // Keep the username if the user needs to retry authentication 
         authResult.uid = "creds.username"
-        When authResult.uid is true
+        When authResult.success is true
               // Return username in case of successful authentication 
               Finish authResult.uid
     // Max number of failed authentication attempts reached. Return False to end the flow
@@ -331,7 +360,7 @@ from this project listing page.
 ### Design user interface
 
 In the RRF configuration step, we mentioned `login.ftlh` to render the login page elements.
-We need to add `login.ftlh` to the Agama project so that the flow can use during the flow execution.
+We need to add `login.ftlh` to the Agama project so that the flow can use it during the execution.
 Use the steps below to create the page.
 
 1. Create a template file
