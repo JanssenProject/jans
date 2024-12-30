@@ -31,6 +31,7 @@ wget https://github.com/JanssenProject/jans/files/11814522/automation-jans-publi
 
 ```shell
 unzip automation-jans-public-gpg.zip
+
 ```
 
 ```shell
