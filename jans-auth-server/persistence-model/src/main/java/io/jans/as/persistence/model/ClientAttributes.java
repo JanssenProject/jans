@@ -62,6 +62,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("postAuthnScripts")
     private List<String> postAuthnScripts;
 
+    @JsonProperty("tokenExchangeScripts")
+    private List<String> tokenExchangeScripts;
+
     @JsonProperty("consentGatheringScripts")
     private List<String> consentGatheringScripts;
 
@@ -348,6 +351,16 @@ public class ClientAttributes implements Serializable {
         this.postAuthnScripts = postAuthnScripts;
     }
 
+    public List<String> getTokenExchangeScripts() {
+        if (tokenExchangeScripts == null) tokenExchangeScripts = Lists.newArrayList();
+        return tokenExchangeScripts;
+    }
+
+    public ClientAttributes setTokenExchangeScripts(List<String> tokenExchangeScripts) {
+        this.tokenExchangeScripts = tokenExchangeScripts;
+        return this;
+    }
+
     public List<String> getConsentGatheringScripts() {
         if (consentGatheringScripts == null) consentGatheringScripts = Lists.newArrayList();
         return consentGatheringScripts;
@@ -539,6 +552,7 @@ public class ClientAttributes implements Serializable {
                 ", backchannelLogoutSessionRequired=" + backchannelLogoutSessionRequired +
                 ", additionalAudience=" + additionalAudience +
                 ", postAuthnScripts=" + postAuthnScripts +
+                ", tokenExchangeScripts=" + tokenExchangeScripts +
                 ", consentGatheringScripts=" + consentGatheringScripts +
                 ", introspectionScripts=" + introspectionScripts +
                 ", rptClaimsScripts=" + rptClaimsScripts +
