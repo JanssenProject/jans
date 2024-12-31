@@ -7,7 +7,7 @@ import io.jans.casa.core.pojo.FidoDevice;
 import io.jans.casa.core.pojo.PlatformAuthenticator;
 import io.jans.casa.core.pojo.SecurityKey;
 import io.jans.casa.misc.Utils;
-import io.jans.casa.plugins.authnmethod.SecurityKey2Extension;
+import io.jans.casa.plugins.authnmethod.PasskeysExtension;
 import io.jans.casa.plugins.authnmethod.service.Fido2Service;
 import io.jans.casa.ui.UIUtils;
 
@@ -37,42 +37,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * This is the ViewModel of page fido2-detail.zul. It controls the CRUD of
- * security keys
+ * passkeys
  */
-public class SecurityKey2ViewModel extends UserViewModel {
+public class PasskeysViewModel extends UserViewModel {
 
 	private static final int REGISTRATION_TIMEOUT = 8000;
 
-    private Logger logger = LoggerFactory.getLogger(getClass());
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	@WireVariable
 	private Fido2Service fido2Service;
 
 	private FidoDevice newDevice;
-	private FidoDevice newTouchId;
+
 	private List<FidoDevice> devices;
 
 	private String editingId;
 	private boolean uiAwaiting;
 	private boolean uiEnrolled;
-
-	private String editingIdPlatformAuthenticator;
-	private boolean uiAwaitingPlatformAuthenticator;
-	private boolean uiEnrolledPlatformAuthenticator;
-
-	private boolean platformAuthenticator;
-	
-	private boolean showUIPlatformAuthenticator;
-
 	private ObjectMapper mapper;
-
-	public boolean isShowUIPlatformAuthenticator() {
-		return showUIPlatformAuthenticator;
-	}
-
-	public void setShowUIPlatformAuthenticator(boolean showUIPlatformAuthenticator) {
-		this.showUIPlatformAuthenticator = showUIPlatformAuthenticator;
-	}
 
 	public FidoDevice getNewDevice() {
 		return newDevice;
@@ -82,24 +65,8 @@ public class SecurityKey2ViewModel extends UserViewModel {
 		return devices;
 	}
 
-	public boolean getPlatformAuthenticator() {
-		return platformAuthenticator;
-	}
-
-	public void setPlatformAuthenticator(boolean platformAuthenticator) {
-		this.platformAuthenticator = platformAuthenticator;
-	}
-
 	public String getEditingId() {
 		return editingId;
-	}
-
-	public FidoDevice getNewTouchId() {
-		return newTouchId;
-	}
-
-	public void setNewTouchId(FidoDevice newTouchId) {
-		this.newTouchId = newTouchId;
 	}
 
 	public void setNewDevice(FidoDevice newDevice) {
@@ -114,24 +81,11 @@ public class SecurityKey2ViewModel extends UserViewModel {
 		return uiEnrolled;
 	}
 
-	public String getEditingIdPlatformAuthenticator() {
-		return editingIdPlatformAuthenticator;
-	}
-
-	public boolean isUiAwaitingPlatformAuthenticator() {
-		return uiAwaitingPlatformAuthenticator;
-	}
-
-	public boolean isUiEnrolledPlatformAuthenticator() {
-		return uiEnrolledPlatformAuthenticator;
-	}
-
 	@Init(superclass = true)
 	public void childInit() throws Exception {
 		logger.debug("childInit");
 		mapper = new ObjectMapper();
-		newDevice = new SecurityKey();
-		newTouchId = new PlatformAuthenticator();
+		newDevice = new FidoDevice();
 		devices = fido2Service.getDevices(user.getId(), fido2Service.appId(), true);
 
 	}
@@ -140,33 +94,20 @@ public class SecurityKey2ViewModel extends UserViewModel {
 	public void afterCompose(@ContextParam(ContextType.VIEW) Component view) {
 		logger.debug("afterCompose");
 		Selectors.wireEventListeners(view, this);
-
 	}
 
-	public void triggerAttestationRequestPlatformAuthenticator() {
-		platformAuthenticator = true;
-		triggerAttestationRequest();
-	}
-	
 	public void triggerAttestationRequest() {
-		logger.debug("triggerAttestationRequest : "+platformAuthenticator);
 		try {
 
-			if (platformAuthenticator) {
-				uiAwaitingPlatformAuthenticator = true;
-				BindUtils.postNotifyChange(this, "uiAwaitingPlatforAuthenticator");
-			} else {
-				uiAwaiting = true;
-				BindUtils.postNotifyChange(this, "uiAwaiting");
-			}
+			uiAwaiting = true;
+			BindUtils.postNotifyChange(this, "uiAwaiting");
 			String uid = user.getUserName();
-			String jsonRequest = fido2Service.doRegister(uid, Optional.ofNullable(user.getGivenName()).orElse(uid),
-					platformAuthenticator);
+			String jsonRequest = fido2Service.doRegister(uid, Optional.ofNullable(user.getGivenName()).orElse(uid));
 			logger.debug("JSONrequest - " + jsonRequest);
 			// Notify browser to exec proper function
 			UIUtils.showMessageUI(Clients.NOTIFICATION_TYPE_INFO, Labels.getLabel("usr.fido2_touch"));
 			Clients.response(
-					new AuInvoke(platformAuthenticator? "triggerFido2AttestationPA" : "triggerFido2Attestation", new JavaScriptValue(jsonRequest), REGISTRATION_TIMEOUT));
+					new AuInvoke("triggerFido2Attestation", new JavaScriptValue(jsonRequest), REGISTRATION_TIMEOUT));
 		} catch (Exception e) {
 			UIUtils.showMessageUI(false);
 			logger.error(e.getMessage(), e);
@@ -177,35 +118,24 @@ public class SecurityKey2ViewModel extends UserViewModel {
 	@Listen("onData=#readyButton")
 	public void notified(Event event) throws Exception {
 		logger.debug("notified ready" + event.getTarget());
+		logger.debug("attestation response :"+event.getData());
+		logger.debug("attestation response :"+event.toString());
 		String errMessage = null;
 		try {
+			
 			if (fido2Service.verifyRegistration(mapper.writeValueAsString(event.getData()))) {
 
-				if (platformAuthenticator) {
-					newTouchId = fido2Service.getLatestSecurityKey(user.getId(), System.currentTimeMillis());
-					if (newTouchId != null) {
-						uiEnrolledPlatformAuthenticator = true;
-						BindUtils.postNotifyChange(this, "uiEnrolledPlatformAuthenticator");
+				// pick the most suitable recent entry
+				newDevice = fido2Service.getLatestPasskey(user.getId(), System.currentTimeMillis());
+				if (newDevice != null) {
 
-						uiAwaitingPlatformAuthenticator = false;
-						BindUtils.postNotifyChange(this, "uiAwaitingPlatformAuthenticator");
-					} else {
-						errMessage = Labels.getLabel("general.error.general");
-					}
+					uiEnrolled = true;
+					BindUtils.postNotifyChange(this, "uiEnrolled");
+
+					uiAwaiting = false;
+					BindUtils.postNotifyChange(this, "uiAwaiting");
 				} else {
-					// pick the most suitable recent entry
-					newDevice = fido2Service.getLatestSecurityKey(user.getId(), System.currentTimeMillis());
-					if (newDevice != null) {
-
-						uiEnrolled = true;
-						BindUtils.postNotifyChange(this, "uiEnrolled");
-
-						uiAwaiting = false;
-						BindUtils.postNotifyChange(this, "uiAwaiting");
-					} else {
-						errMessage = Labels.getLabel("general.error.general");
-					}
-
+					errMessage = Labels.getLabel("general.error.general");
 				}
 
 			} else {
@@ -220,18 +150,6 @@ public class SecurityKey2ViewModel extends UserViewModel {
 			UIUtils.showMessageUI(false, errMessage);
 		}
 
-	}
-
-	@Listen("onData=#readyPlatformButton")
-	public void notifiedPlatform(Event event) throws Exception {
-		logger.debug("notified platform ready" + event.getTarget());
-		notified(event);
-	}
-
-	@Listen("onError=#readyPlatformButton")
-	public void notifiedErrPlatform(Event event) throws Exception {
-		logger.debug("notified notifiedErrPlatform" + event.getTarget());
-		notifiedErr(event);
 	}
 
 	@Listen("onError=#readyButton")
@@ -252,24 +170,19 @@ public class SecurityKey2ViewModel extends UserViewModel {
 		} else {
 			message = Labels.getLabel("general.error.detailed", new String[] { msg });
 		}
-		if (platformAuthenticator) {
-			uiAwaitingPlatformAuthenticator = false;
-			BindUtils.postNotifyChange(this, "uiAwaitingPlatformAuthenticator");
-		} else {
-			uiAwaiting = false;
-			BindUtils.postNotifyChange(this, "uiAwaiting");
-		}
+
+		uiAwaiting = false;
+		BindUtils.postNotifyChange(this, "uiAwaiting");
+
 		UIUtils.showMessageUI(false, message);
 
 	}
 
-	@NotifyChange({ "uiEnrolled", "uiEnrolledPlatformAuthenticator", "newDevice", "newTouchId", "devices" })
+	@NotifyChange({ "uiEnrolled", "newDevice", "devices" })
 	public void add() {
 		logger.debug("add - ");
 		FidoDevice dev = null;
-		if (platformAuthenticator && Utils.isNotEmpty(newTouchId.getNickName())) {
-			dev = newTouchId;
-		} else if (Utils.isNotEmpty(newDevice.getNickName())) {
+		if (Utils.isNotEmpty(newDevice.getNickName())) {
 			dev = newDevice;
 		}
 		if (dev != null) {
@@ -277,7 +190,7 @@ public class SecurityKey2ViewModel extends UserViewModel {
 				fido2Service.updateDevice(dev);
 				devices.add(dev);
 				UIUtils.showMessageUI(true, Labels.getLabel("usr.enroll.success"));
-				userService.notifyEnrollment(user, SecurityKey2Extension.ACR);
+				userService.notifyEnrollment(user, PasskeysExtension.ACR);
 			} catch (Exception e) {
 				UIUtils.showMessageUI(false, Labels.getLabel("usr.error_updating"));
 				logger.error(e.getMessage(), e);
@@ -287,9 +200,9 @@ public class SecurityKey2ViewModel extends UserViewModel {
 
 	}
 
-	@NotifyChange({ "uiEnrolled", "uiEnrolledPlatformAuthenticator", "newDevice", "newTouchId" })
+	@NotifyChange({ "uiEnrolled", "newDevice" })
 	public void cancel() {
-		
+
 		boolean success = false;
 		try {
 			/*
@@ -299,10 +212,7 @@ public class SecurityKey2ViewModel extends UserViewModel {
 			 * pressing cancel), we need to be obliterate the entry
 			 */
 			FidoDevice dev = null;
-			if (platformAuthenticator && Utils.isNotEmpty(newTouchId.getId())) {
-				dev = newTouchId;
-				logger.debug("cancel invoked - platform authenticator");
-			} else if (Utils.isNotEmpty(newDevice.getId())) {
+			if (Utils.isNotEmpty(newDevice.getId())) {
 				dev = newDevice;
 				logger.debug("cancel invoked");
 			}
@@ -320,7 +230,7 @@ public class SecurityKey2ViewModel extends UserViewModel {
 
 	}
 
-	@NotifyChange({ "editingId", "editingIdPlatformAuthenticator", "newDevice" })
+	@NotifyChange({ "editingId", "newDevice" })
 	public void prepareForUpdate(FidoDevice dev) {
 		logger.debug("prepareForUpdate");
 		// This will make the modal window to become visible
@@ -329,7 +239,7 @@ public class SecurityKey2ViewModel extends UserViewModel {
 		newDevice.setNickName(dev.getNickName());
 	}
 
-	@NotifyChange({ "editingId", "editingIdPlatformAuthenticator", "newDevice" })
+	@NotifyChange({ "editingId", "newDevice" })
 	public void cancelUpdate(Event event) {
 		logger.debug("cancelUpdate");
 		newDevice.setNickName(null);
@@ -339,7 +249,7 @@ public class SecurityKey2ViewModel extends UserViewModel {
 		}
 	}
 
-	@NotifyChange({ "devices", "editingId", "editingIdPlatformAuthenticator", "newDevice" })
+	@NotifyChange({ "devices", "editingId", "newDevice" })
 	public void update() {
 		logger.debug("update");
 		String nick = newDevice.getNickName();
@@ -364,7 +274,7 @@ public class SecurityKey2ViewModel extends UserViewModel {
 
 	public void delete(FidoDevice device) {
 		logger.debug("delete invoked");
-		String resetMessages = resetPreferenceMessage(SecurityKey2Extension.ACR, devices.size());
+		String resetMessages = resetPreferenceMessage(PasskeysExtension.ACR, devices.size());
 		boolean reset = resetMessages != null;
 		Pair<String, String> delMessages = getDeleteMessages(device.getNickName(), resetMessages);
 
@@ -373,14 +283,14 @@ public class SecurityKey2ViewModel extends UserViewModel {
 					if (Messagebox.ON_YES.equals(event.getName())) {
 						try {
 							devices.remove(device);
-							boolean success = fido2Service.removeDevice(device, user.getId(),
-									    fido2Service.appId(), true);		
+							boolean success = fido2Service.removeDevice(device, user.getId(), fido2Service.appId(),
+									true);
 							if (success) {
 								if (reset) {
 									userService.turn2faOff(user);
 								}
 								// trigger refresh (this method is asynchronous...)
-								BindUtils.postNotifyChange(SecurityKey2ViewModel.this, "devices");
+								BindUtils.postNotifyChange(PasskeysViewModel.this, "devices");
 							} else {
 								devices.add(device);
 							}
@@ -396,18 +306,6 @@ public class SecurityKey2ViewModel extends UserViewModel {
 	private void resetAddSettings() {
 		logger.debug("resetAddSettings");
 		uiEnrolled = false;
-		uiEnrolledPlatformAuthenticator = false;
-		newDevice = new SecurityKey();
-		newTouchId = new PlatformAuthenticator();
+		newDevice = new FidoDevice();
 	}
-
-	@Listen("onData=#platformAuthenticator")
-	public void updatePlatform(Event event) throws Exception {
-		
-		showUIPlatformAuthenticator = Boolean.valueOf(event.getData().toString());
-		logger.debug("updatePlatform");
-		BindUtils.postNotifyChange(this, "showUIPlatformAuthenticator");
-
-	}
-
 }

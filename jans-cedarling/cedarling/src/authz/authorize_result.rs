@@ -1,14 +1,13 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::collections::HashSet;
 
 use cedar_policy::Decision;
 use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
-use std::collections::HashSet;
 
 use crate::bootstrap_config::WorkloadBoolOp;
 

@@ -128,12 +128,12 @@ class Cedarling:
 
 @final
 class Request:
-    access_token: str
-    id_token: str
-    userinfo_token: str
     action: str
     resource: ResourceData
     context: Dict[str, Any]
+    access_token: str | None
+    id_token: str | None
+    userinfo_token: str | None
 
     def __init__(self,
                  access_token: str,

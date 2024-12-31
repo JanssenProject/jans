@@ -1,9 +1,8 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
 #![deny(missing_docs)]
 //! # Cedarling
 //! The Cedarling is a performant local authorization service that runs the Rust Cedar Engine.
@@ -29,31 +28,29 @@ mod tests;
 use std::sync::Arc;
 
 pub use authz::request::{Request, ResourceData};
+#[cfg(test)]
+use authz::AuthorizeEntitiesData;
 use authz::Authz;
 pub use authz::{AuthorizeError, AuthorizeResult};
 pub use bootstrap_config::*;
+use common::app_types;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
 use init::ServiceFactory;
-
-use common::app_types;
 use log::interface::LogWriter;
-use log::LogEntry;
-use log::LogType;
+use log::{LogEntry, LogType};
 pub use log::{LogLevel, LogStorage};
 
-pub use crate::authz::entities::CedarPolicyCreateTypeError;
-
-#[cfg(test)]
-use authz::AuthorizeEntitiesData;
+pub use crate::authz::entities::CreateCedarEntityError;
 
 #[doc(hidden)]
 pub mod bindings {
+    pub use cedar_policy;
+
     pub use super::log::{
         AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
     };
     pub use crate::common::policy_store::PolicyStore;
-    pub use cedar_policy;
 }
 
 /// Errors that can occur during initialization Cedarling.
@@ -120,7 +117,7 @@ impl Cedarling {
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         let tokens = self.authz.decode_tokens(request)?;
-        self.authz.authorize_entities_data(request, &tokens)
+        self.authz.build_entities(request, &tokens)
     }
 }
 

@@ -1,9 +1,9 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::collections::{HashMap, HashSet};
 
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LogConfig,
@@ -11,7 +11,6 @@ use cedarling::{
     TokenValidationConfig, WorkloadBoolOp,
 };
 use jsonwebtoken::Algorithm;
-use std::collections::{HashMap, HashSet};
 
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../test_files/policy-store_with_trusted_issuers_ok.yaml");
@@ -62,9 +61,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // on a specific resource. Each token (access, ID, and userinfo) is required for the
     // authorization process, alongside resource and action details.
     let result = cedarling.authorize(Request {
-        access_token,
-        id_token,
-        userinfo_token,
+        access_token: Some(access_token),
+        id_token: Some(id_token),
+        userinfo_token: Some(userinfo_token),
         action: "Jans::Action::\"Update\"".to_string(),
         context: serde_json::json!({}),
         resource: ResourceData {

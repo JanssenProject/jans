@@ -1,31 +1,36 @@
 package io.jans.casa.plugins.authnmethod.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import io.jans.fido2.ctap.AttestationConveyancePreference;
-import io.jans.fido2.model.attestation.AttestationOptions;
-import io.jans.orm.search.filter.Filter;
-import io.jans.fido2.client.AttestationService;
-import io.jans.orm.model.fido2.Fido2RegistrationStatus;
-
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import io.jans.casa.core.model.Fido2RegistrationEntry;
+import io.jans.casa.core.pojo.FidoDevice;
+import io.jans.casa.core.pojo.MultideviceAuthenticator;
+import io.jans.casa.core.pojo.PlatformAuthenticator;
+import io.jans.casa.core.pojo.SecurityKey;
+import io.jans.casa.misc.Utils;
+import io.jans.casa.rest.RSUtils;
+import io.jans.entry.Transports;
+import io.jans.fido2.client.AttestationService;
+import io.jans.fido2.model.attestation.AttestationOptions;
+import io.jans.orm.model.fido2.Fido2RegistrationStatus;
+import io.jans.orm.search.filter.Filter;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.core.Response;
-
-import io.jans.casa.core.pojo.FidoDevice;
-import io.jans.casa.core.pojo.PlatformAuthenticator;
-import io.jans.casa.core.pojo.SecurityKey;
-import io.jans.casa.misc.Utils;
-import io.jans.casa.plugins.authnmethod.SecurityKey2Extension;
-import io.jans.casa.rest.RSUtils;
-import io.jans.casa.core.model.Fido2RegistrationEntry;
-
-import org.json.JSONObject;
-import org.slf4j.Logger;
 
 @Named
 @ApplicationScoped
@@ -77,22 +82,31 @@ public class Fido2Service extends BaseService {
                 Filter.createEqualityFilter("jansStatus", state),
                 Filter.createEqualityFilter("personInum", userId),
                 Filter.createEqualityFilter("jansApp", appId));
-        
+        logger.trace("Filter:"+filter);
         List<FidoDevice> devices = new ArrayList<>();
         try {
             List<Fido2RegistrationEntry> list = persistenceService.find(Fido2RegistrationEntry.class,
             	String.format("ou=%s,%s", FIDO2_OU, persistenceService.getPersonDn(userId)), filter);
 
+            logger.trace(list.toString()+list.size());
             for (Fido2RegistrationEntry entry : list) {
             	FidoDevice device = null;
-            	if (Optional.ofNullable(entry.getRegistrationData().getAttenstationRequest())
-            	       .map(ar -> ar.contains("platform")).orElse(false)) {
-            		device = new PlatformAuthenticator();
-            		
-            	} else {
-            		device = new SecurityKey();
-            		
-            	}
+            	Set<String> transports = new HashSet<>(Arrays.asList(entry.getRegistrationData().getTransports()));
+            	
+            	// internal implies platform auth
+				if (transports.contains(Transports.INTERNAL.getValue()) && transports.size() == 1) {
+					device = new PlatformAuthenticator();
+				} 
+				// internal and hybrid implies multidev
+				else if (transports.contains(Transports.HYBRID.getValue())) {
+					device = new MultideviceAuthenticator();
+				} else if (transports.contains(Transports.USB.getValue())
+						|| transports.contains(Transports.NFC.getValue())
+						|| transports.contains(Transports.BLE.getValue())) {
+					device = new SecurityKey();
+				} else {
+					logger.trace("Transports was not set, ideally flow should never reach here");
+				}
             	device.setId(entry.getId());
             	device.setCreationDate(entry.getCreationDate());
             	device.setNickName(entry.getDisplayName());
@@ -176,11 +190,10 @@ public class Fido2Service extends BaseService {
 
     }
 
-    public String doRegister(String userName, String displayName, boolean platformAuthenticator) throws Exception {
+    public String doRegister(String userName, String displayName) throws Exception {
         AttestationOptions attestationOptions = new AttestationOptions();
         attestationOptions.setUsername(userName);
         attestationOptions.setDisplayName(displayName);
-        attestationOptions.setAttestation(AttestationConveyancePreference.direct);
 
         try (Response response = attestationService.register(attestationOptions)) {
             String content = response.readEntity(String.class);
@@ -200,6 +213,7 @@ public class Fido2Service extends BaseService {
         JsonNode jsonObj=mapper.readTree(tokenResponse);
     	try (Response response = attestationService.verify(mapper.convertValue(jsonObj, io.jans.fido2.model.attestation.AttestationResult.class))) {
             int status = response.getStatus();
+            logger.debug("Status of attestation: "+status);
             boolean verified = status == Response.Status.OK.getStatusCode();
             
             if (!verified) {
@@ -212,7 +226,7 @@ public class Fido2Service extends BaseService {
         
     }
 
-    public FidoDevice getLatestSecurityKey(String userId, long time) {
+    public FidoDevice getLatestPasskey(String userId, long time) {
 
     	FidoDevice sk = null;
         try {

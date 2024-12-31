@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2024-11-15 09:19'
+ENV CN_BUILD_DATE='2024-12-20 09:07'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
@@ -70,7 +70,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=39e74a153edf01db8ab43be81f5585bc4210818d
+ENV JANS_SOURCE_VERSION=aa1b2edaa8d7e3413bd57a7bd7cc86206086768b
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -238,8 +238,10 @@ COPY templates /app/templates/
 RUN cp /app/templates/jans-config-api/jans-config-api.xml ${JETTY_BASE}/jans-config-api/webapps/
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
-RUN chmod +x /app/scripts/external_healthcheck.py \
-    && ln -s /app/scripts/external_healthcheck.py /opt/jans/bin/jans_services_status.py
+
+# drop-replacement for jans-linux-setup jans_services_status.py script
+COPY contrib/external_healthcheck.py /opt/jans/bin/jans_services_status.py
+RUN chmod +x /opt/jans/bin/jans_services_status.py
 
 # unquote apiApprovedIssuer
 RUN sed -i 's/"${apiApprovedIssuer}"/${apiApprovedIssuer}/g' /app/templates/jans-config-api/dynamic-conf.json
