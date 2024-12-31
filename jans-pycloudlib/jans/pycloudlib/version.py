@@ -1,4 +1,3 @@
 """This module contains version-related info."""
-from importlib import metadata
 
-__version__ = metadata.version(__package__)
+__version__ = "0.0.0"  # pragma: no cover

@@ -1,6 +1,15 @@
+[build-system]
+requires = [
+    # The minimum setuptools version is specific to the PEP 517 backend,
+    # and may be stricter than the version required in `setup.cfg`
+    "setuptools>=40.6.0,!=60.9.0",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "jans-pycloudlib"
-version = "0.0.0"
+dynamic = ["version"]
 description = "Utilities for Janssen cloud-native deployment"
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -67,19 +76,17 @@ jans-pycloudlib = "jans.pycloudlib.cli:cli"
 [project.urls]
 "Homepage" = "https://github.com/JanssenProject/jans/tree/main/jans-pycloudlib"
 
-[build-system]
-requires = [
-    # The minimum setuptools version is specific to the PEP 517 backend,
-    # and may be stricter than the version required in `setup.cfg`
-    "setuptools>=40.6.0,!=60.9.0",
-    "wheel",
-]
-build-backend = "setuptools.build_meta"
-
 [tool.setuptools]
 include-package-data = true
 zip-safe = false
-packages = ["jans"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["jans"]
+namespaces = true
+
+[tool.setuptools.dynamic]
+version = {attr = "jans.pycloudlib.version.__version__"}
 
 [tool.pydocstyle]
 convention = "google"
