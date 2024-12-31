@@ -202,7 +202,7 @@ pub struct TokensMetadata<'a> {
     pub tx_tokens: &'a TokenEntityMetadata,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub enum TokenKind {
     /// Access token used for granting access to resources.
     Access,

@@ -17,9 +17,37 @@ use serde_json::Value;
 pub struct ClaimMappings(HashMap<String, ClaimMapping>);
 
 impl ClaimMappings {
-    pub fn get_mapping(&self, field: &str, cedar_policy_type: &str) -> Option<&ClaimMapping> {
+    pub fn get(&self, claim: &str) -> Option<&ClaimMapping> {
+        self.0.get(claim)
+    }
+
+    // returns (claim_name, &ClaimMapping)
+    pub fn get_mapping_for_type(&self, type_name: &str) -> Option<(&String, &ClaimMapping)> {
+        // PERF: we can probably avoiding iterating through all of this by changing the
+        // `claim_mapping` in the Token Entity Metadata Schema
         self.0
-            .get(field)
+            .iter()
+            .find_map(|(claim_name, mapping)| match mapping {
+                ClaimMapping::Regex(regex_mapping) => {
+                    if regex_mapping.cedar_policy_type == type_name {
+                        Some((claim_name, mapping))
+                    } else {
+                        None
+                    }
+                },
+                ClaimMapping::Json { r#type } => {
+                    if r#type == type_name {
+                        Some((claim_name, mapping))
+                    } else {
+                        None
+                    }
+                },
+            })
+    }
+
+    pub fn get_mapping(&self, claim: &str, cedar_policy_type: &str) -> Option<&ClaimMapping> {
+        self.0
+            .get(claim)
             .filter(|claim_mapping| match claim_mapping {
                 ClaimMapping::Regex(regexp_mapping) => {
                     regexp_mapping.cedar_policy_type == cedar_policy_type

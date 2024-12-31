@@ -8,13 +8,14 @@
 use serde::Deserialize;
 use std::collections::HashMap;
 
-mod action;
-mod attr_kind;
+pub(crate) mod action;
+pub(crate) mod attribute;
+pub(crate) mod entity_type;
+
 mod deserialize;
-mod entity_type;
 
 use action::*;
-use attr_kind::*;
+use attribute::*;
 use entity_type::*;
 
 pub type ActionName = String;
@@ -33,12 +34,32 @@ pub struct CedarSchemaJson {
     namespaces: HashMap<NamespaceName, Namespace>,
 }
 
+impl CedarSchemaJson {
+    pub fn get_common_type(&self, name: &str) -> Option<(&NamespaceName, &Attribute)> {
+        for (namespace_name, namespace) in self.namespaces.iter() {
+            if let Some(attr) = namespace.common_types.get(name) {
+                return Some((namespace_name, attr));
+            }
+        }
+        None
+    }
+
+    pub fn get_entity_type(&self, name: &str) -> Option<(&NamespaceName, &EntityType)> {
+        for (namespace_name, namespace) in self.namespaces.iter() {
+            if let Some(entity_type) = namespace.entity_types.get(name) {
+                return Some((namespace_name, entity_type));
+            }
+        }
+        None
+    }
+}
+
 #[derive(Debug, Deserialize, PartialEq)]
 pub struct Namespace {
     #[serde(rename = "entityTypes", default)]
     entity_types: HashMap<EntityTypeName, EntityType>,
     #[serde(rename = "commonTypes", default)]
-    common_types: HashMap<CommonTypeName, AttributeKind>,
+    common_types: HashMap<CommonTypeName, Attribute>,
     #[serde(default)]
     actions: HashMap<ActionName, Action>,
 }
@@ -76,8 +97,8 @@ mod test_deserialize_json_cedar_schema {
                     EntityType {
                         member_of: Some(HashSet::from(["UserGroup".into()])),
                         shape: Some(EntityShape::required(HashMap::from([
-                            ("department".into(), AttributeKind::string()),
-                            ("jobLevel".into(), AttributeKind::long()),
+                            ("department".into(), Attribute::string()),
+                            ("jobLevel".into(), Attribute::long()),
                         ]))),
                         tags: None,
                     },

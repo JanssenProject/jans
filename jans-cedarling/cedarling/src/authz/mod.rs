@@ -25,6 +25,8 @@ use crate::log::{
 };
 
 mod authorize_result;
+#[allow(dead_code)]
+mod entity_builder;
 mod merge_json;
 
 pub(crate) mod entities;
@@ -34,12 +36,12 @@ use std::time::Instant;
 pub use authorize_result::AuthorizeResult;
 use cedar_policy::{ContextJsonError, Entities, Entity, EntityUid};
 use entities::{
-    CEDAR_POLICY_SEPARATOR, CreateCedarEntityError, CreateUserEntityError,
-    CreateWorkloadEntityError, DecodedTokens, ResourceEntityError, RoleEntityError,
     create_resource_entity, create_role_entities, create_token_entities, create_user_entity,
-    create_workload_entity,
+    create_workload_entity, CreateCedarEntityError, CreateUserEntityError,
+    CreateWorkloadEntityError, DecodedTokens, ResourceEntityError, RoleEntityError,
+    CEDAR_POLICY_SEPARATOR,
 };
-use merge_json::{MergeError, merge_json_values};
+use merge_json::{merge_json_values, MergeError};
 use request::Request;
 use serde_json::Value;
 

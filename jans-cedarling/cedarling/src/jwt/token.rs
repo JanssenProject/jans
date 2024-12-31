@@ -84,6 +84,10 @@ impl<'a> Token<'a> {
     pub fn claims(&self) -> &TokenClaims {
         &self.claims
     }
+
+    pub fn claims_value(&self) -> &HashMap<String, Value> {
+        &self.claims.claims
+    }
 }
 
 /// A struct holding information on a decoded JWT.
@@ -208,7 +212,7 @@ impl TokenClaimTypeError {
     }
 
     /// Constructs a `TypeMismatch` error with detailed information about the expected and actual types.
-    fn type_mismatch(key: &str, expected_type_name: &str, got_value: &Value) -> Self {
+    pub fn type_mismatch(key: &str, expected_type_name: &str, got_value: &Value) -> Self {
         let got_value_type_name = Self::json_value_type_name(got_value);
 
         Self {

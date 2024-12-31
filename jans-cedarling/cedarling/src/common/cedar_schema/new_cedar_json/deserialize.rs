@@ -23,7 +23,7 @@ where
 /// Deserialize a [`Value`] to a to the attrs of a [`AttributeKind::Record`]
 pub fn deserialize_record_attrs<'de, D>(
     attrs: Value,
-) -> Result<HashMap<AttributeName, AttributeKind>, D::Error>
+) -> Result<HashMap<AttributeName, Attribute>, D::Error>
 where
     D: serde::Deserializer<'de>,
 {
@@ -34,14 +34,14 @@ where
     })?;
 
     // loop through each attr then deserialize into Self
-    let mut attrs = HashMap::<AttributeName, AttributeKind>::new();
+    let mut attrs = HashMap::<AttributeName, Attribute>::new();
     for (key, val) in attrs_json.into_iter() {
-        let val = serde_json::from_value::<AttributeKind>(val).map_err(|e| {
+        let val = serde_json::from_value::<Attribute>(val).map_err(|e| {
             de::Error::custom(format!(
                 "error while deserializing cedar record attribute: {e}"
             ))
         })?;
-        attrs.insert(key.into(), val);
+        attrs.insert(key, val);
     }
 
     Ok(attrs)

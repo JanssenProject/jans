@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::attr_kind::AttributeKind;
+use super::attribute::Attribute;
 use super::deserialize::*;
 use super::*;
 use serde::{de, Deserialize};
@@ -12,13 +12,13 @@ use std::collections::HashSet;
 
 #[derive(Debug, PartialEq)]
 pub struct EntityShape {
-    required: bool,
-    attrs: HashMap<AttributeName, AttributeKind>,
+    pub required: bool,
+    pub attrs: HashMap<AttributeName, Attribute>,
 }
 
 #[cfg(test)]
 impl EntityShape {
-    pub fn required(attrs: HashMap<AttributeName, AttributeKind>) -> Self {
+    pub fn required(attrs: HashMap<AttributeName, Attribute>) -> Self {
         Self {
             required: true,
             attrs,
@@ -33,7 +33,7 @@ pub struct EntityType {
     #[serde(deserialize_with = "deserialize_entity_shape", default)]
     pub shape: Option<EntityShape>,
     #[serde(default)]
-    pub tags: Option<AttributeKind>,
+    pub tags: Option<Attribute>,
 }
 
 // Forces the `shape` field into the [`AttributeKind::Shape`] variant.
@@ -47,7 +47,7 @@ where
         .ok_or(de::Error::missing_field("type"))?;
     let required = attr
         .remove("required")
-        .map(|v| serde_json::from_value::<bool>(v))
+        .map(serde_json::from_value::<bool>)
         .transpose()
         .map_err(|e| {
             de::Error::custom(format!("error while deserializing JSON Value to bool: {e}"))
@@ -75,7 +75,7 @@ where
 
 #[cfg(test)]
 mod test_deserialize_entity_type {
-    use super::super::attr_kind::AttributeKind;
+    use super::super::attribute::Attribute;
     use super::*;
     use serde_json::json;
     use std::collections::{HashMap, HashSet};
@@ -98,8 +98,8 @@ mod test_deserialize_entity_type {
             EntityType {
                 member_of: None,
                 shape: Some(EntityShape::required(HashMap::from([
-                    ("name".into(), AttributeKind::string()),
-                    ("age".into(), AttributeKind::long())
+                    ("name".into(), Attribute::string()),
+                    ("age".into(), Attribute::long())
                 ]))),
                 tags: None,
             }
@@ -124,8 +124,8 @@ mod test_deserialize_entity_type {
             EntityType {
                 member_of: Some(HashSet::from(["UserGroup".into()])),
                 shape: Some(EntityShape::required(HashMap::from([
-                    ("name".into(), AttributeKind::string()),
-                    ("age".into(), AttributeKind::long())
+                    ("name".into(), Attribute::string()),
+                    ("age".into(), Attribute::long())
                 ]))),
                 tags: None,
             }
@@ -156,12 +156,10 @@ mod test_deserialize_entity_type {
             EntityType {
                 member_of: None,
                 shape: Some(EntityShape::required(HashMap::from([
-                    ("name".into(), AttributeKind::string()),
-                    ("age".into(), AttributeKind::long())
+                    ("name".into(), Attribute::string()),
+                    ("age".into(), Attribute::long())
                 ]))),
-                tags: Some(AttributeKind::set(AttributeKind::entity_or_common(
-                    "String",
-                )))
+                tags: Some(Attribute::set(Attribute::entity_or_common("String",)))
             }
         );
     }
