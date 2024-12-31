@@ -8,6 +8,10 @@ use crate::jwt::Token;
 use cedar_policy::Entity;
 use std::collections::HashSet;
 
+// Default claims to use for the Workload Entity's ID.
+const DEFAULT_ACCESS_TKN_WORKLOAD_CLAIM: &str = "client_id";
+const DEFAULT_ID_TKN_WORKLOAD_CLAIM: &str = "aud";
+
 impl EntityBuilder {
     pub fn build_workload_entity(
         &self,
@@ -44,7 +48,9 @@ impl EntityBuilder {
                 Ok(entity) => return Ok(entity),
                 Err(err) => errors.push((TokenKind::Access, err)),
             }
-        } else if let Some(token) = tokens.id_token.as_ref() {
+        }
+
+        if let Some(token) = tokens.id_token.as_ref() {
             match try_build_entity(
                 DEFAULT_ID_TKN_WORKLOAD_CLAIM,
                 token,
@@ -328,20 +334,35 @@ mod test {
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
         let builder = EntityBuilder::new(issuers, schema, EntityNames::default());
         let access_token = Token::new_access(TokenClaims::new(HashMap::new()), Some(&iss));
+        let id_token = Token::new_id(TokenClaims::new(HashMap::new()), Some(&iss));
         let tokens = DecodedTokens {
             access_token: Some(access_token),
-            id_token: None,
+            id_token: Some(id_token),
             userinfo_token: None,
         };
-        let err = builder.build_workload_entity(&tokens).unwrap_err();
+        let err = builder
+            .build_workload_entity(&tokens)
+            .expect_err("expected to error while building the workload entity");
 
-        assert_eq!(err.errors.len(), 1);
-        assert!(matches!(
-            err.errors[0],
-            (ref tkn_kind, BuildEntityError::MissingClaim(ref claim_name))
-                if tkn_kind == &TokenKind::Access &&
-                    claim_name == "client_id"
-        ));
+        assert_eq!(err.errors.len(), 2);
+        assert!(
+            matches!(
+                err.errors[0],
+                (ref tkn_kind, BuildEntityError::MissingClaim(ref claim_name))
+                    if tkn_kind == &TokenKind::Access &&
+                        claim_name == "client_id"
+            ),
+            "expected an error due to missing the `client_id` claim"
+        );
+        assert!(
+            matches!(
+                err.errors[1],
+                (ref tkn_kind, BuildEntityError::MissingClaim(ref claim_name))
+                    if tkn_kind == &TokenKind::Id &&
+                        claim_name == "aud"
+            ),
+            "expected an error due to missing the `aud` claim"
+        );
     }
 
     #[test]

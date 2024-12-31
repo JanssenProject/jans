@@ -101,8 +101,13 @@ impl Attribute {
                     ))?;
 
                     let mut values = Vec::new();
-                    for _item in claim {
-                        if let Some(expr) = element.build_expr(claims, claim_name, schema)? {
+                    for (i, val) in claim.into_iter().enumerate() {
+                        let claim_name = i.to_string();
+                        if let Some(expr) = element.build_expr(
+                            &HashMap::from([(claim_name.clone(), val.clone())]),
+                            &claim_name,
+                            schema,
+                        )? {
                             values.push(expr);
                         }
                     }

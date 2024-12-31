@@ -5,6 +5,7 @@
 
 mod build_attrs;
 mod build_expr;
+mod build_user_entity;
 mod build_workload_entity;
 mod mapping;
 
@@ -25,8 +26,6 @@ const DEFAULT_USER_ENTITY_NAME: &str = "User";
 const DEFAULT_ACCESS_TKN_ENTITY_NAME: &str = "Access_token";
 const DEFAULT_ID_TKN_ENTITY_NAME: &str = "id_token";
 const DEFAULT_USERINFO_TKN_ENTITY_NAME: &str = "Userinfo_token";
-const DEFAULT_ACCESS_TKN_WORKLOAD_CLAIM: &str = "client_id";
-const DEFAULT_ID_TKN_WORKLOAD_CLAIM: &str = "aud";
 
 pub struct DecodedTokens<'a> {
     pub access_token: Option<Token<'a>>,
@@ -73,7 +72,7 @@ impl From<&AuthorizationConfig> for EntityNames {
 impl Default for EntityNames {
     fn default() -> Self {
         Self {
-            user: DEFAULT_USERINFO_TKN_ENTITY_NAME.to_string(),
+            user: DEFAULT_USER_ENTITY_NAME.to_string(),
             workload: DEFAULT_WORKLOAD_ENTITY_NAME.to_string(),
             id_token: DEFAULT_ID_TKN_ENTITY_NAME.to_string(),
             access_token: DEFAULT_ACCESS_TKN_ENTITY_NAME.to_string(),
