@@ -5,7 +5,7 @@
 
     <groupId>io.jans.casa.plugins</groupId>
     <artifactId>acct-linking-agama</artifactId>
-    <version>1.2.0</version>
+    <version>0.0.0-nightly</version>
     
     <dependencies>
     </dependencies>

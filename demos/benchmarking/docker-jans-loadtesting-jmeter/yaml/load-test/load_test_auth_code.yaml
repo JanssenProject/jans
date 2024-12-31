@@ -36,7 +36,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: load-test-authz-cm
-        image: ghcr.io/janssenproject/jans/loadtesting-jmeter:1.2.0-1
+        image: ghcr.io/janssenproject/jans/loadtesting-jmeter:0.0.0-nightly
         imagePullPolicy: Always
         name: load-test-authz
         resources:

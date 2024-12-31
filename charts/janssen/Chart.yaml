@@ -3,34 +3,34 @@ annotations:
   artifacthub.io/containsSecurityUpdates: 'true'
   artifacthub.io/images: |
     - name: auth-server
-      image: ghcr.io/janssenproject/jans/auth-server:1.2.0-1
+      image: ghcr.io/janssenproject/jans/auth-server:0.0.0-nightly
     - name: auth-server-key-rotation
-      image: ghcr.io/janssenproject/jans/certmanager:1.2.0-1
+      image: ghcr.io/janssenproject/jans/certmanager:0.0.0-nightly
     - name: configuration-manager
-      image: ghcr.io/janssenproject/jans/configurator:1.2.0-1
+      image: ghcr.io/janssenproject/jans/configurator:0.0.0-nightly
     - name:  config-api
-      image: ghcr.io/janssenproject/jans/config-api:1.2.0-1
+      image: ghcr.io/janssenproject/jans/config-api:0.0.0-nightly
     - name: fido2
-      image: ghcr.io/janssenproject/jans/fido2:1.2.0-1
+      image: ghcr.io/janssenproject/jans/fido2:0.0.0-nightly
     - name: persistence
-      image: ghcr.io/janssenproject/jans/persistence-loader:1.2.0-1
+      image: ghcr.io/janssenproject/jans/persistence-loader:0.0.0-nightly
     - name: casa
-      image: ghcr.io/janssenproject/jans/casa:1.2.0-1
+      image: ghcr.io/janssenproject/jans/casa:0.0.0-nightly
     - name: scim
-      image: ghcr.io/janssenproject/jans/scim:1.2.0-1
+      image: ghcr.io/janssenproject/jans/scim:0.0.0-nightly
     - name: link
-      image: ghcr.io/janssenproject/jans/link:1.2.0-1
+      image: ghcr.io/janssenproject/jans/link:0.0.0-nightly
     - name: saml
-      image: ghcr.io/janssenproject/jans/saml:1.2.0-1
+      image: ghcr.io/janssenproject/jans/saml:0.0.0-nightly
     - name: kc-scheduler
-      image: ghcr.io/janssenproject/jans/kc-scheduler:1.2.0-1
+      image: ghcr.io/janssenproject/jans/kc-scheduler:0.0.0-nightly
   artifacthub.io/license: Apache-2.0
-  artifacthub.io/prerelease: 'false'
+  artifacthub.io/prerelease: 'true'
   catalog.cattle.io/certified: partner
   catalog.cattle.io/release-name: janssen
   catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management Microservices
 apiVersion: v2
-appVersion: "1.2.0"
+appVersion: "0.0.0-nightly"
 icon: >-
   https://raw.githubusercontent.com/JanssenProject/jans/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
 home: https://jans.io
@@ -42,56 +42,56 @@ maintainers:
     email: support@jans.io
 description: Janssen Access and Identity Management Microservices Chart. This chart deploys each janssen microservice as a separate deployment.
 name: janssen
-version: 1.2.0
+version: 0.0.0-nightly
 dependencies:
     - name: casa
-      version: 1.2.0
+      version: 0.0.0-nightly
       condition: global.casa.enabled
 
     - name: config
       condition: global.config.enabled
-      version: 1.2.0
+      version: 0.0.0-nightly
 
     - name: config-api
       condition: global.config-api.enabled
-      version: 1.2.0
+      version: 0.0.0-nightly
 
     - name: auth-server
       condition: global.auth-server.enabled
-      version: 1.2.0
+      version: 0.0.0-nightly
 
     - name: fido2
       condition: global.fido2.enabled
-      version: 1.2.0
+      version: 0.0.0-nightly
 
     - name: scim
       condition: global.scim.enabled
-      version: 1.2.0
+      version: 0.0.0-nightly
 
     - name: nginx-ingress
       condition: global.nginx-ingress.enabled
-      version: 1.2.0
+      version: 0.0.0-nightly
 
     - name: auth-server-key-rotation
       condition: global.auth-server-key-rotation.enabled
-      version: 1.2.0
+      version: 0.0.0-nightly
 
     - name: persistence
       condition: global.persistence.enabled
-      version: 1.2.0
+      version: 0.0.0-nightly
 
     - name: link
       condition: global.link.enabled
-      version: 1.2.0
+      version: 0.0.0-nightly
 
     - name: saml
       condition: global.saml.enabled
-      version: 1.2.0
+      version: 0.0.0-nightly
 
     - name: cn-istio-ingress
       condition: global.istio.ingress
-      version: 1.2.0
+      version: 0.0.0-nightly
 
     - name: kc-scheduler
       condition: global.kc-scheduler.enabled
-      version: 1.2.0
+      version: 0.0.0-nightly
