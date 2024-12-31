@@ -29,7 +29,8 @@ ENV JANS_SOURCE_VERSION=aa1b2edaa8d7e3413bd57a7bd7cc86206086768b
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
-RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+ARG GIT_CLONE_DEPTH=100
+RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
@@ -39,11 +40,13 @@ RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/ja
 # Python
 # ======
 
+# default pip timeout
+ARG PIP_TIMEOUT=15
 COPY requirements.txt /app/requirements.txt
 RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.disabled \
     && python3 -m ensurepip \
-    && pip3 install --no-cache-dir -U pip wheel setuptools \
-    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && pip3 install --no-cache-dir -U pip wheel setuptools --timeout ${PIP_TIMEOUT} \
+    && pip3 install --no-cache-dir -r /app/requirements.txt --timeout ${PIP_TIMEOUT} \
     && pip3 uninstall -y pip wheel
 
 # =======
