@@ -53,7 +53,7 @@ sudo rpm -import automation-jans-public-gpg.asc
   [Releases](https://github.com/JanssenProject/jans/releases)
 
 ```shell
-wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version.suse15.x86_64.rpm
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.suse15.x86_64.rpm
 ```
 
 - Verify integrity of the downloaded package using published `sha256sum`.
@@ -61,7 +61,7 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 Download `sha256sum` file for the package
 
 ```shell
-wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version.suse15.x86_64.rpm.sha256sum
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.suse15.x86_64.rpm.sha256sum
 ```
 
 Check the hash if it is matching. You may need to change your working directory

@@ -185,13 +185,17 @@ class SQLBackend:
             self.client.create_index(query)
 
     def create_indexes(self):
-        for table_name, column_mapping in self.client.get_table_mapping().items():
+        # exclude tables that created externally https://github.com/JanssenProject/jans/issues/10512
+        table_mapping = {
+            k: v for k, v in self.client.get_table_mapping().items()
+            if k in self.table_mapping_from_schema()
+        }
+
+        for table_name, column_mapping in table_mapping.items():
             if self.client.dialect == "pgsql":
-                index_func = self.create_pgsql_indexes
+                self.create_pgsql_indexes(table_name, column_mapping)
             else:
-                index_func = self.create_mysql_indexes
-            # run the callback
-            index_func(table_name, column_mapping)
+                self.create_mysql_indexes(table_name, column_mapping)
 
     def create_unique_indexes(self):
         for table_name, column in [
