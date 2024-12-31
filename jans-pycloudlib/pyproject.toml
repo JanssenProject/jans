@@ -79,11 +79,7 @@ jans-pycloudlib = "jans.pycloudlib.cli:cli"
 [tool.setuptools]
 include-package-data = true
 zip-safe = false
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["jans"]
-namespaces = true
+packages = ["jans", "jans.pycloudlib"]
 
 [tool.setuptools.dynamic]
 version = {attr = "jans.pycloudlib.version.__version__"}
