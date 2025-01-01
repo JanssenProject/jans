@@ -4,7 +4,6 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::*;
-use crate::jwt::Token;
 use cedar_policy::Entity;
 use std::collections::HashSet;
 
@@ -17,47 +16,34 @@ impl EntityBuilder {
         &self,
         tokens: &DecodedTokens,
     ) -> Result<Entity, BuildWorkloadEntityError> {
+        let entity_name = self.entity_names.workload.as_ref();
         let mut errors = vec![];
 
-        let try_build_entity = |claim_name: &str,
-                                token: &Token,
-                                claim_aliases: Vec<(&str, &str)>| {
-            let mut entity_name = self.entity_names.workload.clone();
-            let entity_id = token
-                .get_claim(claim_name)
-                .ok_or(BuildEntityError::MissingClaim(claim_name.to_string()))?
-                .as_str()?
-                .to_owned();
-
-            // get entity namespace and type
-            let (namespace, entity_type) = self
-                .schema
-                .get_entity_type(&entity_name)
-                .ok_or(BuildEntityError::EntityNotInSchema(entity_name.to_string()))?;
-            if !namespace.is_empty() {
-                entity_name = [namespace.as_str(), &entity_name].join(CEDAR_NAMESPACE_SEPARATOR);
-            }
-
-            let entity_attrs = self.build_entity_attrs(entity_type, token, claim_aliases)?;
-
-            build_entity(&entity_name, &entity_id, entity_attrs, HashSet::new())
-        };
-
-        if let Some(token) = tokens.access_token.as_ref() {
-            match try_build_entity(DEFAULT_ACCESS_TKN_WORKLOAD_CLAIM, token, vec![]) {
-                Ok(entity) => return Ok(entity),
-                Err(err) => errors.push((TokenKind::Access, err)),
-            }
-        }
-
-        if let Some(token) = tokens.id_token.as_ref() {
-            match try_build_entity(
+        for (claim_name, token_option, claim_aliases) in [
+            (
+                DEFAULT_ACCESS_TKN_WORKLOAD_CLAIM,
+                tokens.access_token.as_ref(),
+                vec![],
+            ),
+            (
                 DEFAULT_ID_TKN_WORKLOAD_CLAIM,
-                token,
+                tokens.id_token.as_ref(),
                 vec![("aud", "client_id")],
-            ) {
-                Ok(entity) => return Ok(entity),
-                Err(err) => errors.push((TokenKind::Id, err)),
+            ),
+        ]
+        .into_iter()
+        {
+            if let Some(token) = token_option {
+                match self.build_entity(
+                    entity_name,
+                    token,
+                    claim_name,
+                    claim_aliases,
+                    HashSet::new(),
+                ) {
+                    Ok(entity) => return Ok(entity),
+                    Err(err) => errors.push((token.kind, err)),
+                }
             }
         }
 
@@ -133,14 +119,22 @@ mod test {
             id_token: None,
             userinfo_token: None,
         };
-        let entity = builder.build_workload_entity(&tokens).unwrap();
+        let entity = builder
+            .build_workload_entity(&tokens)
+            .expect("expeted to successfully build workload entity");
         assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
         assert_eq!(
-            entity.attr("client_id").unwrap().unwrap(),
+            entity
+                .attr("client_id")
+                .expect("expected workload entity to have a `client_id` attribute")
+                .unwrap(),
             EvalResult::String("workload-123".to_string()),
         );
         assert_eq!(
-            entity.attr("name").unwrap().unwrap(),
+            entity
+                .attr("name")
+                .expect("expected workload entity to have a `name` attribute")
+                .unwrap(),
             EvalResult::String("somename".to_string()),
         );
     }
@@ -174,14 +168,22 @@ mod test {
             id_token: Some(id_token),
             userinfo_token: None,
         };
-        let entity = builder.build_workload_entity(&tokens).unwrap();
+        let entity = builder
+            .build_workload_entity(&tokens)
+            .expect("expected to successfully build workload entity");
         assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
         assert_eq!(
-            entity.attr("client_id").unwrap().unwrap(),
+            entity
+                .attr("client_id")
+                .expect("expected workload entity to have a `client_id` attribute")
+                .unwrap(),
             EvalResult::String("workload-123".to_string()),
         );
         assert_eq!(
-            entity.attr("name").unwrap().unwrap(),
+            entity
+                .attr("name")
+                .expect("expected workload entity to have a `name` attribute")
+                .unwrap(),
             EvalResult::String("somename".to_string()),
         );
     }
@@ -260,18 +262,23 @@ mod test {
             id_token: None,
             userinfo_token: None,
         };
-        let entity = builder.build_workload_entity(&tokens).unwrap();
+        let entity = builder
+            .build_workload_entity(&tokens)
+            .expect("expected to successfully build workload entity");
 
         assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
 
         assert_eq!(
-            entity.attr("client_id").unwrap().unwrap(),
+            entity
+                .attr("client_id")
+                .expect("expected to workload entity to have a `client_id` attribute")
+                .unwrap(),
             EvalResult::String("workload-123".to_string()),
         );
 
         let email = entity
             .attr("email")
-            .expect("entity must have an `email` attribute")
+            .expect("expected workload entity to have an `email` attribute")
             .unwrap();
         if let EvalResult::Record(ref record) = email {
             assert_eq!(record.len(), 2);

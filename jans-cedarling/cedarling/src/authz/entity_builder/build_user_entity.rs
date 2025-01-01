@@ -4,7 +4,6 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::*;
-use crate::jwt::Token;
 use cedar_policy::Entity;
 use std::collections::HashSet;
 
@@ -13,45 +12,17 @@ impl EntityBuilder {
         &self,
         tokens: &DecodedTokens,
     ) -> Result<Entity, BuildUserEntityError> {
+        let entity_name = self.entity_names.user.as_ref();
         let mut errors = vec![];
 
-        let try_build_entity = |claim_name: &str,
-                                token: &Token,
-                                claim_aliases: Vec<(&str, &str)>| {
-            let mut entity_name = self.entity_names.user.clone();
-            let entity_id = token
-                .get_claim(claim_name)
-                .ok_or(BuildEntityError::MissingClaim(claim_name.to_string()))?
-                .as_str()?
-                .to_owned();
-
-            // get entity namespace and type
-            let (namespace, entity_type) = self
-                .schema
-                .get_entity_type(&entity_name)
-                .ok_or(BuildEntityError::EntityNotInSchema(entity_name.to_string()))?;
-            if !namespace.is_empty() {
-                entity_name = [namespace.as_str(), &entity_name].join(CEDAR_NAMESPACE_SEPARATOR);
-            }
-
-            let entity_attrs = self.build_entity_attrs(entity_type, token, claim_aliases)?;
-
-            build_entity(&entity_name, &entity_id, entity_attrs, HashSet::new())
-        };
-
-        if let Some(token) = tokens.userinfo_token.as_ref() {
+        for token in [tokens.userinfo_token.as_ref(), tokens.id_token.as_ref()]
+            .into_iter()
+            .flatten()
+        {
             let claim_name = token.user_mapping();
-            match try_build_entity(claim_name, token, vec![]) {
+            match self.build_entity(entity_name, token, claim_name, vec![], HashSet::new()) {
                 Ok(entity) => return Ok(entity),
-                Err(err) => errors.push((TokenKind::Userinfo, err)),
-            }
-        }
-
-        if let Some(token) = tokens.id_token.as_ref() {
-            let claim_name = token.user_mapping();
-            match try_build_entity(claim_name, token, vec![]) {
-                Ok(entity) => return Ok(entity),
-                Err(err) => errors.push((TokenKind::Id, err)),
+                Err(err) => errors.push((token.kind, err)),
             }
         }
 

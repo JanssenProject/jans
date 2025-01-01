@@ -15,7 +15,7 @@ use crate::jwt::{Token, TokenClaimTypeError};
 use crate::AuthorizationConfig;
 use build_attrs::BuildAttrError;
 use build_expr::*;
-use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid, RestrictedExpression};
+use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid};
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::str::FromStr;
@@ -99,6 +99,42 @@ impl EntityBuilder {
             entity_names,
         }
     }
+
+    fn build_entity(
+        &self,
+        entity_name: &str,
+        token: &Token,
+        claim_name: &str,
+        claim_aliases: Vec<(&str, &str)>,
+        parents: HashSet<EntityUid>,
+    ) -> Result<Entity, BuildEntityError> {
+        // Get entity Id from the specified token claim
+        let entity_id = token
+            .get_claim(claim_name)
+            .ok_or(BuildEntityError::MissingClaim(claim_name.to_string()))?
+            .as_str()?
+            .to_owned();
+
+        // Get entity namespace and type
+        let mut entity_name = entity_name.to_string();
+        let (namespace, entity_type) = self
+            .schema
+            .get_entity_type(&entity_name)
+            .ok_or(BuildEntityError::EntityNotInSchema(entity_name.to_string()))?;
+        if !namespace.is_empty() {
+            entity_name = [namespace.as_str(), &entity_name].join(CEDAR_NAMESPACE_SEPARATOR);
+        }
+
+        // Build entity attributes
+        let entity_attrs = self.build_entity_attrs(entity_type, token, claim_aliases)?;
+
+        // Build cedar entity
+        let entity_type_name = EntityTypeName::from_str(&entity_name)
+            .map_err(BuildEntityError::ParseEntityTypeName)?;
+        let entity_id = EntityId::from_str(&entity_id).unwrap(); // this is safe to unwrap since it returns infallible
+        let entity_uid = EntityUid::from_type_name_and_id(entity_type_name, entity_id);
+        Ok(Entity::new(entity_uid, entity_attrs, parents)?)
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -122,15 +158,15 @@ pub enum BuildEntityError {
     #[error(transparent)]
     BuildEntityAttr(#[from] BuildAttrError),
 }
-
-fn build_entity(
-    name: &str,
-    id: &str,
-    attrs: HashMap<String, RestrictedExpression>,
-    parents: HashSet<EntityUid>,
-) -> Result<Entity, BuildEntityError> {
-    let name = EntityTypeName::from_str(name).map_err(BuildEntityError::ParseEntityTypeName)?;
-    let id = EntityId::from_str(id).unwrap(); // this is safe to unwrap since it returns infallible
-    let uid = EntityUid::from_type_name_and_id(name, id);
-    Ok(Entity::new(uid, attrs, parents)?)
-}
+//
+// fn build_entity(
+//     name: &str,
+//     id: &str,
+//     attrs: HashMap<String, RestrictedExpression>,
+//     parents: HashSet<EntityUid>,
+// ) -> Result<Entity, BuildEntityError> {
+//     let name = EntityTypeName::from_str(name).map_err(BuildEntityError::ParseEntityTypeName)?;
+//     let id = EntityId::from_str(id).unwrap(); // this is safe to unwrap since it returns infallible
+//     let uid = EntityUid::from_type_name_and_id(name, id);
+//     Ok(Entity::new(uid, attrs, parents)?)
+// }
