@@ -3,8 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use chrono::Duration;
 use std::sync::Mutex;
-use std::time::Duration;
 
 use sparkv::{Config as ConfigSparKV, SparKV};
 
@@ -25,7 +25,11 @@ pub(crate) struct MemoryLogger {
 impl MemoryLogger {
     pub fn new(config: MemoryLogConfig, log_level: LogLevel) -> Self {
         let sparkv_config = ConfigSparKV {
-            default_ttl: Duration::from_secs(config.log_ttl),
+            default_ttl: Duration::new(
+                config.log_ttl.try_into().expect("u64 that fits in a i64"),
+                0,
+            )
+            .expect("a valid duration"),
             ..Default::default()
         };
 
@@ -128,6 +132,11 @@ mod tests {
             app_types::PdpID::new(),
             Some(app_types::ApplicationName("app2".to_string())),
             LogType::System,
+        );
+
+        assert!(
+            entry1.base.request_id < entry2.base.request_id,
+            "entry1.base.request_id should be lower than in entry2"
         );
 
         // log entries

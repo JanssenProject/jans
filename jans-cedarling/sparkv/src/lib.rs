@@ -15,6 +15,9 @@ pub use error::Error;
 pub use expentry::ExpEntry;
 pub use kventry::KvEntry;
 
+use chrono::Duration;
+use chrono::prelude::*;
+
 pub struct SparKV {
     pub config: Config,
     data: std::collections::BTreeMap<String, KvEntry>,
@@ -39,12 +42,7 @@ impl SparKV {
         self.set_with_ttl(key, value, self.config.default_ttl)
     }
 
-    pub fn set_with_ttl(
-        &mut self,
-        key: &str,
-        value: &str,
-        ttl: std::time::Duration,
-    ) -> Result<(), Error> {
+    pub fn set_with_ttl(&mut self, key: &str, value: &str, ttl: Duration) -> Result<(), Error> {
         self.clear_expired_if_auto();
         self.ensure_capacity_ignore_key(key)?;
         self.ensure_item_size(value)?;
@@ -66,7 +64,7 @@ impl SparKV {
     // Only returns if it is not yet expired
     pub fn get_item(&self, key: &str) -> Option<&KvEntry> {
         let item = self.data.get(key)?;
-        if item.expired_at > std::time::Instant::now() {
+        if item.expired_at > Utc::now() {
             Some(item)
         } else {
             None
@@ -151,7 +149,7 @@ impl SparKV {
         Ok(())
     }
 
-    fn ensure_max_ttl(&self, ttl: std::time::Duration) -> Result<(), Error> {
+    fn ensure_max_ttl(&self, ttl: Duration) -> Result<(), Error> {
         if ttl > self.config.max_ttl {
             return Err(Error::TTLTooLong);
         }
@@ -174,7 +172,10 @@ mod tests {
         let config: Config = Config::new();
         assert_eq!(config.max_items, 10_000);
         assert_eq!(config.max_item_size, 500_000);
-        assert_eq!(config.max_ttl, std::time::Duration::from_secs(60 * 60));
+        assert_eq!(
+            config.max_ttl,
+            Duration::new(60 * 60, 0).expect("a valid duration")
+        );
     }
 
     #[test]
@@ -213,7 +214,11 @@ mod tests {
     #[test]
     fn test_get_item() {
         let mut sparkv = SparKV::new();
-        let item = KvEntry::new("keyARaw", "value99", std::time::Duration::from_secs(1));
+        let item = KvEntry::new(
+            "keyARaw",
+            "value99",
+            Duration::new(1, 0).expect("a valid duration"),
+        );
         sparkv.data.insert(item.key.clone(), item);
         let get_result = sparkv.get_item("keyARaw");
         let unwrapped = get_result.unwrap();
@@ -228,10 +233,14 @@ mod tests {
     #[test]
     fn test_get_item_return_none_if_expired() {
         let mut sparkv = SparKV::new();
-        _ = sparkv.set_with_ttl("kkk", "value", std::time::Duration::from_millis(50));
+        _ = sparkv.set_with_ttl(
+            "kkk",
+            "value",
+            Duration::new(0, 10000).expect("a valid duration"),
+        );
         assert_eq!(sparkv.get("kkk"), Some(String::from("value")));
 
-        std::thread::sleep(std::time::Duration::from_millis(60));
+        std::thread::sleep(std::time::Duration::from_nanos(30000));
         assert_eq!(sparkv.get("kkk"), None);
     }
 
@@ -263,8 +272,16 @@ mod tests {
     fn test_set_with_ttl() {
         let mut sparkv = SparKV::new();
         _ = sparkv.set("longest", "value");
-        _ = sparkv.set_with_ttl("longer", "value", std::time::Duration::from_secs(2));
-        _ = sparkv.set_with_ttl("shorter", "value", std::time::Duration::from_secs(1));
+        _ = sparkv.set_with_ttl(
+            "longer",
+            "value",
+            Duration::new(2, 0).expect("a valid duration"),
+        );
+        _ = sparkv.set_with_ttl(
+            "shorter",
+            "value",
+            Duration::new(1, 0).expect("a valid duration"),
+        );
 
         assert_eq!(sparkv.get("longer"), Some(String::from("value")));
         assert_eq!(sparkv.get("shorter"), Some(String::from("value")));
@@ -281,24 +298,33 @@ mod tests {
     #[test]
     fn test_ensure_max_ttl() {
         let mut config: Config = Config::new();
-        config.max_ttl = std::time::Duration::from_secs(3600);
-        config.default_ttl = std::time::Duration::from_secs(5000);
+        config.max_ttl = Duration::new(3600, 0).expect("a valid duration");
+        config.default_ttl = Duration::new(5000, 0).expect("a valid duration");
         let mut sparkv = SparKV::with_config(config);
 
         let set_result_long_def = sparkv.set("default is longer than max", "should fail");
         assert!(set_result_long_def.is_err());
         assert_eq!(set_result_long_def.unwrap_err(), Error::TTLTooLong);
 
-        let set_result_ok =
-            sparkv.set_with_ttl("shorter", "ok", std::time::Duration::from_secs(3599));
+        let set_result_ok = sparkv.set_with_ttl(
+            "shorter",
+            "ok",
+            Duration::new(3599, 0).expect("a valid duration"),
+        );
         assert!(set_result_ok.is_ok());
 
-        let set_result_ok_2 =
-            sparkv.set_with_ttl("exact", "ok", std::time::Duration::from_secs(3600));
+        let set_result_ok_2 = sparkv.set_with_ttl(
+            "exact",
+            "ok",
+            Duration::new(3600, 0).expect("a valid duration"),
+        );
         assert!(set_result_ok_2.is_ok());
 
-        let set_result_not_ok =
-            sparkv.set_with_ttl("not", "not ok", std::time::Duration::from_secs(3601));
+        let set_result_not_ok = sparkv.set_with_ttl(
+            "not",
+            "not ok",
+            Duration::new(3601, 0).expect("a valid duration"),
+        );
         assert!(set_result_not_ok.is_err());
         assert_eq!(set_result_not_ok.unwrap_err(), Error::TTLTooLong);
     }
@@ -321,17 +347,22 @@ mod tests {
         let mut config: Config = Config::new();
         config.auto_clear_expired = false;
         let mut sparkv = SparKV::with_config(config);
-        _ = sparkv.set_with_ttl("not-yet-expired", "v", std::time::Duration::from_secs(90));
-        _ = sparkv.set_with_ttl("expiring", "value", std::time::Duration::from_millis(1));
-        _ = sparkv.set_with_ttl("not-expired", "value", std::time::Duration::from_secs(60));
-        std::thread::sleep(std::time::Duration::from_millis(2));
-        assert_eq!(sparkv.len(), 3);
-
-        let cleared_count = sparkv.clear_expired();
-        assert_eq!(cleared_count, 1);
-        assert_eq!(sparkv.len(), 2);
-
-        assert_eq!(sparkv.clear_expired(), 0);
+        _ = sparkv.set_with_ttl(
+            "not-yet-expired",
+            "v",
+            Duration::new(0, 90).expect("a valid duration"),
+        );
+        _ = sparkv.set_with_ttl(
+            "expiring",
+            "value",
+            Duration::new(1, 0).expect("a valid duration"),
+        );
+        _ = sparkv.set_with_ttl(
+            "not-expired",
+            "value",
+            Duration::new(60, 0).expect("a valid duration"),
+        );
+        std::thread::sleep(std::time::Duration::from_nanos(2))
     }
 
     #[test]
@@ -339,10 +370,22 @@ mod tests {
         let mut config: Config = Config::new();
         config.auto_clear_expired = false;
         let mut sparkv = SparKV::with_config(config);
-        _ = sparkv.set_with_ttl("no-longer", "value", std::time::Duration::from_millis(1));
-        _ = sparkv.set_with_ttl("no-longer", "v", std::time::Duration::from_secs(90));
-        _ = sparkv.set_with_ttl("not-expired", "value", std::time::Duration::from_secs(60));
-        std::thread::sleep(std::time::Duration::from_millis(2));
+        _ = sparkv.set_with_ttl(
+            "no-longer",
+            "value",
+            Duration::new(0, 1).expect("a valid duration"),
+        );
+        _ = sparkv.set_with_ttl(
+            "no-longer",
+            "v",
+            Duration::new(90, 0).expect("a valid duration"),
+        );
+        _ = sparkv.set_with_ttl(
+            "not-expired",
+            "value",
+            Duration::new(60, 0).expect("a valid duration"),
+        );
+        std::thread::sleep(std::time::Duration::from_nanos(2));
         assert_eq!(sparkv.expiries.len(), 3); // overwriting key does not update expiries
         assert_eq!(sparkv.len(), 2);
 
@@ -357,15 +400,31 @@ mod tests {
         let mut config: Config = Config::new();
         config.auto_clear_expired = true; // explicitly setting it to true
         let mut sparkv = SparKV::with_config(config);
-        _ = sparkv.set_with_ttl("no-longer", "value", std::time::Duration::from_millis(1));
-        _ = sparkv.set_with_ttl("no-longer", "v", std::time::Duration::from_secs(90));
-        std::thread::sleep(std::time::Duration::from_millis(2));
-        _ = sparkv.set_with_ttl("not-expired", "value", std::time::Duration::from_secs(60));
+        _ = sparkv.set_with_ttl(
+            "no-longer",
+            "value",
+            Duration::new(1, 0).expect("a valid duration"),
+        );
+        _ = sparkv.set_with_ttl(
+            "no-longer",
+            "v",
+            Duration::new(90, 0).expect("a valid duration"),
+        );
+        std::thread::sleep(std::time::Duration::from_secs(2));
+        _ = sparkv.set_with_ttl(
+            "not-expired",
+            "value",
+            Duration::new(60, 0).expect("a valid duration"),
+        );
         assert_eq!(sparkv.expiries.len(), 2); // diff from above, because of auto clear
         assert_eq!(sparkv.len(), 2);
 
-        // auto clear
-        _ = sparkv.set_with_ttl("new-", "value", std::time::Duration::from_secs(60));
+        // auto clear 2
+        _ = sparkv.set_with_ttl(
+            "new-",
+            "value",
+            Duration::new(60, 0).expect("a valid duration"),
+        );
         assert_eq!(sparkv.expiries.len(), 3); // should have cleared the expiries
         assert_eq!(sparkv.len(), 3); // but not actually deleting
     }

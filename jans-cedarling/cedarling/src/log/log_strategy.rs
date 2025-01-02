@@ -3,11 +3,11 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use super::LogEntry;
 use super::interface::{LogStorage, LogWriter, Loggable};
 use super::memory_logger::MemoryLogger;
 use super::nop_logger::NopLogger;
 use super::stdout_logger::StdOutLogger;
-use super::LogEntry;
 use crate::bootstrap_config::log_config::{LogConfig, LogTypeConfig};
 
 /// LogStrategy implements strategy pattern for logging.

@@ -15,7 +15,8 @@ use jsonwebtoken::Algorithm;
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../test_files/policy-store_with_trusted_issuers_ok.yaml");
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Configure JWT validation settings. Enable the JwtService to validate JWT tokens
     // using specific algorithms: `HS256` and `RS256`. Only tokens signed with these algorithms
     // will be accepted; others will be marked as invalid during validation.
@@ -54,27 +55,30 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             user_workload_operator: WorkloadBoolOp::And,
             ..Default::default()
         },
-    })?;
+    })
+    .await?;
 
     // Perform an authorization request to Cedarling.
     // This request checks if the provided tokens have sufficient permission to perform an action
     // on a specific resource. Each token (access, ID, and userinfo) is required for the
     // authorization process, alongside resource and action details.
-    let result = cedarling.authorize(Request {
-        access_token: Some(access_token),
-        id_token: Some(id_token),
-        userinfo_token: Some(userinfo_token),
-        action: "Jans::Action::\"Update\"".to_string(),
-        context: serde_json::json!({}),
-        resource: ResourceData {
-            id: "random_id".to_string(),
-            resource_type: "Jans::Issue".to_string(),
-            payload: HashMap::from_iter([(
-                "org_id".to_string(),
-                serde_json::Value::String("some_long_id".to_string()),
-            )]),
-        },
-    });
+    let result = cedarling
+        .authorize(Request {
+            access_token: Some(access_token),
+            id_token: Some(id_token),
+            userinfo_token: Some(userinfo_token),
+            action: "Jans::Action::\"Update\"".to_string(),
+            context: serde_json::json!({}),
+            resource: ResourceData {
+                id: "random_id".to_string(),
+                resource_type: "Jans::Issue".to_string(),
+                payload: HashMap::from_iter([(
+                    "org_id".to_string(),
+                    serde_json::Value::String("some_long_id".to_string()),
+                )]),
+            },
+        })
+        .await;
 
     // Handle authorization result. If there's an error, print it.
     if let Err(ref e) = &result {

@@ -12,6 +12,7 @@ use std::io::Write;
 use interface::{LogWriter, Loggable};
 use nop_logger::NopLogger;
 use stdout_logger::StdOutLogger;
+use test_utils::assert_eq;
 
 use super::*;
 use crate::bootstrap_config::log_config;

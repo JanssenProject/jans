@@ -10,10 +10,10 @@ use std::collections::{HashMap, HashSet};
 use std::fmt::Display;
 use std::hash::Hash;
 
-use uuid7::{uuid7, Uuid};
+use uuid7::Uuid;
 
-use super::interface::Loggable;
 use super::LogLevel;
+use super::interface::Loggable;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types::{self, ApplicationName};
 use crate::common::policy_store::PoliciesContainer;
@@ -29,6 +29,7 @@ pub struct LogEntry {
     /// it is unwrap to flatten structure
     #[serde(flatten)]
     pub base: BaseLogEntry,
+
     /// message of the event
     pub msg: String,
     /// name of application from [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
@@ -195,6 +196,12 @@ impl From<cedar_policy::Decision> for Decision {
     }
 }
 
+impl From<bool> for Decision {
+    fn from(value: bool) -> Self {
+        if value { Self::Allow } else { Self::Deny }
+    }
+}
+
 /// An error occurred when evaluating a policy
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct PolicyEvaluationError {
@@ -298,7 +305,7 @@ pub struct DecisionLogEntry<'a> {
     /// Dictionary with the token type and claims which should be included in the log
     pub tokens: LogTokensInfo<'a>,
     /// time in milliseconds spent for decision
-    pub decision_time_ms: u128,
+    pub decision_time_ms: i64,
 }
 
 impl Loggable for &DecisionLogEntry<'_> {
@@ -309,6 +316,18 @@ impl Loggable for &DecisionLogEntry<'_> {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }
+}
+
+/// custom uuid generation function to avoid using std::time because it makes panic in WASM
+//
+// TODO: maybe using wasm we can use `js_sys::Date::now()`
+// TODO: use global generator
+fn gen_uuid7() -> Uuid {
+    use uuid7::V7Generator;
+
+    let mut g = V7Generator::with_rand08(rand::rngs::OsRng);
+    let custom_unix_ts_ms = chrono::Utc::now().timestamp_millis();
+    g.generate_or_reset_core(custom_unix_ts_ms as u64, 10_000)
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -342,7 +361,7 @@ impl BaseLogEntry {
             // We use uuid v7 because it is generated based on the time and sortable.
             // and we need sortable ids to use it in the sparkv database.
             // Sparkv store data in BTree. So we need have correct order of ids.
-            request_id: uuid7(),
+            request_id: gen_uuid7(),
             timestamp: Some(local_time_string),
             log_kind: log_type,
             pdp_id: pdp_id.0,

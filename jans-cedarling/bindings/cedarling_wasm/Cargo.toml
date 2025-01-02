@@ -1,0 +1,25 @@
+[package]
+name = "cedarling_wasm"
+version = "0.0.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"] # Required for WASM output
+
+[dependencies]
+# Common dependency for WASM interop
+wasm-bindgen = { version = "0.2", features = [
+    "serde-serialize",
+    "enable-interning",
+] }
+cedarling = { workspace = true }
+serde_json = { workspace = true }
+serde-wasm-bindgen = "0.6"
+wasm-bindgen-futures = "0.4"
+wasm-bindgen-test = "0.3.49"
+
+[profile.release]
+lto = true
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ['-O4', '--enable-reference-types', '--enable-gc']
