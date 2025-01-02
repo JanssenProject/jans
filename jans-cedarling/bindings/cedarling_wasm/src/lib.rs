@@ -3,8 +3,6 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-// #![cfg(target_arch = "wasm32")]
-
 use cedarling::bindings::cedar_policy;
 use cedarling::{BootstrapConfig, BootstrapConfigRaw, LogStorage, Request};
 use serde_wasm_bindgen::Error;
