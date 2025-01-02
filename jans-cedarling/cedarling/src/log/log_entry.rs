@@ -318,14 +318,21 @@ impl Loggable for &DecisionLogEntry<'_> {
     }
 }
 
-/// custom uuid generation function to avoid using std::time because it makes panic in WASM
+/// Custom uuid generation function to avoid using std::time because it makes panic in WASM
 //
 // TODO: maybe using wasm we can use `js_sys::Date::now()`
-// TODO: use global generator
+// Static variable initialize only once at start of program and available during all program live cycle.
+// Import inside function guarantee that it is used only inside function.
 fn gen_uuid7() -> Uuid {
+    use std::sync::{LazyLock, Mutex};
     use uuid7::V7Generator;
 
-    let mut g = V7Generator::with_rand08(rand::rngs::OsRng);
+    static GLOBAL_V7_GENERATOR: LazyLock<
+        Mutex<V7Generator<uuid7::generator::with_rand08::Adapter<rand::rngs::OsRng>>>,
+    > = LazyLock::new(|| Mutex::new(V7Generator::with_rand08(rand::rngs::OsRng)));
+
+    let mut g = GLOBAL_V7_GENERATOR.lock().expect("mutex should be locked");
+
     let custom_unix_ts_ms = chrono::Utc::now().timestamp_millis();
     g.generate_or_reset_core(custom_unix_ts_ms as u64, 10_000)
 }
