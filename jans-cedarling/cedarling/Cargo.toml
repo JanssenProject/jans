@@ -2,6 +2,8 @@
 name = "cedarling"
 version = "0.0.0-nightly"
 edition = "2021"
+description = "WASM binding to Cedarling"
+license = "Apache-2.0"
 
 [features]
 # blocking with default is used only for local testing, next line should be commented
