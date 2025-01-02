@@ -334,7 +334,12 @@ fn gen_uuid7() -> Uuid {
     let mut g = GLOBAL_V7_GENERATOR.lock().expect("mutex should be locked");
 
     let custom_unix_ts_ms = chrono::Utc::now().timestamp_millis();
-    g.generate_or_reset_core(custom_unix_ts_ms as u64, 10_000)
+
+    // from docs
+    // The rollback_allowance parameter specifies the amount of unix_ts_ms rollback that is considered significant.
+    // A suggested value is 10_000 (milliseconds).
+    const ROLLBACK_ALLOWANCE: u64 = 10_000;
+    g.generate_or_reset_core(custom_unix_ts_ms as u64, ROLLBACK_ALLOWANCE)
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
