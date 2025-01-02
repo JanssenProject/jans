@@ -94,14 +94,14 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    CreateRequestWorkloadEntityError,
+    WorkloadRequestValidationError,
     AuthorizeError,
     "Error encountered while creating cedar_policy::Request for workload entity principal"
 );
 
 create_exception!(
     authorize_errors,
-    CreateRequestUserEntityError,
+    UserRequestValidationError,
     AuthorizeError,
     "Error encountered while creating cedar_policy::Request for user entity principal"
 );
@@ -175,8 +175,8 @@ errors_functions! {
     RoleEntity => RoleEntityError,
     Action => ActionError,
     CreateContext => CreateContextError,
-    CreateRequestWorkloadEntity => CreateRequestWorkloadEntityError,
-    CreateRequestUserEntity => CreateRequestUserEntityError,
+    WorkloadRequestValidation => WorkloadRequestValidationError,
+    UserRequestValidation => UserRequestValidationError,
     BuildContext => AddEntitiesIntoContextError,
     Entities => EntitiesError,
     EntitiesToJson => EntitiesToJsonError

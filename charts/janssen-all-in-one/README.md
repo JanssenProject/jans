@@ -307,7 +307,9 @@ Kubernetes: `>=v1.22.0-0`
 | link.appLoggers.scriptLogLevel | string | `"INFO"` | cacherefresh_script.log level |
 | link.appLoggers.scriptLogTarget | string | `"FILE"` | cacherefresh_script.log target |
 | link.enabled | bool | `false` | Boolean flag to enable/disable the link chart. |
-| link.ingress | object | `{"linkEnabled":true}` | Enable endpoints in either istio or nginx ingress depending on users choice |
+| link.ingress | object | `{"linkAdditionalAnnotations":{},"linkEnabled":true,"linkLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
+| link.ingress.linkAdditionalAnnotations | object | `{}` | link ingress resource additional annotations. |
+| link.ingress.linkLabels | object | `{}` | link ingress resource labels. key app is taken |
 | link.linkServiceName | string | `"link"` | Name of the link service. Please keep it as default. |
 | livenessProbe | object | `{"exec":{"command":["python3","/app/jans_aio/jans_auth/healthcheck.py"]},"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5}` | Configure the liveness healthcheck for the auth server if needed. |
 | livenessProbe.exec | object | `{"command":["python3","/app/jans_aio/jans_auth/healthcheck.py"]}` | Executes the python3 healthcheck. https://github.com/JanssenProject/docker-jans-auth-server/blob/master/scripts/healthcheck.py |
@@ -352,7 +354,7 @@ Kubernetes: `>=v1.22.0-0`
 | scim.ingress.scimConfigEnabled | bool | `false` | Enable endpoint /.well-known/scim-configuration |
 | scim.ingress.scimConfigLabels | object | `{}` | SCIM config ingress resource labels. key app is taken |
 | scim.ingress.scimEnabled | bool | `false` | Enable SCIM endpoints /jans-scim |
-| scim.ingress.scimLabels | object | `{}` | SCIM config ingress resource labels. key app is taken |
+| scim.ingress.scimLabels | object | `{}` | SCIM ingress resource labels. key app is taken |
 | scim.scimServiceName | string | `"scim"` | Name of the scim service. Please keep it as default. |
 | service.name | string | `"http-aio"` | The name of the aio port within the aio service. Please keep it as default. |
 | service.port | int | `8080` | Port of the fido2 service. Please keep it as default. |

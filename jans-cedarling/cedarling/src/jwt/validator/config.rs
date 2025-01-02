@@ -1,17 +1,15 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
+
+use jsonwebtoken::Algorithm;
 
 use super::IssuerId;
 use crate::common::policy_store::TrustedIssuer;
-use jsonwebtoken::Algorithm;
-use std::{
-    collections::{HashMap, HashSet},
-    sync::Arc,
-};
 
 /// Validation options related to JSON Web Tokens (JWT).
 ///
