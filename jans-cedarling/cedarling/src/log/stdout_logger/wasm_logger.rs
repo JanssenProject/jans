@@ -9,10 +9,9 @@ use std::sync::{Arc, Mutex};
 use crate::log::LogLevel;
 use crate::log::interface::{LogWriter, Loggable};
 
-use serde_wasm_bindgen::to_value;
-use web_sys::js_sys::{Array, Object};
+use web_sys::console;
+use web_sys::js_sys::Array;
 use web_sys::wasm_bindgen::JsValue;
-use web_sys::{ConsoleLevel, console};
 
 /// A logger that write to std output.
 pub(crate) struct StdOutLogger {
@@ -36,7 +35,7 @@ impl LogWriter for StdOutLogger {
         let json_string = serde_json::json!(entry).to_string();
         let js_string = JsValue::from(json_string);
 
-        let mut js_array = Array::new();
+        let js_array = Array::new();
         js_array.push(&js_string);
 
         match entry.get_log_level() {

@@ -11,6 +11,7 @@ use serde_wasm_bindgen::Error;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::js_sys::{Map, Object};
+use wasm_bindgen_test::console_log;
 
 #[cfg(test)]
 mod tests;
@@ -64,9 +65,22 @@ impl Cedarling {
     /// Authorize request
     /// makes authorization decision based on the [`Request`]
     pub async fn authorize(&self, request: JsValue) -> Result<AuthorizeResult, Error> {
-        let request: Request = serde_wasm_bindgen::from_value(request)?;
+        // if `request` is map convert to object
+        let request_object: JsValue = if request.is_instance_of::<Map>() {
+            Object::from_entries(&request)?.into()
+        } else {
+            request
+        };
 
-        let result = self.instance.authorize(request).await.map_err(Error::new)?;
+        console_log!("request_object: {:?}", request_object);
+        let cedar_request: Request = serde_wasm_bindgen::from_value(request_object)?;
+        console_log!("cedar_request: {:?}", cedar_request);
+
+        let result = self
+            .instance
+            .authorize(cedar_request)
+            .await
+            .map_err(Error::new)?;
         Ok(result.into())
     }
 }

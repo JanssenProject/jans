@@ -7,6 +7,8 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 thiserror = "1.0"
 sparkv = { path = "sparkv" }
+jsonwebtoken = "9.3.0"
+jsonwebkey = "0.3.5"
 chrono = "0.4"
 cedarling = { path = "cedarling" }
 test_utils = { path = "test_utils" }

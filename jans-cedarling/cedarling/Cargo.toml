@@ -21,7 +21,7 @@ cedar-policy = "4.2"
 base64 = "0.22.1"
 url = "2.5.2"
 lazy_static = "1.5.0"
-jsonwebtoken = "9.3.0"
+jsonwebtoken = { workspace = true }
 reqwest = { version = "0.12.8", features = ["json"] }
 bytes = "1.7.2"
 typed-builder = "0.20.0"
@@ -39,7 +39,7 @@ tokio = { version = "1.42.0", features = ["macros", "time"] }
 rand = "0.8.5"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-web-sys = { workspace = true, features = ["ConsoleLevel", "console"] }
+web-sys = { workspace = true, features = ["console"] }
 serde-wasm-bindgen = { workspace = true }
 
 
@@ -47,5 +47,5 @@ serde-wasm-bindgen = { workspace = true }
 # is used in testing
 test_utils = { workspace = true }
 rand = "0.8.5"
-jsonwebkey = { version = "0.3.5", features = ["generate", "jwt-convert"] }
+jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
 mockito = "1.5.0"
