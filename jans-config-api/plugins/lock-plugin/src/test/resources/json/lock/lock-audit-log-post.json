@@ -1,0 +1,9 @@
+{
+  "eventTime": "2012-04-21T18:25:43-05:00",
+  "eventType": "registration",
+  "severetyLevel": "warning",
+  "policyId": "PID001",
+  "policyResult": "deny",
+  "userAccountId": "ACC0001",
+  "clientId": "CLI001"
+}
