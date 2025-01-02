@@ -5,11 +5,12 @@
 
 use cedarling::bindings::cedar_policy;
 use cedarling::{BootstrapConfig, BootstrapConfigRaw, LogStorage, Request};
+use serde::ser::{Serialize, SerializeStruct, Serializer};
+use serde_json::json;
 use serde_wasm_bindgen::Error;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::js_sys::{Array, Map, Object};
-use wasm_bindgen_test::console_log;
 
 #[cfg(test)]
 mod tests;
@@ -70,9 +71,7 @@ impl Cedarling {
             request
         };
 
-        console_log!("request_object: {:?}", request_object);
         let cedar_request: Request = serde_wasm_bindgen::from_value(request_object)?;
-        console_log!("cedar_request: {:?}", cedar_request);
 
         let result = self
             .instance
@@ -120,6 +119,7 @@ impl Cedarling {
 /// A WASM wrapper for the Rust `cedarling::AuthorizeResult` struct.
 /// Represents the result of an authorization request.
 #[wasm_bindgen]
+#[derive(serde::Serialize)]
 pub struct AuthorizeResult {
     /// Result of authorization where principal is `Jans::Workload`
     #[wasm_bindgen(getter_with_clone)]
@@ -134,6 +134,14 @@ pub struct AuthorizeResult {
     ///
     /// this field is [`bool`] type to be compatible with [authzen Access Evaluation Decision](https://openid.github.io/authzen/#section-6.2.1).
     pub decision: bool,
+}
+
+#[wasm_bindgen]
+impl AuthorizeResult {
+    /// Convert `AuthorizeResult` to json string value
+    pub fn json_string(&self) -> String {
+        json!(self).to_string()
+    }
 }
 
 impl From<cedarling::AuthorizeResult> for AuthorizeResult {
@@ -176,6 +184,18 @@ impl AuthorizeResultResponse {
     }
 }
 
+impl Serialize for AuthorizeResultResponse {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Diagnostics", 2)?;
+        state.serialize_field("decision", &self.decision())?;
+        state.serialize_field("diagnostics", &self.diagnostics())?;
+        state.end()
+    }
+}
+
 /// Diagnostics
 /// ===========
 ///
@@ -212,6 +232,18 @@ impl Diagnostics {
     }
 }
 
+impl Serialize for Diagnostics {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Diagnostics", 2)?;
+        state.serialize_field("reason", &self.reason())?;
+        state.serialize_field("errors", &self.errors())?;
+        state.end()
+    }
+}
+
 /// PolicyEvaluationError
 /// =====================
 ///
@@ -233,5 +265,17 @@ impl PolicyEvaluationError {
     #[wasm_bindgen(getter)]
     pub fn error(&self) -> String {
         self.inner.error.clone()
+    }
+}
+
+impl Serialize for PolicyEvaluationError {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("PolicyEvaluationError", 2)?;
+        state.serialize_field("id", &self.id())?;
+        state.serialize_field("error", &self.error())?;
+        state.end()
     }
 }
