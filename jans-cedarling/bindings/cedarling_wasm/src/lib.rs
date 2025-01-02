@@ -6,11 +6,11 @@
 // #![cfg(target_arch = "wasm32")]
 
 use cedarling::bindings::cedar_policy;
-use cedarling::{BootstrapConfig, BootstrapConfigRaw, Request};
+use cedarling::{BootstrapConfig, BootstrapConfigRaw, LogStorage, Request};
 use serde_wasm_bindgen::Error;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::js_sys::{Map, Object};
+use wasm_bindgen_futures::js_sys::{Array, Map, Object};
 use wasm_bindgen_test::console_log;
 
 #[cfg(test)]
@@ -82,6 +82,37 @@ impl Cedarling {
             .await
             .map_err(Error::new)?;
         Ok(result.into())
+    }
+
+    /// return logs and remove them from the storage
+    pub fn pop_logs(&self) -> Result<Array, Error> {
+        let result = Array::new();
+        for log in self.instance.pop_logs() {
+            let js_log = serde_wasm_bindgen::to_value(&log)?;
+            result.push(&js_log);
+        }
+        Ok(result)
+    }
+
+    /// get specific log entry
+    pub fn get_log_by_id(&self, id: &str) -> Result<JsValue, Error> {
+        let result = if let Some(log_json_value) = self.instance.get_log_by_id(id) {
+            let js_log = serde_wasm_bindgen::to_value(&log_json_value)?;
+            js_log
+        } else {
+            JsValue::NULL
+        };
+        Ok(result)
+    }
+
+    /// returns a list of all log ids
+    pub fn get_log_ids(&self) -> Array {
+        let result = Array::new();
+        for log_id in self.instance.get_log_ids() {
+            let js_id = log_id.into();
+            result.push(&js_id);
+        }
+        result
     }
 }
 
