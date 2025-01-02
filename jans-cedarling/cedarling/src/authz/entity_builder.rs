@@ -5,6 +5,7 @@
 
 mod build_attrs;
 mod build_expr;
+mod build_resource_entity;
 mod build_token_entities;
 mod build_user_entity;
 mod build_workload_entity;
@@ -101,18 +102,19 @@ impl EntityBuilder {
         }
     }
 
+    /// Builds a Cedar Entity using a JWT
     fn build_entity(
         &self,
         entity_name: &str,
         token: &Token,
-        claim_name: &str,
+        id_src_claim: &str,
         claim_aliases: Vec<(&str, &str)>,
         parents: HashSet<EntityUid>,
     ) -> Result<Entity, BuildEntityError> {
         // Get entity Id from the specified token claim
         let entity_id = token
-            .get_claim(claim_name)
-            .ok_or(BuildEntityError::MissingClaim(claim_name.to_string()))?
+            .get_claim(id_src_claim)
+            .ok_or(BuildEntityError::MissingClaim(id_src_claim.to_string()))?
             .as_str()?
             .to_owned();
 
@@ -150,6 +152,8 @@ pub enum BuildEntityError {
     TokenUnavailable,
     #[error("the given token is missing a `{0}` claim")]
     MissingClaim(String),
+    #[error("the given data is missing a `{0}` entry")]
+    MissingData(String),
     #[error(transparent)]
     TokenClaimTypeMismatch(#[from] TokenClaimTypeError),
     #[error("the entity `{0}` is not defined in the schema")]

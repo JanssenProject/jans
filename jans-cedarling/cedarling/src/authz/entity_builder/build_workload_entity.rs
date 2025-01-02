@@ -19,7 +19,7 @@ impl EntityBuilder {
         let entity_name = self.entity_names.workload.as_ref();
         let mut errors = vec![];
 
-        for (claim_name, token_option, claim_aliases) in [
+        for (workload_id_claim, token_option, claim_aliases) in [
             (
                 DEFAULT_ACCESS_TKN_WORKLOAD_CLAIM,
                 tokens.access.as_ref(),
@@ -37,7 +37,7 @@ impl EntityBuilder {
                 match self.build_entity(
                     entity_name,
                     token,
-                    claim_name,
+                    workload_id_claim,
                     claim_aliases,
                     HashSet::new(),
                 ) {

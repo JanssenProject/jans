@@ -19,8 +19,8 @@ impl EntityBuilder {
             .into_iter()
             .flatten()
         {
-            let claim_name = token.user_mapping();
-            match self.build_entity(entity_name, token, claim_name, vec![], HashSet::new()) {
+            let user_id_claim = token.user_mapping();
+            match self.build_entity(entity_name, token, user_id_claim, vec![], HashSet::new()) {
                 Ok(entity) => return Ok(entity),
                 Err(err) => errors.push((token.kind, err)),
             }

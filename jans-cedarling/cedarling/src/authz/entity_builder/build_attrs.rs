@@ -3,13 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::{BuildExprError, EntityBuilder};
+use super::*;
 use crate::{common::cedar_schema::new_cedar_json::entity_type::EntityType, jwt::Token};
 use cedar_policy::RestrictedExpression;
 use serde_json::Value;
 use std::collections::HashMap;
 
 impl EntityBuilder {
+    /// Builds Cedar entity attributes using a JWT
     pub fn build_entity_attrs(
         &self,
         entity_type: &EntityType,
@@ -63,4 +64,37 @@ pub enum BuildAttrError {
     MissingClaim(String),
     #[error(transparent)]
     BuildExpression(#[from] BuildExprError),
+}
+
+#[derive(Debug, thiserror::Error)]
+#[error("type mismatch for key '{key}'. expected: '{expected_type}', but found: '{actual_type}'")]
+struct KeyedJsonTypeError {
+    pub key: String,
+    pub expected_type: String,
+    pub actual_type: String,
+}
+
+impl KeyedJsonTypeError {
+    /// Returns the JSON type name of the given value.
+    pub fn value_type_name(value: &Value) -> String {
+        match value {
+            Value::Null => "null".to_string(),
+            Value::Bool(_) => "bool".to_string(),
+            Value::Number(_) => "number".to_string(),
+            Value::String(_) => "string".to_string(),
+            Value::Array(_) => "array".to_string(),
+            Value::Object(_) => "object".to_string(),
+        }
+    }
+
+    /// Constructs a `TypeMismatch` error with detailed information about the expected and actual types.
+    pub fn type_mismatch(key: &str, expected_type_name: &str, got_value: &Value) -> Self {
+        let got_value_type_name = Self::value_type_name(got_value);
+
+        Self {
+            key: key.to_string(),
+            expected_type: expected_type_name.to_string(),
+            actual_type: got_value_type_name,
+        }
+    }
 }
