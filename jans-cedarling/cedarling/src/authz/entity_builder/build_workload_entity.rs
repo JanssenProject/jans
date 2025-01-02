@@ -22,12 +22,12 @@ impl EntityBuilder {
         for (claim_name, token_option, claim_aliases) in [
             (
                 DEFAULT_ACCESS_TKN_WORKLOAD_CLAIM,
-                tokens.access_token.as_ref(),
+                tokens.access.as_ref(),
                 vec![],
             ),
             (
                 DEFAULT_ID_TKN_WORKLOAD_CLAIM,
-                tokens.id_token.as_ref(),
+                tokens.id.as_ref(),
                 vec![("aud", "client_id")],
             ),
         ]
@@ -88,7 +88,6 @@ mod test {
     use cedar_policy::EvalResult;
     use serde_json::json;
     use std::collections::HashMap;
-    use test_utils::assert_eq;
 
     #[test]
     fn can_build_using_access_tkn() {
@@ -115,9 +114,9 @@ mod test {
             Some(&iss),
         );
         let tokens = DecodedTokens {
-            access_token: Some(access_token),
-            id_token: None,
-            userinfo_token: None,
+            access: Some(access_token),
+            id: None,
+            userinfo: None,
         };
         let entity = builder
             .build_workload_entity(&tokens)
@@ -164,9 +163,9 @@ mod test {
             Some(&iss),
         );
         let tokens = DecodedTokens {
-            access_token: None,
-            id_token: Some(id_token),
-            userinfo_token: None,
+            access: None,
+            id: Some(id_token),
+            userinfo: None,
         };
         let entity = builder
             .build_workload_entity(&tokens)
@@ -258,9 +257,9 @@ mod test {
             Some(&iss),
         );
         let tokens = DecodedTokens {
-            access_token: Some(access_token),
-            id_token: None,
-            userinfo_token: None,
+            access: Some(access_token),
+            id: None,
+            userinfo: None,
         };
         let entity = builder
             .build_workload_entity(&tokens)
@@ -343,9 +342,9 @@ mod test {
         let access_token = Token::new_access(TokenClaims::new(HashMap::new()), Some(&iss));
         let id_token = Token::new_id(TokenClaims::new(HashMap::new()), Some(&iss));
         let tokens = DecodedTokens {
-            access_token: Some(access_token),
-            id_token: Some(id_token),
-            userinfo_token: None,
+            access: Some(access_token),
+            id: Some(id_token),
+            userinfo: None,
         };
         let err = builder
             .build_workload_entity(&tokens)
@@ -388,9 +387,9 @@ mod test {
         .unwrap();
         let builder = EntityBuilder::new(HashMap::new(), schema, EntityNames::default());
         let tokens = DecodedTokens {
-            access_token: None,
-            id_token: None,
-            userinfo_token: None,
+            access: None,
+            id: None,
+            userinfo: None,
         };
         let err = builder.build_workload_entity(&tokens).unwrap_err();
 

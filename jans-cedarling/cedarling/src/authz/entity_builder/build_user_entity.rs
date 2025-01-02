@@ -15,7 +15,7 @@ impl EntityBuilder {
         let entity_name = self.entity_names.user.as_ref();
         let mut errors = vec![];
 
-        for token in [tokens.userinfo_token.as_ref(), tokens.id_token.as_ref()]
+        for token in [tokens.userinfo.as_ref(), tokens.id.as_ref()]
             .into_iter()
             .flatten()
         {
@@ -185,9 +185,9 @@ mod test {
             Some(&iss),
         );
         let tokens = DecodedTokens {
-            access_token: None,
-            id_token: None,
-            userinfo_token: Some(userinfo_token),
+            access: None,
+            id: None,
+            userinfo: Some(userinfo_token),
         };
         test_successfully_building_user_entity(tokens, iss.clone());
     }
@@ -204,9 +204,9 @@ mod test {
             Some(&iss),
         );
         let tokens = DecodedTokens {
-            access_token: None,
-            id_token: Some(id_token),
-            userinfo_token: None,
+            access: None,
+            id: Some(id_token),
+            userinfo: None,
         };
         test_successfully_building_user_entity(tokens, iss.clone());
     }
@@ -219,9 +219,9 @@ mod test {
         let id_token = Token::new_id(TokenClaims::new(HashMap::new()), Some(&iss));
         let userinfo_token = Token::new_userinfo(TokenClaims::new(HashMap::new()), Some(&iss));
         let tokens = DecodedTokens {
-            access_token: None,
-            id_token: Some(id_token),
-            userinfo_token: Some(userinfo_token),
+            access: None,
+            id: Some(id_token),
+            userinfo: Some(userinfo_token),
         };
 
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
@@ -250,9 +250,9 @@ mod test {
         let schema = test_schema();
 
         let tokens = DecodedTokens {
-            access_token: None,
-            id_token: None,
-            userinfo_token: None,
+            access: None,
+            id: None,
+            userinfo: None,
         };
 
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);

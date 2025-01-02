@@ -5,6 +5,7 @@
 
 mod build_attrs;
 mod build_expr;
+mod build_token_entities;
 mod build_user_entity;
 mod build_workload_entity;
 mod mapping;
@@ -28,9 +29,9 @@ const DEFAULT_ID_TKN_ENTITY_NAME: &str = "id_token";
 const DEFAULT_USERINFO_TKN_ENTITY_NAME: &str = "Userinfo_token";
 
 pub struct DecodedTokens<'a> {
-    pub access_token: Option<Token<'a>>,
-    pub id_token: Option<Token<'a>>,
-    pub userinfo_token: Option<Token<'a>>,
+    pub access: Option<Token<'a>>,
+    pub id: Option<Token<'a>>,
+    pub userinfo: Option<Token<'a>>,
 }
 
 /// The names of the entities in the schema
@@ -145,8 +146,8 @@ pub enum BuildEntityError {
     ParseEntityId(#[source] cedar_policy::ParseErrors),
     #[error("failed to evaluate entity or tag: {0}")]
     AttrEvaluation(#[from] cedar_policy::EntityAttrEvaluationError),
-    #[error("failed to build {0} entity since the following tokens were not provided: {1:?}")]
-    TokenUnavailable(String, Vec<TokenKind>),
+    #[error("failed to build entity since a token was not provided")]
+    TokenUnavailable,
     #[error("the given token is missing a `{0}` claim")]
     MissingClaim(String),
     #[error(transparent)]
@@ -158,15 +159,3 @@ pub enum BuildEntityError {
     #[error(transparent)]
     BuildEntityAttr(#[from] BuildAttrError),
 }
-//
-// fn build_entity(
-//     name: &str,
-//     id: &str,
-//     attrs: HashMap<String, RestrictedExpression>,
-//     parents: HashSet<EntityUid>,
-// ) -> Result<Entity, BuildEntityError> {
-//     let name = EntityTypeName::from_str(name).map_err(BuildEntityError::ParseEntityTypeName)?;
-//     let id = EntityId::from_str(id).unwrap(); // this is safe to unwrap since it returns infallible
-//     let uid = EntityUid::from_type_name_and_id(name, id);
-//     Ok(Entity::new(uid, attrs, parents)?)
-// }
