@@ -1,21 +1,18 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 //! Module to lazily initialize internal cedarling services
 
 use std::sync::Arc;
 
-use crate::bootstrap_config::BootstrapConfig;
-use crate::common::policy_store::PolicyStoreWithID;
-use crate::jwt::{JwtService, JwtServiceInitError};
-
 use super::service_config::ServiceConfig;
 use crate::authz::{Authz, AuthzConfig};
+use crate::bootstrap_config::BootstrapConfig;
 use crate::common::app_types;
+use crate::common::policy_store::PolicyStoreWithID;
+use crate::jwt::{JwtService, JwtServiceInitError};
 use crate::log;
 
 #[derive(Clone)]

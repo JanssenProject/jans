@@ -1101,7 +1101,7 @@ global:
       scimConfigLabels: { }
       # -- SCIM config ingress resource additional annotations.
       scimConfigAdditionalAnnotations: { }
-      # -- SCIM config ingress resource labels. key app is taken
+      # -- SCIM ingress resource labels. key app is taken
       scimLabels: { }
       # -- SCIM ingress resource additional annotations.
       scimAdditionalAnnotations: { }
@@ -1161,6 +1161,10 @@ global:
     ingress:
       # Enable link endpoints /jans-link
       linkEnabled: true
+      # -- link ingress resource labels. key app is taken
+      linkLabels: { }
+      # -- link ingress resource additional annotations.
+      linkAdditionalAnnotations: { }
   saml:
     # — Add custom annotations for kubernetes resources for the service
     customAnnotations:

@@ -1,13 +1,14 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::thread::sleep;
+use std::time::Duration;
+
+use reqwest::blocking::Client;
 
 use super::{HttpClientError, HttpGet, Response};
-use reqwest::blocking::Client;
-use std::{thread::sleep, time::Duration};
 
 /// A wrapper around `reqwest::blocking::Client` providing HTTP request functionality
 /// with retry logic.

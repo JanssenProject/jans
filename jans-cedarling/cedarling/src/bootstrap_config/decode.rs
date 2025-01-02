@@ -1,19 +1,23 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-use super::{
-    authorization_config::AuthorizationConfig, BootstrapConfig, BootstrapConfigLoadingError,
-    IdTokenTrustMode, JwtConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig,
-    PolicyStoreSource, TokenValidationConfig,
-};
-use crate::log::LogLevel;
+use std::collections::HashSet;
+use std::fmt::Display;
+use std::fs;
+use std::path::Path;
+use std::str::FromStr;
+
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
-use std::{collections::HashSet, fmt::Display, fs, path::Path, str::FromStr};
+
+use super::authorization_config::AuthorizationConfig;
+use super::{
+    BootstrapConfig, BootstrapConfigLoadingError, IdTokenTrustMode, JwtConfig, LogConfig,
+    LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, TokenValidationConfig,
+};
+use crate::log::LogLevel;
 
 #[derive(Deserialize, PartialEq, Debug, Default)]
 /// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
@@ -427,6 +431,10 @@ pub struct ParseFeatureToggleError {
 impl BootstrapConfig {
     /// Construct an instance from BootstrapConfigRaw
     pub fn from_raw_config(raw: &BootstrapConfigRaw) -> Result<Self, BootstrapConfigLoadingError> {
+        if !raw.workload_authz.is_enabled() && !raw.user_authz.is_enabled() {
+            return Err(BootstrapConfigLoadingError::BothPrincipalsDisabled);
+        }
+
         // Decode LogCofig
         let log_type = match raw.log_type {
             LoggerType::Off => LogTypeConfig::Off,
