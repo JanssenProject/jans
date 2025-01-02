@@ -247,5 +247,5 @@ jobs:
             images+="${tag}@${DIGEST} "
           done
           if [[ -n $images ]]; then
-            cosign sign --yes -a author=JanssenProject ${images}
+            cosign sign --yes -a author=JanssenProject ${images} || echo "Failed to sign images"
           fi
