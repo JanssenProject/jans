@@ -11,7 +11,6 @@ use serde_wasm_bindgen::Error;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::js_sys::{Map, Object};
-use wasm_bindgen_test::console_log;
 
 #[cfg(test)]
 mod tests;
@@ -32,7 +31,6 @@ pub async fn init(config: JsValue) -> Result<Cedarling, Error> {
         let config_map: Map = config.unchecked_into();
         Cedarling::new_from_map(config_map).await
     } else if let Some(config_object) = Object::try_from(&config) {
-        console_log!("init  as object");
         Cedarling::new(config_object).await
     } else {
         Err(Error::new("config should be Map or Object"))

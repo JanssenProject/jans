@@ -38,6 +38,11 @@ chrono = { workspace = true }
 tokio = { version = "1.42.0", features = ["macros", "time"] }
 rand = "0.8.5"
 
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+web-sys = { workspace = true, features = ["ConsoleLevel", "console"] }
+serde-wasm-bindgen = { workspace = true }
+
+
 [dev-dependencies]
 # is used in testing
 test_utils = { workspace = true }
