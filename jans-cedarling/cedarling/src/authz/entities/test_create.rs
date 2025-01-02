@@ -7,7 +7,7 @@
 
 use std::collections::HashSet;
 
-use test_utils::{assert_eq, SortedJson};
+use test_utils::{SortedJson, assert_eq};
 
 use super::create::*;
 use crate::common::cedar_schema::CedarSchemaJson;
@@ -183,7 +183,9 @@ fn get_token_claim_type_string_error() {
             "expected type: {origin_type}, but got: {actual_type}"
         );
     } else {
-        panic!("expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
+        panic!(
+            "expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}"
+        );
     }
 }
 
@@ -237,7 +239,9 @@ fn get_token_claim_type_long_error() {
             "expected type: {origin_type}, but got: {actual_type}"
         );
     } else {
-        panic!("expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
+        panic!(
+            "expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}"
+        );
     }
 }
 
@@ -291,7 +295,9 @@ fn get_token_claim_type_entity_uid_error() {
             "expected type: {origin_type}, but got: {actual_type}"
         );
     } else {
-        panic!("expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
+        panic!(
+            "expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}"
+        );
     }
 }
 
@@ -351,7 +357,9 @@ fn get_token_claim_type_boolean_error() {
              {expected_type}"
         );
     } else {
-        panic!("expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
+        panic!(
+            "expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}"
+        );
     }
 }
 
@@ -411,7 +419,9 @@ fn get_token_claim_type_set_error() {
              {expected_type}"
         );
     } else {
-        panic!("expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
+        panic!(
+            "expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}"
+        );
     }
 }
 
@@ -474,7 +484,9 @@ fn get_token_claim_type_set_of_set_error() {
              {expected_type}"
         );
     } else {
-        panic!("expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}");
+        panic!(
+            "expected error type: CedarPolicyCreateTypeError::TokenClaimTypeError(GetTokenClaimError::KeyNotCorrectType), but got: {entity_creation_error}"
+        );
     }
 }
 

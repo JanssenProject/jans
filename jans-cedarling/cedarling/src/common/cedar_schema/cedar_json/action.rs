@@ -6,8 +6,8 @@
 use std::collections::{HashMap, HashSet};
 
 use serde::ser::SerializeMap;
-use serde::{de, Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde::{Deserialize, Serialize, de};
+use serde_json::{Value, json};
 
 use super::entity_types::{
     CedarSchemaEntityAttribute, CedarSchemaEntityType, PrimitiveType, PrimitiveTypeKind,
@@ -336,15 +336,15 @@ mod test {
     use std::collections::{HashMap, HashSet};
 
     use serde::Deserialize;
-    use serde_json::{json, Value};
+    use serde_json::{Value, json};
 
     use super::ActionSchema;
+    use crate::common::cedar_schema::cedar_json::CedarSchemaRecord;
     use crate::common::cedar_schema::cedar_json::action::RecordOrType;
     use crate::common::cedar_schema::cedar_json::entity_types::{
         CedarSchemaEntityAttribute, CedarSchemaEntityType, EntityType, PrimitiveType,
         PrimitiveTypeKind,
     };
-    use crate::common::cedar_schema::cedar_json::CedarSchemaRecord;
 
     type ActionType = String;
     #[derive(Deserialize, Debug, PartialEq)]
@@ -371,14 +371,11 @@ mod test {
 
     fn build_expected(ctx: Option<RecordOrType>) -> MockJsonSchema {
         MockJsonSchema {
-            actions: HashMap::from([(
-                "Update".to_string(),
-                ActionSchema {
-                    resource_types: HashSet::from(["Issue"].map(|s| s.to_string())),
-                    principal_types: HashSet::from(["Workload", "User"].map(|s| s.to_string())),
-                    context: ctx,
-                },
-            )]),
+            actions: HashMap::from([("Update".to_string(), ActionSchema {
+                resource_types: HashSet::from(["Issue"].map(|s| s.to_string())),
+                principal_types: HashSet::from(["Workload", "User"].map(|s| s.to_string())),
+                context: ctx,
+            })]),
         }
     }
 
@@ -416,26 +413,20 @@ mod test {
         let expected = build_expected(Some(RecordOrType::Record(CedarSchemaRecord {
             entity_type: "Record".to_string(),
             attributes: HashMap::from([
-                (
-                    "token".to_string(),
-                    CedarSchemaEntityAttribute {
-                        cedar_type: CedarSchemaEntityType::Typed(EntityType {
-                            kind: "EntityOrCommon".to_string(),
-                            name: "Access_token".to_string(),
-                        }),
-                        required: true,
-                    },
-                ),
-                (
-                    "username".to_string(),
-                    CedarSchemaEntityAttribute {
-                        cedar_type: CedarSchemaEntityType::Typed(EntityType {
-                            kind: "EntityOrCommon".to_string(),
-                            name: "String".to_string(),
-                        }),
-                        required: true,
-                    },
-                ),
+                ("token".to_string(), CedarSchemaEntityAttribute {
+                    cedar_type: CedarSchemaEntityType::Typed(EntityType {
+                        kind: "EntityOrCommon".to_string(),
+                        name: "Access_token".to_string(),
+                    }),
+                    required: true,
+                }),
+                ("username".to_string(), CedarSchemaEntityAttribute {
+                    cedar_type: CedarSchemaEntityType::Typed(EntityType {
+                        kind: "EntityOrCommon".to_string(),
+                        name: "String".to_string(),
+                    }),
+                    required: true,
+                }),
             ]),
         })));
 
