@@ -82,7 +82,8 @@ impl Cedarling {
         Ok(result.into())
     }
 
-    /// return logs and remove them from the storage
+    /// Get logs and remove them from the storage.
+    /// Returns `Array` of `Map`
     pub fn pop_logs(&self) -> Result<Array, Error> {
         let result = Array::new();
         for log in self.instance.pop_logs() {
@@ -92,7 +93,8 @@ impl Cedarling {
         Ok(result)
     }
 
-    /// get specific log entry
+    /// Get specific log entry.
+    /// Returns `Map` with values or `null`.
     pub fn get_log_by_id(&self, id: &str) -> Result<JsValue, Error> {
         let result = if let Some(log_json_value) = self.instance.get_log_by_id(id) {
             let js_log = serde_wasm_bindgen::to_value(&log_json_value)?;
@@ -103,7 +105,8 @@ impl Cedarling {
         Ok(result)
     }
 
-    /// returns a list of all log ids
+    /// Returns a list of all log ids.
+    /// Returns `Array` of `String`
     pub fn get_log_ids(&self) -> Array {
         let result = Array::new();
         for log_id in self.instance.get_log_ids() {
