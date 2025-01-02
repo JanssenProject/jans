@@ -24,10 +24,34 @@ jobs:
       run: |
         cd ./jans-cedarling
         cargo test --workspace
-    - name: Run Clippy
+    - name: Run Clippy on native target
       run: |
         cd ./jans-cedarling
         cargo clippy -- -Dwarnings
+  wasm_tests:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+    - name: Install WASM dependencies
+      run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+    - name: Run WASM tests using chrome
+      run: |
+        cd ./jans-cedarling/bindings/cedarling_wasm
+        wasm-pack test --headless --chrome
+    - name: Run WASM tests using firefox
+      run: |
+        cd ./jans-cedarling/bindings/cedarling_wasm
+        wasm-pack test --headless --firefox
+    - name: Run Clippy on WASM target
+      run: |
+        cd ./jans-cedarling
+        cargo clippy --target wasm32-unknown-unknown -- -Dwarnings
   python_tests:
     runs-on: ubuntu-latest
     strategy:
