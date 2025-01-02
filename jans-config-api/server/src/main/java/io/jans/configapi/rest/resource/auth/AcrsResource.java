@@ -30,6 +30,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.Optional;
@@ -214,22 +215,22 @@ public class AcrsResource extends ConfigBaseResource {
     private Set<String> getDirectLaunchFlows(List<Deployment> agamaDeploymentList) {
         log.info(" agamaDeploymentList:{}", agamaDeploymentList);
         Set<String> keys = null;
-        List<String> noDirectLaunchFlows = null;
+        List<String> noDirectLaunchFlows = new ArrayList<>();
         if (agamaDeploymentList == null || agamaDeploymentList.isEmpty()) {
             return keys;
         }
         for (Deployment deployment : agamaDeploymentList) {
-            log.debug("Agama deployment:{},", deployment);
+            log.info("Agama deployment:{},", deployment);
             if (deployment.getDetails() != null && deployment.getDetails().getFlowsError() != null) {
                 keys = deployment.getDetails().getFlowsError().keySet();
-                log.debug(" Agama flow keys:{},", keys);
+                log.info(" Agama flow keys:{},", keys);
 
                 if (deployment.getDetails().getProjectMetadata() != null) {
-                    noDirectLaunchFlows = deployment.getDetails().getProjectMetadata().getNoDirectLaunchFlows();
+                    noDirectLaunchFlows.addAll(deployment.getDetails().getProjectMetadata().getNoDirectLaunchFlows());
                 }
             }
         }
-        log.debug("All deployed agama keys:{}, noDirectLaunchFlows:{}", keys, noDirectLaunchFlows);
+        log.info("All deployed agama keys:{}, noDirectLaunchFlows:{}", keys, noDirectLaunchFlows);
         if (keys != null && !keys.isEmpty() && noDirectLaunchFlows != null) {
             keys.removeAll(noDirectLaunchFlows);
         }
