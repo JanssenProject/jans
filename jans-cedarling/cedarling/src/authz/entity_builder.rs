@@ -134,7 +134,7 @@ impl EntityBuilder {
         // Build cedar entity
         let entity_type_name = EntityTypeName::from_str(&entity_name)
             .map_err(BuildEntityError::ParseEntityTypeName)?;
-        let entity_id = EntityId::from_str(&entity_id).unwrap(); // this is safe to unwrap since it returns infallible
+        let entity_id = EntityId::from_str(&entity_id).expect("expected infallible");
         let entity_uid = EntityUid::from_type_name_and_id(entity_type_name, entity_id);
         Ok(Entity::new(entity_uid, entity_attrs, parents)?)
     }
