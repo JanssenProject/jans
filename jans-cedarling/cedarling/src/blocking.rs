@@ -9,8 +9,7 @@
 
 use crate::Cedarling as AsyncCedarling;
 use crate::{
-    AuthorizeError, AuthorizeResult, BootstrapConfig, InitCedarlingError, LogEntry, LogStorage,
-    Request,
+    AuthorizeError, AuthorizeResult, BootstrapConfig, InitCedarlingError, LogStorage, Request,
 };
 use std::sync::Arc;
 use tokio::runtime::Runtime;
@@ -43,11 +42,11 @@ impl Cedarling {
 }
 
 impl LogStorage for Cedarling {
-    fn pop_logs(&self) -> Vec<LogEntry> {
+    fn pop_logs(&self) -> Vec<serde_json::Value> {
         self.instance.pop_logs()
     }
 
-    fn get_log_by_id(&self, id: &str) -> Option<LogEntry> {
+    fn get_log_by_id(&self, id: &str) -> Option<serde_json::Value> {
         self.instance.get_log_by_id(id)
     }
 

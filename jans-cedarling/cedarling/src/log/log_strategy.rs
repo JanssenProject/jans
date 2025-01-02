@@ -3,7 +3,6 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::LogEntry;
 use super::interface::{LogStorage, LogWriter, Loggable};
 use super::memory_logger::MemoryLogger;
 use super::nop_logger::NopLogger;
@@ -47,14 +46,14 @@ impl LogWriter for LogStrategy {
 // Implementation of LogStorage
 // for cases where we not use memory logger we return default value
 impl LogStorage for LogStrategy {
-    fn pop_logs(&self) -> Vec<LogEntry> {
+    fn pop_logs(&self) -> Vec<serde_json::Value> {
         match self {
             Self::MemoryLogger(memory_logger) => memory_logger.pop_logs(),
             _ => Vec::new(),
         }
     }
 
-    fn get_log_by_id(&self, id: &str) -> Option<LogEntry> {
+    fn get_log_by_id(&self, id: &str) -> Option<serde_json::Value> {
         match self {
             Self::MemoryLogger(memory_logger) => memory_logger.get_log_by_id(id),
             _ => None,

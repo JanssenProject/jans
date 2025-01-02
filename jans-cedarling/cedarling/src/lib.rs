@@ -132,11 +132,11 @@ impl Cedarling {
 // implements LogStorage for Cedarling
 // we can use this methods outside crate only when import trait
 impl LogStorage for Cedarling {
-    fn pop_logs(&self) -> Vec<LogEntry> {
+    fn pop_logs(&self) -> Vec<serde_json::Value> {
         self.log.pop_logs()
     }
 
-    fn get_log_by_id(&self, id: &str) -> Option<LogEntry> {
+    fn get_log_by_id(&self, id: &str) -> Option<serde_json::Value> {
         self.log.get_log_by_id(id)
     }
 

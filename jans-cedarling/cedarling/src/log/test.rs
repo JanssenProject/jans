@@ -116,28 +116,31 @@ fn test_log_memory_logger() {
     strategy.log(entry1.clone());
     strategy.log(entry2.clone());
 
+    let entry1_json = serde_json::json!(entry1);
+    let entry2_json = serde_json::json!(entry2);
+
     // check that we have two entries in the log database
     assert_eq!(strategy.get_log_ids().len(), 2);
     assert_eq!(
         strategy
             .get_log_by_id(&entry1.get_request_id().to_string())
             .unwrap(),
-        entry1,
+        entry1_json,
         "Failed to get log entry by id"
     );
     assert_eq!(
         strategy
             .get_log_by_id(&entry2.get_request_id().to_string())
             .unwrap(),
-        entry2,
+        entry2_json,
         "Failed to get log entry by id"
     );
 
     // get logs using `pop_logs`
     let logs = strategy.pop_logs();
     assert_eq!(logs.len(), 2);
-    assert_eq!(logs[0], entry1, "First log entry is incorrect");
-    assert_eq!(logs[1], entry2, "Second log entry is incorrect");
+    assert_eq!(logs[0], entry1_json, "First log entry is incorrect");
+    assert_eq!(logs[1], entry2_json, "Second log entry is incorrect");
 
     // check that we have no entries in the log database
     assert!(
