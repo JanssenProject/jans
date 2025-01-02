@@ -96,8 +96,7 @@ impl Cedarling {
     /// Returns `Map` with values or `null`.
     pub fn get_log_by_id(&self, id: &str) -> Result<JsValue, Error> {
         let result = if let Some(log_json_value) = self.instance.get_log_by_id(id) {
-            let js_log = serde_wasm_bindgen::to_value(&log_json_value)?;
-            js_log
+            serde_wasm_bindgen::to_value(&log_json_value)?
         } else {
             JsValue::NULL
         };
