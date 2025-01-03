@@ -360,13 +360,13 @@ fn build_context(
     action: &cedar_policy::EntityUid,
 ) -> Result<cedar_policy::Context, BuildContextError> {
     let namespace = config.policy_store.namespace();
-    let action_name = action.id().escaped().to_string();
+    let action_name = &action.id().escaped();
     let action_schema = config
         .policy_store
         .schema
         .json
-        .get_action(&action_name, namespace)
-        .ok_or(BuildContextError::UnknownAction(action_name.clone()))?;
+        .get_action(namespace, action_name)
+        .ok_or(BuildContextError::UnknownAction(action_name.to_string()))?;
 
     // Get the entities required for the context
     let mut ctx_schema_entity_types = Vec::new();

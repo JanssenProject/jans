@@ -272,7 +272,9 @@ fn test_failed_id_token_mapping() {
 
     let cedarling = Cedarling::new(&config).expect("could be created without error");
 
-    let request = REQUEST.clone();
+    let mut request = REQUEST.clone();
+    request.access_token = None;
+    request.userinfo_token = None;
 
     let err = cedarling
         .authorize(request)
@@ -289,7 +291,7 @@ fn test_failed_id_token_mapping() {
                 err
             );
         },
-        _ => panic!("expected BuildEntity error"),
+        _ => panic!("expected BuildEntity error, got: {:?}", err),
     }
 }
 
@@ -322,7 +324,7 @@ fn test_failed_access_token_mapping() {
                 err
             );
         },
-        _ => panic!("expected BuildEntity error"),
+        _ => panic!("expected BuildEntity error, got: {:?}", err),
     }
 }
 
@@ -355,7 +357,7 @@ fn test_failed_userinfo_token_mapping() {
                 err
             );
         },
-        _ => panic!("expected BuildEntity error"),
+        _ => panic!("expected BuildEntity error, got: {:?}", err),
     }
 }
 

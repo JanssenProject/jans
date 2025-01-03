@@ -8,9 +8,29 @@ use super::*;
 const DEFAULT_TKN_PRINCIPAL_IDENTIFIER: &str = "jti";
 
 impl EntityBuilder {
-    pub fn build_tkn_entity(&self, token: &Token) -> Result<Entity, BuildTokenEntityError> {
-        // TODO: use the other entity names
+    pub fn build_access_tkn_entity(&self, token: &Token) -> Result<Entity, BuildTokenEntityError> {
         let entity_name = self.entity_names.access_token.as_ref();
+        self.build_tkn_entity(entity_name, token)
+    }
+
+    pub fn build_id_tkn_entity(&self, token: &Token) -> Result<Entity, BuildTokenEntityError> {
+        let entity_name = self.entity_names.id_token.as_ref();
+        self.build_tkn_entity(entity_name, token)
+    }
+
+    pub fn build_userinfo_tkn_entity(
+        &self,
+        token: &Token,
+    ) -> Result<Entity, BuildTokenEntityError> {
+        let entity_name = self.entity_names.userinfo_token.as_ref();
+        self.build_tkn_entity(entity_name, token)
+    }
+
+    fn build_tkn_entity(
+        &self,
+        entity_name: &str,
+        token: &Token,
+    ) -> Result<Entity, BuildTokenEntityError> {
         let id_src_claim = token
             .metadata()
             .principal_identifier
@@ -139,7 +159,7 @@ mod test {
             Some(&issuers.get("test_iss").unwrap()),
         );
         let entity = builder
-            .build_tkn_entity(&access_token)
+            .build_access_tkn_entity(&access_token)
             .expect("expected to successfully build token entity");
 
         assert_eq!(entity.uid().to_string(), "Jans::Access_token::\"tkn-123\"");

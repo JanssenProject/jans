@@ -138,7 +138,7 @@ impl EntityBuilder {
 
         let access_token = if let Some(token) = tokens.access.as_ref() {
             Some(
-                self.build_tkn_entity(token)
+                self.build_access_tkn_entity(token)
                     .map_err(BuildCedarlingEntityError::AccessToken)?,
             )
         } else {
@@ -147,8 +147,8 @@ impl EntityBuilder {
 
         let id_token = if let Some(token) = tokens.access.as_ref() {
             Some(
-                self.build_tkn_entity(token)
-                    .map_err(BuildCedarlingEntityError::AccessToken)?,
+                self.build_id_tkn_entity(token)
+                    .map_err(BuildCedarlingEntityError::IdToken)?,
             )
         } else {
             None
@@ -156,8 +156,8 @@ impl EntityBuilder {
 
         let userinfo_token = if let Some(token) = tokens.access.as_ref() {
             Some(
-                self.build_tkn_entity(token)
-                    .map_err(BuildCedarlingEntityError::AccessToken)?,
+                self.build_userinfo_tkn_entity(token)
+                    .map_err(BuildCedarlingEntityError::UserinfoToken)?,
             )
         } else {
             None
