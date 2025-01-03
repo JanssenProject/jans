@@ -61,7 +61,7 @@ fn extract_first_policy_store(
 /// Loads the policy store based on the provided configuration.
 ///
 /// This function supports multiple sources for loading policies.
-pub(crate) fn load_policy_store(
+pub(crate) async fn load_policy_store(
     config: &PolicyStoreConfig,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     let policy_store = match &config.source {
@@ -76,7 +76,7 @@ pub(crate) fn load_policy_store(
             extract_first_policy_store(&agama_policy_store)?
         },
         PolicyStoreSource::LockMaster(policy_store_uri) => {
-            load_policy_store_from_lock_master(policy_store_uri)?
+            load_policy_store_from_lock_master(policy_store_uri).await?
         },
         PolicyStoreSource::FileJson(path) => {
             let policy_json = fs::read_to_string(path)
@@ -98,11 +98,11 @@ pub(crate) fn load_policy_store(
 /// Loads the policy store from the Lock Master.
 ///
 /// The URI is from the `CEDARLING_POLICY_STORE_URI` bootstrap property.
-fn load_policy_store_from_lock_master(
+async fn load_policy_store_from_lock_master(
     uri: &str,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     let client = HttpClient::new(3, Duration::from_secs(3))?;
-    let agama_policy_store = client.get(uri)?.json::<AgamaPolicyStore>()?;
+    let agama_policy_store = client.get(uri).await?.json::<AgamaPolicyStore>()?;
     extract_first_policy_store(&agama_policy_store)
 }
 
@@ -119,29 +119,31 @@ mod test {
     // works correctly anymore here since we already have tests for those in
     // src/common/policy_store/test.rs...
 
-    #[test]
-    fn can_load_from_json_file() {
+    #[tokio::test]
+    async fn can_load_from_json_file() {
         load_policy_store(&PolicyStoreConfig {
             source: crate::PolicyStoreSource::FileJson(
                 Path::new("../test_files/policy-store_generated.json").into(),
             ),
         })
+        .await
         .expect("Should load policy store from JSON file");
     }
 
-    #[test]
-    fn can_load_from_yaml_file() {
+    #[tokio::test]
+    async fn can_load_from_yaml_file() {
         load_policy_store(&PolicyStoreConfig {
             source: crate::PolicyStoreSource::FileYaml(
                 Path::new("../test_files/policy-store_ok.yaml").into(),
             ),
         })
+        .await
         .expect("Should load policy store from YAML file");
     }
 
-    #[test]
-    fn can_load_from_lock_master() {
-        let mut mock_server = Server::new();
+    #[tokio::test]
+    async fn can_load_from_lock_master() {
+        let mut mock_server = Server::new_async().await;
 
         let policy_store_json =
             include_str!("../../../test_files/policy-store_lock_master_ok.json").to_string();
@@ -159,6 +161,7 @@ mod test {
         load_policy_store(&PolicyStoreConfig {
             source: crate::PolicyStoreSource::LockMaster(uri),
         })
+        .await
         .expect("Should load policy store from Lock Master file");
 
         mock_endpoint.assert();

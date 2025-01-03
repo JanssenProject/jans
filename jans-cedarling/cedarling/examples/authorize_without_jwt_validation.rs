@@ -12,7 +12,8 @@ use cedarling::{
 
 static POLICY_STORE_RAW: &str = include_str!("../../test_files/policy-store_ok.yaml");
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cedarling = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
@@ -32,7 +33,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             decision_log_workload_claims: vec!["org_id".to_string()],
             ..Default::default()
         },
-    })?;
+    })
+    .await?;
 
     // the following tokens are expired
     // access_token claims:
@@ -111,33 +113,35 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // }
     let userinfo_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2FkbWluLXVpLXRlc3QuZ2x1dS5vcmciLCJzdWIiOiJib0c4ZGZjNU1LVG4zN283Z3NkQ2V5cUw4THBXUXRnb080MW0xS1p3ZHEwIiwiY2xpZW50X2lkIjoiNWI0NDg3YzQtOGRiMS00MDlkLWE2NTMtZjkwN2I4MDk0MDM5IiwiYXVkIjoiNWI0NDg3YzQtOGRiMS00MDlkLWE2NTMtZjkwN2I4MDk0MDM5IiwidXNlcm5hbWUiOiJhZG1pbkBnbHV1Lm9yZyIsIm5hbWUiOiJEZWZhdWx0IEFkbWluIFVzZXIiLCJlbWFpbCI6ImFkbWluQGdsdXUub3JnIiwiY291bnRyeSI6IlVTIiwianRpIjoidXNyaW5mb190a25fanRpIn0.NoR53vPZFpfb4vFk85JH9RPx7CHsaJMZwrH3fnB-N60".to_string();
 
-    let result = cedarling.authorize(Request {
+    let result = cedarling
+        .authorize(Request {
         tokens: Tokens {
-            access_token: Some(access_token),
-            id_token: Some(id_token),
-            userinfo_token: Some(userinfo_token),
+                access_token: Some(access_token),
+                id_token: Some(id_token),
+                userinfo_token: Some(userinfo_token),
         },
-        action: "Jans::Action::\"Update\"".to_string(),
-        context: serde_json::json!({}),
-        resource: ResourceData {
-            id: "random_id".to_string(),
-            resource_type: "Jans::Issue".to_string(),
-            payload: HashMap::from_iter([
-                (
-                    "org_id".to_string(),
-                    serde_json::Value::String("some_long_id".to_string()),
-                ),
-                (
-                    "country".to_string(),
-                    serde_json::Value::String("US".to_string()),
-                ),
-            ]),
-        },
-    });
+            action: "Jans::Action::\"Update\"".to_string(),
+            context: serde_json::json!({}),
+            resource: ResourceData {
+                id: "random_id".to_string(),
+                resource_type: "Jans::Issue".to_string(),
+                payload: HashMap::from_iter([
+                    (
+                        "org_id".to_string(),
+                        serde_json::Value::String("some_long_id".to_string()),
+                    ),
+                    (
+                        "country".to_string(),
+                        serde_json::Value::String("US".to_string()),
+                    ),
+                ]),
+            },
+        })
+        .await;
 
     match result {
         Ok(result) => {
-            println!("\n\nis allowed: {}", result.is_allowed());
+            println!("\n\nis allowed: {}", result.decision);
         },
         Err(e) => eprintln!("Error while authorizing: {}\n {:?}\n\n", e, e),
     }

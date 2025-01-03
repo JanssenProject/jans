@@ -12,7 +12,7 @@ use std::sync::Arc;
 
 use base64::prelude::*;
 pub use config::*;
-use jsonwebtoken::{self as jwt, decode_header, Algorithm, Validation};
+use jsonwebtoken::{self as jwt, Algorithm, Validation, decode_header};
 use serde_json::Value;
 use url::Url;
 

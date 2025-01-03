@@ -6,8 +6,8 @@
 use std::io::Write;
 use std::sync::{Arc, Mutex};
 
-use super::interface::{LogWriter, Loggable};
-use super::LogLevel;
+use crate::log::LogLevel;
+use crate::log::interface::{LogWriter, Loggable};
 
 /// A logger that write to std output.
 pub(crate) struct StdOutLogger {
@@ -37,6 +37,7 @@ impl StdOutLogger {
 
 // Implementation of LogWriter
 impl LogWriter for StdOutLogger {
+    #[cfg(not(target_arch = "wasm32"))]
     fn log_any<T: Loggable>(&self, entry: T) {
         if !entry.can_log(self.log_level) {
             // do nothing
@@ -54,6 +55,14 @@ impl LogWriter for StdOutLogger {
             &json_str
         )
         .unwrap();
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    fn log_any<T: Loggable>(&self, entry: T) {
+        if !entry.can_log(self.log_level) {
+            // do nothing
+            return;
+        }
     }
 }
 
@@ -93,9 +102,9 @@ impl Write for TestWriter {
 mod tests {
     use std::io::Write;
 
-    use super::super::{LogEntry, LogType};
     use super::*;
     use crate::common::app_types::PdpID;
+    use crate::log::{LogEntry, LogType};
 
     #[test]
     fn write_log_ok() {

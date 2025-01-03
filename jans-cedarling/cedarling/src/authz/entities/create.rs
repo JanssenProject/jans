@@ -9,10 +9,10 @@ use std::str::FromStr;
 use cedar_policy::{EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 
 use super::trait_as_expression::AsExpression;
+use crate::common::cedar_schema::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::{
     CedarSchemaEntityShape, CedarSchemaRecord, CedarType, GetCedarTypeError, SchemaDefinedType,
 };
-use crate::common::cedar_schema::CedarSchemaJson;
 use crate::common::policy_store::ClaimMappings;
 use crate::jwt::{Token, TokenClaim, TokenClaimTypeError, TokenClaims};
 

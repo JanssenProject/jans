@@ -62,14 +62,14 @@ use serde_pyobject::to_pyobject;
 #[derive(Clone)]
 #[pyclass]
 pub struct Cedarling {
-    inner: cedarling::Cedarling,
+    inner: cedarling::blocking::Cedarling,
 }
 
 #[pymethods]
 impl Cedarling {
     #[new]
     fn new(config: &BootstrapConfig) -> PyResult<Self> {
-        let inner = cedarling::Cedarling::new(config.inner())
+        let inner = cedarling::blocking::Cedarling::new(config.inner())
             .map_err(|err| PyValueError::new_err(err.to_string()))?;
         Ok(Self { inner })
     }
@@ -112,7 +112,7 @@ impl Cedarling {
     }
 }
 
-fn log_entry_to_py(gil: Python, entry: &cedarling::bindings::LogEntry) -> PyResult<PyObject> {
+fn log_entry_to_py(gil: Python, entry: &serde_json::Value) -> PyResult<PyObject> {
     to_pyobject(gil, entry)
         .map(|v| v.unbind())
         .map_err(|err| err.0)

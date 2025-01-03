@@ -6,16 +6,18 @@
  */
 
 use super::kventry::KvEntry;
+use chrono::Duration;
+use chrono::prelude::*;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ExpEntry {
     pub key: String,
-    pub expired_at: std::time::Instant,
+    pub expired_at: DateTime<Utc>,
 }
 
 impl ExpEntry {
-    pub fn new(key: &str, expiration: std::time::Duration) -> Self {
-        let expired_at: std::time::Instant = std::time::Instant::now() + expiration;
+    pub fn new(key: &str, expiration: Duration) -> Self {
+        let expired_at: DateTime<Utc> = Utc::now() + expiration;
         Self {
             key: String::from(key),
             expired_at,
@@ -30,7 +32,7 @@ impl ExpEntry {
     }
 
     pub fn is_expired(&self) -> bool {
-        self.expired_at < std::time::Instant::now()
+        self.expired_at < Utc::now()
     }
 }
 
@@ -57,10 +59,10 @@ mod tests {
 
     #[test]
     fn test_new() {
-        let item = ExpEntry::new("key", std::time::Duration::from_secs(10));
+        let item = ExpEntry::new("key", Duration::new(10, 0).expect("a valid duration"));
         assert_eq!(item.key, "key");
-        assert!(item.expired_at > std::time::Instant::now() + std::time::Duration::from_secs(9));
-        assert!(item.expired_at <= std::time::Instant::now() + std::time::Duration::from_secs(10));
+        assert!(item.expired_at > Utc::now() + Duration::new(9, 0).expect("a valid duration"));
+        assert!(item.expired_at <= Utc::now() + Duration::new(10, 0).expect("a valid duration"));
     }
 
     #[test]
@@ -68,7 +70,7 @@ mod tests {
         let kv_entry = KvEntry::new(
             "keyFromKV",
             "value from KV",
-            std::time::Duration::from_secs(10),
+            Duration::new(10, 0).expect("a valid duration"),
         );
         let exp_item = ExpEntry::from_kv_entry(&kv_entry);
         assert_eq!(exp_item.key, "keyFromKV");
@@ -77,17 +79,16 @@ mod tests {
 
     #[test]
     fn test_cmp() {
-        let item_small = ExpEntry::new("k1", std::time::Duration::from_secs(10));
-        let item_big = ExpEntry::new("k2", std::time::Duration::from_secs(8000));
+        let item_small = ExpEntry::new("k1", Duration::new(10, 0).expect("a valid duration"));
+        let item_big = ExpEntry::new("k2", Duration::new(8000, 0).expect("a valid duration"));
         assert!(item_small > item_big); // reverse order
         assert!(item_big < item_small); // reverse order
     }
 
     #[test]
     fn test_is_expired() {
-        let item = ExpEntry::new("k1", std::time::Duration::from_millis(1));
-        assert!(!item.is_expired());
-        std::thread::sleep(std::time::Duration::from_millis(2));
+        let item = ExpEntry::new("k1", Duration::new(0, 100).expect("a valid duration"));
+        std::thread::sleep(std::time::Duration::from_nanos(200));
         assert!(item.is_expired());
     }
 }

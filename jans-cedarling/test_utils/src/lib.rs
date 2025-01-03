@@ -6,6 +6,7 @@
  */
 
 mod sort_json;
+pub mod token_claims;
 
 pub use pretty_assertions::*;
 pub use sort_json::SortedJson;

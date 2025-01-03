@@ -241,10 +241,11 @@ impl<'de> Deserialize<'de> for TokenKind {
             "id_token" => Ok(TokenKind::Id),
             "userinfo_token" => Ok(TokenKind::Userinfo),
             "access_token" => Ok(TokenKind::Access),
-            _ => Err(serde::de::Error::unknown_variant(
-                &token_kind,
-                &["access_token", "id_token", "userinfo_token"],
-            )),
+            _ => Err(serde::de::Error::unknown_variant(&token_kind, &[
+                "access_token",
+                "id_token",
+                "userinfo_token",
+            ])),
         }
     }
 }

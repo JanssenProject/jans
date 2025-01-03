@@ -3,15 +3,16 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use lazy_static::lazy_static;
+//! Package for generating JWT tokens for testing purpose.
+
+use std::sync::LazyLock;
+
 use {jsonwebkey as jwk, jsonwebtoken as jwt};
 
 // Represent meta information about entity from cedar-policy schema.
-lazy_static! {
-    pub(crate) static ref EncodingKeys: GeneratedKeys = generate_keys();
-}
+static ENCODING_KEYS: LazyLock<GeneratedKeys> = LazyLock::new(generate_keys);
 
-pub(crate) struct GeneratedKeys {
+pub struct GeneratedKeys {
     pub private_key_id: String,
     pub private_encoding_key: jwt::EncodingKey,
 }
@@ -19,7 +20,7 @@ pub(crate) struct GeneratedKeys {
 /// Generates a set of private and public keys using ES256
 ///
 /// Returns a tuple: (Vec<(key_id, private_key)>, jwks)
-pub fn generate_keys() -> GeneratedKeys {
+fn generate_keys() -> GeneratedKeys {
     let kid = 1;
     // Generate a private key
     let mut jwk = jwk::JsonWebKey::new(jwk::Key::generate_p256());
@@ -50,8 +51,8 @@ pub fn generate_keys() -> GeneratedKeys {
 
 /// Generates a token string signed with ES256
 pub fn generate_token_using_claims(claims: impl serde::Serialize) -> String {
-    let key_id = EncodingKeys.private_key_id.clone();
-    let encoding_key = &EncodingKeys.private_encoding_key;
+    let key_id = ENCODING_KEYS.private_key_id.clone();
+    let encoding_key = &ENCODING_KEYS.private_encoding_key;
 
     // select a key from the keyset
     // for simplicity, were just choosing the second one

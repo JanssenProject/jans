@@ -16,20 +16,20 @@ mod test_create;
 use std::collections::HashSet;
 
 use cedar_policy::{Entity, EntityUid};
+pub use create::{CEDAR_POLICY_SEPARATOR, CreateCedarEntityError};
 use create::{
-    build_entity_uid, create_entity, parse_namespace_and_typename, EntityMetadata,
-    EntityParsedTypeName,
+    EntityMetadata, EntityParsedTypeName, build_entity_uid, create_entity,
+    parse_namespace_and_typename,
 };
-pub use create::{CreateCedarEntityError, CEDAR_POLICY_SEPARATOR};
 pub use user::*;
 pub use workload::*;
 
-use super::request::ResourceData;
 use super::AuthorizeError;
+use super::request::ResourceData;
+use crate::AuthorizationConfig;
 use crate::common::cedar_schema::CedarSchemaJson;
 use crate::common::policy_store::{ClaimMappings, PolicyStore, TokenKind};
 use crate::jwt::Token;
-use crate::AuthorizationConfig;
 
 const DEFAULT_ACCESS_TKN_ENTITY_TYPE_NAME: &str = "Access_token";
 const DEFAULT_ID_TKN_ENTITY_TYPE_NAME: &str = "id_token";

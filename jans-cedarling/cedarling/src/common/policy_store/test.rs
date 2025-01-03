@@ -10,7 +10,7 @@ use serde::Deserialize;
 use serde_json::json;
 use test_utils::assert_eq;
 
-use super::{parse_option_string, AgamaPolicyStore, ParsePolicySetMessage, PolicyStore};
+use super::{AgamaPolicyStore, ParsePolicySetMessage, PolicyStore, parse_option_string};
 use crate::common::policy_store::parse_cedar_version;
 
 /// Tests successful deserialization of a valid policy store JSON.
@@ -86,10 +86,12 @@ fn test_base64_decoding_error_in_policy_store() {
     });
 
     let policy_result = serde_json::from_str::<PolicyStore>(policy_store_json.to_string().as_str());
-    assert!(policy_result
-        .unwrap_err()
-        .to_string()
-        .contains(&ParsePolicySetMessage::Base64.to_string()));
+    assert!(
+        policy_result
+            .unwrap_err()
+            .to_string()
+            .contains(&ParsePolicySetMessage::Base64.to_string())
+    );
 }
 
 /// Tests for parsing error due to broken UTF-8 in the policy store.
@@ -136,10 +138,12 @@ fn test_policy_parsing_error_in_policy_store() {
     });
 
     let policy_result = serde_json::from_str::<PolicyStore>(policy_store_json.to_string().as_str());
-    assert!(policy_result
-        .unwrap_err()
-        .to_string()
-        .contains(&ParsePolicySetMessage::String.to_string()));
+    assert!(
+        policy_result
+            .unwrap_err()
+            .to_string()
+            .contains(&ParsePolicySetMessage::String.to_string())
+    );
 }
 
 /// Tests for broken policy parsing error in the policy store.

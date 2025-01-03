@@ -106,7 +106,7 @@ mod tests {
 
     use action::CtxAttribute;
     use serde_json::json;
-    use test_utils::{assert_eq, SortedJson};
+    use test_utils::{SortedJson, assert_eq};
 
     use super::entity_types::*;
     use super::*;
@@ -121,139 +121,101 @@ mod tests {
             serde_json::from_str(json_value).expect("failed to parse json");
 
         let entity_types = HashMap::from_iter(vec![
-            (
-                "Access_token".to_string(),
-                CedarSchemaEntityShape {
-                    shape: Some(CedarSchemaRecord {
-                        entity_type: "Record".to_string(),
-                        attributes: HashMap::from_iter(vec![
-                            (
-                                "aud".to_string(),
-                                CedarSchemaEntityAttribute {
-                                    cedar_type: CedarSchemaEntityType::Typed(EntityType {
-                                        kind: "EntityOrCommon".to_string(),
-                                        name: "String".to_string(),
-                                    }),
-                                    required: true,
-                                },
-                            ),
-                            (
-                                "exp".to_string(),
-                                CedarSchemaEntityAttribute {
-                                    cedar_type: CedarSchemaEntityType::Typed(EntityType {
-                                        kind: "EntityOrCommon".to_string(),
-                                        name: "Long".to_string(),
-                                    }),
-                                    required: true,
-                                },
-                            ),
-                            (
-                                "iat".to_string(),
-                                CedarSchemaEntityAttribute {
-                                    cedar_type: CedarSchemaEntityType::Primitive(PrimitiveType {
-                                        kind: PrimitiveTypeKind::Long,
-                                    }),
-                                    required: true,
-                                },
-                            ),
-                            (
-                                "scope".to_string(),
-                                CedarSchemaEntityAttribute {
-                                    cedar_type: CedarSchemaEntityType::Set(Box::new(
-                                        SetEntityType {
-                                            element: CedarSchemaEntityType::Typed(EntityType {
-                                                kind: "EntityOrCommon".to_string(),
-                                                name: "String".to_string(),
-                                            }),
-                                        },
-                                    )),
-
-                                    required: false,
-                                },
-                            ),
-                        ]),
-                    }),
-                },
-            ),
-            ("Role".to_string(), CedarSchemaEntityShape { shape: None }),
-            (
-                "TrustedIssuer".to_string(),
-                CedarSchemaEntityShape {
-                    shape: Some(CedarSchemaRecord {
-                        entity_type: "Record".to_string(),
-                        attributes: HashMap::from_iter([(
-                            "issuer_entity_id".to_string(),
-                            CedarSchemaEntityAttribute {
-                                required: true,
-                                cedar_type: CedarSchemaEntityType::Typed(EntityType {
-                                    name: "Url".to_string(),
+            ("Access_token".to_string(), CedarSchemaEntityShape {
+                shape: Some(CedarSchemaRecord {
+                    entity_type: "Record".to_string(),
+                    attributes: HashMap::from_iter(vec![
+                        ("aud".to_string(), CedarSchemaEntityAttribute {
+                            cedar_type: CedarSchemaEntityType::Typed(EntityType {
+                                kind: "EntityOrCommon".to_string(),
+                                name: "String".to_string(),
+                            }),
+                            required: true,
+                        }),
+                        ("exp".to_string(), CedarSchemaEntityAttribute {
+                            cedar_type: CedarSchemaEntityType::Typed(EntityType {
+                                kind: "EntityOrCommon".to_string(),
+                                name: "Long".to_string(),
+                            }),
+                            required: true,
+                        }),
+                        ("iat".to_string(), CedarSchemaEntityAttribute {
+                            cedar_type: CedarSchemaEntityType::Primitive(PrimitiveType {
+                                kind: PrimitiveTypeKind::Long,
+                            }),
+                            required: true,
+                        }),
+                        ("scope".to_string(), CedarSchemaEntityAttribute {
+                            cedar_type: CedarSchemaEntityType::Set(Box::new(SetEntityType {
+                                element: CedarSchemaEntityType::Typed(EntityType {
                                     kind: "EntityOrCommon".to_string(),
+                                    name: "String".to_string(),
                                 }),
-                            },
-                        )]),
-                    }),
-                },
-            ),
+                            })),
+
+                            required: false,
+                        }),
+                    ]),
+                }),
+            }),
+            ("Role".to_string(), CedarSchemaEntityShape { shape: None }),
+            ("TrustedIssuer".to_string(), CedarSchemaEntityShape {
+                shape: Some(CedarSchemaRecord {
+                    entity_type: "Record".to_string(),
+                    attributes: HashMap::from_iter([(
+                        "issuer_entity_id".to_string(),
+                        CedarSchemaEntityAttribute {
+                            required: true,
+                            cedar_type: CedarSchemaEntityType::Typed(EntityType {
+                                name: "Url".to_string(),
+                                kind: "EntityOrCommon".to_string(),
+                            }),
+                        },
+                    )]),
+                }),
+            }),
             ("Issue".to_string(), CedarSchemaEntityShape { shape: None }),
         ]);
 
-        let common_types = HashMap::from_iter([(
-            "Url".to_string(),
-            CedarSchemaRecord {
-                entity_type: "Record".to_string(),
-                attributes: HashMap::from_iter([
-                    (
-                        "host".to_string(),
-                        CedarSchemaEntityAttribute {
-                            cedar_type: CedarSchemaEntityType::Typed(EntityType {
-                                kind: "EntityOrCommon".to_string(),
-                                name: "String".to_string(),
-                            }),
-                            required: true,
-                        },
-                    ),
-                    (
-                        "path".to_string(),
-                        CedarSchemaEntityAttribute {
-                            cedar_type: CedarSchemaEntityType::Typed(EntityType {
-                                kind: "EntityOrCommon".to_string(),
-                                name: "String".to_string(),
-                            }),
-                            required: true,
-                        },
-                    ),
-                    (
-                        "protocol".to_string(),
-                        CedarSchemaEntityAttribute {
-                            cedar_type: CedarSchemaEntityType::Typed(EntityType {
-                                kind: "EntityOrCommon".to_string(),
-                                name: "String".to_string(),
-                            }),
-                            required: true,
-                        },
-                    ),
-                ]),
-            },
-        )]);
+        let common_types = HashMap::from_iter([("Url".to_string(), CedarSchemaRecord {
+            entity_type: "Record".to_string(),
+            attributes: HashMap::from_iter([
+                ("host".to_string(), CedarSchemaEntityAttribute {
+                    cedar_type: CedarSchemaEntityType::Typed(EntityType {
+                        kind: "EntityOrCommon".to_string(),
+                        name: "String".to_string(),
+                    }),
+                    required: true,
+                }),
+                ("path".to_string(), CedarSchemaEntityAttribute {
+                    cedar_type: CedarSchemaEntityType::Typed(EntityType {
+                        kind: "EntityOrCommon".to_string(),
+                        name: "String".to_string(),
+                    }),
+                    required: true,
+                }),
+                ("protocol".to_string(), CedarSchemaEntityAttribute {
+                    cedar_type: CedarSchemaEntityType::Typed(EntityType {
+                        kind: "EntityOrCommon".to_string(),
+                        name: "String".to_string(),
+                    }),
+                    required: true,
+                }),
+            ]),
+        })]);
 
-        let actions = HashMap::from([(
-            "Update".to_string(),
-            ActionSchema {
-                resource_types: HashSet::from(["Issue"].map(|x| x.to_string())),
-                principal_types: HashSet::from(["Access_token", "Role"].map(|x| x.to_string())),
-                context: None,
-            },
-        )]);
+        let actions = HashMap::from([("Update".to_string(), ActionSchema {
+            resource_types: HashSet::from(["Issue"].map(|x| x.to_string())),
+            principal_types: HashSet::from(["Access_token", "Role"].map(|x| x.to_string())),
+            context: None,
+        })]);
 
         let schema_to_compare = CedarSchemaJson {
-            namespace: HashMap::from_iter(vec![(
-                "Jans".to_string(),
-                CedarSchemaEntities {
-                    entity_types,
-                    common_types,
-                    actions,
-                },
-            )]),
+            namespace: HashMap::from_iter(vec![("Jans".to_string(), CedarSchemaEntities {
+                entity_types,
+                common_types,
+                actions,
+            })]),
         };
 
         assert_eq!(

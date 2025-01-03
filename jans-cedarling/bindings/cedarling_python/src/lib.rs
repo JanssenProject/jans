@@ -4,9 +4,10 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
+#![cfg(not(target_arch = "wasm32"))]
 
-use pyo3::prelude::*;
 use pyo3::Bound;
+use pyo3::prelude::*;
 
 mod authorize;
 mod cedarling;
