@@ -34,12 +34,12 @@ use std::time::Instant;
 pub use authorize_result::AuthorizeResult;
 use cedar_policy::{ContextJsonError, Entities, Entity, EntityUid};
 use entities::{
-    CEDAR_POLICY_SEPARATOR, CreateCedarEntityError, CreateUserEntityError,
-    CreateWorkloadEntityError, DecodedTokens, ResourceEntityError, RoleEntityError,
     create_resource_entity, create_role_entities, create_token_entities, create_user_entity,
-    create_workload_entity,
+    create_workload_entity, CreateCedarEntityError, CreateUserEntityError,
+    CreateWorkloadEntityError, DecodedTokens, ResourceEntityError, RoleEntityError,
+    CEDAR_POLICY_SEPARATOR,
 };
-use merge_json::{MergeError, merge_json_values};
+use merge_json::{merge_json_values, MergeError};
 use request::Request;
 use serde_json::Value;
 
@@ -87,16 +87,19 @@ impl Authz {
         request: &'a Request,
     ) -> Result<DecodedTokens<'a>, AuthorizeError> {
         let access_token = request
+            .tokens
             .access_token
             .as_ref()
             .map(|tkn| self.config.jwt_service.process_token(TokenStr::Access(tkn)))
             .transpose()?;
         let id_token = request
+            .tokens
             .id_token
             .as_ref()
             .map(|tkn| self.config.jwt_service.process_token(TokenStr::Id(tkn)))
             .transpose()?;
         let userinfo_token = request
+            .tokens
             .userinfo_token
             .as_ref()
             .map(|tkn| {
