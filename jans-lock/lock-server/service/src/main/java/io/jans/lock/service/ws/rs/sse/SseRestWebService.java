@@ -33,7 +33,7 @@ public interface SseRestWebService {
 	@GET
 	@Path("/sse")
 	@Produces(MediaType.SERVER_SENT_EVENTS)
-	@ProtectedApi(scopes = {"https://jans.io/lock-server/sse.read"})
+	@ProtectedApi(scopes = {"https://jans.io/oauth/lock/sse.read"})
 	public void subscribe(@Context Sse sse, @Context SseEventSink sseEventSink);
 
 }
