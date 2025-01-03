@@ -3,9 +3,6 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::io::Write;
-use std::sync::{Arc, Mutex};
-
 use crate::log::LogLevel;
 use crate::log::interface::{LogWriter, Loggable};
 

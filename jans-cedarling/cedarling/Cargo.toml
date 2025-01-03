@@ -14,7 +14,7 @@ blocking = ["tokio/rt-multi-thread"]
 
 [dependencies]
 serde = { workspace = true }
-serde_json = { workspace = true }
+serde_json = { workspace = true, features = ["raw_value"] }
 serde_yml = "0.0.12"
 thiserror = { workspace = true }
 sparkv = { workspace = true }
@@ -42,7 +42,6 @@ rand = "0.8.5"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { workspace = true, features = ["console"] }
-serde-wasm-bindgen = { workspace = true }
 
 
 [dev-dependencies]
