@@ -43,7 +43,6 @@ pub fn create_workload_entity(
     for (token_kind, token, key) in [
         (TokenKind::Access, tokens.access_token.as_ref(), "client_id"),
         (TokenKind::Id, tokens.id_token.as_ref(), "aud"),
-        (TokenKind::Userinfo, tokens.userinfo_token.as_ref(), "aud"),
     ] {
         match try_create_entity(token_kind, token, key) {
             Ok(entity) => return Ok(entity),
@@ -233,7 +232,7 @@ mod test {
         let result = create_workload_entity(entity_mapping, &policy_store, &tokens)
             .expect_err("expected to error while creating workload entity");
 
-        assert_eq!(result.errors.len(), 3);
+        assert_eq!(result.errors.len(), 2);
         for (_tkn_kind, err) in result.errors.iter() {
             assert!(
                 matches!(err, CreateCedarEntityError::UnavailableToken),

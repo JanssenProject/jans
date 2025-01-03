@@ -3,7 +3,7 @@
 #
 # Copyright (c) 2024, Gluu, Inc.
 
-from cedarling_python import BootstrapConfig
+from cedarling_python import BootstrapConfig, Tokens
 from cedarling_python import Cedarling
 from cedarling_python import ResourceData, Request
 import time
@@ -189,9 +189,7 @@ context = {
 action = 'Jans::Action::"Read"'
 
 request = Request(
-    access_token,
-    id_token,
-    userinfo_token,
+    tokens=Tokens(access_token, id_token, userinfo_token),
     action=action,
     resource=resource, context=context)
 
