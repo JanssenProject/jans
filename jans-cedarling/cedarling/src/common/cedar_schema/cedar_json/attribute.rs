@@ -42,19 +42,6 @@ pub enum Attribute {
     },
 }
 
-impl Attribute {
-    const ATTR_VARIANTS: [&str; 8] = [
-        "String",
-        "Long",
-        "Boolean",
-        "Record",
-        "Set",
-        "Entity",
-        "Extension",
-        "EntityOrCommon",
-    ];
-}
-
 impl<'de> Deserialize<'de> for Attribute {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -120,7 +107,10 @@ impl<'de> Deserialize<'de> for Attribute {
                 let name = deserialize_to_string::<D>(name)?;
                 Self::EntityOrCommon { required, name }
             },
-            variant => return Err(de::Error::unknown_variant(variant, &Self::ATTR_VARIANTS)),
+            name => Self::EntityOrCommon {
+                required,
+                name: name.to_string(),
+            },
         };
 
         Ok(attr)
