@@ -1,7 +1,7 @@
 [
   {
     "inum": "4000.01.1",
-    "jansId": "https://jans.io/lock-server/sse.read",
+    "jansId": "https://jans.io/oauth/lock/sse.read",
     "displayName": "Lock API scope",
     "description": "Permission to access SSE endpoint",
     "jansDefScope": false,
