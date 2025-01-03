@@ -61,12 +61,12 @@ impl fmt::Display for BuildWorkloadEntityError {
         if self.errors.is_empty() {
             writeln!(
                 f,
-                "Failed to create Workload Entity since no tokens were provided"
+                "failed to create Workload Entity since no tokens were provided"
             )?;
         } else {
             writeln!(
                 f,
-                "Failed to create Workload Entity due to the following errors:"
+                "failed to create Workload Entity due to the following errors:"
             )?;
             for (token_kind, error) in &self.errors {
                 writeln!(f, "- TokenKind {:?}: {}", token_kind, error)?;
@@ -105,7 +105,7 @@ mod test {
         .unwrap();
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default());
+        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), true, false);
         let access_token = Token::new_access(
             TokenClaims::new(HashMap::from([
                 ("client_id".to_string(), json!("workload-123")),
@@ -154,7 +154,7 @@ mod test {
         .unwrap();
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default());
+        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), true, false);
         let id_token = Token::new_id(
             TokenClaims::new(HashMap::from([
                 ("aud".to_string(), json!("workload-123")),
@@ -247,7 +247,7 @@ mod test {
             ..Default::default()
         };
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default());
+        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), true, false);
         let access_token = Token::new_access(
             TokenClaims::new(HashMap::from([
                 ("client_id".to_string(), json!("workload-123")),
@@ -338,7 +338,7 @@ mod test {
         .unwrap();
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default());
+        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), true, false);
         let access_token = Token::new_access(TokenClaims::new(HashMap::new()), Some(&iss));
         let id_token = Token::new_id(TokenClaims::new(HashMap::new()), Some(&iss));
         let tokens = DecodedTokens {
@@ -385,7 +385,8 @@ mod test {
             }}}
         }))
         .unwrap();
-        let builder = EntityBuilder::new(HashMap::new(), schema, EntityNames::default());
+        let builder =
+            EntityBuilder::new(HashMap::new(), schema, EntityNames::default(), true, false);
         let tokens = DecodedTokens {
             access: None,
             id: None,

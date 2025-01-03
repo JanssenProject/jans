@@ -41,12 +41,12 @@ impl fmt::Display for BuildUserEntityError {
         if self.errors.is_empty() {
             writeln!(
                 f,
-                "Failed to create User Entity since no tokens were provided"
+                "failed to create User Entity since no tokens were provided"
             )?;
         } else {
             writeln!(
                 f,
-                "Failed to create User Entity due to the following errors:"
+                "failed to create User Entity due to the following errors:"
             )?;
             for (token_kind, error) in &self.errors {
                 writeln!(f, "- TokenKind {:?}: {}", token_kind, error)?;
@@ -128,7 +128,7 @@ mod test {
     fn test_successfully_building_user_entity(tokens: DecodedTokens, iss: TrustedIssuer) {
         let schema = test_schema();
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default());
+        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), false, true);
         let entity = builder
             .build_user_entity(&tokens, HashSet::new())
             .expect("expected to build user entity");
@@ -214,7 +214,7 @@ mod test {
         };
 
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default());
+        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), false, true);
         let err = builder
             .build_user_entity(&tokens, HashSet::new())
             .expect_err("expected to error while building the user entity");
@@ -246,7 +246,7 @@ mod test {
         };
 
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default());
+        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), false, true);
         let err = builder
             .build_user_entity(&tokens, HashSet::new())
             .expect_err("expected to error while building the user entity");
@@ -272,7 +272,7 @@ mod test {
         };
         let schema = test_schema();
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default());
+        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), false, true);
         let roles = HashSet::from([
             "Role::\"role1\"".parse().unwrap(),
             "Role::\"role2\"".parse().unwrap(),

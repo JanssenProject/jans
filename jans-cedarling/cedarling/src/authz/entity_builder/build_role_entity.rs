@@ -105,12 +105,12 @@ impl fmt::Display for BuildRoleEntityError {
         if self.errors.is_empty() {
             writeln!(
                 f,
-                "Failed to create Role Entity since no tokens were provided"
+                "failed to create Role Entity since no tokens were provided"
             )?;
         } else {
             writeln!(
                 f,
-                "Failed to create Role Entity due to the following errors:"
+                "failed to create Role Entity due to the following errors:"
             )?;
             for (token_kind, error) in &self.errors {
                 writeln!(f, "- TokenKind {:?}: {}", token_kind, error)?;
@@ -148,7 +148,7 @@ mod test {
     fn test_build_entity_from_str_claim(tokens: DecodedTokens, iss: TrustedIssuer) {
         let schema = test_schema();
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default());
+        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), false, false);
         let entity = builder
             .build_role_entities(&tokens)
             .expect("expected to build role entities");
@@ -174,7 +174,7 @@ mod test {
         };
         let schema = test_schema();
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default());
+        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), false, false);
         let entity = builder
             .build_role_entities(&tokens)
             .expect("expected to build role entities");
@@ -244,7 +244,7 @@ mod test {
         };
 
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default());
+        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), false, false);
         let err = builder
             .build_role_entities(&tokens)
             .expect_err("expected to error while building the role entity");
@@ -279,7 +279,7 @@ mod test {
         };
 
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default());
+        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), false, false);
         let err = builder
             .build_role_entities(&tokens)
             .expect_err("expected to error while building the role entity");

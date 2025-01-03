@@ -127,7 +127,7 @@ mod test {
     fn can_build_access_tkn_entity() {
         let schema = test_schema();
         let issuers = test_issusers();
-        let builder = EntityBuilder::new(issuers.clone(), schema, EntityNames::default());
+        let builder = EntityBuilder::new(issuers.clone(), schema, EntityNames::default(), false, false);
         let access_token = Token::new_access(
             TokenClaims::new(HashMap::from([
                 ("jti".to_string(), json!("tkn-123")),

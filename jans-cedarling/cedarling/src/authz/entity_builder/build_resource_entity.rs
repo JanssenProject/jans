@@ -150,7 +150,7 @@ mod test {
     fn can_build_resource_entity() {
         let schema = test_schema();
         let issuers = HashMap::from([("test_iss".into(), TrustedIssuer::default())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default());
+        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), false, false);
         let resource_data = ResourceData {
             resource_type: "HttpRequest".to_string(),
             id: "request-123".to_string(),

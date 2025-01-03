@@ -15,15 +15,21 @@ mod mapping;
 use crate::common::cedar_schema::new_cedar_json::CedarSchemaJson;
 use crate::common::policy_store::{TokenKind, TrustedIssuer};
 use crate::jwt::{Token, TokenClaimTypeError};
-use crate::AuthorizationConfig;
+use crate::{AuthorizationConfig, ResourceData};
 use build_attrs::BuildAttrError;
 use build_expr::*;
-use build_resource_entity::JsonTypeError;
+use build_resource_entity::{BuildResourceEntityError, JsonTypeError};
+use build_role_entity::BuildRoleEntityError;
+use build_token_entities::BuildTokenEntityError;
+use build_user_entity::BuildUserEntityError;
+use build_workload_entity::BuildWorkloadEntityError;
 use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::str::FromStr;
+
+use super::AuthorizeEntitiesData;
 
 const CEDAR_NAMESPACE_SEPARATOR: &str = "::";
 const DEFAULT_WORKLOAD_ENTITY_NAME: &str = "Workload";
@@ -99,6 +105,8 @@ pub struct EntityBuilder {
     schema: CedarSchemaJson,
     issuers: HashMap<String, TrustedIssuer>,
     entity_names: EntityNames,
+    build_workload: bool,
+    build_user: bool,
 }
 
 impl EntityBuilder {
@@ -106,12 +114,78 @@ impl EntityBuilder {
         issuers: HashMap<String, TrustedIssuer>,
         schema: CedarSchemaJson,
         entity_names: EntityNames,
+        build_workload: bool,
+        build_user: bool,
     ) -> Self {
         Self {
             schema,
             issuers,
             entity_names,
+            build_workload,
+            build_user,
         }
+    }
+
+    pub fn build_entities(
+        &self,
+        tokens: &DecodedTokens,
+        resource: &ResourceData,
+    ) -> Result<AuthorizeEntitiesData, BuildCedarlingEntityError> {
+        let workload = if self.build_workload {
+            Some(self.build_workload_entity(tokens)?)
+        } else {
+            None
+        };
+
+        let (user, roles) = if self.build_user {
+            let roles = self.build_role_entities(tokens)?;
+            let parents = roles
+                .iter()
+                .map(|role| role.uid())
+                .collect::<HashSet<EntityUid>>();
+            (Some(self.build_user_entity(tokens, parents)?), roles)
+        } else {
+            (None, vec![])
+        };
+
+        let access_token = if let Some(token) = tokens.access.as_ref() {
+            Some(
+                self.build_tkn_entity(token)
+                    .map_err(BuildCedarlingEntityError::AccessToken)?,
+            )
+        } else {
+            None
+        };
+
+        let id_token = if let Some(token) = tokens.access.as_ref() {
+            Some(
+                self.build_tkn_entity(token)
+                    .map_err(BuildCedarlingEntityError::AccessToken)?,
+            )
+        } else {
+            None
+        };
+
+        let userinfo_token = if let Some(token) = tokens.access.as_ref() {
+            Some(
+                self.build_tkn_entity(token)
+                    .map_err(BuildCedarlingEntityError::AccessToken)?,
+            )
+        } else {
+            None
+        };
+
+        let resource = self.build_resource_entity(resource)?;
+
+        Ok(AuthorizeEntitiesData {
+            workload,
+            user,
+            access_token,
+            id_token,
+            userinfo_token,
+            resource,
+            roles,
+        })
     }
 
     /// Builds a Cedar Entity using a JWT
@@ -150,6 +224,25 @@ impl EntityBuilder {
         let entity_uid = EntityUid::from_type_name_and_id(entity_type_name, entity_id);
         Ok(Entity::new(entity_uid, entity_attrs, parents)?)
     }
+}
+
+/// Errors encountered when building a Cedarling-specific entity
+#[derive(Debug, thiserror::Error)]
+pub enum BuildCedarlingEntityError {
+    #[error(transparent)]
+    Workload(#[from] BuildWorkloadEntityError),
+    #[error(transparent)]
+    User(#[from] BuildUserEntityError),
+    #[error(transparent)]
+    Role(#[from] BuildRoleEntityError),
+    #[error(transparent)]
+    Resource(#[from] BuildResourceEntityError),
+    #[error("error while building Access Token entity: {0}")]
+    AccessToken(#[source] BuildTokenEntityError),
+    #[error("error while building Id Token entity: {0}")]
+    IdToken(#[source] BuildTokenEntityError),
+    #[error("error while building Userinfo Token entity: {0}")]
+    UserinfoToken(#[source] BuildTokenEntityError),
 }
 
 #[derive(Debug, thiserror::Error)]
