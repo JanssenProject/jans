@@ -51,6 +51,7 @@
   "metricReporterInterval": 300,
   "metricReporterKeepDataDays": 15,
   "metricReporterEnabled": true,
+  "statEnabled": true,
   "errorReasonEnabled": false,
   "opaConfiguration": {
     "baseUrl": "http://%(jans_opa_host)s:%(jans_opa_port)s/v1/",

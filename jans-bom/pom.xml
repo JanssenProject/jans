@@ -509,6 +509,16 @@
 				<artifactId>commons-collections</artifactId>
 				<version>3.2.2</version>
 			</dependency>
+			<dependency>
+				<groupId>io.prometheus</groupId>
+				<artifactId>simpleclient_common</artifactId>
+				<version>0.9.0</version>
+			</dependency>
+            <dependency>
+                <groupId>net.agkn</groupId>
+                <artifactId>hll</artifactId>
+                <version>1.6.0</version>
+            </dependency>
 
 			<!-- Logging -->
 			<dependency>
@@ -605,7 +615,7 @@
 				<artifactId>jackson-dataformat-cbor</artifactId>
 				<version>${jackson.version}</version>
 			</dependency>
-		<!-- 	<dependency>
+			<!-- 	<dependency>
 				<groupId>jakarta.xml.bind</groupId>
 				<artifactId>jakarta.xml.bind-api</artifactId>
 				<version>2.3.3</version>
@@ -788,7 +798,7 @@
 				<artifactId>metrics-core</artifactId>
 				<version>4.2.12</version>
 			</dependency>
-			
+
 			<!-- Timer -->
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
@@ -832,7 +842,7 @@
 				<artifactId>velocity-engine-core</artifactId>
 				<version>2.3</version>
 			</dependency>
-			
+
 			<!-- Date/time utils -->
 			<dependency>
 				<groupId>joda-time</groupId>
@@ -897,8 +907,8 @@
 				<version>${mockito.version}</version>
 				<scope>test</scope>
 			</dependency>
-				
-            <!-- java compiler lib -->
+
+			<!-- java compiler lib -->
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>compiler</artifactId>

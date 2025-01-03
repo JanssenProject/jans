@@ -36,6 +36,7 @@ public class BaseDnConfiguration {
     private String tokens;
 	private String scripts;
 	private String metric;
+	private String stat;
 
 	public String getConfiguration() {
 		return configuration;
@@ -91,6 +92,14 @@ public class BaseDnConfiguration {
 
 	public void setMetric(String metric) {
 		this.metric = metric;
+	}
+
+	public String getStat() {
+		return stat;
+	}
+
+	public void setStat(String stat) {
+		this.stat = stat;
 	}
 
 }

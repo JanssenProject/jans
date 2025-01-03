@@ -78,7 +78,8 @@ class CasaInstaller(JettyInstaller):
 
 
     def generate_configuration(self):
-        self.casa_scopes = self.create_scopes()
+        if not hasattr(self, 'casa_scopes'):
+            self.casa_scopes = self.create_scopes()
 
         self.check_clients([('casa_client_id', self.client_id_prefix)])
 
@@ -115,38 +116,6 @@ class CasaInstaller(JettyInstaller):
     def create_folders(self):
         for cdir in ('plugins', 'static'):
             self.createDirs(os.path.join(self.jetty_service_dir, cdir))
-
-
-    def create_scopes(self):
-        self.logIt("Creating Casa client scopes")
-        scopes = base.readJsonFile(self.scopes_fn)
-        casa_scopes_ldif_fn = os.path.join(self.output_folder, 'scopes.ldif')
-        self.createDirs(self.output_folder)
-        scope_ldif_fd = open(casa_scopes_ldif_fn, 'wb')
-        scopes_list = []
-
-        ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
-
-        for scope in scopes:
-            scope_dn = 'inum={},ou=scopes,o=jans'.format(scope['inum'])
-            scopes_list.append(scope_dn)
-            ldif_dict = {
-                        'objectClass': ['top', 'jansScope'],
-                        'description': [scope['description']],
-                        'displayName': [scope['displayName']],
-                        'inum': [scope['inum']],
-                        'jansDefScope': [str(scope['jansDefScope'])],
-                        'jansId': [scope['jansId']],
-                        'jansScopeTyp': [scope['jansScopeTyp']],
-                        'jansAttrs': [json.dumps({"spontaneousClientId":None, "spontaneousClientScopes":[], "showInConfigurationEndpoint": False})],
-                    }
-            ldif_scopes_writer.unparse(scope_dn, ldif_dict)
-
-        scope_ldif_fd.close()
-
-        self.dbUtils.import_ldif([casa_scopes_ldif_fn])
-
-        return scopes_list
 
 
     def service_post_setup(self):
