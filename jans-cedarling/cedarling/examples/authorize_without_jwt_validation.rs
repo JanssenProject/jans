@@ -7,7 +7,7 @@ use std::collections::HashMap;
 
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource, Request, ResourceData, WorkloadBoolOp,
+    PolicyStoreConfig, PolicyStoreSource, Request, ResourceData, Tokens, WorkloadBoolOp,
 };
 
 static POLICY_STORE_RAW: &str = include_str!("../../test_files/policy-store_ok.yaml");
@@ -115,9 +115,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let result = cedarling
         .authorize(Request {
-            access_token: Some(access_token),
-            id_token: Some(id_token),
-            userinfo_token: Some(userinfo_token),
+        tokens: Tokens {
+                access_token: Some(access_token),
+                id_token: Some(id_token),
+                userinfo_token: Some(userinfo_token),
+        },
             action: "Jans::Action::\"Update\"".to_string(),
             context: serde_json::json!({}),
             resource: ResourceData {

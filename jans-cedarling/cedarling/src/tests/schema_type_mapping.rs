@@ -19,68 +19,70 @@ async fn check_mapping_tokens_data() {
     // JWT tokens payload from using `tarp` with `https://test-casa.gluu.info/.well-known/openid-configuration`
     let request = Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
-                "sub": "J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg",
-                "code": "697da80d-16ad-41f8-ad8e-c71f881c5473",
-                "iss": "https://test-casa.gluu.info",
-                "token_type": "Bearer",
-                "client_id": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
-                "aud": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
-                "acr": "simple_password_auth",
-                "x5t#S256": "",
-                "nbf": 1730494543,
-                "scope": [
-                    "role",
-                    "openid"
-                ],
-                "auth_time": 1730494542,
-                "exp": 1730574245,
-                "iat": 1730494543,
-                "jti": "qpCu52Z0S8ynfZ7ufCXQow",
-                "username": "John Smith",
-                "status": {
-                    "status_list": {
-                        "idx": 1003,
-                        "uri": "https://test-casa.gluu.info/jans-auth/restv1/status_list"
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
+                    "sub": "J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg",
+                    "code": "697da80d-16ad-41f8-ad8e-c71f881c5473",
+                    "iss": "https://test-casa.gluu.info",
+                    "token_type": "Bearer",
+                    "client_id": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
+                    "aud": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
+                    "acr": "simple_password_auth",
+                    "x5t#S256": "",
+                    "nbf": 1730494543,
+                    "scope": [
+                        "role",
+                        "openid"
+                    ],
+                    "auth_time": 1730494542,
+                    "exp": 1730574245,
+                    "iat": 1730494543,
+                    "jti": "qpCu52Z0S8ynfZ7ufCXQow",
+                    "username": "John Smith",
+                    "status": {
+                        "status_list": {
+                            "idx": 1003,
+                            "uri": "https://test-casa.gluu.info/jans-auth/restv1/status_list"
+                        }
                     }
-                }
-            })),
-            "id_token": generate_token_using_claims(json!({
-                "at_hash": "zajL-IEPbJ7XprbAgi5LAg",
-                "sub": "J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg",
-                "amr": [],
-                "iss": "https://test-casa.gluu.info",
-                "nonce": "b9b6df51-a04a-475a-9141-3fe589c2aab8",
-                "sid": "71eedb3a-7c18-420c-9fea-37d6532990e6",
-                "jansOpenIDConnectVersion": "openidconnect-1.0",
-                "aud": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
-                "acr": "simple_password_auth",
-                "c_hash": "pQi9rYqmSCVc3tK--2AgiA",
-                "nbf": 1730494543,
-                "auth_time": 1730494542,
-                "exp": 1730498143,
-                "grant": "authorization_code",
-                "iat": 1730494543,
-                "jti": "v2SWGfAEQGWZ1mPDSJPvbg",
-                "status": {
-                    "status_list": {
-                        "idx": 1004,
-                        "uri": "https://test-casa.gluu.info/jans-auth/restv1/status_list"
+                })),
+                "id_token": generate_token_using_claims(json!({
+                    "at_hash": "zajL-IEPbJ7XprbAgi5LAg",
+                    "sub": "J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg",
+                    "amr": [],
+                    "iss": "https://test-casa.gluu.info",
+                    "nonce": "b9b6df51-a04a-475a-9141-3fe589c2aab8",
+                    "sid": "71eedb3a-7c18-420c-9fea-37d6532990e6",
+                    "jansOpenIDConnectVersion": "openidconnect-1.0",
+                    "aud": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
+                    "acr": "simple_password_auth",
+                    "c_hash": "pQi9rYqmSCVc3tK--2AgiA",
+                    "nbf": 1730494543,
+                    "auth_time": 1730494542,
+                    "exp": 1730498143,
+                    "grant": "authorization_code",
+                    "iat": 1730494543,
+                    "jti": "v2SWGfAEQGWZ1mPDSJPvbg",
+                    "status": {
+                        "status_list": {
+                            "idx": 1004,
+                            "uri": "https://test-casa.gluu.info/jans-auth/restv1/status_list"
+                        }
                     }
-                }
-            })),
-            "userinfo_token":  generate_token_using_claims(json!({
-                "sub": "J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg",
-                "aud": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
-                "role": [
-                    "Manager",
-                    "Support"
-                ],
-                "iss": "https://test-casa.gluu.info",
-                "jti": "qOxklMYfSfqdYgXl01j9wA",
-                "client_id": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
-                "email":"user@example.com",
-            })),
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
+                    "sub": "J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg",
+                    "aud": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
+                    "role": [
+                        "Manager",
+                        "Support"
+                    ],
+                    "iss": "https://test-casa.gluu.info",
+                    "jti": "qOxklMYfSfqdYgXl01j9wA",
+                    "client_id": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
+                    "email":"user@example.com",
+                })),
+            },
             "action": "Test::Action::\"Search\"",
             "resource": {
                 "id": "SomeID",

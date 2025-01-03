@@ -99,8 +99,8 @@ public class AuthorizationChallengeService {
         try {
             return authorize(authzRequest);
         } catch (WebApplicationException e) {
-            if (log.isErrorEnabled() && AuthzRequestService.canLogWebApplicationException(e))
-                log.error(e.getMessage(), e);
+            if (log.isTraceEnabled())
+                log.trace(e.getMessage(), e);
             throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);

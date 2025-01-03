@@ -34,7 +34,7 @@ use std::sync::Arc;
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
 use authz::Authz;
-pub use authz::request::{Request, ResourceData};
+pub use authz::request::{Request, ResourceData, Tokens};
 pub use authz::{AuthorizeError, AuthorizeResult};
 pub use bootstrap_config::*;
 use common::app_types;

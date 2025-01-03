@@ -435,6 +435,6 @@ pub enum CreateCedarEntityError {
     UnavailableToken,
 
     /// Missing claim
-    #[error("{0} Entity creation failed: no available token to build the entity from")]
+    #[error("missing claim: {0}")]
     MissingClaim(String),
 }

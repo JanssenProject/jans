@@ -21,27 +21,29 @@ static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/policy-st
 lazy_static! {
     pub(crate) static ref AuthRequestBase: Request = Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
                     "iss": "some_iss",
                     "aud": "some_aud",
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "iss": "some_iss",
                     "aud": "some_aud",
                     "sub": "some_sub",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
                     "client_id": "some_client_id",
                     "role": "Admin",
-                  })),
+                })),
+            },
             // we need specify action name in each test case
             "action": "",
             "resource": {

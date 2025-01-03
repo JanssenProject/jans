@@ -87,7 +87,7 @@ impl Authz {
         &'a self,
         request: &'a Request,
     ) -> Result<DecodedTokens<'a>, AuthorizeError> {
-        let access_token = if let Some(tkn) = request.access_token.as_ref() {
+        let access_token = if let Some(tkn) = request.tokens.access_token.as_ref() {
             Some(
                 self.config
                     .jwt_service
@@ -98,7 +98,7 @@ impl Authz {
             None
         };
 
-        let id_token = if let Some(tkn) = request.id_token.as_ref() {
+        let id_token = if let Some(tkn) = request.tokens.id_token.as_ref() {
             Some(
                 self.config
                     .jwt_service
@@ -109,7 +109,7 @@ impl Authz {
             None
         };
 
-        let userinfo_token = if let Some(tkn) = request.userinfo_token.as_ref() {
+        let userinfo_token = if let Some(tkn) = request.tokens.userinfo_token.as_ref() {
             Some(
                 self.config
                     .jwt_service
