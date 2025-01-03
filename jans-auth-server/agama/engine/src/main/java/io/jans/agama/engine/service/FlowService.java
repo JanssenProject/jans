@@ -51,7 +51,7 @@ public class FlowService {
     private static final String SESSION_ID_COOKIE = "session_id";
     private static final String SCRIPT_SUFFIX = ".js";
     
-    private static final int TIMEOUT_SKEW = 8000; //millisecons
+    private static final int TIMEOUT_SKEW = 8000; //milliseconds
     
     @Inject
     private Logger logger;
@@ -271,6 +271,9 @@ public class FlowService {
             pe = pre;
 
         } else if (pending instanceof PendingRedirectException) {
+            
+            if (status.isNativeClient())
+                throw new IOException("RFAC for native clients is not available");
             
             PendingRedirectException pre = (PendingRedirectException) pending;
             
