@@ -22,7 +22,7 @@ pub struct Request {
 }
 
 /// Contains the JWTs that will be used for the AuthZ request
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Tokens {
     /// Access token raw value
     #[serde(default)]
