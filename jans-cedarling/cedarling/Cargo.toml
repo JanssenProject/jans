@@ -2,7 +2,7 @@
 name = "cedarling"
 version = "0.0.0-nightly"
 edition = "2021"
-description = "WASM binding to Cedarling"
+description = "The Cedarling: a high-performance local authorization service powered by the Rust Cedar Engine."
 license = "Apache-2.0"
 
 [features]
