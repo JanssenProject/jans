@@ -47,14 +47,3 @@ jobs:
       run: |
         cd ./jans-pycloudlib
         tox
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
-      with:
-        file: ./jans-pycloudlib/coverage.xml
-        files: ./jans-pycloudlib/coverage1.xml,./jans-pycloudlib/coverage2.xml
-        directory: ./jans-pycloudlib/coverage/reports/
-        flags: unittests
-        env_vars: OS,PYTHON
-        name: codecov-umbrella
-        fail_ci_if_error: true
-        verbose: true

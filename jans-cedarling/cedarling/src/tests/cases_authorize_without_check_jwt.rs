@@ -24,27 +24,29 @@ fn success_test_role_string() {
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
                     "iss": "some_iss",
                     "aud": "some_aud",
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "iss": "some_iss",
                     "aud": "some_aud",
                     "sub": "some_sub",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
                     "client_id": "some_client_id",
                     "role": "Admin",
-                  })),
+                })),
+            },
             "action": "Jans::Action::\"Update\"",
             "resource": {
                 "id": "random_id",
@@ -100,27 +102,29 @@ fn forbid_test_role_guest() {
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
                     "iss": "some_iss",
                     "aud": "some_aud",
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "iss": "some_iss",
                     "aud": "some_aud",
                     "sub": "some_sub",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
                     "client_id": "some_client_id",
                     "role": "Guest",
-                  })),
+                })),
+            },
             "action": "Jans::Action::\"Update\"",
             "resource": {
                 "id": "random_id",
@@ -176,27 +180,29 @@ fn success_test_role_array() {
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
                     "iss": "some_iss",
                     "aud": "some_aud",
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "iss": "some_iss",
                     "aud": "some_aud",
                     "sub": "some_sub",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
                     "client_id": "some_client_id",
                     "role": ["Admin"],
-                  })),
+                })),
+            },
             "action": "Jans::Action::\"Update\"",
             "resource": {
                 "id": "random_id",
@@ -253,20 +259,21 @@ fn success_test_no_role() {
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
                     "iss": "some_iss",
                     "aud": "some_aud",
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "iss": "some_iss",
                     "aud": "some_aud",
                     "sub": "some_sub",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
@@ -274,7 +281,8 @@ fn success_test_no_role() {
                     "client_id": "some_client_id",
                     // comment role field (removed)
                     // "role": ["Admin"],
-                  })),
+                })),
+            },
             "action": "Jans::Action::\"Update\"",
             "resource": {
                 "id": "random_id",
@@ -332,28 +340,30 @@ fn success_test_user_data_in_id_token() {
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
                     "iss": "some_iss",
                     "aud": "some_aud",
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "iss": "some_iss",
                     "aud": "some_aud",
                     "sub": "some_sub",
                     "country": "US",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "sub": "some_sub",
                     "iss": "some_iss",
                     "client_id": "some_client_id",
                     "role": ["Admin"],
                     "country": "US",
-                  })),
+                })),
+            },
             "action": "Jans::Action::\"Update\"",
             "resource": {
                 "id": "random_id",
@@ -405,21 +415,22 @@ fn all_forbid() {
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
-                  // org_id different from resource
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
+                    // org_id different from resource
                     "org_id": "some_long_id_2",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
                     "iss": "some_iss",
                     "aud": "some_aud",
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "iss": "some_iss",
                     "aud": "some_aud",
                     "sub": "some_sub",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "jti": "some_jti",
                   // country different from resource
                     "country": "UK",
@@ -429,7 +440,8 @@ fn all_forbid() {
                     "client_id": "some_client_id",
                     // role not Admin
                     "role": ["Guest"],
-                  })),
+                })),
+            },
             "action": "Jans::Action::\"Update\"",
             "resource": {
                 "id": "random_id",
@@ -481,20 +493,21 @@ fn only_workload_permit() {
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
                     "iss": "some_iss",
                     "aud": "some_aud",
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "iss": "some_iss",
                     "aud": "some_aud",
                     "sub": "some_sub",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "jti": "some_jti",
                   // country different from resource
                     "country": "UK",
@@ -503,7 +516,8 @@ fn only_workload_permit() {
                     "client_id": "some_client_id",
                     // role not Admin
                     "role": ["Guest"],
-                  })),
+                })),
+            },
             "action": "Jans::Action::\"Update\"",
             "resource": {
                 "id": "random_id",
@@ -561,21 +575,22 @@ fn only_person_permit() {
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
-                  // org_id different from resource
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
+                    // org_id different from resource
                     "org_id": "some_long_id_2",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
                     "iss": "some_iss",
                     "aud": "some_aud",
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "iss": "some_iss",
                     "aud": "some_aud",
                     "sub": "some_sub",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "jti": "some_jti",
                   // country different from resource
                     "country": "US",
@@ -584,7 +599,8 @@ fn only_person_permit() {
                     "client_id": "some_client_id",
                     // role not present, commented line
                     // "role": ["Guest"],
-                  })),
+                })),
+            },
             "action": "Jans::Action::\"Update\"",
             "resource": {
                 "id": "random_id",
@@ -636,21 +652,22 @@ fn only_user_role_permit() {
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
-                  // org_id different from resource
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
+                    // org_id different from resource
                     "org_id": "some_long_id_2",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
                     "iss": "some_iss",
                     "aud": "some_aud",
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "iss": "some_iss",
                     "aud": "some_aud",
                     "sub": "some_sub",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "jti": "some_jti",
                   // country different from resource
                     "country": "UK",
@@ -658,7 +675,8 @@ fn only_user_role_permit() {
                     "iss": "some_iss",
                     "client_id": "some_client_id",
                     "role": ["Admin"],
-                  })),
+                })),
+            },
             "action": "Jans::Action::\"Update\"",
             "resource": {
                 "id": "random_id",
@@ -710,20 +728,21 @@ fn only_workload_and_person_permit() {
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
                     "iss": "some_iss",
                     "aud": "some_aud",
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "iss": "some_iss",
                     "aud": "some_aud",
                     "sub": "some_sub",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
@@ -731,7 +750,8 @@ fn only_workload_and_person_permit() {
                     "client_id": "some_client_id",
                     // role vector is empty
                     "role": [],
-                  })),
+                })),
+            },
             "action": "Jans::Action::\"Update\"",
             "resource": {
                 "id": "random_id",
@@ -783,28 +803,30 @@ fn only_workload_and_role_permit() {
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
                     "iss": "some_iss",
                     "aud": "some_aud",
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "iss": "some_iss",
                     "aud": "some_aud",
                     "sub": "some_sub",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "jti": "some_jti",
-                  // country different from resource
+                    // country different from resource
                     "country": "UK",
                     "sub": "some_sub",
                     "iss": "some_iss",
                     "client_id": "some_client_id",
                     "role": ["Admin"],
-                  })),
+                })),
+            },
             "action": "Jans::Action::\"Update\"",
             "resource": {
                 "id": "random_id",
@@ -855,7 +877,8 @@ fn success_test_role_string_with_abac() {
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
                     "org_id": "some_long_id",
                     "jti": "token1",
                     "client_id": "some_client_id",
@@ -864,8 +887,8 @@ fn success_test_role_string_with_abac() {
                     "exp": i64::MAX,
                     "iat": 0,
                     "name": "Worker123",
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "jti": "token2",
                     "iss": "https://account.gluu.org",
                     "aud": "client123",
@@ -874,8 +897,8 @@ fn success_test_role_string_with_abac() {
                     "iat": 0,
                     "amr": "some_amr",
                     "acr": "some_acr",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "jti": "token3",
                     "iss": "https://account.gluu.org",
                     "sub": "some_sub",
@@ -886,7 +909,8 @@ fn success_test_role_string_with_abac() {
                     "username": "worker123",
                     "exp": i64::MAX,
                     "iat": 0,
-                  })),
+                })),
+            },
             "action": "Jans::Action::\"Update\"",
             "resource": {
                 "id": "random_id",

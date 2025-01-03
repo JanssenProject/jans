@@ -19,7 +19,8 @@ fn success_test_json() {
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
                     "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
                     "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
                     "iss": "https://admin-ui-test.gluu.org",
@@ -44,8 +45,8 @@ fn success_test_json() {
                         "uri": "https://admin-ui-test.gluu.org/jans-auth/restv1/status_list"
                       }
                     }
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "acr": "basic",
                     "amr": "10",
                     "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
@@ -67,8 +68,8 @@ fn success_test_json() {
                       }
                     },
                     "role":"Admin"
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "country": "US",
                     "email": "user@example.com",
                     "username": "UserNameExample",
@@ -88,7 +89,8 @@ fn success_test_json() {
                         "api-admin"
                     ],
                     "exp": 1724945978
-                  })),
+                })),
+            },
             "action": "Jans::Action::\"Update\"",
             "resource": {
                 "id": "random_id",
