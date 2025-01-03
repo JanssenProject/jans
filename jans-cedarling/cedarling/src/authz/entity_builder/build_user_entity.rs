@@ -11,16 +11,17 @@ impl EntityBuilder {
     pub fn build_user_entity(
         &self,
         tokens: &DecodedTokens,
+        parents: HashSet<EntityUid>,
     ) -> Result<Entity, BuildUserEntityError> {
         let entity_name = self.entity_names.user.as_ref();
         let mut errors = vec![];
 
         for token in [tokens.userinfo.as_ref(), tokens.id.as_ref()]
-            .into_iter()
+            .iter()
             .flatten()
         {
             let user_id_claim = token.user_mapping();
-            match self.build_entity(entity_name, token, user_id_claim, vec![], HashSet::new()) {
+            match self.build_entity(entity_name, token, user_id_claim, vec![], parents.clone()) {
                 Ok(entity) => return Ok(entity),
                 Err(err) => errors.push((token.kind, err)),
             }
@@ -107,20 +108,20 @@ mod test {
                         },
                     },
                 },
-            "entityTypes": {
-                "Role": {},
-                "User": {
-                    "memberOfTypes": ["Role"],
-                    "shape": {
-                        "type": "Record",
-                        "attributes":  {
-                            "email": { "type": "EntityOrCommon", "name": "Email" },
-                            "sub": { "type": "String" },
-                            "role": { "type": "Set", "element": { "type": "String" }},
-                    },
+                "entityTypes": {
+                    "Role": {},
+                    "User": {
+                        "memberOf": ["Role"],
+                        "shape": {
+                            "type": "Record",
+                            "attributes":  {
+                                "email": { "type": "EntityOrCommon", "name": "Email" },
+                                "sub": { "type": "String" },
+                        },
+                    }
                 }
-            }}}
-        }))
+            }
+        }}))
         .expect("should successfully create test schema")
     }
 
@@ -129,7 +130,7 @@ mod test {
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
         let builder = EntityBuilder::new(issuers, schema, EntityNames::default());
         let entity = builder
-            .build_user_entity(&tokens)
+            .build_user_entity(&tokens, HashSet::new())
             .expect("expected to build user entity");
 
         assert_eq!(entity.uid().to_string(), "Jans::User::\"user-123\"");
@@ -138,18 +139,6 @@ mod test {
             entity.attr("sub").unwrap().unwrap(),
             EvalResult::String("user-123".to_string()),
         );
-
-        let role = entity
-            .attr("role")
-            .expect("expected role attribute to be present")
-            .unwrap();
-        if let EvalResult::Set(set) = role {
-            assert_eq!(set.len(), 2);
-            assert!(set.contains(&EvalResult::String("admin".to_string())));
-            assert!(set.contains(&EvalResult::String("user".to_string())));
-        } else {
-            panic!("expected role attribute to be of kind EvalResult::Set, got: {role:?}");
-        }
 
         let email = entity
             .attr("email")
@@ -227,8 +216,8 @@ mod test {
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
         let builder = EntityBuilder::new(issuers, schema, EntityNames::default());
         let err = builder
-            .build_user_entity(&tokens)
-            .expect_err("expected to error while building the workload entity");
+            .build_user_entity(&tokens, HashSet::new())
+            .expect_err("expected to error while building the user entity");
 
         assert_eq!(err.errors.len(), 2);
         for (i, expected_kind) in [TokenKind::Userinfo, TokenKind::Id].iter().enumerate() {
@@ -239,7 +228,8 @@ mod test {
                         if tkn_kind == expected_kind &&
                             claim_name == "sub"
                 ),
-                "expected an error due to missing the `sub` claim"
+                "expected an error due to missing the `sub` claim, got: {:?}",
+                err.errors[i]
             );
         }
     }
@@ -258,9 +248,42 @@ mod test {
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
         let builder = EntityBuilder::new(issuers, schema, EntityNames::default());
         let err = builder
-            .build_user_entity(&tokens)
-            .expect_err("expected to error while building the workload entity");
+            .build_user_entity(&tokens, HashSet::new())
+            .expect_err("expected to error while building the user entity");
 
         assert_eq!(err.errors.len(), 0);
+    }
+
+    #[test]
+    fn can_build_entity_with_roles() {
+        let iss = test_iss();
+        let userinfo_token = Token::new_userinfo(
+            TokenClaims::new(HashMap::from([
+                ("sub".to_string(), json!("user-123")),
+                ("email".to_string(), json!("someone@email.com")),
+                ("role".to_string(), json!(["role1", "role2", "role3"])),
+            ])),
+            Some(&iss),
+        );
+        let tokens = DecodedTokens {
+            access: None,
+            id: None,
+            userinfo: Some(userinfo_token),
+        };
+        let schema = test_schema();
+        let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
+        let builder = EntityBuilder::new(issuers, schema, EntityNames::default());
+        let roles = HashSet::from([
+            "Role::\"role1\"".parse().unwrap(),
+            "Role::\"role2\"".parse().unwrap(),
+            "Role::\"role3\"".parse().unwrap(),
+        ]);
+
+        let user_entity = builder
+            .build_user_entity(&tokens, roles.clone())
+            .expect("expected to build user entity");
+
+        let (_, _, parents) = user_entity.into_inner();
+        assert_eq!(parents, roles,);
     }
 }

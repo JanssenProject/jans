@@ -81,7 +81,7 @@ pub enum BuildResourceEntityError {
 }
 
 #[derive(Debug, thiserror::Error)]
-#[error("type mismatch: expected '{expected_type}', but found '{actual_type}'")]
+#[error("JSON value type mismatch: expected '{expected_type}', but found '{actual_type}'")]
 pub struct JsonTypeError {
     pub expected_type: String,
     pub actual_type: String,

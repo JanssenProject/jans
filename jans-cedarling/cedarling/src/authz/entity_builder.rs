@@ -6,6 +6,7 @@
 mod build_attrs;
 mod build_expr;
 mod build_resource_entity;
+mod build_role_entity;
 mod build_token_entities;
 mod build_user_entity;
 mod build_workload_entity;
@@ -17,7 +18,9 @@ use crate::jwt::{Token, TokenClaimTypeError};
 use crate::AuthorizationConfig;
 use build_attrs::BuildAttrError;
 use build_expr::*;
+use build_resource_entity::JsonTypeError;
 use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid};
+use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::str::FromStr;
@@ -33,6 +36,15 @@ pub struct DecodedTokens<'a> {
     pub access: Option<Token<'a>>,
     pub id: Option<Token<'a>>,
     pub userinfo: Option<Token<'a>>,
+}
+
+impl<'a> DecodedTokens<'a> {
+    /// Returns an iterator over non-None tokens.
+    pub fn iter(&'a self) -> impl Iterator<Item = &'a Token<'a>> {
+        [&self.access, &self.id, &self.userinfo]
+            .into_iter()
+            .filter_map(|token| token.as_ref())
+    }
 }
 
 /// The names of the entities in the schema
@@ -156,10 +168,18 @@ pub enum BuildEntityError {
     MissingData(String),
     #[error(transparent)]
     TokenClaimTypeMismatch(#[from] TokenClaimTypeError),
+    #[error(transparent)]
+    JsonTypeError(#[from] JsonTypeError),
     #[error("the entity `{0}` is not defined in the schema")]
     EntityNotInSchema(String),
     #[error(transparent)]
     BuildExpression(#[from] BuildExprError),
     #[error(transparent)]
     BuildEntityAttr(#[from] BuildAttrError),
+}
+
+impl BuildEntityError {
+    pub fn json_type_err(expected_type_name: &str, got_value: &Value) -> Self {
+        Self::JsonTypeError(JsonTypeError::type_mismatch(expected_type_name, got_value))
+    }
 }
