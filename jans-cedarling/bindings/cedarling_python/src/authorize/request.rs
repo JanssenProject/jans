@@ -20,12 +20,10 @@ use serde_pyobject::from_pyobject;
 ///
 /// Attributes
 /// ----------
+/// :param tokens: A class containing the JWTs what will be used for the request.
 /// :param action: The action to be authorized.
 /// :param resource: Resource data (wrapped `ResourceData` object).
 /// :param context: Python dictionary with additional context.
-/// :param access_token: (Optional) The access token string.
-/// :param id_token: (Optional) The id token string.
-/// :param userinfo_token: (Optional) The userinfo token string.
 ///
 /// Example
 /// -------
@@ -35,12 +33,7 @@ use serde_pyobject::from_pyobject;
 /// ```
 #[pyclass(get_all, set_all)]
 pub struct Request {
-    /// Access token raw value
-    pub access_token: Option<String>,
-    /// Id token raw value
-    pub id_token: Option<String>,
-    /// Userinfo token raw value
-    pub userinfo_token: Option<String>,
+    pub tokens: Tokens,
     /// cedar_policy action
     pub action: String,
     /// cedar_policy resource data
@@ -49,14 +42,39 @@ pub struct Request {
     pub context: Py<PyDict>,
 }
 
+/// Tokens
+/// =======
+///
+/// A Python wrapper for the Rust `cedarling::Token` struct. Contains the JWTs
+/// that will be used for the AuthZ request.
+///
+/// Attributes
+/// ----------
+/// :param access_token: (Optional) The access token string.
+/// :param id_token: (Optional) The id token string.
+/// :param userinfo_token: (Optional) The userinfo token string.
+///
+/// Example
+/// -------
+/// ```python
+/// tokens = Request("your_access_tkn", "your_id_tkn", "your_userinfo_tkn")
+/// ```
+#[derive(Clone)]
+#[pyclass(get_all, set_all)]
+pub struct Tokens {
+    /// Access token raw value
+    pub access_token: Option<String>,
+    /// Id token raw value
+    pub id_token: Option<String>,
+    /// Userinfo token raw value
+    pub userinfo_token: Option<String>,
+}
+
 #[pymethods]
-impl Request {
+impl Tokens {
     #[new]
-    #[pyo3(signature = (action, resource, context, access_token=None, id_token=None, userinfo_token=None))]
+    #[pyo3(signature = (access_token, id_token, userinfo_token))]
     fn new(
-        action: String,
-        resource: ResourceData,
-        context: Py<PyDict>,
         access_token: Option<String>,
         id_token: Option<String>,
         userinfo_token: Option<String>,
@@ -65,9 +83,30 @@ impl Request {
             access_token,
             id_token,
             userinfo_token,
+        }
+    }
+}
+
+#[pymethods]
+impl Request {
+    #[new]
+    #[pyo3(signature = (tokens, action, resource, context))]
+    fn new(tokens: Tokens, action: String, resource: ResourceData, context: Py<PyDict>) -> Self {
+        Self {
+            tokens,
             action,
             resource,
             context,
+        }
+    }
+}
+
+impl From<Tokens> for cedarling::Tokens {
+    fn from(tokens: Tokens) -> Self {
+        Self {
+            access_token: tokens.access_token,
+            id_token: tokens.id_token,
+            userinfo_token: tokens.userinfo_token,
         }
     }
 }
@@ -82,9 +121,7 @@ impl Request {
         })?;
 
         Ok(cedarling::Request {
-            access_token: self.access_token.clone(),
-            id_token: self.id_token.clone(),
-            userinfo_token: self.userinfo_token.clone(),
+            tokens: self.tokens.clone().into(),
             action: self.action.clone(),
             resource: self.resource.clone().into(),
             context,

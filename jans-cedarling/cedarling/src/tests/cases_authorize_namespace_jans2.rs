@@ -21,27 +21,29 @@ fn test_namespace_jans2() {
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
                     "iss": "some_iss",
                     "aud": "some_aud",
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "iss": "some_iss",
                     "aud": "some_aud",
                     "sub": "some_sub",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
                     "role": ["Admin"],
-                  })),
+                })),
+            },
             "action": "Jans2::Action::\"Update\"",
             "resource": {
                 "id": "random_id",
