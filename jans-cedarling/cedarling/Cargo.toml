@@ -6,9 +6,6 @@ description = "WASM binding to Cedarling"
 license = "Apache-2.0"
 
 [features]
-# blocking with default is used only for local testing, next line should be commented
-# default = ["blocking"]
-
 # blocking feature allows to use blocking cedarling client
 blocking = ["tokio/rt-multi-thread"]
 
