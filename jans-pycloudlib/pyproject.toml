@@ -1,3 +1,93 @@
+[build-system]
+requires = [
+    # The minimum setuptools version is specific to the PEP 517 backend,
+    # and may be stricter than the version required in `setup.cfg`
+    "setuptools>=40.6.0,!=60.9.0",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jans-pycloudlib"
+dynamic = ["version"]
+description = "Utilities for Janssen cloud-native deployment"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "JanssenProject"}
+]
+maintainers = [
+    {name = "Isman Firmansyah", email = "isman@gluu.org"}
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
+]
+dependencies = [
+    "requests>=2.22.0",
+    "python-consul>=1.0.1",
+    "hvac>=0.7.0",
+    "kubernetes>=11.0",
+
+    # the ldap3 library is not removed for the following reasons:
+    #
+    # - it's still used by `jans.pycloudlib.utils.ldap_encode` (hashed function)
+    # - it's still used by `jans.pycloudlib.persistence.sql.doc_id_from_dn` (parse_dn function)
+    # - vendoring hashed and parse_dn functions from ldap3 library will need testcases, which we can avoid by reusing the original functions
+    # - LDAP/LDIF DN is still used heavily in Janssen data design
+    #
+    "ldap3>=2.5",
+
+    "backoff>=2.1.2",
+    "docker>=3.7.2",
+    "requests-toolbelt>=0.9.1",
+    "cryptography>=2.8",
+    "google-cloud-secret-manager>=2.2.0",
+    "pymysql>=1.0.2",
+    "sqlalchemy>=1.3,<1.4",
+    "psycopg2>=2.8.6",
+    "Click>=6.7",
+    "ldif>=4.1.1",
+
+    # handle CVE-2022-36087
+    "oauthlib>=3.2.1",
+
+    "boto3",
+    "sprig-aes>=0.4.0",
+    "marshmallow>=3.21.2",
+    "apispec[marshmallow]>=6.6.1",
+    "fqdn>=1.5.1",
+    "pem>=23.1.0",
+
+    # extra dependency for google-cloud-secret-manager
+    "grpc-interceptor>=0.15.4"
+]
+requires-python = ">=3.9"
+
+[project.scripts]
+jans-pycloudlib = "jans.pycloudlib.cli:cli"
+
+[project.urls]
+"Homepage" = "https://github.com/JanssenProject/jans/tree/main/jans-pycloudlib"
+
+[tool.setuptools]
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.packages.find]
+include = ["jans*"]
+# disable scanning PEP 420 namespaces
+namespaces = false
+
+[tool.setuptools.dynamic]
+version = {attr = "jans.pycloudlib.version.__version__"}
+
 [tool.pydocstyle]
 convention = "google"
 inherit = false
