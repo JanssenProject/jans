@@ -115,7 +115,7 @@ impl JsonTypeError {
 mod test {
     use super::super::*;
     use super::*;
-    use crate::common::cedar_schema::new_cedar_json::CedarSchemaJson;
+    use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
     use cedar_policy::EvalResult;
     use serde_json::json;
 
@@ -149,8 +149,7 @@ mod test {
     #[test]
     fn can_build_resource_entity() {
         let schema = test_schema();
-        let issuers = HashMap::from([("test_iss".into(), TrustedIssuer::default())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), false, false);
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let resource_data = ResourceData {
             resource_type: "HttpRequest".to_string(),
             id: "request-123".to_string(),

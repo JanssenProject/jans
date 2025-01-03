@@ -9,7 +9,7 @@ use serde::{de, Deserialize};
 use serde_json::Value;
 use std::collections::HashMap;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Attribute {
     String {
         required: bool,
@@ -53,59 +53,6 @@ impl Attribute {
         "Extension",
         "EntityOrCommon",
     ];
-}
-
-#[cfg(test)]
-#[allow(dead_code)]
-/// Helper methods to easily create required attributes
-impl Attribute {
-    pub fn string() -> Self {
-        Self::String { required: true }
-    }
-
-    pub fn long() -> Self {
-        Self::Long { required: true }
-    }
-
-    pub fn boolean() -> Self {
-        Self::Boolean { required: true }
-    }
-
-    pub fn record(attrs: HashMap<AttributeName, Self>) -> Self {
-        Self::Record {
-            required: true,
-            attrs,
-        }
-    }
-
-    pub fn set(element: Self) -> Self {
-        Self::Set {
-            required: true,
-
-            element: Box::new(element),
-        }
-    }
-
-    pub fn entity(name: &str) -> Self {
-        Self::Entity {
-            required: true,
-            name: name.into(),
-        }
-    }
-
-    pub fn extension(name: &str) -> Self {
-        Self::Extension {
-            required: true,
-            name: name.into(),
-        }
-    }
-
-    pub fn entity_or_common(name: &str) -> Self {
-        Self::EntityOrCommon {
-            required: true,
-            name: name.into(),
-        }
-    }
 }
 
 impl<'de> Deserialize<'de> for Attribute {
@@ -173,11 +120,62 @@ impl<'de> Deserialize<'de> for Attribute {
                 let name = deserialize_to_string::<D>(name)?;
                 Self::EntityOrCommon { required, name }
             },
-
             variant => return Err(de::Error::unknown_variant(variant, &Self::ATTR_VARIANTS)),
         };
 
         Ok(attr)
+    }
+}
+
+#[cfg(test)]
+/// Helper methods to easily create required attributes
+impl Attribute {
+    pub fn string() -> Self {
+        Self::String { required: true }
+    }
+
+    pub fn long() -> Self {
+        Self::Long { required: true }
+    }
+
+    pub fn boolean() -> Self {
+        Self::Boolean { required: true }
+    }
+
+    pub fn record(attrs: HashMap<AttributeName, Self>) -> Self {
+        Self::Record {
+            required: true,
+            attrs,
+        }
+    }
+
+    pub fn set(element: Self) -> Self {
+        Self::Set {
+            required: true,
+
+            element: Box::new(element),
+        }
+    }
+
+    pub fn entity(name: &str) -> Self {
+        Self::Entity {
+            required: true,
+            name: name.into(),
+        }
+    }
+
+    pub fn extension(name: &str) -> Self {
+        Self::Extension {
+            required: true,
+            name: name.into(),
+        }
+    }
+
+    pub fn entity_or_common(name: &str) -> Self {
+        Self::EntityOrCommon {
+            required: true,
+            name: name.into(),
+        }
     }
 }
 

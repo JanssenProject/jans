@@ -3,8 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::common::cedar_schema::new_cedar_json::attribute::Attribute;
-use crate::common::cedar_schema::new_cedar_json::CedarSchemaJson;
+use crate::common::cedar_schema::cedar_json::attribute::Attribute;
+use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use cedar_policy::{
     EntityId, EntityTypeName, EntityUid, ExpressionConstructionError, RestrictedExpression,
 };

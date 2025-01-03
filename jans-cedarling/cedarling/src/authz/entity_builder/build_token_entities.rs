@@ -9,18 +9,18 @@ const DEFAULT_TKN_PRINCIPAL_IDENTIFIER: &str = "jti";
 
 impl EntityBuilder {
     pub fn build_tkn_entity(&self, token: &Token) -> Result<Entity, BuildTokenEntityError> {
+        // TODO: use the other entity names
         let entity_name = self.entity_names.access_token.as_ref();
-        self.build_entity(
-            entity_name,
-            &token,
-            DEFAULT_TKN_PRINCIPAL_IDENTIFIER,
-            vec![],
-            HashSet::new(),
-        )
-        .map_err(|err| BuildTokenEntityError {
-            token_kind: token.kind,
-            err,
-        })
+        let id_src_claim = token
+            .metadata()
+            .principal_identifier
+            .as_deref()
+            .unwrap_or(DEFAULT_TKN_PRINCIPAL_IDENTIFIER);
+        self.build_entity(entity_name, &token, id_src_claim, vec![], HashSet::new())
+            .map_err(|err| BuildTokenEntityError {
+                token_kind: token.kind,
+                err,
+            })
     }
 }
 
@@ -57,7 +57,7 @@ impl BuildTokenEntityError {
 #[cfg(test)]
 mod test {
     use super::super::*;
-    use crate::common::cedar_schema::new_cedar_json::CedarSchemaJson;
+    use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
     use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer};
     use crate::jwt::{Token, TokenClaims};
     use cedar_policy::EvalResult;
@@ -127,7 +127,7 @@ mod test {
     fn can_build_access_tkn_entity() {
         let schema = test_schema();
         let issuers = test_issusers();
-        let builder = EntityBuilder::new(issuers.clone(), schema, EntityNames::default(), false, false);
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let access_token = Token::new_access(
             TokenClaims::new(HashMap::from([
                 ("jti".to_string(), json!("tkn-123")),

@@ -24,7 +24,7 @@ use std::sync::Arc;
 
 pub use jsonwebtoken::Algorithm;
 use key_service::{KeyService, KeyServiceError};
-pub use token::{Token, TokenClaim, TokenClaimTypeError, TokenClaims, TokenStr};
+pub use token::{Token, TokenClaimTypeError, TokenClaims, TokenStr};
 use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
 
 use crate::common::policy_store::TrustedIssuer;

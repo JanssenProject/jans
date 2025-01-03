@@ -107,7 +107,7 @@ fn check_mapping_tokens_data() {
     .expect("Request should be deserialized from json");
 
     let entities = cedarling
-        .authorize_entities_data(&request)
+        .build_entities(&request)
         // log err to be human readable
         .inspect_err(|err| println!("Error: {}", err.to_string()))
         .expect("request should be parsed without errors");

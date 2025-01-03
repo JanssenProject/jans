@@ -12,15 +12,16 @@ mod build_user_entity;
 mod build_workload_entity;
 mod mapping;
 
-use crate::common::cedar_schema::new_cedar_json::CedarSchemaJson;
-use crate::common::policy_store::{TokenKind, TrustedIssuer};
+use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
+use crate::common::cedar_schema::CEDAR_NAMESPACE_SEPARATOR;
+use crate::common::policy_store::TokenKind;
 use crate::jwt::{Token, TokenClaimTypeError};
 use crate::{AuthorizationConfig, ResourceData};
 use build_attrs::BuildAttrError;
 use build_expr::*;
 use build_resource_entity::{BuildResourceEntityError, JsonTypeError};
 use build_role_entity::BuildRoleEntityError;
-use build_token_entities::BuildTokenEntityError;
+pub use build_token_entities::BuildTokenEntityError;
 use build_user_entity::BuildUserEntityError;
 use build_workload_entity::BuildWorkloadEntityError;
 use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid};
@@ -31,7 +32,6 @@ use std::str::FromStr;
 
 use super::AuthorizeEntitiesData;
 
-const CEDAR_NAMESPACE_SEPARATOR: &str = "::";
 const DEFAULT_WORKLOAD_ENTITY_NAME: &str = "Workload";
 const DEFAULT_USER_ENTITY_NAME: &str = "User";
 const DEFAULT_ACCESS_TKN_ENTITY_NAME: &str = "Access_token";
@@ -42,15 +42,6 @@ pub struct DecodedTokens<'a> {
     pub access: Option<Token<'a>>,
     pub id: Option<Token<'a>>,
     pub userinfo: Option<Token<'a>>,
-}
-
-impl<'a> DecodedTokens<'a> {
-    /// Returns an iterator over non-None tokens.
-    pub fn iter(&'a self) -> impl Iterator<Item = &'a Token<'a>> {
-        [&self.access, &self.id, &self.userinfo]
-            .into_iter()
-            .filter_map(|token| token.as_ref())
-    }
 }
 
 /// The names of the entities in the schema
@@ -103,7 +94,6 @@ impl Default for EntityNames {
 
 pub struct EntityBuilder {
     schema: CedarSchemaJson,
-    issuers: HashMap<String, TrustedIssuer>,
     entity_names: EntityNames,
     build_workload: bool,
     build_user: bool,
@@ -111,7 +101,6 @@ pub struct EntityBuilder {
 
 impl EntityBuilder {
     pub fn new(
-        issuers: HashMap<String, TrustedIssuer>,
         schema: CedarSchemaJson,
         entity_names: EntityNames,
         build_workload: bool,
@@ -119,7 +108,6 @@ impl EntityBuilder {
     ) -> Self {
         Self {
             schema,
-            issuers,
             entity_names,
             build_workload,
             build_user,

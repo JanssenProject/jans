@@ -123,7 +123,7 @@ impl fmt::Display for BuildRoleEntityError {
 #[cfg(test)]
 mod test {
     use super::super::*;
-    use crate::common::cedar_schema::new_cedar_json::CedarSchemaJson;
+    use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
     use crate::common::policy_store::TrustedIssuer;
     use crate::jwt::{Token, TokenClaims};
     use serde_json::json;
@@ -145,10 +145,9 @@ mod test {
         .expect("should successfully create test schema")
     }
 
-    fn test_build_entity_from_str_claim(tokens: DecodedTokens, iss: TrustedIssuer) {
+    fn test_build_entity_from_str_claim(tokens: DecodedTokens) {
         let schema = test_schema();
-        let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), false, false);
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let entity = builder
             .build_role_entities(&tokens)
             .expect("expected to build role entities");
@@ -173,8 +172,7 @@ mod test {
             userinfo: Some(userinfo_token),
         };
         let schema = test_schema();
-        let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), false, false);
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let entity = builder
             .build_role_entities(&tokens)
             .expect("expected to build role entities");
@@ -196,7 +194,7 @@ mod test {
             id: None,
             userinfo: Some(userinfo_token),
         };
-        test_build_entity_from_str_claim(tokens, iss.clone());
+        test_build_entity_from_str_claim(tokens);
     }
 
     #[test]
@@ -211,7 +209,7 @@ mod test {
             id: Some(id_token),
             userinfo: None,
         };
-        test_build_entity_from_str_claim(tokens, iss.clone());
+        test_build_entity_from_str_claim(tokens);
     }
 
     #[test]
@@ -226,7 +224,7 @@ mod test {
             id: None,
             userinfo: None,
         };
-        test_build_entity_from_str_claim(tokens, iss.clone());
+        test_build_entity_from_str_claim(tokens);
     }
 
     #[test]
@@ -243,8 +241,7 @@ mod test {
             userinfo: Some(userinfo_token),
         };
 
-        let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), false, false);
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let err = builder
             .build_role_entities(&tokens)
             .expect_err("expected to error while building the role entity");
@@ -269,7 +266,6 @@ mod test {
 
     #[test]
     fn errors_when_tokens_unavailable() {
-        let iss = TrustedIssuer::default();
         let schema = test_schema();
 
         let tokens = DecodedTokens {
@@ -278,8 +274,7 @@ mod test {
             userinfo: None,
         };
 
-        let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), false, false);
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let err = builder
             .build_role_entities(&tokens)
             .expect_err("expected to error while building the role entity");

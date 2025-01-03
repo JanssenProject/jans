@@ -7,8 +7,6 @@ use crate::common::policy_store::ClaimMappings;
 use serde_json::Value;
 use std::collections::HashMap;
 
-struct MappedClaims {}
-
 impl ClaimMappings {
     /// Creates new claims and adds it to the HashMap of the given claims
     /// if a mapping exists

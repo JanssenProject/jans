@@ -81,10 +81,6 @@ impl<'a> Token<'a> {
         self.claims.logging_info(claim)
     }
 
-    pub fn claims(&self) -> &TokenClaims {
-        &self.claims
-    }
-
     pub fn claims_value(&self) -> &HashMap<String, Value> {
         &self.claims.claims
     }
@@ -104,12 +100,9 @@ impl From<HashMap<String, Value>> for TokenClaims {
 }
 
 impl TokenClaims {
+    #[cfg(test)]
     pub fn new(claims: HashMap<String, serde_json::Value>) -> Self {
         Self { claims }
-    }
-
-    pub fn from_json_map(map: serde_json::Map<String, serde_json::Value>) -> Self {
-        Self::new(HashMap::from_iter(map))
     }
 
     pub fn get_claim(&self, name: &str) -> Option<TokenClaim> {
@@ -136,20 +129,8 @@ pub struct TokenClaim<'a> {
 }
 
 impl TokenClaim<'_> {
-    pub fn key(&self) -> &str {
-        &self.key
-    }
-
     pub fn value(&self) -> &serde_json::Value {
         self.value
-    }
-
-    pub fn as_i64(&self) -> Result<i64, TokenClaimTypeError> {
-        self.value
-            .as_i64()
-            .ok_or(TokenClaimTypeError::type_mismatch(
-                &self.key, "i64", self.value,
-            ))
     }
 
     pub fn as_str(&self) -> Result<&str, TokenClaimTypeError> {
@@ -157,35 +138,6 @@ impl TokenClaim<'_> {
             .as_str()
             .ok_or(TokenClaimTypeError::type_mismatch(
                 &self.key, "String", self.value,
-            ))
-    }
-
-    pub fn as_bool(&self) -> Result<bool, TokenClaimTypeError> {
-        self.value
-            .as_bool()
-            .ok_or(TokenClaimTypeError::type_mismatch(
-                &self.key, "bool", self.value,
-            ))
-    }
-
-    pub fn as_array(&self) -> Result<Vec<TokenClaim>, TokenClaimTypeError> {
-        self.value
-            .as_array()
-            .map(|array| {
-                array
-                    .iter()
-                    .enumerate()
-                    .map(|(i, v)| {
-                        TokenClaim {
-                            // show current key and index in array
-                            key: format!("{}[{}]", self.key, i),
-                            value: v,
-                        }
-                    })
-                    .collect()
-            })
-            .ok_or(TokenClaimTypeError::type_mismatch(
-                &self.key, "Array", self.value,
             ))
     }
 }

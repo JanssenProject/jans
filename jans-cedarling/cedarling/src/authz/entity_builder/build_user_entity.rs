@@ -59,7 +59,7 @@ impl fmt::Display for BuildUserEntityError {
 #[cfg(test)]
 mod test {
     use super::super::*;
-    use crate::common::cedar_schema::new_cedar_json::CedarSchemaJson;
+    use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
     use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer};
     use crate::jwt::{Token, TokenClaims};
     use cedar_policy::EvalResult;
@@ -125,10 +125,9 @@ mod test {
         .expect("should successfully create test schema")
     }
 
-    fn test_successfully_building_user_entity(tokens: DecodedTokens, iss: TrustedIssuer) {
+    fn test_successfully_building_user_entity(tokens: DecodedTokens) {
         let schema = test_schema();
-        let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), false, true);
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, true);
         let entity = builder
             .build_user_entity(&tokens, HashSet::new())
             .expect("expected to build user entity");
@@ -178,7 +177,7 @@ mod test {
             id: None,
             userinfo: Some(userinfo_token),
         };
-        test_successfully_building_user_entity(tokens, iss.clone());
+        test_successfully_building_user_entity(tokens);
     }
 
     #[test]
@@ -197,7 +196,7 @@ mod test {
             id: Some(id_token),
             userinfo: None,
         };
-        test_successfully_building_user_entity(tokens, iss.clone());
+        test_successfully_building_user_entity(tokens);
     }
 
     #[test]
@@ -213,8 +212,7 @@ mod test {
             userinfo: Some(userinfo_token),
         };
 
-        let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), false, true);
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, true);
         let err = builder
             .build_user_entity(&tokens, HashSet::new())
             .expect_err("expected to error while building the user entity");
@@ -236,7 +234,6 @@ mod test {
 
     #[test]
     fn errors_when_tokens_unavailable() {
-        let iss = test_iss();
         let schema = test_schema();
 
         let tokens = DecodedTokens {
@@ -245,8 +242,7 @@ mod test {
             userinfo: None,
         };
 
-        let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), false, true);
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, true);
         let err = builder
             .build_user_entity(&tokens, HashSet::new())
             .expect_err("expected to error while building the user entity");
@@ -271,8 +267,7 @@ mod test {
             userinfo: Some(userinfo_token),
         };
         let schema = test_schema();
-        let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), false, true);
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, true);
         let roles = HashSet::from([
             "Role::\"role1\"".parse().unwrap(),
             "Role::\"role2\"".parse().unwrap(),

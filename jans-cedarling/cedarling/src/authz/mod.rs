@@ -1,5 +1,4 @@
 // This software is available under the Apache-2.0 license.
-// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
 //
 // Copyright (c) 2024, Gluu, Inc.
 
@@ -8,14 +7,9 @@
 //! - evaluate if authorization is granted for *user*
 //! - evaluate if authorization is granted for *client* / *workload *
 
-use std::collections::{HashMap, HashSet};
-use std::io::Cursor;
-use std::str::FromStr;
-use std::sync::Arc;
-
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types;
-use crate::common::cedar_schema::cedar_json::{BuildJsonCtxError, FindActionError};
+use crate::common::cedar_schema::cedar_json::attribute::Attribute;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt::{self, TokenStr};
 use crate::log::interface::LogWriter;
@@ -23,27 +17,23 @@ use crate::log::{
     AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, LogEntry, LogLevel,
     LogTokensInfo, LogType, Logger, PrincipalLogEntry, UserAuthorizeInfo, WorkloadAuthorizeInfo,
 };
-
-mod authorize_result;
-#[allow(dead_code)]
-mod entity_builder;
-mod merge_json;
-
-pub(crate) mod entities;
-pub(crate) mod request;
-use std::time::Instant;
-
 pub use authorize_result::AuthorizeResult;
 use cedar_policy::{ContextJsonError, Entities, Entity, EntityUid};
-use entities::{
-    create_resource_entity, create_role_entities, create_token_entities, create_user_entity,
-    create_workload_entity, CreateCedarEntityError, CreateUserEntityError,
-    CreateWorkloadEntityError, DecodedTokens, ResourceEntityError, RoleEntityError,
-    CEDAR_POLICY_SEPARATOR,
-};
+use entity_builder::*;
 use merge_json::{merge_json_values, MergeError};
 use request::Request;
-use serde_json::Value;
+use serde_json::{json, Value};
+use std::collections::HashMap;
+use std::io::Cursor;
+use std::str::FromStr;
+use std::sync::Arc;
+use std::time::Instant;
+
+mod authorize_result;
+mod merge_json;
+
+pub(crate) mod entity_builder;
+pub(crate) mod request;
 
 /// Configuration to Authz to initialize service without errors
 pub(crate) struct AuthzConfig {
@@ -53,6 +43,7 @@ pub(crate) struct AuthzConfig {
     pub policy_store: PolicyStoreWithID,
     pub jwt_service: Arc<jwt::JwtService>,
     pub authorization: AuthorizationConfig,
+    pub entity_builder: EntityBuilder,
 }
 
 /// Authorization Service
@@ -88,17 +79,17 @@ impl Authz {
         &'a self,
         request: &'a Request,
     ) -> Result<DecodedTokens<'a>, AuthorizeError> {
-        let access_token = request
+        let access = request
             .access_token
             .as_ref()
             .map(|tkn| self.config.jwt_service.process_token(TokenStr::Access(tkn)))
             .transpose()?;
-        let id_token = request
+        let id = request
             .id_token
             .as_ref()
             .map(|tkn| self.config.jwt_service.process_token(TokenStr::Id(tkn)))
             .transpose()?;
-        let userinfo_token = request
+        let userinfo = request
             .userinfo_token
             .as_ref()
             .map(|tkn| {
@@ -109,9 +100,9 @@ impl Authz {
             .transpose()?;
 
         Ok(DecodedTokens {
-            access_token,
-            id_token,
-            userinfo_token,
+            access,
+            id,
+            userinfo,
         })
     }
 
@@ -128,7 +119,9 @@ impl Authz {
             .map_err(AuthorizeError::Action)?;
 
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
-        let entities_data: AuthorizeEntitiesData = self.build_entities(&request, &tokens)?;
+        let entities_data = self
+            .entity_builder()
+            .build_entities(&tokens, &request.resource)?;
 
         // Get entity UIDs what we will be used on authorize check
         let resource_uid = entities_data.resource.uid();
@@ -273,7 +266,7 @@ impl Authz {
         );
 
         let tokens_logging_info = LogTokensInfo {
-            access: tokens.access_token.as_ref().map(|tkn| {
+            access: tokens.access.as_ref().map(|tkn| {
                 tkn.logging_info(
                     self.config
                         .authorization
@@ -281,7 +274,7 @@ impl Authz {
                         .as_str(),
                 )
             }),
-            id_token: tokens.access_token.as_ref().map(|tkn| {
+            id_token: tokens.id.as_ref().map(|tkn| {
                 tkn.logging_info(
                     self.config
                         .authorization
@@ -289,7 +282,7 @@ impl Authz {
                         .as_str(),
                 )
             }),
-            userinfo: tokens.userinfo_token.as_ref().map(|tkn| {
+            userinfo: tokens.userinfo.as_ref().map(|tkn| {
                 tkn.logging_info(
                     self.config
                         .authorization
@@ -341,60 +334,20 @@ impl Authz {
         Ok(response)
     }
 
-    /// Build all the Cedar [`Entities`] from a [`Request`]
-    ///
-    /// [`Entities`]: Entity
+    fn entity_builder(&self) -> &EntityBuilder {
+        &self.config.entity_builder
+    }
+
+    #[cfg(test)]
     pub fn build_entities(
         &self,
         request: &Request,
         tokens: &DecodedTokens,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
-        let policy_store = &self.config.policy_store;
-        let auth_conf = &self.config.authorization;
-
-        // build workload entity
-        let workload = if self.config.authorization.use_workload_principal {
-            Some(create_workload_entity(
-                auth_conf.mapping_workload.as_deref(),
-                policy_store,
-                tokens,
-            )?)
-        } else {
-            None
-        };
-
-        // build role entity
-        let roles = create_role_entities(policy_store, tokens)?;
-
-        // build user entity
-        let user = if self.config.authorization.use_user_principal {
-            Some(create_user_entity(
-                auth_conf.mapping_user.as_deref(),
-                policy_store,
-                tokens,
-                HashSet::from_iter(roles.iter().map(|e| e.uid())),
-            )?)
-        } else {
-            None
-        };
-
-        let token_entities = create_token_entities(auth_conf, policy_store, tokens)?;
-
-        // build resource entity
-        let resource = create_resource_entity(
-            request.resource.clone(),
-            &self.config.policy_store.schema.json,
-        )?;
-
-        Ok(AuthorizeEntitiesData {
-            workload,
-            access_token: token_entities.access,
-            id_token: token_entities.id,
-            userinfo_token: token_entities.userinfo,
-            user,
-            resource,
-            roles,
-        })
+        Ok(self
+            .config
+            .entity_builder
+            .build_entities(tokens, &request.resource)?)
     }
 }
 
@@ -412,27 +365,48 @@ fn build_context(
         .policy_store
         .schema
         .json
-        .find_action(&action_name, namespace)
-        .map_err(|e| BuildContextError::FindActionSchema(action_name.clone(), e))?
-        .ok_or(BuildContextError::MissingActionSchema(action_name))?;
+        .get_action(&action_name, namespace)
+        .ok_or(BuildContextError::UnknownAction(action_name.clone()))?;
 
-    let mut id_mapping = HashMap::new();
-    for entity in entities_data.iter() {
-        // we strip the namespace from the type_name then make it lowercase
-        // example: 'Jans::Id_token' -> 'id_token'
-        let type_name = entity.uid().type_name().to_string();
-        let type_name = type_name
-            .strip_prefix(&format!("{}{}", namespace, CEDAR_POLICY_SEPARATOR))
-            .unwrap_or(&type_name)
-            .to_lowercase();
-        let type_id = entity.uid().id().escaped();
-        id_mapping.insert(type_name, type_id.to_string());
+    // Get the entities required for the context
+    let mut ctx_schema_entity_types = Vec::new();
+    let mut entities_ctx = json!({});
+    let type_ids = entities_data.type_ids();
+    if let Some(ctx) = action_schema.applies_to.context.as_ref() {
+        match ctx {
+            Attribute::Record { attrs, .. } => {
+                for (key, attr) in attrs.iter() {
+                    match attr {
+                        Attribute::Entity { name, .. } => {
+                            if let Some(type_id) = type_ids.get(name).as_ref() {
+                                entities_ctx[key] = json!({"type": name, "id": type_id});
+                            } else {
+                                todo!("return error when type_id isn't supplied")
+                            }
+                            ctx_schema_entity_types.push(name.to_string());
+                        },
+                        Attribute::EntityOrCommon { name, .. } => {
+                            match config.policy_store.schema.json.get_entity_type(name) {
+                                Some((entity_nmspce, _)) if namespace == entity_nmspce => {
+                                    if let Some(type_id) = type_ids.get(name).as_ref() {
+                                        entities_ctx[key] = json!({"type": name, "id": type_id});
+                                    } else {
+                                        todo!("return error when type_id isn't supplied")
+                                    }
+                                    ctx_schema_entity_types.push(name.to_string());
+                                },
+                                _ => {},
+                            }
+                        },
+                        _ => {}, // do nothing if it's not an entity
+                    }
+                }
+            },
+            _ => panic!("ctx must be of type record"),
+        }
     }
 
-    let entities_context = action_schema.build_ctx_entity_refs_json(id_mapping)?;
-
-    let context = merge_json_values(entities_context, request_context)?;
-
+    let context = merge_json_values(entities_ctx, request_context)?;
     let context: cedar_policy::Context =
         cedar_policy::Context::from_json_value(context, Some((schema, action)))?;
 
@@ -461,6 +435,16 @@ pub struct AuthorizeEntitiesData {
 }
 
 impl AuthorizeEntitiesData {
+    fn type_ids(&self) -> HashMap<String, String> {
+        self.iter()
+            .map(|entity| {
+                let type_name = entity.uid().type_name().basename().to_string();
+                let type_id = entity.uid().id().escaped().to_string();
+                (type_name, type_id)
+            })
+            .collect::<HashMap<String, String>>()
+    }
+
     /// Create iterator to get all entities
     fn into_iter(self) -> impl Iterator<Item = Entity> {
         vec![self.resource].into_iter().chain(self.roles).chain(
@@ -509,27 +493,6 @@ pub enum AuthorizeError {
     /// Error encountered while processing JWT token data
     #[error(transparent)]
     ProcessTokens(#[from] jwt::JwtProcessingError),
-    /// Error encountered while creating id token entity
-    #[error("could not create id_token entity: {0}")]
-    CreateIdTokenEntity(CreateCedarEntityError),
-    /// Error encountered while creating userinfo entity
-    #[error("could not create userinfo entity: {0}")]
-    CreateUserinfoTokenEntity(CreateCedarEntityError),
-    /// Error encountered while creating access_token entity
-    #[error("could not create access_token entity: {0}")]
-    CreateAccessTokenEntity(CreateCedarEntityError),
-    /// Error encountered while creating user entity
-    #[error("could not create User entity: {0}")]
-    CreateUserEntity(#[from] CreateUserEntityError),
-    /// Error encountered while creating workload
-    #[error(transparent)]
-    CreateWorkloadEntity(#[from] CreateWorkloadEntityError),
-    /// Error encountered while creating resource entity
-    #[error("{0}")]
-    ResourceEntity(#[from] ResourceEntityError),
-    /// Error encountered while creating role entity
-    #[error(transparent)]
-    RoleEntity(#[from] RoleEntityError),
     /// Error encountered while parsing Action to EntityUid
     #[error("could not parse action: {0}")]
     Action(cedar_policy::ParseErrors),
@@ -551,6 +514,9 @@ pub enum AuthorizeError {
     /// Error encountered while building the context for the request
     #[error("Failed to build context: {0}")]
     BuildContext(#[from] BuildContextError),
+    /// Error encountered while building Cedar Entities
+    #[error(transparent)]
+    BuildEntity(#[from] BuildCedarlingEntityError),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -562,14 +528,11 @@ pub enum BuildContextError {
     #[error(transparent)]
     DeserializeFromJson(#[from] ContextJsonError),
     /// Error encountered while deserializing the Context from JSON
-    #[error("Failed to find the action `{0}` in the schema: {0}")]
-    FindActionSchema(String, FindActionError),
+    #[error("failed to find the action `{0}` in the schema")]
+    UnknownAction(String),
     /// Error encountered while deserializing the Context from JSON
     #[error("The action `{0}` was not found in the schema")]
     MissingActionSchema(String),
-    /// Error encountered while deserializing the Context from JSON
-    #[error(transparent)]
-    BuildJson(#[from] BuildJsonCtxError),
 }
 
 #[derive(Debug, derive_more::Error, derive_more::Display)]

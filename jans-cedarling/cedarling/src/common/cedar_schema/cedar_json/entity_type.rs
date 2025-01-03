@@ -10,7 +10,7 @@ use serde::{de, Deserialize};
 use serde_json::Value;
 use std::collections::HashSet;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct EntityShape {
     pub required: bool,
     pub attrs: HashMap<AttributeName, Attribute>,
@@ -26,7 +26,7 @@ impl EntityShape {
     }
 }
 
-#[derive(Debug, PartialEq, Deserialize)]
+#[derive(Debug, PartialEq, Deserialize, Clone)]
 pub struct EntityType {
     #[serde(rename = "memberOfTypes")]
     pub member_of: Option<HashSet<EntityTypeName>>,

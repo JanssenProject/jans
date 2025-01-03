@@ -80,7 +80,7 @@ impl fmt::Display for BuildWorkloadEntityError {
 mod test {
     use super::super::*;
     use crate::authz::entity_builder::BuildEntityError;
-    use crate::common::cedar_schema::new_cedar_json::CedarSchemaJson;
+    use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
     use crate::common::policy_store::{
         ClaimMappings, TokenEntityMetadata, TokenKind, TrustedIssuer,
     };
@@ -104,8 +104,7 @@ mod test {
         }))
         .unwrap();
         let iss = TrustedIssuer::default();
-        let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), true, false);
+        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let access_token = Token::new_access(
             TokenClaims::new(HashMap::from([
                 ("client_id".to_string(), json!("workload-123")),
@@ -153,8 +152,7 @@ mod test {
         }))
         .unwrap();
         let iss = TrustedIssuer::default();
-        let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), true, false);
+        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let id_token = Token::new_id(
             TokenClaims::new(HashMap::from([
                 ("aud".to_string(), json!("workload-123")),
@@ -246,8 +244,7 @@ mod test {
             },
             ..Default::default()
         };
-        let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), true, false);
+        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let access_token = Token::new_access(
             TokenClaims::new(HashMap::from([
                 ("client_id".to_string(), json!("workload-123")),
@@ -337,8 +334,7 @@ mod test {
         }))
         .unwrap();
         let iss = TrustedIssuer::default();
-        let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(issuers, schema, EntityNames::default(), true, false);
+        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let access_token = Token::new_access(TokenClaims::new(HashMap::new()), Some(&iss));
         let id_token = Token::new_id(TokenClaims::new(HashMap::new()), Some(&iss));
         let tokens = DecodedTokens {
@@ -385,8 +381,7 @@ mod test {
             }}}
         }))
         .unwrap();
-        let builder =
-            EntityBuilder::new(HashMap::new(), schema, EntityNames::default(), true, false);
+        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let tokens = DecodedTokens {
             access: None,
             id: None,
