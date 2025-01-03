@@ -37,11 +37,3 @@ To run example using `index.html` you need execute following steps:
 1. Build wasm cedarling.
 2. Run webserver using `python3 -m http.server` or any other.
 3. Visit [localhost](http://localhost:8000/).
-
-## Optimization wasm binary
-
-You can try to use `wasm-opt`, a C++ tool for optimize WebAssembly, you can make it even smaller too! `WASM` file holds in the `pkg` folder.
-
-```bash
-wasm-opt -Os cedarling_wasm_bg.wasm -o cedarling_wasm.wasm
-```
