@@ -228,7 +228,7 @@ pub enum BuildCedarlingEntityError {
     User(#[from] BuildUserEntityError),
     #[error(transparent)]
     Role(#[from] BuildRoleEntityError),
-    #[error(transparent)]
+    #[error("failed to build resource entity: {0}")]
     Resource(#[from] BuildResourceEntityError),
     #[error("error while building Access Token entity: {0}")]
     AccessToken(#[source] BuildTokenEntityError),

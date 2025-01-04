@@ -6,7 +6,7 @@
 use super::*;
 use crate::{common::cedar_schema::cedar_json::entity_type::EntityType, jwt::Token};
 use cedar_policy::RestrictedExpression;
-use serde_json::{json, Value};
+use serde_json::Value;
 use std::collections::HashMap;
 
 impl EntityBuilder {
@@ -74,7 +74,7 @@ impl EntityBuilder {
                 },
                 _ => continue,
             };
-        
+
             let mapped_src = serde_json::from_value::<HashMap<String, Value>>(val.clone());
             let src = if let Ok(mapped_src) = mapped_src.as_ref() {
                 mapped_src
