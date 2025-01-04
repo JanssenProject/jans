@@ -6,15 +6,14 @@
 use super::*;
 use cedar_policy::{EntityId, EntityTypeName, EntityUid};
 
-const DEFAULT_ROLE_ENTITY_NAME: &str = "Role";
-
 impl EntityBuilder {
-    pub fn build_role_entities(
+    /// Tries to build role entities using each given token. Will return an empty Vec
+    /// if no entities were created.
+    pub fn try_build_role_entities(
         &self,
         tokens: &DecodedTokens,
     ) -> Result<Vec<Entity>, BuildRoleEntityError> {
-        let entity_name = DEFAULT_ROLE_ENTITY_NAME;
-        let mut errors = Vec::new();
+        let entity_name = &self.entity_names.role;
         let mut entities = Vec::new();
 
         // Get entity namespace and type
@@ -36,54 +35,37 @@ impl EntityBuilder {
             let role_claim = token.role_mapping();
             if let Some(claim) = token.get_claim(role_claim).as_ref() {
                 match claim.value() {
+                    // Case: the claim is a String
                     serde_json::Value::String(role) => {
-                        match build_entity(&entity_name, role) {
-                            Ok(entity) => {
-                                entities.push(entity);
-                            },
-                            Err(err) => {
-                                errors.push((token.kind, err));
-                            },
-                        };
+                        let entity = build_entity(&entity_name, role)
+                            .map_err(|e| BuildRoleEntityError::map_tkn_err(token, e))?;
+                        entities.push(entity);
                     },
+
+                    // Case: the claim is an Array
                     serde_json::Value::Array(vec) => {
                         for val in vec {
                             let role = match val.as_str() {
                                 Some(role) => role,
                                 None => {
-                                    errors.push((
-                                        token.kind,
+                                    return Err(BuildRoleEntityError::map_tkn_err(
+                                        token,
                                         BuildEntityError::json_type_err("str", val),
                                     ));
-                                    continue;
                                 },
                             };
 
-                            match build_entity(&entity_name, role) {
-                                Ok(entity) => {
-                                    entities.push(entity);
-                                },
-                                Err(err) => {
-                                    errors.push((token.kind, err));
-                                },
-                            };
+                            let entity = build_entity(&entity_name, role)
+                                .map_err(|e| BuildRoleEntityError::map_tkn_err(token, e))?;
+                            entities.push(entity);
                         }
                     },
                     _ => unimplemented!(),
                 }
-            } else {
-                errors.push((
-                    token.kind,
-                    BuildEntityError::MissingClaim(role_claim.to_string()),
-                ));
             }
         }
 
-        if entities.is_empty() {
-            Err(BuildRoleEntityError { errors })
-        } else {
-            return Ok(entities);
-        }
+        return Ok(entities);
     }
 }
 
@@ -96,27 +78,23 @@ fn build_entity(name: &str, id: &str) -> Result<Entity, BuildEntityError> {
 }
 
 #[derive(Debug, thiserror::Error)]
-pub struct BuildRoleEntityError {
-    pub errors: Vec<(TokenKind, BuildEntityError)>,
+pub enum BuildRoleEntityError {
+    #[error("failed to build role entity from access token: {0}")]
+    Access(#[source] BuildEntityError),
+    #[error("failed to build role entity from id token: {0}")]
+    Id(#[source] BuildEntityError),
+    #[error("failed to build role entity from userinfo token: {0}")]
+    Userinfo(#[source] BuildEntityError),
 }
 
-impl fmt::Display for BuildRoleEntityError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.errors.is_empty() {
-            writeln!(
-                f,
-                "failed to create Role Entity since no tokens were provided"
-            )?;
-        } else {
-            writeln!(
-                f,
-                "failed to create Role Entity due to the following errors:"
-            )?;
-            for (token_kind, error) in &self.errors {
-                writeln!(f, "- TokenKind {:?}: {}", token_kind, error)?;
-            }
+impl BuildRoleEntityError {
+    pub fn map_tkn_err(token: &Token, err: BuildEntityError) -> Self {
+        match token.kind {
+            TokenKind::Access => BuildRoleEntityError::Access(err),
+            TokenKind::Id => BuildRoleEntityError::Id(err),
+            TokenKind::Userinfo => BuildRoleEntityError::Userinfo(err),
+            TokenKind::Transaction => unimplemented!("transaction tokens are not yet supported"),
         }
-        Ok(())
     }
 }
 
@@ -149,7 +127,7 @@ mod test {
         let schema = test_schema();
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let entity = builder
-            .build_role_entities(&tokens)
+            .try_build_role_entities(&tokens)
             .expect("expected to build role entities");
 
         assert_eq!(entity.len(), 1);
@@ -174,7 +152,7 @@ mod test {
         let schema = test_schema();
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let entity = builder
-            .build_role_entities(&tokens)
+            .try_build_role_entities(&tokens)
             .expect("expected to build role entities");
 
         assert_eq!(entity.len(), 2);
@@ -225,60 +203,5 @@ mod test {
             userinfo: None,
         };
         test_build_entity_from_str_claim(tokens);
-    }
-
-    #[test]
-    fn errors_when_token_is_missing_role_claim() {
-        let iss = TrustedIssuer::default();
-        let schema = test_schema();
-
-        let access_token = Token::new_access(TokenClaims::new(HashMap::new()), Some(&iss));
-        let id_token = Token::new_id(TokenClaims::new(HashMap::new()), Some(&iss));
-        let userinfo_token = Token::new_userinfo(TokenClaims::new(HashMap::new()), Some(&iss));
-        let tokens = DecodedTokens {
-            access: Some(access_token),
-            id: Some(id_token),
-            userinfo: Some(userinfo_token),
-        };
-
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
-        let err = builder
-            .build_role_entities(&tokens)
-            .expect_err("expected to error while building the role entity");
-
-        assert_eq!(err.errors.len(), 3);
-        for (i, expected_kind) in [TokenKind::Userinfo, TokenKind::Id, TokenKind::Access]
-            .iter()
-            .enumerate()
-        {
-            assert!(
-                matches!(
-                    err.errors[i],
-                    (ref tkn_kind, BuildEntityError::MissingClaim(ref claim_name))
-                        if tkn_kind == expected_kind &&
-                            claim_name == "role"
-                ),
-                "expected an error due to missing the `role` claim, got: {:?}",
-                err.errors[i]
-            );
-        }
-    }
-
-    #[test]
-    fn errors_when_tokens_unavailable() {
-        let schema = test_schema();
-
-        let tokens = DecodedTokens {
-            access: None,
-            id: None,
-            userinfo: None,
-        };
-
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
-        let err = builder
-            .build_role_entities(&tokens)
-            .expect_err("expected to error while building the role entity");
-
-        assert_eq!(err.errors.len(), 0);
     }
 }

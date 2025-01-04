@@ -37,6 +37,7 @@ const DEFAULT_USER_ENTITY_NAME: &str = "User";
 const DEFAULT_ACCESS_TKN_ENTITY_NAME: &str = "Access_token";
 const DEFAULT_ID_TKN_ENTITY_NAME: &str = "id_token";
 const DEFAULT_USERINFO_TKN_ENTITY_NAME: &str = "Userinfo_token";
+const DEFAULT_ROLE_ENTITY_NAME: &str = "Role";
 
 pub struct DecodedTokens<'a> {
     pub access: Option<Token<'a>>,
@@ -51,6 +52,7 @@ pub struct EntityNames {
     id_token: String,
     access_token: String,
     userinfo_token: String,
+    role: String,
 }
 
 impl From<&AuthorizationConfig> for EntityNames {
@@ -76,6 +78,8 @@ impl From<&AuthorizationConfig> for EntityNames {
                 .mapping_userinfo_token
                 .clone()
                 .unwrap_or(DEFAULT_USERINFO_TKN_ENTITY_NAME.to_string()),
+            // TODO: implement a bootstrap property to set the Role entity name
+            role: DEFAULT_ROLE_ENTITY_NAME.to_string(),
         }
     }
 }
@@ -88,6 +92,7 @@ impl Default for EntityNames {
             id_token: DEFAULT_ID_TKN_ENTITY_NAME.to_string(),
             access_token: DEFAULT_ACCESS_TKN_ENTITY_NAME.to_string(),
             userinfo_token: DEFAULT_USERINFO_TKN_ENTITY_NAME.to_string(),
+            role: DEFAULT_ROLE_ENTITY_NAME.to_string(),
         }
     }
 }
@@ -126,7 +131,7 @@ impl EntityBuilder {
         };
 
         let (user, roles) = if self.build_user {
-            let roles = self.build_role_entities(tokens)?;
+            let roles = self.try_build_role_entities(tokens)?;
             let parents = roles
                 .iter()
                 .map(|role| role.uid())

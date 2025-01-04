@@ -29,9 +29,9 @@ pub struct ActionGroup {
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct AppliesTo {
     #[serde(rename = "principalTypes", default)]
-    principal_types: HashSet<EntityName>,
+    pub principal_types: HashSet<EntityName>,
     #[serde(rename = "resourceTypes", default)]
-    resource_types: HashSet<EntityName>,
+    pub resource_types: HashSet<EntityName>,
     #[serde(default)]
     pub context: Option<Attribute>,
 }
