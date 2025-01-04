@@ -109,8 +109,6 @@ fn test_default_mapping() {
 /// This function validates the mapping of users and workloads using the defined `cedar` schema.
 /// For other entities, currently, it is not possible to automatically validate the mapping.
 ///
-/// TODO: Add validation for `IdToken`, `Access_token`, and `Userinfo_token` once they are added to the context.
-///
 /// Note: Verified that the mapped entity types are present in the logs.
 #[test]
 fn test_custom_mapping() {
