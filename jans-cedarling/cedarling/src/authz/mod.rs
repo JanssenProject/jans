@@ -408,7 +408,6 @@ fn build_context(
     }
 
     let context = merge_json_values(ctx_entity_refs, request_context)?;
-    println!("ctx: {:#?}", context);
     let context: cedar_policy::Context =
         cedar_policy::Context::from_json_value(context, Some((schema, action)))?;
 
@@ -422,6 +421,7 @@ fn build_entity_refs_from_attr(
     type_ids: &HashMap<String, String>,
     schema: &CedarSchemaJson,
 ) -> Option<Value> {
+    // TODO: handle errors here
     match attr {
         Attribute::Entity { name, .. } => {
             if let Some(type_id) = type_ids.get(name).as_ref() {

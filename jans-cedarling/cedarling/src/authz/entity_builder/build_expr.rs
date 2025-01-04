@@ -12,6 +12,8 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::str::FromStr;
 
+use super::CEDAR_NAMESPACE_SEPARATOR;
+
 impl Attribute {
     pub fn kind_str(&self) -> &str {
         match self {
@@ -122,7 +124,15 @@ impl Attribute {
                     let claim = claim
                         .as_str()
                         .ok_or(KeyedJsonTypeError::type_mismatch(src_key, "string", claim))?;
-                    let type_name = EntityTypeName::from_str(name).unwrap();
+
+                    let mut name = name.to_string();
+                    if let Some((namespace, _)) = schema.get_entity_type(&name) {
+                        if !namespace.is_empty() {
+                            name = [namespace, name.as_str()].join(CEDAR_NAMESPACE_SEPARATOR);
+                        }
+                    }
+
+                    let type_name = EntityTypeName::from_str(&name).unwrap();
                     let type_id = EntityId::new(claim);
                     let uid = EntityUid::from_type_name_and_id(type_name, type_id);
                     Ok(Some(RestrictedExpression::new_entity_uid(uid)))

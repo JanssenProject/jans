@@ -320,6 +320,74 @@ mod test {
     }
 
     #[test]
+    fn can_build_entity_with_entity_ref() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": {
+                "entityTypes": {
+                    "TrustedIss": {},
+                    "Workload": {
+                        "shape": {
+                            "type": "Record",
+                            "attributes":  {
+                                "client_id": { "type": "String" },
+                                "iss": { "type": "EntityOrCommon", "name": "TrustedIss" },
+                            },
+                        }
+                    }
+            }}
+        }))
+        .unwrap();
+        let iss = TrustedIssuer::default();
+        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
+        let access_token = Token::new_access(
+            TokenClaims::new(HashMap::from([
+                ("client_id".to_string(), json!("workload-123")),
+                (
+                    "iss".to_string(),
+                    json!("https://test.com/.well-known/openid-configuration"),
+                ),
+            ])),
+            Some(&iss),
+        );
+        let tokens = DecodedTokens {
+            access: Some(access_token),
+            id: None,
+            userinfo: None,
+        };
+        let entity = builder
+            .build_workload_entity(&tokens)
+            .expect("expected to successfully build workload entity");
+
+        assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
+
+        assert_eq!(
+            entity
+                .attr("client_id")
+                .expect("expected to workload entity to have a `client_id` attribute")
+                .unwrap(),
+            EvalResult::String("workload-123".to_string()),
+        );
+
+        let iss = entity
+            .attr("iss")
+            .expect("entity must have a `iss` attribute")
+            .unwrap();
+        if let EvalResult::EntityUid(uid) = iss {
+            assert_eq!(uid.type_name().namespace(), "Jans");
+            assert_eq!(uid.type_name().basename(), "TrustedIss");
+            assert_eq!(
+                uid.id().escaped(),
+                "https://test.com/.well-known/openid-configuration"
+            );
+        } else {
+            panic!(
+                "expected the attribute `iss` to be an EntityUid, got: {:?}",
+                iss
+            );
+        }
+    }
+
+    #[test]
     fn errors_when_token_has_missing_claim() {
         let schema = serde_json::from_value::<CedarSchemaJson>(json!({
             "Jans": { "entityTypes": { "Workload": {
