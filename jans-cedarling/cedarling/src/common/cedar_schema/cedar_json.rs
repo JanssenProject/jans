@@ -9,7 +9,7 @@ use action::*;
 use attribute::*;
 use entity_type::*;
 use serde::Deserialize;
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
 pub(crate) mod action;
 pub(crate) mod attribute;
@@ -51,9 +51,27 @@ impl CedarSchemaJson {
         None
     }
 
-    pub fn get_entity_type(&self, name: &str) -> Option<(&NamespaceName, &EntityType)> {
+    pub fn get_entity_from_base_name(
+        &self,
+        base_name: &str,
+    ) -> Option<(&NamespaceName, &EntityType)> {
         for (namespace_name, namespace) in self.namespaces.iter() {
-            if let Some(entity_type) = namespace.entity_types.get(name) {
+            if let Some(entity_type) = namespace.entity_types.get(base_name) {
+                return Some((namespace_name, entity_type));
+            }
+        }
+        None
+    }
+
+    pub fn get_entity_from_full_name(
+        &self,
+        full_name: &str,
+    ) -> Option<(NamespaceName, &EntityType)> {
+        let full_name = cedar_policy::EntityTypeName::from_str(full_name).ok()?;
+        let namespace_name = full_name.namespace();
+        if let Some(namespace) = self.namespaces.get(&namespace_name) {
+            let base_name = full_name.basename();
+            if let Some(entity_type) = namespace.entity_types.get(base_name) {
                 return Some((namespace_name, entity_type));
             }
         }

@@ -18,7 +18,7 @@ impl EntityBuilder {
 
         // Get entity namespace and type
         let mut entity_name = entity_name.to_string();
-        if let Some((namespace, _entity_type)) = self.schema.get_entity_type(&entity_name) {
+        if let Some((namespace, _entity_type)) = self.schema.get_entity_from_base_name(&entity_name) {
             if !namespace.is_empty() {
                 entity_name = [namespace.as_str(), &entity_name].join(CEDAR_NAMESPACE_SEPARATOR);
             }

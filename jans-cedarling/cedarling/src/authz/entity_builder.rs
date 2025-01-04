@@ -201,14 +201,14 @@ impl EntityBuilder {
         let mut entity_name = entity_name.to_string();
         let (namespace, entity_type) = self
             .schema
-            .get_entity_type(&entity_name)
+            .get_entity_from_base_name(&entity_name)
             .ok_or(BuildEntityError::EntityNotInSchema(entity_name.to_string()))?;
         if !namespace.is_empty() {
             entity_name = [namespace.as_str(), &entity_name].join(CEDAR_NAMESPACE_SEPARATOR);
         }
 
         // Build entity attributes
-        let entity_attrs = self.build_entity_attrs(entity_type, token, claim_aliases)?;
+        let entity_attrs = self.build_entity_attrs_from_tkn(entity_type, token, claim_aliases)?;
 
         // Build cedar entity
         let entity_type_name = EntityTypeName::from_str(&entity_name)

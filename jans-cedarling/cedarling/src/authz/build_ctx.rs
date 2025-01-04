@@ -85,7 +85,7 @@ fn build_entity_refs_from_attr(
     // TODO: handle errors here
     match attr {
         Attribute::Entity { name, .. } => map_entity_id(namespace, name, type_ids),
-        Attribute::EntityOrCommon { name, .. } => match schema.get_entity_type(name) {
+        Attribute::EntityOrCommon { name, .. } => match schema.get_entity_from_base_name(name) {
             Some((entity_namespace, _)) if namespace == entity_namespace => {
                 map_entity_id(namespace, name, type_ids)
             },

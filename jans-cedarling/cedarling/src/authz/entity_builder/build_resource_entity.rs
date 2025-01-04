@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedar_policy::{EntityAttrEvaluationError, ExpressionConstructionError, RestrictedExpression};
+use cedar_policy::{EntityAttrEvaluationError, ExpressionConstructionError, ParseErrors};
 use serde_json::Value;
 
 use super::*;
@@ -14,58 +14,21 @@ impl EntityBuilder {
         &self,
         resource: &ResourceData,
     ) -> Result<Entity, BuildResourceEntityError> {
-        // Get entity namespace and type
+        let entity_type_name = EntityTypeName::from_str(&resource.resource_type)?;
+        let (_namespace_name, entity_type) = self
+            .schema
+            .get_entity_from_base_name(entity_type_name.basename())
+            .ok_or(BuildEntityError::EntityNotInSchema(
+                entity_type_name.to_string(),
+            ))?;
 
-        // Build entity attributes from payload
-        let mut entity_attrs = HashMap::new();
-        for (key, val) in resource.payload.iter() {
-            if let Some(expr) = value_to_restricted_expr(val)? {
-                entity_attrs.insert(key.to_string(), expr);
-            }
-        }
+        let entity_attrs = self.build_entity_attrs_from_values(entity_type, &resource.payload)?;
 
         // Build cedar entity
-        let entity_type_name = EntityTypeName::from_str(&resource.resource_type)
-            .map_err(BuildEntityError::ParseEntityTypeName)?;
         let entity_id = EntityId::from_str(&resource.id).expect("expected infallible");
         let entity_uid = EntityUid::from_type_name_and_id(entity_type_name, entity_id);
         Ok(Entity::new(entity_uid, entity_attrs, HashSet::new())?)
     }
-}
-
-fn value_to_restricted_expr(
-    value: &Value,
-) -> Result<Option<RestrictedExpression>, BuildResourceEntityError> {
-    let expr = match value {
-        Value::Null => return Ok(None),
-        Value::Bool(value) => RestrictedExpression::new_bool(*value),
-        Value::Number(ref number) => RestrictedExpression::new_long(
-            number
-                .as_i64()
-                .ok_or(JsonTypeError::type_mismatch("i64", &value))?,
-        ),
-        Value::String(str) => RestrictedExpression::new_string(str.to_string()),
-        Value::Array(vec) => {
-            let mut values = Vec::new();
-            for val in vec.into_iter() {
-                if let Some(expr) = value_to_restricted_expr(val)? {
-                    values.push(expr);
-                }
-            }
-            RestrictedExpression::new_set(values)
-        },
-        Value::Object(map) => {
-            let mut fields = HashMap::new();
-            for (key, val) in map.into_iter() {
-                if let Some(expr) = value_to_restricted_expr(val)? {
-                    fields.insert(key.to_string(), expr);
-                }
-            }
-            RestrictedExpression::new_record(fields)?
-        },
-    };
-
-    Ok(Some(expr))
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -78,6 +41,10 @@ pub enum BuildResourceEntityError {
     ExpressionConstructExpression(#[from] ExpressionConstructionError),
     #[error(transparent)]
     EntityAttrEvaluationError(#[from] EntityAttrEvaluationError),
+    #[error(transparent)]
+    BuildAttr(#[from] BuildAttrError),
+    #[error("invalid entity name: {0}")]
+    InvalidEntityName(#[from] ParseErrors),
 }
 
 #[derive(Debug, thiserror::Error)]

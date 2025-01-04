@@ -126,7 +126,7 @@ impl Attribute {
                         .ok_or(KeyedJsonTypeError::type_mismatch(src_key, "string", claim))?;
 
                     let mut name = name.to_string();
-                    if let Some((namespace, _)) = schema.get_entity_type(&name) {
+                    if let Some((namespace, _)) = schema.get_entity_from_base_name(&name) {
                         if !namespace.is_empty() {
                             name = [namespace, name.as_str()].join(CEDAR_NAMESPACE_SEPARATOR);
                         }
@@ -166,7 +166,7 @@ impl Attribute {
             Attribute::EntityOrCommon { required, name } => {
                 if let Some((_namespace_name, attr)) = schema.get_common_type(name) {
                     attr.build_expr(attr_src, src_key, schema)
-                } else if schema.get_entity_type(name).is_some() {
+                } else if schema.get_entity_from_base_name(name).is_some() {
                     let attr = Attribute::Entity {
                         required: *required,
                         name: name.to_string(),
