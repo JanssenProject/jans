@@ -91,16 +91,19 @@ impl Authz {
         request: &'a Request,
     ) -> Result<DecodedTokens<'a>, AuthorizeError> {
         let access = request
+            .tokens
             .access_token
             .as_ref()
             .map(|tkn| self.config.jwt_service.process_token(TokenStr::Access(tkn)))
             .transpose()?;
         let id = request
+            .tokens
             .id_token
             .as_ref()
             .map(|tkn| self.config.jwt_service.process_token(TokenStr::Id(tkn)))
             .transpose()?;
         let userinfo = request
+            .tokens
             .userinfo_token
             .as_ref()
             .map(|tkn| {

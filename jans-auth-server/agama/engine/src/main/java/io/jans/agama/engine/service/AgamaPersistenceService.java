@@ -189,7 +189,7 @@ public class AgamaPersistenceService {
         
         logger.debug("Saving state of current flow run");
         entryManager.merge(run);
-        
+
     }
     
     public void finishFlow(String sessionId, FlowResult result) throws IOException {

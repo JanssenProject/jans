@@ -8,7 +8,7 @@ use std::collections::{HashMap, HashSet};
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LogConfig,
     LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
-    TokenValidationConfig, WorkloadBoolOp,
+    TokenValidationConfig, Tokens, WorkloadBoolOp,
 };
 use jsonwebtoken::Algorithm;
 
@@ -61,9 +61,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // on a specific resource. Each token (access, ID, and userinfo) is required for the
     // authorization process, alongside resource and action details.
     let result = cedarling.authorize(Request {
-        access_token: Some(access_token),
-        id_token: Some(id_token),
-        userinfo_token: Some(userinfo_token),
+        tokens: Tokens {
+            access_token: Some(access_token),
+            id_token: Some(id_token),
+            userinfo_token: Some(userinfo_token),
+        },
         action: "Jans::Action::\"Update\"".to_string(),
         context: serde_json::json!({}),
         resource: ResourceData {
