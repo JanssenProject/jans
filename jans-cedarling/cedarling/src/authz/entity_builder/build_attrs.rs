@@ -35,7 +35,12 @@ impl EntityBuilder {
                 let mapped_claim = mapping.apply_mapping(claim);
                 attr.build_expr(&mapped_claim, attr_name, &self.schema)?
             } else {
-                attr.build_expr(&claims, attr_name, &self.schema)?
+                match attr.build_expr(&claims, attr_name, &self.schema) {
+                    Ok(expr) => expr,
+                    Err(err) if attr.is_required() => Err(err)?,
+                    // silently fail when attribute isn't required
+                    Err(_) => continue,
+                }
             };
 
             if let Some(expr) = expression {

@@ -117,6 +117,21 @@ impl<'de> Deserialize<'de> for Attribute {
     }
 }
 
+impl Attribute {
+    pub fn is_required(&self) -> bool {
+        *match self {
+            Attribute::String { required } => required,
+            Attribute::Long { required } => required,
+            Attribute::Boolean { required } => required,
+            Attribute::Record { required, .. } => required,
+            Attribute::Set { required, .. } => required,
+            Attribute::Entity { required, .. } => required,
+            Attribute::Extension { required, .. } => required,
+            Attribute::EntityOrCommon { required, .. } => required,
+        }
+    }
+}
+
 #[cfg(test)]
 /// Helper methods to easily create required attributes
 impl Attribute {
