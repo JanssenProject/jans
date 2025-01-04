@@ -266,9 +266,7 @@ fn test_failed_id_token_mapping() {
 
     let cedarling = Cedarling::new(&config).expect("could be created without error");
 
-    let mut request = REQUEST.clone();
-    request.access_token = None;
-    request.userinfo_token = None;
+    let request = REQUEST.clone();
 
     let err = cedarling
         .authorize(request)
@@ -285,7 +283,10 @@ fn test_failed_id_token_mapping() {
                 err
             );
         },
-        _ => panic!("expected BuildEntity error, got: {:?}", err),
+        _ => panic!(
+            "expected BuildEntity(BuildCedarlingEntityError::IdToken(_)) error, got: {:?}",
+            err
+        ),
     }
 }
 
