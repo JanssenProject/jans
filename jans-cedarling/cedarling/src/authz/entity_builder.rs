@@ -145,7 +145,7 @@ impl EntityBuilder {
             None
         };
 
-        let id_token = if let Some(token) = tokens.access.as_ref() {
+        let id_token = if let Some(token) = tokens.id.as_ref() {
             Some(
                 self.build_id_tkn_entity(token)
                     .map_err(BuildCedarlingEntityError::IdToken)?,
@@ -154,7 +154,7 @@ impl EntityBuilder {
             None
         };
 
-        let userinfo_token = if let Some(token) = tokens.access.as_ref() {
+        let userinfo_token = if let Some(token) = tokens.userinfo.as_ref() {
             Some(
                 self.build_userinfo_tkn_entity(token)
                     .map_err(BuildCedarlingEntityError::UserinfoToken)?,
