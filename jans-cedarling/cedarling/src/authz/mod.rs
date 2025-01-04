@@ -10,6 +10,8 @@
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
+use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
+use crate::common::cedar_schema::CEDAR_NAMESPACE_SEPARATOR;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt::{self, TokenStr};
 use crate::log::interface::LogWriter;
@@ -361,56 +363,95 @@ fn build_context(
 ) -> Result<cedar_policy::Context, BuildContextError> {
     let namespace = config.policy_store.namespace();
     let action_name = &action.id().escaped();
-    let action_schema = config
-        .policy_store
-        .schema
-        .json
+    let json_schema = &config.policy_store.schema.json;
+    let action_schema = json_schema
         .get_action(namespace, action_name)
         .ok_or(BuildContextError::UnknownAction(action_name.to_string()))?;
 
     // Get the entities required for the context
-    let mut ctx_schema_entity_types = Vec::new();
-    let mut entities_ctx = json!({});
+    let mut ctx_entity_refs = json!({});
     let type_ids = entities_data.type_ids();
     if let Some(ctx) = action_schema.applies_to.context.as_ref() {
         match ctx {
             Attribute::Record { attrs, .. } => {
                 for (key, attr) in attrs.iter() {
-                    match attr {
-                        Attribute::Entity { name, .. } => {
-                            if let Some(type_id) = type_ids.get(name).as_ref() {
-                                entities_ctx[key] = json!({"type": name, "id": type_id});
-                            } else {
-                                todo!("return error when type_id isn't supplied")
-                            }
-                            ctx_schema_entity_types.push(name.to_string());
-                        },
-                        Attribute::EntityOrCommon { name, .. } => {
-                            match config.policy_store.schema.json.get_entity_type(name) {
-                                Some((entity_nmspce, _)) if namespace == entity_nmspce => {
-                                    if let Some(type_id) = type_ids.get(name).as_ref() {
-                                        entities_ctx[key] = json!({"type": name, "id": type_id});
-                                    } else {
-                                        todo!("return error when type_id isn't supplied")
-                                    }
-                                    ctx_schema_entity_types.push(name.to_string());
-                                },
-                                _ => {},
-                            }
-                        },
-                        _ => {}, // do nothing if it's not an entity
+                    if let Some(entity_ref) =
+                        build_entity_refs_from_attr(namespace, attr, &type_ids, json_schema)
+                    {
+                        ctx_entity_refs[key] = entity_ref;
                     }
                 }
             },
-            _ => panic!("ctx must be of type record"),
+            Attribute::EntityOrCommon { name, .. } => {
+                // TODO: handle potential namespace collisions when Cedarling starts
+                // supporting multiple namespaces
+                if let Some((_namespace, attr)) = json_schema.get_common_type(name) {
+                    match attr {
+                        Attribute::Record { attrs, .. } => {
+                            for (key, attr) in attrs.iter() {
+                                if let Some(entity_ref) = build_entity_refs_from_attr(
+                                    namespace,
+                                    attr,
+                                    &type_ids,
+                                    json_schema,
+                                ) {
+                                    ctx_entity_refs[key] = entity_ref;
+                                }
+                            }
+                        },
+                        _ => panic!("common type attr must be of type record"),
+                    }
+                }
+            },
+            _ => panic!("ctx must be a record or common type"),
         }
     }
 
-    let context = merge_json_values(entities_ctx, request_context)?;
+    let context = merge_json_values(ctx_entity_refs, request_context)?;
+    println!("ctx: {:#?}", context);
     let context: cedar_policy::Context =
         cedar_policy::Context::from_json_value(context, Some((schema, action)))?;
 
     Ok(context)
+}
+
+/// Builds the JSON entity references from a given attribute.
+fn build_entity_refs_from_attr(
+    namespace: &str,
+    attr: &Attribute,
+    type_ids: &HashMap<String, String>,
+    schema: &CedarSchemaJson,
+) -> Option<Value> {
+    match attr {
+        Attribute::Entity { name, .. } => {
+            if let Some(type_id) = type_ids.get(name).as_ref() {
+                let name = try_join_namespace(name, namespace);
+                Some(json!({"type": name, "id": type_id}))
+            } else {
+                todo!("return error when type_id isn't supplied")
+            }
+        },
+        Attribute::EntityOrCommon { name, .. } => match schema.get_entity_type(name) {
+            Some((entity_nmspce, _)) if namespace == entity_nmspce => {
+                if let Some(type_id) = type_ids.get(name).as_ref() {
+                    let name = try_join_namespace(namespace, name);
+                    Some(json!({"type": name, "id": type_id}))
+                } else {
+                    todo!("return error when type_id isn't supplied")
+                }
+            },
+            _ => None,
+        },
+        _ => None, // do nothing if it's not an entity
+    }
+}
+
+/// Joins the given type name with the given namespace if it's not an empty string.
+fn try_join_namespace(namespace: &str, type_name: &str) -> String {
+    if namespace.is_empty() {
+        return type_name.to_string();
+    }
+    [namespace, type_name].join(CEDAR_NAMESPACE_SEPARATOR)
 }
 
 /// Helper struct to hold named parameters for [`Authz::execute_authorize`] method.
@@ -435,6 +476,7 @@ pub struct AuthorizeEntitiesData {
 }
 
 impl AuthorizeEntitiesData {
+    // NOTE: the type ids created from these does not include the namespace
     fn type_ids(&self) -> HashMap<String, String> {
         self.iter()
             .map(|entity| {
