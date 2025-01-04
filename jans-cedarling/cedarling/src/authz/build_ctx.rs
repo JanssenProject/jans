@@ -58,11 +58,21 @@ pub fn build_context(
                                 }
                             }
                         },
-                        _ => panic!("common type attr must be of type record"),
+                        attr => {
+                            return Err(BuildContextError::InvalidKind(
+                                attr.kind_str().to_string(),
+                                "record".to_string(),
+                            ))
+                        },
                     }
                 }
             },
-            _ => panic!("ctx must be a record or common type"),
+            attr => {
+                return Err(BuildContextError::InvalidKind(
+                    attr.kind_str().to_string(),
+                    "record or common".to_string(),
+                ))
+            },
         }
     }
 
@@ -132,6 +142,8 @@ pub enum BuildContextError {
     /// Error encountered while building entity references in the Context
     #[error("failed to build entity reference for `{0}` since an entity id was not provided")]
     MissingEntityId(String),
+    #[error("invalid action context type: {0}. expected: {1}")]
+    InvalidKind(String, String),
 }
 
 pub fn merge_json_values(mut base: Value, other: Value) -> Result<Value, BuildContextError> {
