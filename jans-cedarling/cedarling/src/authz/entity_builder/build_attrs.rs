@@ -82,7 +82,7 @@ impl EntityBuilder {
                 src
             };
 
-            let expression = match attr.build_expr(&src, attr_name, &self.schema) {
+            let expression = match attr.build_expr(src, attr_name, &self.schema) {
                 Ok(expr) => expr,
                 Err(err) if attr.is_required() => Err(err)?,
                 // silently fail when attribute isn't required

@@ -18,7 +18,8 @@ impl EntityBuilder {
 
         // Get entity namespace and type
         let mut entity_name = entity_name.to_string();
-        if let Some((namespace, _entity_type)) = self.schema.get_entity_from_base_name(&entity_name) {
+        if let Some((namespace, _entity_type)) = self.schema.get_entity_from_base_name(&entity_name)
+        {
             if !namespace.is_empty() {
                 entity_name = [namespace.as_str(), &entity_name].join(CEDAR_NAMESPACE_SEPARATOR);
             }
@@ -65,12 +66,12 @@ impl EntityBuilder {
             }
         }
 
-        return Ok(entities);
+        Ok(entities)
     }
 }
 
 fn build_entity(name: &str, id: &str) -> Result<Entity, BuildEntityError> {
-    let name = EntityTypeName::from_str(&name).map_err(BuildEntityError::ParseEntityTypeName)?;
+    let name = EntityTypeName::from_str(name).map_err(BuildEntityError::ParseEntityTypeName)?;
     let id = EntityId::from_str(id).expect("expected infallible");
     let uid = EntityUid::from_type_name_and_id(name, id);
     let entity = Entity::new(uid, HashMap::new(), HashSet::new())?;
