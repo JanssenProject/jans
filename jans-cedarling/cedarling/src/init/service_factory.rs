@@ -6,11 +6,9 @@
 //! Module to lazily initialize internal cedarling services
 
 use super::service_config::ServiceConfig;
-use crate::authz::entity_builder::{self, EntityBuilder, EntityNames};
 use crate::authz::{Authz, AuthzConfig};
 use crate::bootstrap_config::BootstrapConfig;
 use crate::common::app_types;
-use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt::{JwtService, JwtServiceInitError};
 use crate::log;
@@ -89,12 +87,6 @@ impl<'a> ServiceFactory<'a> {
         if let Some(authz) = &self.container.authz_service {
             Ok(authz.clone())
         } else {
-            // TODO: move this inside authz::new
-            let entity_builder = entity_builder::EntityBuilder::new_from_config(
-                self.bootstrap_config,
-                self.policy_store().schema.json.clone(),
-            );
-
             let config = AuthzConfig {
                 log_service: self.log_service(),
                 pdp_id: self.pdp_id(),
@@ -102,7 +94,6 @@ impl<'a> ServiceFactory<'a> {
                 policy_store: self.policy_store(),
                 jwt_service: self.jwt_service()?,
                 authorization: self.bootstrap_config.authorization_config.clone(),
-                entity_builder,
             };
             let service = Arc::new(Authz::new(config));
             self.container.authz_service = Some(service.clone());
@@ -116,14 +107,4 @@ impl<'a> ServiceFactory<'a> {
 pub enum ServiceInitError {
     #[error(transparent)]
     JwtService(#[from] JwtServiceInitError),
-}
-
-impl EntityBuilder {
-    fn new_from_config(config: &BootstrapConfig, schema: CedarSchemaJson) -> Self {
-        let authz_conf = &config.authorization_config;
-        let entity_names: EntityNames = authz_conf.into();
-        let build_workload = config.authorization_config.use_workload_principal;
-        let build_user = config.authorization_config.use_user_principal;
-        Self::new(schema, entity_names, build_workload, build_user)
-    }
 }

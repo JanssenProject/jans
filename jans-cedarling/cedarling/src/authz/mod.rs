@@ -42,7 +42,6 @@ pub(crate) struct AuthzConfig {
     pub policy_store: PolicyStoreWithID,
     pub jwt_service: Arc<jwt::JwtService>,
     pub authorization: AuthorizationConfig,
-    pub entity_builder: EntityBuilder,
 }
 
 /// Authorization Service
@@ -51,11 +50,23 @@ pub(crate) struct AuthzConfig {
 pub struct Authz {
     config: AuthzConfig,
     authorizer: cedar_policy::Authorizer,
+    entity_builder: EntityBuilder,
 }
 
 impl Authz {
     /// Create a new Authorization Service
     pub(crate) fn new(config: AuthzConfig) -> Self {
+        let json_schema = config.policy_store.schema.json.clone();
+        let entity_names = EntityNames::from(&config.authorization);
+        let build_workload = config.authorization.use_workload_principal;
+        let build_user = config.authorization.use_user_principal;
+        let entity_builder = entity_builder::EntityBuilder::new(
+            json_schema,
+            entity_names,
+            build_workload,
+            build_user,
+        );
+
         config.log_service.log(
             LogEntry::new_with_data(
                 config.pdp_id,
@@ -70,6 +81,7 @@ impl Authz {
         Self {
             config,
             authorizer: cedar_policy::Authorizer::new(),
+            entity_builder,
         }
     }
 
@@ -119,7 +131,7 @@ impl Authz {
 
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
         let entities_data = self
-            .entity_builder()
+            .entity_builder
             .build_entities(&tokens, &request.resource)?;
 
         // Get entity UIDs what we will be used on authorize check
@@ -333,10 +345,6 @@ impl Authz {
         Ok(response)
     }
 
-    fn entity_builder(&self) -> &EntityBuilder {
-        &self.config.entity_builder
-    }
-
     #[cfg(test)]
     pub fn build_entities(
         &self,
@@ -344,7 +352,6 @@ impl Authz {
         tokens: &DecodedTokens,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         Ok(self
-            .config
             .entity_builder
             .build_entities(tokens, &request.resource)?)
     }
