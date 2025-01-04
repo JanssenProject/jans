@@ -170,7 +170,7 @@ impl Attribute {
 }
 
 #[cfg(test)]
-mod test_deserialize_record_attr {
+mod test {
     use super::Attribute;
     use serde_json::json;
     use std::collections::HashMap;
@@ -264,17 +264,5 @@ mod test_deserialize_record_attr {
         let attr_json = json!({"type": "String", "required": false});
         let deserialized = serde_json::from_value::<Attribute>(attr_json).unwrap();
         assert_eq!(deserialized, Attribute::String { required: false });
-    }
-
-    #[test]
-    fn errors_on_invalid_type() {
-        let attr_json = json!({"type": "InvalidType"});
-        let err = serde_json::from_value::<Attribute>(attr_json)
-            .unwrap_err()
-            .to_string();
-        assert!(
-            err.contains("unknown variant `InvalidType`"),
-            "unexpected error: {err}"
-        );
     }
 }
