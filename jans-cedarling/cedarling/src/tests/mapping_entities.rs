@@ -224,8 +224,8 @@ fn test_failed_workload_mapping() {
         .expect_err("request should be parsed with mapping error");
 
     match err {
-        AuthorizeError::BuildEntity(BuildCedarlingEntityError::User(error)) => {
-            assert_eq!(error.errors.len(), 3, "there should be 3 errors");
+        AuthorizeError::BuildEntity(BuildCedarlingEntityError::Workload(error)) => {
+            assert_eq!(error.errors.len(), 2, "there should be 2 errors");
 
             // check for access token error
             let (token_kind, err) = &error.errors[0];
@@ -246,17 +246,11 @@ fn test_failed_workload_mapping() {
                 &entity_type,
                 err,
             );
-
-            // check for userinfo token error
-            let (token_kind, err) = &error.errors[2];
-            assert_eq!(token_kind, &TokenKind::Userinfo);
-            assert!(
-                matches!(err, BuildEntityError::EntityNotInSchema(ref claim) if claim == "aud"),
-                "expected MissinClaim(\"aud\"), got: {:?}",
-                err
-            );
         },
-        _ => panic!("expected error CreateWorkloadEntity"),
+        _ => panic!(
+            "expected BuildEntity(BuildCedarlingEntityError::Workload(_))) error, got: {:?}",
+            err
+        ),
     }
 }
 

@@ -45,7 +45,7 @@ impl EntityBuilder {
 }
 
 #[derive(Debug, thiserror::Error)]
-#[error("failed to create {token_kind} entity: {err}")]
+#[error("failed to create {token_kind} token entity: {err}")]
 pub struct BuildTokenEntityError {
     pub token_kind: TokenKind,
     pub err: BuildEntityError,
