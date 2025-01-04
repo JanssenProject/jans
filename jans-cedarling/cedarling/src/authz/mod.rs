@@ -1,4 +1,5 @@
 // This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
 //
 // Copyright (c) 2024, Gluu, Inc.
 
@@ -9,9 +10,6 @@
 
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types;
-use crate::common::cedar_schema::cedar_json::attribute::Attribute;
-use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
-use crate::common::cedar_schema::CEDAR_NAMESPACE_SEPARATOR;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt::{self, TokenStr};
 use crate::log::interface::LogWriter;
@@ -20,11 +18,10 @@ use crate::log::{
     LogTokensInfo, LogType, Logger, PrincipalLogEntry, UserAuthorizeInfo, WorkloadAuthorizeInfo,
 };
 pub use authorize_result::AuthorizeResult;
-use cedar_policy::{ContextJsonError, Entities, Entity, EntityUid};
+use build_ctx::*;
+use cedar_policy::{Entities, Entity, EntityUid};
 use entity_builder::*;
-use merge_json::{merge_json_values, MergeError};
 use request::Request;
-use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::io::Cursor;
 use std::str::FromStr;
@@ -32,7 +29,7 @@ use std::sync::Arc;
 use std::time::Instant;
 
 mod authorize_result;
-mod merge_json;
+mod build_ctx;
 
 pub(crate) mod entity_builder;
 pub(crate) mod request;
@@ -353,107 +350,6 @@ impl Authz {
     }
 }
 
-/// Constructs the authorization context by adding the built entities from the tokens
-fn build_context(
-    config: &AuthzConfig,
-    request_context: Value,
-    entities_data: &AuthorizeEntitiesData,
-    schema: &cedar_policy::Schema,
-    action: &cedar_policy::EntityUid,
-) -> Result<cedar_policy::Context, BuildContextError> {
-    let namespace = config.policy_store.namespace();
-    let action_name = &action.id().escaped();
-    let json_schema = &config.policy_store.schema.json;
-    let action_schema = json_schema
-        .get_action(namespace, action_name)
-        .ok_or(BuildContextError::UnknownAction(action_name.to_string()))?;
-
-    // Get the entities required for the context
-    let mut ctx_entity_refs = json!({});
-    let type_ids = entities_data.type_ids();
-    if let Some(ctx) = action_schema.applies_to.context.as_ref() {
-        match ctx {
-            Attribute::Record { attrs, .. } => {
-                for (key, attr) in attrs.iter() {
-                    if let Some(entity_ref) =
-                        build_entity_refs_from_attr(namespace, attr, &type_ids, json_schema)
-                    {
-                        ctx_entity_refs[key] = entity_ref;
-                    }
-                }
-            },
-            Attribute::EntityOrCommon { name, .. } => {
-                // TODO: handle potential namespace collisions when Cedarling starts
-                // supporting multiple namespaces
-                if let Some((_namespace, attr)) = json_schema.get_common_type(name) {
-                    match attr {
-                        Attribute::Record { attrs, .. } => {
-                            for (key, attr) in attrs.iter() {
-                                if let Some(entity_ref) = build_entity_refs_from_attr(
-                                    namespace,
-                                    attr,
-                                    &type_ids,
-                                    json_schema,
-                                ) {
-                                    ctx_entity_refs[key] = entity_ref;
-                                }
-                            }
-                        },
-                        _ => panic!("common type attr must be of type record"),
-                    }
-                }
-            },
-            _ => panic!("ctx must be a record or common type"),
-        }
-    }
-
-    let context = merge_json_values(ctx_entity_refs, request_context)?;
-    let context: cedar_policy::Context =
-        cedar_policy::Context::from_json_value(context, Some((schema, action)))?;
-
-    Ok(context)
-}
-
-/// Builds the JSON entity references from a given attribute.
-fn build_entity_refs_from_attr(
-    namespace: &str,
-    attr: &Attribute,
-    type_ids: &HashMap<String, String>,
-    schema: &CedarSchemaJson,
-) -> Option<Value> {
-    // TODO: handle errors here
-    match attr {
-        Attribute::Entity { name, .. } => {
-            if let Some(type_id) = type_ids.get(name).as_ref() {
-                let name = try_join_namespace(name, namespace);
-                Some(json!({"type": name, "id": type_id}))
-            } else {
-                todo!("return error when type_id isn't supplied")
-            }
-        },
-        Attribute::EntityOrCommon { name, .. } => match schema.get_entity_type(name) {
-            Some((entity_nmspce, _)) if namespace == entity_nmspce => {
-                if let Some(type_id) = type_ids.get(name).as_ref() {
-                    let name = try_join_namespace(namespace, name);
-                    Some(json!({"type": name, "id": type_id}))
-                } else {
-                    todo!("return error when type_id isn't supplied")
-                }
-            },
-            _ => None,
-        },
-        _ => None, // do nothing if it's not an entity
-    }
-}
-
-/// Joins the given type name with the given namespace if it's not an empty string.
-fn try_join_namespace(namespace: &str, type_name: &str) -> String {
-    if namespace.is_empty() {
-        return type_name.to_string();
-    }
-    [namespace, type_name].join(CEDAR_NAMESPACE_SEPARATOR)
-}
-
 /// Helper struct to hold named parameters for [`Authz::execute_authorize`] method.
 struct ExecuteAuthorizeParameters<'a> {
     entities: &'a Entities,
@@ -559,22 +455,6 @@ pub enum AuthorizeError {
     /// Error encountered while building Cedar Entities
     #[error(transparent)]
     BuildEntity(#[from] BuildCedarlingEntityError),
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum BuildContextError {
-    /// Error encountered while validating context according to the schema
-    #[error(transparent)]
-    Merge(#[from] MergeError),
-    /// Error encountered while deserializing the Context from JSON
-    #[error(transparent)]
-    DeserializeFromJson(#[from] ContextJsonError),
-    /// Error encountered while deserializing the Context from JSON
-    #[error("failed to find the action `{0}` in the schema")]
-    UnknownAction(String),
-    /// Error encountered while deserializing the Context from JSON
-    #[error("The action `{0}` was not found in the schema")]
-    MissingActionSchema(String),
 }
 
 #[derive(Debug, derive_more::Error, derive_more::Display)]
