@@ -65,7 +65,6 @@ impl EntityBuilder {
             None => return Ok(entity_attrs),
         };
 
-        println!("{:#?}", src);
         for (attr_name, attr) in shape.attrs.iter() {
             let val = match src.get(attr_name) {
                 Some(val) => val,
