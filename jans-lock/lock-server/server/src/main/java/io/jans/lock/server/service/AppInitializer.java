@@ -28,6 +28,8 @@ import com.google.common.collect.Lists;
 import io.jans.exception.ConfigurationException;
 import io.jans.lock.service.config.ApplicationFactory;
 import io.jans.lock.service.config.ConfigurationFactory;
+import io.jans.lock.service.stat.StatService;
+import io.jans.lock.service.stat.StatTimer;
 import io.jans.lock.service.status.StatusCheckerTimer;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.orm.PersistenceEntryManager;
@@ -123,6 +125,11 @@ public class AppInitializer {
 
     @Inject
     private DocumentStoreManager documentStoreManager;
+    
+    @Inject
+    private StatService statService;
+    
+    @Inject StatTimer statTimer;
 
 	@PostConstruct
 	public void createApplicationComponents() {
@@ -154,6 +161,9 @@ public class AppInitializer {
 		
 		// Initialize script manager
 		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.LOCK_EXTENSION);
+        
+        // Initialize stat service
+        statService.init();
 
 		// Start timer
 		initSchedulerService();
@@ -162,10 +172,11 @@ public class AppInitializer {
 		loggerService.initTimer();
 		statusCheckerTimer.initTimer();
 		customScriptManager.initTimer(supportedCustomScriptTypes);
+        statTimer.initTimer();
 
         // Initialize Document Store Manager
         documentStoreManager.initTimer(Arrays.asList(DOCUMENT_STORE_MANAGER_JANS_LOCK_TYPE));
-
+        
 		// Notify plugins about finish application initialization 
 		eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)
 				.fire(new ApplicationInitializedEvent());
