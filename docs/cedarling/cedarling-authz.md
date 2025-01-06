@@ -56,25 +56,24 @@ this is a sample request from a hypothetical application:
 
 ```js
 input = { 
-  "tokens": {
-    "access_token": "eyJhbGc....", 
-    "id_token": "eyJjbGc...", 
-    "userinfo_token": "eyJjbGc...",
-  },
-    "action": "View",
-    "resource": {
-      "id": "ticket-10101",
-      "type" : "Ticket",
-      "owner": "bob@acme.com", 
-      "org_id": "Acme"
-    },
-      "context": {
-        "ip_address": "54.9.21.201",
-        "network_type": "VPN",
-        "user_agent": "Chrome 125.0.6422.77 (Official Build) (arm64)",
-        "time": "1719266610.98636",
-      }
-    }
+           "access_token": "eyJhbGc....", 
+           "id_token": "eyJjbGc...", 
+           "userinfo_token": "eyJjbGc...",
+           "tx_token": "eyJjbGc...",
+           "action": "View",
+           "resource": {
+                          "id": "ticket-10101",
+                          "type" : "Ticket",
+                          "owner": "bob@acme.com", 
+                          "org_id": "Acme"
+                        },
+           "context": {
+                       "ip_address": "54.9.21.201",
+                       "network_type": "VPN",
+                       "user_agent": "Chrome 125.0.6422.77 (Official Build) (arm64)",
+                       "time": "1719266610.98636",
+                      }
+         }
 
 decision_result = authz(input)
 ```
