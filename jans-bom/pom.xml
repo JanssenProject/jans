@@ -914,7 +914,7 @@
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-deploy</artifactId>
-				<version>9.4.49.v20220914</version>
+				<version>12.0.16</version>
 				<scope>provided</scope>
 			</dependency>
 
