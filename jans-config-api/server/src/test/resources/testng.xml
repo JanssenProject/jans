@@ -1,0 +1,43 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Config-API" parallel="false">
+
+    <parameter name="propertiesFile" value="./target/test-classes/test.properties" />
+	
+	<listeners>
+        <listener class-name="io.jans.configapi.core.test.listener.AlterSuiteListener" />
+        <listener class-name="io.jans.configapi.core.test.listener.SkipTestsListener" />
+    </listeners>
+  
+    <test name="Acrs" enabled="true">
+        <classes>
+            <class name="io.jans.configapi.test.auth.AcrsResourceTest" />
+        </classes>
+    </test>
+	
+	<test name="Agama Deployments" enabled="true">
+        <classes>
+             <class name="io.jans.configapi.test.auth.AgamaDeploymentsResourceTest" />
+        </classes>
+    </test>
+
+	<test name="Auth Server Config" enabled="true">
+        <classes>
+            <class name="io.jans.configapi.test.auth.AuthConfigResourceTest" />
+        </classes>
+    </test>
+
+    <test name="Openid Client" enabled="true">
+        <classes>
+             <class name="io.jans.configapi.test.auth.ClientResourceTest" />
+        </classes>
+    </test>
+
+	<test name="Config" enabled="true">
+        <classes>
+            <class name="io.jans.configapi.test.auth.ConfigResourceTest" />
+        </classes>
+    </test>
+   
+
+</suite>

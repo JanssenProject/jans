@@ -1,0 +1,21 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Config-API-KC-SAML-Plugin" parallel="false">
+
+    <parameter name="propertiesFile" value="target/test-classes/test.properties" />
+	
+	<listeners>
+        <listener class-name="io.jans.configapi.core.test.listener.AlterSuiteListener" />
+        <listener class-name="io.jans.configapi.core.test.listener.SkipTestsListener" />
+    </listeners>
+  
+    <test name="KC-SAML-Plugin" enabled="true">
+        <classes>
+            <class name="io.jans.configapi.test.JansIdpResourceTest" />
+			<class name="io.jans.configapi.test.JansKcSAMLConfigResourceTest" />
+			<class name="io.jans.configapi.test.JansKcSAMLTrustRelationshipTest" />
+        </classes>
+    </test>
+	
+
+</suite>
