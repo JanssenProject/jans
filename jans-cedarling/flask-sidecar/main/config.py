@@ -25,6 +25,11 @@ class BaseConfig:
         exit()
     with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
         CEDARLING_BOOTSTRAP_CONFIG = f.read()
+    SIDECAR_DEBUG_RESPONSE = os.getenv("SIDECAR_DEBUG_RESPONSE", "False")
+    if SIDECAR_DEBUG_RESPONSE == "True":
+        SIDECAR_DEBUG_RESPONSE = True
+    else:
+        SIDECAR_DEBUG_RESPONSE = False
 
 class TestingConfig(BaseConfig):
     TESTING = True
