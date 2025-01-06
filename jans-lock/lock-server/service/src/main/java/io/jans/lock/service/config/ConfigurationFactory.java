@@ -28,6 +28,7 @@ import io.jans.lock.model.config.BaseDnConfiguration;
 import io.jans.lock.model.config.Conf;
 import io.jans.lock.model.config.Configuration;
 import io.jans.lock.model.config.StaticConfiguration;
+import io.jans.lock.model.error.ErrorResponseFactory;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.model.PersistenceConfiguration;
@@ -79,6 +80,8 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
 
 	@Inject
 	private Instance<Configuration> configurationInstance;
+
+	private ErrorResponseFactory errorResponseFactory;
 
 	public final static String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
 	public final static String BASE_CONFIGUARION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
@@ -250,6 +253,12 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
 		return staticConf;
 	}
 
+	@Produces
+	@ApplicationScoped
+	public ErrorResponseFactory getFido2ErrorResponseFactory() {
+		return errorResponseFactory;
+	}
+
 	public BaseDnConfiguration getBaseDn() {
 		return getStaticConfiguration().getBaseDn();
 	}
@@ -326,6 +335,9 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
 		}
 		if (conf.getStatics() != null) {
 			staticConf = conf.getStatics();
+		}
+		if (conf.getErrors() != null) {
+			errorResponseFactory = new ErrorResponseFactory(conf.getErrors(), conf.getDynamic());
 		}
 	}
 

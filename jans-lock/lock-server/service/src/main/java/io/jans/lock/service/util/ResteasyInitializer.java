@@ -24,9 +24,9 @@ import io.jans.lock.service.ws.rs.ConfigurationRestWebService;
 import io.jans.lock.service.ws.rs.audit.AuditRestWebServiceImpl;
 import io.jans.lock.service.ws.rs.config.ConfigRestWebServiceImpl;
 import io.jans.lock.service.ws.rs.sse.SseRestWebServiceImpl;
+import io.jans.lock.service.ws.rs.stat.StatRestWebServiceImpl;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
-
 
 /**
  * Integration with Resteasy
@@ -34,21 +34,22 @@ import jakarta.ws.rs.core.Application;
  * @author Yuriy Movchan Date: 06/06/2024
  */
 @ApplicationPath("/v1")
-public class ResteasyInitializer extends Application {	
+public class ResteasyInitializer extends Application {
 
 	@Override
-    public Set<Class<?>> getClasses() {
-        HashSet<Class<?>> classes = new HashSet<Class<?>>();
-        classes.add(ConfigurationRestWebService.class);
+	public Set<Class<?>> getClasses() {
+		HashSet<Class<?>> classes = new HashSet<Class<?>>();
+		classes.add(ConfigurationRestWebService.class);
 
-        classes.add(AuditRestWebServiceImpl.class);
-        classes.add(ConfigRestWebServiceImpl.class);
+		classes.add(AuditRestWebServiceImpl.class);
+		classes.add(ConfigRestWebServiceImpl.class);
+		classes.add(StatRestWebServiceImpl.class);
 
-        classes.add(SseRestWebServiceImpl.class);
-        
-        classes.add(AuthorizationProcessingFilter.class);
+		classes.add(SseRestWebServiceImpl.class);
 
-        return classes;
-    }
+		classes.add(AuthorizationProcessingFilter.class);
+
+		return classes;
+	}
 
 }

@@ -16,6 +16,7 @@
 
 package io.jans.lock.service.ws.rs.sse;
 
+import io.jans.service.security.api.ProtectedApi;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -32,6 +33,7 @@ public interface SseRestWebService {
 	@GET
 	@Path("/sse")
 	@Produces(MediaType.SERVER_SENT_EVENTS)
+	@ProtectedApi(scopes = {"https://jans.io/oauth/lock/sse.read"})
 	public void subscribe(@Context Sse sse, @Context SseEventSink sseEventSink);
 
 }
