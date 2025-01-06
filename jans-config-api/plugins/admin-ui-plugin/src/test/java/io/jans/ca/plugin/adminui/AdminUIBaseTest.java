@@ -17,7 +17,7 @@ public class AdminUIBaseTest extends BaseTest{
     
     @BeforeMethod
     @Override
-    public void getAccessToken() throws Exception {
+    public void getAccessToken() {
         log.info("AdminUI - getAccessToken - propertiesMap:{}", propertiesMap);
 
         String tokenUrl = propertiesMap.get("test.authzurl");

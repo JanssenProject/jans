@@ -22,7 +22,7 @@ import jakarta.ws.rs.core.Response.Status;
 
 public class ConfigResourceTest extends ConfigServerBaseTest {
 
-    @Parameters({ "issuer", "apiConfigtionUrl" })
+    @Parameters({ "test.issuer", "apiConfigtionUrl" })
     @Test
     public void getApiConfigtion(final String issuer, final String apiConfigtionUrl) {
         log.info("getApiConfigtion() - accessToken:{}, issuer:{}, apiConfigtionUrl:{}", accessToken, issuer,
@@ -36,7 +36,7 @@ public class ConfigResourceTest extends ConfigServerBaseTest {
 
     }
 
-    @Parameters({ "issuer", "apiConfigtionUrl", "api_config_patch_1" })
+    @Parameters({ "test.issuer", "apiConfigtionUrl", "api_config_patch_1" })
     @Test
     public void patchgetApiConfigtion(final String issuer, final String apiConfigtionUrl, final String json) {
         log.info("getApiConfigtion() - accessToken:{}, issuer:{}, apiConfigtionUrl:{}, json:{}", accessToken, issuer,

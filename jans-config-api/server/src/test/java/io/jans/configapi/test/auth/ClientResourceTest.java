@@ -19,7 +19,7 @@ import org.testng.annotations.Test;
 public class ClientResourceTest extends ConfigServerBaseTest {
 
  
-    @Parameters({ "issuer", "openidClientsUrl" })
+    @Parameters({ "test.issuer", "openidClientsUrl" })
     @Test
     public void getAllClient(final String issuer, final String openidClientsUrl) {
         log.info("getAllClient() - accessToken:{}, issuer:{}, openidClientsUrl:{}", accessToken, issuer,
@@ -33,7 +33,7 @@ public class ClientResourceTest extends ConfigServerBaseTest {
         log.info("Response for getAllClient -  response:{}", response);
     }
 
-    @Parameters({ "issuer", "openidClientsUrl", "openid_client_1" })
+    @Parameters({ "test.issuer", "openidClientsUrl", "openid_client_1" })
     @Test
     public void postClient(final String issuer, final String openidClientsUrl, final String json) {
         log.info("\n\n\n postClient2 - accessToken:{}, issuer:{}, openidClientsUrl:{}, json:{}", accessToken, issuer,

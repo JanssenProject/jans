@@ -18,7 +18,7 @@ import org.testng.annotations.Test;
 
 public class AgamaDeploymentsResourceTest extends ConfigServerBaseTest {
 
-    @Parameters({ "issuer", "agamaDeploymentUrl" })
+    @Parameters({ "test.issuer", "agamaDeploymentUrl" })
     @Test
     public void getDeployments(final String issuer, final String agamaDeploymentUrl) {
         log.info("accessToken:{}, issuer:{}, agamaDeploymentUrl:{}", accessToken, issuer, agamaDeploymentUrl);

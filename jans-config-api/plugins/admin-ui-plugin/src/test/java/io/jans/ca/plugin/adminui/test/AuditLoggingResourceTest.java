@@ -29,14 +29,14 @@ public class AuditLoggingResourceTest extends AdminUIBaseTest{
     @Parameters({"test.issuer", "auditLoggingURL", "audit_post_1"})
     @Test
     public void postAuditLoggingData(final String issuer, final String auditLoggingURL, final String json) {
-        log.info("postAuditLoggingData() - accessToken:{}, issuer:{}, auditLoggingURL:{}, json:{}", accessToken, issuer, auditLoggingURL, json);
+        log.error("postAuditLoggingData() - accessToken:{}, issuer:{}, auditLoggingURL:{}, json:{}", accessToken, issuer, auditLoggingURL, json);
         Builder request = getResteasyService().getClientBuilder(issuer+auditLoggingURL);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);      
         
         Response response = request.post(Entity.entity(json, MediaType.APPLICATION_JSON));
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.info("\n\n Response for postAuditLoggingData -  response:{}", response);
+        log.error("\n\n Response for postAuditLoggingData -  response:{}", response);
     }
 	
 

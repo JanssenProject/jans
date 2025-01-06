@@ -21,7 +21,7 @@ import org.testng.annotations.Test;
 
 public class AuthConfigResourceTest extends ConfigServerBaseTest{
 
-    @Parameters({"issuer", "authConfigurationUrl"})
+    @Parameters({"test.issuer", "authConfigurationUrl"})
     @Test
     public void getAuthConfigurationProperty(final String issuer, final String authConfigurationUrl) {
         log.info("getAuthConfigurationProperty() - accessToken:{}, issuer:{}, authConfigurationUrl:{}", accessToken, issuer, authConfigurationUrl);
@@ -35,7 +35,7 @@ public class AuthConfigResourceTest extends ConfigServerBaseTest{
             log.info("Response for getAuthConfigurationProperty() -  response:{}", response);
     }
     
-    @Parameters({"issuer", "authConfigurationUrl"})
+    @Parameters({"test.issuer", "authConfigurationUrl"})
     @Test
     public void getPersistenceDetails(final String issuer, final String authConfigurationUrl) {
         log.info("getPersistenceDetails() - accessToken:{}, issuer:{}, authConfigurationUrl:{}", accessToken, issuer, authConfigurationUrl);
@@ -49,7 +49,7 @@ public class AuthConfigResourceTest extends ConfigServerBaseTest{
             log.info("Response for getPersistenceDetails() -  response:{}", response);
     }
     
-    @Parameters({"issuer", "authConfigurationUrl", "auth_config_patch_1"})
+    @Parameters({"test.issuer", "authConfigurationUrl", "auth_config_patch_1"})
     @Test
     public void patchAuthConfigurationProperty(final String issuer, final String authConfigurationUrl, final String json) {
         log.info("patchAuthConfigurationProperty() - getApiConfigtion() - accessToken:{}, issuer:{}, authConfigurationUrl:{}, json:{}", accessToken, issuer,

@@ -20,7 +20,7 @@ import org.testng.annotations.Parameters;
 
 public class ApiHealthTest extends ConfigServerBaseTest {
 
-    @Parameters({ "issuer", "healthUrl" })
+    @Parameters({ "test.issuer", "healthUrl" })
     @Test
     public void getHealthResponse(final String issuer, final String healthUrl) {
         log.info("accessToken:{}, issuer:{}, healthUrl:{}", accessToken, issuer, healthUrl);
@@ -33,7 +33,7 @@ public class ApiHealthTest extends ConfigServerBaseTest {
         log.info("Response for getHealthResponse -  response:{}", response);
     }
 
-    @Parameters({ "issuer", "healthUrl" })
+    @Parameters({ "test.issuer", "healthUrl" })
     @Test
     public void getServerStat(final String issuer, final String healthUrl) {
         log.info("accessToken:{}, issuer:{}, healthUrl:{}", accessToken, issuer, healthUrl);
@@ -47,7 +47,7 @@ public class ApiHealthTest extends ConfigServerBaseTest {
         log.info("Response for getServerStat -  response:{}", response);
     }
 
-    @Parameters({ "issuer", "healthUrl" })
+    @Parameters({ "test.issuer", "healthUrl" })
     @Test
     public void getApplicationVersion(final String issuer, final String healthUrl) {
         log.info("accessToken:{}, issuer:{}, healthUrl:{}", accessToken, issuer, healthUrl);
@@ -61,7 +61,7 @@ public class ApiHealthTest extends ConfigServerBaseTest {
         log.info("Response for getApplicationVersion -  response:{}", response);
     }
 
-    @Parameters({ "issuer", "healthUrl" })
+    @Parameters({ "test.issuer", "healthUrl" })
     @Test
     public void getServiceStatus(final String issuer, final String healthUrl) {
         log.info("accessToken:{}, issuer:{}, healthUrl:{}", accessToken, issuer, healthUrl);

@@ -62,11 +62,11 @@ public class BaseTest {
     @BeforeMethod
     public void getAccessToken()  {
         log.info("getAccessToken - propertiesMap:{}", propertiesMap);
-        String tokenUrl = propertiesMap.get("tokenEndpoint");
-        String strGrantType = propertiesMap.get("tokenGrantType");
-        String clientId = propertiesMap.get("clientId");
-        String clientSecret = propertiesMap.get("clientSecret");
-        String scopes = propertiesMap.get("scopes");
+        String tokenUrl = propertiesMap.get("token.endpoint");
+        String strGrantType = propertiesMap.get("token.grant.type");
+        String clientId = propertiesMap.get("test.client.id");
+        String clientSecret = propertiesMap.get("test.client.secret");
+        String scopes = propertiesMap.get("test.scopes");
         GrantType grantType = GrantType.fromString(strGrantType);
         this.accessToken = getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
         log.info("accessToken:{}", accessToken);
@@ -102,8 +102,8 @@ public class BaseTest {
      */
     protected String getEncodedCredentials() {
         try {
-            String clientId = propertiesMap.get("clientId");
-            String clientSecret = propertiesMap.get("clientSecret");
+            String clientId = propertiesMap.get("test.client.id");
+            String clientSecret = propertiesMap.get("test.client.secret");
             if (StringUtils.isNotBlank(clientId) && StringUtils.isNotBlank(clientSecret)) {
                 return Base64.encodeBase64String(Util.getBytes(getCredentials(clientId, clientSecret)));
             }
