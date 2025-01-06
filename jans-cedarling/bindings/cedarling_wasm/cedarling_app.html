@@ -210,6 +210,11 @@
                 request_result_values.text(auth_result_json_str);
                 request_result_panel.show();
 
+                // scroll to show result
+                $('html, body').animate({
+                    scrollTop: request_result_panel.offset().top
+                }, 1000);
+
                 let logs = window.cedar_instance.pop_logs();
                 if (logs.length != 0) {
                     let pretty_logs = logs.map(log => JSON.stringify(Object.fromEntries(log), null, 2));
@@ -224,6 +229,11 @@
             } catch (error) {
                 request_error.text(error.message);
                 request_error.show();
+
+                // scroll to show error
+                $('html, body').animate({
+                    scrollTop: request_error.offset().top
+                }, 1000);
 
                 request_result_panel.hide();
                 request_log_panel.hide();
