@@ -15,129 +15,25 @@
             width: 100%;
         }
     </style>
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-      <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-    <![endif]-->
 </head>
 
 <body>
-
     <div class="container">
         <!-- div to make init cedarling -->
-        <div>
-            <div class="row">
-                <h2>Init cedarling</h2>
-                input bootstrap config json
-            </div>
-
-            <!-- textarea with bootstrap config -->
-            <div class="row">
-                <!-- by default textarea contains example of bootstrap config, set by js -->
-                <textarea id="bootstrap_config_textarea" rows="10" cols="100"></textarea>
-            </div>
-
-            <!-- Button to init cedarling with defined above bootsrap config JSON -->
-            <div class="row">
-                <button type="button" class="btn btn-default" id="bootstrap_init_button">Init Cedarling</button>
-                <div style="display: none;" id="bootstrap_init_processing"> Processing...</div>
-            </div>
-
-            <!-- Success message -->
-            <div class="row alert alert-success" role="alert" style="display: none" id="bootstrap_init_success">
-                Cedarling initialized
-            </div>
-
-            <!-- Log panel, is showh only if "CEDARLING_LOG_TYPE": "memory" -->
-            <div class="row panel panel-success" style="display: none;" id="bootstrap_init_log_panel">
-                <h3>Logs</h3>
-                <pre id="bootstrap_init_log_values">
-
-            </pre>
-            </div>
-
-            <!-- Error message in case if cedarling initialized with error -->
-            <div class="row alert alert-danger" role="alert" style="display: none" id="bootstrap_init_error">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                <span class="sr-only">Error:</span>
-                Error message
-            </div>
+        <div class="row">
+            <h1>It is Cedarling example WASM page</h2>
+                Result is written to the js console log.
         </div>
 
-        <!-- div to make authorize request -->
-        <div id="authorize_request_div" style="display: none;">
-            <div class="row">
-                <h3>Execute authorize request</h3>
-                input json request
-            </div>
-            <!-- textarea with json request -->
-            <div class="row">
-                <textarea id="request_textarea" rows="10" cols="100"></textarea>
-            </div>
-
-            <!-- Button to execute authorize request -->
-            <div class="row">
-                <button type="button" class="btn btn-default" id="request_button">Execute request</button>
-                <div style="display: none;" id="request_processing"> Processing...</div>
-            </div>
-
-            <!-- Error message in case if cedarling initialized with error -->
-            <div class="row alert alert-danger" role="alert" style="display: none" id="request_error">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                <span class="sr-only">Error:</span>
-                Error message
-            </div>
-
-            <!-- Result panel -->
-            <div class="row panel panel-success" style="display: none;" id="request_result_panel">
-                <h3>Result</h3>
-                <pre id="request_result_values"></pre>
-            </div>
-
-
-            <!-- Log panel, is showh only if "CEDARLING_LOG_TYPE": "memory" -->
-            <div class="row panel panel-success" style="display: none;" id="request_log_panel">
-                <h3>Logs</h3>
-                <pre id="request_log_values"></pre>
-            </div>
-
-
+        <br><br>
+        <div class="row">
+            Click here to move to the <a href="./cedarling_app.html">Cedarling test app</a>
         </div>
-
-
     </div>
 
-
-
-
-
-    <script type="module">
-        import initWasm, { init, Cedarling } from "./pkg/cedarling_wasm.js";
-        async function main() {
-            await initWasm(); // Initialize the WebAssembly module
-            window.Cedarling = Cedarling;
-            window.cedarling_init = init;
-        }
-        main().catch(console.error);
-
-    </script>
-
-
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://code.jquery.com/jquery-1.12.4.min.js"
-        integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ"
-        crossorigin="anonymous"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js"
-        integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
-        crossorigin="anonymous"></script>
-
+    <!-- In this `script` we define default config and request -->
     <script>
-        // At first we define default config and request
-
-        const RAW_DEFAULT_BOOTSTRAP_CONFIG = JSON.stringify({
+        const BOOTSTRAP_CONFIG = {
             "CEDARLING_APPLICATION_NAME": "My App",
             "CEDARLING_POLICY_STORE_URI": "https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/bindings/cedarling_python/example_files/policy-store.json",
             "CEDARLING_LOG_TYPE": "memory",
@@ -178,7 +74,7 @@
             "CEDARLING_AUDIT_HEALTH_INTERVAL": 0,
             "CEDARLING_AUDIT_TELEMETRY_INTERVAL": 0,
             "CEDARLING_LISTEN_SSE": "disabled"
-        }, null, 2);
+        };
 
 
         // Payload of access_token:
@@ -268,7 +164,7 @@
         // }
         let USERINFO_TOKEN = "eyJraWQiOiJjb25uZWN0X2Y5YTAwN2EyLTZkMGItNDkyYS05MGNkLWYwYzliMWMyYjVkYl9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJxenhuMVNjcmI5bFd0R3hWZWRNQ2t5LVFsX0lMc3BaYVFBNmZ5dVlrdHcwIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInJvbGUiOlsiQ2FzYUFkbWluIl0sImlzcyI6Imh0dHBzOi8vYWNjb3VudC5nbHV1Lm9yZyIsImdpdmVuX25hbWUiOiJBZG1pbiIsIm1pZGRsZV9uYW1lIjoiQWRtaW4iLCJpbnVtIjoiYTZhNzAzMDEtYWY0OS00OTAxLTk2ODctMGJjZGNmNGUzNGZhIiwiY2xpZW50X2lkIjoiZDdmNzFiZWEtYzM4ZC00Y2FmLWExYmEtZTQzYzc0YTExYTYyIiwiYXVkIjoiZDdmNzFiZWEtYzM4ZC00Y2FmLWExYmEtZTQzYzc0YTExYTYyIiwidXBkYXRlZF9hdCI6MTczMTY5ODEzNSwibmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsIm5pY2tuYW1lIjoiQWRtaW4iLCJmYW1pbHlfbmFtZSI6IlVzZXIiLCJqdGkiOiJPSW4zZzFTUFNEU0tBWUR6RU5Wb3VnIiwiZW1haWwiOiJhZG1pbkBqYW5zLnRlc3QiLCJqYW5zQWRtaW5VSVJvbGUiOlsiYXBpLWFkbWluIl19.CIahQtRpoTkIQx8KttLPIKH7gvGG8OmYCMzz7wch6k792DVYQG1R7q3sS9Ema1rO5Fm_GgjOsR0yTTMKsyhHDLBwkDd3cnMLgsh2AwVFZvxtpafTlUAPfjvMAy9YTtkPcY6rNUhsYLSSOA83kt6pHdIv5nI-G6ybqgg-bLBRpwZDoOV0TulRhmuukdiuugTXHT6Bb-K3ZeYs8CwewztnxoFTSDghSzq7VZIraV8SLTBLx5_xswn9mefamyB2XNN3o6vXuMyf4BEbYSCuJ3pu6YtNgfyWwt9cF8PYe4PVLoXZuJKN-cy4qrtgy43QXPCg96jSQUJqgLb5ZL5_3udm2Q";
 
-        let DEFAULT_REQUEST = JSON.stringify({
+        let REQUEST = {
             "access_token": ACCESS_TOKEN,
             "id_token": ID_TOKEN,
             "userinfo_token": USERINFO_TOKEN,
@@ -294,118 +190,20 @@
                 "operating_system": "Linux",
                 "user_agent": "Linux"
             },
-        }, null, 2);
+        };
+    </script>
 
-        // Program strart here
+    <script type="module">
+        import initWasm, { init } from "./pkg/cedarling_wasm.js";
+        async function main() {
+            await initWasm(); // Initialize the WebAssembly module
 
-        // Define links to div in body
-        const bootstrap_config_textarea = $('#bootstrap_config_textarea');
-        const bootstrap_init_button = $('#bootstrap_init_button');
-        const bootstrap_init_processing = $('#bootstrap_init_processing');
-        const bootstrap_init_success = $('#bootstrap_init_success');
-        const bootstrap_init_error = $('#bootstrap_init_error');
-        const bootstrap_init_log_panel = $('#bootstrap_init_log_panel');
-        const bootstrap_init_log_values = $('#bootstrap_init_log_values');
-        const authorize_request_div = $('#authorize_request_div');
+            let instance = await init(BOOTSTRAP_CONFIG);
+            let result = await instance.authorize(REQUEST);
+            console.log("result:", result);
 
-        const request_textarea = $('#request_textarea');
-        const request_button = $('#request_button');
-        const request_processing = $('#request_processing');
-        const request_error = $('#request_error');
-        const request_result_panel = $('#request_result_panel');
-        const request_result_values = $('#request_result_values');
-        const request_log_panel = $('#request_log_panel');
-        const request_log_values = $('#request_log_values');
-
-
-        // set default bootstrap config to textarea
-        bootstrap_config_textarea.val(RAW_DEFAULT_BOOTSTRAP_CONFIG);
-
-
-        // function to initialize cedarling on button with id `bootstrap_init_button`
-        bootstrap_init_button.on('click', async function () {
-            bootstrap_init_button.hide();
-            bootstrap_init_processing.show();
-            try {
-                let bootsrap_config_str = bootstrap_config_textarea.val();
-                let bootsrap_config_json = JSON.parse(bootsrap_config_str);
-
-                // init cedarling
-                const cedar_instance = await window.cedarling_init(bootsrap_config_json);
-                window.cedar_instance = cedar_instance;
-
-                let logs = cedar_instance.pop_logs();
-                if (logs.length != 0) {
-                    let pretty_logs = logs.map(log => JSON.stringify(Object.fromEntries(log), null, 2));
-
-                    bootstrap_init_log_panel.show();
-                    bootstrap_init_log_values.text(pretty_logs);
-                } else {
-                    bootstrap_init_log_panel.hide();
-                };
-                // show and hide div blocks when no errors
-                bootstrap_init_error.hide();
-                bootstrap_init_success.show();
-                authorize_request_div.show();
-
-                // if bootstrap config is not changed set default request to textarea
-                if (bootsrap_config_str == RAW_DEFAULT_BOOTSTRAP_CONFIG) {
-                    request_textarea.val(DEFAULT_REQUEST);
-                }
-
-            } catch (error) {
-                // add error message to div
-                bootstrap_init_error.text(error.message);
-                bootstrap_init_error.show();
-                bootstrap_init_success.hide();
-                bootstrap_init_log_panel.hide();
-                authorize_request_div.hide();
-            } finally {
-                bootstrap_init_button.show();
-                bootstrap_init_processing.hide();
-            }
-        });
-
-
-        // function to execute authorize on button with id `bootstrap_init_button`
-        request_button.on('click', async function () {
-            request_button.hide();
-            request_processing.show();
-            try {
-                let request_json = JSON.parse(request_textarea.val());
-
-                let auth_result = await window.cedar_instance.authorize(request_json);
-                let auth_result_json = auth_result.json_string();
-
-                // convert JSON to object and apply `JSON.stringify` to have pretty json string
-                let auth_result_json_str = JSON.stringify(JSON.parse(auth_result_json), null, 2);
-
-                request_result_values.text(auth_result_json_str);
-                request_result_panel.show();
-
-                let logs = window.cedar_instance.pop_logs();
-                if (logs.length != 0) {
-                    let pretty_logs = logs.map(log => JSON.stringify(Object.fromEntries(log), null, 2));
-
-                    request_log_panel.show();
-                    request_log_values.text(pretty_logs);
-                } else {
-                    request_log_panel.hide();
-                };
-
-                request_error.hide();
-            } catch (error) {
-                request_error.text(error.message);
-                request_error.show();
-
-                request_result_panel.hide();
-                request_log_panel.hide();
-            } finally {
-                request_button.show();
-                request_processing.hide();
-            }
-        });
-
+        }
+        main().catch(console.error);
     </script>
 </body>
 
