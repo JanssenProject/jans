@@ -25,6 +25,7 @@ pub(crate) trait LogWriter {
 pub(crate) trait Loggable: serde::Serialize {
     /// get unique request ID
     fn get_request_id(&self) -> Uuid;
+
     /// get log level for entity
     /// not all log entities have log level, only when `log_kind` == `System`
     fn get_log_level(&self) -> Option<LogLevel>;

@@ -14,11 +14,11 @@ use crate::bootstrap_config::log_config::MemoryLogConfig;
 
 const STORAGE_MUTEX_EXPECT_MESSAGE: &str = "MemoryLogger storage mutex should unlock";
 const STORAGE_JSON_PARSE_EXPECT_MESSAGE: &str =
-    "In MemoryLogger storage value should be valid LogEntry json string";
+    "In MemoryLogger storage value should be valid LogEntry json value";
 
 /// A logger that store logs in-memory.
 pub(crate) struct MemoryLogger {
-    storage: Mutex<SparKV<String>>,
+    storage: Mutex<SparKV<serde_json::Value>>,
     log_level: LogLevel,
 }
 
@@ -48,13 +48,13 @@ impl LogWriter for MemoryLogger {
             return;
         }
 
-        let json_string = serde_json::json!(entry).to_string();
+        let json = serde_json::json!(entry);
 
         let result = self
             .storage
             .lock()
             .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
-            .set(&entry.get_request_id().to_string(), json_string);
+            .set(&entry.get_request_id().to_string(), json);
 
         if let Err(err) = result {
             // log error to stderr
@@ -74,17 +74,18 @@ impl LogStorage for MemoryLogger {
 
         keys.iter()
             .filter_map(|key| storage_guard.pop(key))
-            // we call unwrap, because we know that the value is valid json
-            .map(|str_json| serde_json::from_str::<serde_json::Value>(str_json.as_str())
-            .expect(STORAGE_JSON_PARSE_EXPECT_MESSAGE))
+            // TODO we call unwrap, because we know that the value is valid json
+            .map(|value| serde_json::from_value(value).expect(STORAGE_JSON_PARSE_EXPECT_MESSAGE) )
             .collect()
     }
 
     fn get_log_by_id(&self, id: &str) -> Option<serde_json::Value> {
         self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE)
-            .get(id)
-            // we call unwrap, because we know that the value is valid json
-            .map(|str_json| serde_json::from_str::<serde_json::Value>(str_json.as_str()).expect(STORAGE_JSON_PARSE_EXPECT_MESSAGE))
+        .get(id)
+        .and_then(|value|
+            // TODO we call unwrap, because we know that the value is valid json
+            serde_json::from_value(value.clone()).expect(STORAGE_JSON_PARSE_EXPECT_MESSAGE)
+        )
     }
 
     fn get_log_ids(&self) -> Vec<String> {
