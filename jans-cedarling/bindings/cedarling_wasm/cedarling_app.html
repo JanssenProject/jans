@@ -13,12 +13,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Cedarling WASM App</title>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css"
-        integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        crossorigin="anonymous">
 
     <style>
-        textarea {
-            width: 100%;
+        button {
+            margin: 6px;
+        }
+
+        body {
+            margin-bottom: 100px;
         }
     </style>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -47,8 +51,11 @@
 
             <!-- Button to init cedarling with defined above bootsrap config JSON -->
             <div class="row">
-                <button type="button" class="btn btn-default" id="bootstrap_init_button">Init Cedarling</button>
-                <div style="display: none;" id="bootstrap_init_processing"> Processing...</div>
+                <div class="d-grid gap-2 col-6 mx-auto">
+                    <button type="button" class="btn btn-outline-primary" id="bootstrap_init_button">Init
+                        Cedarling</button>
+                    <div style="display: none;" id="bootstrap_init_processing"> Processing...</div>
+                </div>
             </div>
 
             <!-- Success message -->
@@ -59,7 +66,7 @@
             <!-- Log panel, is showh only if "CEDARLING_LOG_TYPE": "memory" -->
             <div class="row panel panel-success" style="display: none;" id="bootstrap_init_log_panel">
                 <h3>Logs</h3>
-                <pre id="bootstrap_init_log_values">
+                <pre id="bootstrap_init_log_values" class="border border-dark">
 
             </pre>
             </div>
@@ -85,8 +92,10 @@
 
             <!-- Button to execute authorize request -->
             <div class="row">
-                <button type="button" class="btn btn-default" id="request_button">Execute request</button>
-                <div style="display: none;" id="request_processing"> Processing...</div>
+                <div class="d-grid gap-2 col-6 mx-auto">
+                    <button type="button" class="btn btn-outline-primary" id="request_button">Execute request</button>
+                    <div style="display: none;" id="request_processing"> Processing...</div>
+                </div>
             </div>
 
             <!-- Error message in case if cedarling initialized with error -->
@@ -99,26 +108,23 @@
             <!-- Result panel -->
             <div class="row panel panel-success" style="display: none;" id="request_result_panel">
                 <h3>Result</h3>
-                <pre id="request_result_values"></pre>
+                <pre id="request_result_values" class="border border-dark"></pre>
             </div>
 
 
             <!-- Log panel, is showh only if "CEDARLING_LOG_TYPE": "memory" -->
             <div class="row panel panel-success" style="display: none;" id="request_log_panel">
                 <h3>Logs</h3>
-                <pre id="request_log_values"></pre>
+                <pre id="request_log_values" class="border border-dark"></pre>
             </div>
         </div>
     </div>
 
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://code.jquery.com/jquery-1.12.4.min.js"
-        integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ"
-        crossorigin="anonymous"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js"
-        integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
-        crossorigin="anonymous"></script>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+        integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script type="module">
         import { BOOTSTRAP_CONFIG, REQUEST } from "/example_data.js"
@@ -219,7 +225,7 @@
                 // scroll to show result
                 $('html, body').animate({
                     scrollTop: request_result_panel.offset().top
-                }, 1000);
+                }, 1);
 
                 let logs = window.cedar_instance.pop_logs();
                 if (logs.length != 0) {
@@ -239,7 +245,7 @@
                 // scroll to show error
                 $('html, body').animate({
                     scrollTop: request_error.offset().top
-                }, 1000);
+                }, 1);
 
                 request_result_panel.hide();
                 request_log_panel.hide();
