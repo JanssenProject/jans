@@ -146,7 +146,8 @@ jobs:
     - name: Build ${{ matrix.service }}
       run: |
         if [ "${{ github.event_name }}" == "pull_request" ]; then
-          mvn -f ${{ matrix.service }}/pom.xml -Dcfg=${{ env.PROFILE_NAME }} -Dmaven.test.skip=${{ matrix.maven_skip_tests }} clean install -Drevision=${{ github.head_ref }}-nightly
+          revision=${{ github.sha }}-nightly
+          mvn -f ${{ matrix.service }}/pom.xml -Dcfg=${{ env.PROFILE_NAME }} -Dmaven.test.skip=${{ matrix.maven_skip_tests }} clean install -Drevision=$revision
         else
           mvn -f ${{ matrix.service }}/pom.xml -Dcfg=${{ env.PROFILE_NAME }} -Dmaven.test.skip=${{ matrix.maven_skip_tests }} clean install
         fi
