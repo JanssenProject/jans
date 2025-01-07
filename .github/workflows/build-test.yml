@@ -44,7 +44,6 @@ permissions:
   contents: read
 jobs:
   cleanup:
-    if: github.event_name == 'push' && github.event.ref == 'refs/heads/main'
     runs-on: ubuntu-20.04
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
