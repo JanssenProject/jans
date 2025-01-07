@@ -198,7 +198,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y python3 build-essential ca-certificates dbus systemd iproute2 gpg python3-pip python3-dev libpq-dev gcc
-        python3 -m pip install --upgrade pip
+        python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
         pip3 install shiv wheel setuptools
         echo "Building jans-linux-setup package"
         sudo chown -R runner:docker /home/runner/work/jans/jans        

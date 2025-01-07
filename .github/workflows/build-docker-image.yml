@@ -91,7 +91,7 @@ jobs:
         if: steps.build_docker_image.outputs.build || github.event_name == 'tags'
         run: |
           sudo apt-get update
-          sudo python3 -m pip install --upgrade pip
+          sudo python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
           sudo pip3 install setuptools --upgrade
           sudo pip3 install -r ./automation/requirements.txt
           sudo apt-get update
