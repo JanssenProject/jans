@@ -10,7 +10,7 @@ use serde_json::json;
 use serde_wasm_bindgen::Error;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::js_sys::{Array, Map, Object};
+use wasm_bindgen_futures::js_sys::{Array, Map, Object, Reflect};
 
 #[cfg(test)]
 mod tests;
@@ -86,7 +86,7 @@ impl Cedarling {
     pub fn pop_logs(&self) -> Result<Array, Error> {
         let result = Array::new();
         for log in self.instance.pop_logs() {
-            let js_log = serde_wasm_bindgen::to_value(&log)?;
+            let js_log = convert_json_to_object(&log)?;
             result.push(&js_log);
         }
         Ok(result)
@@ -96,7 +96,7 @@ impl Cedarling {
     /// Returns `Map` with values or `null`.
     pub fn get_log_by_id(&self, id: &str) -> Result<JsValue, Error> {
         let result = if let Some(log_json_value) = self.instance.get_log_by_id(id) {
-            serde_wasm_bindgen::to_value(&log_json_value)?
+            convert_json_to_object(&log_json_value)?
         } else {
             JsValue::NULL
         };
@@ -112,6 +112,49 @@ impl Cedarling {
             result.push(&js_id);
         }
         result
+    }
+}
+
+/// convert json to js object
+fn convert_json_to_object(json_value: &serde_json::Value) -> Result<JsValue, Error> {
+    let js_map_value = serde_wasm_bindgen::to_value(json_value)?;
+    to_object_recursive(js_map_value)
+}
+
+/// recurcive convert [`Map`] to object
+fn to_object_recursive(value: JsValue) -> Result<JsValue, Error> {
+    if value.is_instance_of::<Map>() {
+        // Convert the Map into an Object where keys and values are recursively processed
+        let map = Map::unchecked_from_js(value);
+        let obj = Object::new();
+        for entry in map.entries().into_iter() {
+            let entry = Array::unchecked_from_js(entry?);
+            let key = entry.get(0);
+            let val = to_object_recursive(entry.get(1))?;
+            Reflect::set(&obj, &key, &val)?;
+        }
+        Ok(obj.into())
+    } else if value.is_instance_of::<Array>() {
+        // Recursively process arrays
+        let array = Array::unchecked_from_js(value);
+        let serialized_array = Array::new();
+        for item in array.iter() {
+            serialized_array.push(&to_object_recursive(item)?);
+        }
+        Ok(serialized_array.into())
+    } else if value.is_object() {
+        // Recursively process plain objects
+        let obj = Object::unchecked_from_js(value);
+        let keys = Object::keys(&obj);
+        let serialized_obj = Object::new();
+        for key in keys.iter() {
+            let val = Reflect::get(&obj, &key)?;
+            Reflect::set(&serialized_obj, &key, &to_object_recursive(val)?)?;
+        }
+        Ok(serialized_obj.into())
+    } else {
+        // Return primitive values as-is
+        Ok(value)
     }
 }
 

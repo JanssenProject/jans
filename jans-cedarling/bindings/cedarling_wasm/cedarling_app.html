@@ -163,7 +163,7 @@
 
                 let logs = cedar_instance.pop_logs();
                 if (logs.length != 0) {
-                    let pretty_logs = logs.map(log => JSON.stringify(Object.fromEntries(log), null, 2));
+                    let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
 
                     bootstrap_init_log_panel.show();
                     bootstrap_init_log_values.text(pretty_logs);
@@ -217,7 +217,7 @@
 
                 let logs = window.cedar_instance.pop_logs();
                 if (logs.length != 0) {
-                    let pretty_logs = logs.map(log => JSON.stringify(Object.fromEntries(log), null, 2));
+                    let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
 
                     request_log_panel.show();
                     request_log_values.text(pretty_logs);
