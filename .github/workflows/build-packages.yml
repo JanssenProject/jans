@@ -5,6 +5,8 @@ on:
     tags:
     - 'v**'
     - 'nightly'
+permissions:
+  contents: read
 jobs:
   publish_binary_packages:
     if: github.repository == 'JanssenProject/jans'

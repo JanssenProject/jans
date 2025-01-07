@@ -40,6 +40,8 @@ on:
 concurrency:
   group: run-once
   cancel-in-progress: false
+permissions:
+  contents: read
 jobs:
   cleanup:
     if: github.event_name == 'push' && github.event.ref == 'refs/heads/main'
@@ -170,7 +172,9 @@ jobs:
 
   run-tests:
     if: github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.project == 'jans-bom, jans-orm, jans-core, jans-lock/lock-server, agama, jans-auth-server, jans-link, jans-fido2, jans-scim, jans-keycloak-link, jans-config-api, jans-keycloak-integration, jans-casa')
-    permissions: write-all
+    permissions:
+      contents: read
+      packages: write
     needs: cleanup
     runs-on: ubuntu-20.04
     env:
