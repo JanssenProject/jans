@@ -53,7 +53,6 @@ jobs:
       with:
         egress-policy: audit
     - name: Get version ID for 0.0.0-nightly
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       id: get_version_id
       run: |
         services=$(gh api -H "Accept: application/vnd.github+json" \
