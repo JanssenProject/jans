@@ -69,6 +69,10 @@ pub enum InitCedarlingError {
     /// Error while parse [`BootstrapConfigRaw`]
     #[error(transparent)]
     BootstrapConfigLoading(#[from] BootstrapConfigLoadingError),
+    #[cfg(feature = "blocking")]
+    /// Error while init tokio runtime
+    #[error(transparent)]
+    RuntimeInit(std::io::Error),
 }
 
 /// The instance of the Cedarling application.

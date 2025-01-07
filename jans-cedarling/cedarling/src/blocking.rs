@@ -25,7 +25,7 @@ pub struct Cedarling {
 impl Cedarling {
     /// Builder
     pub fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
-        let rt = Runtime::new().unwrap();
+        let rt = Runtime::new().map_err(InitCedarlingError::RuntimeInit)?;
 
         rt.block_on(AsyncCedarling::new(config))
             .map(|async_instance| Cedarling {
