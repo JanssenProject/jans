@@ -56,10 +56,10 @@ jobs:
       id: get_version_id
       run: |
         services=$(gh api -H "Accept: application/vnd.github+json" \
-                  /orgs/JanssenProject/packages?package_type=maven \
-                  | jq -r '.[].name' | tr '\n' ' ')
-        services="\"$services\""
-        for service in "$services"; do
+                          /orgs/JanssenProject/packages?package_type=maven \
+                          | jq -r '.[].name' | tr '\n' ' ' | sed 's/ *$//')
+        
+        for service in $services; do
           echo "Checking $service"
           version_id=$(gh api -H "Accept: application/vnd.github+json" \
             /orgs/JanssenProject/packages/maven/io.jans.${service}/versions \
