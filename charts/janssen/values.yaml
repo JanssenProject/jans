@@ -1203,6 +1203,8 @@ global:
   cnConfiguratorCustomSchema:
     # -- The name of the secrets used for storing custom configuration schema.
     secretName: ""
+  cnConfiguratorKey: ""
+  cnConfiguratorKeyFile: /etc/jans/conf/configuration.key
 
 # -- Nginx ingress definitions chart
 nginx-ingress:
