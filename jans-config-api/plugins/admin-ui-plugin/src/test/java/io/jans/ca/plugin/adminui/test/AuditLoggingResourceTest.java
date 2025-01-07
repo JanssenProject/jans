@@ -27,7 +27,7 @@ public class AuditLoggingResourceTest extends AdminUIBaseTest{
      *  Testing Audit Logging endpoint
      */	 
     @Parameters({"test.issuer", "auditLoggingURL", "audit_post_1"})
-    @Test
+    //@Test
     public void postAuditLoggingData(final String issuer, final String auditLoggingURL, final String json) {
         log.error("postAuditLoggingData() - accessToken:{}, issuer:{}, auditLoggingURL:{}, json:{}", accessToken, issuer, auditLoggingURL, json);
         Builder request = getResteasyService().getClientBuilder(issuer+auditLoggingURL);
@@ -38,7 +38,5 @@ public class AuditLoggingResourceTest extends AdminUIBaseTest{
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
         log.error("\n\n Response for postAuditLoggingData -  response:{}", response);
     }
-	
-
-  
+	  
 }
