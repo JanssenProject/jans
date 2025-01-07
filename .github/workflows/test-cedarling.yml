@@ -19,7 +19,7 @@ jobs:
         egress-policy: audit
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
     - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
     - name: Run Tests
       run: |
         cd ./jans-cedarling
@@ -45,7 +45,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        python3 -m pip install --upgrade pip
+        python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
         python3 -m pip install tox
     - name: Test with pytest
       run: |
