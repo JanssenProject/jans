@@ -69,7 +69,7 @@ public class BaseTest {
         String scopes = propertiesMap.get("test.scopes");
         GrantType grantType = GrantType.fromString(strGrantType);
         this.accessToken = getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
-        log.info("accessToken:{}", accessToken);
+        log.info("\n\n accessToken:{}", accessToken);
     }
     
     protected String getToken(final String tokenUrl, final String clientId, final String clientSecret, GrantType grantType,
