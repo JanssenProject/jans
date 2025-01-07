@@ -209,7 +209,10 @@ jobs:
           # END move generated chart from a previous step
           
           # copy search from nightly to all other versions. This is to ensure that the search index is available for all versions
-          for folder in v*/; do cp -r nightly/search "$folder"; done
+          for folder in v*/; do
+            cp -r nightly/search "$folder"
+            git add $folder/search && git update-index --refresh
+          done
           # END copy search from nightly to all other versions
 
           echo "Replacing release number markers with actual release number"
