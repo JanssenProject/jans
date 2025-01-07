@@ -58,22 +58,32 @@ jobs:
     - name: Get version ID for 0.0.0-nightly
       id: get_version_id
       run: |
-        services=$(gh api -H "Accept: application/vnd.github+json" \
-                          /orgs/JanssenProject/packages?package_type=maven\&per_page=100 \
-                          | jq -r '.[].name' | tr '\n' ' ' | sed 's/ *$//')
-        
-        for service in $services; do
-          echo "Checking $service"
-          version_id=$(gh api -H "Accept: application/vnd.github+json" \
-            /orgs/JanssenProject/packages/maven/"${service}"/versions \
-            | jq -r '.[] | select(.name == "0.0.0-nightly") | .id')
-          echo "version_id=$version_id" >> $GITHUB_ENV
-          gh api --method DELETE \
-          -H "Accept: application/vnd.github+json" \
-          -H "X-GitHub-Api-Version: 2022-11-28" \
-          /orgs/JanssenProject/packages/maven/"${service}"/versions/"${version_id}" || echo "Failed to delete $service"
+        page=1
+        services=""
+        while true; do
+          response=$(gh api -H "Accept: application/vnd.github+json" \
+            /orgs/JanssenProject/packages?package_type=maven\&per_page=100\&page=$page)
+          names=$(echo "$response" | jq -r '.[].name')
+          if [ -z "$names" ]; then
+            break
+          fi
+          services="$services $names"
+          page=$((page + 1))
         done
-
+        
+        services=$(echo "$services" | tr '\n' ' ' | sed 's/ *$//')
+        echo "Services: $services"
+          for service in $services; do
+            echo "Checking $service"
+            version_id=$(gh api -H "Accept: application/vnd.github+json" \
+              /orgs/JanssenProject/packages/maven/"${service}"/versions \
+              | jq -r '.[] | select(.name == "0.0.0-nightly") | .id')
+            echo "version_id=$version_id" >> $GITHUB_ENV
+            gh api --method DELETE \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /orgs/JanssenProject/packages/maven/"${service}"/versions/"${version_id}" || echo "Failed to delete $service"
+          done
 
   prep-matrix:
     needs: cleanup
