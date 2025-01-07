@@ -85,11 +85,14 @@ impl Attribute {
                 for (name, kind) in attrs.iter() {
                     if let Some(expr) = kind.build_expr(attr_src, name, schema)? {
                         fields.insert(name.to_string(), expr);
-                    } else if *required {
-                        return Err(BuildExprError::MissingSource(name.clone()));
                     }
                 }
-                Ok(Some(RestrictedExpression::new_record(fields)?))
+
+                if fields.is_empty() && !required {
+                    Ok(None)
+                } else {
+                    Ok(Some(RestrictedExpression::new_record(fields)?))
+                }
             },
 
             // Handle Set attributes

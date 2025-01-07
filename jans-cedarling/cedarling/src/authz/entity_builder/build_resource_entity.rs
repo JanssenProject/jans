@@ -87,7 +87,7 @@ mod test {
     use serde_json::json;
 
     #[test]
-    fn can_build_resource_entity() {
+    fn can_build_entity() {
         let schema = serde_json::from_value::<CedarSchemaJson>(json!({
             "Jans": {
                 "commonTypes": {
@@ -179,6 +179,145 @@ mod test {
                     .expect("expected `url` to have an `Accept` attribute"),
                 &EvalResult::String("test".to_string())
             );
+        } else {
+            panic!(
+                "expected the attribute `header` to be a record, got: {:?}",
+                header
+            );
+        }
+    }
+
+    #[test]
+    fn can_build_entity_with_optional_attr() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": {
+                "commonTypes": {
+                    "Url": {
+                        "type": "Record",
+                        "attributes": {
+                            "host": { "type": "String" },
+                            "path": { "type": "String" },
+                            "protocol": { "type": "String" },
+                        },
+                    },
+                },
+                "entityTypes": {
+                    "Role": {},
+                    "HttpRequest": {
+                        "shape": {
+                            "type": "Record",
+                            "attributes":  {
+                                "url": { "type": "EntityOrCommon", "name": "Url", "required": false},
+                            },
+                        }
+                    }
+                }
+            }
+        }))
+        .expect("should successfully create test schema");
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let resource_data = ResourceData {
+            resource_type: "HttpRequest".to_string(),
+            id: "request-123".to_string(),
+            payload: HashMap::new(),
+        };
+        let entity = builder
+            .build_resource_entity(&resource_data)
+            .expect("expected to build resource entity");
+
+        assert!(
+            entity.attr("url").is_none(),
+            "entity should not have a `url` attribute"
+        );
+    }
+
+    #[test]
+    fn can_build_entity_with_optional_record_attr() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": {
+                "commonTypes": {
+                    "Url": {
+                        "type": "Record",
+                        "attributes": {
+                            "host": { "type": "String" },
+                            "path": { "type": "String" },
+                            "protocol": { "type": "String" },
+                        },
+                    },
+                },
+                "entityTypes": {
+                    "Role": {},
+                    "HttpRequest": {
+                        "shape": {
+                            "type": "Record",
+                            "attributes":  {
+                                "header": {
+                                    "type": "Record",
+                                    "attributes": {
+                                        "Accept": { "type": "EntityOrCommon", "name": "String", "required": false },
+                                    },
+                                },
+                                "url": { "type": "EntityOrCommon", "name": "Url" },
+                            },
+                        }
+                    }
+                }
+            }
+        }))
+        .expect("should successfully create test schema");
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let resource_data = ResourceData {
+            resource_type: "HttpRequest".to_string(),
+            id: "request-123".to_string(),
+            payload: HashMap::from([
+                (
+                    "url".to_string(),
+                    json!({"host": "protected.host", "protocol": "http", "path": "/protected"}),
+                ),
+                ("header".to_string(), json!({})),
+            ]),
+        };
+        let entity = builder
+            .build_resource_entity(&resource_data)
+            .expect("expected to build resource entity");
+
+        let url = entity
+            .attr("url")
+            .expect("entity must have an `url` attribute")
+            .unwrap();
+        if let EvalResult::Record(ref record) = url {
+            assert_eq!(record.len(), 3);
+            assert_eq!(
+                record
+                    .get("host")
+                    .expect("expected `url` to have a `host` attribute"),
+                &EvalResult::String("protected.host".to_string())
+            );
+            assert_eq!(
+                record
+                    .get("protocol")
+                    .expect("expected `url` to have a `domain` attribute"),
+                &EvalResult::String("http".to_string())
+            );
+            assert_eq!(
+                record
+                    .get("path")
+                    .expect("expected `url` to have a `path` attribute"),
+                &EvalResult::String("/protected".to_string())
+            );
+        } else {
+            panic!(
+                "expected the attribute `url` to be a record, got: {:?}",
+                url
+            );
+        }
+
+        let header = entity
+            .attr("header")
+            .expect("entity must have an `header` attribute")
+            .unwrap();
+        if let EvalResult::Record(ref record) = header {
+            assert_eq!(record.len(), 0, "the header attribute must be empty");
         } else {
             panic!(
                 "expected the attribute `header` to be a record, got: {:?}",
