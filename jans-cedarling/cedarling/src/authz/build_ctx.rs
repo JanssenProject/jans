@@ -76,7 +76,7 @@ pub fn build_context(
         }
     }
 
-    let context = merge_json_values(ctx_entity_refs, request_context)?;
+    let context = merge_json_values(request_context, ctx_entity_refs)?;
     let context: cedar_policy::Context =
         cedar_policy::Context::from_json_value(context, Some((schema, action)))?;
 
