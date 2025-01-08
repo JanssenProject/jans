@@ -141,24 +141,18 @@ impl<T> SparKV<T> {
 
     pub fn clear_expired(&mut self) -> usize {
         let mut cleared_count: usize = 0;
-        loop {
-            let peeked = self.expiries.peek().cloned();
-            match peeked {
-                Some(exp_item) => {
-                    if exp_item.is_expired() {
-                        let kv_entry = self.data.get(&exp_item.key).unwrap();
-                        if kv_entry.key == exp_item.key
-                            && kv_entry.expired_at == exp_item.expired_at
-                        {
-                            cleared_count += 1;
-                            self.pop(&exp_item.key);
-                        }
-                        self.expiries.pop();
-                    } else {
-                        break;
-                    }
-                },
-                None => break,
+        while let Some(exp_item) = self.expiries.peek().cloned() {
+            if exp_item.is_expired() {
+                let kv_entry = self.data.get(&exp_item.key).unwrap();
+                if kv_entry.key == exp_item.key
+                    && kv_entry.expired_at == exp_item.expired_at
+                {
+                    cleared_count += 1;
+                    self.pop(&exp_item.key);
+                }
+                self.expiries.pop();
+            } else {
+                break
             }
         }
         cleared_count
