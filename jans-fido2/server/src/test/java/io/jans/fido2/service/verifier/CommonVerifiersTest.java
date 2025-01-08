@@ -21,6 +21,7 @@ import io.jans.fido2.service.processor.attestation.TPMProcessor;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
 import io.jans.service.net.NetworkService;
 import jakarta.enterprise.inject.Instance;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.bouncycastle.util.encoders.Hex;
@@ -33,9 +34,7 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -114,6 +113,47 @@ class CommonVerifiersTest {
 
         assertNotNull(response);
         assertEquals(response, "test.domain");
+    }
+
+
+    @Test
+    void verifyRpDomain_originMatchesValidOrigin_valid() {
+        String origin = "https://test.bank.com";
+        String rpId = "bank.com";
+        List<RequestedParty> requestedParties = new ArrayList<>();
+        RequestedParty rp = new RequestedParty();
+        rp.setOrigins(Arrays.asList("test.bank.com", "emp.bank.com", "india.bank.com"));
+        requestedParties.add(rp);
+
+        when(networkService.getHost(origin)).thenReturn("test.bank.com");
+
+        String response = commonVerifiers.verifyRpDomain(origin, rpId, requestedParties);
+
+        assertNotNull(response);
+        assertEquals("test.bank.com", response);
+    }
+
+    @Test
+    void verifyRpDomain_originDoesNotMatchValidOrigins_invalid() {
+        String origin = "https://test.bank1.com";
+        String rpId = "bank.com";
+        List<RequestedParty> requestedParties = new ArrayList<>();
+        RequestedParty rp = new RequestedParty();
+        rp.setOrigins(Arrays.asList("test.bank.com", "emp.bank.com", "india.bank.com"));
+        requestedParties.add(rp);
+
+        when(networkService.getHost(origin)).thenReturn("test.bank1.com");
+
+        // Here we mock the errorResponseFactory to throw a BadRequestException
+        when(errorResponseFactory.badRequestException(any(), anyString()))
+                .thenThrow(new BadRequestException("The origin '\" + origin + \"' is not listed in the allowed origins."));
+
+        // Expecting an exception when the origin doesn't match any of the allowed origins
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            commonVerifiers.verifyRpDomain(origin, rpId, requestedParties);
+        });
+
+        assertEquals("The origin '\" + origin + \"' is not listed in the allowed origins.", exception.getMessage());
     }
 
     @Test
