@@ -133,10 +133,10 @@ impl Attribute {
                         if !namespace.is_empty() {
                             name = [namespace, name.as_str()].join(CEDAR_NAMESPACE_SEPARATOR);
                         }
+                    } else if *required {
+                        return Err(BuildExprError::EntityNotInSchema(name.to_string()));
                     } else {
-                        if *required {
-                            return Err(BuildExprError::EntityNotInSchema(name.to_string()));
-                        }
+                        return Ok(None);
                     }
 
                     let type_name = EntityTypeName::from_str(&name).unwrap();
