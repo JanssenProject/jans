@@ -91,6 +91,28 @@ fn test_set_should_fail_if_capacity_exceeded() {
 }
 
 #[test]
+fn memsize_item_capacity_exceeded() {
+    let value : String = "jay".into();
+
+    let mut config: Config = Config::new();
+    config.max_item_size = std::mem::size_of_val(&value) / 2;
+    let mut sparkv = SparKV::<String>::with_config(config);
+
+    let error = sparkv.set("blue", value);
+    assert_eq!(error, Err(crate::Error::ItemSizeExceeded));
+}
+
+#[test]
+fn custom_item_capacity_exceeded() {
+    let mut config: Config = Config::new();
+    config.max_item_size = 20;
+    let mut sparkv = SparKV::<String>::with_config_and_sizer(config, Some(String::len));
+
+    assert_eq!(Ok(()), sparkv.set("short", "value".to_string()));
+    assert_eq!(Err(crate::Error::ItemSizeExceeded), sparkv.set("long", "This is a value that exceeds 20 characters".to_string()));
+}
+
+#[test]
 fn test_set_with_ttl() {
     let mut sparkv = SparKV::<String>::new();
     _ = sparkv.set("longest", "value".into());

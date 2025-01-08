@@ -26,7 +26,9 @@ pub struct SparKV<T> {
     ///
     /// Used by `ensure_item_size`.
     ///
-    /// If this function is not provided, the container will not enforce `Config.max_item_size`.
+    /// If this function is not provided, the container will enforce
+    /// `Config.max_item_size` on the basis of `std::mem::size_of_val` which
+    /// probably won't be what you expect.
     size_calculator : Option<fn(&T) -> usize>,
 }
 
