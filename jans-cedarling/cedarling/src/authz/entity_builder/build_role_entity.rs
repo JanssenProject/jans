@@ -260,4 +260,43 @@ mod test {
         };
         test_build_entity_from_str_claim(tokens);
     }
+
+    #[test]
+    fn can_create_multiple_different_roles_from_different_tokens() {
+        let iss = TrustedIssuer::default();
+        let schema = test_schema();
+        let access_token = Token::new_access(
+            TokenClaims::new(HashMap::from([("role".to_string(), json!("role1"))])),
+            Some(&iss),
+        );
+        let id_token = Token::new_id(
+            TokenClaims::new(HashMap::from([("role".to_string(), json!("role2"))])),
+            Some(&iss),
+        );
+        let userinfo_token = Token::new_userinfo(
+            TokenClaims::new(HashMap::from([(
+                "role".to_string(),
+                json!(["role3", "role4"]),
+            )])),
+            Some(&iss),
+        );
+        let tokens = DecodedTokens {
+            access: Some(access_token),
+            id: Some(id_token),
+            userinfo: Some(userinfo_token),
+        };
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let entities = builder
+            .try_build_role_entities(&tokens)
+            .expect("expected to build role entities");
+
+        let entities = entities
+            .iter()
+            .map(|e| e.uid().to_string())
+            .collect::<HashSet<String>>();
+        let expected_entities = (1..=4)
+            .map(|x| format!("Jans::Role::\"role{}\"", x))
+            .collect::<HashSet<String>>();
+        assert_eq!(entities, expected_entities);
+    }
 }
