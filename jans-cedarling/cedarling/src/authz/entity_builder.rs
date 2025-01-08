@@ -263,6 +263,8 @@ pub enum BuildEntityError {
     BuildExpression(#[from] BuildExprError),
     #[error(transparent)]
     BuildEntityAttr(#[from] BuildAttrError),
+    #[error("got {0} token, expected: {1}")]
+    InvalidToken(TokenKind, TokenKind),
 }
 
 impl BuildEntityError {

@@ -87,7 +87,7 @@ impl<'a> Token<'a> {
 }
 
 /// A struct holding information on a decoded JWT.
-#[derive(Debug, PartialEq, Default, Deserialize)]
+#[derive(Debug, PartialEq, Default, Deserialize, Clone)]
 pub struct TokenClaims {
     #[serde(flatten)]
     claims: HashMap<String, Value>,

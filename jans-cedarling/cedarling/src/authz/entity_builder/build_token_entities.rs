@@ -9,11 +9,23 @@ const DEFAULT_TKN_PRINCIPAL_IDENTIFIER: &str = "jti";
 
 impl EntityBuilder {
     pub fn build_access_tkn_entity(&self, token: &Token) -> Result<Entity, BuildTokenEntityError> {
+        if token.kind != TokenKind::Access {
+            return Err(BuildTokenEntityError {
+                token_kind: TokenKind::Access,
+                err: BuildEntityError::InvalidToken(token.kind, TokenKind::Access),
+            });
+        }
         let entity_name = self.entity_names.access_token.as_ref();
         self.build_tkn_entity(entity_name, token)
     }
 
     pub fn build_id_tkn_entity(&self, token: &Token) -> Result<Entity, BuildTokenEntityError> {
+        if token.kind != TokenKind::Id {
+            return Err(BuildTokenEntityError {
+                token_kind: TokenKind::Id,
+                err: BuildEntityError::InvalidToken(token.kind, TokenKind::Id),
+            });
+        }
         let entity_name = self.entity_names.id_token.as_ref();
         self.build_tkn_entity(entity_name, token)
     }
@@ -22,6 +34,12 @@ impl EntityBuilder {
         &self,
         token: &Token,
     ) -> Result<Entity, BuildTokenEntityError> {
+        if token.kind != TokenKind::Userinfo {
+            return Err(BuildTokenEntityError {
+                token_kind: TokenKind::Userinfo,
+                err: BuildEntityError::InvalidToken(token.kind, TokenKind::Userinfo),
+            });
+        }
         let entity_name = self.entity_names.userinfo_token.as_ref();
         self.build_tkn_entity(entity_name, token)
     }
@@ -122,8 +140,7 @@ mod test {
     }
 
     fn test_issusers() -> HashMap<String, TrustedIssuer> {
-        let iss = TrustedIssuer {
-            access_tokens: TokenEntityMetadata {
+        let token_entity_metadata = TokenEntityMetadata {
                 claim_mapping: serde_json::from_value::<ClaimMappings>(json!({
                     "url": {
                         "parser": "regex",
@@ -136,7 +153,11 @@ mod test {
                 }))
                 .unwrap(),
                 ..Default::default()
-            },
+            };
+        let iss = TrustedIssuer {
+            access_tokens: token_entity_metadata.clone(),
+            id_tokens: token_entity_metadata.clone(),
+            userinfo_tokens: token_entity_metadata,
             ..Default::default()
         };
         let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
@@ -186,6 +207,87 @@ mod test {
             panic!(
                 "expected the attribute `trusted_issuer` to be an EntityUid, got: {:?}",
                 trusted_iss
+            );
+        }
+    }
+
+    #[test]
+    fn errors_when_given_incorrect_tkn_kind() {
+        let schema = test_schema();
+        let issuers = test_issusers();
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let tkn_claims = TokenClaims::new(HashMap::from([
+            ("jti".to_string(), json!("tkn-123")),
+            (
+                "trusted_issuer".to_string(),
+                json!("https://some-iss.com/.well-known/openid-configuration"),
+            ),
+        ]));
+        let iss = Some(issuers.get("test_iss").unwrap());
+        let access_token = Token::new_access(tkn_claims.clone(), iss);
+        let id_token = Token::new_id(tkn_claims.clone(), iss);
+        let userinfo_token = Token::new_userinfo(tkn_claims, iss);
+
+        for tkn in [&id_token, &userinfo_token].iter() {
+            let err = builder
+                .build_access_tkn_entity(tkn)
+                .expect_err("expected to error because a wrong token kind was supplied");
+            assert!(
+                matches!(
+                    err,
+                    BuildTokenEntityError {
+                        ref token_kind,
+                        err: BuildEntityError::InvalidToken(ref got_kind, ref expected_kind)
+                    }
+                    if *token_kind == TokenKind::Access &&
+                        *got_kind == tkn.kind &&
+                        *expected_kind == TokenKind::Access
+                ),
+                "should match error for {} token but got: {:#?}",
+                tkn.kind,
+                err,
+            );
+        }
+
+        for tkn in [&access_token, &userinfo_token].iter() {
+            let err = builder
+                .build_id_tkn_entity(tkn)
+                .expect_err("expected to error because a wrong token kind was supplied");
+            assert!(
+                matches!(
+                    err,
+                    BuildTokenEntityError {
+                        ref token_kind,
+                        err: BuildEntityError::InvalidToken(ref got_kind, ref expected_kind)
+                    }
+                    if *token_kind == TokenKind::Id &&
+                        *got_kind == tkn.kind &&
+                        *expected_kind == TokenKind::Id
+                ),
+                "should match error for {} token but got: {:#?}",
+                tkn.kind,
+                err,
+            );
+        }
+
+        for tkn in [&access_token, &id_token].iter() {
+            let err = builder
+                .build_userinfo_tkn_entity(tkn)
+                .expect_err("expected to error because a wrong token kind was supplied");
+            assert!(
+                matches!(
+                    err,
+                    BuildTokenEntityError {
+                        ref token_kind,
+                        err: BuildEntityError::InvalidToken(ref got_kind, ref expected_kind)
+                    }
+                    if *token_kind == TokenKind::Userinfo &&
+                        *got_kind == tkn.kind &&
+                        *expected_kind == TokenKind::Userinfo
+                ),
+                "should match error for {} token but got: {:#?}",
+                tkn.kind,
+                err,
             );
         }
     }
