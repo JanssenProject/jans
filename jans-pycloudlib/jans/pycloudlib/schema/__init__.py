@@ -4,7 +4,6 @@ import json
 import logging
 import re
 from base64 import b64decode
-from contextlib import suppress
 
 import pem
 from fqdn import FQDN
@@ -21,7 +20,6 @@ from marshmallow.validate import Length
 from marshmallow.validate import OneOf
 from marshmallow.validate import Predicate
 from marshmallow.validate import Range
-from sprig_aes import sprig_decrypt_aes
 
 logger = logging.getLogger(__name__)
 
@@ -886,72 +884,38 @@ class ConfigurationSchema(Schema):
     _configmap = Nested(ConfigmapSchema, required=True)
 
 
-def load_schema_from_file(path, exclude_configmap=False, exclude_secret=False, key_file=""):
+def load_schema_from_file(path, exclude_configmap=False, exclude_secret=False):
     """Loads schema from file."""
-    out, err, code = maybe_encrypted_schema(path, key_file)
+    out = {}
+    err = {}
+    code = 0
 
-    if code != 0:
+    try:
+        with open(path) as f:
+            docs = json.loads(f.read())
+    except (IOError, ValueError) as exc:
+        err = exc
+        code = 1
         return out, err, code
 
     # dont exclude attributes
-    exclude_attrs = []
+    exclude_attrs = False
 
     # exclude configmap from loading mechanism
     if exclude_configmap:
         key = "_configmap"
         exclude_attrs = [key]
-        out.pop(key, None)
+        docs.pop(key, None)
 
     # exclude secret from loading mechanism
     if exclude_secret:
         key = "_secret"
         exclude_attrs = [key]
-        out.pop(key, None)
+        docs.pop(key, None)
 
     try:
-        out = ConfigurationSchema().load(out, partial=exclude_attrs)
+        out = ConfigurationSchema().load(docs, partial=exclude_attrs)
     except ValidationError as exc:
         err = exc.messages
         code = 1
-    return out, err, code
-
-
-def load_schema_key(path):
-    try:
-        with open(path) as f:
-            key = f.read().strip()
-    except FileNotFoundError:
-        key = ""
-    return key
-
-
-def maybe_encrypted_schema(path, key_file):
-    out, err, code = {}, {}, 0
-
-    try:
-        # read schema as raw string
-        with open(path) as f:
-            raw_txt = f.read()
-    except FileNotFoundError as exc:
-        err = {
-            "error": f"Unable to load schema {path}",
-            "reason": exc,
-        }
-        code = exc.errno
-    else:
-        if key := load_schema_key(key_file):
-            # try to decrypt schema (if applicable)
-            with suppress(ValueError):
-                raw_txt = sprig_decrypt_aes(raw_txt, key)
-
-        try:
-            out = json.loads(raw_txt)
-        except (json.decoder.JSONDecodeError, UnicodeDecodeError) as exc:
-            err = {
-                "error": f"Unable to decode JSON from {path}",
-                "reason": exc,
-            }
-            code = 1
-
-    # finalized results
     return out, err, code

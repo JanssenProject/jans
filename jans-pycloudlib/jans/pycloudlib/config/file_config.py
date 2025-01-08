@@ -12,9 +12,8 @@ logger = logging.getLogger(__name__)
 class FileConfig(BaseConfig):
     def __init__(self) -> None:
         filepath = os.environ.get("CN_CONFIGURATOR_CONFIGURATION_FILE", "/etc/jans/conf/configuration.json")
-        key_file = os.environ.get("CN_CONFIGURATOR_CONFIGURATION_KEY_FILE", "/etc/jans/conf/configuration.key")
 
-        out, err, code = load_schema_from_file(filepath, exclude_secret=True, key_file=key_file)
+        out, err, code = load_schema_from_file(filepath, exclude_secret=True)
         if code != 0:
             logger.warning(f"Unable to load configmaps from file {filepath}; error={err}; local configmaps will be excluded")
 
