@@ -92,7 +92,6 @@ fn build_entity_refs_from_attr(
     type_ids: &HashMap<String, String>,
     schema: &CedarSchemaJson,
 ) -> Result<Option<Value>, BuildContextError> {
-    // TODO: handle errors here
     match attr {
         Attribute::Entity { name, .. } => map_entity_id(namespace, name, type_ids),
         Attribute::EntityOrCommon { name, .. } => {
