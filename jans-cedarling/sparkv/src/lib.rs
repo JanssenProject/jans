@@ -41,6 +41,23 @@ impl<'a, T> Iterator for Iter<'a, T> {
     }
 }
 
+pub struct DrainIter<T>
+{
+     value_iter : std::collections::btree_map::IntoValues<String, KvEntry<T>>,
+}
+
+impl<T> Iterator for DrainIter<T> {
+    type Item = (String,T);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.value_iter.next().map(|kventry| (kventry.key, kventry.value) )
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.value_iter.size_hint()
+    }
+}
+
 impl<T> SparKV<T> {
     pub fn new() -> Self {
         let config = Config::new();
@@ -76,8 +93,7 @@ impl<T> SparKV<T> {
 
     pub fn get(&self, key: &str) -> Option<&T>
     {
-        let item = self.get_item(key)?;
-        Some(&item.value)
+        Some(&self.get_item(key)?.value)
     }
 
     // Only returns if it is not yet expired
@@ -92,6 +108,16 @@ impl<T> SparKV<T> {
 
     pub fn iter(&self) -> Iter<T> {
         Iter{ btree_value_iter: self.data.values() }
+    }
+
+    /// Return an iterator of (key,value) : (String,T) which empties the container.
+    /// All entries will be owned by the iterator, and yielded entries will not be checked against expiry.
+    /// All entries and expiries will be cleared.
+    pub fn drain(&mut self) -> DrainIter<T> {
+        // assume that slightly-expired entries should be returned.
+        self.expiries.clear();
+        let data_only = std::mem::take(&mut self.data);
+        DrainIter{ value_iter: data_only.into_values() }
     }
 
     pub fn pop(&mut self, key: &str) -> Option<T> {
@@ -450,6 +476,24 @@ mod tests {
         let iter = sparkv.iter();
         assert!(!sparkv.is_empty(), "sparkv empty");
         assert_eq!(sparkv.get("ghost").unwrap(), "town");
+
+        let (keys, values): (Vec<_>, Vec<_>) = iter.unzip();
+        assert_eq!(keys, vec!["ghost", "is", "like", "oh", "this", "woo"]);
+        assert_eq!(values, vec!["town", "coming", "a", "yeah", "town", "oooo"]);
+    }
+
+    #[test]
+    fn drain() {
+        let mut sparkv = SparKV::<String>::new();
+        sparkv.set("this", "town".into()).unwrap();
+        sparkv.set("woo", "oooo".into()).unwrap();
+        sparkv.set("is", "coming".into()).unwrap();
+        sparkv.set("like", "a".into()).unwrap();
+        sparkv.set("ghost", "town".into()).unwrap();
+        sparkv.set("oh", "yeah".into()).unwrap();
+
+        let iter = sparkv.drain();
+        assert!(sparkv.is_empty(), "sparkv not empty");
 
         let (keys, values): (Vec<_>, Vec<_>) = iter.unzip();
         assert_eq!(keys, vec!["ghost", "is", "like", "oh", "this", "woo"]);
