@@ -39,9 +39,7 @@ impl CedarSchemaJson {
             .get(namespace)
             .and_then(|nmspce| nmspce.actions.get(name))
     }
-}
 
-impl CedarSchemaJson {
     pub fn get_common_type(&self, name: &str) -> Option<(&NamespaceName, &Attribute)> {
         for (namespace_name, namespace) in self.namespaces.iter() {
             if let Some(attr) = namespace.common_types.get(name) {
