@@ -532,7 +532,7 @@ jansEnabled: FALSE
 jansLevel: 1
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: java
-jansRevision: 11
+jansRevision: 1
 jansScr::%(discovery_discovery)s
 jansScrTyp: discovery
 
@@ -546,7 +546,7 @@ jansEnabled: true
 jansLevel: 1
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: java
-jansRevision: 11
+jansRevision: 1
 jansScr::%(authz_detail_authzdetail)s
 jansScrTyp: authz_detail
 
@@ -560,7 +560,7 @@ jansEnabled: true
 jansLevel: 1
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: java
-jansRevision: 11
+jansRevision: 1
 jansScr::%(authorization_challenge_authorizationchallenge)s
 jansScrTyp: authorization_challenge
 
@@ -574,7 +574,7 @@ jansEnabled: true
 jansLevel: 1
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: java
-jansRevision: 11
+jansRevision: 1
 jansScr::%(access_evaluation_accessevaluation)s
 jansScrTyp: access_evaluation
 

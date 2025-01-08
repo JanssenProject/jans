@@ -27,7 +27,7 @@ mod tests;
 
 use std::sync::Arc;
 
-pub use authz::request::{Request, ResourceData};
+pub use authz::request::{Request, ResourceData, Tokens};
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
 use authz::Authz;

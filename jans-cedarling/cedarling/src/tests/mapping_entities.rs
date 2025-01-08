@@ -28,27 +28,29 @@ static REQUEST: LazyLock<Request> = LazyLock::new(|| {
     // deserialize `Request` from json
     Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
                     "iss": "some_iss",
                     "aud": "some_aud",
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "iss": "some_iss",
                     "aud": "some_aud",
                     "sub": "some_sub",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
                     "client_id": "some_client_id",
                     "role": "Admin",
-                  })),
+                })),
+            },
             "action": "Jans::Action::\"Update\"",
             "resource": {
                 "id": "random_id",
@@ -222,7 +224,7 @@ fn test_failed_workload_mapping() {
 
     match err {
         AuthorizeError::CreateWorkloadEntity(error) => {
-            assert_eq!(error.errors.len(), 3, "there should be 3 errors");
+            assert_eq!(error.errors.len(), 2, "there should be 2 errors");
 
             // check for access token error
             let (token_kind, err) = &error.errors[0];
@@ -242,15 +244,6 @@ fn test_failed_workload_mapping() {
                 "expected CouldNotFindEntity(\"{}\"), got: {:?}",
                 &entity_type,
                 err,
-            );
-
-            // check for userinfo token error
-            let (token_kind, err) = &error.errors[2];
-            assert_eq!(token_kind, &TokenKind::Userinfo);
-            assert!(
-                matches!(err, CreateCedarEntityError::MissingClaim(ref claim) if claim == "aud"),
-                "expected MissinClaim(\"aud\"), got: {:?}",
-                err
             );
         },
         _ => panic!("expected error CreateWorkloadEntity"),
@@ -355,29 +348,31 @@ fn test_role_many_tokens_mapping() {
     let request = // deserialize `Request` from json
     Request::deserialize(serde_json::json!(
         {
-            "access_token": generate_token_using_claims(json!({
+            "tokens": {
+                "access_token": generate_token_using_claims(json!({
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
                     "iss": "https://test-casa.gluu.info",
                     "aud": "some_aud",
                     "role": "Guest",
-                  })),
-            "id_token": generate_token_using_claims(json!({
+                })),
+                "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "iss": "https://test-casa.gluu.info",
                     "aud": "some_aud",
                     "sub": "some_sub",
                     "role": "User",
-                  })),
-            "userinfo_token":  generate_token_using_claims(json!({
+                })),
+                "userinfo_token":  generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "https://test-casa.gluu.info",
                     "client_id": "some_client_id",
                     "role": "Admin",
-                  })),
+                })),
+            },
             "action": "Jans::Action::\"Update\"",
             "resource": {
                 "id": "random_id",

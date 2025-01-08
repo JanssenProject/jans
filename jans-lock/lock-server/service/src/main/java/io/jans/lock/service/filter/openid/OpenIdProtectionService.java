@@ -6,6 +6,7 @@ import static jakarta.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -159,6 +160,22 @@ public class OpenIdProtectionService implements ProtectionService {
         List<String> scopes = new ArrayList<>();
         scopes.addAll(getScopesFromAnnotation(resourceInfo.getResourceClass()));
         scopes.addAll(getScopesFromAnnotation(resourceInfo.getResourceMethod()));
+
+        Method baseMethod = resourceInfo.getResourceMethod();
+        for (Class<?> interfaces : resourceInfo.getResourceClass().getInterfaces()) {
+            scopes.addAll(getScopesFromAnnotation(interfaces));
+            
+            Method method = null;
+			try {
+				method = interfaces.getDeclaredMethod(baseMethod.getName(), baseMethod.getParameterTypes());
+			} catch (NoSuchMethodException | SecurityException e) {
+				// It's expected behavior
+			}
+            if (method != null) {
+                scopes.addAll(getScopesFromAnnotation(method));
+            }
+
+        }
 
         return scopes;
     }

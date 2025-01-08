@@ -99,8 +99,8 @@ public class AuthorizationChallengeService {
         try {
             return authorize(authzRequest);
         } catch (WebApplicationException e) {
-            if (log.isErrorEnabled() && AuthzRequestService.canLogWebApplicationException(e))
-                log.error(e.getMessage(), e);
+            if (log.isTraceEnabled())
+                log.trace(e.getMessage(), e);
             throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -164,8 +164,8 @@ public class AuthorizationChallengeService {
             if (!ok) {
                 log.debug("Not allowed by authorization challenge script, client_id {}.", client.getClientId());
                 throw new WebApplicationException(errorResponseFactory
-                        .newErrorResponse(Response.Status.BAD_REQUEST)
-                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, state, "No allowed by authorization challenge script."))
+                        .newErrorResponse(Response.Status.UNAUTHORIZED)
+                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, state, "Not allowed by authorization challenge script."))
                         .build());
             }
 
