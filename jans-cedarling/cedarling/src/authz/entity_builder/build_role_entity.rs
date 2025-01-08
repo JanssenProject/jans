@@ -59,7 +59,19 @@ impl EntityBuilder {
                             entities.push(entity);
                         }
                     },
-                    _ => unimplemented!(),
+
+                    value => {
+                        return Err(BuildRoleEntityError::map_tkn_err(
+                            token,
+                            BuildEntityError::TokenClaimTypeMismatch(
+                                TokenClaimTypeError::type_mismatch(
+                                    role_claim,
+                                    "String or Array",
+                                    value,
+                                ),
+                            ),
+                        ))
+                    },
                 }
             }
         }
