@@ -24,6 +24,23 @@ pub struct SparKV<T> {
     expiries: std::collections::BinaryHeap<ExpEntry>,
 }
 
+pub struct Iter<'a, T: 'a>
+{
+     btree_value_iter : std::collections::btree_map::Values<'a, String, KvEntry<T>>,
+}
+
+impl<'a, T> Iterator for Iter<'a, T> {
+    type Item = (&'a String,&'a T);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.btree_value_iter.next().map(|kventry| (&kventry.key, &kventry.value) )
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.btree_value_iter.size_hint()
+    }
+}
+
 impl<T> SparKV<T> {
     pub fn new() -> Self {
         let config = Config::new();
@@ -73,6 +90,10 @@ impl<T> SparKV<T> {
         self.data.keys().cloned().collect()
     }
 
+    pub fn iter(&self) -> Iter<T> {
+        Iter{ btree_value_iter: self.data.values() }
+    }
+
     pub fn pop(&mut self, key: &str) -> Option<T> {
         self.clear_expired_if_auto();
         let item = self.data.remove(key)?;
@@ -115,6 +136,11 @@ impl<T> SparKV<T> {
             }
         }
         cleared_count
+    }
+
+    pub fn clear(&mut self) {
+        self.data.clear();
+        self.expiries.clear();
     }
 
     fn clear_expired_if_auto(&mut self) {
@@ -409,5 +435,24 @@ mod tests {
         );
         assert_eq!(sparkv.expiries.len(), 3); // should have cleared the expiries
         assert_eq!(sparkv.len(), 3); // but not actually deleting
+    }
+
+    #[test]
+    fn iterator() {
+        let mut sparkv = SparKV::<String>::new();
+        sparkv.set("this", "town".into()).unwrap();
+        sparkv.set("woo", "oooo".into()).unwrap();
+        sparkv.set("is", "coming".into()).unwrap();
+        sparkv.set("like", "a".into()).unwrap();
+        sparkv.set("ghost", "town".into()).unwrap();
+        sparkv.set("oh", "yeah".into()).unwrap();
+
+        let iter = sparkv.iter();
+        assert!(!sparkv.is_empty(), "sparkv empty");
+        assert_eq!(sparkv.get("ghost").unwrap(), "town");
+
+        let (keys, values): (Vec<_>, Vec<_>) = iter.unzip();
+        assert_eq!(keys, vec!["ghost", "is", "like", "oh", "this", "woo"]);
+        assert_eq!(values, vec!["town", "coming", "a", "yeah", "town", "oooo"]);
     }
 }
