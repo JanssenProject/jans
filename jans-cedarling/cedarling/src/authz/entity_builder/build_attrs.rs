@@ -17,7 +17,7 @@ impl EntityBuilder {
         &self,
         entity_type: &EntityType,
         token: &Token,
-        claim_aliases: Vec<(&str, &str)>,
+        claim_aliases: Vec<ClaimAliasMap>,
     ) -> Result<HashMap<String, RestrictedExpression>, BuildAttrError> {
         let mut entity_attrs = HashMap::new();
 
@@ -27,7 +27,7 @@ impl EntityBuilder {
         };
 
         let mut claims = token.claims_value().clone();
-        apply_claim_aliases(&mut claims, &claim_aliases);
+        apply_claim_aliases(&mut claims, claim_aliases);
 
         for (attr_name, attr) in shape.attrs.iter() {
             let expression = if let Some(mapping) = token.claim_mapping().get(attr_name) {
@@ -99,13 +99,22 @@ impl EntityBuilder {
     }
 }
 
-fn apply_claim_aliases(
-    claims: &mut HashMap<String, Value>,
-    aliases: &[(impl AsRef<str>, impl AsRef<str>)],
-) {
-    for (from, to) in aliases {
-        if let Some(claim) = claims.get(from.as_ref()) {
-            claims.insert(to.as_ref().to_string(), claim.clone());
+/// Describes how to rename a claim named `from` to `to`
+pub struct ClaimAliasMap<'a> {
+    from: &'a str,
+    to: &'a str,
+}
+
+impl<'a> ClaimAliasMap<'a> {
+    pub fn new(from: &'a str, to: &'a str) -> Self {
+        Self { from, to }
+    }
+}
+
+fn apply_claim_aliases(claims: &mut HashMap<String, Value>, aliases: Vec<ClaimAliasMap>) {
+    for map in aliases {
+        if let Some(claim) = claims.get(map.from) {
+            claims.insert(map.to.to_string(), claim.clone());
         }
     }
 }

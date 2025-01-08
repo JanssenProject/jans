@@ -28,7 +28,7 @@ impl EntityBuilder {
             (
                 DEFAULT_ID_TKN_WORKLOAD_CLAIM,
                 tokens.id.as_ref(),
-                vec![("aud", "client_id")],
+                vec![ClaimAliasMap::new("aud", "client_id")],
             ),
         ]
         .into_iter()

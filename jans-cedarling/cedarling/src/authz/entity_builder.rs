@@ -17,7 +17,7 @@ use crate::common::cedar_schema::CEDAR_NAMESPACE_SEPARATOR;
 use crate::common::policy_store::TokenKind;
 use crate::jwt::{Token, TokenClaimTypeError};
 use crate::{AuthorizationConfig, ResourceData};
-use build_attrs::BuildAttrError;
+use build_attrs::{BuildAttrError, ClaimAliasMap};
 use build_expr::*;
 use build_resource_entity::{BuildResourceEntityError, JsonTypeError};
 use build_role_entity::BuildRoleEntityError;
@@ -188,7 +188,7 @@ impl EntityBuilder {
         entity_name: &str,
         token: &Token,
         id_src_claim: &str,
-        claim_aliases: Vec<(&str, &str)>,
+        claim_aliases: Vec<ClaimAliasMap>,
         parents: HashSet<EntityUid>,
     ) -> Result<Entity, BuildEntityError> {
         // Get entity Id from the specified token claim
