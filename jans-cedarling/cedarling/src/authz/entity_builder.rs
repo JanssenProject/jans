@@ -27,6 +27,7 @@ use build_workload_entity::BuildWorkloadEntityError;
 use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
+use std::convert::Infallible;
 use std::fmt;
 use std::str::FromStr;
 
@@ -213,7 +214,7 @@ impl EntityBuilder {
         // Build cedar entity
         let entity_type_name = EntityTypeName::from_str(&entity_name)
             .map_err(BuildEntityError::ParseEntityTypeName)?;
-        let entity_id = EntityId::from_str(&entity_id).expect("expected infallible");
+        let entity_id = EntityId::from_str(&entity_id).map_err(BuildEntityError::ParseEntityId)?;
         let entity_uid = EntityUid::from_type_name_and_id(entity_type_name, entity_id);
         Ok(Entity::new(entity_uid, entity_attrs, parents)?)
     }
@@ -243,7 +244,7 @@ pub enum BuildEntityError {
     #[error("failed to parse entity type name: {0}")]
     ParseEntityTypeName(#[source] cedar_policy::ParseErrors),
     #[error("failed to parse entity id: {0}")]
-    ParseEntityId(#[source] cedar_policy::ParseErrors),
+    ParseEntityId(#[source] Infallible),
     #[error("failed to evaluate entity or tag: {0}")]
     AttrEvaluation(#[from] cedar_policy::EntityAttrEvaluationError),
     #[error("failed to build entity since a token was not provided")]

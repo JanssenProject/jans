@@ -25,7 +25,8 @@ impl EntityBuilder {
         let entity_attrs = self.build_entity_attrs_from_values(entity_type, &resource.payload)?;
 
         // Build cedar entity
-        let entity_id = EntityId::from_str(&resource.id).expect("expected infallible");
+        let entity_id =
+            EntityId::from_str(&resource.id).map_err(BuildEntityError::ParseEntityId)?;
         let entity_uid = EntityUid::from_type_name_and_id(entity_type_name, entity_id);
         Ok(Entity::new(entity_uid, entity_attrs, HashSet::new())?)
     }

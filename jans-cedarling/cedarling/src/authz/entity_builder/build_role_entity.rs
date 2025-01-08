@@ -70,7 +70,7 @@ impl EntityBuilder {
 
 fn build_entity(name: &str, id: &str) -> Result<Entity, BuildEntityError> {
     let name = EntityTypeName::from_str(name).map_err(BuildEntityError::ParseEntityTypeName)?;
-    let id = EntityId::from_str(id).expect("expected infallible");
+    let id = EntityId::from_str(id).map_err(BuildEntityError::ParseEntityId)?;
     let uid = EntityUid::from_type_name_and_id(name, id);
     let entity = Entity::new(uid, HashMap::new(), HashSet::new())?;
     Ok(entity)
