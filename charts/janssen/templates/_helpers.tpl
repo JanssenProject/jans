@@ -55,5 +55,5 @@ volumeMounts:
   - name: {{ $keyName }}
     mountPath: {{ .Values.global.cnConfiguratorKeyFile }}
     subPath: {{ .Values.global.cnConfiguratorKeyFile | base }}
-{{- end -}}
+{{- end }}
 {{- end }}

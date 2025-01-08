@@ -159,4 +159,4 @@ Obfuscate configuration schema (only if configuration key is available)
 {{- end }}
 
 {{/* end of helpers */}}
-{{- end}}
+{{- end }}
