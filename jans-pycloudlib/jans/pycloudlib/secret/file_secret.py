@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class FileSecret(BaseSecret):
     def __init__(self) -> None:
         filepath = os.environ.get("CN_CONFIGURATOR_CONFIGURATION_FILE", "/etc/jans/conf/configuration.json")
-        key_file = os.environ.get("CN_CONFIGURATOR_CONFIGURATION_KEY_FILE", "/etc/jans/conf/configuration.key")
+        key_file = os.environ.get("CN_CONFIGURATOR_KEY_FILE", "/etc/jans/conf/configuration.key")
 
         out, err, code = load_schema_from_file(filepath, exclude_configmap=True, key_file=key_file)
         if code != 0:
