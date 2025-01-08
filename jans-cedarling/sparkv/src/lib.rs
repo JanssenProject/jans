@@ -22,6 +22,7 @@ pub struct SparKV<T> {
     pub config: Config,
     data: std::collections::BTreeMap<String, KvEntry<T>>,
     expiries: std::collections::BinaryHeap<ExpEntry>,
+    size_calculator : Option<fn(&T) -> usize>,
 }
 
 pub struct Iter<'a, T: 'a>
@@ -69,6 +70,17 @@ impl<T> SparKV<T> {
             config,
             data: std::collections::BTreeMap::new(),
             expiries: std::collections::BinaryHeap::new(),
+            // This will underestimate the size of most things.
+            size_calculator: Some(|v| std::mem::size_of_val(v)),
+        }
+    }
+
+    pub fn with_config_and_sizer(config: Config, sizer: Option<fn(&T) -> usize>) -> Self {
+        SparKV {
+            config,
+            data: std::collections::BTreeMap::new(),
+            expiries: std::collections::BinaryHeap::new(),
+            size_calculator: sizer,
         }
     }
 
@@ -184,8 +196,10 @@ impl<T> SparKV<T> {
     }
 
     fn ensure_item_size(&self, value: &T) -> Result<(), Error> {
-        if std::mem::size_of_val(value) > self.config.max_item_size {
-            return Err(Error::ItemSizeExceeded);
+        if let Some(calc) = self.size_calculator {
+            if calc(value) > self.config.max_item_size {
+                return Err(Error::ItemSizeExceeded)
+            }
         }
         Ok(())
     }
@@ -494,3 +508,6 @@ mod tests {
         assert_eq!(values, vec!["town", "coming", "a", "yeah", "town", "oooo"]);
     }
 }
+
+#[cfg(test)]
+mod test_json_value;
