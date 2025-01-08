@@ -126,6 +126,24 @@ mod test {
                         },
                     }
                 },
+                "id_token": {
+                    "shape": {
+                        "type": "Record",
+                        "attributes":  {
+                            "jti": { "type": "String" },
+                            "trusted_issuer": { "type": "EntityOrCommon", "name": "TrustedIssuer" },
+                        },
+                    }
+                },
+                "Userinfo_token": {
+                    "shape": {
+                        "type": "Record",
+                        "attributes":  {
+                            "jti": { "type": "String" },
+                            "trusted_issuer": { "type": "EntityOrCommon", "name": "TrustedIssuer" },
+                        },
+                    }
+                },
                 "TrustedIssuer": {
                     "shape": {
                         "type": "Record",
@@ -164,26 +182,17 @@ mod test {
         issuers
     }
 
-    #[test]
-    fn can_build_access_tkn_entity() {
-        let schema = test_schema();
-        let issuers = test_issusers();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
-        let access_token = Token::new_access(
-            TokenClaims::new(HashMap::from([
-                ("jti".to_string(), json!("tkn-123")),
-                (
-                    "trusted_issuer".to_string(),
-                    json!("https://some-iss.com/.well-known/openid-configuration"),
-                ),
-            ])),
-            Some(&issuers.get("test_iss").unwrap()),
-        );
-        let entity = builder
-            .build_access_tkn_entity(&access_token)
-            .expect("expected to successfully build token entity");
+    fn test_build_entity<F>(tkn_entity_type_name: &str, token: Token, build_tkn_entity_fn: F)
+    where
+        F: FnOnce(&Token) -> Result<Entity, BuildTokenEntityError>,
+    {
+        let entity =
+            build_tkn_entity_fn(&token).expect("expected to successfully build token entity");
 
-        assert_eq!(entity.uid().to_string(), "Jans::Access_token::\"tkn-123\"");
+        assert_eq!(
+            entity.uid().to_string(),
+            format!("Jans::{}::\"tkn-123\"", tkn_entity_type_name)
+        );
 
         assert_eq!(
             entity
@@ -209,6 +218,64 @@ mod test {
                 trusted_iss
             );
         }
+    }
+
+    #[test]
+    fn can_build_access_tkn_entity() {
+        let schema = test_schema();
+        let issuers = test_issusers();
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let access_token = Token::new_access(
+            TokenClaims::new(HashMap::from([
+                ("jti".to_string(), json!("tkn-123")),
+                (
+                    "trusted_issuer".to_string(),
+                    json!("https://some-iss.com/.well-known/openid-configuration"),
+                ),
+            ])),
+            Some(&issuers.get("test_iss").unwrap()),
+        );
+        test_build_entity("Access_token", access_token, |tkn| {
+            builder.build_access_tkn_entity(tkn)
+        });
+    }
+
+    #[test]
+    fn can_build_id_tkn_entity() {
+        let schema = test_schema();
+        let issuers = test_issusers();
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let id_token = Token::new_id(
+            TokenClaims::new(HashMap::from([
+                ("jti".to_string(), json!("tkn-123")),
+                (
+                    "trusted_issuer".to_string(),
+                    json!("https://some-iss.com/.well-known/openid-configuration"),
+                ),
+            ])),
+            Some(&issuers.get("test_iss").unwrap()),
+        );
+        test_build_entity("id_token", id_token, |tkn| builder.build_id_tkn_entity(tkn));
+    }
+
+    #[test]
+    fn can_build_userinfo_tkn_entity() {
+        let schema = test_schema();
+        let issuers = test_issusers();
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let userinfo_token = Token::new_userinfo(
+            TokenClaims::new(HashMap::from([
+                ("jti".to_string(), json!("tkn-123")),
+                (
+                    "trusted_issuer".to_string(),
+                    json!("https://some-iss.com/.well-known/openid-configuration"),
+                ),
+            ])),
+            Some(&issuers.get("test_iss").unwrap()),
+        );
+        test_build_entity("Userinfo_token", userinfo_token, |tkn| {
+            builder.build_userinfo_tkn_entity(tkn)
+        });
     }
 
     #[test]
