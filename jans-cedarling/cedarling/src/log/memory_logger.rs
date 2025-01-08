@@ -66,17 +66,14 @@ impl LogWriter for MemoryLogger {
 // Implementation of LogStorage
 impl LogStorage for MemoryLogger {
     fn pop_logs(&self) -> Vec<serde_json::Value> {
-        // TODO: implement more efficient implementation
-
         let mut storage_guard = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
 
-        let keys = storage_guard.get_keys();
-
-        keys.iter()
-            .filter_map(|key| storage_guard.pop(key))
-            // TODO we call unwrap, because we know that the value is valid json
-            .map(|value| serde_json::from_value(value).expect(STORAGE_JSON_PARSE_EXPECT_MESSAGE) )
-            .collect()
+        let entries = storage_guard
+            .iter()
+            .map(|(_k,value)| serde_json::from_value(value.clone()).expect(STORAGE_JSON_PARSE_EXPECT_MESSAGE) )
+            .collect();
+        storage_guard.clear();
+        entries
     }
 
     fn get_log_by_id(&self, id: &str) -> Option<serde_json::Value> {
