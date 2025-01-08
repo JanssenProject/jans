@@ -25,14 +25,12 @@ impl EntityBuilder {
             }
         }
 
-        for token in [
+        let token_refs = vec![
             tokens.userinfo.as_ref(),
             tokens.id.as_ref(),
             tokens.access.as_ref(),
-        ]
-        .into_iter()
-        .flatten()
-        {
+        ];
+        for token in token_refs.into_iter().flatten() {
             let role_claim = token.role_mapping();
             if let Some(claim) = token.get_claim(role_claim).as_ref() {
                 match claim.value() {
