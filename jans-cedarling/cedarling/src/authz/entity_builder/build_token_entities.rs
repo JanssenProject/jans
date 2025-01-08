@@ -54,11 +54,18 @@ impl EntityBuilder {
             .principal_identifier
             .as_deref()
             .unwrap_or(DEFAULT_TKN_PRINCIPAL_IDENTIFIER);
-        self.build_entity(entity_name, token, id_src_claim, vec![], HashSet::new())
-            .map_err(|err| BuildTokenEntityError {
-                token_kind: token.kind,
-                err,
-            })
+        build_entity(
+            &self.schema,
+            entity_name,
+            token,
+            id_src_claim,
+            vec![],
+            HashSet::new(),
+        )
+        .map_err(|err| BuildTokenEntityError {
+            token_kind: token.kind,
+            err,
+        })
     }
 }
 

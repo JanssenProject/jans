@@ -100,7 +100,7 @@ impl Attribute {
                 if let Some(claim) = attr_src.get(src_key) {
                     let claim = claim
                         .as_array()
-                        .ok_or(KeyedJsonTypeError::type_mismatch(src_key, "Array", claim))?;
+                        .ok_or(KeyedJsonTypeError::type_mismatch(src_key, "array", claim))?;
 
                     let mut values = Vec::new();
                     for (i, val) in claim.iter().enumerate() {
@@ -132,6 +132,10 @@ impl Attribute {
                     if let Some((namespace, _)) = schema.get_entity_from_base_name(&name) {
                         if !namespace.is_empty() {
                             name = [namespace, name.as_str()].join(CEDAR_NAMESPACE_SEPARATOR);
+                        }
+                    } else {
+                        if *required {
+                            return Err(BuildExprError::EntityNotInSchema(name.to_string()));
                         }
                     }
 
@@ -210,6 +214,10 @@ pub enum BuildExprError {
         "failed to build restricted expression for `{0}` since the type could not be determined"
     )]
     UnkownType(String),
+    #[error(
+        "failed to build entity restricted expression for `{0}` since it is not in the schema"
+    )]
+    EntityNotInSchema(String),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -242,5 +250,337 @@ impl KeyedJsonTypeError {
             expected_type: expected_type_name.to_string(),
             actual_type: got_value_type_name,
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::{
+        authz::entity_builder::BuildExprError,
+        common::cedar_schema::cedar_json::{attribute::Attribute, CedarSchemaJson},
+    };
+    use serde_json::json;
+    use std::collections::HashMap;
+
+    #[test]
+    fn can_build_string_expr() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": { "Test": {
+                "shape": {
+                    "type": "Record",
+                    "attributes":  {
+                        "attr1": { "type": "String" },
+                    },
+                }
+            }}}
+        }))
+        .expect("should successfully build schema");
+        let attr = Attribute::string();
+        let src = HashMap::from([("src_key".to_string(), json!("attr-val"))]);
+        let expr = attr
+            .build_expr(&src, "src_key", &schema)
+            .expect("should not error");
+        assert!(expr.is_some(), "a restricted expression should be built")
+    }
+
+    #[test]
+    fn can_build_long_expr() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": { "Test": {
+                "shape": {
+                    "type": "Record",
+                    "attributes":  {
+                        "attr1": { "type": "Long" },
+                    },
+                }
+            }}}
+        }))
+        .expect("should successfully build schema");
+        let attr = Attribute::long();
+        let src = HashMap::from([("src_key".to_string(), json!(123))]);
+        let expr = attr
+            .build_expr(&src, "src_key", &schema)
+            .expect("should not error");
+        assert!(expr.is_some(), "a restricted expression should be built")
+    }
+
+    #[test]
+    fn can_build_boolean_expr() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": { "Test": {
+                "shape": {
+                    "type": "Record",
+                    "attributes":  {
+                        "attr1": { "type": "Boolean" },
+                    },
+                }
+            }}}
+        }))
+        .expect("should successfully build schema");
+        let attr = Attribute::boolean();
+        let src = HashMap::from([("src_key".to_string(), json!(true))]);
+        let expr = attr
+            .build_expr(&src, "src_key", &schema)
+            .expect("should not error");
+        assert!(expr.is_some(), "a restricted expression should be built")
+    }
+
+    #[test]
+    fn can_build_record_expr() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": { "Test": {
+                "shape": {
+                    "type": "Record",
+                    "attributes":  {
+                        "outer_attr": {
+                            "type": "Record",
+                            "attributes": {
+                                "inner_attr": { "type": "String" }
+                            },
+                        },
+                    },
+                }
+            }}}
+        }))
+        .expect("should successfully build schema");
+        let attr = Attribute::record(HashMap::from([(
+            "inner_attr".to_string(),
+            Attribute::string(),
+        )]));
+        let src = HashMap::from([("inner_attr".to_string(), json!("test"))]);
+        let expr = attr
+            .build_expr(&src, "src_key", &schema)
+            .expect("should not error");
+        assert!(expr.is_some(), "a restricted expression should be built")
+    }
+
+    #[test]
+    fn can_build_set_expr() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": { "Test": {
+                "shape": {
+                    "type": "Record",
+                    "attributes":  {
+                        "attr1": {
+                            "type": "Set",
+                            "element": {
+                              "type": "String",
+                            }
+                        },
+                    },
+                }
+            }}}
+        }))
+        .expect("should successfully build schema");
+        let attr = Attribute::set(Attribute::string());
+        let src = HashMap::from([("src_key".to_string(), json!(["admin", "user"]))]);
+        let expr = attr
+            .build_expr(&src, "src_key", &schema)
+            .expect("should not error");
+        assert!(expr.is_some(), "a restricted expression should be built")
+    }
+
+    #[test]
+    fn errors_when_expected_set_has_different_types() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": { "Test": {
+                "shape": {
+                    "type": "Record",
+                    "attributes":  {
+                        "attr1": {
+                            "type": "Set",
+                            "element": {
+                              "type": "String",
+                            }
+                        },
+                    },
+                }
+            }}}
+        }))
+        .expect("should successfully build schema");
+        let attr = Attribute::set(Attribute::string());
+        let src = HashMap::from([("src_key".to_string(), json!(["admin", 123]))]);
+        let err = attr
+            .build_expr(&src, "src_key", &schema)
+            .expect_err("should error");
+        assert!(
+            matches!(err, BuildExprError::TypeMismatch(_)),
+            "should error due to type mismatch but got: {:?}",
+            err
+        );
+    }
+
+    #[test]
+    fn can_build_entity_expr() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": {
+                "OtherEntity": {},
+                "Test": {
+                    "shape": {
+                        "type": "Record",
+                        "attributes":  {
+                            "attr1": {
+                                "type": "Entity",
+                                "name": "OtherEntity",
+                            },
+                        },
+                    }
+                }
+            }}
+        }))
+        .expect("should successfully build schema");
+        let attr = Attribute::entity("OtherEntity");
+        let src = HashMap::from([("src_key".to_string(), json!("test"))]);
+        let expr = attr
+            .build_expr(&src, "src_key", &schema)
+            .expect("should not error");
+        assert!(expr.is_some(), "a restricted expression should be built");
+    }
+
+    #[test]
+    fn can_build_entity_expr_from_entity_or_common() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": {
+                "OtherEntity": {},
+                "Test": {
+                    "shape": {
+                        "type": "Record",
+                        "attributes":  {
+                            "attr1": {
+                                "type": "EntityOrCommon",
+                                "name": "OtherEntity",
+                            },
+                        },
+                    }
+                }
+            }}
+        }))
+        .expect("should successfully build schema");
+        let attr = Attribute::entity("OtherEntity");
+        let src = HashMap::from([("src_key".to_string(), json!("test"))]);
+        let expr = attr
+            .build_expr(&src, "src_key", &schema)
+            .expect("should not error");
+        assert!(expr.is_some(), "a restricted expression should be built");
+    }
+
+    #[test]
+    fn errors_when_entity_isnt_in_schema() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": { "Test": {
+                "shape": {
+                    "type": "Record",
+                    "attributes":  {
+                        "attr1": {
+                            "type": "Entity",
+                            "name": "OtherEntity",
+                        },
+                    },
+                }
+            }}}
+        }))
+        .expect("should successfully build schema");
+        let attr = Attribute::entity("OtherEntity");
+        let src = HashMap::from([("src_key".to_string(), json!("test"))]);
+        let err = attr
+            .build_expr(&src, "src_key", &schema)
+            .expect_err("should error");
+        assert!(
+            matches!(
+                err,
+                BuildExprError::EntityNotInSchema(ref entity_name)
+                    if entity_name == "OtherEntity"
+            ),
+            "should error due to type mismatch but got: {:?}",
+            err
+        );
+    }
+
+    #[test]
+    fn can_build_ip_addr_extension_expr() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": { "Test": {
+                "shape": {
+                    "type": "Record",
+                    "attributes":  {
+                        "attr1": { "type": "Extension", "name": "ipaddr" },
+                    },
+                }
+            }}}
+        }))
+        .expect("should successfully build schema");
+        let attr = Attribute::string();
+        let src = HashMap::from([("src_key".to_string(), json!("0.0.0.0"))]);
+        let expr = attr
+            .build_expr(&src, "src_key", &schema)
+            .expect("should not error");
+        assert!(expr.is_some(), "a restricted expression should be built")
+    }
+
+    #[test]
+    fn can_build_decimal_extension_expr() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": { "Test": {
+                "shape": {
+                    "type": "Record",
+                    "attributes":  {
+                        "attr1": { "type": "Extension", "name": "decimal" },
+                    },
+                }
+            }}}
+        }))
+        .expect("should successfully build schema");
+        let attr = Attribute::string();
+        let src = HashMap::from([("src_key".to_string(), json!("1.1"))]);
+        let expr = attr
+            .build_expr(&src, "src_key", &schema)
+            .expect("should not error");
+        assert!(expr.is_some(), "a restricted expression should be built")
+    }
+
+    #[test]
+    fn can_skip_non_required_expr() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": { "Workload": {
+                "shape": {
+                    "type": "Record",
+                    "attributes":  {
+                        "client_id": { "type": "String" },
+                    },
+                }
+            }}}
+        }))
+        .expect("should successfully build schema");
+        let attr = Attribute::String { required: false };
+        let src = HashMap::new();
+        let expr = attr
+            .build_expr(&src, "client_id", &schema)
+            .expect("should not error");
+        assert!(expr.is_none(), "a restricted expression shouldn't built")
+    }
+
+    #[test]
+    fn errors_on_type_mismatch() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": { "Test": {
+                "shape": {
+                    "type": "Record",
+                    "attributes":  {
+                        "attr1": { "type": "String" },
+                    },
+                }
+            }}}
+        }))
+        .expect("should successfully build schema");
+        let attr = Attribute::string();
+        let src = HashMap::from([("src_key".to_string(), json!(123))]);
+        let err = attr
+            .build_expr(&src, "src_key", &schema)
+            .expect_err("should error");
+        assert!(
+            matches!(err, BuildExprError::TypeMismatch(_)),
+            "should error due to type mismatch but got: {:?}",
+            err
+        );
     }
 }

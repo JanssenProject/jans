@@ -9,94 +9,92 @@ use cedar_policy::RestrictedExpression;
 use serde_json::Value;
 use std::collections::HashMap;
 
-impl EntityBuilder {
-    /// Builds Cedar entity attributes using a JWT.
-    ///
-    /// This uses claim mapping metadata to unwrap claims into their respective Cedar types
-    pub fn build_entity_attrs_from_tkn(
-        &self,
-        entity_type: &EntityType,
-        token: &Token,
-        claim_aliases: Vec<ClaimAliasMap>,
-    ) -> Result<HashMap<String, RestrictedExpression>, BuildAttrError> {
-        let mut entity_attrs = HashMap::new();
+/// Builds Cedar entity attributes using a JWT.
+///
+/// This uses claim mapping metadata to unwrap claims into their respective Cedar types
+pub fn build_entity_attrs_from_tkn(
+    schema: &CedarSchemaJson,
+    entity_type: &EntityType,
+    token: &Token,
+    claim_aliases: Vec<ClaimAliasMap>,
+) -> Result<HashMap<String, RestrictedExpression>, BuildAttrError> {
+    let mut entity_attrs = HashMap::new();
 
-        let shape = match entity_type.shape.as_ref() {
-            Some(shape) => shape,
-            None => return Ok(entity_attrs),
-        };
+    let shape = match entity_type.shape.as_ref() {
+        Some(shape) => shape,
+        None => return Ok(entity_attrs),
+    };
 
-        let mut claims = token.claims_value().clone();
-        apply_claim_aliases(&mut claims, claim_aliases);
+    let mut claims = token.claims_value().clone();
+    apply_claim_aliases(&mut claims, claim_aliases);
 
-        for (attr_name, attr) in shape.attrs.iter() {
-            let expression = if let Some(mapping) = token.claim_mapping().get(attr_name) {
-                let claim = claims
-                    .get(attr_name)
-                    .ok_or_else(|| BuildAttrError::MissingSource(attr_name.to_string()))?;
-                let mapped_claim = mapping.apply_mapping(claim);
-                attr.build_expr(&mapped_claim, attr_name, &self.schema)?
-            } else {
-                match attr.build_expr(&claims, attr_name, &self.schema) {
-                    Ok(expr) => expr,
-                    Err(err) if attr.is_required() => Err(err)?,
-                    // silently fail when attribute isn't required
-                    Err(_) => continue,
-                }
-            };
-
-            if let Some(expr) = expression {
-                entity_attrs.insert(attr_name.to_string(), expr);
-            }
-        }
-
-        Ok(entity_attrs)
-    }
-
-    pub fn build_entity_attrs_from_values(
-        &self,
-        entity_type: &EntityType,
-        src: &HashMap<String, Value>,
-    ) -> Result<HashMap<String, RestrictedExpression>, BuildAttrError> {
-        let mut entity_attrs = HashMap::new();
-
-        let shape = match entity_type.shape.as_ref() {
-            Some(shape) => shape,
-            None => return Ok(entity_attrs),
-        };
-
-        for (attr_name, attr) in shape.attrs.iter() {
-            let val = match src.get(attr_name) {
-                Some(val) => val,
-                None if attr.is_required() => {
-                    return Err(BuildAttrError::MissingSource(attr_name.to_string()));
-                },
-                _ => continue,
-            };
-
-            let mapped_src = serde_json::from_value::<HashMap<String, Value>>(val.clone());
-            let src = if let Ok(mapped_src) = mapped_src.as_ref() {
-                mapped_src
-            } else {
-                src
-            };
-
-            let expression = match attr.build_expr(src, attr_name, &self.schema) {
+    for (attr_name, attr) in shape.attrs.iter() {
+        let expression = if let Some(mapping) = token.claim_mapping().get(attr_name) {
+            let claim = claims
+                .get(attr_name)
+                .ok_or_else(|| BuildAttrError::MissingSource(attr_name.to_string()))?;
+            let mapped_claim = mapping.apply_mapping(claim);
+            attr.build_expr(&mapped_claim, attr_name, schema)?
+        } else {
+            match attr.build_expr(&claims, attr_name, schema) {
                 Ok(expr) => expr,
-                Err(err) if attr.is_required() => {
-                    return Err(err)?;
-                },
-                // move on to the next attribute if this isn't required
+                Err(err) if attr.is_required() => Err(err)?,
+                // silently fail when attribute isn't required
                 Err(_) => continue,
-            };
-
-            if let Some(expr) = expression {
-                entity_attrs.insert(attr_name.to_string(), expr);
             }
-        }
+        };
 
-        Ok(entity_attrs)
+        if let Some(expr) = expression {
+            entity_attrs.insert(attr_name.to_string(), expr);
+        }
     }
+
+    Ok(entity_attrs)
+}
+
+pub fn build_entity_attrs_from_values(
+    schema: &CedarSchemaJson,
+    entity_type: &EntityType,
+    src: &HashMap<String, Value>,
+) -> Result<HashMap<String, RestrictedExpression>, BuildAttrError> {
+    let mut entity_attrs = HashMap::new();
+
+    let shape = match entity_type.shape.as_ref() {
+        Some(shape) => shape,
+        None => return Ok(entity_attrs),
+    };
+
+    for (attr_name, attr) in shape.attrs.iter() {
+        let val = match src.get(attr_name) {
+            Some(val) => val,
+            None if attr.is_required() => {
+                return Err(BuildAttrError::MissingSource(attr_name.to_string()));
+            },
+            _ => continue,
+        };
+
+        let mapped_src = serde_json::from_value::<HashMap<String, Value>>(val.clone());
+        let src = if let Ok(mapped_src) = mapped_src.as_ref() {
+            mapped_src
+        } else {
+            src
+        };
+
+        let expression = match attr.build_expr(src, attr_name, schema) {
+            Ok(expr) => expr,
+            Err(err) if attr.is_required() => {
+                return Err(err)?;
+            },
+            // move on to the next attribute if this isn't required
+            Err(_) => continue,
+        };
+
+        if let Some(expr) = expression {
+            entity_attrs.insert(attr_name.to_string(), expr);
+        }
+    }
+
+    Ok(entity_attrs)
 }
 
 /// Describes how to rename a claim named `from` to `to`
@@ -125,4 +123,159 @@ pub enum BuildAttrError {
     MissingSource(String),
     #[error(transparent)]
     BuildExpression(#[from] BuildExprError),
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::{
+        common::{
+            cedar_schema::cedar_json::{
+                attribute::Attribute,
+                entity_type::{EntityShape, EntityType},
+            },
+            policy_store::TrustedIssuer,
+        },
+        jwt::TokenClaims,
+    };
+    use serde_json::json;
+    use std::collections::HashMap;
+
+    #[test]
+    fn can_build_entity_attrs_from_tkn() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": { "Workload": {
+                "shape": {
+                    "type": "Record",
+                    "attributes":  {
+                        "client_id": { "type": "String" },
+                    },
+                }
+            }}}
+        }))
+        .expect("should successfully build schema");
+        let entity_type = EntityType {
+            member_of: None,
+            tags: None,
+            shape: Some(EntityShape {
+                required: true,
+                attrs: HashMap::from([("client_id".to_string(), Attribute::string())]),
+            }),
+        };
+        let iss = TrustedIssuer::default();
+        let token = Token::new_access(
+            TokenClaims::new(HashMap::from([(
+                "client_id".to_string(),
+                json!("workload-123"),
+            )])),
+            Some(&iss),
+        );
+
+        let attrs = build_entity_attrs_from_tkn(&schema, &entity_type, &token, Vec::new())
+            .expect("should build entity attrs");
+        // RestrictedExpression does not implement PartialEq so the best we can do is check
+        // if the attribute was created
+        assert!(
+            attrs.contains_key("client_id"),
+            "there should be a `client_id` attribute"
+        );
+    }
+
+    #[test]
+    fn errors_when_tkn_missing_src() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": { "Workload": {
+                "shape": {
+                    "type": "Record",
+                    "attributes":  {
+                        "client_id": { "type": "String" },
+                    },
+                }
+            }}}
+        }))
+        .expect("should successfully build schema");
+        let entity_type = EntityType {
+            member_of: None,
+            tags: None,
+            shape: Some(EntityShape {
+                required: true,
+                attrs: HashMap::from([("client_id".to_string(), Attribute::string())]),
+            }),
+        };
+        let iss = TrustedIssuer::default();
+        let token = Token::new_access(TokenClaims::new(HashMap::new()), Some(&iss));
+
+        let err = build_entity_attrs_from_tkn(&schema, &entity_type, &token, Vec::new())
+            .expect_err("should error due to missing source");
+        assert!(
+            matches!(err, BuildAttrError::BuildExpression(BuildExprError::MissingSource(ref src_name)) if src_name == "client_id"),
+            "expected MissingSource error but got: {:?}",
+            err,
+        );
+    }
+
+    #[test]
+    fn can_build_entity_attrs_from_value() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": { "Workload": {
+                "shape": {
+                    "type": "Record",
+                    "attributes":  {
+                        "client_id": { "type": "String" },
+                    },
+                }
+            }}}
+        }))
+        .expect("should successfully build schema");
+        let entity_type = EntityType {
+            member_of: None,
+            tags: None,
+            shape: Some(EntityShape {
+                required: true,
+                attrs: HashMap::from([("client_id".to_string(), Attribute::string())]),
+            }),
+        };
+        let src_values = HashMap::from([("client_id".to_string(), json!("workload-123"))]);
+
+        let attrs = build_entity_attrs_from_values(&schema, &entity_type, &src_values)
+            .expect("should build entity attrs");
+        // RestrictedExpression does not implement PartialEq so the best we can do is check
+        // if the attribute was created
+        assert!(
+            attrs.contains_key("client_id"),
+            "there should be a `client_id` attribute"
+        );
+    }
+
+    #[test]
+    fn errors_when_values_missing_src() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": { "Workload": {
+                "shape": {
+                    "type": "Record",
+                    "attributes":  {
+                        "client_id": { "type": "String" },
+                    },
+                }
+            }}}
+        }))
+        .expect("should successfully build schema");
+        let entity_type = EntityType {
+            member_of: None,
+            tags: None,
+            shape: Some(EntityShape {
+                required: true,
+                attrs: HashMap::from([("client_id".to_string(), Attribute::string())]),
+            }),
+        };
+        let src_values = HashMap::new();
+
+        let err = build_entity_attrs_from_values(&schema, &entity_type, &src_values)
+            .expect_err("should error due to missing source");
+        assert!(
+            matches!(err, BuildAttrError::MissingSource(ref src_name) if src_name == "client_id"),
+            "expected MissingSource error but got: {:?}",
+            err,
+        );
+    }
 }

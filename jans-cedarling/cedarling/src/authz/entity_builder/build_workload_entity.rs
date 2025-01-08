@@ -34,7 +34,8 @@ impl EntityBuilder {
         .into_iter()
         {
             if let Some(token) = token_option {
-                match self.build_entity(
+                match build_entity(
+                    &self.schema,
                     entity_name,
                     token,
                     workload_id_claim,

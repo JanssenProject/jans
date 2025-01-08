@@ -17,7 +17,7 @@ use crate::common::cedar_schema::CEDAR_NAMESPACE_SEPARATOR;
 use crate::common::policy_store::TokenKind;
 use crate::jwt::{Token, TokenClaimTypeError};
 use crate::{AuthorizationConfig, ResourceData};
-use build_attrs::{BuildAttrError, ClaimAliasMap};
+use build_attrs::{build_entity_attrs_from_tkn, BuildAttrError, ClaimAliasMap};
 use build_expr::*;
 use build_resource_entity::{BuildResourceEntityError, JsonTypeError};
 use build_role_entity::BuildRoleEntityError;
@@ -181,43 +181,42 @@ impl EntityBuilder {
             roles,
         })
     }
+}
 
-    /// Builds a Cedar Entity using a JWT
-    fn build_entity(
-        &self,
-        entity_name: &str,
-        token: &Token,
-        id_src_claim: &str,
-        claim_aliases: Vec<ClaimAliasMap>,
-        parents: HashSet<EntityUid>,
-    ) -> Result<Entity, BuildEntityError> {
-        // Get entity Id from the specified token claim
-        let entity_id = token
-            .get_claim(id_src_claim)
-            .ok_or(BuildEntityError::MissingClaim(id_src_claim.to_string()))?
-            .as_str()?
-            .to_owned();
+/// Builds a Cedar Entity using a JWT
+fn build_entity(
+    schema: &CedarSchemaJson,
+    entity_name: &str,
+    token: &Token,
+    id_src_claim: &str,
+    claim_aliases: Vec<ClaimAliasMap>,
+    parents: HashSet<EntityUid>,
+) -> Result<Entity, BuildEntityError> {
+    // Get entity Id from the specified token claim
+    let entity_id = token
+        .get_claim(id_src_claim)
+        .ok_or(BuildEntityError::MissingClaim(id_src_claim.to_string()))?
+        .as_str()?
+        .to_owned();
 
-        // Get entity namespace and type
-        let mut entity_name = entity_name.to_string();
-        let (namespace, entity_type) = self
-            .schema
-            .get_entity_from_base_name(&entity_name)
-            .ok_or(BuildEntityError::EntityNotInSchema(entity_name.to_string()))?;
-        if !namespace.is_empty() {
-            entity_name = [namespace.as_str(), &entity_name].join(CEDAR_NAMESPACE_SEPARATOR);
-        }
-
-        // Build entity attributes
-        let entity_attrs = self.build_entity_attrs_from_tkn(entity_type, token, claim_aliases)?;
-
-        // Build cedar entity
-        let entity_type_name = EntityTypeName::from_str(&entity_name)
-            .map_err(BuildEntityError::ParseEntityTypeName)?;
-        let entity_id = EntityId::from_str(&entity_id).map_err(BuildEntityError::ParseEntityId)?;
-        let entity_uid = EntityUid::from_type_name_and_id(entity_type_name, entity_id);
-        Ok(Entity::new(entity_uid, entity_attrs, parents)?)
+    // Get entity namespace and type
+    let mut entity_name = entity_name.to_string();
+    let (namespace, entity_type) = schema
+        .get_entity_from_base_name(&entity_name)
+        .ok_or(BuildEntityError::EntityNotInSchema(entity_name.to_string()))?;
+    if !namespace.is_empty() {
+        entity_name = [namespace.as_str(), &entity_name].join(CEDAR_NAMESPACE_SEPARATOR);
     }
+
+    // Build entity attributes
+    let entity_attrs = build_entity_attrs_from_tkn(schema, entity_type, token, claim_aliases)?;
+
+    // Build cedar entity
+    let entity_type_name =
+        EntityTypeName::from_str(&entity_name).map_err(BuildEntityError::ParseEntityTypeName)?;
+    let entity_id = EntityId::from_str(&entity_id).map_err(BuildEntityError::ParseEntityId)?;
+    let entity_uid = EntityUid::from_type_name_and_id(entity_type_name, entity_id);
+    Ok(Entity::new(entity_uid, entity_attrs, parents)?)
 }
 
 /// Errors encountered when building a Cedarling-specific entity
@@ -251,8 +250,6 @@ pub enum BuildEntityError {
     TokenUnavailable,
     #[error("the given token is missing a `{0}` claim")]
     MissingClaim(String),
-    #[error("the given data is missing a `{0}` entry")]
-    MissingData(String),
     #[error(transparent)]
     TokenClaimTypeMismatch(#[from] TokenClaimTypeError),
     #[error(transparent)]
@@ -270,5 +267,206 @@ pub enum BuildEntityError {
 impl BuildEntityError {
     pub fn json_type_err(expected_type_name: &str, got_value: &Value) -> Self {
         Self::JsonTypeError(JsonTypeError::type_mismatch(expected_type_name, got_value))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::{
+        common::{cedar_schema::cedar_json::CedarSchemaJson, policy_store::TrustedIssuer},
+        jwt::{Token, TokenClaims},
+    };
+    use cedar_policy::EvalResult;
+    use serde_json::json;
+    use std::collections::HashMap;
+
+    #[test]
+    fn can_build_entity_using_jwt() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": { "Workload": {
+                "shape": {
+                    "type": "Record",
+                    "attributes":  {
+                        "client_id": { "type": "String" },
+                        "name": { "type": "String" },
+                    },
+                }
+            }}}
+        }))
+        .expect("should successfully build schema");
+        let iss = TrustedIssuer::default();
+        let token = Token::new_access(
+            TokenClaims::new(HashMap::from([
+                ("client_id".to_string(), json!("workload-123")),
+                ("name".to_string(), json!("somename")),
+            ])),
+            Some(&iss),
+        );
+        let entity = build_entity(
+            &schema,
+            "Workload",
+            &token,
+            "client_id",
+            Vec::new(),
+            HashSet::new(),
+        )
+        .expect("should successfully build entity");
+
+        assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
+        assert_eq!(
+            entity
+                .attr("client_id")
+                .expect("expected workload entity to have a `client_id` attribute")
+                .unwrap(),
+            EvalResult::String("workload-123".to_string()),
+        );
+        assert_eq!(
+            entity
+                .attr("name")
+                .expect("expected workload entity to have a `name` attribute")
+                .unwrap(),
+            EvalResult::String("somename".to_string()),
+        );
+    }
+
+    #[test]
+    fn errors_on_invalid_entity_type_name() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": { "Workload!": {
+                "shape": {
+                    "type": "Record",
+                    "attributes":  {
+                        "client_id": { "type": "String" },
+                        "name": { "type": "String" },
+                    },
+                }
+            }}}
+        }))
+        .expect("should successfully build schema");
+        let iss = TrustedIssuer::default();
+        let token = Token::new_access(
+            TokenClaims::new(HashMap::from([
+                ("client_id".to_string(), json!("workload-123")),
+                ("name".to_string(), json!("somename")),
+            ])),
+            Some(&iss),
+        );
+
+        let err = build_entity(
+            &schema,
+            "Workload!",
+            &token,
+            "client_id",
+            Vec::new(),
+            HashSet::new(),
+        )
+        .expect_err("should error while parsing entity type name");
+
+        assert!(
+            matches!(err, BuildEntityError::ParseEntityTypeName(_)),
+            "expected ParseEntityTypeName error but got: {:?}",
+            err
+        );
+    }
+
+    #[test]
+    fn errors_when_token_is_missing_entity_id_claim() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({}))
+            .expect("should successfully build schema");
+        let iss = TrustedIssuer::default();
+        let token = Token::new_access(TokenClaims::new(HashMap::new()), Some(&iss));
+
+        let err = build_entity(
+            &schema,
+            "Workload",
+            &token,
+            "client_id",
+            Vec::new(),
+            HashSet::new(),
+        )
+        .expect_err("should error while parsing entity type name");
+
+        assert!(
+            matches!(
+                err,
+                BuildEntityError::MissingClaim(ref claim_name)
+                if claim_name =="client_id"
+            ),
+            "expected MissingClaim error but got: {}",
+            err
+        );
+    }
+
+    #[test]
+    fn errors_token_claim_has_unexpected_type() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+            "Jans": { "entityTypes": { "Workload": {
+                "shape": {
+                    "type": "Record",
+                    "attributes":  {
+                        "client_id": { "type": "String" },
+                    },
+                }
+            }}}
+        }))
+        .expect("should successfully build schema");
+        let iss = TrustedIssuer::default();
+        let token = Token::new_access(
+            TokenClaims::new(HashMap::from([("client_id".to_string(), json!(123))])),
+            Some(&iss),
+        );
+        let err = build_entity(
+            &schema,
+            "Workload",
+            &token,
+            "client_id",
+            Vec::new(),
+            HashSet::new(),
+        )
+        .expect_err("should error due to unexpected json type");
+
+        assert!(
+            matches!(
+                err,
+                BuildEntityError::TokenClaimTypeMismatch(ref err)
+                if err == &TokenClaimTypeError::type_mismatch("client_id", "String", &json!(123))
+            ),
+            "expected TokenClaimTypeMismatch error but got: {:?}",
+            err
+        );
+    }
+
+    #[test]
+    fn errors_when_entity_not_in_schema() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({}))
+            .expect("should successfully build schema");
+        let iss = TrustedIssuer::default();
+        let token = Token::new_access(
+            TokenClaims::new(HashMap::from([(
+                "client_id".to_string(),
+                json!("client-123"),
+            )])),
+            Some(&iss),
+        );
+
+        let err = build_entity(
+            &schema,
+            "Workload",
+            &token,
+            "client_id",
+            Vec::new(),
+            HashSet::new(),
+        )
+        .expect_err("should error due to entity not being in the schema");
+        assert!(
+            matches!(
+                err,
+                BuildEntityError::EntityNotInSchema(ref type_name)
+                if type_name == "Workload"
+            ),
+            "expected EntityNotInSchema error but got: {:?}",
+            err
+        );
     }
 }

@@ -21,7 +21,14 @@ impl EntityBuilder {
             .flatten()
         {
             let user_id_claim = token.user_mapping();
-            match self.build_entity(entity_name, token, user_id_claim, vec![], parents.clone()) {
+            match build_entity(
+                &self.schema,
+                entity_name,
+                token,
+                user_id_claim,
+                vec![],
+                parents.clone(),
+            ) {
                 Ok(entity) => return Ok(entity),
                 Err(err) => errors.push((token.kind, err)),
             }

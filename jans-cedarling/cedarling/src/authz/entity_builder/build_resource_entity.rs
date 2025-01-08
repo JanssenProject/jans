@@ -3,6 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use build_attrs::build_entity_attrs_from_values;
 use cedar_policy::{EntityAttrEvaluationError, ExpressionConstructionError, ParseErrors};
 use serde_json::Value;
 
@@ -22,7 +23,8 @@ impl EntityBuilder {
                 entity_type_name.to_string(),
             ))?;
 
-        let entity_attrs = self.build_entity_attrs_from_values(entity_type, &resource.payload)?;
+        let entity_attrs =
+            build_entity_attrs_from_values(&self.schema, entity_type, &resource.payload)?;
 
         // Build cedar entity
         let entity_id =
@@ -48,7 +50,7 @@ pub enum BuildResourceEntityError {
     InvalidEntityName(#[from] ParseErrors),
 }
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error, PartialEq)]
 #[error("JSON value type mismatch: expected '{expected_type}', but found '{actual_type}'")]
 pub struct JsonTypeError {
     pub expected_type: String,
