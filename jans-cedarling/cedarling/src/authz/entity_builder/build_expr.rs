@@ -222,20 +222,20 @@ pub struct KeyedJsonTypeError {
 
 impl KeyedJsonTypeError {
     /// Returns the JSON type name of the given value.
-    pub fn value_type_name(value: &Value) -> String {
+    pub fn value_type_name(value: &Value) -> &'static str {
         match value {
-            Value::Null => "null".to_string(),
-            Value::Bool(_) => "bool".to_string(),
-            Value::Number(_) => "number".to_string(),
-            Value::String(_) => "string".to_string(),
-            Value::Array(_) => "array".to_string(),
-            Value::Object(_) => "object".to_string(),
+            Value::Null => "null",
+            Value::Bool(_) => "bool",
+            Value::Number(_) => "number",
+            Value::String(_) => "string",
+            Value::Array(_) => "array",
+            Value::Object(_) => "object",
         }
     }
 
     /// Constructs a `TypeMismatch` error with detailed information about the expected and actual types.
     pub fn type_mismatch(key: &str, expected_type_name: &str, got_value: &Value) -> Self {
-        let got_value_type_name = Self::value_type_name(got_value);
+        let got_value_type_name = Self::value_type_name(got_value).to_string();
 
         Self {
             key: key.to_string(),
