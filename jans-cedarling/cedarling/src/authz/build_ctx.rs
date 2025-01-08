@@ -113,7 +113,7 @@ fn map_entity_id(
     type_ids: &HashMap<String, String>,
 ) -> Result<Option<Value>, BuildContextError> {
     if let Some(type_id) = type_ids.get(name).as_ref() {
-        let name = try_join_namespace(namespace, name);
+        let name = join_namespace(namespace, name);
         Ok(Some(json!({"type": name, "id": type_id})))
     } else {
         Err(BuildContextError::MissingEntityId(name.to_string()))
@@ -121,7 +121,7 @@ fn map_entity_id(
 }
 
 /// Joins the given type name with the given namespace if it's not an empty string.
-fn try_join_namespace(namespace: &str, type_name: &str) -> String {
+fn join_namespace(namespace: &str, type_name: &str) -> String {
     if namespace.is_empty() {
         return type_name.to_string();
     }
