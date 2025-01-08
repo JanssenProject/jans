@@ -234,14 +234,14 @@ mod tests {
     fn test_get_item_return_none_if_expired() {
         let mut sparkv = SparKV::new();
         _ = sparkv.set_with_ttl(
-            "kkk",
+            "key",
             "value",
             Duration::new(0, 10000).expect("a valid duration"),
         );
-        assert_eq!(sparkv.get("kkk"), Some(String::from("value")));
+        assert_eq!(sparkv.get("key"), Some(String::from("value")));
 
         std::thread::sleep(std::time::Duration::from_nanos(30000));
-        assert_eq!(sparkv.get("kkk"), None);
+        assert_eq!(sparkv.get("key"), None);
     }
 
     #[test]
