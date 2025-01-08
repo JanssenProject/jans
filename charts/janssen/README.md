@@ -344,8 +344,8 @@ Kubernetes: `>=v1.22.0-0`
 | global.cnConfiguratorCustomSchema | object | `{"secretName":""}` | Use custom configuration schema in existing secrets. Note, the secrets has to contain the key configuration.json or any basename as specified in cnConfiguratorConfigurationFile. |
 | global.cnConfiguratorCustomSchema.secretName | string | `""` | The name of the secrets used for storing custom configuration schema. |
 | global.cnConfiguratorDumpFile | string | `"/etc/jans/conf/configuration.out.json"` | Path to dumped configuration schema file |
-| global.cnConfiguratorKey | string | `""` | Key to encrypt/decrypt configuration schema file |
-| global.cnConfiguratorKeyFile | string | `"/etc/jans/conf/configuration.key"` | Path to file contains key to encrypt/decrypt configuration schema file |
+| global.cnConfiguratorKey | string | `""` | Key to encrypt/decrypt configuration schema file (if empty, encryption/decryption will be skipped). |
+| global.cnConfiguratorKeyFile | string | `"/etc/jans/conf/configuration.key"` | Path to file contains key to encrypt/decrypt configuration schema file. |
 | global.cnDocumentStoreType | string | `"DB"` | Document store type to use for shibboleth files DB. |
 | global.cnGoogleApplicationCredentials | string | `"/etc/jans/conf/google-credentials.json"` | Base64 encoded service account. The sa must have roles/secretmanager.admin to use Google secrets. Leave as this is a sensible default. |
 | global.cnPersistenceType | string | `"sql"` | Persistence backend to run Janssen with hybrid|sql |
