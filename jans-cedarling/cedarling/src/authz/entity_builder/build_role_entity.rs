@@ -14,6 +14,7 @@ impl EntityBuilder {
         tokens: &DecodedTokens,
     ) -> Result<Vec<Entity>, BuildRoleEntityError> {
         let entity_name = &self.entity_names.role;
+        let mut created_roles = HashSet::new();
         let mut entities = Vec::new();
 
         // Get entity namespace and type
@@ -36,9 +37,11 @@ impl EntityBuilder {
                 match claim.value() {
                     // Case: the claim is a String
                     serde_json::Value::String(role) => {
-                        let entity = build_entity(&entity_name, role)
-                            .map_err(|e| BuildRoleEntityError::map_tkn_err(token, e))?;
-                        entities.push(entity);
+                        if let Some(entity) =
+                            build_role_entity(&mut created_roles, &entity_name, role, token)?
+                        {
+                            entities.push(entity);
+                        }
                     },
 
                     // Case: the claim is an Array
@@ -53,10 +56,11 @@ impl EntityBuilder {
                                     ));
                                 },
                             };
-
-                            let entity = build_entity(&entity_name, role)
-                                .map_err(|e| BuildRoleEntityError::map_tkn_err(token, e))?;
-                            entities.push(entity);
+                            if let Some(entity) =
+                                build_role_entity(&mut created_roles, &entity_name, role, token)?
+                            {
+                                entities.push(entity);
+                            }
                         }
                     },
 
@@ -78,6 +82,24 @@ impl EntityBuilder {
 
         Ok(entities)
     }
+}
+
+/// Builds the role entity if it doesn't exist yet
+fn build_role_entity(
+    created_roles: &mut HashSet<String>,
+    entity_type_name: &str,
+    role: &str,
+    token: &Token,
+) -> Result<Option<Entity>, BuildRoleEntityError> {
+    if created_roles.contains(role) {
+        return Ok(None);
+    }
+
+    let entity = build_entity(entity_type_name, role)
+        .map_err(|e| BuildRoleEntityError::map_tkn_err(token, e))?;
+    created_roles.insert(role.to_string());
+
+    Ok(Some(entity))
 }
 
 fn build_entity(name: &str, id: &str) -> Result<Entity, BuildEntityError> {
@@ -212,6 +234,29 @@ mod test {
             access: Some(access_token),
             id: None,
             userinfo: None,
+        };
+        test_build_entity_from_str_claim(tokens);
+    }
+
+    #[test]
+    fn ignores_duplicate_roles() {
+        let iss = TrustedIssuer::default();
+        let access_token = Token::new_access(
+            TokenClaims::new(HashMap::from([("role".to_string(), json!("admin"))])),
+            Some(&iss),
+        );
+        let id_token = Token::new_id(
+            TokenClaims::new(HashMap::from([("role".to_string(), json!("admin"))])),
+            Some(&iss),
+        );
+        let userinfo_token = Token::new_userinfo(
+            TokenClaims::new(HashMap::from([("role".to_string(), json!("admin"))])),
+            Some(&iss),
+        );
+        let tokens = DecodedTokens {
+            access: Some(access_token),
+            id: Some(id_token),
+            userinfo: Some(userinfo_token),
         };
         test_build_entity_from_str_claim(tokens);
     }
