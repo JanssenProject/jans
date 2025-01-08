@@ -10,7 +10,7 @@ use crate::common::cedar_schema::cedar_json::attribute::Attribute;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::CEDAR_NAMESPACE_SEPARATOR;
 use cedar_policy::ContextJsonError;
-use serde_json::{json, Value};
+use serde_json::{json, map::Entry, Value};
 
 /// Constructs the authorization context by adding the built entities from the tokens
 pub fn build_context(
@@ -151,10 +151,11 @@ pub enum BuildContextError {
 pub fn merge_json_values(mut base: Value, other: Value) -> Result<Value, BuildContextError> {
     if let (Some(base_map), Some(additional_map)) = (base.as_object_mut(), other.as_object()) {
         for (key, value) in additional_map {
-            if base_map.contains_key(key) {
+            if let Entry::Vacant(entry) = base_map.entry(key) {
+                entry.insert(value.clone());
+            } else {
                 return Err(BuildContextError::KeyConflict(key.clone()));
             }
-            base_map.insert(key.clone(), value.clone());
         }
     }
     Ok(base)
