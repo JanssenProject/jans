@@ -144,7 +144,7 @@ impl<T> SparKV<T> {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.data.len() == 0
+        self.data.is_empty()
     }
 
     pub fn contains_key(&self, key: &str) -> bool {
