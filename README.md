@@ -36,7 +36,7 @@ commercial distribution of Janssen Project Components called
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/janssen-auth-server)](https://artifacthub.io/packages/search?repo=janssen-auth-server)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4353/badge)](https://bestpractices.coreinfrastructure.org/projects/4353)
 [![Hex.pm](https://img.shields.io/hexpm/l/plug)](./LICENSE)
-[![GitHub contributors](https://img.shields.io/github/contributors/janssenproject/jans)](#users-and-community)
+[![GitHub contributors](https://img.shields.io/github/contributors/janssenproject/jans)](#community)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 
 ----
@@ -55,7 +55,7 @@ commercial distribution of Janssen Project Components called
 | **[Jans KC](jans-keycloak-integration)**     | provides an array of out of the box IAM services in a single lightweight container image. It's handy for many workforce requirements like SAML. The Janssen authenticator module (SPI) simplifies SSO across Janssen and Keycloak websites. | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
 | **[Jans LDAP Link](jans-link)**              | a group of components that provide synchronization services to update the Janssen User Store from an external authoritative LDAP data sources                                                                                               | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
 | **[Jans Keycloak Link](jans-keycloak-link)** | a group of components that provide synchronization services to update the Janssen User Store from an external authoritative Keycloak data sources                                                                                           | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
-| **[Jans Cedarling](jans-cedaring)**          | Cedarling binding for Python and WASM. In simple terms, the Cedarling returns the answer: should the application allow this action on this resource given these JWT tokens..                                                                | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
+| **[Jans Cedarling](jans-cedarling)**          | Cedarling binding for Python and WASM. In simple terms, the Cedarling returns the answer: should the application allow this action on this resource given these JWT tokens..                                                                | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
 | **[Jans Lock](jans-lock)**                   | An enterprise authorization solution featuring the Cedarling, a stateless PDP and the Lock Server which centralizes audit logs and configuration.                                                                                           | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
 | **[Jans Tarp](demos/jans-tarp)**             | An OpenID Connect RP test website that runs as a browser plugin in Chrome or Firefox.                                                                                                                                                       | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
 | **[Jans Chip](demos/jans-chip)**             | Sample iOS and Android mobile applications that implement the full OAuth and FIDO security stack for app integrity, client constrained access tokens, and user presence.                                                                    | ![Demo](https://img.shields.io/badge/Demo-%23368af7)             |
@@ -63,7 +63,7 @@ commercial distribution of Janssen Project Components called
 ## Installation
 
 You can install the Janssen federation stack in a Kubernetes cluster or as a 
-single VM. Check out the [Janssen Documentation](https://docs.jans.io/head/admin/install/) 
+single VM. Check out the [Janssen Documentation](/docs/janssen-server/install/README.md) 
 for details.
 
 ## Community
