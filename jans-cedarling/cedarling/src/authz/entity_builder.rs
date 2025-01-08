@@ -61,23 +61,23 @@ impl From<&AuthorizationConfig> for EntityNames {
             user: config
                 .mapping_user
                 .clone()
-                .unwrap_or(DEFAULT_USER_ENTITY_NAME.to_string()),
+                .unwrap_or_else(|| DEFAULT_USER_ENTITY_NAME.to_string()),
             workload: config
                 .mapping_workload
                 .clone()
-                .unwrap_or(DEFAULT_WORKLOAD_ENTITY_NAME.to_string()),
+                .unwrap_or_else(|| DEFAULT_WORKLOAD_ENTITY_NAME.to_string()),
             id_token: config
                 .mapping_id_token
                 .clone()
-                .unwrap_or(DEFAULT_ID_TKN_ENTITY_NAME.to_string()),
+                .unwrap_or_else(|| DEFAULT_ID_TKN_ENTITY_NAME.to_string()),
             access_token: config
                 .mapping_access_token
                 .clone()
-                .unwrap_or(DEFAULT_ACCESS_TKN_ENTITY_NAME.to_string()),
+                .unwrap_or_else(|| DEFAULT_ACCESS_TKN_ENTITY_NAME.to_string()),
             userinfo_token: config
                 .mapping_userinfo_token
                 .clone()
-                .unwrap_or(DEFAULT_USERINFO_TKN_ENTITY_NAME.to_string()),
+                .unwrap_or_else(|| DEFAULT_USERINFO_TKN_ENTITY_NAME.to_string()),
             // TODO: implement a bootstrap property to set the Role entity name
             role: DEFAULT_ROLE_ENTITY_NAME.to_string(),
         }
