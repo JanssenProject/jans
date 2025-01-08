@@ -22,9 +22,15 @@ pub struct SparKV<T> {
     pub config: Config,
     data: std::collections::BTreeMap<String, KvEntry<T>>,
     expiries: std::collections::BinaryHeap<ExpEntry>,
+    /// An optional function that calculates the memory size of a value.
+    ///
+    /// Used by `ensure_item_size`.
+    ///
+    /// If this function is not provided, the container will not enforce `Config.max_item_size`.
     size_calculator : Option<fn(&T) -> usize>,
 }
 
+/// See the SparKV::iter function
 pub struct Iter<'a, T: 'a>
 {
      btree_value_iter : std::collections::btree_map::Values<'a, String, KvEntry<T>>,
@@ -42,6 +48,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
     }
 }
 
+/// See the SparKV::drain function
 pub struct DrainIter<T>
 {
      value_iter : std::collections::btree_map::IntoValues<String, KvEntry<T>>,
@@ -75,6 +82,7 @@ impl<T> SparKV<T> {
         }
     }
 
+    /// Provide optional size function. See SparKV.size_calculator comments.
     pub fn with_config_and_sizer(config: Config, sizer: Option<fn(&T) -> usize>) -> Self {
         SparKV {
             config,
@@ -118,6 +126,7 @@ impl<T> SparKV<T> {
         self.data.keys().cloned().collect()
     }
 
+    /// Return an iterator of (key,value) : (&String,&T).
     pub fn iter(&self) -> Iter<T> {
         Iter{ btree_value_iter: self.data.values() }
     }
@@ -170,6 +179,7 @@ impl<T> SparKV<T> {
         cleared_count
     }
 
+    /// Empty the container. That is, remove all key-values and expiries.
     pub fn clear(&mut self) {
         self.data.clear();
         self.expiries.clear();
