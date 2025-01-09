@@ -10,7 +10,7 @@ Security updates will typically only be applied to the latest release.
 
 | Version | Supported          |
 |---------|--------------------|
-| <=1.0.0 | :x:                |
+| <1.0.0  | :x:                |
 | >=1.0.0 | :white_check_mark: |
 
 ## Reporting a vulnerability
