@@ -20,7 +20,7 @@ import org.testng.annotations.Parameters;
 
 public class Fido2ResourceTest extends BaseTest {
 
-    @Parameters({"issuer", "fido2Url"})
+    @Parameters({"test.issuer", "fido2Url"})
     @Test
     public void getFido2Configuration(final String issuer, final String fido2Url) {
         log.error("getFido2Configuration() - accessToken:{}, issuer:{}, fido2Url:{}", accessToken, issuer, fido2Url);

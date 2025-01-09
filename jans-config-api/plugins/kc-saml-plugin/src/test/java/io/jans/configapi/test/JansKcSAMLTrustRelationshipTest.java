@@ -31,7 +31,7 @@ public class JansKcSAMLTrustRelationshipTest extends BaseTest {
             throw new SkipException("KC-SAML Plugin not deployed");
     }
 
-    @Parameters({ "issuer", "samlTrustRelationshipUrl" })
+    @Parameters({ "test.issuer", "samlTrustRelationshipUrl" })
     @Test
     public void getKcSAMLTrustRelationship(final String issuer, final String samlTrustRelationshipUrl) {
         log.info("getKcSAMLTrustRelationship() - accessToken:{}, issuer:{}, samlTrustRelationshipUrl:{}", accessToken,

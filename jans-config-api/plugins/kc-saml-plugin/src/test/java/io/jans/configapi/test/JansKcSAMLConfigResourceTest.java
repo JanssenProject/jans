@@ -31,7 +31,7 @@ public class JansKcSAMLConfigResourceTest extends BaseTest {
             throw new SkipException("KC-SAML Plugin not deployed");
     }
 
-    @Parameters({ "issuer", "samlConfigUrl" })
+    @Parameters({ "test.issuer", "samlConfigUrl" })
     @Test
     public void getKcSAMLConfiguration(final String issuer, final String samlConfigUrl) {
         log.info("getKcSAMLConfiguration() - accessToken:{}, issuer:{}, samlConfigUrl:{}", accessToken, issuer,

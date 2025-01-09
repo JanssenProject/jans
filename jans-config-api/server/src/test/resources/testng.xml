@@ -38,6 +38,6 @@
             <class name="io.jans.configapi.test.auth.ConfigResourceTest" />
         </classes>
     </test>
-   
+
 
 </suite>

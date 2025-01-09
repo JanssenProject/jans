@@ -18,7 +18,7 @@ import org.testng.annotations.Parameters;
 
 public class ScimConfigResourceTest extends BaseTest {
 
-    @Parameters({"issuer", "scimConfigUrl"})
+    @Parameters({"test.issuer", "scimConfigUrl"})
     @Test
     public void getScimConfigData(final String issuer, final String scimConfigUrl) {
         log.info("getScimConfigData() - accessToken:{}, issuer:{}, scimConfigUrl:{}", accessToken, issuer, scimConfigUrl);

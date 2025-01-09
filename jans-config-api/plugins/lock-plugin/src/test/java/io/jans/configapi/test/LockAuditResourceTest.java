@@ -37,7 +37,7 @@ public class LockAuditResourceTest extends BaseTest {
 
     }
 
-    @Parameters({ "issuer", "lockAuditHealthPostUrl", "audit_health_post_1" })
+    @Parameters({ "test.issuer", "lockAuditHealthPostUrl", "audit_health_post_1" })
     @Test
     public void getLockAuditData(final String issuer, final String lockAuditHealthPostUrl, final String json) {
         log.info("getLockAuditData() - accessToken:{}, issuer:{}, lockAuditHealthPostUrl:{}, json:{}", accessToken,
@@ -52,7 +52,7 @@ public class LockAuditResourceTest extends BaseTest {
         log.info("Response for getLockAuditData -  response:{}", response);
     }
 
-    @Parameters({ "issuer", "lockAuditHealthSearchUrl" })
+    @Parameters({ "test.issuer", "lockAuditHealthSearchUrl" })
     // @Test
     public void getLockAuditData(final String issuer, final String lockAuditHealthSearchUrl) {
         log.info("getLockAuditData() - accessToken:{}, issuer:{}, lockAuditHealthSearchUrl:{}", accessToken, issuer,

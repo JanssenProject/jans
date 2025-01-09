@@ -20,7 +20,7 @@ import org.testng.annotations.Parameters;
 
 public class JansLinkConfigResourceTest extends BaseTest {
 
-    @Parameters({"issuer", "linkConfigUrl"})
+    @Parameters({"test.issuer", "linkConfigUrl"})
     @Test
     public void getLinkConfiguration(final String issuer, final String linkConfigUrl) {
         log.error("getLinkConfiguration() - accessToken:{}, issuer:{}, linkConfigUrl:{}", accessToken, issuer, linkConfigUrl);

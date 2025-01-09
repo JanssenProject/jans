@@ -19,7 +19,7 @@ import static org.testng.Assert.assertEquals;
 
 public class UserResourceTest extends BaseTest {
 
-    @Parameters({"issuer", "userUrl"})
+    @Parameters({"test.issuer", "userUrl"})
     @Test
     public void getUserResourceData(final String issuer, final String userUrl) {
         log.info("\n\n getUserResourceData() - accessToken:{}, issuer:{}, userUrl:{}", accessToken, issuer, userUrl);

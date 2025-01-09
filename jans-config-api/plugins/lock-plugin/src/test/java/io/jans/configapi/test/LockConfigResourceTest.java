@@ -34,7 +34,7 @@ public class LockConfigResourceTest extends BaseTest {
 
     }
 
-    @Parameters({ "issuer", "lockConfigUrl" })
+    @Parameters({ "test.issuer", "lockConfigUrl" })
     @Test
     public void getLockConfigUrlData(final String issuer, final String lockConfigUrl) {
         log.info("getLockConfigUrlData() - accessToken:{}, issuer:{}, lockConfigUrl:{}", accessToken, issuer,

@@ -34,7 +34,7 @@ public class JansIdpResourceTest extends BaseTest {
         }
     }
 
-    @Parameters({ "issuer", "samlIdpUrl" })
+    @Parameters({ "test.issuer", "samlIdpUrl" })
     @Test
     public void getKcSAMLIdp(final String issuer, final String samlIdpUrl) {
         log.info("getKcSAMLIdp() - accessToken:{}, issuer:{}, samlIdpUrl:{}", accessToken, issuer, samlIdpUrl);

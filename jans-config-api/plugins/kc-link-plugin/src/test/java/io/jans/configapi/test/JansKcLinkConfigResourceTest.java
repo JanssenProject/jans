@@ -33,7 +33,7 @@ public class JansKcLinkConfigResourceTest extends BaseTest {
         }    
     }   
     
-    @Parameters({"issuer", "kcLinkConfigUrl"})
+    @Parameters({"test.issuer", "kcLinkConfigUrl"})
     @Test
     public void getKcLinkConfiguration(final String issuer, final String kcLinkConfigUrl) {
         log.info("getKcLinkConfiguration() - accessToken:{}, issuer:{}, kcLinkConfigUrl:{}", accessToken, issuer, kcLinkConfigUrl);

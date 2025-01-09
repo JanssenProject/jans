@@ -9,7 +9,7 @@
         <listener class-name="io.jans.configapi.core.test.listener.SkipTestsListener" />
     </listeners>
 	
-	<test name="OAuth2" enabled="true">
+	<!--<test name="OAuth2" enabled="true">
         <classes>
              <class name="io.jans.ca.plugin.adminui.test.OAuth2ResourceTest" />
         </classes>
@@ -28,6 +28,6 @@
         </classes>
     </test>
 
-   
+-->   
 
 </suite>

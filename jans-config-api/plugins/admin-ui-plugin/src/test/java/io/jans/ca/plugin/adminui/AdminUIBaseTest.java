@@ -15,21 +15,21 @@ public class AdminUIBaseTest extends BaseTest{
 
     //AdminUI specific code
     
-    /*@BeforeMethod
+    @BeforeMethod
     @Override
     public void getAccessToken() {
-        log.error("AdminUI - getAccessToken - propertiesMap:{}", propertiesMap);
+        log.info("AdminUI - getAccessToken - propertiesMap:{}", propertiesMap);
 
         String tokenUrl = propertiesMap.get("test.authzurl");
         String strGrantType = propertiesMap.get("test.grant.type");
         String clientId = propertiesMap.get("test.client.id");
         String clientSecret = propertiesMap.get("test.client.secret");
         String scopes = propertiesMap.get("test.scopes");
-        log.error("\n\n\n\n AdminUI- tokenUrl:{}, strGrantType:{}, clientId:{},  clientSecret:{}, scopes:{}", tokenUrl, strGrantType, clientId, clientSecret, scopes);
+        log.error("\n\n\n\n ************ AdminUI- tokenUrl:{}, strGrantType:{}, clientId:{},  clientSecret:{}, scopes:{}", tokenUrl, strGrantType, clientId, clientSecret, scopes);
         GrantType grantType = GrantType.fromString(strGrantType);
         this.accessToken = getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
-        log.error("\n\n\n\n AdminUI- accessToken:{}", accessToken);
-    }*/
+        log.info("\n\n\n\n AdminUI- accessToken:{} :{}", accessToken,"**********");
+    }
 	
     
 }
