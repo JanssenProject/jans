@@ -5,6 +5,23 @@
 
 use super::*;
 use cedar_policy::{EntityId, EntityTypeName, EntityUid};
+use serde::Deserialize;
+
+#[derive(Debug, serde::Deserialize)]
+#[serde(untagged)]
+enum UnifyClaims {
+    Single(String),
+    Multiple(Vec<String>),
+}
+
+impl UnifyClaims {
+    fn iter<'a>(&'a self) -> Box<dyn std::iter::Iterator<Item=&'a String> + 'a> {
+        match self {
+            Self::Single(ref v) => Box::new(std::iter::once(v)),
+            Self::Multiple(ref vs) => Box::new(vs.iter()),
+        }
+    }
+}
 
 impl EntityBuilder {
     /// Tries to build role entities using each given token. Will return an empty Vec
@@ -13,12 +30,8 @@ impl EntityBuilder {
         &self,
         tokens: &DecodedTokens,
     ) -> Result<Vec<Entity>, BuildRoleEntityError> {
-        let entity_name = &self.entity_names.role;
-        let mut created_roles = HashSet::new();
-        let mut entities = Vec::new();
-
         // Get entity namespace and type
-        let mut entity_name = entity_name.to_string();
+        let mut entity_name = self.entity_names.role.to_string();
         if let Some((namespace, _entity_type)) = self.schema.get_entity_from_base_name(&entity_name)
         {
             if !namespace.is_empty() {
@@ -26,7 +39,9 @@ impl EntityBuilder {
             }
         }
 
-        let token_refs = vec![
+        let mut entities = HashMap::new();
+
+        let token_refs = [
             tokens.userinfo.as_ref(),
             tokens.id.as_ref(),
             tokens.access.as_ref(),
@@ -34,72 +49,35 @@ impl EntityBuilder {
         for token in token_refs.into_iter().flatten() {
             let role_claim = token.role_mapping();
             if let Some(claim) = token.get_claim(role_claim).as_ref() {
-                match claim.value() {
-                    // Case: the claim is a String
-                    serde_json::Value::String(role) => {
-                        if let Some(entity) =
-                            build_role_entity(&mut created_roles, &entity_name, role, token)?
-                        {
-                            entities.push(entity);
-                        }
-                    },
-
-                    // Case: the claim is an Array
-                    serde_json::Value::Array(vec) => {
-                        for val in vec {
-                            let role = match val.as_str() {
-                                Some(role) => role,
-                                None => {
-                                    return Err(BuildRoleEntityError::map_tkn_err(
-                                        token,
-                                        BuildEntityError::json_type_err("str", val),
-                                    ));
-                                },
-                            };
-                            if let Some(entity) =
-                                build_role_entity(&mut created_roles, &entity_name, role, token)?
-                            {
-                                entities.push(entity);
-                            }
-                        }
-                    },
-
-                    value => {
+                let unified_claims = UnifyClaims::deserialize(claim.value());
+                let claim_role_name_iter = match unified_claims {
+                    Ok(ref unified_claims) => unified_claims.iter(),
+                    Err(_) => {
                         return Err(BuildRoleEntityError::map_tkn_err(
                             token,
                             BuildEntityError::TokenClaimTypeMismatch(
                                 TokenClaimTypeError::type_mismatch(
                                     role_claim,
                                     "String or Array",
-                                    value,
+                                    claim.value(),
+                                    ),
                                 ),
-                            ),
-                        ))
-                    },
+                            ))
+                    }
+                };
+
+                for claim_role_name in claim_role_name_iter {
+                    if !entities.contains_key(claim_role_name) {
+                        let entity = build_entity(&entity_name, claim_role_name)
+                            .map_err(|e| BuildRoleEntityError::map_tkn_err(token, e))?;
+                        entities.insert(claim_role_name.clone(), entity);
+                    }
                 }
             }
         }
 
-        Ok(entities)
+        Ok(entities.into_values().collect())
     }
-}
-
-/// Builds the role entity if it doesn't exist yet
-fn build_role_entity(
-    created_roles: &mut HashSet<String>,
-    entity_type_name: &str,
-    role: &str,
-    token: &Token,
-) -> Result<Option<Entity>, BuildRoleEntityError> {
-    if created_roles.contains(role) {
-        return Ok(None);
-    }
-
-    let entity = build_entity(entity_type_name, role)
-        .map_err(|e| BuildRoleEntityError::map_tkn_err(token, e))?;
-    created_roles.insert(role.to_string());
-
-    Ok(Some(entity))
 }
 
 fn build_entity(name: &str, id: &str) -> Result<Entity, BuildEntityError> {
