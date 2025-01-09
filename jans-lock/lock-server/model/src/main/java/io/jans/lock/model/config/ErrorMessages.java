@@ -22,6 +22,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.jans.model.error.ErrorMessage;
 import jakarta.enterprise.inject.Vetoed;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * Base interface for all Jans Auth configurations
@@ -29,10 +34,18 @@ import jakarta.enterprise.inject.Vetoed;
  * @author Yuriy Movchan Date: 12/18/2023
  */
 @Vetoed
+@XmlRootElement(name = "errors")
+@XmlAccessorType(XmlAccessType.FIELD)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ErrorMessages implements Configuration {
 
+    @XmlElementWrapper(name = "common")
+    @XmlElement(name = "error")
     private List<ErrorMessage> common;
+
+    @XmlElementWrapper(name = "stat")
+    @XmlElement(name = "error")
+    private List<ErrorMessage> stat;
 
     public List<ErrorMessage> getCommon() {
         return common;
@@ -41,5 +54,13 @@ public class ErrorMessages implements Configuration {
     public void setCommon(List<ErrorMessage> common) {
         this.common = common;
     }
+
+	public List<ErrorMessage> getStat() {
+		return stat;
+	}
+
+	public void setStat(List<ErrorMessage> stat) {
+		this.stat = stat;
+	}
 
 }
