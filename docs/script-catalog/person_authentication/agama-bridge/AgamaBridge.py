@@ -144,7 +144,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 
             try:
                 bridge = CdiUtil.bean(NativeJansFlowBridge)
-                running = bridge.prepareFlow(session.getId(), qn, ins)
+                running = bridge.prepareFlow(session.getId(), qn, ins, False)
                 
                 if running == None:
                     print "Agama. Flow '%s' does not exist or cannot be launched from a browser!" % qn

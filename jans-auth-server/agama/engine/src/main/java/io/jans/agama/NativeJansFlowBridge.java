@@ -42,7 +42,7 @@ public class NativeJansFlowBridge {
                 "agama" + ExecutionServlet.URL_SUFFIX;       
     }
     
-    public Boolean prepareFlow(String sessionId, String qname, String jsonInput) throws Exception {
+    public Boolean prepareFlow(String sessionId, String qname, String jsonInput, boolean nativeClient) throws Exception {
         
         logger.info("Preparing flow '{}'", qname);
         Boolean alreadyRunning = null;
@@ -68,6 +68,7 @@ public class NativeJansFlowBridge {
                 st.setQname(qname);
                 st.setJsonInput(jsonInput);
                 st.setFinishBefore(expireAt);
+                st.setNativeClient(nativeClient);
                 aps.createFlowRun(sessionId, st, expireAt);
                 LogUtils.log("@w Effective timeout for this flow will be % seconds", timeout);
             }

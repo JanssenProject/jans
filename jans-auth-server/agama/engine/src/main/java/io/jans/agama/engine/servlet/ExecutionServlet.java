@@ -71,7 +71,7 @@ public class ExecutionServlet extends BaseServlet {
             if (path.equals(expectedUrl)) {
                 page.setTemplatePath(engineConf.getTemplatesPath() + "/" + fstatus.getTemplatePath());
                 page.setDataModel(fstatus.getTemplateDataModel());
-                sendPageContents(response);
+                sendPageContents(response, fstatus.isNativeClient());
             } else {
                 //This is an attempt to GET a page which is not the current page of this flow
                 //json-based clients must explicitly pass the content-type in GET requests
@@ -194,6 +194,7 @@ public class ExecutionServlet extends BaseServlet {
             // Local redirection
             newLocation = contextPath + getExpectedUrl(fls);
         }
+
         //See https://developer.mozilla.org/en-US/docs/Web/HTTP/Redirections and
         //https://stackoverflow.com/questions/4764297/difference-between-http-redirect-codes
         if (currentIsGet) {

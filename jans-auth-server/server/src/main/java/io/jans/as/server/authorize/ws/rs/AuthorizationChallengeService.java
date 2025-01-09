@@ -164,8 +164,8 @@ public class AuthorizationChallengeService {
             if (!ok) {
                 log.debug("Not allowed by authorization challenge script, client_id {}.", client.getClientId());
                 throw new WebApplicationException(errorResponseFactory
-                        .newErrorResponse(Response.Status.BAD_REQUEST)
-                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, state, "No allowed by authorization challenge script."))
+                        .newErrorResponse(Response.Status.UNAUTHORIZED)
+                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, state, "Not allowed by authorization challenge script."))
                         .build());
             }
 
