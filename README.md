@@ -59,7 +59,6 @@ commercial distribution of Janssen Project Components called
 | **[Jans Lock](jans-lock)**                   | An enterprise authorization solution featuring the Cedarling, a stateless PDP and the Lock Server which centralizes audit logs and configuration.                                                                                           | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
 | **[Jans Tarp](demos/jans-tarp)**             | An OpenID Connect RP test website that runs as a browser plugin in Chrome or Firefox.                                                                                                                                                       | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
 | **[Jans Chip](demos/jans-chip)**             | Sample iOS and Android mobile applications that implement the full OAuth and FIDO security stack for app integrity, client constrained access tokens, and user presence.                                                                    | ![Demo](https://img.shields.io/badge/Demo-%23368af7)             |
-| **[Jans Tent](demos/jans-tent)**             | A test Relying Party ("RP") built using Python and Flask. Enables you to send different requests by quickly modifying just one configuration file.                                                                                          | ![Demo](https://img.shields.io/badge/Demo-%23368af7)             |
 
 ## Installation
 
