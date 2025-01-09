@@ -21,12 +21,12 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
     - name: Run Tests
+      working-directory: jans-cedarling
       run: |
-        cd ./jans-cedarling
         cargo test --workspace
     - name: Run Clippy on native target
+      working-directory: jans-cedarling
       run: |
-        cd ./jans-cedarling
         cargo clippy -- -Dwarnings
   wasm_tests:
     runs-on: ubuntu-latest
@@ -41,16 +41,16 @@ jobs:
     - name: Install WASM dependencies
       run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
     - name: Run WASM tests using chrome
+      working-directory: jans-cedarling/bindings/cedarling_wasm
       run: |
-        cd ./jans-cedarling/bindings/cedarling_wasm
         wasm-pack test --headless --chrome
     - name: Run WASM tests using firefox
+      working-directory: jans-cedarling/bindings/cedarling_wasm
       run: |
-        cd ./jans-cedarling/bindings/cedarling_wasm
         wasm-pack test --headless --firefox
     - name: Run Clippy on WASM target
+      working-directory: jans-cedarling
       run: |
-        cd ./jans-cedarling
         cargo clippy --target wasm32-unknown-unknown -- -Dwarnings
   python_tests:
     runs-on: ubuntu-latest
@@ -72,6 +72,6 @@ jobs:
         python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
         python3 -m pip install tox
     - name: Test with pytest
+      working-directory: jans-cedarling/bindings/cedarling_python
       run: |
-        cd ./jans-cedarling/bindings/cedarling_python
         tox
