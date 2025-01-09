@@ -1,65 +1,105 @@
-# Cedarling WASM
+---
+tags:
+  - cedarling
+  - wasm
+---
 
-This module is designed to build cedarling for browser wasm.
+# WASM for Cedarling
+
+Cedarling provides a binding for JavaScript programs via the `wasm-pack` tool. This allows browser developers to use the cedarling crate in their code directly.
+
+## Requirements
+
+- Rust 1.63 or greater
+- Installed `wasm-pack` via `cargo`
+- clang with `wasm` target support
 
 ## Building
 
-For building we use [`wasm-pack`](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_Wasm) for install you can use command `cargo install wasm-pack`
+- Install `wasm-pack` by:
 
-Build cedarling in release:
+  ```sh
+  cargo install wasm-pack
+  ```
 
-```bash
-wasm-pack build --release --target web
-```
+- Build cedarling `wasm` in release:
 
-Build cedarling in dev mode
+  ```bash
+  wasm-pack build --release --target web
+  ```
 
-```bash
-wasm-pack build --target web --dev
-```
+  `wasm-pack` automatically make optimization of `wasm` binary file, using `wasm-opt`.
+- Get result in the `pkg` folder.
 
-Result files will be in `pkg` folder.
+## Including in projects
 
-## Testing
+For using result files in browser project you need make result `pkg` folder accessible for loading in the browser so that you can later import the corresponding file from the browser.
 
-For WASM testing we use `wasm-pack` and it allows to make test in `node`, `chrome`, `firefox`, `safari`. You just need specify appropriate flag.
+Here is example of code snippet:
 
-Example for firefox.
-
-```bash
-wasm-pack test --firefox
-```
-
-## Run browser example
-
-To run example using `index.html` you need execute following steps:
-
-1. Build wasm cedarling.
-2. Run webserver using `python3 -m http.server` or any other.
-3. Visit example app [localhost](http://localhost:8000/), on this app you will get log in browser console.
-    - Also you can try use cedarling with web app using [cedarling_app](http://localhost:8000/cedarling_app.html), using custom bootstrap properties and request.
-
-## WASM Usage
-
-After building WASM bindings in folder `pkg` you can find where you can find `cedarling_wasm.js` and `cedarling_wasm.d.ts` where is defined interface for application.
-
-In `index.html` described simple usage of `cedarling wasm` API:
-
-```js
-        import { BOOTSTRAP_CONFIG, REQUEST } from "/example_data.js" // Import js objects: bootstrap config and request
+```html
+   <script type="module">
         import initWasm, { init } from "/pkg/cedarling_wasm.js";
 
         async function main() {
             await initWasm(); // Initialize the WebAssembly module
 
-            let instance = await init(BOOTSTRAP_CONFIG);
-            let result = await instance.authorize(REQUEST);
+            // init cedarling with `BOOTSTRAP` config
+            let instance = await init({
+               "CEDARLING_APPLICATION_NAME": "My App",
+                "CEDARLING_POLICY_STORE_URI": "https://example.com/policy-store.json",
+                "CEDARLING_LOG_TYPE": "memory",
+                "CEDARLING_LOG_LEVEL": "INFO",
+                "CEDARLING_LOG_TTL": 120,
+                "CEDARLING_DECISION_LOG_USER_CLAIMS ": ["aud", "sub", "email", "username"],
+                "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS ": ["aud", "client_id", "rp_id"],
+                "CEDARLING_USER_AUTHZ": "enabled",
+                "CEDARLING_WORKLOAD_AUTHZ": "enabled",
+                "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
+            });
+            // make authorize request
+            let result = await instance.authorize({
+                "tokens": {
+                    "access_token": "...",
+                    "id_token": "...",
+                    "userinfo_token": "...",
+                },
+                "action": 'Jans::Action::"Read"',
+                "resource": {
+                    "type": "Jans::Application",
+                    "id": "some_id",
+                    "app_id": "application_id",
+                    "name": "Some Application",
+                    "url": {
+                        "host": "jans.test",
+                        "path": "/protected-endpoint",
+                        "protocol": "http"
+                    }
+                },
+                "context": {
+                    "current_time": Math.floor(Date.now() / 1000),
+                    "device_health": ["Healthy"],
+                    "fraud_indicators": ["Allowed"],
+                    "geolocation": ["America"],
+                    "network": "127.0.0.1",
+                    "network_type": "Local",
+                    "operating_system": "Linux",
+                    "user_agent": "Linux"
+                },
+            });
             console.log("result:", result);
         }
         main().catch(console.error);
+    </script>
 ```
 
-Before using any function from library you need initialize WASM runtime by calling `initWasm` function.
+## Usage
+
+Before usage make sure that you have completed `Building` steps.
+You can find usage examples in the following locations:
+
+- `jans-cedarling/bindings/cedarling_wasm/index.html`: A simple example demonstrating basic usage.
+- `jans-cedarling/bindings/cedarling_wasm/cedarling_app.html`: A fully featured `Cedarling` browser app where you can test and validate your configuration.
 
 ### Defined API
 

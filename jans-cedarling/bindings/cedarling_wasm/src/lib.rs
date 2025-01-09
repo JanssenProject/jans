@@ -53,7 +53,7 @@ impl Cedarling {
     }
 
     /// Create a new instance of the Cedarling application.
-    /// Assume that config is `Object`
+    /// Assume that config is `Map`
     pub async fn new_from_map(config: Map) -> Result<Cedarling, Error> {
         let conf_js_val = config.unchecked_into();
 
