@@ -606,7 +606,7 @@ The default configuration is sufficient for most of the time. If there's a requi
     apiVersion: v1
     kind: Secret
     metadata:
-      name: custom-configuration-file
+      name: custom-configuration-schema
       namespace: jans
     type: Opaque
     stringData:
@@ -631,7 +631,7 @@ The default configuration is sufficient for most of the time. If there's a requi
 1.  Create Kubernetes secrets:
 
     ```bash
-    kubernetes -n jans create secret generic custom-configuration-schema --from-file=custom-configuration.json
+    kubectl -n jans apply -f custom-configuration-schema.yaml
     ```
 
 1.  Specify the secret in `values.yaml`:
