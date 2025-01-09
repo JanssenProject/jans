@@ -43,6 +43,7 @@ public class CacheGrant implements Serializable {
     private String acrValues;
     private String sessionDn;
     private int expiresIn = 1;
+    private boolean isAuthorizationChallenge;
 
     // CIBA
     private String authReqId;
@@ -73,6 +74,7 @@ public class CacheGrant implements Serializable {
         codeChallengeMethod = grant.getCodeChallengeMethod();
         claims = grant.getClaims();
         sessionDn = grant.getSessionDn();
+        isAuthorizationChallenge = grant.isAuthorizationChallenge();
     }
 
     public CacheGrant(CIBAGrant grant, AppConfiguration appConfiguration) {
@@ -263,6 +265,7 @@ public class CacheGrant implements Serializable {
         grant.setAcrValues(acrValues);
         grant.setNonce(nonce);
         grant.setClaims(claims);
+        grant.setAuthorizationChallenge(isAuthorizationChallenge);
 
         return grant;
     }
@@ -335,11 +338,12 @@ public class CacheGrant implements Serializable {
 
     @Override
     public String toString() {
-        return "MemcachedGrant{" +
+        return "CacheGrant{" +
                 "authorizationCode=" + authorizationCodeString +
                 ", user=" + user +
                 ", client=" + client +
                 ", authenticationTime=" + authenticationTime +
+                ", isAuthorizationChallenge=" + isAuthorizationChallenge +
                 '}';
     }
 }

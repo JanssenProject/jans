@@ -104,6 +104,10 @@ public class ExternalAuthorizationChallengeService extends ExternalScriptService
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(script.getCustomScript(), ex);
+            throw new WebApplicationException(errorResponseFactory
+                    .newErrorResponse(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, executionContext.getAuthzRequest().getState(), "Unable to run authorization challenge script."))
+                    .build());
         }
 
         log.trace("Finished 'authorize' method, script name: {}, clientId: {}, result: {}", script.getName(), executionContext.getAuthzRequest().getClientId(), result);

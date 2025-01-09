@@ -38,37 +38,37 @@ public interface AuditRestWebService {
 	@POST
 	@Path("/health")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = {"https://jans.io/lock-server/audit.write"})
+	@ProtectedApi(scopes = {"https://jans.io/oauth/lock/health.write"})
 	Response processHealthRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
 
 	@POST
 	@Path("/health/bulk")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = {"https://jans.io/lock-server/audit.write"})
+	@ProtectedApi(scopes = {"https://jans.io/oauth/lock/health.write"})
 	Response processBulkHealthRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
 
 	@POST
 	@Path("/log")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = {"https://jans.io/lock-server/audit.write"})
+	@ProtectedApi(scopes = {"https://jans.io/oauth/lock/log.write"})
 	Response processLogRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
 
 	@POST
 	@Path("/log/bulk")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = {"https://jans.io/lock-server/audit.write"})
+	@ProtectedApi(scopes = {"https://jans.io/oauth/lock/log.write"})
 	Response processBulkLogRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
 
 	@POST
 	@Path("/telemetry")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = {"https://jans.io/lock-server/audit.write"})
+	@ProtectedApi(scopes = {"https://jans.io/oauth/lock/telemetry.write"})
 	Response processTelemetryRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
 
 	@POST
 	@Path("/telemetry/bulk")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = {"https://jans.io/lock-server/audit.write"})
+	@ProtectedApi(scopes = {"https://jans.io/oauth/lock/telemetry.write"})
 	Response processBulkTelemetryRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
 
 }
