@@ -15,7 +15,7 @@ enum UnifyClaims {
 }
 
 impl UnifyClaims {
-    fn iter<'a>(&'a self) -> Box<dyn std::iter::Iterator<Item=&'a String> + 'a> {
+    fn iter<'a>(&'a self) -> Box<dyn std::iter::Iterator<Item = &'a String> + 'a> {
         match self {
             Self::Single(ref v) => Box::new(std::iter::once(v)),
             Self::Multiple(ref vs) => Box::new(vs.iter()),
@@ -60,10 +60,10 @@ impl EntityBuilder {
                                     role_claim,
                                     "String or Array",
                                     claim.value(),
-                                    ),
                                 ),
-                            ))
-                    }
+                            ),
+                        ))
+                    },
                 };
 
                 for claim_role_name in claim_role_name_iter {
@@ -167,8 +167,14 @@ mod test {
             .expect("expected to build role entities");
 
         assert_eq!(entity.len(), 2);
-        assert_eq!(entity[0].uid().to_string(), "Jans::Role::\"admin\"");
-        assert_eq!(entity[1].uid().to_string(), "Jans::Role::\"user\"");
+        let entity_uids = entity
+            .iter()
+            .map(|e| e.uid().to_string())
+            .collect::<HashSet<String>>();
+        assert_eq!(
+            entity_uids,
+            HashSet::from(["Jans::Role::\"admin\"", "Jans::Role::\"user\""].map(|s| s.to_string()))
+        );
     }
 
     #[test]
