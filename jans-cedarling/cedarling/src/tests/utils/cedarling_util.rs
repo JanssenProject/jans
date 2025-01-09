@@ -23,7 +23,6 @@ pub fn get_raw_config(local_policy_store: &str) -> BootstrapConfigRaw {
         log_type: crate::LoggerType::StdOut,
         local_policy_store: Some(local_policy_store_json.to_string()),
         jwt_status_validation: FeatureToggle::Disabled,
-        id_token_trust_mode: crate::IdTokenTrustMode::None,
         ..Default::default()
     }
 }

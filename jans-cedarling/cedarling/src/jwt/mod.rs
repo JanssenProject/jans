@@ -28,7 +28,7 @@ pub use token::{Token, TokenClaim, TokenClaimTypeError, TokenClaims, TokenStr};
 use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
 
 use crate::common::policy_store::TrustedIssuer;
-use crate::{IdTokenTrustMode, JwtConfig};
+use crate::JwtConfig;
 
 /// Type alias for Trusted Issuers' ID.
 type TrustedIssuerId = Arc<str>;
@@ -92,10 +92,6 @@ pub struct JwtService {
     access_tkn_validator: JwtValidator,
     id_tkn_validator: JwtValidator,
     userinfo_tkn_validator: JwtValidator,
-    // TODO: implement the usage of this bootstrap property in
-    // the authz module.
-    #[allow(dead_code)]
-    id_token_trust_mode: IdTokenTrustMode,
 }
 
 impl JwtService {
@@ -173,7 +169,6 @@ impl JwtService {
             access_tkn_validator,
             id_tkn_validator,
             userinfo_tkn_validator,
-            id_token_trust_mode: config.id_token_trust_mode,
         })
     }
 
@@ -220,7 +215,7 @@ mod test {
 
     use super::test_utils::*;
     use super::{JwtService, Token, TokenClaims, TokenStr};
-    use crate::{IdTokenTrustMode, JwtConfig, TokenValidationConfig};
+    use crate::{JwtConfig, TokenValidationConfig};
 
     #[test]
     pub fn can_validate_token() {
@@ -262,7 +257,6 @@ mod test {
                 jwks: Some(local_jwks),
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
-                id_token_trust_mode: IdTokenTrustMode::Strict,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
                 access_token_config: TokenValidationConfig::access_token(),
                 id_token_config: TokenValidationConfig::id_token(),
