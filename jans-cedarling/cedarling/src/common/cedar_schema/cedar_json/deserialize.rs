@@ -15,7 +15,7 @@ where
 {
     serde_json::from_value::<String>(value).map_err(|e| {
         de::Error::custom(format!(
-            "error while desrializing JSON Value to a String: {e}"
+            "error while deserializing JSON Value to a String: {e}"
         ))
     })
 }
