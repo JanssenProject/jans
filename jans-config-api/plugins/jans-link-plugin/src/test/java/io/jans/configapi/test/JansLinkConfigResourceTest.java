@@ -27,8 +27,8 @@ public class JansLinkConfigResourceTest extends BaseTest {
 
     @BeforeMethod
     public void before(Method methodName) {
-        boolean isServiceDeployed = isServiceDeployed("io.jans.configapi.plugin.link.rest.ApiApplication");
-        log.info("\n\n\n *** JANS-LINK Plugin isServiceDeployed{}", isServiceDeployed);
+        boolean isServiceDeployed = isDeployed();
+        log.error("\n\n\n *** JANS-LINK Plugin isServiceDeployed{}", isServiceDeployed);
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well
         if (!isServiceDeployed) {
@@ -42,10 +42,10 @@ public class JansLinkConfigResourceTest extends BaseTest {
 
     @Parameters({ "test.issuer", "linkConfigUrl" })
     @Test
-    public void getLinkConfiguration(final String issuer, final String linkConfigUrl) {
-        log.info("\n\n\n Get Link Configuration isDeployed():{} {}", isDeployed(), "\n\n\n");
+    public void fetchLinkConfiguration(final String issuer, final String linkConfigUrl) {
+        log.error("\n\n\n Get Link Configuration isDeployed():{} {}", isDeployed(), "\n\n\n");
         if (isDeployed()) {
-            log.info("getLinkConfiguration() - accessToken:{}, issuer:{}, linkConfigUrl:{}", accessToken, issuer,
+            log.info("fetchLinkConfiguration() - accessToken:{}, issuer:{}, linkConfigUrl:{}", accessToken, issuer,
                     linkConfigUrl);
             Builder request = getResteasyService().getClientBuilder(issuer + linkConfigUrl);
             request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
@@ -53,7 +53,7 @@ public class JansLinkConfigResourceTest extends BaseTest {
 
             Response response = request.get();
             assertEquals(response.getStatus(), Status.OK.getStatusCode());
-            log.info("Response for getLinkConfiguration -  response:{}", response);
+            log.info("Response for fetchLinkConfiguration -  response:{}", response);
         } else {
             assertTrue(true);
         }

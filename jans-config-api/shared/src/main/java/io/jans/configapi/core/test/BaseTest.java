@@ -142,6 +142,7 @@ public class BaseTest {
             isDeployed = true;
         } catch (ClassNotFoundException ex) {
             log.error("*** \n\n\n'{}' service is NOT deployed :{}", serviceName,"\n\n\n");
+            isDeployed = false;
             return isDeployed;
         }
         return isDeployed;
