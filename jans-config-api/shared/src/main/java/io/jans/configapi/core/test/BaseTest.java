@@ -140,8 +140,9 @@ public class BaseTest {
         try {
             Class.forName(serviceName);
             isDeployed = true;
+            log.error("*** \n\n\n'{}' service is deployed :{} {}", serviceName,"\n\n\n");
         } catch (ClassNotFoundException ex) {
-            log.error("*** \n\n\n'{}' service is NOT deployed :{}", serviceName,"\n\n\n");
+            log.error("*** \n\n\n'{}' service is NOT deployed :{} {}", serviceName,"\n\n\n");
             isDeployed = false;
             return isDeployed;
         }

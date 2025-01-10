@@ -25,8 +25,8 @@ public class AdminUIBaseTest extends BaseTest {
     }
 
     // Execute before each test is run
-    @BeforeMethod
-    public void before() {
+    //@BeforeMethod
+    protected void before() {
         boolean isServiceDeployed = isDeployed();
         log.error("\n\n\n *** ADMIN-UI Plugin isServiceDeployed{}", isServiceDeployed);
         // check condition, note once you condition is met the rest of the tests will be
