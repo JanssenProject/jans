@@ -573,7 +573,7 @@ cnConfiguratorDumpFile: /etc/jans/conf/configuration.out.json
 cnConfiguratorCustomSchema:
   # -- The name of the secrets used for storing custom configuration schema.
   secretName: ""
-# -- Key to encrypt/decrypt configuration schema file (if empty, encryption/decryption will be skipped).
+# -- Key to encrypt/decrypt configuration schema file using AES-256 CBC mode. Set the value to empty string to disable encryption/decryption, or 32 alphanumeric characters to enable it.
 cnConfiguratorKey: ""
 # -- Path to file contains key to encrypt/decrypt configuration schema file.
 cnConfiguratorKeyFile: /etc/jans/conf/configuration.key
