@@ -610,7 +610,7 @@ The default configuration is sufficient for most of the time. If there's a requi
       namespace: jans
     type: Opaque
     stringData:
-      custom-configuration.json: |-
+      configuration.json: |-
         {
           "_configmap": {
             "hostname": "demoexample.jans.io",
@@ -638,9 +638,46 @@ The default configuration is sufficient for most of the time. If there's a requi
 
     ```yaml
     global:
-      cnConfiguratorConfigurationFile: /etc/jans/conf/custom-configuration.json
       cnConfiguratorCustomSchema:
         secretName: custom-configuration-schema
     ```
 
 1.  Install the Jans charts.
+
+## Encrypting Configuration Schema
+
+The configuration schema can be encrypted by specifying 32 alphanumeric characters to `cnConfiguratorKey` attribute (default value is an empty string).
+The encryption is using [Helm-specific](https://helm.sh/docs/chart_template_guide/function_list/#encryptaes) implementation of AES-256 CBC mode.
+
+```yaml
+global:
+  cnConfiguratorKey: "VMtVyFha8CfppdDGQSw8zEnfKXRvksAD"
+```
+
+The following example is what an encrypted default configuration looks like:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jans-configuration-file
+  namespace: jans
+stringData:
+  configuration.json: |-
+    sxySo+redacted+generated+by+helm/TNpE5PoUR2+JxXiHiLq8X5ibexJcfjAN0fKlqRvU=
+```
+
+If using custom configuration, user will need to generate the string using [sprig-aes](https://pypi.org/project/sprig-aes/) CLI and paste into a YAML manifest.
+
+```yaml
+# custom-configuration-schema.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: custom-configuration-schema
+  namespace: jans
+type: Opaque
+stringData:
+  configuration.json: |-
+    sxySo+redacted+generated+by+sprigaes+JxXiHiLq8X5ibexJcfjAN0fKlqRvU=
+```
