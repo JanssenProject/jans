@@ -19,7 +19,7 @@ import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
 
 public class AdminUIBaseTest extends BaseTest {
-    
+
     protected boolean isDeployed() {
         return isServiceDeployed("io.jans.ca.plugin.adminui.rest.ApiApplication");
     }
@@ -36,9 +36,7 @@ public class AdminUIBaseTest extends BaseTest {
         }
     }
 
-    @BeforeMethod
-    @Override
-    public void getAccessToken() {
+    public void authorize() {
         log.info("AdminUI - getAccessToken - propertiesMap:{}", propertiesMap);
 
         String authzurl = propertiesMap.get("test.authzurl");
