@@ -13,8 +13,6 @@ use super::interface::{LogStorage, LogWriter, Loggable};
 use crate::bootstrap_config::log_config::MemoryLogConfig;
 
 const STORAGE_MUTEX_EXPECT_MESSAGE: &str = "MemoryLogger storage mutex should unlock";
-const STORAGE_JSON_PARSE_EXPECT_MESSAGE: &str =
-    "In MemoryLogger storage value should be valid LogEntry json value";
 
 /// A logger that store logs in-memory.
 pub(crate) struct MemoryLogger {
@@ -74,17 +72,14 @@ impl LogStorage for MemoryLogger {
     fn pop_logs(&self) -> Vec<serde_json::Value> {
         self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE)
             .drain()
-            .map(|(_k,value)| serde_json::from_value(value).expect(STORAGE_JSON_PARSE_EXPECT_MESSAGE) )
+            .map(|(_k,value)| value )
             .collect()
     }
 
     fn get_log_by_id(&self, id: &str) -> Option<serde_json::Value> {
         self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE)
-        .get(id)
-        .and_then(|value|
-            // TODO we call unwrap, because we know that the value is valid json
-            serde_json::from_value(value.clone()).expect(STORAGE_JSON_PARSE_EXPECT_MESSAGE)
-        )
+            .get(id)
+            .cloned()
     }
 
     fn get_log_ids(&self) -> Vec<String> {
