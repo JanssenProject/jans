@@ -32,7 +32,7 @@ public class JansLinkConfigResourceTest extends BaseTest {
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well
         if (!isServiceDeployed) {
-            throw new SkipException("JANS-LINK Plugin not deployed");
+            throw new SkipException("JANS-LINK Plugin Not deployed");
         }
     }
 
