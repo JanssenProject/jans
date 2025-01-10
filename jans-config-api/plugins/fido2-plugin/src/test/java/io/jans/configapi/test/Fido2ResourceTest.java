@@ -20,6 +20,17 @@ import org.testng.annotations.Parameters;
 
 public class Fido2ResourceTest extends BaseTest {
 
+    @BeforeMethod
+    public void before(Method methodName) {
+        boolean isServiceDeployed = isServiceDeployed("io.jans.configapi.plugin.fido2.rest.ApiApplication");
+        log.info("\n\n\n *** FIDO2 Plugin isServiceDeployed{}", isServiceDeployed);
+        // check condition, note once you condition is met the rest of the tests will be
+        // skipped as well
+        if (!isServiceDeployed) {
+            throw new SkipException("FIDO2 Plugin not deployed");
+        }
+    }
+    
     @Parameters({"test.issuer", "fido2Url"})
     @Test
     public void getFido2Configuration(final String issuer, final String fido2Url) {

@@ -22,21 +22,21 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.net.URLEncoder;
 
+import jakarta.ws.rs.core.Response;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-
+import org.apache.http.entity.ContentType;
 import org.testng.ITestContext;
-import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
-
 
 public class BaseTest {
 
     private static final String FILE_PREFIX = "file:";
-    private static final Charset DEFAULT_CHARSET =  StandardCharsets.UTF_8;
+    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     private static final String NEW_LINE = System.getProperty("line.separator");
     protected static final String CONTENT_TYPE = "Content-Type";
     protected static final String AUTHORIZATION = "Authorization";
@@ -47,20 +47,19 @@ public class BaseTest {
     protected static Map<String, String> propertiesMap = null;
     protected ResteasyService resteasyService = new ResteasyService();;
     protected HttpService httpService = new HttpService();
-	protected TokenService tokenService = new TokenService();
+    protected TokenService tokenService = new TokenService();
     protected String accessToken;
 
     @BeforeSuite
-    public void initTestSuite(ITestContext context)  {
+    public void initTestSuite(ITestContext context) {
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
         log.info("Invoked initTestSuite propertiesFile '{}'", propertiesFile);
         propertiesMap = context.getSuite().getXmlSuite().getParameters();
         log.info("End initTestSuite propertiesMap: {}", propertiesMap);
     }
 
-
     @BeforeMethod
-    public void getAccessToken()  {
+    public void getAccessToken() {
         log.info("getAccessToken - propertiesMap:{}", propertiesMap);
         String tokenUrl = propertiesMap.get("token.endpoint");
         String strGrantType = propertiesMap.get("token.grant.type");
@@ -71,12 +70,12 @@ public class BaseTest {
         this.accessToken = getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
         log.info("\n\n accessToken:{}", accessToken);
     }
-    
-    protected String getToken(final String tokenUrl, final String clientId, final String clientSecret, GrantType grantType,
-            final String scopes) {
+
+    protected String getToken(final String tokenUrl, final String clientId, final String clientSecret,
+            GrantType grantType, final String scopes) {
         return getTokenService().getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
     }
-   
+
     protected HttpService getHttpService() {
         return this.httpService;
     }
@@ -84,8 +83,8 @@ public class BaseTest {
     protected ResteasyService getResteasyService() {
         return this.resteasyService;
     }
-	
-	protected TokenService getTokenService() {
+
+    protected TokenService getTokenService() {
         return this.tokenService;
     }
 
@@ -134,9 +133,9 @@ public class BaseTest {
         log.info("\n\n decodeFileValue - decoded:{}", decoded);
         return decoded;
     }
-    
+
     protected boolean isServiceDeployed(String serviceName) {
-        log.info("\n\n\n *** Check if  service is deployed - serviceName:{}", serviceName+" *** \n\n\n");
+        log.info("\n\n\n *** Check if  service is deployed - serviceName:{}", serviceName + " *** \n\n\n");
         boolean isDeployed = false;
         try {
             Class.forName(serviceName);
@@ -147,5 +146,15 @@ public class BaseTest {
         }
         return isDeployed;
     }
-    
+
+    protected Response executeGet(final String url, final String clientId, final String clientSecret,
+            final String authType, final String authCode, final Map<String, String> parameters,
+            ContentType contentType) {
+        log.info(
+                "Data for executing GET request -  url:{}, clientId:{}, clientSecret:{} , authType:{}, authCode:{} , parameters:{}, contentType:{}",
+                url, clientId, clientSecret, authType, authCode, parameters, contentType);
+        return getResteasyService().executeGet(url, clientId, clientSecret, authType, authCode, parameters,
+                contentType);
+    }
+
 }

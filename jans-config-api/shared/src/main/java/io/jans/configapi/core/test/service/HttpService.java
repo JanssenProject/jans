@@ -192,7 +192,7 @@ public class HttpService implements Serializable {
         return executePost(httpClient, uri, authCode, null, postData, contentType, null);
     }
 
-    public HttpServiceResponse executePost(String uri, String authCode, Map<String, String> headers, String postData,
+    public HttpServiceResponse executePost(String uri, String authCode, String postData,
             ContentType contentType, String authType) {
         return executePost(this.getHttpsClient(), uri, authCode, null, postData, contentType, authType);
     }
@@ -205,13 +205,29 @@ public class HttpService implements Serializable {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
-    public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers) {
+    public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers,
+            Map<String, String> parameters) {
         HttpGet httpGet = new HttpGet(requestUri);
 
         if (headers != null) {
             for (Entry<String, String> headerEntry : headers.entrySet()) {
                 httpGet.setHeader(headerEntry.getKey(), headerEntry.getValue());
             }
+        }
+
+        if (parameters != null && !parameters.isEmpty()) {
+            StringBuilder query = new StringBuilder("");
+            for (String key : parameters.keySet()) {
+
+                String value = parameters.get(key);
+                if (value != null && value.length() > 0) {
+
+                    String delim = "&" + URLEncoder.encode(key, StandardCharsets.UTF_8) + "=";
+                    query.append(delim.substring(1));
+                    query.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
+                }
+            }
+            httpGet = new HttpGet(requestUri + query.toString());
         }
 
         try {
@@ -225,13 +241,18 @@ public class HttpService implements Serializable {
         return null;
     }
 
+    public HttpServiceResponse executeGet(String requestUri, Map<String, String> headers, Map<String, String> data) {
+        HttpClient httpClient = this.getHttpsClient();
+        return executeGet(httpClient, requestUri, headers, data);
+    }
+
     public HttpServiceResponse executeGet(String requestUri, Map<String, String> headers) {
         HttpClient httpClient = this.getHttpsClient();
-        return executeGet(httpClient, requestUri, headers);
+        return executeGet(httpClient, requestUri, headers, null);
     }
 
     public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri) {
-        return executeGet(httpClient, requestUri, null);
+        return executeGet(httpClient, requestUri, null, null);
     }
 
     public byte[] getResponseContent(HttpResponse httpResponse) throws IOException {

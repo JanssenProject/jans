@@ -4,38 +4,23 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.test;
+package io.jans.configapi.lock.test;
 
 import io.jans.configapi.core.test.BaseTest;
+import io.jans.configapi.lock.LockBaseTest;
+
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import java.lang.reflect.Method;
 
 import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
-
-import org.testng.SkipException;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Parameters;
 
-public class LockAuditResourceTest extends BaseTest {
-
-    // Execute before each test is run
-    @BeforeMethod
-    public void before(Method methodName) {
-        boolean isServiceDeployed = isServiceDeployed("io.jans.configapi.plugin.lock.rest.ApiApplication");
-        log.info("\n\n\n *** LockAuditResourceTest - isServiceDeployed:{}", isServiceDeployed);
-        // check condition, note once you condition is met the rest of the tests will be
-        // skipped as well
-        if (!isServiceDeployed) {
-            throw new SkipException("Lock Plugin not deployed");
-        }
-
-    }
+public class LockAuditResourceTest extends LockBaseTest {
 
     @Parameters({ "test.issuer", "lockAuditHealthPostUrl", "audit_health_post_1" })
     @Test

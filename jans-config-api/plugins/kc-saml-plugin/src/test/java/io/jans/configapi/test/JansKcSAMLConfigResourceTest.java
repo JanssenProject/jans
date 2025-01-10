@@ -6,30 +6,21 @@
 
 package io.jans.configapi.test;
 
-import java.lang.reflect.Method;
+
+
 import io.jans.configapi.core.test.BaseTest;
+import io.jans.configapi.saml.KcSAMLBaseTest;
+
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
-
-import org.testng.SkipException;
 import org.testng.annotations.Parameters;
 
-public class JansKcSAMLConfigResourceTest extends BaseTest {
-
-    // Execute before each test is run
-    @BeforeMethod
-    public void before(Method methodName) {
-        // check condition, note once you condition is met the rest of the tests will be
-        // skipped as well
-        if (!isServiceDeployed("io.jans.configapi.plugin.saml.rest.ApiApplication"))
-            throw new SkipException("KC-SAML Plugin not deployed");
-    }
+public class JansKcSAMLConfigResourceTest extends KcSAMLBaseTest {
 
     @Parameters({ "test.issuer", "samlConfigUrl" })
     @Test
