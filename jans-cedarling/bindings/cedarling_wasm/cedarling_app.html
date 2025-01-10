@@ -49,7 +49,7 @@
                 <textarea id="bootstrap_config_textarea" rows="10" cols="100"></textarea>
             </div>
 
-            <!-- Button to init cedarling with defined above bootsrap config JSON -->
+            <!-- Button to init cedarling with defined above bootstrap config JSON -->
             <div class="row">
                 <div class="d-grid gap-2 col-6 mx-auto">
                     <button type="button" class="btn btn-outline-primary" id="bootstrap_init_button">Init
@@ -166,11 +166,11 @@
             bootstrap_init_button.hide();
             bootstrap_init_processing.show();
             try {
-                let bootsrap_config_str = bootstrap_config_textarea.val();
-                let bootsrap_config_json = JSON.parse(bootsrap_config_str);
+                let bootstrap_config_str = bootstrap_config_textarea.val();
+                let bootstrap_config_json = JSON.parse(bootstrap_config_str);
 
                 // init cedarling
-                const cedar_instance = await init(bootsrap_config_json);
+                const cedar_instance = await init(bootstrap_config_json);
                 window.cedar_instance = cedar_instance;
 
                 let logs = cedar_instance.pop_logs();
@@ -188,7 +188,7 @@
                 authorize_request_div.show();
 
                 // if bootstrap config is not changed set default request to textarea
-                if (bootsrap_config_str == DEFAULT_BOOTSTRAP_CONFIG_JSON) {
+                if (bootstrap_config_str == DEFAULT_BOOTSTRAP_CONFIG_JSON) {
                     request_textarea.val(REQUEST_JSON);
                 }
 
