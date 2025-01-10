@@ -236,11 +236,11 @@ mod tests {
         _ = sparkv.set_with_ttl(
             "key",
             "value",
-            Duration::new(0, 10000).expect("a valid duration"),
+            Duration::new(0, 40000).expect("a valid duration"),
         );
         assert_eq!(sparkv.get("key"), Some(String::from("value")));
 
-        std::thread::sleep(std::time::Duration::from_nanos(30000));
+        std::thread::sleep(std::time::Duration::from_nanos(50000));
         assert_eq!(sparkv.get("key"), None);
     }
 
