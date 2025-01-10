@@ -3,7 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::{AuthorizationConfig, JwtConfig, WorkloadBoolOp};
+use crate::{
+    authorization_config::IdTokenTrustMode, AuthorizationConfig, JwtConfig, WorkloadBoolOp,
+};
 pub use crate::{
     BootstrapConfig, BootstrapConfigRaw, Cedarling, FeatureToggle, LogConfig, LogTypeConfig,
     PolicyStoreConfig, PolicyStoreSource,
@@ -23,6 +25,7 @@ pub fn get_raw_config(local_policy_store: &str) -> BootstrapConfigRaw {
         log_type: crate::LoggerType::StdOut,
         local_policy_store: Some(local_policy_store_json.to_string()),
         jwt_status_validation: FeatureToggle::Disabled,
+        id_token_trust_mode: IdTokenTrustMode::None,
         ..Default::default()
     }
 }
@@ -43,6 +46,7 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::And,
+            id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
     }

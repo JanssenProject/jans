@@ -122,6 +122,13 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
+    IdTokenTrustModeError,
+    AuthorizeError,
+    "Error encountered while parsing all entities to json for logging"
+);
+
+create_exception!(
+    authorize_errors,
     AddEntitiesIntoContextError,
     AuthorizeError,
     "Error encountered while adding entities into context"
@@ -179,7 +186,8 @@ errors_functions! {
     UserRequestValidation => UserRequestValidationError,
     BuildContext => AddEntitiesIntoContextError,
     Entities => EntitiesError,
-    EntitiesToJson => EntitiesToJsonError
+    EntitiesToJson => EntitiesToJsonError,
+    IdTokenTrustMode => IdTokenTrustModeError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {

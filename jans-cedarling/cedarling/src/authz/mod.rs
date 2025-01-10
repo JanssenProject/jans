@@ -13,6 +13,7 @@ use std::io::Cursor;
 use std::str::FromStr;
 use std::sync::Arc;
 
+use crate::authorization_config::IdTokenTrustMode;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types;
 use crate::common::cedar_schema::cedar_json::{BuildJsonCtxError, FindActionError};
@@ -26,6 +27,7 @@ use crate::log::{
 
 mod authorize_result;
 mod merge_json;
+mod trust_mode;
 
 pub(crate) mod entities;
 pub(crate) mod request;
@@ -42,6 +44,7 @@ use entities::{
 use merge_json::{merge_json_values, MergeError};
 use request::Request;
 use serde_json::Value;
+use trust_mode::*;
 
 /// Configuration to Authz to initialize service without errors
 pub(crate) struct AuthzConfig {
@@ -123,6 +126,10 @@ impl Authz {
         let start_time = Instant::now();
         let schema = &self.config.policy_store.schema;
         let tokens = self.decode_tokens(&request)?;
+
+        if let IdTokenTrustMode::Strict = self.config.authorization.id_token_trust_mode {
+            enforce_id_tkn_trust_mode(&tokens)?;
+        }
 
         // Parse action UID.
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
@@ -552,6 +559,9 @@ pub enum AuthorizeError {
     /// Error encountered while building the context for the request
     #[error("Failed to build context: {0}")]
     BuildContext(#[from] BuildContextError),
+    /// Error encountered while building the context for the request
+    #[error("error while running on strict id token trust mode: {0}")]
+    IdTokenTrustMode(#[from] IdTokenTrustModeError),
 }
 
 #[derive(Debug, thiserror::Error)]
