@@ -43,8 +43,9 @@ public class JansLinkConfigResourceTest extends BaseTest {
     @Parameters({ "test.issuer", "linkConfigUrl" })
     @Test
     public void getLinkConfiguration(final String issuer, final String linkConfigUrl) {
+        log.info("\n\n\n Get Link Configuration \n\n\n");
         if (isDeployed()) {
-            log.error("getLinkConfiguration() - accessToken:{}, issuer:{}, linkConfigUrl:{}", accessToken, issuer,
+            log.info("getLinkConfiguration() - accessToken:{}, issuer:{}, linkConfigUrl:{}", accessToken, issuer,
                     linkConfigUrl);
             Builder request = getResteasyService().getClientBuilder(issuer + linkConfigUrl);
             request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
@@ -52,9 +53,10 @@ public class JansLinkConfigResourceTest extends BaseTest {
 
             Response response = request.get();
             assertEquals(response.getStatus(), Status.OK.getStatusCode());
-            log.error("Response for getLinkConfiguration -  response:{}", response);
+            log.info("Response for getLinkConfiguration -  response:{}", response);
+        } else {
+            assertTrue(true);
         }
-        assertTrue(true);
     }
 
 }
