@@ -43,7 +43,7 @@ public class JansLinkConfigResourceTest extends BaseTest {
     @Parameters({ "test.issuer", "linkConfigUrl" })
     @Test
     public void getLinkConfiguration(final String issuer, final String linkConfigUrl) {
-        log.info("\n\n\n Get Link Configuration \n\n\n");
+        log.info("\n\n\n Get Link Configuration isDeployed():{} {}", isDeployed(), "\n\n\n");
         if (isDeployed()) {
             log.info("getLinkConfiguration() - accessToken:{}, issuer:{}, linkConfigUrl:{}", accessToken, issuer,
                     linkConfigUrl);
