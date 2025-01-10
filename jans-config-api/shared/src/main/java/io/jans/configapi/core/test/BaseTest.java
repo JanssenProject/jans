@@ -135,13 +135,13 @@ public class BaseTest {
     }
 
     protected boolean isServiceDeployed(String serviceName) {
-        log.info("\n\n\n *** Check if  service is deployed - serviceName:{}", serviceName + " *** \n\n\n");
+        log.info("\n\n\n *** Check if  service is deployed - serviceName:{} :{}", serviceName , " *** \n\n\n");
         boolean isDeployed = false;
         try {
             Class.forName(serviceName);
             isDeployed = true;
         } catch (ClassNotFoundException ex) {
-            log.error("*** \n\n\n'{}' service is NOT deployed ***\n\n", serviceName);
+            log.error("*** \n\n\n'{}' service is NOT deployed :{}", serviceName,"\n\n\n");
             return isDeployed;
         }
         return isDeployed;
