@@ -6,7 +6,6 @@
 
 package io.jans.configapi.scim.test;
 
-import io.jans.configapi.core.test.BaseTest;
 import io.jans.configapi.scim.ScimBaseTest;
 
 import jakarta.ws.rs.client.Invocation.Builder;
@@ -24,13 +23,14 @@ public class ScimConfigResourceTest extends ScimBaseTest {
     @Test
     public void getScimConfigData(final String issuer, final String scimConfigUrl) {
         log.info("getScimConfigData() - accessToken:{}, issuer:{}, scimConfigUrl:{}", accessToken, issuer, scimConfigUrl);
+        before();
         Builder request = getResteasyService().getClientBuilder(issuer + scimConfigUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
-        assertEquals(response.getStatus(), Status.OK.getStatusCode());
         log.info("Response for getScimConfigData -  response:{}", response);
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
     }
     
 }

@@ -28,11 +28,13 @@ public class AdminUIBaseTest extends BaseTest {
     @BeforeMethod
     public void before() {
         boolean isServiceDeployed = isDeployed();
-        log.info("\n\n\n *** ADMIN-UI Plugin isServiceDeployed{}", isServiceDeployed);
+        log.error("\n\n\n *** ADMIN-UI Plugin isServiceDeployed{}", isServiceDeployed);
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well
         if (!isServiceDeployed) {
             throw new SkipException("ADMIN-UI Plugin not deployed");
+        }else {
+            log.error("\n\n\n *** ADMIN-UI Plugin is Deployed{} {}", "\n\n");
         }
     }
 

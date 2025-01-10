@@ -44,19 +44,18 @@ public class JansLinkConfigResourceTest extends BaseTest {
     @Test
     public void fetchLinkConfiguration(final String issuer, final String linkConfigUrl) {
         log.error("\n\n\n Get Link Configuration isDeployed():{} {}", isDeployed(), "\n\n\n");
-        if (isDeployed()) {
-            log.info("fetchLinkConfiguration() - accessToken:{}, issuer:{}, linkConfigUrl:{}", accessToken, issuer,
-                    linkConfigUrl);
-            Builder request = getResteasyService().getClientBuilder(issuer + linkConfigUrl);
-            request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
-            request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        
+        before();
+        log.info("fetchLinkConfiguration() - accessToken:{}, issuer:{}, linkConfigUrl:{}", accessToken, issuer,
+                linkConfigUrl);
+        Builder request = getResteasyService().getClientBuilder(issuer + linkConfigUrl);
+        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
-            Response response = request.get();
-            assertEquals(response.getStatus(), Status.OK.getStatusCode());
-            log.info("Response for fetchLinkConfiguration -  response:{}", response);
-        } else {
-            assertTrue(true);
-        }
+        Response response = request.get();
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
+        log.info("Response for fetchLinkConfiguration -  response:{}", response);
+
     }
 
 }

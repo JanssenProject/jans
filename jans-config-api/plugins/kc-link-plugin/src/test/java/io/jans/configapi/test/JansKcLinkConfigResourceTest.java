@@ -37,12 +37,15 @@ public class JansKcLinkConfigResourceTest extends BaseTest {
     @Test
     public void getKcLinkConfiguration(final String issuer, final String kcLinkConfigUrl) {
         log.info("getKcLinkConfiguration() - accessToken:{}, issuer:{}, kcLinkConfigUrl:{}", accessToken, issuer, kcLinkConfigUrl);
+        
+        before();
         Builder request = getResteasyService().getClientBuilder(issuer + kcLinkConfigUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        
         Response response = request.get();
-        assertEquals(response.getStatus(), Status.OK.getStatusCode());
         log.info("Response for getKcLinkConfiguration -  response:{}", response);
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
     }
     
 }

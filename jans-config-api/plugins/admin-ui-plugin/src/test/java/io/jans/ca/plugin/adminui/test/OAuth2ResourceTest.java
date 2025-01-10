@@ -10,8 +10,10 @@ import io.jans.ca.plugin.adminui.AdminUIBaseTest;
 
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.MediaType;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Parameters;
@@ -25,19 +27,19 @@ public class OAuth2ResourceTest extends AdminUIBaseTest {
     @Parameters({ "test.issuer", "adminUIConfigURL" })
     @Test
     public void getOAuth2Data(final String issuer, final String adminUIConfigURL) {
-        if (isDeployed()) {
-            log.info("getOAuth2Data() - accessToken:{}, issuer:{}, adminUIConfigURL:{}", accessToken, issuer,
-                    adminUIConfigURL);
+        
+        before();
+        log.info("getOAuth2Data() - accessToken:{}, issuer:{}, adminUIConfigURL:{}", accessToken, issuer,
+                adminUIConfigURL);
 
-            Builder request = getResteasyService().getClientBuilder(issuer + adminUIConfigURL);
-            request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
-            request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        Builder request = getResteasyService().getClientBuilder(issuer + adminUIConfigURL);
+        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
-            Response response = request.get();
-            log.info("Response for getOAuth2Data() -  response:{}", response);
-        } else {
-            assertTrue(true);
-        }
+        Response response = request.get();
+        log.info("Response for getOAuth2Data() -  response:{}", response);
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
+
     }
 
     /**
@@ -46,17 +48,17 @@ public class OAuth2ResourceTest extends AdminUIBaseTest {
     @Parameters({ "test.issuer", "apiProtectionTokenURL", "ujwt" })
     @Test
     public void getApiProtectionTokenData(final String issuer, final String apiProtectionTokenURL, final String ujwt) {
-        if (isDeployed()) {
-            log.info("\n\n getApiProtectionTokenData() - accessToken:{}, issuer:{}, apiProtectionTokenURL:{}, ujwt:{}",
-                    accessToken, issuer, apiProtectionTokenURL, ujwt);
-            Builder request = getResteasyService().getClientBuilder(issuer + apiProtectionTokenURL);
-            request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
-            request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
-            request.property("ujwt", ujwt);
-            Response response = request.get();
-            log.info("\n\n Response for getApiProtectionTokenData() -  response:{}", response);
-        } else {
-            assertTrue(true);
-        }
+        
+        before();
+        log.info("\n\n getApiProtectionTokenData() - accessToken:{}, issuer:{}, apiProtectionTokenURL:{}, ujwt:{}",
+                accessToken, issuer, apiProtectionTokenURL, ujwt);
+        Builder request = getResteasyService().getClientBuilder(issuer + apiProtectionTokenURL);
+        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
+        request.property("ujwt", ujwt);
+        Response response = request.get();
+        log.info("\n\n Response for getApiProtectionTokenData() -  response:{}", response);
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
+
     }
 }

@@ -28,19 +28,18 @@ public class LicenseResourceTest extends AdminUIBaseTest {
     @Parameters({ "test.issuer", "checkActiveLicenseURL" })
     @Test
     public void getLicenseDetails(final String issuer, final String checkActiveLicenseURL) {
-        if (isDeployed()) {
-            log.info("getLicenseDetails() - accessToken:{}, issuer:{}, checkActiveLicenseURL:{}", accessToken, issuer,
-                    checkActiveLicenseURL);
-            Builder request = getResteasyService().getClientBuilder(issuer + checkActiveLicenseURL);
-            request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
-            request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        
+        before();
+        log.info("getLicenseDetails() - accessToken:{}, issuer:{}, checkActiveLicenseURL:{}", accessToken, issuer,
+                checkActiveLicenseURL);
+        Builder request = getResteasyService().getClientBuilder(issuer + checkActiveLicenseURL);
+        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
-            Response response = request.get();
-            assertEquals(response.getStatus(), Status.OK.getStatusCode());
-            log.info("\n\n Response for getLicenseDetails -  response:{}", response);
-        } else {
-            assertTrue(true);
-        }
+        Response response = request.get();
+        log.info("\n\n Response for getLicenseDetails -  response:{}", response);
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
+
     }
 
 }

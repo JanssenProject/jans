@@ -6,8 +6,6 @@
 
 package io.jans.configapi.test;
 
-
-import io.jans.configapi.core.test.BaseTest;
 import io.jans.configapi.saml.KcSAMLBaseTest;
 
 import jakarta.ws.rs.client.Invocation.Builder;
@@ -25,12 +23,15 @@ public class JansIdpResourceTest extends KcSAMLBaseTest {
     @Test
     public void getKcSAMLIdp(final String issuer, final String samlIdpUrl) {
         log.info("getKcSAMLIdp() - accessToken:{}, issuer:{}, samlIdpUrl:{}", accessToken, issuer, samlIdpUrl);
+       
+        before();
         Builder request = getResteasyService().getClientBuilder(issuer + samlIdpUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        
         Response response = request.get();
-        assertEquals(response.getStatus(), Status.OK.getStatusCode());
         log.info("Response for getKcSAMLIdp -  response:{}", response);
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
     }
 
 }

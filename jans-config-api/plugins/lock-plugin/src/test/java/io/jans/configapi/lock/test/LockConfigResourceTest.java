@@ -6,7 +6,6 @@
 
 package io.jans.configapi.lock.test;
 
-import io.jans.configapi.core.test.BaseTest;
 import io.jans.configapi.lock.LockBaseTest;
 
 import jakarta.ws.rs.client.Invocation.Builder;
@@ -25,13 +24,14 @@ public class LockConfigResourceTest extends LockBaseTest {
     public void getLockConfigUrlData(final String issuer, final String lockConfigUrl) {
         log.info("getLockConfigUrlData() - accessToken:{}, issuer:{}, lockConfigUrl:{}", accessToken, issuer,
                 lockConfigUrl);
+        before();
         Builder request = getResteasyService().getClientBuilder(issuer + lockConfigUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
-        assertEquals(response.getStatus(), Status.OK.getStatusCode());
         log.info("Response for getLockConfigUrlData -  response:{}", response);
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
     }
 
 }

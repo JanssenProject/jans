@@ -6,7 +6,6 @@
 
 package io.jans.configapi.test;
 
-import io.jans.configapi.core.test.BaseTest;
 import io.jans.configapi.saml.KcSAMLBaseTest;
 
 import jakarta.ws.rs.client.Invocation.Builder;
@@ -25,12 +24,15 @@ public class JansKcSAMLTrustRelationshipTest extends KcSAMLBaseTest {
     public void getKcSAMLTrustRelationship(final String issuer, final String samlTrustRelationshipUrl) {
         log.info("getKcSAMLTrustRelationship() - accessToken:{}, issuer:{}, samlTrustRelationshipUrl:{}", accessToken,
                 issuer, samlTrustRelationshipUrl);
+        
+        before();
         Builder request = getResteasyService().getClientBuilder(issuer + samlTrustRelationshipUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        
         Response response = request.get();
-        assertEquals(response.getStatus(), Status.OK.getStatusCode());
         log.info("Response for getKcSAMLTrustRelationship -  response:{}", response);
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
     }
 
 }

@@ -6,7 +6,6 @@
 
 package io.jans.configapi.lock.test;
 
-import io.jans.configapi.core.test.BaseTest;
 import io.jans.configapi.lock.LockBaseTest;
 
 import jakarta.ws.rs.client.Entity;
@@ -27,6 +26,7 @@ public class LockAuditResourceTest extends LockBaseTest {
     public void getLockAuditData(final String issuer, final String lockAuditHealthPostUrl, final String json) {
         log.info("getLockAuditData() - accessToken:{}, issuer:{}, lockAuditHealthPostUrl:{}, json:{}", accessToken,
                 issuer, lockAuditHealthPostUrl, json);
+        before();
         Builder request = getResteasyService().getClientBuilder(issuer + lockAuditHealthPostUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
@@ -34,7 +34,7 @@ public class LockAuditResourceTest extends LockBaseTest {
         Response response = request.post(Entity.entity(json, MediaType.APPLICATION_JSON));
         log.info("post lock audit -  response:{}", response);
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.info("Response for getLockAuditData -  response:{}", response);
+
     }
 
     @Parameters({ "test.issuer", "lockAuditHealthSearchUrl" })
@@ -42,13 +42,14 @@ public class LockAuditResourceTest extends LockBaseTest {
     public void getLockAuditData(final String issuer, final String lockAuditHealthSearchUrl) {
         log.info("getLockAuditData() - accessToken:{}, issuer:{}, lockAuditHealthSearchUrl:{}", accessToken, issuer,
                 lockAuditHealthSearchUrl);
+        before();
         Builder request = getResteasyService().getClientBuilder(issuer + lockAuditHealthSearchUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
-        assertEquals(response.getStatus(), Status.OK.getStatusCode());
         log.info("Response for getLockAuditData -  response:{}", response);
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
     }
 
 }
