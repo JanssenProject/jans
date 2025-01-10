@@ -20,8 +20,9 @@ use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt::{self, TokenStr};
 use crate::log::interface::LogWriter;
 use crate::log::{
-    AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, LogEntry, LogLevel,
-    LogTokensInfo, LogType, Logger, PrincipalLogEntry, UserAuthorizeInfo, WorkloadAuthorizeInfo,
+    AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, DiagnosticsRefs, LogEntry,
+    LogLevel, LogTokensInfo, LogType, Logger, PrincipalLogEntry, UserAuthorizeInfo,
+    WorkloadAuthorizeInfo,
 };
 
 mod authorize_result;
@@ -34,12 +35,12 @@ use std::time::Instant;
 pub use authorize_result::AuthorizeResult;
 use cedar_policy::{ContextJsonError, Entities, Entity, EntityUid};
 use entities::{
-    create_resource_entity, create_role_entities, create_token_entities, create_user_entity,
-    create_workload_entity, CreateCedarEntityError, CreateUserEntityError,
+    CEDAR_POLICY_SEPARATOR, CreateCedarEntityError, CreateUserEntityError,
     CreateWorkloadEntityError, DecodedTokens, ResourceEntityError, RoleEntityError,
-    CEDAR_POLICY_SEPARATOR,
+    create_resource_entity, create_role_entities, create_token_entities, create_user_entity,
+    create_workload_entity,
 };
-use merge_json::{merge_json_values, MergeError};
+use merge_json::{MergeError, merge_json_values};
 use request::Request;
 use serde_json::Value;
 
@@ -251,27 +252,13 @@ impl Authz {
         let entities_json: serde_json::Value = serde_json::from_slice(entities_raw_json.as_slice())
             .map_err(AuthorizeError::EntitiesToJson)?;
 
-        // DEBUG LOG
-        // Log all result information about both authorize checks.
-        // Where principal is `"Jans::Workload"` and where principal is `"Jans::User"`.
-        self.config.log_service.as_ref().log(
-            LogEntry::new_with_data(
-                self.config.pdp_id,
-                Some(self.config.application_name.clone()),
-                LogType::System,
-            )
-            .set_level(LogLevel::DEBUG)
-            .set_auth_info(AuthorizationLogInfo {
-                action: request.action.clone(),
-                context: request.context.clone(),
-                resource: resource_uid.to_string(),
-                entities: entities_json,
-                person_authorize_info: user_authz_info,
-                workload_authorize_info: workload_authz_info,
-                authorized: result.is_allowed(),
-            })
-            .set_message("Result of authorize.".to_string()),
-        );
+        let user_authz_diagnostic = user_authz_info
+            .as_ref()
+            .map(|auth_info| &auth_info.diagnostics);
+
+        let workload_authz_diagnostic = user_authz_info
+            .as_ref()
+            .map(|auth_info| &auth_info.diagnostics);
 
         let tokens_logging_info = LogTokensInfo {
             access: tokens.access_token.as_ref().map(|tkn| {
@@ -301,6 +288,7 @@ impl Authz {
         };
 
         // Decision log
+        // we log decision log before debug log, to avoid cloning diagnostic info
         self.config.log_service.as_ref().log_any(&DecisionLogEntry {
             base: BaseLogEntry::new(self.config.pdp_id, LogType::Decision),
             policystore_id: self.config.policy_store.id.as_str(),
@@ -314,7 +302,33 @@ impl Authz {
             decision: result.decision().into(),
             tokens: tokens_logging_info,
             decision_time_ms: elapsed_ms,
+            diagnostics: DiagnosticsRefs::new(&[
+                &user_authz_diagnostic,
+                &workload_authz_diagnostic,
+            ]),
         });
+
+        // DEBUG LOG
+        // Log all result information about both authorize checks.
+        // Where principal is `"Jans::Workload"` and where principal is `"Jans::User"`.
+        self.config.log_service.as_ref().log(
+            LogEntry::new_with_data(
+                self.config.pdp_id,
+                Some(self.config.application_name.clone()),
+                LogType::System,
+            )
+            .set_level(LogLevel::DEBUG)
+            .set_auth_info(AuthorizationLogInfo {
+                action: request.action.clone(),
+                context: request.context.clone(),
+                resource: resource_uid.to_string(),
+                entities: entities_json,
+                person_authorize_info: user_authz_info,
+                workload_authorize_info: workload_authz_info,
+                authorized: result.is_allowed(),
+            })
+            .set_message("Result of authorize.".to_string()),
+        );
 
         Ok(result)
     }
