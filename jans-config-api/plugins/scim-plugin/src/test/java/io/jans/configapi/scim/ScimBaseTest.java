@@ -22,7 +22,7 @@ public class ScimBaseTest extends BaseTest {
 
     // Execute before each test is run
     @BeforeMethod
-    public void before(Method methodName) {
+    public void before() {
         boolean isServiceDeployed = isServiceDeployed("io.jans.configapi.plugin.scim.rest.ApiApplication");
         log.info("\n\n\n *** SCIM Plugin isServiceDeployed{}", isServiceDeployed);
         // check condition, note once you condition is met the rest of the tests will be

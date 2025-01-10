@@ -21,7 +21,7 @@ import org.testng.annotations.Parameters;
 public class Fido2ResourceTest extends BaseTest {
 
     @BeforeMethod
-    public void before(Method methodName) {
+    public void before() {
         boolean isServiceDeployed = isServiceDeployed("io.jans.configapi.plugin.fido2.rest.ApiApplication");
         log.info("\n\n\n *** FIDO2 Plugin isServiceDeployed{}", isServiceDeployed);
         // check condition, note once you condition is met the rest of the tests will be

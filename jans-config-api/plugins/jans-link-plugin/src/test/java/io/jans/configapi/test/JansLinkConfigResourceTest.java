@@ -26,7 +26,7 @@ import org.testng.annotations.Parameters;
 public class JansLinkConfigResourceTest extends BaseTest {
 
     @BeforeMethod
-    public void before(Method methodName) {
+    public void before() {
         boolean isServiceDeployed = isDeployed();
         log.error("\n\n\n *** JANS-LINK Plugin isServiceDeployed{}", isServiceDeployed);
         // check condition, note once you condition is met the rest of the tests will be

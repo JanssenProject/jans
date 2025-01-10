@@ -21,12 +21,12 @@ import org.testng.annotations.BeforeMethod;
 public class AdminUIBaseTest extends BaseTest {
     
     protected boolean isDeployed() {
-        return isServiceDeployed("io.jans.configapi.plugin.link.rest.ApiApplication");
+        return isServiceDeployed("io.jans.ca.plugin.adminui.rest.ApiApplication");
     }
 
     // Execute before each test is run
     @BeforeMethod
-    public void before(Method methodName) {
+    public void before() {
         boolean isServiceDeployed = isDeployed();
         log.info("\n\n\n *** ADMIN-UI Plugin isServiceDeployed{}", isServiceDeployed);
         // check condition, note once you condition is met the rest of the tests will be
