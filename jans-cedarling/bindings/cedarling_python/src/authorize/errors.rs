@@ -124,7 +124,7 @@ create_exception!(
     authorize_errors,
     IdTokenTrustModeError,
     AuthorizeError,
-    "Error encountered while parsing all entities to json for logging"
+    "Error encountered while running on strict id token trust mode"
 );
 
 create_exception!(

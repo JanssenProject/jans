@@ -241,6 +241,10 @@ ___
 Error encountered while parsing all entities to json for logging
 ___
 
+# authorize_errors.IdTokenTrustModeError
+Error encountered while running on strict id token trust mode
+___
+
 # authorize_errors.ProcessTokens
 Error encountered while processing JWT token data
 ___
