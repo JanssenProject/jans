@@ -59,11 +59,13 @@ public class AdminUIBaseTest extends BaseTest {
     }
 
     private String getAuthCode(final String clientId, final String clientSecret) {
+        String code = null;
         try {
-            return getCredentials(clientId, clientSecret);
+            code = getCredentials(clientId, clientSecret);
         } catch (UnsupportedEncodingException ex) {
             log.error("Error while encoding credentials is ", ex);
         }
+        return code;
     }
 
     private Response authorize(final String authzurl, final String clientId, final String clientSecret,
