@@ -125,7 +125,7 @@ fn apply_claim_aliases(claims: &mut HashMap<String, Value>, aliases: Vec<ClaimAl
 }
 
 #[derive(Debug, thiserror::Error)]
-#[error("failed to build `{attr_name}` attribute: `{source}`")]
+#[error("failed to build `{attr_name}` attribute: {source}")]
 pub struct BuildAttrError {
     attr_name: String,
     #[source]
