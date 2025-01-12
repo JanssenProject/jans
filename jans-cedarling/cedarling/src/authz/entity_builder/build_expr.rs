@@ -3,10 +3,11 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::common::cedar_schema::cedar_json::attribute::Attribute;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
+use crate::common::cedar_schema::cedar_json::attribute::Attribute;
 use cedar_policy::{
-    EntityId, EntityTypeName, EntityUid, ExpressionConstructionError, RestrictedExpression,
+    EntityId, EntityTypeName, EntityUid, ExpressionConstructionError, ParseErrors,
+    RestrictedExpression,
 };
 use serde_json::Value;
 use std::collections::HashMap;
@@ -139,7 +140,8 @@ impl Attribute {
                         return Ok(None);
                     }
 
-                    let type_name = EntityTypeName::from_str(&name).unwrap();
+                    let type_name = EntityTypeName::from_str(&name)
+                        .map_err(|e| BuildExprError::ParseEntityTypeName(name, e))?;
                     let type_id = EntityId::new(claim);
                     let uid = EntityUid::from_type_name_and_id(type_name, type_id);
                     Ok(Some(RestrictedExpression::new_entity_uid(uid)))
@@ -210,14 +212,12 @@ pub enum BuildExprError {
     TypeMismatch(#[from] KeyedJsonTypeError),
     #[error(transparent)]
     ConstructionError(#[from] ExpressionConstructionError),
-    #[error(
-        "failed to build restricted expression for `{0}` since the type could not be determined"
-    )]
+    #[error("the type of `{0}` could not be determined")]
     UnkownType(String),
-    #[error(
-        "failed to build entity restricted expression for `{0}` since it is not in the schema"
-    )]
+    #[error("the entity type `{0}` is not in the schema")]
     EntityNotInSchema(String),
+    #[error("failed to parse entity type name \"{0}\": {1}")]
+    ParseEntityTypeName(String, ParseErrors),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -257,7 +257,7 @@ impl KeyedJsonTypeError {
 mod test {
     use crate::{
         authz::entity_builder::BuildExprError,
-        common::cedar_schema::cedar_json::{attribute::Attribute, CedarSchemaJson},
+        common::cedar_schema::cedar_json::{CedarSchemaJson, attribute::Attribute},
     };
     use serde_json::json;
     use std::collections::HashMap;

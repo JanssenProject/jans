@@ -12,12 +12,12 @@ mod build_user_entity;
 mod build_workload_entity;
 mod mapping;
 
-use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::CEDAR_NAMESPACE_SEPARATOR;
+use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::policy_store::TokenKind;
 use crate::jwt::{Token, TokenClaimTypeError};
 use crate::{AuthorizationConfig, ResourceData};
-use build_attrs::{build_entity_attrs_from_tkn, BuildAttrError, ClaimAliasMap};
+use build_attrs::{BuildAttrError, ClaimAliasMap, build_entity_attrs_from_tkn};
 use build_expr::*;
 use build_resource_entity::{BuildResourceEntityError, JsonTypeError};
 use build_role_entity::BuildRoleEntityError;
@@ -209,7 +209,8 @@ fn build_entity(
     }
 
     // Build entity attributes
-    let entity_attrs = build_entity_attrs_from_tkn(schema, entity_type, token, claim_aliases)?;
+    let entity_attrs = build_entity_attrs_from_tkn(schema, entity_type, token, claim_aliases)
+        .map_err(BuildEntityError::BuildAttribute)?;
 
     // Build cedar entity
     let entity_type_name =
@@ -257,9 +258,7 @@ pub enum BuildEntityError {
     #[error("the entity `{0}` is not defined in the schema")]
     EntityNotInSchema(String),
     #[error(transparent)]
-    BuildExpression(#[from] BuildExprError),
-    #[error(transparent)]
-    BuildEntityAttr(#[from] BuildAttrError),
+    BuildAttribute(#[from] BuildAttrError),
     #[error("got {0} token, expected: {1}")]
     InvalidToken(TokenKind, TokenKind),
 }

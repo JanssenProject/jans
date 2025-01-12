@@ -30,15 +30,19 @@ pub fn build_entity_attrs_from_tkn(
 
     for (attr_name, attr) in shape.attrs.iter() {
         let expression = if let Some(mapping) = token.claim_mapping().get(attr_name) {
-            let claim = claims
-                .get(attr_name)
-                .ok_or_else(|| BuildAttrError::MissingSource(attr_name.to_string()))?;
+            let claim = claims.get(attr_name).ok_or_else(|| {
+                BuildAttrError::new(
+                    attr_name,
+                    BuildAttrErrorKind::MissingSource(attr_name.to_string()),
+                )
+            })?;
             let mapped_claim = mapping.apply_mapping(claim);
-            attr.build_expr(&mapped_claim, attr_name, schema)?
+            attr.build_expr(&mapped_claim, attr_name, schema)
+                .map_err(|err| BuildAttrError::new(attr_name, err.into()))?
         } else {
             match attr.build_expr(&claims, attr_name, schema) {
                 Ok(expr) => expr,
-                Err(err) if attr.is_required() => Err(err)?,
+                Err(err) if attr.is_required() => Err(BuildAttrError::new(attr_name, err.into()))?,
                 // silently fail when attribute isn't required
                 Err(_) => continue,
             }
@@ -68,7 +72,10 @@ pub fn build_entity_attrs_from_values(
         let val = match src.get(attr_name) {
             Some(val) => val,
             None if attr.is_required() => {
-                return Err(BuildAttrError::MissingSource(attr_name.to_string()));
+                return Err(BuildAttrError::new(
+                    attr_name,
+                    BuildAttrErrorKind::MissingSource(attr_name.to_string()),
+                ));
             },
             _ => continue,
         };
@@ -83,7 +90,7 @@ pub fn build_entity_attrs_from_values(
         let expression = match attr.build_expr(src, attr_name, schema) {
             Ok(expr) => expr,
             Err(err) if attr.is_required() => {
-                return Err(err)?;
+                return Err(BuildAttrError::new(attr_name, err.into()))?;
             },
             // move on to the next attribute if this isn't required
             Err(_) => continue,
@@ -118,10 +125,27 @@ fn apply_claim_aliases(claims: &mut HashMap<String, Value>, aliases: Vec<ClaimAl
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum BuildAttrError {
-    #[error("failed to build entity attribute due to a missing attribute source: `{0}`")]
+#[error("failed to build `{attr_name}` attribute: `{source}`")]
+pub struct BuildAttrError {
+    attr_name: String,
+    #[source]
+    source: BuildAttrErrorKind,
+}
+
+impl BuildAttrError {
+    fn new(name: impl ToString, src: BuildAttrErrorKind) -> Self {
+        Self {
+            attr_name: name.to_string(),
+            source: src,
+        }
+    }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum BuildAttrErrorKind {
+    #[error("missing attribute source: `{0}`")]
     MissingSource(String),
-    #[error(transparent)]
+    #[error("failed to build restricted expression: {0}")]
     BuildExpression(#[from] BuildExprError),
 }
 
@@ -208,7 +232,14 @@ mod test {
         let err = build_entity_attrs_from_tkn(&schema, &entity_type, &token, Vec::new())
             .expect_err("should error due to missing source");
         assert!(
-            matches!(err, BuildAttrError::BuildExpression(BuildExprError::MissingSource(ref src_name)) if src_name == "client_id"),
+            matches!(
+                err,
+                BuildAttrError {
+                    attr_name: ref name,
+                    source: BuildAttrErrorKind::BuildExpression(BuildExprError::MissingSource(ref src_name))}
+                        if name == "client_id" &&
+                           src_name == "client_id"
+            ),
             "expected MissingSource error but got: {:?}",
             err,
         );
@@ -273,7 +304,13 @@ mod test {
         let err = build_entity_attrs_from_values(&schema, &entity_type, &src_values)
             .expect_err("should error due to missing source");
         assert!(
-            matches!(err, BuildAttrError::MissingSource(ref src_name) if src_name == "client_id"),
+            matches!(
+                err, 
+                BuildAttrError{
+                    attr_name: ref name, 
+                    source: BuildAttrErrorKind::MissingSource(ref src_name)} 
+                        if name == "client_id" && 
+                           src_name == "client_id"),
             "expected MissingSource error but got: {:?}",
             err,
         );
