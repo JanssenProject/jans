@@ -59,7 +59,8 @@ impl EntityBuilder {
             entity_name,
             token,
             id_src_claim,
-            vec![],
+            Vec::new(),
+            &mut HashMap::new(),
             HashSet::new(),
         )
         .map_err(|err| BuildTokenEntityError {

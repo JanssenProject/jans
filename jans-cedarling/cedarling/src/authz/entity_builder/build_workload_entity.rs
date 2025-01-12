@@ -38,6 +38,7 @@ impl EntityBuilder {
                     token,
                     workload_id_claim,
                     claim_aliases,
+                    &mut HashMap::new(),
                     HashSet::new(),
                 ) {
                     Ok(entity) => return Ok(entity),

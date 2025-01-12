@@ -15,7 +15,7 @@ impl EntityBuilder {
         &self,
         resource: &ResourceData,
     ) -> Result<Entity, BuildResourceEntityError> {
-        let entity_type_name = EntityTypeName::from_str(&resource.resource_type)?;
+        let entity_type_name = cedar_policy::EntityTypeName::from_str(&resource.resource_type)?;
         let (_namespace_name, entity_type) = self
             .schema
             .get_entity_from_base_name(entity_type_name.basename())
@@ -23,8 +23,12 @@ impl EntityBuilder {
                 entity_type_name.to_string(),
             ))?;
 
-        let entity_attrs =
-            build_entity_attrs_from_values(&self.schema, entity_type, &resource.payload)?;
+        let entity_attrs = build_entity_attrs_from_values(
+            &self.schema,
+            entity_type,
+            &resource.payload,
+            &mut HashMap::new(),
+        )?;
 
         // Build cedar entity
         let entity_id =

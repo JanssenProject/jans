@@ -14,7 +14,7 @@ mod mapping;
 
 use super::AuthorizeEntitiesData;
 use crate::common::cedar_schema::CEDAR_NAMESPACE_SEPARATOR;
-use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
+use crate::common::cedar_schema::cedar_json::{CedarSchemaJson, EntityTypeName};
 use crate::common::policy_store::TokenKind;
 use crate::jwt::{Token, TokenClaimTypeError};
 use crate::{AuthorizationConfig, ResourceData};
@@ -25,7 +25,7 @@ use build_role_entity::BuildRoleEntityError;
 pub use build_token_entities::BuildTokenEntityError;
 use build_user_entity::BuildUserEntityError;
 use build_workload_entity::BuildWorkloadEntityError;
-use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid};
+use cedar_policy::{Entity, EntityId, EntityUid};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::convert::Infallible;
@@ -201,6 +201,7 @@ fn build_entity(
     token: &Token,
     id_src_claim: &str,
     claim_aliases: Vec<ClaimAliasMap>,
+    built_entities: &mut HashMap<EntityTypeName, String>,
     parents: HashSet<EntityUid>,
 ) -> Result<Entity, BuildEntityError> {
     // Get entity Id from the specified token claim
@@ -220,12 +221,12 @@ fn build_entity(
     }
 
     // Build entity attributes
-    let entity_attrs = build_entity_attrs_from_tkn(schema, entity_type, token, claim_aliases)
-        .map_err(BuildEntityError::BuildAttribute)?;
+    let entity_attrs =
+        build_entity_attrs_from_tkn(schema, entity_type, token, claim_aliases, built_entities)?;
 
     // Build cedar entity
-    let entity_type_name =
-        EntityTypeName::from_str(&entity_name).map_err(BuildEntityError::ParseEntityTypeName)?;
+    let entity_type_name = cedar_policy::EntityTypeName::from_str(&entity_name)
+        .map_err(BuildEntityError::ParseEntityTypeName)?;
     let entity_id = EntityId::from_str(&entity_id).map_err(BuildEntityError::ParseEntityId)?;
     let entity_uid = EntityUid::from_type_name_and_id(entity_type_name, entity_id);
     Ok(Entity::new(entity_uid, entity_attrs, parents)?)
@@ -268,8 +269,10 @@ pub enum BuildEntityError {
     JsonTypeError(#[from] JsonTypeError),
     #[error("the entity `{0}` is not defined in the schema")]
     EntityNotInSchema(String),
-    #[error(transparent)]
-    BuildAttribute(#[from] BuildAttrError),
+    #[error("failed build restricted expression: {0}")]
+    BuildExpression(#[from] BuildExprError),
+    #[error("failed to build entity attribute: {0}")]
+    BuildEntityAttr(#[from] BuildAttrError),
     #[error("got {0} token, expected: {1}")]
     InvalidToken(TokenKind, TokenKind),
 }
@@ -294,16 +297,19 @@ mod test {
     #[test]
     fn can_build_entity_using_jwt() {
         let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Workload": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "client_id": { "type": "String" },
-                        "name": { "type": "String" },
-                    },
+        "Jans": {
+            "entityTypes": {
+                "Workload": {
+                    "shape": {
+                        "type": "Record",
+                        "attributes":  {
+                            "client_id": { "type": "String" },
+                            "name": { "type": "String" },
+                        },
+                    }
                 }
-            }}}
-        }))
+            }
+        }}))
         .expect("should successfully build schema");
         let iss = TrustedIssuer::default();
         let token = Token::new_access(
@@ -319,6 +325,7 @@ mod test {
             &token,
             "client_id",
             Vec::new(),
+            &mut HashMap::new(),
             HashSet::new(),
         )
         .expect("should successfully build entity");
@@ -337,6 +344,92 @@ mod test {
                 .expect("expected workload entity to have a `name` attribute")
                 .unwrap(),
             EvalResult::String("somename".to_string()),
+        );
+    }
+
+    #[test]
+    fn can_build_entity_with_token_ref() {
+        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
+        "Jans": {
+            "entityTypes": {
+                "Access_token": {
+                    "jti": { "type": "String" },
+                },
+                "Id_token": {
+                    "jti": { "type": "String" },
+                },
+                "Userinfo_token": {
+                    "jti": { "type": "String" },
+                },
+                "Workload": {
+                    "shape": {
+                        "type": "Record",
+                        "attributes":  {
+                            "access_token": { "type": "Entity", "name": "Access_token" },
+                            "id_token": { "type": "Entity", "name": "Id_token" },
+                            "userinfo_token": { "type": "Entity", "name": "Userinfo_token" },
+                        },
+                    }
+                }
+            }
+        }}))
+        .expect("should successfully build schema");
+        let iss = TrustedIssuer::default();
+        let token = Token::new_access(
+            TokenClaims::new(HashMap::from([
+                ("client_id".to_string(), json!("workload-123")),
+                ("access_token".to_string(), json!("token-123")),
+                ("userinfo_token".to_string(), json!("token-321")),
+            ])),
+            Some(&iss),
+        );
+        let mut built_entities = HashMap::from([
+            ("Jans::Id_token".to_string(), "token-123".to_string()),
+            ("Jans::Userinfo_token".to_string(), "token-123".to_string()),
+        ]);
+        let entity = build_entity(
+            &schema,
+            "Workload",
+            &token,
+            "client_id",
+            Vec::new(),
+            &mut built_entities,
+            HashSet::new(),
+        )
+        .expect("should successfully build entity");
+
+        assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
+
+        let access_tkn_uid = EntityUid::from_str("Jans::Access_token::\"token-123\"").unwrap();
+        let access_tkn_attr = entity
+            .attr("access_token")
+            .expect("expected workload entity to have an `access_token` attribute")
+            .unwrap();
+        assert!(
+            matches!(access_tkn_attr, EvalResult::EntityUid(ref uid) if uid == &access_tkn_uid),
+            "the access_token attribute should be an entity uid from the given token's claim"
+        );
+
+        let id_tkn_uid = EntityUid::from_str("Jans::Id_token::\"token-123\"").unwrap();
+        let id_tkn_attr = entity
+            .attr("id_token")
+            .expect("expected workload entity to have an `id_token` attribute")
+            .unwrap();
+        assert!(
+            matches!(id_tkn_attr, EvalResult::EntityUid(ref uid) if uid == &id_tkn_uid),
+            "the id_token attribute should be an entity uid from the already built token entities"
+        );
+
+        // This checks if the uid from the already built entities is prioritized over the uid from
+        // the given token's claim
+        let userinfo_tkn_uid = EntityUid::from_str("Jans::Userinfo_token::\"token-123\"").unwrap();
+        let userinfo_tkn_attr = entity
+            .attr("userinfo_token")
+            .expect("expected workload entity to have an `userinfo_token` attribute")
+            .unwrap();
+        assert!(
+            matches!(userinfo_tkn_attr, EvalResult::EntityUid(ref uid) if uid == &userinfo_tkn_uid),
+            "the userinfo_token attribute should be an entity uid from the already built token entities"
         );
     }
 
@@ -369,6 +462,7 @@ mod test {
             &token,
             "client_id",
             Vec::new(),
+            &mut HashMap::new(),
             HashSet::new(),
         )
         .expect_err("should error while parsing entity type name");
@@ -393,6 +487,7 @@ mod test {
             &token,
             "client_id",
             Vec::new(),
+            &mut HashMap::new(),
             HashSet::new(),
         )
         .expect_err("should error while parsing entity type name");
@@ -432,6 +527,7 @@ mod test {
             &token,
             "client_id",
             Vec::new(),
+            &mut HashMap::new(),
             HashSet::new(),
         )
         .expect_err("should error due to unexpected json type");
@@ -466,6 +562,7 @@ mod test {
             &token,
             "client_id",
             Vec::new(),
+            &mut HashMap::new(),
             HashSet::new(),
         )
         .expect_err("should error due to entity not being in the schema");

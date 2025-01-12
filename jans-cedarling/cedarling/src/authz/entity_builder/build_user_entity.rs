@@ -26,7 +26,8 @@ impl EntityBuilder {
                 entity_name,
                 token,
                 user_id_claim,
-                vec![],
+                Vec::new(),
+                &mut HashMap::new(),
                 parents.clone(),
             ) {
                 Ok(entity) => return Ok(entity),
