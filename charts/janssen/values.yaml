@@ -1199,9 +1199,9 @@ global:
   cnConfiguratorConfigurationFile: /etc/jans/conf/configuration.json
   # -- Path to the dumped configuration schema file
   cnConfiguratorDumpFile: /etc/jans/conf/configuration.out.json
-  # -- Use custom configuration schema in existing secrets. Note, the secrets has to contain the key configuration.json or any basename as specified in cnConfiguratorConfigurationFile.
+  # -- Use custom configuration schema in existing Kubernetes secret. Note that the secret has to contain the configuration.json key or any basename as specified in cnConfiguratorConfigurationFile.
   cnConfiguratorCustomSchema:
-    # -- The name of the secrets used for storing custom configuration schema.
+    # -- The name of the Kubernetes secret used for storing custom configuration schema.
     secretName: ""
   # -- Key to encrypt/decrypt configuration schema file using AES-256 CBC mode. Set the value to empty string to disable encryption/decryption, or 32 alphanumeric characters to enable it.
   cnConfiguratorKey: ""
