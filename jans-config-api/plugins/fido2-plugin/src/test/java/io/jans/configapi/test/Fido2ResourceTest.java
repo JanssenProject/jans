@@ -16,14 +16,24 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 
+import java.util.Map;
+
+import org.testng.SkipException;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Parameters;
 
 public class Fido2ResourceTest extends BaseTest {
 
+    protected boolean isEndpointAvailable(final String url, Map<String, String> headers,
+            final Map<String, String> parameters) {
+        return isEndpointAvailable(url, headers, parameters);
+    }
+
+   
     @BeforeMethod
     public void before() {
-        boolean isServiceDeployed = isServiceDeployed("io.jans.configapi.plugin.fido2.rest.ApiApplication");
-        log.info("\n\n\n *** FIDO2 Plugin isServiceDeployed{}", isServiceDeployed);
+        boolean endpointAvailable = isEndpointAvailable(propertiesMap.get("fido2Url"), null, null);
+        log.info("\n\n\n *** FIDO2 Plugin endpointAvailable{}", endpointAvailable);
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well
         if (!isServiceDeployed) {

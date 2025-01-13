@@ -32,6 +32,35 @@ public class ResteasyService implements Serializable {
         return ClientBuilder.newClient().target(url).request();
     }
 
+    public Response executeGet(final String url, final Map<String, String> headers,
+            final Map<String, String> parameters) {
+        logger.error("\n\n\n *** Execut GET - url:{}, headers:{}, parameters:{}", url, headers, parameters);
+        StringBuilder query = null;
+        if (parameters != null && !parameters.isEmpty()) {
+            query = new StringBuilder("");
+            for (Map.Entry<String, String> entry : parameters.entrySet()) {
+                String value = entry.getValue();
+                if (value != null && value.length() > 0) {
+                    String delim = "&" + URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8) + "=";
+                    query.append(delim.substring(1));
+                    query.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
+                }
+            }
+        }
+
+        Builder request = getClientBuilder(url + query);
+        if (headers != null && !headers.isEmpty()) {
+            for (Map.Entry<String, String> header : headers.entrySet()) {
+                request.header(header.getKey(), header.getValue());
+            }
+        }
+
+        Response response = request.get();
+        logger.info(" response:{}", response);
+
+        return response;
+    }
+
     public Response executeGet(final String url, final String clientId, final String clientSecret,
             final String authType, final String authCode, final Map<String, String> parameters,
             ContentType contentType) {

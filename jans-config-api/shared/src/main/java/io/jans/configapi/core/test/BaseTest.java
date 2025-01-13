@@ -23,6 +23,7 @@ import java.util.Map;
 import java.net.URLEncoder;
 
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -147,6 +148,27 @@ public class BaseTest {
             return isDeployed;
         }
         return isDeployed;
+    }
+
+    protected boolean isEndpointAvailable(final String url, final Map<String, String> headers, final Map<String, String> parameters)  {
+        log.error("\n\n\n *** Check if endpoint available - url:{}, headers:{}, parameters:{}", url, headers, parameters);
+        boolean isEndpointAvailable = false;
+        try {
+            Response response = getResteasyService().executeGet(url, headers, parameters);
+            log.error("\n\n\n *** Check if  endpoint - response:{}", response);
+            if(response!=null && response.getStatus()== Status.NOT_FOUND.getStatusCode()) {                    
+                isEndpointAvailable = false;
+            }else {
+                isEndpointAvailable = true;
+            }
+            
+        } catch (Exception ex) {
+            log.error("Endpoint:{} is NOT available", url);
+            isEndpointAvailable = false;
+            return isEndpointAvailable;
+        }
+        log.error("*** \n\n\n Endpoint:{} is  available {}", isEndpointAvailable,"\n\n\n");
+        return isEndpointAvailable;
     }
 
     protected Response executeGet(final String url, final String clientId, final String clientSecret,

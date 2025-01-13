@@ -9,7 +9,6 @@ package io.jans.ca.plugin.adminui;
 import io.jans.configapi.core.test.BaseTest;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.HashMap;
 import jakarta.ws.rs.core.Response;
@@ -20,20 +19,22 @@ import org.testng.annotations.BeforeMethod;
 
 public class AdminUIBaseTest extends BaseTest {
 
-    protected boolean isDeployed() {
-        return isServiceDeployed("io.jans.ca.plugin.adminui.rest.ApiApplication");
+    protected boolean isEndpointAvailable(final String url, Map<String, String> headers,
+            final Map<String, String> parameters) {
+        return isEndpointAvailable(url, headers, parameters);
     }
 
     // Execute before each test is run
-    //@BeforeMethod
+    @BeforeMethod
     protected void before() {
-        boolean isServiceDeployed = isDeployed();
-        log.error("\n\n\n *** ADMIN-UI Plugin isServiceDeployed{}", isServiceDeployed);
+        boolean endpointAvailable = isEndpointAvailable(propertiesMap.get("auditLoggingURL"), null, null);
+        log.error("\n\n\n *** ADMIN-UI Plugin endpointAvailable:{} {}", endpointAvailable, "\n\n\n");
         // check condition, note once you condition is met the rest of the tests will be
+
         // skipped as well
-        if (!isServiceDeployed) {
+        if (!endpointAvailable) {
             throw new SkipException("ADMIN-UI Plugin Not deployed");
-        }else {
+        } else {
             log.error("\n\n\n *** ADMIN-UI Plugin is Deployed{} {}", "\n\n");
         }
     }
@@ -49,8 +50,9 @@ public class AdminUIBaseTest extends BaseTest {
         String responseType = propertiesMap.get("test.response.type");
         String redirectUri = propertiesMap.get("test.redirect.uri");
         log.error(
-                "\n\n\n\n ************ AdminUI- authzurl:{}, strGrantType:{}, clientId:{},  clientSecret:{}, scopes:{}, responseType:{}",
-                authzurl, strGrantType, clientId, clientSecret, scopes, responseType);
+                "\n\n\n\n ************ AdminUI- authzurl:{}, strGrantType:{}, clientId:{},  clientSecret:{}, scopes:{}, responseType:{}, propertiesMap.get(auditLoggingURL)",
+                authzurl, strGrantType, clientId, clientSecret, scopes, responseType,
+                propertiesMap.get("auditLoggingURL"));
         Map<String, String> params = new HashMap<>();
         params.put("client_id", clientId);
         params.put("scope", scopes);
