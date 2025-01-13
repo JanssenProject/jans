@@ -37,8 +37,9 @@ public class AuditLoggingResourceTest extends AdminUIBaseTest {
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.post(Entity.entity(json, MediaType.APPLICATION_JSON));
-        log.info("\n\n Response for postAuditLoggingData -  response:{}", response);
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
+        log.info("\n\n Response for postAuditLoggingData -  response:{}, response.getStatus():{}", response,
+                response.getStatus());
 
     }
 

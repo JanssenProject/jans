@@ -31,8 +31,9 @@ public class ConfigResourceTest extends ConfigServerBaseTest {
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
         Response response = request.get();
+        log.info("Response for getApiConfigtion -  response:{}, response.getStatus():{}", response,
+                response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.info("Response for getApiConfigtion -  response:{}", response);
 
     }
 
@@ -45,8 +46,10 @@ public class ConfigResourceTest extends ConfigServerBaseTest {
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON_PATCH_JSON);
 
-        Response response = request.method(HttpMethod.PATCH, Entity.entity(json, MediaType.APPLICATION_JSON_PATCH_JSON));
+        Response response = request.method(HttpMethod.PATCH,
+                Entity.entity(json, MediaType.APPLICATION_JSON_PATCH_JSON));
+        log.info("Response for getApiConfigtion -  response:{}, response.getStatus():{}", response,
+                response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.info("Response for getApiConfigtion -  response:{}", response);
     }
 }

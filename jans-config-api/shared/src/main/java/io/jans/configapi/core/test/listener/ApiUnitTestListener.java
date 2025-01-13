@@ -22,7 +22,7 @@ public class ApiUnitTestListener implements ITestListener {
     @Override
     public void onTestSuccess(ITestResult result) {
         Reporter.log("Test SUCCESS: " + getTestInfo(result), true);
-        Reporter.log("", true); 
+        Reporter.log("", true);
     }
 
     @Override
@@ -34,33 +34,35 @@ public class ApiUnitTestListener implements ITestListener {
     @Override
     public void onTestSkipped(ITestResult result) {
         Reporter.log("Test SKIPPED: " + getTestInfo(result), true);
-        Reporter.log("", true); 
+        Reporter.log("", true);
     }
 
     @Override
     public void onTestFailedButWithinSuccessPercentage(ITestResult result) {
         Reporter.log("Test FAILED with Success Percentage: " + getTestInfo(result), true);
-        testFailed(result); 
+        testFailed(result);
     }
 
     @Override
     public void onStart(ITestContext context) {
+        Reporter.log("Test onStart ", false);
     }
 
     @Override
     public void onFinish(ITestContext context) {
+        Reporter.log("Test onFinish ", false);
     }
 
     private void testFailed(ITestResult result) {
         Object[] parameters = result.getParameters();
-        if(parameters != null) {
+        if (parameters != null) {
             Reporter.log("Test Parameters: ", true);
-            for(Object parameter : parameters) {
+            for (Object parameter : parameters) {
                 Reporter.log("parameter = " + parameter, true);
             }
         }
         Throwable throwable = result.getThrowable();
-        if(throwable != null) {
+        if (throwable != null) {
             Reporter.log("", true);
             Reporter.log("Exception: ", true);
             Reporter.log(Throwables.getStackTraceAsString(result.getThrowable()), true);

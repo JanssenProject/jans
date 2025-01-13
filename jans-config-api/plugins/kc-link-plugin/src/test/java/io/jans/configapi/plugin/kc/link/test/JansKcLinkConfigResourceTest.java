@@ -29,7 +29,7 @@ public class JansKcLinkConfigResourceTest extends KcLinkBaseTest {
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
-        log.info("Response for getKcLinkConfiguration -  response:{}", response);
+        log.info("Response for getKcLinkConfiguration -  response:{}, response.getStatus():{}", response, response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
     }
 

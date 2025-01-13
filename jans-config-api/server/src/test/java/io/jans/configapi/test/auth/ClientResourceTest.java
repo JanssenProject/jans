@@ -18,7 +18,6 @@ import org.testng.annotations.Test;
 
 public class ClientResourceTest extends ConfigServerBaseTest {
 
- 
     @Parameters({ "test.issuer", "openidClientsUrl" })
     @Test
     public void getAllClient(final String issuer, final String openidClientsUrl) {
@@ -29,8 +28,9 @@ public class ClientResourceTest extends ConfigServerBaseTest {
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
+        log.info("Response for getAllClient -  response:{}, response.getStatus():{}", response, response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.info("Response for getAllClient -  response:{}", response);
+
     }
 
     @Parameters({ "test.issuer", "openidClientsUrl", "openid_client_1" })
@@ -43,7 +43,7 @@ public class ClientResourceTest extends ConfigServerBaseTest {
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
         Response response = request.post(Entity.entity(json, MediaType.APPLICATION_JSON));
-        log.info("post client -  response:{}", response);
+        log.info("post client -  response:{}, response.getStatus():{}", response, response.getStatus());
 
         if (response.getStatus() == 201) {
             log.trace("Response for postClient -  response.getEntity():{}, response.getClass():{}",

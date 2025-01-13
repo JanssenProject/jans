@@ -31,7 +31,7 @@ public class LockAuditResourceTest extends LockBaseTest {
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.post(Entity.entity(json, MediaType.APPLICATION_JSON));
-        log.info("post lock audit -  response:{}", response);
+        log.info("post lock audit -  response:{}, response.getStatus():{}", response, response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
 
     }
@@ -47,7 +47,7 @@ public class LockAuditResourceTest extends LockBaseTest {
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
-        log.info("Response for getLockAuditData -  response:{}", response);
+        log.info("Response for getLockAuditData -  response:{}, response.getStatus():{}", response, response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
     }
 

@@ -34,7 +34,7 @@ public class ResteasyService implements Serializable {
 
     public Response executeGet(final String url, final Map<String, String> headers,
             final Map<String, String> parameters) {
-        logger.error("\n\n\n *** Execut GET - url:{}, headers:{}, parameters:{}", url, headers, parameters);
+        logger.info("\n\n\n *** Execut GET - url:{}, headers:{}, parameters:{}", url, headers, parameters);
         StringBuilder query = null;
         if (parameters != null && !parameters.isEmpty()) {
             query = new StringBuilder("");

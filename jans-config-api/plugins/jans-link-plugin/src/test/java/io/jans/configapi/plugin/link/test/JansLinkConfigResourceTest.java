@@ -31,7 +31,7 @@ public class JansLinkConfigResourceTest extends LinkBaseTest {
 
         Response response = request.get();
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.info("Response for fetchLinkConfiguration -  response:{}", response);
+        log.info("Response for fetchLinkConfiguration -  response:{}, response.getStatus()", response, response.getStatus());
 
     }
 

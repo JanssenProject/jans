@@ -19,37 +19,37 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 public class AcrsResourceTest extends ConfigServerBaseTest {
-    
-   private String defaultAcr;
 
-    @Parameters({"test.issuer", "acrsUrl"})
+    private String defaultAcr;
+
+    @Parameters({ "test.issuer", "acrsUrl" })
     @Test
     public void getDefaultAuthenticationMethod(final String issuer, final String acrsUrl) {
-        log.error("accessToken:{}, issuer:{}, acrsUrl:{}", accessToken, issuer, acrsUrl);
+        log.info("accessToken:{}, issuer:{}, acrsUrl:{}", accessToken, issuer, acrsUrl);
         Builder request = getResteasyService().getClientBuilder(issuer + acrsUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
         Response response = request.get();
         log.info("response:{}", response);
+        defaultAcr = response.readEntity(String.class);
+        log.info("Response for getDefaultAuthenticationMethod -  defaultAcr:{}, response.getStatus():{}", defaultAcr,
+                response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-
-        defaultAcr =  response.readEntity(String.class);
-        log.info("Response for getDefaultAuthenticationMethod -  defaultAcr:{}", defaultAcr);
     }
-    
-	
-	@Parameters({"test.issuer", "acrsUrl"})
+
+    @Parameters({ "test.issuer", "acrsUrl" })
     @Test
     public void postClient(final String issuer, final String acrsUrl) {
         log.info("accessToken:{}, issuer:{}, acrsUrl:{}", accessToken, issuer, acrsUrl);
         Builder request = getResteasyService().getClientBuilder(issuer + acrsUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        
+
         log.info("Update defaultAcr:{}", defaultAcr);
         Response response = request.put(Entity.entity(defaultAcr, MediaType.APPLICATION_JSON));
+        log.info("Response for getApiConfigtion -  response:{}, response.getStatus():{}", response,
+                response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.info("Response for getApiConfigtion -  response:{}", response);
- 
+
     }
 }

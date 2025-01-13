@@ -19,48 +19,55 @@ import static org.testng.Assert.*;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-public class AuthConfigResourceTest extends ConfigServerBaseTest{
+public class AuthConfigResourceTest extends ConfigServerBaseTest {
 
-    @Parameters({"test.issuer", "authConfigurationUrl"})
+    @Parameters({ "test.issuer", "authConfigurationUrl" })
     @Test
     public void getAuthConfigurationProperty(final String issuer, final String authConfigurationUrl) {
-        log.info("getAuthConfigurationProperty() - accessToken:{}, issuer:{}, authConfigurationUrl:{}", accessToken, issuer, authConfigurationUrl);
+        log.info("getAuthConfigurationProperty() - accessToken:{}, issuer:{}, authConfigurationUrl:{}", accessToken,
+                issuer, authConfigurationUrl);
 
-            Builder request = getResteasyService().getClientBuilder(issuer + authConfigurationUrl);
-            request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
-            request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        Builder request = getResteasyService().getClientBuilder(issuer + authConfigurationUrl);
+        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
-            Response response = request.get();
-            assertEquals(response.getStatus(), Status.OK.getStatusCode());
-            log.info("Response for getAuthConfigurationProperty() -  response:{}", response);
+        Response response = request.get();
+        log.info("Response for getAuthConfigurationProperty() -  response:{}, response.getStatus():{}", response,
+                response.getStatus());
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
     }
-    
-    @Parameters({"test.issuer", "authConfigurationUrl"})
+
+    @Parameters({ "test.issuer", "authConfigurationUrl" })
     @Test
     public void getPersistenceDetails(final String issuer, final String authConfigurationUrl) {
-        log.info("getPersistenceDetails() - accessToken:{}, issuer:{}, authConfigurationUrl:{}", accessToken, issuer, authConfigurationUrl);
+        log.info("getPersistenceDetails() - accessToken:{}, issuer:{}, authConfigurationUrl:{}", accessToken, issuer,
+                authConfigurationUrl);
 
-            Builder request = getResteasyService().getClientBuilder(issuer + authConfigurationUrl + "/persistence");
-            request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
-            request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        Builder request = getResteasyService().getClientBuilder(issuer + authConfigurationUrl + "/persistence");
+        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
-            Response response = request.get();
-            assertEquals(response.getStatus(), Status.OK.getStatusCode());
-            log.info("Response for getPersistenceDetails() -  response:{}", response);
+        Response response = request.get();
+        log.info("Response for getPersistenceDetails() -  response:{}, response.getStatus():{}", response,
+                response.getStatus());
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
     }
-    
-    @Parameters({"test.issuer", "authConfigurationUrl", "auth_config_patch_1"})
+
+    @Parameters({ "test.issuer", "authConfigurationUrl", "auth_config_patch_1" })
     @Test
-    public void patchAuthConfigurationProperty(final String issuer, final String authConfigurationUrl, final String json) {
-        log.info("patchAuthConfigurationProperty() - getApiConfigtion() - accessToken:{}, issuer:{}, authConfigurationUrl:{}, json:{}", accessToken, issuer,
-                authConfigurationUrl, json);
+    public void patchAuthConfigurationProperty(final String issuer, final String authConfigurationUrl,
+            final String json) {
+        log.info(
+                "patchAuthConfigurationProperty() - getApiConfigtion() - accessToken:{}, issuer:{}, authConfigurationUrl:{}, json:{}",
+                accessToken, issuer, authConfigurationUrl, json);
         Builder request = getResteasyService().getClientBuilder(issuer + authConfigurationUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON_PATCH_JSON);
 
-        Response response = request.method(HttpMethod.PATCH, Entity.entity(json, MediaType.APPLICATION_JSON_PATCH_JSON));
-
+        Response response = request.method(HttpMethod.PATCH,
+                Entity.entity(json, MediaType.APPLICATION_JSON_PATCH_JSON));
+        log.info("Response patchAuthConfigurationProperty() -  response:{}, response.getStatus():{}", response,
+                response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.info("Response patchAuthConfigurationProperty() -  response:{}", response);
     }
 }

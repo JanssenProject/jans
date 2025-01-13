@@ -28,9 +28,9 @@ public class AgamaDeploymentsResourceTest extends ConfigServerBaseTest {
         request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
 
         Response response = request.get();
+        log.info("Response for getDefaultAuthenticationMethod -  response:{}, response.getStatus():{}", response,
+                response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.info("Response for getDefaultAuthenticationMethod -  response:{}", response);
-
     }
 
 }

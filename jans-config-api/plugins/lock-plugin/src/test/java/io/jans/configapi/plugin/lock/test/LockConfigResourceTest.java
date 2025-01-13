@@ -30,7 +30,7 @@ public class LockConfigResourceTest extends LockBaseTest {
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
-        log.info("Response for getLockConfigUrlData -  response:{}", response);
+        log.info("Response for getLockConfigUrlData -  response:{}, response.getStatus():{}", response, response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
     }
 

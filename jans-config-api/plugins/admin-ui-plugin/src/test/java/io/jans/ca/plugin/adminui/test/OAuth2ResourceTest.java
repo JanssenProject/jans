@@ -35,7 +35,8 @@ public class OAuth2ResourceTest extends AdminUIBaseTest {
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
-        log.info("Response for getOAuth2Data() -  response:{}", response);
+        log.info("Response for getOAuth2Data() -  response:{}, response.getStatus():{}", response,
+                response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
 
     }
@@ -55,7 +56,8 @@ public class OAuth2ResourceTest extends AdminUIBaseTest {
         request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
         request.property("ujwt", ujwt);
         Response response = request.get();
-        log.info("\n\n Response for getApiProtectionTokenData() -  response:{}", response);
+        log.info("\n\n Response for getApiProtectionTokenData() -  response:{}, response.getStatus():{}", response,
+                response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
 
     }

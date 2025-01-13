@@ -22,56 +22,49 @@ public class ApiHealthTest extends ConfigServerBaseTest {
 
     @Parameters({ "test.issuer", "healthUrl" })
     @Test
-    public void getHealthResponse(final String issuer, final String healthUrl) {
+    public void getAppHealth(final String issuer, final String healthUrl) {
         log.info("accessToken:{}, issuer:{}, healthUrl:{}", accessToken, issuer, healthUrl);
-        Builder request = getResteasyService().getClientBuilder(issuer + healthUrl);
-        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
-        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-
-        Response response = request.get();
+        Response response = getHealthResponse(issuer + healthUrl);
+        log.info("Response for getAppHealth -  response:{}, response.getStatus():{}", response, response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.info("Response for getHealthResponse -  response:{}", response);
     }
 
     @Parameters({ "test.issuer", "healthUrl" })
     @Test
     public void getServerStat(final String issuer, final String healthUrl) {
         log.info("accessToken:{}, issuer:{}, healthUrl:{}", accessToken, issuer, healthUrl);
-
-        Builder request = getResteasyService().getClientBuilder(issuer + healthUrl + "/server-stat");
-        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
-        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-
-        Response response = request.get();
+        Response response = getHealthResponse(issuer + healthUrl + "/server-stat");
+        log.info("Response for getServerStat -  response:{}, response.getStatus():{}", response, response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.info("Response for getServerStat -  response:{}", response);
     }
 
     @Parameters({ "test.issuer", "healthUrl" })
     @Test
     public void getApplicationVersion(final String issuer, final String healthUrl) {
         log.info("accessToken:{}, issuer:{}, healthUrl:{}", accessToken, issuer, healthUrl);
-
-        Builder request = getResteasyService().getClientBuilder(issuer + healthUrl + "/app-version");
-        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
-        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-
-        Response response = request.get();
+        Response response = getHealthResponse(issuer + healthUrl + "/app-version");
+        log.info("Response for getApplicationVersion -  response:{}, response.getStatus():{}", response,
+                response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.info("Response for getApplicationVersion -  response:{}", response);
     }
 
     @Parameters({ "test.issuer", "healthUrl" })
     @Test
     public void getServiceStatus(final String issuer, final String healthUrl) {
         log.info("accessToken:{}, issuer:{}, healthUrl:{}", accessToken, issuer, healthUrl);
+        Response response = getHealthResponse(issuer + healthUrl + "/service-status");
+        log.info("Response for getServiceStatus -  response:{}, response.getStatus():{}", response,
+                response.getStatus());
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
+    }
 
-        Builder request = getResteasyService().getClientBuilder(issuer + healthUrl + "/service-status");
+    private Response getHealthResponse(final String healthUrl) {
+        log.info("accessToken:{}, healthUrl:{}", accessToken, healthUrl);
+
+        Builder request = getResteasyService().getClientBuilder(healthUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
-        Response response = request.get();
-        assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.info("Response for getServiceStatus -  response:{}", response);
+        return request.get();
     }
 }

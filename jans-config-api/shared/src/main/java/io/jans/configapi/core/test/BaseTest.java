@@ -45,8 +45,8 @@ public class BaseTest {
 
     protected Logger log = LogManager.getLogger(getClass());
     protected Base64 base64;
-    protected static Map<String, String> propertiesMap = null;
-    protected ResteasyService resteasyService = new ResteasyService();;
+    protected Map<String, String> propertiesMap = null;
+    protected ResteasyService resteasyService = new ResteasyService();
     protected HttpService httpService = new HttpService();
     protected TokenService tokenService = new TokenService();
     protected String accessToken;
@@ -136,14 +136,14 @@ public class BaseTest {
     }
 
     protected boolean isServiceDeployed(String serviceName) {
-        log.error("\n\n\n *** Check if  service is deployed - serviceName:{} :{}", serviceName ," *** \n\n\n");
+        log.info("\n\n\n *** Check if  service is deployed - serviceName:{} :{}", serviceName ," *** \n\n\n");
         boolean isDeployed = false;
         try {
             Class.forName(serviceName);
             isDeployed = true;
-            log.error("*** \n\n\n service:{} is deployed{}", serviceName,"\n\n\n");
+            log.info("*** service:{} is deployed", serviceName);
         } catch (ClassNotFoundException ex) {
-            log.error("*** \n\n\n service:{} is NOT deployed {}", serviceName,"\n\n\n");
+            log.info("*** service:{} is NOT deployed", serviceName);
             isDeployed = false;
             return isDeployed;
         }
@@ -151,11 +151,11 @@ public class BaseTest {
     }
 
     protected boolean isEndpointAvailable(final String url, final Map<String, String> headers, final Map<String, String> parameters)  {
-        log.error("\n\n\n *** Check if endpoint available - url:{}, headers:{}, parameters:{}", url, headers, parameters);
+        log.info("*** Check if endpoint available - url:{}, headers:{}, parameters:{}", url, headers, parameters);
         boolean isEndpointAvailable = false;
         try {
             Response response = getResteasyService().executeGet(url, headers, parameters);
-            log.error("\n\n\n *** Check endpoint url:{}, response:{}", url, response);
+            log.info("*** Check endpoint url:{}, response:{}", url, response);
             if(response!=null && response.getStatus()== Status.NOT_FOUND.getStatusCode()) {                    
                 isEndpointAvailable = false;
             }else {
@@ -163,11 +163,11 @@ public class BaseTest {
             }
             
         } catch (Exception ex) {
-            log.error("Endpoint:{} is NOT available", url);
+            log.info("Endpoint:{} is NOT available", url);
             isEndpointAvailable = false;
             return isEndpointAvailable;
         }
-        log.error("*** \n\n\n Endpoint:{} available:{} {}", url, isEndpointAvailable,"\n\n\n");
+        log.info("*** \n\n\n Endpoint:{} available:{} {}", url, isEndpointAvailable,"\n\n\n");
         return isEndpointAvailable;
     }
 

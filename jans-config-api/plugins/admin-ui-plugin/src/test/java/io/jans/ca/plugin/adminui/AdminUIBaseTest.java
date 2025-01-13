@@ -27,14 +27,14 @@ public class AdminUIBaseTest extends BaseTest {
     @BeforeMethod
     protected void before() {
         boolean isAvailable = isAvailable(propertiesMap.get("auditLoggingURL"), null, null);
-        log.error("\n\n\n *** ADMIN-UI Plugin isAvailable:{} {}", isAvailable, "\n\n\n");
+        log.info("\n\n\n *** ADMIN-UI Plugin isAvailable:{} {}", isAvailable, "\n\n\n");
         // check condition, note once you condition is met the rest of the tests will be
 
         // skipped as well
         if (!isAvailable) {
             throw new SkipException("ADMIN-UI Plugin Not deployed");
         } else {
-            log.error("\n\n\n *** ADMIN-UI Plugin is Deployed{} {}", "\n\n");
+            log.info("\n\n\n *** ADMIN-UI Plugin is Deployed{} {}", "\n\n");
         }
     }
 
@@ -48,7 +48,7 @@ public class AdminUIBaseTest extends BaseTest {
         String scopes = propertiesMap.get("test.scopes");
         String responseType = propertiesMap.get("test.response.type");
         String redirectUri = propertiesMap.get("test.redirect.uri");
-        log.error(
+        log.info(
                 "\n\n\n\n ************ AdminUI- authzurl:{}, strGrantType:{}, clientId:{},  clientSecret:{}, scopes:{}, responseType:{}, propertiesMap.get(auditLoggingURL)",
                 authzurl, strGrantType, clientId, clientSecret, scopes, responseType,
                 propertiesMap.get("auditLoggingURL"));

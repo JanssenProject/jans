@@ -29,8 +29,9 @@ public class UserResourceTest extends UserBaseTest {
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
+        log.info("\n\n Response for getUserResourceData() -  response:{}, response.getStatus():{}", response, response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.info("\n\n Response for getUserResourceData() -  response:{}", response);
+        
     }
 
 }

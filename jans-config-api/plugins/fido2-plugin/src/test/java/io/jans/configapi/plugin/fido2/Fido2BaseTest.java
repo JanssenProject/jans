@@ -20,7 +20,7 @@ public class Fido2BaseTest extends BaseTest {
 
     public void before() {
         boolean isAvailable = isAvailable(propertiesMap.get("fido2Url"), null, null);
-        log.error("\n\n\n *** FIDO2 Plugin isAvailable{}", isAvailable);
+        log.info("\n\n\n *** FIDO2 Plugin isAvailable{}", isAvailable);
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well
         if (!isAvailable) {

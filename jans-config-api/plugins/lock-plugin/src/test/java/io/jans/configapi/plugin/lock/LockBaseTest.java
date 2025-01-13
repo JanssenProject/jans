@@ -23,10 +23,10 @@ public class LockBaseTest extends BaseTest {
     @BeforeMethod
     public void before() {
         boolean isAvailable = isAvailable(propertiesMap.get("lockConfigUrl"), null, null);
-        log.info("\n\n\n *** LOCK Plugin isServiceDeployed{}", isServiceDeployed);
+        log.info("\n\n\n *** LOCK Plugin isAvailable{}", isAvailable);
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well
-        if (!isServiceDeployed) {
+        if (!isAvailable) {
             throw new SkipException("LOCK Plugin not deployed");
         }
     }
