@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.test;
+package io.jans.configapi.plugin.kc.link.test;
 
 import io.jans.configapi.core.test.BaseTest;
 import jakarta.ws.rs.client.Invocation.Builder;
@@ -21,17 +21,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Parameters;
 
 public class JansKcLinkConfigResourceTest extends BaseTest {
-
-    // Execute before each test is run
-    @BeforeMethod
-    public void before(){
-        boolean isServiceDeployed = isServiceDeployed("io.jans.configapi.plugin.kc.link.rest.ApiApplication");
-          log.info("\n\n\n *** KC-LINK - isServiceDeployed:{}",isServiceDeployed);
-        // check condition, note once you condition is met the rest of the tests will be skipped as well
-        if(!isServiceDeployed) {
-            throw new SkipException("KC-LINK Plugin not deployed");
-        }    
-    }   
     
     @Parameters({"test.issuer", "kcLinkConfigUrl"})
     @Test

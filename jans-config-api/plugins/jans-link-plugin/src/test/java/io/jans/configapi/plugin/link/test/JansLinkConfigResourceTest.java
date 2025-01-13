@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.test;
+package io.jans.configapi.plugin.link.test;
 
 import io.jans.configapi.core.test.BaseTest;
 import jakarta.ws.rs.client.Invocation.Builder;
@@ -25,26 +25,11 @@ import org.testng.annotations.Parameters;
 
 public class JansLinkConfigResourceTest extends BaseTest {
 
-    @BeforeMethod
-    public void before() {
-        boolean isServiceDeployed = isDeployed();
-        log.error("\n\n\n *** JANS-LINK Plugin isServiceDeployed{}", isServiceDeployed);
-        // check condition, note once you condition is met the rest of the tests will be
-        // skipped as well
-        if (!isServiceDeployed) {
-            throw new SkipException("JANS-LINK Plugin Not deployed");
-        }
-    }
-
-    private boolean isDeployed() {
-        return isServiceDeployed("io.jans.configapi.plugin.link.rest.ApiApplication");
-    }
-
     @Parameters({ "test.issuer", "linkConfigUrl" })
     @Test
     public void fetchLinkConfiguration(final String issuer, final String linkConfigUrl) {
         log.error("\n\n\n Get Link Configuration isDeployed():{} {}", isDeployed(), "\n\n\n");
-        
+
         before();
         log.info("fetchLinkConfiguration() - accessToken:{}, issuer:{}, linkConfigUrl:{}", accessToken, issuer,
                 linkConfigUrl);
