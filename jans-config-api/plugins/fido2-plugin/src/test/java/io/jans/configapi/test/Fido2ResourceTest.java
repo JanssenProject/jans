@@ -24,7 +24,7 @@ import org.testng.annotations.Parameters;
 
 public class Fido2ResourceTest extends BaseTest {
 
-    protected boolean isEndpointAvailable(final String url, Map<String, String> headers,
+    protected boolean isAvailable(final String url, Map<String, String> headers,
             final Map<String, String> parameters) {
         return isEndpointAvailable(url, headers, parameters);
     }
@@ -32,11 +32,11 @@ public class Fido2ResourceTest extends BaseTest {
    
     @BeforeMethod
     public void before() {
-        boolean endpointAvailable = isEndpointAvailable(propertiesMap.get("fido2Url"), null, null);
-        log.info("\n\n\n *** FIDO2 Plugin endpointAvailable{}", endpointAvailable);
+        boolean isAvailable = isAvailable(propertiesMap.get("fido2Url"), null, null);
+        log.info("\n\n\n *** FIDO2 Plugin isAvailable{}", isAvailable);
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well
-        if (!isServiceDeployed) {
+        if (!isAvailable) {
             throw new SkipException("FIDO2 Plugin not deployed");
         }
     }

@@ -19,7 +19,7 @@ import org.testng.annotations.BeforeMethod;
 
 public class AdminUIBaseTest extends BaseTest {
 
-    protected boolean isEndpointAvailable(final String url, Map<String, String> headers,
+    protected boolean isAvailable(final String url, Map<String, String> headers,
             final Map<String, String> parameters) {
         return isEndpointAvailable(url, headers, parameters);
     }
@@ -27,12 +27,12 @@ public class AdminUIBaseTest extends BaseTest {
     // Execute before each test is run
     @BeforeMethod
     protected void before() {
-        boolean endpointAvailable = isEndpointAvailable(propertiesMap.get("auditLoggingURL"), null, null);
-        log.error("\n\n\n *** ADMIN-UI Plugin endpointAvailable:{} {}", endpointAvailable, "\n\n\n");
+        boolean isAvailable = isAvailable(propertiesMap.get("auditLoggingURL"), null, null);
+        log.error("\n\n\n *** ADMIN-UI Plugin isAvailable:{} {}", isAvailable, "\n\n\n");
         // check condition, note once you condition is met the rest of the tests will be
 
         // skipped as well
-        if (!endpointAvailable) {
+        if (!isAvailable) {
             throw new SkipException("ADMIN-UI Plugin Not deployed");
         } else {
             log.error("\n\n\n *** ADMIN-UI Plugin is Deployed{} {}", "\n\n");
