@@ -59,10 +59,10 @@ mod tests {
 
     #[test]
     fn test_new() {
-        let item = ExpEntry::new("key", Duration::new(10, 0).expect("a valid duration"));
+        let item = ExpEntry::new("key", Duration::seconds(10));
         assert_eq!(item.key, "key");
-        assert!(item.expired_at > Utc::now() + Duration::new(9, 0).expect("a valid duration"));
-        assert!(item.expired_at <= Utc::now() + Duration::new(10, 0).expect("a valid duration"));
+        assert!(item.expired_at > Utc::now() + Duration::seconds(9));
+        assert!(item.expired_at <= Utc::now() + Duration::seconds(10));
     }
 
     #[test]
@@ -70,7 +70,7 @@ mod tests {
         let kv_entry = KvEntry::new(
             "keyFromKV",
             "value from KV",
-            Duration::new(10, 0).expect("a valid duration"),
+            Duration::seconds(10),
         );
         let exp_item = ExpEntry::from_kv_entry(&kv_entry);
         assert_eq!(exp_item.key, "keyFromKV");
@@ -79,15 +79,15 @@ mod tests {
 
     #[test]
     fn test_cmp() {
-        let item_small = ExpEntry::new("k1", Duration::new(10, 0).expect("a valid duration"));
-        let item_big = ExpEntry::new("k2", Duration::new(8000, 0).expect("a valid duration"));
+        let item_small = ExpEntry::new("k1", Duration::seconds(10));
+        let item_big = ExpEntry::new("k2", Duration::seconds(8000));
         assert!(item_small > item_big); // reverse order
         assert!(item_big < item_small); // reverse order
     }
 
     #[test]
     fn test_is_expired() {
-        let item = ExpEntry::new("k1", Duration::new(0, 100).expect("a valid duration"));
+        let item = ExpEntry::new("k1", Duration::seconds(0));
         std::thread::sleep(std::time::Duration::from_nanos(200));
         assert!(item.is_expired());
     }

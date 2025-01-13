@@ -31,11 +31,11 @@ mod tests {
         let item = KvEntry::<String>::new(
             "key",
             "value".into(),
-            Duration::new(10, 0).expect("a valid duration"),
+            Duration::seconds(10),
         );
         assert_eq!(item.key, "key");
         assert_eq!(item.value, "value");
-        assert!(item.expired_at > Utc::now() + Duration::new(9, 0).expect("a valid duration"));
-        assert!(item.expired_at <= Utc::now() + Duration::new(10, 0).expect("a valid duration"));
+        assert!(item.expired_at > Utc::now() + Duration::seconds(9));
+        assert!(item.expired_at <= Utc::now() + Duration::seconds(10));
     }
 }

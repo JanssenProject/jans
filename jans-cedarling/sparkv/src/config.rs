@@ -21,8 +21,8 @@ impl Config {
         Config {
             max_items: 10_000,
             max_item_size: 500_000,
-            max_ttl: Duration::new(60 * 60, 0).expect("a valid duration"),
-            default_ttl: Duration::new(5 * 60, 0).expect("a valid duration"), // 5 minutes
+            max_ttl: Duration::seconds(60 * 60),
+            default_ttl: Duration::seconds(5 * 60), // 5 minutes
             auto_clear_expired: true,
         }
     }
@@ -45,11 +45,11 @@ mod tests {
         assert_eq!(config.max_item_size, 500_000);
         assert_eq!(
             config.max_ttl,
-            Duration::new(60 * 60, 0).expect("a valid duration")
+            Duration::seconds(60 * 60)
         );
         assert_eq!(
             config.default_ttl,
-            Duration::new(5 * 60, 0).expect("a valid duration")
+            Duration::seconds(5 * 60)
         );
         assert!(config.auto_clear_expired);
     }
