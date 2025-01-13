@@ -6,33 +6,25 @@
 
 package io.jans.configapi.plugin.link.test;
 
-import io.jans.configapi.core.test.BaseTest;
+import io.jans.configapi.plugin.link.LinkBaseTest;
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 import org.testng.annotations.Test;
-
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
-
-import java.lang.reflect.Method;
-
-import org.testng.SkipException;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Parameters;
 
-public class JansLinkConfigResourceTest extends BaseTest {
+public class JansLinkConfigResourceTest extends LinkBaseTest {
 
     @Parameters({ "test.issuer", "linkConfigUrl" })
     @Test
     public void fetchLinkConfiguration(final String issuer, final String linkConfigUrl) {
-        log.error("\n\n\n Get Link Configuration isDeployed():{} {}", isDeployed(), "\n\n\n");
-
-        before();
         log.info("fetchLinkConfiguration() - accessToken:{}, issuer:{}, linkConfigUrl:{}", accessToken, issuer,
                 linkConfigUrl);
+
         Builder request = getResteasyService().getClientBuilder(issuer + linkConfigUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);

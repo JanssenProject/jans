@@ -4,16 +4,16 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.plugin.link;
+package io.jans.configapi.plugin.fido2;
 
 import io.jans.configapi.core.test.BaseTest;
 
 import java.util.Map;
 
 import org.testng.SkipException;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.a;
 
-public class LinkBaseTest extends BaseTest {
+public class Fido2BaseTest extends BaseTest {
 
     protected boolean isAvailable(final String url, Map<String, String> headers, final Map<String, String> parameters) {
         return isEndpointAvailable(url, headers, parameters);
@@ -21,12 +21,12 @@ public class LinkBaseTest extends BaseTest {
 
     @BeforeMethod
     public void before() {
-        boolean isAvailable = isAvailable(propertiesMap.get("linkConfigUrl"), null, null);
-        log.error("\n\n\n *** JANS-LINK Plugin isAvailable{}", isAvailable);
+        boolean isAvailable = isAvailable(propertiesMap.get("fido2Url"), null, null);
+        log.error("\n\n\n *** FIDO2 Plugin isAvailable{}", isAvailable);
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well
         if (!isAvailable) {
-            throw new SkipException("JANS-LINK Plugin Not deployed");
+            throw new SkipException("FIDO2 Plugin Not deployed");
         }
     }
 

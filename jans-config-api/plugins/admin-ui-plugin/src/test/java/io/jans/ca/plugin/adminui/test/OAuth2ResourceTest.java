@@ -27,8 +27,6 @@ public class OAuth2ResourceTest extends AdminUIBaseTest {
     @Parameters({ "test.issuer", "adminUIConfigURL" })
     @Test
     public void getOAuth2Data(final String issuer, final String adminUIConfigURL) {
-        
-        before();
         log.info("getOAuth2Data() - accessToken:{}, issuer:{}, adminUIConfigURL:{}", accessToken, issuer,
                 adminUIConfigURL);
 
@@ -48,7 +46,7 @@ public class OAuth2ResourceTest extends AdminUIBaseTest {
     @Parameters({ "test.issuer", "apiProtectionTokenURL", "ujwt" })
     @Test
     public void getApiProtectionTokenData(final String issuer, final String apiProtectionTokenURL, final String ujwt) {
-        
+
         before();
         log.info("\n\n getApiProtectionTokenData() - accessToken:{}, issuer:{}, apiProtectionTokenURL:{}, ujwt:{}",
                 accessToken, issuer, apiProtectionTokenURL, ujwt);

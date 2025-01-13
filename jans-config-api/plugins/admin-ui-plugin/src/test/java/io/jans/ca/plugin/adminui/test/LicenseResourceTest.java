@@ -28,10 +28,9 @@ public class LicenseResourceTest extends AdminUIBaseTest {
     @Parameters({ "test.issuer", "checkActiveLicenseURL" })
     @Test
     public void getLicenseDetails(final String issuer, final String checkActiveLicenseURL) {
-        
-        before();
         log.info("getLicenseDetails() - accessToken:{}, issuer:{}, checkActiveLicenseURL:{}", accessToken, issuer,
                 checkActiveLicenseURL);
+
         Builder request = getResteasyService().getClientBuilder(issuer + checkActiveLicenseURL);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);

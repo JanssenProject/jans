@@ -4,9 +4,9 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.test;
+package io.jans.configapi.plugin.lock.test;
 
-import io.jans.configapi.saml.KcSAMLBaseTest;
+import io.jans.configapi.plugin.lock.LockBaseTest;
 
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
@@ -17,21 +17,20 @@ import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
 import org.testng.annotations.Parameters;
 
-public class JansKcSAMLTrustRelationshipTest extends KcSAMLBaseTest {
+public class LockConfigResourceTest extends LockBaseTest {
 
-    @Parameters({ "test.issuer", "samlTrustRelationshipUrl" })
+    @Parameters({ "test.issuer", "lockConfigUrl" })
     @Test
-    public void getKcSAMLTrustRelationship(final String issuer, final String samlTrustRelationshipUrl) {
-        log.info("getKcSAMLTrustRelationship() - accessToken:{}, issuer:{}, samlTrustRelationshipUrl:{}", accessToken,
-                issuer, samlTrustRelationshipUrl);
-        
-        before();
-        Builder request = getResteasyService().getClientBuilder(issuer + samlTrustRelationshipUrl);
+    public void getLockConfigUrlData(final String issuer, final String lockConfigUrl) {
+        log.info("getLockConfigUrlData() - accessToken:{}, issuer:{}, lockConfigUrl:{}", accessToken, issuer,
+                lockConfigUrl);
+
+        Builder request = getResteasyService().getClientBuilder(issuer + lockConfigUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        
+
         Response response = request.get();
-        log.info("Response for getKcSAMLTrustRelationship -  response:{}", response);
+        log.info("Response for getLockConfigUrlData -  response:{}", response);
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
     }
 

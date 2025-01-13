@@ -19,8 +19,7 @@ import org.testng.annotations.BeforeMethod;
 
 public class AdminUIBaseTest extends BaseTest {
 
-    protected boolean isAvailable(final String url, Map<String, String> headers,
-            final Map<String, String> parameters) {
+    protected boolean isAvailable(final String url, Map<String, String> headers, final Map<String, String> parameters) {
         return isEndpointAvailable(url, headers, parameters);
     }
 

@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.plugin.link;
+package io.jans.configapi.plugin.scim;
 
 import io.jans.configapi.core.test.BaseTest;
 
@@ -13,20 +13,21 @@ import java.util.Map;
 import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
 
-public class LinkBaseTest extends BaseTest {
+public class ScimBaseTest extends BaseTest {
 
     protected boolean isAvailable(final String url, Map<String, String> headers, final Map<String, String> parameters) {
         return isEndpointAvailable(url, headers, parameters);
     }
 
+    // Execute before each test is run
     @BeforeMethod
     public void before() {
-        boolean isAvailable = isAvailable(propertiesMap.get("linkConfigUrl"), null, null);
-        log.error("\n\n\n *** JANS-LINK Plugin isAvailable{}", isAvailable);
+        boolean isAvailable = isAvailable(propertiesMap.get("scimConfigUrl"), null, null);
+        log.info("\n\n\n *** SCIM Plugin isAvailable{}", isAvailable);
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well
         if (!isAvailable) {
-            throw new SkipException("JANS-LINK Plugin Not deployed");
+            throw new SkipException("SCIM Plugin not deployed");
         }
     }
 

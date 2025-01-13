@@ -4,34 +4,33 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.lock.test;
+package io.jans.configapi.plugin.mgt.test;
 
-import io.jans.configapi.lock.LockBaseTest;
+import io.jans.configapi.plugin.mgt.UserBaseTest;
 
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
 import org.testng.annotations.Parameters;
+import static org.testng.Assert.assertEquals;
 
-public class LockConfigResourceTest extends LockBaseTest {
+public class UserResourceTest extends UserBaseTest {
 
-    @Parameters({ "test.issuer", "lockConfigUrl" })
+    @Parameters({ "test.issuer", "userUrl" })
     @Test
-    public void getLockConfigUrlData(final String issuer, final String lockConfigUrl) {
-        log.info("getLockConfigUrlData() - accessToken:{}, issuer:{}, lockConfigUrl:{}", accessToken, issuer,
-                lockConfigUrl);
-        before();
-        Builder request = getResteasyService().getClientBuilder(issuer + lockConfigUrl);
+    public void getUserResourceData(final String issuer, final String userUrl) {
+        log.info("\n\n getUserResourceData() - accessToken:{}, issuer:{}, userUrl:{}", accessToken, issuer, userUrl);
+
+        Builder request = getResteasyService().getClientBuilder(issuer + userUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
-        log.info("Response for getLockConfigUrlData -  response:{}", response);
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
+        log.info("\n\n Response for getUserResourceData() -  response:{}", response);
     }
 
 }

@@ -4,10 +4,9 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.mgt.test;
+package io.jans.configapi.plugin.saml.test;
 
-import io.jans.configapi.core.test.BaseTest;
-import io.jans.configapi.mgt.UserBaseTest;
+import io.jans.configapi.plugin.saml.KcSAMLBaseTest;
 
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
@@ -15,25 +14,24 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 import org.testng.annotations.Test;
-import org.testng.annotations.Parameters;
 import static org.testng.Assert.assertEquals;
+import org.testng.annotations.Parameters;
 
+public class JansKcSAMLConfigResourceTest extends KcSAMLBaseTest {
 
-public class UserResourceTest extends UserBaseTest {
-
-    @Parameters({"test.issuer", "userUrl"})
+    @Parameters({ "test.issuer", "samlConfigUrl" })
     @Test
-    public void getUserResourceData(final String issuer, final String userUrl) {
-        log.info("\n\n getUserResourceData() - accessToken:{}, issuer:{}, userUrl:{}", accessToken, issuer, userUrl);
-        Builder request = getResteasyService().getClientBuilder(issuer + userUrl);
+    public void getKcSAMLConfiguration(final String issuer, final String samlConfigUrl) {
+        log.info("getKcSAMLConfiguration() - accessToken:{}, issuer:{}, samlConfigUrl:{}", accessToken, issuer,
+                samlConfigUrl);
+
+        Builder request = getResteasyService().getClientBuilder(issuer + samlConfigUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
+        log.info("Response for getKcSAMLConfiguration -  response:{}", response);
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        log.info("\n\n Response for getUserResourceData() -  response:{}", response);
     }
-    
-	
 
 }

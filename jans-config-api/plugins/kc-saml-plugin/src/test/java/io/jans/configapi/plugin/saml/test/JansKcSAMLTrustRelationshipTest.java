@@ -4,9 +4,9 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.scim.test;
+package io.jans.configapi.plugin.saml.test;
 
-import io.jans.configapi.scim.ScimBaseTest;
+import io.jans.configapi.plugin.saml.KcSAMLBaseTest;
 
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
@@ -17,20 +17,21 @@ import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
 import org.testng.annotations.Parameters;
 
-public class ScimConfigResourceTest extends ScimBaseTest {
+public class JansKcSAMLTrustRelationshipTest extends KcSAMLBaseTest {
 
-    @Parameters({"test.issuer", "scimConfigUrl"})
+    @Parameters({ "test.issuer", "samlTrustRelationshipUrl" })
     @Test
-    public void getScimConfigData(final String issuer, final String scimConfigUrl) {
-        log.info("getScimConfigData() - accessToken:{}, issuer:{}, scimConfigUrl:{}", accessToken, issuer, scimConfigUrl);
-        before();
-        Builder request = getResteasyService().getClientBuilder(issuer + scimConfigUrl);
+    public void getKcSAMLTrustRelationship(final String issuer, final String samlTrustRelationshipUrl) {
+        log.info("getKcSAMLTrustRelationship() - accessToken:{}, issuer:{}, samlTrustRelationshipUrl:{}", accessToken,
+                issuer, samlTrustRelationshipUrl);
+
+        Builder request = getResteasyService().getClientBuilder(issuer + samlTrustRelationshipUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
-        log.info("Response for getScimConfigData -  response:{}", response);
+        log.info("Response for getKcSAMLTrustRelationship -  response:{}", response);
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
     }
-    
+
 }
