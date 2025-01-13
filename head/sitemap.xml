@@ -191,6 +191,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/cedarling/cedarling-wasm/</loc>
+         <lastmod>2025-01-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/cedarling/python/</loc>
          <lastmod>2025-01-13</lastmod>
          <changefreq>daily</changefreq>
@@ -202,11 +207,6 @@
     </url>
     <url>
          <loc>https://jans.io/docs/head/cedarling/python/usage/</loc>
-         <lastmod>2025-01-13</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/cedarling/wasm/</loc>
          <lastmod>2025-01-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
