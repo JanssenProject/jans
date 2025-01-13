@@ -85,7 +85,6 @@ nav:
       - Docker compose: janssen-server/install/docker-install/compose.md
     - Setup Instructions: janssen-server/install/setup.md
     - FAQ: janssen-server/install/install-faq.md
-    - jans command: janssen-server/install/jans-command.md
   - Kubernetes Operation Guide:
     - janssen-server/kubernetes-ops/README.md
     - Upgrade: janssen-server/kubernetes-ops/upgrade.md
@@ -361,6 +360,7 @@ nav:
         - Monolith: janssen-server/reference/kubernetes/docker-jans-monolith.md
         - Persistence: janssen-server/reference/kubernetes/docker-jans-persistence-loader.md
         - SCIM: janssen-server/reference/kubernetes/docker-jans-scim.md
+    - jans command: janssen-server/reference/jans-command.md
     - Learning Reference: janssen-server/reference/learning-reference.md
   - FIDO Admin Guide:
     - janssen-server/fido/README.md
@@ -477,9 +477,9 @@ plugins:
 - search
 - exclude-search:
     exclude_unreferenced: true
-# - git-revision-date-localized:
-#     enable_creation_date: true
-#     type: timeago
+- git-revision-date-localized:
+    enable_creation_date: true
+    type: timeago
 repo_name: GitHub
 repo_url: https://github.com/JanssenProject/jans/
 site_author: Janssen, Inc.

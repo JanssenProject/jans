@@ -8,45 +8,52 @@ tags:
 # Jans Command Overview
 
 The `jans` command is a top-level wrapper script for managing the Janssen Server. 
-This guide provides an overview of its usage and available commands.
+This guide provides an overview of its usage and available commands. List of 
+available commands may change as more commands are added. To see the current
+list of commands available in your installation, run following command at the
+Janssen Server:
 
+```bash title="Command"
+jans
+```
 
 ## Available Commands
 
-### Version
+### Version and build information
 
-Displays the version of the currently installed Janssen Server.
+Displays the version and build information of the currently installed 
+Janssen Server.
 
 ```bash title="Command"
 jans version
 ```
-![gif](../../assets/jans_version.png)
+![](../../assets/jans_version.png)
 
 
 ### CLI
 
-Description: Invokes the Janssen Command-Line Interface.
+Invokes the Janssen Command-Line Interface.
+
 ```bash title="Command"
 jans cli
 ```
 
-
-
 ### TUI
+
 Launches the text-based user interface for Janssen.
 
 ```bash title="Command"
 jans tui
 ```
-     ![gif](../../assets/jans-tui.gif)
-
+     
 ### Logs
 
 Shows the log file paths for various Janssen Server modules. 
+
 ```bash title="Command"
 jans logs
 ```
-![gif](../../assets/jans_logs.png)
+![](../../assets/jans_logs.png)
 
 
 ### Status
@@ -56,7 +63,7 @@ Displays the status of Janssen Server module services.
 ```bash title="Command"
 jans status
 ```
-![gif](../../assets/jans_status.png)
+![](../../assets/jans_status.png)
 
 
 ### Start 
@@ -86,7 +93,7 @@ Stops services for the Janssen Server.
 jans stop
 ```
 
-![gif](../../assets/jans_stop.png)
+![](../../assets/jans_stop.png)
 
 Stop a specific service.
 
@@ -102,12 +109,12 @@ Executing sudo systemctl stop jans-config-api
 
 ### Restart 
 
-Restarts services for the Janssen Server.
+Restart services for the Janssen Server.
 
 ```bash title="Command"
 jans restart
 ```
-![gif](../../assets/jans_restart.png)
+![](../../assets/jans_restart.png)
 
 Restart a specific service.
 
@@ -123,7 +130,7 @@ Executing sudo systemctl restart jans-config-api
 
 ### Health
 
-Retrieves health status from the Janssen services' health-check endpoint.
+Retrieves health status from the Janssen services health-check endpoint.
 
 ```bash title="Command"
 jans health
@@ -146,12 +153,12 @@ Checking health status for jans-config-api
 
 ### Info
 
-Lists important URLs, such as .well-known and Casa.
+Lists important URLs such as `.well-known` endpoints.
 
 ```bash title="Command"
 jans info
 ```
-![git](../../assets/jans_info.png)
+![](../../assets/jans_info.png)
 
 
 
