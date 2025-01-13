@@ -11,7 +11,7 @@
   
     <test name="Link-Plugin" enabled="true">
         <classes>
-            <class name="io.jans.configapi.test.JansLinkConfigResourceTest" />
+            <class name="io.jans.configapi.plugin.link.test.JansLinkConfigResourceTest" />
         </classes>
     </test>
 	

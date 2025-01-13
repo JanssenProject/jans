@@ -11,7 +11,7 @@
   
     <test name="KC-Link-Plugin" enabled="true">
         <classes>
-            <class name="io.jans.configapi.test.JansKcLinkConfigResourceTest" />
+            <class name="io.jans.configapi.plugin.kc.link.test.JansKcLinkConfigResourceTest" />
         </classes>
     </test>
 	

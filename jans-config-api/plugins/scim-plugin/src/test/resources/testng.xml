@@ -11,7 +11,7 @@
   
     <test name="SCIM-Plugin" enabled="true">
         <classes>
-            <class name="io.jans.configapi.test.ScimConfigResourceTest" />
+            <class name="io.jans.configapi.plugin.scim.test.ScimConfigResourceTest" />
         </classes>
     </test>
 	

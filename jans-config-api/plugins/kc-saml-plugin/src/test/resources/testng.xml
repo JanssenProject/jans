@@ -11,9 +11,9 @@
   
     <test name="KC-SAML-Plugin" enabled="true">
         <classes>
-            <class name="io.jans.configapi.test.JansIdpResourceTest" />
-			<class name="io.jans.configapi.test.JansKcSAMLConfigResourceTest" />
-			<class name="io.jans.configapi.test.JansKcSAMLTrustRelationshipTest" />
+            <class name="io.jans.configapi.plugin.saml.test.JansIdpResourceTest" />
+			<class name="io.jans.configapi.plugin.saml.test.JansKcSAMLConfigResourceTest" />
+			<class name="io.jans.configapi.plugin.saml.test.JansKcSAMLTrustRelationshipTest" />
         </classes>
     </test>
 	

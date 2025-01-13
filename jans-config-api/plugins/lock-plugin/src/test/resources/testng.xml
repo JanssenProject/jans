@@ -11,8 +11,8 @@
   
     <test name="Lock-Plugin" enabled="true">
         <classes>
-            <class name="io.jans.configapi.test.LockAuditResourceTest" />
-			<class name="io.jans.configapi.test.LockConfigResourceTest" />
+            <class name="io.jans.configapi.plugin.lock.test.LockAuditResourceTest" />
+			<class name="io.jans.configapi.plugin.lock.test.LockConfigResourceTest" />
         </classes>
     </test>
 	
