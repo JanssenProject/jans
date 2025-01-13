@@ -35,7 +35,8 @@ commercial distribution of Janssen Project Components called
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/janssen-auth-server)](https://artifacthub.io/packages/search?repo=janssen-auth-server)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/JanssenProject/jans/badge)](https://scorecard.dev/viewer/?uri=github.com/JanssenProject/jans)
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/4353/badge)](https://www.bestpractices.dev/projects/4353)[![Hex.pm](https://img.shields.io/hexpm/l/plug)](./LICENSE)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/4353/badge)](https://www.bestpractices.dev/projects/4353)
+[![Hex.pm](https://img.shields.io/hexpm/l/plug)](./LICENSE)
 [![GitHub contributors](https://img.shields.io/github/contributors/janssenproject/jans)](#users-and-community)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 
