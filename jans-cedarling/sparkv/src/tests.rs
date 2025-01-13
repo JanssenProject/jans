@@ -58,9 +58,9 @@ fn test_get_item() {
 
 #[test]
 fn test_get_item_return_none_if_expired() {
-    let mut sparkv = SparKV::<String>::new();
-    _ = sparkv.set_with_ttl("key", "value".into(), Duration::microseconds(40));
-    assert_eq!(sparkv.get("key"), Some(&String::from("value")));
+    let mut sparkv = SparKV::new();
+    _ = sparkv.set_with_ttl("key", "value", Duration::microseconds(40));
+    assert_eq!(sparkv.get("key"), Some(&"value"));
 
     std::thread::sleep(std::time::Duration::from_micros(40));
     assert_eq!(sparkv.get("key"), None);
@@ -106,10 +106,10 @@ fn memsize_item_capacity_exceeded() {
 fn custom_item_capacity_exceeded() {
     let mut config: Config = Config::new();
     config.max_item_size = 20;
-    let mut sparkv = SparKV::<String>::with_config_and_sizer(config, Some(String::len));
+    let mut sparkv = SparKV::<&str>::with_config_and_sizer(config, Some(|s| s.len()));
 
-    assert_eq!(Ok(()), sparkv.set("short", "value".to_string()));
-    assert_eq!(Err(crate::Error::ItemSizeExceeded), sparkv.set("long", "This is a value that exceeds 20 characters".to_string()));
+    assert_eq!(Ok(()), sparkv.set("short", "value"));
+    assert_eq!(Err(crate::Error::ItemSizeExceeded), sparkv.set("long", "This is a value that exceeds 20 characters"));
 }
 
 #[test]
@@ -173,10 +173,10 @@ fn test_delete() {
 fn test_clear_expired() {
     let mut config: Config = Config::new();
     config.auto_clear_expired = false;
-    let mut sparkv = SparKV::<String>::with_config(config);
-    _ = sparkv.set_with_ttl("not-yet-expired", "v".into(), Duration::seconds(90),);
-    _ = sparkv.set_with_ttl("expiring", "value".into(), Duration::milliseconds(1),);
-    _ = sparkv.set_with_ttl("not-expired", "value".into(), Duration::seconds(60),);
+    let mut sparkv = SparKV::with_config(config);
+    _ = sparkv.set_with_ttl("not-yet-expired", "v", Duration::seconds(90),);
+    _ = sparkv.set_with_ttl("expiring", "value", Duration::milliseconds(1),);
+    _ = sparkv.set_with_ttl("not-expired", "value", Duration::seconds(60),);
     std::thread::sleep(std::time::Duration::from_millis(2));
     assert_eq!(sparkv.len(), 3);
 
@@ -191,10 +191,10 @@ fn test_clear_expired() {
 fn test_clear_expired_with_overwritten_key() {
     let mut config: Config = Config::new();
     config.auto_clear_expired = false;
-    let mut sparkv = SparKV::<String>::with_config(config);
-    _ = sparkv.set_with_ttl("no-longer", "value".into(), Duration::milliseconds(1));
-    _ = sparkv.set_with_ttl("no-longer", "v".into(), Duration::seconds(90));
-    _ = sparkv.set_with_ttl("not-expired", "value".into(), Duration::seconds(60));
+    let mut sparkv = SparKV::with_config(config);
+    _ = sparkv.set_with_ttl("no-longer", "value", Duration::milliseconds(1));
+    _ = sparkv.set_with_ttl("no-longer", "v", Duration::seconds(90));
+    _ = sparkv.set_with_ttl("not-expired", "value", Duration::seconds(60));
     std::thread::sleep(std::time::Duration::from_millis(2));
     assert_eq!(sparkv.expiries.len(), 3); // overwriting key does not update expiries
     assert_eq!(sparkv.len(), 2);
