@@ -4875,6 +4875,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_1_11_2">
@@ -4967,6 +4969,20 @@
     <li class="md-nav__item">
       <a href="../engine-bridge-config/" class="md-nav__link">
         Engine and bridge configurations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../native-applications/" class="md-nav__link">
+        Agama flows in native applications
       </a>
     </li>
   
@@ -5192,13 +5208,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#does-the-engine-support-ajax" class="md-nav__link">
-    Does the engine support AJAX?
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#how-to-launch-a-flow" class="md-nav__link">
     How to launch a flow?
   </a>
@@ -5271,6 +5280,13 @@
           <li class="md-nav__item">
   <a href="#can-agama-code-be-called-from-java" class="md-nav__link">
     Can Agama code be called from Java?
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-run-flows-from-native-applications-instead-of-web-browsers" class="md-nav__link">
+    How to run flows from native applications instead of web browsers?
   </a>
   
 </li>
@@ -8945,13 +8961,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#does-the-engine-support-ajax" class="md-nav__link">
-    Does the engine support AJAX?
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#how-to-launch-a-flow" class="md-nav__link">
     How to launch a flow?
   </a>
@@ -9024,6 +9033,13 @@
           <li class="md-nav__item">
   <a href="#can-agama-code-be-called-from-java" class="md-nav__link">
     Can Agama code be called from Java?
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-run-flows-from-native-applications-instead-of-web-browsers" class="md-nav__link">
+    How to run flows from native applications instead of web browsers?
   </a>
   
 </li>
@@ -9152,9 +9168,6 @@ ref = CdiUtil.bean(managedBean.class);
 <h3 id="how-to-debug-flows">How to debug flows?<a class="headerlink" href="#how-to-debug-flows" title="Permanent link">#</a></h3>
 <p>We plan to offer a debugger in the future. In the meantime, you can do <code>printf</code>-like debugging using the <code>Log</code> instruction. See <a href="../jans-agama-engine/#logging">Agama logging</a>.</p>
 <h2 id="miscellaneous">Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permanent link">#</a></h2>
-<h3 id="does-the-engine-support-ajax">Does the engine support AJAX?<a class="headerlink" href="#does-the-engine-support-ajax" title="Permanent link">#</a></h3>
-<p>If you require a flow with no page refreshes, it could be implemented using AJAX calls as long as they align to the <a href="../advanced-usages/#flow-advance-and-navigation">POST-REDIRECT-GET</a> pattern, where a form is submitted, and as response a 302/303 HTTP redirection is obtained. Your Javascript code must also render UI elements in accordance with the data obtained by following the redirect (GET). Also, care must be taken in order to process server errors, timeouts, etc. In general, this requires a considerable amount of effort.</p>
-<p>If you require AJAX to consume a resource (service) residing in the same domain of your server, there is no restriction - the engine is not involved. Interaction with external domains may require to setup CORS configuration appropriately in the authentication server.  </p>
 <h3 id="how-to-launch-a-flow">How to launch a flow?<a class="headerlink" href="#how-to-launch-a-flow" title="Permanent link">#</a></h3>
 <p>A flow is launched by issuing an authentication request in a browser as explained <a href="../jans-agama-engine/#launching-flows">here</a>. </p>
 <h3 id="does-flow-execution-timeout">Does flow execution timeout?<a class="headerlink" href="#does-flow-execution-timeout" title="Permanent link">#</a></h3>
@@ -9188,13 +9201,15 @@ String label = lbls.get(&quot;&lt;label key&gt;&quot;, ... optional extra params
 <p>Note the localization context (language, country, etc.) used in such a call is based on the HTTP request that is taking place when the code is invoked.</p>
 <h3 id="can-agama-code-be-called-from-java">Can Agama code be called from Java?<a class="headerlink" href="#can-agama-code-be-called-from-java" title="Permanent link">#</a></h3>
 <p>No. These two languages are supposed to play roles that should not be mixed, check <a href="../agama-best-practices/#about-flow-design">here</a>.</p>
+<h3 id="how-to-run-flows-from-native-applications-instead-of-web-browsers">How to run flows from native applications instead of web browsers?<a class="headerlink" href="#how-to-run-flows-from-native-applications-instead-of-web-browsers" title="Permanent link">#</a></h3>
+<p>There is a separate doc page covering this aspect <a href="../native-applications/">here</a>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-03T10:12:46+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-03</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-10T13:02:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-10</span>
       
         <br>
         Created:
@@ -9223,7 +9238,7 @@ String label = lbls.get(&quot;&lt;label key&gt;&quot;, ... optional extra params
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../engine-bridge-config/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Engine and bridge configurations" rel="prev">
+        <a href="../native-applications/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Agama flows in native applications" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -9232,7 +9247,7 @@ String label = lbls.get(&quot;&lt;label key&gt;&quot;, ... optional extra params
               <span class="md-footer__direction">
                 Previous
               </span>
-              Engine and bridge configurations
+              Agama flows in native applications
             </div>
           </div>
         </a>

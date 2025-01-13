@@ -4869,6 +4869,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_1_11_2">
@@ -4961,6 +4963,20 @@
     <li class="md-nav__item">
       <a href="../../janssen-server/developer/agama/engine-bridge-config/" class="md-nav__link">
         Engine and bridge configurations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../janssen-server/developer/agama/native-applications/" class="md-nav__link">
+        Agama flows in native applications
       </a>
     </li>
   
@@ -8623,7 +8639,9 @@ contain business specific data needed for policy evaluation.</p>
 From a logical perspective, (<code>person_allowed</code> AND <code>workload_allowed</code>) must be <code>True</code>. The JWT's,
 Action, Resource and Context is sent by the application in the authorization request. For example,
 this is a sample request from a hypothetical application:</p>
-<div class="highlight"><pre><span></span><code><span class="nx">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">bootstrap_config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{...};</span><span class="w"></span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">(</span><span class="nx">bootstrap_config</span><span class="p">);</span><span class="w"></span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span>
 <span class="w">  </span><span class="s2">&quot;tokens&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="s2">&quot;access_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eyJhbGc....&quot;</span><span class="p">,</span><span class="w"> </span>
 <span class="w">    </span><span class="s2">&quot;id_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eyJjbGc...&quot;</span><span class="p">,</span><span class="w"> </span>
@@ -8644,7 +8662,7 @@ this is a sample request from a hypothetical application:</p>
 <span class="w">      </span><span class="p">}</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-<span class="nx">decision_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">authz</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span><span class="w"></span>
+<span class="nx">decision_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span><span class="w"></span>
 </code></pre></div>
 <h2 id="automatically-adding-entity-references-to-the-context">Automatically Adding Entity References to the Context<a class="headerlink" href="#automatically-adding-entity-references-to-the-context" title="Permanent link">#</a></h2>
 <p>Cedarling simplifies context creation by automatically including certain entities. This means you don't need to manually pass their references when using them in your policies. The following entities are automatically added to the context, along with their naming conventions in <code>lower_snake_case</code> format:</p>
@@ -8729,7 +8747,7 @@ action &quot;View&quot; appliesTo {
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-03T08:32:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-03</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-13T07:20:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-13</span>
       
         <br>
         Created:
