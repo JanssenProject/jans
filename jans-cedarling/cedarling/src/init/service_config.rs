@@ -1,13 +1,14 @@
-// This software is available under the Apache-2.0 license.
-// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
-//
-// Copyright (c) 2024, Gluu, Inc.
+/*
+ * This software is available under the Apache-2.0 license.
+ * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+ *
+ * Copyright (c) 2024, Gluu, Inc.
+ */
 
-use bootstrap_config::BootstrapConfig;
-
-use super::policy_store::{load_policy_store, PolicyStoreLoadError};
+use super::policy_store::{PolicyStoreLoadError, load_policy_store};
 use crate::bootstrap_config;
 use crate::common::policy_store::PolicyStoreWithID;
+use bootstrap_config::BootstrapConfig;
 
 /// Configuration that hold validated infomation from bootstrap config
 #[derive(Clone)]
@@ -23,8 +24,8 @@ pub enum ServiceConfigError {
 }
 
 impl ServiceConfig {
-    pub fn new(bootstrap: &BootstrapConfig) -> Result<Self, ServiceConfigError> {
-        let policy_store = load_policy_store(&bootstrap.policy_store_config)?;
+    pub async fn new(bootstrap: &BootstrapConfig) -> Result<Self, ServiceConfigError> {
+        let policy_store = load_policy_store(&bootstrap.policy_store_config).await?;
 
         Ok(Self { policy_store })
     }
