@@ -8913,13 +8913,13 @@
 
 
 <h1 id="agama-flows-in-native-applications">Agama flows in native applications<a class="headerlink" href="#agama-flows-in-native-applications" title="Permanent link">#</a></h1>
-<p>Agama is a framework primarily focused on web flows, however, with the <a href="../../../../script-catalog/authorization_challenge/authorization-challenge/">Authorization Challenge</a> endpoint of Jans Server, developers can  now run their flows outside the browser. This makes possible to offer secure, multi-step authentication flows from desktop and mobile applications without resorting to mechanisms like Web Views that degrade the user experience substantially.</p>
+<p>Agama is a framework primarily focused on web flows, however, with the <a href="../../../../script-catalog/authorization_challenge/authorization-challenge/">Authorization Challenge</a> endpoint of Jans Server, developers can  now run their flows outside the browser. This makes possible to offer secure, multi-step authentication flows from desktop and mobile applications without resorting to mechanisms like Web Views that  substantially degrade the user experience.</p>
 <p>Additionally, the same already-familiar tools for authoring and deploying Agama projects can be used for the job. Moreover, the flows built for the web can be run in the native world without modification, requiring only to code the respective native UI and the logic that interacts with the Authorization Challenge endpoint, called "the endpoint" hereafter.</p>
-<p>In this document, we present an overview on how the endpoint works to make your Agama flows run without a web browser. Preliminar acquaintance with the following topics is recommended:</p>
+<p>In this document, we present an overview of how the endpoint works to make your Agama flows run without a web browser. Preliminar acquaintance with the following topics is recommended:</p>
 <ul>
 <li>Agama <a href="../../../../agama/introduction/#dsl">DSL</a> and <code>.gama</code> <a href="../../../../agama/gama-format/">format</a></li>
-<li>Agama projects <a href="../../../config-guide/auth-server-config/agama-project-configuration.md">deployment</a> in the Janssen Server </li>
-<li><a href="../../../../agama/execution-rules/">Execution rules</a> in the Jans Agama <a href="../../../agama/jans-agama-engine.md">engine</a></li>
+<li>Agama projects <a href="../../../config-guide/auth-server-config/agama-project-configuration/">deployment</a> in the Janssen Server </li>
+<li><a href="../../../../agama/execution-rules/">Execution rules</a> in the Jans Agama <a href="../jans-agama-engine/">engine</a></li>
 <li>A basic understanding of <a href="https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-apps-02.html">OAuth 2.0 for First-Party Applications</a></li>
 </ul>
 <h2 id="how-do-flows-actually-run">How do flows actually run?<a class="headerlink" href="#how-do-flows-actually-run" title="Permanent link">#</a></h2>
@@ -8933,7 +8933,7 @@
 </ul>
 <p>In a native setting no HTML markup is suppossed to be generated and replied - it's the app that is in charge of displaying the UI now. For this purpose, it will receive (from the endpoint) the data that would be originally injected into the template. Most of times, this will carry information gathered at earlier stages of the flow and that is relevant to properly show or update the UI. </p>
 <p>Likewise, the "data submission" for the <em>fetch</em> phase of RRF is performed by the app too. In this case, the relevant data grabbed from the user interaction is sent to the server side (via challenge endpoint) and becomes the result of the RRF (the value for the variable on the left-hand side of the instruction). Note both the input ("injected" data) and the output (result) is specified in JSON format.</p>
-<p>Once the <em>fetch</em> occurs, the flow proceeds its execution as normal until another RRF instruction is hit, where the procedure described above takes place again.</p>
+<p>Once the <em>fetch</em> occurs, the flow proceeds its execution until another RRF instruction is hit, where the procedure described above takes place again.</p>
 <p>Note this approach has two big benefits:</p>
 <ol>
 <li>Regular web flows can be reused in the native world without modifications</li>
@@ -8955,8 +8955,8 @@
 <p>This hypothetical flow is simple but will give you a good idea on how to interact with the endpoint.</p>
 <h3 id="the-flow-code">The flow code<a class="headerlink" href="#the-flow-code" title="Permanent link">#</a></h3>
 <p>The following code depicts the implementation.</p>
-<p><img alt="enabled-2fa-methods" src="../../assets/agama/challenge-flow.png" /></p>
-<p>Flow <code>co.acme.flows.emailOtp</code> is self-explanatory and does not require further insight. Note the templates referenced (in RRF directives) don't necessarily have to exist, however, the template names will be included in the output of the endpoint as the flow executes. This serves as a hint or reference for the app to know the current point of execution and determine what should be shown in the UI. It will be more clearly seen in the next section.</p>
+<p><img alt="enabled-2fa-methods" src="../../../../assets/agama/challenge-flow.png" /></p>
+<p>Flow <code>co.acme.flows.emailOtp</code> is self-explanatory and does not require further insight. Note the templates referenced in RRF directives don't necessarily have to exist, however, the template names will be included in the output of the endpoint as the flow executes. This serves as a hint or reference for the app to know the current point of execution and determine what should be shown in the UI. It will be more clearly seen in the next section.</p>
 <h2 id="running-the-flow">Running the flow<a class="headerlink" href="#running-the-flow" title="Permanent link">#</a></h2>
 <h3 id="requisites">Requisites<a class="headerlink" href="#requisites" title="Permanent link">#</a></h3>
 <p>To be able to run an Agama flow from a native app using the endpoint, it is required to register an OAuth Client in the Jans server with at least the <code>authorization_challenge</code> scope. The process of client registration is beyond the scope of this document.</p>
@@ -9015,7 +9015,7 @@ Content-Type: application/json
 }
 </code></pre></div>
 <p>While this may look like something wrong happened, it is not really the case. This is derived from the spec the endpoint adheres to, where the authorization server must report every intermediate response as an error with a 401 status code.</p>
-<p>The value of the <code>error</code> property references a section that contains the template path. Here it corresponds to the first RRF instruction reached in the execution (line 4 in the flow's code). Particularly this RRF does not have a second parameter, so there is only one property inside the <code>flow_paused</code> JSON object.</p>
+<p>The value of the <code>error</code> property references a section that contains the template path. Here it corresponds to the first RRF instruction reached in the execution (line 4 in the flow's code). Particularly this RRF was not invoked passing two parameters, so there is only one property inside the <code>flow_paused</code> JSON object.</p>
 <p>Note the presence of <code>auth_session</code>. This value allows the authorization server to associate subsequent requests issued by the app with this specific flow execution.</p>
 <p>Based on this response, the app should render UI elements in order to capture the username. Here, <code>username-prompt.ftl</code> serves as a hint for the app to know the point of execution the flow is at currently.</p>
 <h3 id="subsequent-requests">Subsequent requests<a class="headerlink" href="#subsequent-requests" title="Permanent link">#</a></h3>
@@ -9034,7 +9034,7 @@ Content-Type: application/json
 </tr>
 <tr>
 <td><code>auth_session</code></td>
-<td>The value obtained in the initial request</td>
+<td>The value obtained in the previous request</td>
 </tr>
 <tr>
 <td><code>data</code></td>
@@ -9042,8 +9042,10 @@ Content-Type: application/json
 </tr>
 </tbody>
 </table>
-<p>!!! Note:
-    Whenever a request is missing the <code>auth_session</code> param, it is assumed the <a href="#initial-request">inital request</a> is being attempted.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Whenever a request is missing the <code>auth_session</code> param, it is assumed the <a href="#initial-request">inital request</a> is being attempted.</p>
+</div>
 <p>Let's assume the user entered <code>Joan</code> as username in the app. A request like the below can then be issued so the variable <code>obj</code> at line 4 is assigned a value:</p>
 <div class="highlight"><pre><span></span><code>curl -i -d auth_session=BmAiCeArLdAa0 -d use_auth_session=true
      --data-urlencode data=&#39;{ &quot;username&quot;: &quot;Joan&quot; }&#39; 
@@ -9102,7 +9104,7 @@ Content-Type: application/json
 }
 </code></pre></div>
 <p>This means we have hit line 37. </p>
-<p>When a <code>Finish</code> instruction is reached it is fully executed and the error reported changes to <code>flow_finished</code>. What is left now is binding the user identified by <code>userId</code> (Joan) to the authorization request we have been handling (<code>BmAiCeArLdAa0</code>). This is how the user actually gets authenticated.</p>
+<p>When a <code>Finish</code> instruction is reached it is fully executed and the error reported in the response changes to <code>flow_finished</code>. What is left now is binding the user identified by <code>userId</code> (Joan) to the authorization request we have been handling (<code>BmAiCeArLdAa0</code>). This is how the user actually gets authenticated.</p>
 <h3 id="final-request">Final request<a class="headerlink" href="#final-request" title="Permanent link">#</a></h3>
 <p>To authenticate the user, we issue one last request:</p>
 <div class="highlight"><pre><span></span><code>curl -i -d auth_session=BmAiCeArLdAa0 -d use_auth_session=true
@@ -9119,8 +9121,10 @@ Content-Type: application/json
 <p>At this point, the app can update the UI giving the user access to the actual app contents. No more requests are expected to be received by the endpoint with the given <code>auth_session</code> value.</p>
 <h2 id="understanding-errors">Understanding errors<a class="headerlink" href="#understanding-errors" title="Permanent link">#</a></h2>
 <p>So far we have been following the "happy" path in the example flow where all assumptions are met. This is unrealistic so here we offer an overview of how the endpoint behaves when abnormal conditions come up.</p>
-<p>!!! Note:
-    In this section, we stick to the terminology found <a href="../../../../agama/execution-rules/#flows-lifecycle">here</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In this section, we stick to the terminology found <a href="../../../../agama/execution-rules/#flows-lifecycle">here</a>.</p>
+</div>
 <h3 id="missing-parameters">Missing parameters<a class="headerlink" href="#missing-parameters" title="Permanent link">#</a></h3>
 <p>Assume the following request is issued:</p>
 <div class="highlight"><pre><span></span><code>curl -i -d use_auth_session=true -d acr_values=agama_challenge -d client_id=&lt;client-id&gt;
@@ -9154,7 +9158,7 @@ Content-Type: application/json
   }
 }
 </code></pre></div>
-<p>Note <code>auth_session</code> is not replied. As such, no more requests to the endpoint should be made passing an <code>auth_session</code> value obtained earlier.</p>
+<p>Note <code>auth_session</code> is not replied. As such, no more requests to the endpoint should be made passing the <code>auth_session</code> value obtained earlier.</p>
 <h3 id="engine-errors">Engine errors<a class="headerlink" href="#engine-errors" title="Permanent link">#</a></h3>
 <p>There are several conditions under which the engine produces errors. In these cases, the HTTP error emitted by the engine is included in the endpoint response. As in previous error scenarios, no <code>auth_session</code> is replied.</p>
 <h4 id="flow-timeout">Flow timeout<a class="headerlink" href="#flow-timeout" title="Permanent link">#</a></h4>
@@ -9180,8 +9184,8 @@ Content-Type: application/json
 <h4 id="crashed-flow">Crashed flow<a class="headerlink" href="#crashed-flow" title="Permanent link">#</a></h4>
 <p>When a flow crashes, the error is reported in similar way the timeout is reported. Here are some examples:</p>
 <ol>
-<li>An attempt to access a property or index of a <code>null</code> variable in Agama code</li>
-</ol>
+<li>
+<p>An attempt to access a property or index of a <code>null</code> variable in Agama code</p>
 <div class="highlight"><pre><span></span><code>HTTP/1.1 500 Server Error
 Content-Type: application/json
 ...
@@ -9199,9 +9203,9 @@ Content-Type: application/json
   }
 }
 </code></pre></div>
-<ol>
-<li>A variable does not meet the expected shape for a given Agama directive</li>
-</ol>
+</li>
+<li>
+<p>A variable does not meet the expected shape for a given Agama directive</p>
 <div class="highlight"><pre><span></span><code>HTTP/1.1 500 Server Error
 Content-Type: application/json
 ...
@@ -9219,9 +9223,9 @@ Content-Type: application/json
   }
 }
 </code></pre></div>
-<ol>
-<li>Indexing a string in Java beyond length</li>
-</ol>
+</li>
+<li>
+<p>Indexing a string in Java beyond length</p>
 <div class="highlight"><pre><span></span><code>HTTP/1.1 500 Server Error
 Content-Type: application/json
 ...
@@ -9240,6 +9244,8 @@ Content-Type: application/json
   }
 }
 </code></pre></div>
+</li>
+</ol>
 <h3 id="other-errors">Other errors<a class="headerlink" href="#other-errors" title="Permanent link">#</a></h3>
 <p>There are a variety of miscelaneous errors. Here we describe the most common.</p>
 <h4 id="finished-flows-with-problems-of-user-identification">Finished flows with problems of user identification<a class="headerlink" href="#finished-flows-with-problems-of-user-identification" title="Permanent link">#</a></h4>
@@ -9281,7 +9287,7 @@ Content-Type: application/json
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-10T13:02:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-13T13:07:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-13</span>
       
         <br>
         Created:
