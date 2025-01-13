@@ -11,7 +11,6 @@ import io.jans.configapi.core.test.BaseTest;
 import java.util.Map;
 
 import org.testng.SkipException;
-import org.testng.annotations.a;
 
 public class Fido2BaseTest extends BaseTest {
 
@@ -19,7 +18,6 @@ public class Fido2BaseTest extends BaseTest {
         return isEndpointAvailable(url, headers, parameters);
     }
 
-    @BeforeMethod
     public void before() {
         boolean isAvailable = isAvailable(propertiesMap.get("fido2Url"), null, null);
         log.error("\n\n\n *** FIDO2 Plugin isAvailable{}", isAvailable);

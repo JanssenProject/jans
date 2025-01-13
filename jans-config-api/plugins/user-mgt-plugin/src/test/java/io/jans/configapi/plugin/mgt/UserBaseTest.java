@@ -11,7 +11,6 @@ import io.jans.configapi.core.test.BaseTest;
 import java.util.Map;
 
 import org.testng.SkipException;
-import org.testng.annotations.BeforeMethod;
 
 public class UserBaseTest extends BaseTest {
 
@@ -19,8 +18,6 @@ public class UserBaseTest extends BaseTest {
         return isEndpointAvailable(url, headers, parameters);
     }
 
-    // Execute before each test is run
-    @BeforeMethod
     public void before() {
         boolean isAvailable = isAvailable(propertiesMap.get("userUrl"), null, null);
         log.info("\n\n\n *** USER-MGT Plugin isAvailable{}", isAvailable);
