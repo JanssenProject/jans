@@ -493,8 +493,9 @@ impl BootstrapConfig {
             .local_jwks
             .as_ref()
             .map(|path| {
-                fs::read_to_string(path)
-                    .map_err(|e| BootstrapConfigLoadingError::LoadLocalJwks(path.to_string(), e))
+                fs::read_to_string(path).map_err(|e| {
+                    BootstrapConfigLoadingError::LoadLocalJwks(path.to_string(), e.to_string())
+                })
             })
             .transpose()?;
 
