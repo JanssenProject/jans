@@ -691,3 +691,11 @@ stringData:
   configuration.json: |-
     sxySo+redacted+generated+by+sprigaes+JxXiHiLq8X5ibexJcfjAN0fKlqRvU=
 ```
+
+Add the `key` used when encrypting using sprig-aes.
+
+```yaml
+global:
+  cnConfiguratorKey: "VMtVyFha8CfppdDGQSw8zEnfKXRvksAD"
+```
+
