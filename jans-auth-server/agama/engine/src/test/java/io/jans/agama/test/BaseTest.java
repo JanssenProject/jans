@@ -155,11 +155,11 @@ public class BaseTest {
     }
     
     void assertOK(Page page) {
-        assertEquals(page.getWebResponse().getStatusCode(), WebResponse.OK);
+        assertEquals(page.getWebResponse().getStatusCode(), 200);
     }
     
     void assertServerError(Page page) {
-        assertEquals(page.getWebResponse().getStatusCode(), WebResponse.INTERNAL_SERVER_ERROR);
+        assertEquals(page.getWebResponse().getStatusCode(), 500);
     }
     
     void assertTextContained(String text, String ...words) {

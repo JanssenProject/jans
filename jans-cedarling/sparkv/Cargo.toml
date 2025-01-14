@@ -13,3 +13,4 @@ homepage = "https://crates.io/crates/sparkv"
 
 [dependencies]
 thiserror = { workspace = true }
+chrono = { workspace = true }

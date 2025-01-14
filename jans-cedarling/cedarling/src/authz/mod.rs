@@ -18,10 +18,12 @@ use crate::common::app_types;
 use crate::common::cedar_schema::cedar_json::{BuildJsonCtxError, FindActionError};
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt::{self, TokenStr};
+
 use crate::log::interface::LogWriter;
 use crate::log::{
-    AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, LogEntry, LogLevel,
-    LogTokensInfo, LogType, Logger, PrincipalLogEntry, UserAuthorizeInfo, WorkloadAuthorizeInfo,
+    AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, DiagnosticsRefs, LogEntry,
+    LogLevel, LogTokensInfo, LogType, Logger, PrincipalLogEntry, UserAuthorizeInfo,
+    WorkloadAuthorizeInfo,
 };
 
 mod authorize_result;
@@ -29,17 +31,17 @@ mod merge_json;
 
 pub(crate) mod entities;
 pub(crate) mod request;
-use std::time::Instant;
 
 pub use authorize_result::AuthorizeResult;
 use cedar_policy::{ContextJsonError, Entities, Entity, EntityUid};
+use chrono::Utc;
 use entities::{
-    create_resource_entity, create_role_entities, create_token_entities, create_user_entity,
-    create_workload_entity, CreateCedarEntityError, CreateUserEntityError,
+    CEDAR_POLICY_SEPARATOR, CreateCedarEntityError, CreateUserEntityError,
     CreateWorkloadEntityError, DecodedTokens, ResourceEntityError, RoleEntityError,
-    CEDAR_POLICY_SEPARATOR,
+    create_resource_entity, create_role_entities, create_token_entities, create_user_entity,
+    create_workload_entity,
 };
-use merge_json::{merge_json_values, MergeError};
+use merge_json::{MergeError, merge_json_values};
 use request::Request;
 use serde_json::Value;
 
@@ -82,32 +84,42 @@ impl Authz {
     }
 
     // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
-    pub(crate) fn decode_tokens<'a>(
+    pub(crate) async fn decode_tokens<'a>(
         &'a self,
         request: &'a Request,
     ) -> Result<DecodedTokens<'a>, AuthorizeError> {
-        let access_token = request
-            .tokens
-            .access_token
-            .as_ref()
-            .map(|tkn| self.config.jwt_service.process_token(TokenStr::Access(tkn)))
-            .transpose()?;
-        let id_token = request
-            .tokens
-            .id_token
-            .as_ref()
-            .map(|tkn| self.config.jwt_service.process_token(TokenStr::Id(tkn)))
-            .transpose()?;
-        let userinfo_token = request
-            .tokens
-            .userinfo_token
-            .as_ref()
-            .map(|tkn| {
+        let access_token = if let Some(tkn) = request.tokens.access_token.as_ref() {
+            Some(
                 self.config
                     .jwt_service
-                    .process_token(TokenStr::Userinfo(tkn))
-            })
-            .transpose()?;
+                    .process_token(TokenStr::Access(tkn.as_str()))
+                    .await?,
+            )
+        } else {
+            None
+        };
+
+        let id_token = if let Some(tkn) = request.tokens.id_token.as_ref() {
+            Some(
+                self.config
+                    .jwt_service
+                    .process_token(TokenStr::Id(tkn.as_str()))
+                    .await?,
+            )
+        } else {
+            None
+        };
+
+        let userinfo_token = if let Some(tkn) = request.tokens.userinfo_token.as_ref() {
+            Some(
+                self.config
+                    .jwt_service
+                    .process_token(TokenStr::Userinfo(tkn.as_str()))
+                    .await?,
+            )
+        } else {
+            None
+        };
 
         Ok(DecodedTokens {
             access_token,
@@ -119,17 +131,19 @@ impl Authz {
     /// Evaluate Authorization Request
     /// - evaluate if authorization is granted for *person*
     /// - evaluate if authorization is granted for *workload*
-    pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        let start_time = Instant::now();
+    pub async fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
+        let start_time = Utc::now();
+
         let schema = &self.config.policy_store.schema;
-        let tokens = self.decode_tokens(&request)?;
+
+        let tokens = self.decode_tokens(&request).await?;
 
         // Parse action UID.
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
             .map_err(AuthorizeError::Action)?;
 
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
-        let entities_data: AuthorizeEntitiesData = self.build_entities(&request, &tokens)?;
+        let entities_data: AuthorizeEntitiesData = self.build_entities(&request, &tokens).await?;
 
         // Get entity UIDs what we will be used on authorize check
         let resource_uid = entities_data.resource.uid();
@@ -239,7 +253,9 @@ impl Authz {
         );
 
         // measure time how long request executes
-        let elapsed_ms = start_time.elapsed().as_millis();
+        let elapsed_ms = Utc::now()
+            .signed_duration_since(start_time)
+            .num_milliseconds();
 
         // FROM THIS POINT WE ONLY MAKE LOGS
 
@@ -251,27 +267,13 @@ impl Authz {
         let entities_json: serde_json::Value = serde_json::from_slice(entities_raw_json.as_slice())
             .map_err(AuthorizeError::EntitiesToJson)?;
 
-        // DEBUG LOG
-        // Log all result information about both authorize checks.
-        // Where principal is `"Jans::Workload"` and where principal is `"Jans::User"`.
-        self.config.log_service.as_ref().log(
-            LogEntry::new_with_data(
-                self.config.pdp_id,
-                Some(self.config.application_name.clone()),
-                LogType::System,
-            )
-            .set_level(LogLevel::DEBUG)
-            .set_auth_info(AuthorizationLogInfo {
-                action: request.action.clone(),
-                context: request.context.clone(),
-                resource: resource_uid.to_string(),
-                entities: entities_json,
-                person_authorize_info: user_authz_info,
-                workload_authorize_info: workload_authz_info,
-                authorized: result.is_allowed(),
-            })
-            .set_message("Result of authorize.".to_string()),
-        );
+        let user_authz_diagnostic = user_authz_info
+            .as_ref()
+            .map(|auth_info| &auth_info.diagnostics);
+
+        let workload_authz_diagnostic = user_authz_info
+            .as_ref()
+            .map(|auth_info| &auth_info.diagnostics);
 
         let tokens_logging_info = LogTokensInfo {
             access: tokens.access_token.as_ref().map(|tkn| {
@@ -301,6 +303,7 @@ impl Authz {
         };
 
         // Decision log
+        // we log decision log before debug log, to avoid cloning diagnostic info
         self.config.log_service.as_ref().log_any(&DecisionLogEntry {
             base: BaseLogEntry::new(self.config.pdp_id, LogType::Decision),
             policystore_id: self.config.policy_store.id.as_str(),
@@ -311,10 +314,36 @@ impl Authz {
             lock_client_id: None,
             action: request.action.clone(),
             resource: resource_uid.to_string(),
-            decision: result.decision().into(),
+            decision: result.decision.into(),
             tokens: tokens_logging_info,
             decision_time_ms: elapsed_ms,
+            diagnostics: DiagnosticsRefs::new(&[
+                &user_authz_diagnostic,
+                &workload_authz_diagnostic,
+            ]),
         });
+
+        // DEBUG LOG
+        // Log all result information about both authorize checks.
+        // Where principal is `"Jans::Workload"` and where principal is `"Jans::User"`.
+        self.config.log_service.as_ref().log(
+            LogEntry::new_with_data(
+                self.config.pdp_id,
+                Some(self.config.application_name.clone()),
+                LogType::System,
+            )
+            .set_level(LogLevel::DEBUG)
+            .set_auth_info(AuthorizationLogInfo {
+                action: request.action.clone(),
+                context: request.context.clone(),
+                resource: resource_uid.to_string(),
+                entities: entities_json,
+                person_authorize_info: user_authz_info,
+                workload_authorize_info: workload_authz_info,
+                authorized: result.decision,
+            })
+            .set_message("Result of authorize.".to_string()),
+        );
 
         Ok(result)
     }
@@ -345,10 +374,10 @@ impl Authz {
     /// Build all the Cedar [`Entities`] from a [`Request`]
     ///
     /// [`Entities`]: Entity
-    pub fn build_entities(
+    pub async fn build_entities(
         &self,
         request: &Request,
-        tokens: &DecodedTokens,
+        tokens: &DecodedTokens<'_>,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         let policy_store = &self.config.policy_store;
         let auth_conf = &self.config.authorization;
@@ -430,7 +459,9 @@ fn build_context(
         id_mapping.insert(type_name, type_id.to_string());
     }
 
-    let entities_context = action_schema.build_ctx_entity_refs_json(id_mapping)?;
+    let entities_context = action_schema
+        .build_ctx_entity_refs_json(id_mapping)
+        .unwrap();
 
     let context = merge_json_values(entities_context, request_context)?;
 

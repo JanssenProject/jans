@@ -91,6 +91,7 @@ mod test {
     use cedar_policy::{Entity, RestrictedExpression};
     use serde_json::json;
     use test_utils::assert_eq;
+    use tokio::test;
 
     use super::create_user_entity;
     use crate::authz::entities::DecodedTokens;
@@ -100,13 +101,14 @@ mod test {
     use crate::{CreateCedarEntityError, PolicyStoreConfig, PolicyStoreSource};
 
     #[test]
-    fn can_create_from_id_token() {
+    async fn can_create_from_id_token() {
         let entity_mapping = None;
         let policy_store = load_policy_store(&PolicyStoreConfig {
             source: PolicyStoreSource::FileYaml(
                 Path::new("../test_files/policy-store_ok_2.yaml").into(),
             ),
         })
+        .await
         .expect("Should load policy store")
         .store;
 
@@ -141,13 +143,14 @@ mod test {
     }
 
     #[test]
-    fn can_create_from_userinfo_token() {
+    async fn can_create_from_userinfo_token() {
         let entity_mapping = None;
         let policy_store = load_policy_store(&PolicyStoreConfig {
             source: PolicyStoreSource::FileYaml(
                 Path::new("../test_files/policy-store_ok_2.yaml").into(),
             ),
         })
+        .await
         .expect("Should load policy store")
         .store;
 
@@ -182,13 +185,14 @@ mod test {
     }
 
     #[test]
-    fn errors_when_tokens_have_missing_claims() {
+    async fn errors_when_tokens_have_missing_claims() {
         let entity_mapping = None;
         let policy_store = load_policy_store(&PolicyStoreConfig {
             source: PolicyStoreSource::FileYaml(
                 Path::new("../test_files/policy-store_ok_2.yaml").into(),
             ),
         })
+        .await
         .expect("Should load policy store")
         .store;
 
@@ -221,13 +225,14 @@ mod test {
     }
 
     #[test]
-    fn errors_when_tokens_unavailable() {
+    async fn errors_when_tokens_unavailable() {
         let entity_mapping = None;
         let policy_store = load_policy_store(&PolicyStoreConfig {
             source: PolicyStoreSource::FileYaml(
                 Path::new("../test_files/policy-store_ok_2.yaml").into(),
             ),
         })
+        .await
         .expect("Should load policy store")
         .store;
 
