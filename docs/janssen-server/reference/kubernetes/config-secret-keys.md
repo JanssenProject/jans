@@ -9,7 +9,10 @@ tags:
 
 ## Overview
 
-The `config` job creates a set of configuration (contains `secrets` and `configmaps`) used by all Janssen services.
+The `config` job creates a set of configurations (contains `secrets` and `configmaps`) used by all Janssen services.
+
+!!! Note
+    We assume Janssen is installed in a namespace called `jans`
 
 ## Configmaps
 
@@ -27,7 +30,7 @@ Note that each key in configmaps is based on the schema below:
 {
   "city": {
     "type": "string",
-    "description": "Locality name (.e.g city)",
+    "description": "Locality name (e.g. city)",
     "example": "Austin"
   },
   "country_code": {
@@ -502,10 +505,8 @@ Note that each key in secrets is based on the schema below:
 ## Example decoding secrets
 
 ### Opening `base64-decoded` secrets
-!!! Note
-    We assume Jans is installed in a namespace called `jans`
 
-1. Get the `tls-certificate` from backend secret
+1. Get the `tls-certificate` from the backend secret
 
     ```bash
     kubectl get secret tls-certificate -n jans -o yaml
@@ -525,17 +526,22 @@ Note that each key in secrets is based on the schema below:
 
 ## Using Configuration Schema
 
-As mentioned earlier, the `config` job creates configuration. Behind the scene, a Kubernetes' Secret object is created during the deployment to pre-populate `secrets` and `configmaps`.
+As mentioned earlier, the `config` job creates a set of configurations.
+
+This happens by using a Kubernetes secret named `<janssen-release-name>-configuration-file` that gets created during the helm chart installation.
+
+It contains a JSON schema with the necessary `secrets` and `configmaps` to install Janssen services.
+
+This secret is then mounted by the `config` job.
+
 
 ### Default configuration
-
-By default, the configuration only contains necessary `secrets` and `configmaps` to install Jans services.
 
 ```yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: jans-configuration-file
+  name: janssen-configuration-file
   namespace: jans
   labels:
     APP_NAME: configurator
@@ -563,7 +569,7 @@ stringData:
     }
 ```
 
-Note that `_secret` may contain other keys depending on persistence, secrets/configmaps backend, etc. See examples below:
+Note that `_secret` may contain other keys depending on the persistence used, the backend of the secrets/configmaps, etc. For example:
 
 1.  Secrets/configmaps backend is set to `google`:
 
@@ -594,23 +600,22 @@ Note that `_secret` may contain other keys depending on persistence, secrets/con
 
 ### Custom configuration
 
-The default configuration is sufficient for most of the time. If there's a requirement to use custom or reusing existing configuration, user may create a custom Kubernetes object.
+The default configuration schema is sufficient for most of the time. However, if there's a requirement to use a custom configuration or reusing an existing configuration, you can create a Kubernetes secret with the custom configuration schema.
 
 !!! Warning
     The custom configuration schema is a BETA feature. 
 
-1.  Prepare YAML file:
+1.  Prepare the YAML file containing the custom configuration schema. We will name it `custom-configuration-schema.yaml`:
 
     ```yaml
-    # custom-configuration-schema.yaml
     apiVersion: v1
     kind: Secret
     metadata:
-      name: custom-configuration-file
+      name: custom-configuration-schema
       namespace: jans
     type: Opaque
     stringData:
-      custom-configuration.json: |-
+      configuration.json: |-
         {
           "_configmap": {
             "hostname": "demoexample.jans.io",
@@ -628,19 +633,69 @@ The default configuration is sufficient for most of the time. If there's a requi
         }
     ```
 
-1.  Create Kubernetes secrets:
+1.  Create the Kubernetes secret:
 
     ```bash
-    kubernetes -n jans create secret generic custom-configuration-schema --from-file=custom-configuration.json
+    kubectl -n jans apply -f custom-configuration-schema.yaml
     ```
 
 1.  Specify the secret in `values.yaml`:
 
     ```yaml
     global:
-      cnConfiguratorConfigurationFile: /etc/jans/conf/custom-configuration.json
       cnConfiguratorCustomSchema:
         secretName: custom-configuration-schema
     ```
 
-1.  Install the Jans charts.
+1.  Install the Janssen helm chart.
+
+## Encrypting Configuration Schema
+
+The encryption uses [Helm-specific](https://helm.sh/docs/chart_template_guide/function_list/#encryptaes) implementation of AES-256 CBC mode.
+
+### Default configuration
+
+The [default configuration](#default-configuration) schema can be encrypted by specifying 32 alphanumeric characters to `cnConfiguratorKey` attribute (the default value is an empty string).
+
+```yaml
+global:
+  cnConfiguratorKey: "VMtVyFha8CfppdDGQSw8zEnfKXRvksAD"
+```
+
+The following example is what an encrypted default configuration looks like:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: janssen-configuration-file
+  namespace: jans
+stringData:
+  configuration.json: |-
+    sxySo+redacted+generated+by+helm/TNpE5PoUR2+JxXiHiLq8X5ibexJcfjAN0fKlqRvU=
+```
+
+### Custom configuration
+
+If you are using a [custom configuration](#custom-configuration) schema, you will need to generate the string using [sprig-aes](https://pypi.org/project/sprig-aes/) CLI and paste it into a YAML manifest.
+
+```yaml
+# custom-configuration-schema.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: custom-configuration-schema
+  namespace: jans
+type: Opaque
+stringData:
+  configuration.json: |-
+    sxySo+redacted+generated+by+sprigaes+JxXiHiLq8X5ibexJcfjAN0fKlqRvU=
+```
+
+Add the `key` used when encrypting using sprig-aes.
+
+```yaml
+global:
+  cnConfiguratorKey: "VMtVyFha8CfppdDGQSw8zEnfKXRvksAD"
+```
+

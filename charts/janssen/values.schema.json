@@ -1254,6 +1254,11 @@
                     "description": "The location of file contains password for the SQL user config.configmap.cnSqlDbUser. The file path must end with sql_password.",
                     "type": "string",
                     "pattern": ".*sql_password\\b.*"
+                },
+                "cnConfiguratorKey": {
+                    "description": "Key to encrypt/decrypt configuration schema file using AES-256 CBC mode. Set the value to empty string to disable encryption/decryption, or 32 alphanumeric characters to enable it.",
+                    "type": "string",
+                    "pattern": "^(?:[a-zA-Z0-9]{32})?$"
                 }
             }
         },

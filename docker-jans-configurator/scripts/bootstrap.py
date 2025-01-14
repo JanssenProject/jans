@@ -476,6 +476,16 @@ def get_dump_file():
     return f"{DB_DIR}/configuration.out.json"
 
 
+def get_configuration_key_file():
+    path = os.environ.get("CN_CONFIGURATOR_CONFIGURATION_KEY_FILE", "/etc/jans/conf/configuration.key")
+
+    if os.path.isfile(path):
+        return path
+
+    # backward-compat
+    return f"{DB_DIR}/configuration.key"
+
+
 # ============
 # CLI commands
 # ============
@@ -501,7 +511,14 @@ def cli():
     default=get_dump_file(),
     show_default=True,
 )
-def load(configuration_file, dump_file):
+@click.option(
+    "--key-file",
+    type=click.Path(exists=False),
+    help="Absolute path to file contains key to decrypt configmaps and secrets (if applicable)",
+    default=get_configuration_key_file(),
+    show_default=True,
+)
+def load(configuration_file, dump_file, key_file):
     """Loads configmaps and secrets from JSON file (generate if not exist).
     """
     deps = ["config_conn", "secret_conn"]
@@ -517,7 +534,7 @@ def load(configuration_file, dump_file):
     with manager.create_lock("configurator-load"):
         logger.info(f"Loading configmaps and secrets from {configuration_file}")
 
-        params, err, code = load_schema_from_file(configuration_file)
+        params, err, code = load_schema_from_file(configuration_file, key_file=key_file)
         if code != 0:
             logger.error(f"Unable to load configmaps and secrets; reason={err}")
             raise click.Abort()
