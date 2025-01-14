@@ -73,10 +73,10 @@ Create optional scopes list
 {{- define "janssen-all-in-one.optionalScopes"}}
 {{ $newList := list }}
 {{- if eq .Values.configmap.cnCacheType "REDIS" }}
-{{ $newList = append $newList ("redis" | quote )  }}
+{{ $newList = append $newList "redis" }}
 {{- end}}
 {{ if eq .Values.cnPersistenceType "sql" }}
-{{ $newList = append $newList ("sql" | quote) }}
+{{ $newList = append $newList "sql" }}
 {{- end }}
 {{ toJson $newList }}
 {{- end }}
@@ -178,12 +178,78 @@ Create configuration schema-related objects.
 {{- define "janssen-all-in-one.config.schema" -}}
 {{- $commonName := (printf "%s-configuration-file" .Release.Name) -}}
 {{- $secretName := .Values.cnConfiguratorCustomSchema.secretName | default $commonName -}}
+{{- $keyName := (printf "%s-configuration-key-file" .Release.Name) -}}
 volumes:
   - name: {{ $commonName }}
     secret:
       secretName: {{ $secretName }}
+{{- if .Values.cnConfiguratorKey }}
+  - name: {{ $keyName }}
+    secret:
+      secretName: {{ $keyName }}
+{{- end }}
 volumeMounts:
   - name: {{ $commonName }}
     mountPath: {{ .Values.cnConfiguratorConfigurationFile }}
     subPath: {{ .Values.cnConfiguratorConfigurationFile | base }}
-{{- end -}}
+{{- if .Values.cnConfiguratorKey }}
+  - name: {{ $keyName }}
+    mountPath: {{ .Values.cnConfiguratorKeyFile }}
+    subPath: {{ .Values.cnConfiguratorKeyFile | base }}
+{{- end }}
+{{- end }}
+
+{{/*
+Obfuscate configuration schema (only if configuration key is available)
+*/}}
+{{- define "janssen-all-in-one.config.prepareSchema" }}
+
+{{- $configmapSchema := dict }}
+{{- $_ := set $configmapSchema "hostname" .Values.fqdn }}
+{{- $_ := set $configmapSchema "country_code" .Values.countryCode }}
+{{- $_ := set $configmapSchema "state" .Values.state }}
+{{- $_ := set $configmapSchema "city" .Values.city }}
+{{- $_ := set $configmapSchema "admin_email" .Values.email }}
+{{- $_ := set $configmapSchema "orgName" .Values.orgName }}
+{{- $_ := set $configmapSchema "auth_sig_keys" (index .Values "auth-server" "authSigKeys") }}
+{{- $_ := set $configmapSchema "auth_enc_keys" (index .Values "auth-server" "authEncKeys") }}
+{{- $_ := set $configmapSchema "optional_scopes" (include "janssen-all-in-one.optionalScopes" . | trim) }}
+{{- if .Values.saml.enabled }}
+{{- $_ := set $configmapSchema "kc_admin_username" .Values.configmap.kcAdminUsername }}
+{{- end }}
+{{- $_ := set $configmapSchema "init_keys_exp" (index .Values "auth-server-key-rotation" "initKeysLife") }}
+
+{{- $secretSchema := dict }}
+{{- $_ := set $secretSchema "admin_password" .Values.adminPassword }}
+{{- $_ := set $secretSchema "redis_password" .Values.redisPassword }}
+{{- if or ( eq .Values.cnPersistenceType "sql" ) ( eq .Values.cnPersistenceType "hybrid" ) }}
+{{- $_ := set $secretSchema "sql_password" .Values.configmap.cnSqldbUserPassword }}
+{{- end }}
+{{- if eq .Values.configSecretAdapter "vault" }}
+{{- $_ := set $secretSchema "vault_role_id" .Values.configmap.cnVaultRoleId }}
+{{- $_ := set $secretSchema "vault_secret_id" .Values.configmap.cnVaultSecretId }}
+{{- end }}
+{{- if or (eq .Values.configSecretAdapter "google") (eq .Values.configAdapterName "google") }}
+{{- $_ := set $secretSchema "google_credentials" .Values.configmap.cnGoogleSecretManagerServiceAccount }}
+{{- end }}
+{{- if or (eq .Values.configAdapterName "aws") (eq .Values.configSecretAdapter "aws") }}
+{{- $_ := set $secretSchema "aws_credentials" (include "config.aws-shared-credentials" . | b64enc) }}
+{{- $_ := set $secretSchema "aws_config" (include "config.aws-config" . | b64enc) }}
+{{- $_ := set $secretSchema "aws_replica_regions" (toJson .Values.configmap.cnAwsSecretsReplicaRegions | b64enc) }}
+{{- end }}
+{{- if .Values.saml.enabled }}
+{{- $_ := set $secretSchema "kc_db_password" .Values.configmap.kcDbPassword }}
+{{- $_ := set $secretSchema "kc_admin_password" .Values.configmap.kcAdminPassword }}
+{{- end }}
+{{- $_ := set $secretSchema "encoded_salt" .Values.salt }}
+
+{{- $schema := dict "_configmap" $configmapSchema "_secret" $secretSchema }}
+
+{{- if .Values.cnConfiguratorKey }}
+{{- printf "%s" (encryptAES .Values.cnConfiguratorKey (toPrettyJson $schema)) }}
+{{- else -}}
+{{- toPrettyJson $schema }}
+{{- end }}
+
+{{/* end of helpers */}}
+{{- end }}
