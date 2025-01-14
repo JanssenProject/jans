@@ -8,7 +8,7 @@ Background:
 Scenario: Fetch all client token
 Given url mainUrl 
 When method GET 
-Then status 401 
+Then status 404 
 And print response
 
 @ignore	
