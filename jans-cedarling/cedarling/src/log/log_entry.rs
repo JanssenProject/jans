@@ -236,6 +236,37 @@ pub struct Diagnostics {
     pub errors: Vec<PolicyEvaluationError>,
 }
 
+/// DiagnosticsRefs structure actually same as Diagnostics but hold reference on data
+/// And allows to not clone data.
+/// Usefull for logging.
+#[derive(Debug, Default, Clone, PartialEq, serde::Serialize)]
+pub struct DiagnosticsRefs<'a> {
+    /// `PolicyId`s of the policies that contributed to the decision.
+    /// If no policies applied to the request, this set will be empty.
+    pub reason: HashSet<&'a PolicyInfo>,
+    /// Errors that occurred during authorization. The errors should be
+    /// treated as unordered, since policies may be evaluated in any order.
+    pub errors: Vec<&'a PolicyEvaluationError>,
+}
+
+impl DiagnosticsRefs<'_> {
+    pub fn new<'a>(diagnostics: &[&'a Option<&Diagnostics>]) -> DiagnosticsRefs<'a> {
+        let policy_info_iter = diagnostics
+            .iter()
+            .filter_map(|diagnostic_opt| diagnostic_opt.map(|diagnostic| &diagnostic.reason))
+            .flatten();
+        let diagnostic_err_iter = diagnostics
+            .iter()
+            .filter_map(|diagnostic_opt| diagnostic_opt.map(|diagnostic| &diagnostic.errors))
+            .flatten();
+
+        DiagnosticsRefs {
+            reason: HashSet::from_iter(policy_info_iter),
+            errors: diagnostic_err_iter.collect(),
+        }
+    }
+}
+
 /// Policy diagnostic info
 #[derive(Debug, Default, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct PolicyInfo {
@@ -296,6 +327,8 @@ pub struct DecisionLogEntry<'a> {
     /// If this Cedarling has registered with a Lock Server, what is the client_id it received
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lock_client_id: Option<String>,
+    /// diagnostic info about policy and errors as result of cedarling
+    pub diagnostics: DiagnosticsRefs<'a>,
     /// action UID for request
     pub action: String,
     /// resource UID for request
