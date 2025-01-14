@@ -375,8 +375,8 @@ jobs:
           TAG="0.0.0"
         fi
         cd ${{ github.workspace }}/jans-cedarling/target/wheels
-        sha256sum cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_34_x86_64.whl > cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_34_x86_64.whl.sha256sum
-        sha256sum cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_34_x86_64.whl > cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_34_x86_64.whl.sha256sum
+        sha256sum cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_31_x86_64.whl > cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_31_x86_64.whl.sha256sum
+        sha256sum cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_31_x86_64.whl > cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_31_x86_64.whl.sha256sum
         gpg --armor --detach-sign cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_34_x86_64.whl || echo "Failed to sign"
         gpg --armor --detach-sign cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_34_x86_64.whl || echo "Failed to sign"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
