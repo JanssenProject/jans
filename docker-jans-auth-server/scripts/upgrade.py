@@ -62,6 +62,7 @@ def _transform_lock_dynamic_config(conf, manager):
             ],
         }),
         ("groupScopeEnabled", True),
+        ("statEnabled", True),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
@@ -165,6 +166,8 @@ class Upgrade:
         if as_boolean(os.environ.get("CN_LOCK_ENABLED", "false")):
             self.update_lock_dynamic_config()
             self.update_lock_client_scopes()
+            self.update_lock_error_config()
+            self.update_lock_static_config()
 
     def update_lock_dynamic_config(self):
         kwargs = {"table_name": "jansAppConf"}
@@ -233,6 +236,46 @@ class Upgrade:
                 entry.attrs["jansScope"]["v"] = client_scopes + diff
             else:
                 entry.attrs["jansScope"] = client_scopes + diff
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_lock_error_config(self):
+        kwargs = {"table_name": "jansAppConf"}
+        id_ = doc_id_from_dn("ou=jans-lock,ou=configuration,o=jans")
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        with contextlib.suppress(json.decoder.JSONDecodeError):
+            entry.attrs["jansConfErrors"] = json.loads(entry.attrs["jansConfErrors"])
+
+        with open("/app/templates/jans-lock/errors.json") as f:
+            conf = json.loads(f.read())
+
+        if conf != entry.attrs["jansConfErrors"]:
+            entry.attrs["jansConfErrors"] = json.dumps(conf)
+            entry.attrs["jansRevision"] += 1
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_lock_static_config(self):
+        kwargs = {"table_name": "jansAppConf"}
+        id_ = doc_id_from_dn("ou=jans-lock,ou=configuration,o=jans")
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        with contextlib.suppress(json.decoder.JSONDecodeError):
+            entry.attrs["jansConfStatic"] = json.loads(entry.attrs["jansConfStatic"])
+
+        with open("/app/templates/jans-lock/static-conf.json") as f:
+            conf = json.loads(f.read())
+
+        if conf != entry.attrs["jansConfStatic"]:
+            entry.attrs["jansConfStatic"] = json.dumps(conf)
+            entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
 
