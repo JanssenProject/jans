@@ -339,7 +339,7 @@ jobs:
         gh release upload $VER *.zip *.sha256sum --clobber
   build_cedarling_python:
     if: github.repository == 'JanssenProject/jans'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
