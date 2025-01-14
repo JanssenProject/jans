@@ -7542,7 +7542,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../cedarling/cedarling-wasm.md" class="md-nav__link">
+      <a href="../../../cedarling/cedarling-wasm/" class="md-nav__link">
         WASM
       </a>
     </li>
@@ -8801,11 +8801,17 @@ client_id=999e13b8-f4a2-4fed-ad3c-6c88bd2c92ea&amp;scope=openid+profile+address+
 <td align="left"><code>def getAuthenticationMethodClaims(self, context)</code></td>
 <td align="left">Called to get authn method claims. It is injected into <code>id_token</code>. Returns key-value map.</td>
 </tr>
+<tr>
+<td align="left"><code>def prepareAuthzRequest(self, context)</code></td>
+<td align="left">Prepared authorization request before <code>authorize</code> method. It's good place to restore data from session if needed.</td>
+</tr>
 </tbody>
 </table>
 <p><code>authorize</code> method returns true/false which indicates to server whether to issue <code>authorization_code</code> in response or not.</p>
 <p>If parameters is not present then error has to be created and <code>false</code> returned.
 If all is good script has to return <code>true</code> and it's strongly recommended to set user <code>context.getExecutionContext().setUser(user);</code> so AS can keep tracking what exactly user is authenticated.</p>
+<p><code>prepareAuthzRequest</code> should typically be used for authorization request manipulation before <code>authorize</code> method is invoked. 
+Also if there is multi-step flow where some data are stored in <code>session</code> object, it is good place to restore data from session into request (please find example in sample below). </p>
 <h3 id="objects">Objects<a class="headerlink" href="#objects" title="Permanent link">#</a></h3>
 <table>
 <thead>
@@ -9217,6 +9223,19 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
     @Override
     public Map&lt;String, String&gt; getAuthenticationMethodClaims(Object context) {
         return new HashMap&lt;&gt;();
+    }    
+
+    @Override
+    public void prepareAuthzRequest(Object scriptContext) {
+        ExternalScriptContext context = (ExternalScriptContext) scriptContext;
+        final AuthorizationChallengeSession sessionObject = context.getAuthzRequest().getAuthorizationChallengeSessionObject();
+        if (sessionObject != null) {
+            final Map&lt;String, String&gt; sessionAttributes = sessionObject.getAttributes().getAttributes();
+            final String scopeFromSession = sessionAttributes.get(&quot;scope&quot;);
+            if (StringUtils.isNotBlank(scopeFromSession) &amp;&amp; StringUtils.isBlank(context.getAuthzRequest().getScope())) {
+                context.getAuthzRequest().setScope(scopeFromSession);
+            }
+        }
     }
 }
 </code></pre></div>
@@ -9231,7 +9250,7 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-23T10:09:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-23</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-13T15:13:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-13</span>
       
         <br>
         Created:
