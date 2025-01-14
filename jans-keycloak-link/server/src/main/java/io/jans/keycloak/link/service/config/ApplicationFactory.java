@@ -75,7 +75,7 @@ public class ApplicationFactory {
         DocumentStoreConfiguration documentStoreConfiguration = jansConf.getDocumentStoreConfiguration();
         if ((documentStoreConfiguration == null) || (documentStoreConfiguration.getDocumentStoreType() == null)) {
             log.error("Failed to read document store configuration from DB. Please check configuration jsDocStoreConf attribute " +
-                    "that must contain document store configuration JSON represented by DocumentStoreConfiguration.class. Appliance DN: " + jansConf.getDn());
+                    "that must contain document store configuration JSON represented by DocumentStoreConfiguration.class. Appliance DN: {0}", jansConf.getDn());
             log.info("Creating fallback LOCAL document store configuration ... ");
 
             documentStoreConfiguration = new DocumentStoreConfiguration();
@@ -84,7 +84,7 @@ public class ApplicationFactory {
             log.info("LOCAL document store configuration is created.");
         }
 
-        log.info("Document store configuration: " + documentStoreConfiguration);
+        log.info("Document store configuration: {0}" , documentStoreConfiguration);
         return documentStoreConfiguration;
     }
 
@@ -95,7 +95,7 @@ public class ApplicationFactory {
         MessageConfiguration messageConfiguration = jansConf.getMessageConfiguration();
         if (messageConfiguration == null || messageConfiguration.getMessageProviderType() == null) {
             log.error("Failed to read message configuration from DB. Please check configuration jsMessageConf attribute " +
-                    "that must contain message configuration JSON represented by MessageConfiguration.class. Appliance DN: " + jansConf.getDn());
+                    "that must contain message configuration JSON represented by MessageConfiguration.class. Appliance DN: {0}" , jansConf.getDn());
             log.info("Creating fallback Null message configuration ... ");
 
             messageConfiguration = new MessageConfiguration();
@@ -105,7 +105,7 @@ public class ApplicationFactory {
             log.info("NULL message configuration is created.");
         }
 
-        log.info("Message configuration: " + messageConfiguration);
+        log.info("Message configuration: {0}" , messageConfiguration);
         return messageConfiguration;
     }
 }
