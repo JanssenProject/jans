@@ -20,7 +20,8 @@
       "par",
       "ssa",
       "global_token_revocation",
-      "status_list"
+      "status_list",
+      "access_evaluation"
     ],
     "issuer":"${config.oxauth.issuer}",
     "loginPage":"${config.oxauth.contextPath}/login.htm",
