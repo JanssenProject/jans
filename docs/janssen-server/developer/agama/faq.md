@@ -99,7 +99,7 @@ More advanced bean lookup capabilities are provided by method `instance` of [thi
 
 ### How to implement localization?
 
-This topic is covered [here](./advanced-usages.md#localization).
+This topic is covered [here](./advanced-usages.md#localization-and-internationalization).
 
 ### How to modify the built-in error pages?
 
@@ -128,12 +128,6 @@ Not plugins but you can use [Agama Lab](https://agama-lab.gluu.org) for projects
 We plan to offer a debugger in the future. In the meantime, you can do `printf`-like debugging using the `Log` instruction. See [Agama logging](./jans-agama-engine.md#logging).
 
 ## Miscellaneous
-
-### Does the engine support AJAX?
-
-If you require a flow with no page refreshes, it could be implemented using AJAX calls as long as they align to the [POST-REDIRECT-GET](./advanced-usages.md#flow-advance-and-navigation) pattern, where a form is submitted, and as response a 302/303 HTTP redirection is obtained. Your Javascript code must also render UI elements in accordance with the data obtained by following the redirect (GET). Also, care must be taken in order to process server errors, timeouts, etc. In general, this requires a considerable amount of effort.
-
-If you require AJAX to consume a resource (service) residing in the same domain of your server, there is no restriction - the engine is not involved. Interaction with external domains may require to setup CORS configuration appropriately in the authentication server.  
 
 ### How to launch a flow?
 
@@ -178,6 +172,24 @@ See the examples in the Looping section of the [language reference](../../../aga
 
 You can assign this value to a variable at the top of your loop declaration. See the examples in the Looping section of the [language reference](../../../agama/language-reference.md#looping).
 
+### How to access localization labels from Java code?
+
+In Freemarker, [localization](./advanced-usages.md#localization-and-internationalization) labels are accessed using the `${labels(key, ...)}` notation. The following would be a Java equivalent:
+
+```
+import io.jans.agama.engine.service.LabelsService;
+...
+
+lbls = io.jans.service.cdi.util.CdiUtil.bean(LabelsService.class);
+String label = lbls.get("<label key>", ... optional extra params);
+```
+
+Note the localization context (language, country, etc.) used in such a call is based on the HTTP request that is taking place when the code is invoked.
+
 ### Can Agama code be called from Java?
 
 No. These two languages are supposed to play roles that should not be mixed, check [here](./agama-best-practices.md#about-flow-design).
+
+### How to run flows from native applications instead of web browsers?
+
+There is a separate doc page covering this aspect [here](./native-applications.md).

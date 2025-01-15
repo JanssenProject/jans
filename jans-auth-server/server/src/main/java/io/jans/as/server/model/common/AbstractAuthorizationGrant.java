@@ -29,6 +29,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
@@ -77,6 +79,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     private String acrValues;
     private String sessionDn;
+    private boolean isAuthorizationChallenge;
 
     protected final ConcurrentMap<String, TxToken> txTokens = new ConcurrentHashMap<>();
     protected final ConcurrentMap<String, AccessToken> accessTokens = new ConcurrentHashMap<>();
@@ -106,6 +109,15 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     public void setReferenceId(String referenceId) {
         this.referenceId = referenceId;
+    }
+
+    public boolean isAuthorizationChallenge() {
+        return isAuthorizationChallenge;
+    }
+
+    public AbstractAuthorizationGrant setAuthorizationChallenge(boolean authorizationChallenge) {
+        isAuthorizationChallenge = authorizationChallenge;
+        return this;
     }
 
     public Integer getStatusListIndex() {
@@ -334,21 +346,22 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
             lifetime = client.getAccessTokenLifetime();
         }
 
+        if (client != null && client.isAccessTokenAsJwt() && isTrue(appConfiguration.getKeyRegenerationEnabled())) {
+            int intervalInSeconds = appConfiguration.getKeyRegenerationInterval() * 3600;
+            int timePassedInSeconds = (int) ((System.currentTimeMillis() - keyGeneratorTimer.getLastFinishedTime()) / 1000);
+            final int recalculcatedLifetime = intervalInSeconds - timePassedInSeconds;
+            if (recalculcatedLifetime > 0 && recalculcatedLifetime < lifetime) {
+                log.trace("Override access token lifetime based on key lifetime: {}", recalculcatedLifetime);
+                lifetime = recalculcatedLifetime;
+            }
+        }
+
         int lifetimeFromScript = externalUpdateTokenService.getAccessTokenLifetimeInSeconds(ExternalUpdateTokenContext.of(executionContext));
         if (lifetimeFromScript > 0) {
             lifetime = lifetimeFromScript;
             log.trace("Override access token lifetime with value from script: {}", lifetimeFromScript);
         }
 
-        if (client != null && client.isAccessTokenAsJwt() && appConfiguration.getKeyRegenerationEnabled()) {
-            int intervalInSeconds = appConfiguration.getKeyRegenerationInterval() * 3600;
-            int timePassedInSeconds = (int) ((System.currentTimeMillis() - keyGeneratorTimer.getLastFinishedTime()) / 1000);
-            final int recalculcatedLifetime = intervalInSeconds - timePassedInSeconds;
-            if (recalculcatedLifetime > 0) {
-                log.trace("Override access token lifetime based on key lifetime: {}", recalculcatedLifetime);
-                lifetime = recalculcatedLifetime;
-            }
-        }
         return lifetime;
     }
 

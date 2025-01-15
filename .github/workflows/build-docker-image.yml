@@ -22,9 +22,9 @@ on:
   workflow_dispatch:
     inputs:
       services:
-        description: 'One or set of the docker images. Format as following: "docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link docker-jans-kc-scheduler"'
+        description: 'One or set of the docker images. Format as following: "docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link docker-jans-kc-scheduler cedarling-flask-sidecar"'
         required: true
-        default: 'docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link docker-jans-kc-scheduler'
+        default: 'docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link docker-jans-kc-scheduler cedarling-flask-sidecar'
       cn_version:
         description: 'The war version to build the image off'
         required: false
@@ -49,7 +49,7 @@ jobs:
     strategy:
       max-parallel: 8
       matrix:
-        docker-images: ["auth-server", "certmanager", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "saml", "keycloak-link", "kc-scheduler"]
+        docker-images: ["auth-server", "certmanager", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "saml", "keycloak-link", "kc-scheduler", "cedarling-flask-sidecar"]
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
@@ -57,7 +57,7 @@ jobs:
           egress-policy: audit
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.5.0
+        uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # v3.5.0
 
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -67,6 +67,7 @@ jobs:
             docker-jans-${{ matrix.docker-images }}
             automation
             demos
+            jans-cedarling
       - name: Check docker directories that changed
         id: build_docker_image
         run: |
@@ -74,7 +75,7 @@ jobs:
           DEFAULT_ALL=${{ github.event.inputs.services }}
           if [ -z "$DEFAULT_ALL" ]
           then
-            DEFAULT_ALL="docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link docker-jans-kc-scheduler"
+            DEFAULT_ALL="docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link docker-jans-kc-scheduler cedarling-flask-sidecar"
           else
             echo "$DEFAULT_ALL"
           fi
@@ -90,11 +91,19 @@ jobs:
         if: steps.build_docker_image.outputs.build || github.event_name == 'tags'
         run: |
           sudo apt-get update
-          sudo python3 -m pip install --upgrade pip
-          sudo pip3 install setuptools --upgrade
-          sudo pip3 install -r ./automation/requirements.txt
+          sudo python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
+          sudo pip3 install --ignore-installed setuptools --upgrade
+          sudo pip3 install --ignore-installed -r ./automation/requirements.txt 
           sudo apt-get update
 
+      #- uses: actions/delete-package-versions@v5
+      #  continue-on-error: true
+      #  with:
+      #    package-name: jans/${{ matrix.docker-images }}
+      #    package-type: container
+      #    min-versions-to-keep: 1000
+      #    token:  ${{ secrets.GITHUB_TOKEN }}
+      #    delete-only-untagged-versions: true
 
       - name: Prepare
         if: steps.build_docker_image.outputs.build || github.event_name == 'tags'
@@ -105,6 +114,9 @@ jobs:
           if [[ "loadtesting-jmeter" =~ "${{ matrix.docker-images }}" ]]; then
             DOCKER_FILE_LOCATION=./demos/benchmarking/docker-jans-loadtesting-jmeter
           fi
+          if [[ "cedarling-flask-sidecar" =~ "${{ matrix.docker-images }}" ]]; then
+            DOCKER_FILE_LOCATION=./jans-cedarling/flask-sidecar
+          fi          
           MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('$DOCKER_FILE_LOCATION') ; print(dfparser.labels['org.opencontainers.image.version'])")
           DOCKER_IMAGE=ghcr.io/$REPOSITORY/${{ matrix.docker-images }}
           VERSION=${MAIN_VERSION}
@@ -153,19 +165,19 @@ jobs:
           fi
 
       # UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
-      - name: Setup Python 3.7
+      - name: Setup Python 3.10
         if: github.event_name == 'workflow_dispatch' && ${{ matrix.docker-images }} != 'loadtesting-jmeter'
         uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
-          python-version: 3.7
+          python-version: "3.10"
 
       - name: Install Python dependencies
         if: github.event_name == 'workflow_dispatch' && ${{ matrix.docker-images }} != 'loadtesting-jmeter'
         run: |
           sudo apt-get update
-          sudo python3 -m pip install --upgrade pip
-          sudo pip3 install setuptools --upgrade
-          sudo pip3 install -r ./automation/requirements.txt
+          sudo python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
+          sudo pip3 install --ignore-installed setuptools --upgrade
+          sudo pip3 install --ignore-installed -r ./automation/requirements.txt
           sudo apt-get update
           sudo apt-get install jq
 
@@ -235,5 +247,5 @@ jobs:
             images+="${tag}@${DIGEST} "
           done
           if [[ -n $images ]]; then
-            cosign sign --yes -a author=JanssenProject ${images}
+            cosign sign --yes -a author=JanssenProject ${images} || echo "Failed to sign images"
           fi

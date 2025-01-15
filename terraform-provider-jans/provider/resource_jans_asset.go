@@ -32,10 +32,15 @@ func resourceAsset() *schema.Resource {
 				Optional:    true,
 				Description: "The inum of the document.",
 			},
-			"display_name": {
+			"file_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The display name of the document.",
+				Description: "The file name of the document.",
+			},
+			"file_path": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The Jans file path of the document.",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -52,43 +57,30 @@ func resourceAsset() *schema.Resource {
 				Optional:    true,
 				Description: "The creation date of the document.",
 			},
-			"jans_file_path": {
+			"service": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The Jans file path of the document.",
+				Description: "The Jans service of the document.",
 			},
-			"jans_module_property": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Description: "The Jans module property of the document.",
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-			"jans_level": {
+			"level": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The Jans level of the document.",
 			},
-			"jans_revision": {
+			"revision": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The Jans revision of the document.",
 			},
-			"jans_enabled": {
+			"enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "The Jans enabled of the document.",
 			},
-			"jans_alias": {
+			"alias": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The Jans alias of the document.",
-			},
-			"selected": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "The selected of the document.",
 			},
 			"base_dn": {
 				Type:        schema.TypeString,

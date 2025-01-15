@@ -1,10 +1,13 @@
 import os
 import uuid
 import inspect
+import json
 
 from setup_app import paths
 from setup_app.utils import base
 from setup_app.config import Config
+from setup_app.pylib.ldif4.ldif import LDIFWriter
+
 from setup_app.utils.db_utils import dbUtils
 from setup_app.utils.progress import jansProgress
 from setup_app.utils.printVersion import get_war_info
@@ -12,11 +15,19 @@ from setup_app.utils.printVersion import get_war_info
 class BaseInstaller:
     needdb = True
     dbUtils = dbUtils
+    service_scopes_created = False
 
     def register_progess(self):
+        if not hasattr(self, 'output_folder'):
+            self.output_folder = os.path.join(Config.output_dir, self.service_name)
+
+        if not hasattr(self, 'templates_dir'):
+            self.templates_dir = os.path.join(Config.templateFolder, self.service_name)
+
         jansProgress.register(self)
 
     def start_installation(self):
+
         if not hasattr(self, 'pbar_text'):
             pbar_text = "Installing " + self.service_name.title()
         else:
@@ -44,6 +55,9 @@ class BaseInstaller:
         self.render_unit_file()
 
         self.render_import_templates()
+        if not self.service_scopes_created:
+            self.create_scopes()
+
         self.update_backend()
         self.service_post_setup()
 
@@ -150,7 +164,7 @@ class BaseInstaller:
                         cmd_list.insert(-1, '--enable')
                     self.run(cmd_list, None, None, True)
                 elif base.systemctl:
-                    local_script = os.path.join(Config.distFolder, 'scripts', service)
+                    local_script = os.path.join(Config.jansOptFolder, 'scripts', service)
                     if os.path.exists(local_script):
                         self.run([local_script, operation], useWait=True)
                     else:
@@ -229,7 +243,7 @@ class BaseInstaller:
 
     def create_folders(self):
         pass
-    
+
     def copy_static(self):
         pass
 
@@ -241,3 +255,44 @@ class BaseInstaller:
 
     def service_post_setup(self):
         pass
+
+    def service_post_install_tasks(self):
+        pass
+
+    def create_scopes(self):
+        scopes_json_fn = os.path.join(self.templates_dir, 'scopes.json')
+
+        if not os.path.exists(scopes_json_fn):
+            return
+
+        self.logIt(f"Creating {self.service_name} scopes from {scopes_json_fn}")
+        scopes = base.readJsonFile(scopes_json_fn)
+        scopes_ldif_fn = os.path.join(self.output_folder, 'scopes.ldif')
+        self.createDirs(self.output_folder)
+
+        scopes_list = []
+
+        with open(scopes_ldif_fn, 'wb') as scope_ldif_fd:
+            ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
+            for scope in scopes:
+                scope_dn = 'inum={},ou=scopes,o=jans'.format(scope['inum'])
+                scopes_list.append(scope_dn)
+                ldif_dict = {
+                            'objectClass': ['top', 'jansScope'],
+                            'description': [scope['description']],
+                            'displayName': [scope['displayName']],
+                            'inum': [scope['inum']],
+                            'jansDefScope': [str(scope['jansDefScope'])],
+                            'jansId': [scope['jansId']],
+                            'jansScopeTyp': [scope['jansScopeTyp']],
+                            'jansAttrs': [json.dumps({
+                                            "spontaneousClientId":None,
+                                            "spontaneousClientScopes":[],
+                                            "showInConfigurationEndpoint": False
+                                        })],
+                        }
+                ldif_scopes_writer.unparse(scope_dn, ldif_dict)
+
+        self.dbUtils.import_ldif([scopes_ldif_fn])
+        self.service_scopes_created = True
+        return scopes_list

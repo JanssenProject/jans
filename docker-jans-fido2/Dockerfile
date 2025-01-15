@@ -42,7 +42,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2024-11-15 09:10'
+ENV CN_BUILD_DATE='2024-12-20 11:02'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
@@ -61,12 +61,13 @@ RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=871c36da8a2550ee2febd7c0d72c521898b226c3
+ENV JANS_SOURCE_VERSION=856f9fed1d58a6d41503a0459bbe04f52b0bb8e7
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
-RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+ARG GIT_CLONE_DEPTH=100
+RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
@@ -90,10 +91,7 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
-    && cp ${JANS_SETUP_DIR}/templates/jans-fido2/fido2.ldif /app/templates/jans-fido2/ \
-    && cp ${JANS_SETUP_DIR}/templates/jans-fido2/dynamic-conf.json /app/templates/jans-fido2/ \
-    && cp ${JANS_SETUP_DIR}/templates/jans-fido2/static-conf.json /app/templates/jans-fido2/ \
-    && cp ${JANS_SETUP_DIR}/templates/jans-fido2/jans-fido2-errors.json /app/templates/jans-fido2/ \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-fido2/* /app/templates/jans-fido2/ \
     && mkdir -p org/eclipse/jetty \
     && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
     && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
@@ -108,11 +106,13 @@ RUN wget -q https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pe
 # Python
 # ======
 
+# default pip timeout
+ARG PIP_TIMEOUT=15
 COPY requirements.txt /app/requirements.txt
 RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.disabled \
     && python3 -m ensurepip \
-    && pip3 install --no-cache-dir -U pip wheel setuptools \
-    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && pip3 install --no-cache-dir -U pip wheel setuptools --timeout ${PIP_TIMEOUT} \
+    && pip3 install --no-cache-dir -r /app/requirements.txt --timeout ${PIP_TIMEOUT} \
     && pip3 uninstall -y pip wheel
 
 # ==========

@@ -1,12 +1,11 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::collections::HashMap;
 
 use super::{CedarType, GetCedarTypeError};
-use std::collections::HashMap;
 
 /// CedarSchemaEntityShape hold shape of an entity.
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq)]
@@ -35,7 +34,7 @@ impl CedarSchemaRecord {
 
 /// CedarSchemaRecordAttr defines possible type variants of the entity attribute.
 /// RecordAttr ::= STR ': {' Type [',' '"required"' ':' ( true | false )] '}'
-#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, Hash)]
 pub struct CedarSchemaEntityAttribute {
     pub cedar_type: CedarSchemaEntityType,
     pub required: bool,
@@ -85,7 +84,7 @@ impl<'de> serde::Deserialize<'de> for CedarSchemaEntityAttribute {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, Hash)]
 pub enum CedarSchemaEntityType {
     Set(Box<SetEntityType>),
     Typed(EntityType),
@@ -151,7 +150,7 @@ impl<'de> serde::Deserialize<'de> for CedarSchemaEntityType {
 
 /// The Primitive element describes  
 /// Primitive ::= '"type":' ('"Long"' | '"String"' | '"Boolean"' | TYPENAME)  
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq)]
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq, Hash)]
 pub struct PrimitiveType {
     #[serde(rename = "type")]
     pub kind: PrimitiveTypeKind,
@@ -159,7 +158,7 @@ pub struct PrimitiveType {
 
 /// Variants of primitive type.
 /// Primitive ::= '"type":' ('"Long"' | '"String"' | '"Boolean"' | TYPENAME)  
-#[derive(Debug, Clone, serde::Serialize, PartialEq)]
+#[derive(Debug, Clone, serde::Serialize, PartialEq, Hash)]
 pub enum PrimitiveTypeKind {
     Long,
     String,
@@ -195,7 +194,7 @@ impl<'de> serde::Deserialize<'de> for PrimitiveTypeKind {
 }
 
 /// This structure can hold `Extension`, `EntityOrCommon`, `EntityRef`
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq)]
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq, Hash)]
 pub struct EntityType {
     // it also can be primitive type
     #[serde(rename = "type")]
@@ -218,11 +217,10 @@ impl EntityType {
     }
 }
 
-#[derive(Debug, Clone, serde::Deserialize, PartialEq, serde::Serialize)]
 /// Describes the Set element
 /// Set ::= '"type": "Set", "element": ' TypeJson
-//
 // "type": "Set" checked during deserialization
+#[derive(Debug, Clone, serde::Deserialize, PartialEq, serde::Serialize, Hash)]
 pub struct SetEntityType {
     pub element: CedarSchemaEntityType,
 }

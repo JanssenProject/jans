@@ -55,25 +55,113 @@ Action, Resource and Context is sent by the application in the authorization req
 this is a sample request from a hypothetical application:
 
 ```js
-input = { 
-           "access_token": "eyJhbGc....", 
-           "id_token": "eyJjbGc...", 
-           "userinfo_token": "eyJjbGc...",
-           "tx_token": "eyJjbGc...",
-           "action": "View",
-           "resource": {
-                          "id": "ticket-10101",
-                          "type" : "Ticket",
-                          "owner": "bob@acme.com", 
-                          "org_id": "Acme"
-                        },
-           "context": {
-                       "ip_address": "54.9.21.201",
-                       "network_type": "VPN",
-                       "user_agent": "Chrome 125.0.6422.77 (Official Build) (arm64)",
-                       "time": "1719266610.98636",
-                      }
-         }
+const bootstrap_config = {...};
+const cedarling = await init(bootstrap_config);
+let input = { 
+  "tokens": {
+    "access_token": "eyJhbGc....", 
+    "id_token": "eyJjbGc...", 
+    "userinfo_token": "eyJjbGc...",
+  },
+    "action": "View",
+    "resource": {
+      "id": "ticket-10101",
+      "type" : "Ticket",
+      "owner": "bob@acme.com", 
+      "org_id": "Acme"
+    },
+      "context": {
+        "ip_address": "54.9.21.201",
+        "network_type": "VPN",
+        "user_agent": "Chrome 125.0.6422.77 (Official Build) (arm64)",
+        "time": "1719266610.98636",
+      }
+    }
 
-decision_result = authz(input)
+decision_result = await cedarling(input)
+```
+
+## Automatically Adding Entity References to the Context
+
+Cedarling simplifies context creation by automatically including certain entities. This means you don't need to manually pass their references when using them in your policies. The following entities are automatically added to the context, along with their naming conventions in `lower_snake_case` format:
+
+- **Workload Entity**: `workload`
+- **User Entity**: `user`
+- **Resource Entity**: `resource`
+- **Access Token Entity**: `access_token`
+- **ID Token Entity**: `id_token`
+- **Userinfo Token Entity**: `userinfo_token`
+
+### Example Policy
+
+Below is an example policy schema that illustrates how entities are used:  
+
+```cedarschema
+type Context = {
+  "access_token": Access_token, 
+  "time": Long, 
+  "user": User, 
+  "workload": Workload
+};
+
+type Url = {
+  "host": String, 
+  "path": String, 
+  "protocol": String
+};
+
+entity Access_token = {
+  "exp": Long, 
+  "iss": TrustedIssuer
+};
+
+entity Issue = {
+  "country": String, 
+  "org_id": String
+};
+
+entity Role;
+
+entity TrustedIssuer = {
+  "issuer_entity_id": Url
+};
+
+entity User in [Role] = {
+  "country": String, 
+  "email": String, 
+  "sub": String, 
+  "username": String
+};
+
+entity Workload = {
+  "client_id": String, 
+  "iss": TrustedIssuer, 
+  "name": String, 
+  "org_id": String
+};
+
+action "Update" appliesTo {
+  principal: [Role, Workload, User],
+  resource: [Issue],
+  context: {
+    "access_token": Access_token, 
+    "time": Long, 
+    "user": User, 
+    "workload": Workload
+  }
+};
+
+action "View" appliesTo {
+  principal: [Role, Workload, User],
+  resource: [Issue],
+  context: Context
+};
+```
+
+With this schema, you only need to provide the fields that are not automatically included. For instance, to define the `time` in the context:
+
+```js
+let context = {
+  "time": 1719266610.98636,
+}
 ```

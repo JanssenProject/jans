@@ -219,12 +219,20 @@
             <artifactId>zip4j</artifactId>
             <version>2.11.5</version>
         </dependency>
+        
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>oauth2-oidc-sdk</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
 
         <!-- TESTS -->
         <dependency>
             <groupId>net.sourceforge.htmlunit</groupId>
             <artifactId>htmlunit</artifactId>
-            <version>2.70.0</version>
             <scope>test</scope>
         </dependency>
 		<dependency>
@@ -236,11 +244,6 @@
             <groupId>io.jans</groupId>
             <artifactId>agama-inbound</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
             <scope>test</scope>
         </dependency>
         <!-- Needed for htmlunit <-> log4j2 intergration -->

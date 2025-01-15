@@ -1,9 +1,7 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 pub(crate) use cedar_json::CedarSchemaJson;
 pub(crate) mod cedar_json;
@@ -198,10 +196,8 @@ mod deserialize {
     mod tests {
         use test_utils::assert_eq;
 
-        use crate::common::policy_store::AgamaPolicyStore;
-        use crate::common::policy_store::PolicyStore;
-
         use super::*;
+        use crate::common::policy_store::{AgamaPolicyStore, PolicyStore};
 
         #[test]
         fn test_read_ok() {
@@ -258,7 +254,7 @@ mod deserialize {
 
         // In fact this fails because of limitations in cedar_policy::Policy::from_json
         // see PolicyContentType
-        #[allow(dead_code)]
+        #[test]
         fn test_both_ok() {
             static POLICY_STORE_RAW: &str =
                 include_str!("../../../../test_files/policy-store_blobby.json");
@@ -292,7 +288,10 @@ mod deserialize {
             let err = policy_result.unwrap_err();
             let msg = err.to_string();
             assert!(
-                msg.contains("unable to parse cedar policy schema: error parsing schema: unexpected end of input"),
+                msg.contains(
+                    "unable to parse cedar policy schema: error parsing schema: unexpected end of \
+                     input"
+                ),
                 "{err:?}"
             );
         }
@@ -306,7 +305,8 @@ mod deserialize {
             let err_msg = policy_result.unwrap_err().to_string();
             assert_eq!(
                 err_msg,
-                "policy_stores.a1bf93115de86de760ee0bea1d529b521489e5a11747: unable to parse cedar policy schema: failed to resolve type: User_TypeNotExist at line 4 column 5"
+                "policy_stores.a1bf93115de86de760ee0bea1d529b521489e5a11747: unable to parse \
+                 cedar policy schema: failed to resolve type: User_TypeNotExist at line 8 column 5"
             );
         }
     }

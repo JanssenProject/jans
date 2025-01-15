@@ -1,9 +1,7 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 use std::path::Path;
 
@@ -32,8 +30,7 @@ pub enum PolicyStoreSource {
 
     /// Fetch the policies from the Lock Master service using a specified identifier.
     ///
-    /// The string contains the identifier of the policy store, which is set in the
-    /// `CEDARLING_POLICY_STORE_ID` bootstrap configuration.
+    /// The string contains a URI where the policy store can be retrieved.
     LockMaster(String),
 
     /// Read policy from a JSON File.

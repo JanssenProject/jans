@@ -4,14 +4,16 @@ on:
     branches:
       - main
     paths:
-      #TODO: add all python projects paths below "jans-pycloudlib", "jans-cli-tui", "jans-linux-setup"
-      - 'demos/jans-tent/**'
+      - 'jans-pycloudlib/**'
+      - 'jans-cli-tui/**'
+      - 'jans-linux-setup/**'
   pull_request:
     branches:
       - main
     paths:
-      #TODO: add all python projects paths below "jans-pycloudlib", "jans-cli-tui", "jans-linux-setup"
-      - 'demos/jans-tent/**'
+      - 'jans-pycloudlib/**'
+      - 'jans-cli-tui/**'
+      - 'jans-linux-setup/**'
 
 permissions:
   contents: read
@@ -23,8 +25,11 @@ jobs:
       #max-parallel: 1
       fail-fast: false
       matrix:
-        #TODO: add all python projects paths below "jans-pycloudlib", "jans-cli-tui", "jans-linux-setup"
-        python-projects: ["demos/jans-tent"]
+        python-projects: [
+          "jans-pycloudlib",
+          "jans-cli-tui",
+          "jans-linux-setup"
+        ]
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1

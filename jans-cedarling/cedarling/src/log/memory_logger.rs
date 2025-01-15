@@ -1,15 +1,16 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-use super::interface::{LogStorage, LogWriter};
-use super::LogEntry;
-use crate::bootstrap_config::log_config::MemoryLogConfig;
+use chrono::Duration;
+use std::sync::Mutex;
+
 use sparkv::{Config as ConfigSparKV, SparKV};
-use std::{sync::Mutex, time::Duration};
+
+use super::LogLevel;
+use super::interface::{LogStorage, LogWriter, Loggable};
+use crate::bootstrap_config::log_config::MemoryLogConfig;
 
 const STORAGE_MUTEX_EXPECT_MESSAGE: &str = "MemoryLogger storage mutex should unlock";
 const STORAGE_JSON_PARSE_EXPECT_MESSAGE: &str =
@@ -18,31 +19,42 @@ const STORAGE_JSON_PARSE_EXPECT_MESSAGE: &str =
 /// A logger that store logs in-memory.
 pub(crate) struct MemoryLogger {
     storage: Mutex<SparKV>,
+    log_level: LogLevel,
 }
 
 impl MemoryLogger {
-    pub fn new(config: MemoryLogConfig) -> Self {
+    pub fn new(config: MemoryLogConfig, log_level: LogLevel) -> Self {
         let sparkv_config = ConfigSparKV {
-            default_ttl: Duration::from_secs(config.log_ttl),
+            default_ttl: Duration::new(
+                config.log_ttl.try_into().expect("u64 that fits in a i64"),
+                0,
+            )
+            .expect("a valid duration"),
             ..Default::default()
         };
 
         MemoryLogger {
             storage: Mutex::new(SparKV::with_config(sparkv_config)),
+            log_level,
         }
     }
 }
 
 // Implementation of LogWriter
 impl LogWriter for MemoryLogger {
-    fn log(&self, entry: LogEntry) {
+    fn log_any<T: Loggable>(&self, entry: T) {
+        if !entry.can_log(self.log_level) {
+            // do nothing
+            return;
+        }
+
         let json_string = serde_json::json!(entry).to_string();
 
         let result = self
             .storage
             .lock()
             .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
-            .set(entry.id.to_string().as_str(), &json_string);
+            .set(entry.get_request_id().to_string().as_str(), &json_string);
 
         if let Err(err) = result {
             // log error to stderr
@@ -53,7 +65,7 @@ impl LogWriter for MemoryLogger {
 
 // Implementation of LogStorage
 impl LogStorage for MemoryLogger {
-    fn pop_logs(&self) -> Vec<LogEntry> {
+    fn pop_logs(&self) -> Vec<serde_json::Value> {
         // TODO: implement more efficient implementation
 
         let mut storage_guard = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
@@ -63,16 +75,16 @@ impl LogStorage for MemoryLogger {
         keys.iter()
             .filter_map(|key| storage_guard.pop(key))
             // we call unwrap, because we know that the value is valid json
-            .map(|str_json| serde_json::from_str::<LogEntry>(str_json.as_str())
+            .map(|str_json| serde_json::from_str::<serde_json::Value>(str_json.as_str())
             .expect(STORAGE_JSON_PARSE_EXPECT_MESSAGE))
             .collect()
     }
 
-    fn get_log_by_id(&self, id: &str) -> Option<LogEntry> {
+    fn get_log_by_id(&self, id: &str) -> Option<serde_json::Value> {
         self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE)
             .get(id)
             // we call unwrap, because we know that the value is valid json
-            .map(|str_json| serde_json::from_str::<LogEntry>(str_json.as_str()).expect(STORAGE_JSON_PARSE_EXPECT_MESSAGE))
+            .map(|str_json| serde_json::from_str::<serde_json::Value>(str_json.as_str()).expect(STORAGE_JSON_PARSE_EXPECT_MESSAGE))
     }
 
     fn get_log_ids(&self) -> Vec<String> {
@@ -85,14 +97,15 @@ impl LogStorage for MemoryLogger {
 
 #[cfg(test)]
 mod tests {
+    use test_utils::assert_eq;
+
     use super::super::{AuthorizationLogInfo, LogEntry, LogType};
     use super::*;
     use crate::common::app_types;
-    use test_utils::assert_eq;
 
     fn create_memory_logger() -> MemoryLogger {
         let config = MemoryLogConfig { log_ttl: 60 };
-        MemoryLogger::new(config)
+        MemoryLogger::new(config, LogLevel::TRACE)
     }
 
     #[test]
@@ -113,6 +126,7 @@ mod tests {
             person_authorize_info: Default::default(),
             workload_authorize_info: Default::default(),
             authorized: true,
+            entities: serde_json::json!({}),
         });
         let entry2 = LogEntry::new_with_data(
             app_types::PdpID::new(),
@@ -120,28 +134,40 @@ mod tests {
             LogType::System,
         );
 
+        assert!(
+            entry1.base.request_id < entry2.base.request_id,
+            "entry1.base.request_id should be lower than in entry2"
+        );
+
         // log entries
         logger.log(entry1.clone());
         logger.log(entry2.clone());
 
+        let entry1_json = serde_json::json!(entry1);
+        let entry2_json = serde_json::json!(entry2);
+
         // check that we have two entries in the log database
         assert_eq!(logger.get_log_ids().len(), 2);
         assert_eq!(
-            logger.get_log_by_id(&entry1.id.to_string()).unwrap(),
-            entry1,
+            logger
+                .get_log_by_id(&entry1.get_request_id().to_string())
+                .unwrap(),
+            entry1_json,
             "Failed to get log entry by id"
         );
         assert_eq!(
-            logger.get_log_by_id(&entry2.id.to_string()).unwrap(),
-            entry2,
+            logger
+                .get_log_by_id(&entry2.get_request_id().to_string())
+                .unwrap(),
+            entry2_json,
             "Failed to get log entry by id"
         );
 
         // get logs using `pop_logs`
         let logs = logger.pop_logs();
         assert_eq!(logs.len(), 2);
-        assert_eq!(logs[0], entry1, "First log entry is incorrect");
-        assert_eq!(logs[1], entry2, "Second log entry is incorrect");
+        assert_eq!(logs[0], entry1_json, "First log entry is incorrect");
+        assert_eq!(logs[1], entry2_json, "Second log entry is incorrect");
 
         // check that we have no entries in the log database
         assert!(
@@ -170,11 +196,14 @@ mod tests {
         logger.log(entry1.clone());
         logger.log(entry2.clone());
 
+        let entry1_json = serde_json::json!(entry1);
+        let entry2_json = serde_json::json!(entry2);
+
         // check that we have two entries in the log database
         let logs = logger.pop_logs();
         assert_eq!(logs.len(), 2);
-        assert_eq!(logs[0], entry1, "First log entry is incorrect");
-        assert_eq!(logs[1], entry2, "Second log entry is incorrect");
+        assert_eq!(logs[0], entry1_json, "First log entry is incorrect");
+        assert_eq!(logs[1], entry2_json, "Second log entry is incorrect");
 
         // check that we have no entries in the log database
         assert!(

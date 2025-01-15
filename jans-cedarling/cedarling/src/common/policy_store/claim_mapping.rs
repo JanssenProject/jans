@@ -1,15 +1,14 @@
-/*
-* This software is available under the Apache-2.0 license.
-* See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
-*
-* Copyright (c) 2024, Gluu, Inc.
-*/
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use std::collections::HashMap;
 
 use regex;
 use regex::Regex;
-use serde::{de, Deserialize};
+use serde::{Deserialize, de};
 use serde_json::Value;
-use std::collections::HashMap;
 
 /// Structure for storing `claim mappings`
 ///
@@ -266,12 +265,13 @@ impl RegexFieldMappingType {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use super::{ClaimMapping, RegexMapping};
-    use crate::common::policy_store::claim_mapping::RegexFieldMapping;
-    use serde_json::json;
     use std::collections::HashMap;
+
+    use serde_json::json;
     use test_utils::assert_eq;
+
+    use super::{ClaimMapping, RegexMapping, *};
+    use crate::common::policy_store::claim_mapping::RegexFieldMapping;
 
     /// Tests if a token entity metadata with a RegEx parser can be parsed
     /// from a JSON string
@@ -281,20 +281,14 @@ mod test {
             "Acme::Email".to_string(),
             r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
             HashMap::from([
-                (
-                    "UID".to_string(),
-                    RegexFieldMapping {
-                        attr: "uid".to_string(),
-                        r#type: RegexFieldMappingType::String,
-                    },
-                ),
-                (
-                    "DOMAIN".to_string(),
-                    RegexFieldMapping {
-                        attr: "domain".to_string(),
-                        r#type: RegexFieldMappingType::String,
-                    },
-                ),
+                ("UID".to_string(), RegexFieldMapping {
+                    attr: "uid".to_string(),
+                    r#type: RegexFieldMappingType::String,
+                }),
+                ("DOMAIN".to_string(), RegexFieldMapping {
+                    attr: "domain".to_string(),
+                    r#type: RegexFieldMappingType::String,
+                }),
             ]),
         )
         .expect("regexp should parse correctly");
@@ -361,21 +355,15 @@ mod test {
             "Acme::Email".to_string(),
             r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
             HashMap::from([
-                (
-                    "UID".to_string(),
-                    RegexFieldMapping {
-                        attr: "uid".to_string(),
-                        r#type: RegexFieldMappingType::String,
-                    },
-                ),
-                (
-                    "DOMAIN".to_string(),
-                    RegexFieldMapping {
-                        attr: "domain".to_string(),
+                ("UID".to_string(), RegexFieldMapping {
+                    attr: "uid".to_string(),
+                    r#type: RegexFieldMappingType::String,
+                }),
+                ("DOMAIN".to_string(), RegexFieldMapping {
+                    attr: "domain".to_string(),
 
-                        r#type: RegexFieldMappingType::String,
-                    },
-                ),
+                    r#type: RegexFieldMappingType::String,
+                }),
             ]),
         )
         .expect("regexp should parse correctly");

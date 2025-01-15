@@ -77,7 +77,7 @@ public class DiscoveryService {
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.STATUS_LIST))
             jsonObj.put(STATUS_LIST_ENDPOINT, getTokenStatusListEndpoint());
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.ACCESS_EVALUATION))
-            jsonObj.put(ACCESS_EVALUATION_V1_ENDPOINT, getAccessEvaluationV1Endpoint());
+            jsonObj.put(ACCESS_EVALUATION_V1_ENDPOINT, getAccessEvaluationV1Endpoint(appConfiguration));
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_TOKEN))
             jsonObj.put(REVOCATION_ENDPOINT, appConfiguration.getTokenRevocationEndpoint());
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_SESSION))
@@ -243,8 +243,8 @@ public class DiscoveryService {
         return endpointUrl("/status_list");
     }
 
-    public String getAccessEvaluationV1Endpoint() {
-        return endpointUrl("/access/v1/evaluation");
+    public static String getAccessEvaluationV1Endpoint(AppConfiguration appConfiguration) {
+        return endpointUrl(appConfiguration.getEndSessionEndpoint(), "/access/v1/evaluation");
     }
 
 

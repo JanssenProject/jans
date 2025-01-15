@@ -6,6 +6,8 @@ from functools import cached_property
 from string import Template
 from uuid import uuid4
 
+from ldif import LDIFWriter
+
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.utils import PersistenceMapper
@@ -155,12 +157,42 @@ class LockPersistenceSetup:
 
     @cached_property
     def ldif_files(self) -> list[str]:
-        return [
-            "/app/templates/jans-lock/config.ldif",
-            "/app/templates/jans-lock/clients.ldif",
-        ]
+        filenames = ["config.ldif", "clients.ldif"]
+
+        # generate extra scopes
+        self.generate_scopes_ldif()
+        filenames.append("scopes.ldif")
+
+        return [f"/app/templates/jans-lock/{filename}" for filename in filenames]
 
     def import_ldif_files(self) -> None:
         for file_ in self.ldif_files:
             logger.info(f"Importing {file_}")
             self.client.create_from_ldif(file_, self.ctx)
+
+    def generate_scopes_ldif(self):
+        # prepare required scopes (if any)
+        with open("/app/templates/jans-lock/scopes.json") as f:
+            scopes = json.loads(f.read())
+
+        with open("/app/templates/jans-lock/scopes.ldif", "wb") as fd:
+            writer = LDIFWriter(fd, cols=1000)
+
+            for scope in scopes:
+                writer.unparse(
+                    f"inum={scope['inum']},ou=scopes,o=jans",
+                    {
+                        "objectClass": ["top", "jansScope"],
+                        "description": [scope["description"]],
+                        "displayName": [scope["displayName"]],
+                        "inum": [scope["inum"]],
+                        "jansDefScope": [str(scope["jansDefScope"]).lower()],
+                        "jansId": [scope["jansId"]],
+                        "jansScopeTyp": [scope["jansScopeTyp"]],
+                        "jansAttrs": [json.dumps({
+                            "spontaneousClientId": None,
+                            "spontaneousClientScopes": [],
+                            "showInConfigurationEndpoint": False,
+                        })],
+                    },
+                )

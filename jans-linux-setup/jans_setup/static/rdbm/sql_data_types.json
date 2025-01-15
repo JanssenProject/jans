@@ -4,6 +4,11 @@
       "type": "TEXT"
     }
   },
+  "clntDat": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
   "description": {
     "mysql": {
       "size": 768,

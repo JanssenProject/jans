@@ -1,14 +1,25 @@
-use super::{
-    authorization_config::AuthorizationConfig, BootstrapConfig, JwtConfig, LogConfig,
-    LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
-};
-use crate::common::policy_store::PolicyStore;
-use jsonwebtoken::Algorithm;
-use serde::{Deserialize, Deserializer};
-use std::{collections::HashSet, path::Path, str::FromStr};
-use typed_builder::TypedBuilder;
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-#[derive(Deserialize, PartialEq, Debug, TypedBuilder)]
+use std::collections::HashSet;
+use std::fmt::Display;
+use std::fs;
+use std::path::Path;
+use std::str::FromStr;
+
+use jsonwebtoken::Algorithm;
+use serde::{Deserialize, Deserializer, Serialize};
+
+use super::authorization_config::AuthorizationConfig;
+use super::{
+    BootstrapConfig, BootstrapConfigLoadingError, IdTokenTrustMode, JwtConfig, LogConfig,
+    LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, TokenValidationConfig,
+};
+use crate::log::LogLevel;
+
+#[derive(Deserialize, PartialEq, Debug, Default)]
 /// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
 /// from [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
 pub struct BootstrapConfigRaw {
@@ -32,10 +43,27 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_LOG_TYPE", default)]
     pub log_type: LoggerType,
 
+    /// Log level filter for logging. TRACE is lowest. FATAL is highest.
+    #[serde(rename = "CEDARLING_LOG_LEVEL", default)]
+    pub log_level: LogLevel,
+
     /// If `log_type` is set to [`LogType::Memory`], this is the TTL (time to live) of
     /// log entities in seconds.
     #[serde(rename = "CEDARLING_LOG_TTL", default)]
     pub log_ttl: Option<u64>,
+
+    /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
+    #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS", default)]
+    pub decision_log_user_claims: Vec<String>,
+
+    /// List of claims to map from user entity, such as ["client_id", "rp_id", ...]
+    #[serde(rename = "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS", default)]
+    pub decision_log_workload_claims: Vec<String>,
+
+    /// Token claims that will be used for decision logging.
+    /// Default is jti, but perhaps some other claim is needed.
+    #[serde(rename = "CEDARLING_DECISION_LOG_DEFAULT_JWT_ID", default)]
+    pub decision_log_default_jwt_id: String,
 
     /// When `enabled`, Cedar engine authorization is queried for a User principal.
     #[serde(rename = "CEDARLING_USER_AUTHZ", default)]
@@ -54,6 +82,26 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION", default)]
     pub usr_workload_bool_op: WorkloadBoolOp,
 
+    /// Mapping name of cedar schema User entity
+    #[serde(rename = "CEDARLING_MAPPING_USER", default)]
+    pub mapping_user: Option<String>,
+
+    /// Mapping name of cedar schema Workload entity.
+    #[serde(rename = "CEDARLING_MAPPING_WORKLOAD", default)]
+    pub mapping_workload: Option<String>,
+
+    /// Mapping name of cedar schema id_token entity.
+    #[serde(rename = "CEDARLING_MAPPING_ID_TOKEN", default)]
+    pub mapping_id_token: Option<String>,
+
+    /// Mapping name of cedar schema access_token entity.
+    #[serde(rename = "CEDARLING_MAPPING_ACCESS_TOKEN", default)]
+    pub mapping_access_token: Option<String>,
+
+    /// Mapping name of cedar schema userinfo_token entity.
+    #[serde(rename = "CEDARLING_MAPPING_USERINFO_TOKEN", default)]
+    pub mapping_userinfo_token: Option<String>,
+
     /// Path to a local file pointing containing a JWKS.
     #[serde(
         rename = "CEDARLING_LOCAL_JWKS",
@@ -64,7 +112,7 @@ pub struct BootstrapConfigRaw {
 
     /// JSON object with policy store
     #[serde(rename = "CEDARLING_LOCAL_POLICY_STORE", default)]
-    pub local_policy_store: Option<PolicyStore>,
+    pub local_policy_store: Option<String>,
 
     /// Path to a Policy Store JSON file
     #[serde(
@@ -162,7 +210,7 @@ pub struct BootstrapConfigRaw {
     ///     2. if a Userinfo token is present, the sub matches the id_token, and that
     ///         the aud matches the access token client_id.
     #[serde(rename = "CEDARLING_ID_TOKEN_TRUST_MODE", default)]
-    pub id_token_trust_mode: TrustMode,
+    pub id_token_trust_mode: IdTokenTrustMode,
 
     /// If Enabled, the Cedarling will connect to the Lock Master for policies,
     /// and subscribe for SSE events.
@@ -206,30 +254,6 @@ pub struct BootstrapConfigRaw {
     pub listen_sse: FeatureToggle,
 }
 
-/// TrustMode can be `Strict` or `None`
-#[derive(Default, Debug, PartialEq, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum TrustMode {
-    /// `Strict` level of validation
-    #[default]
-    Strict,
-    /// Disable validation.
-    None,
-}
-
-impl FromStr for TrustMode {
-    type Err = ParseTrustModeError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let s = s.to_lowercase();
-        match s.as_str() {
-            "strict" => Ok(TrustMode::Strict),
-            "none" => Ok(TrustMode::None),
-            _ => Err(ParseTrustModeError { trust_mode: s }),
-        }
-    }
-}
-
 /// Type of logger
 #[derive(Debug, PartialEq, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
@@ -263,8 +287,20 @@ impl FromStr for LoggerType {
     }
 }
 
+impl Display for LoggerType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            // we have to make the string representation is lowercase
+            LoggerType::Off => write!(f, "off"),
+            LoggerType::Memory => write!(f, "memory"),
+            LoggerType::StdOut => write!(f, "stdout"),
+            LoggerType::Lock => write!(f, "lock"),
+        }
+    }
+}
+
 /// Enum varians that represent if feature is enabled or disabled
-#[derive(Debug, PartialEq, Deserialize, Default)]
+#[derive(Debug, PartialEq, Deserialize, Default, Copy, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum FeatureToggle {
     /// Represent as disabled.
@@ -272,6 +308,15 @@ pub enum FeatureToggle {
     Disabled,
     /// Represent as enabled.
     Enabled,
+}
+
+impl From<FeatureToggle> for bool {
+    fn from(value: FeatureToggle) -> bool {
+        match value {
+            FeatureToggle::Disabled => false,
+            FeatureToggle::Enabled => true,
+        }
+    }
 }
 
 impl TryFrom<String> for FeatureToggle {
@@ -324,7 +369,7 @@ impl From<bool> for FeatureToggle {
     }
 }
 
-#[derive(Default, Clone, Copy, Debug, PartialEq, Deserialize)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "UPPERCASE")]
 /// Operator that define boolean operator `AND` or `OR`.
 pub enum WorkloadBoolOp {
@@ -383,51 +428,47 @@ pub struct ParseFeatureToggleError {
     value: String,
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum BootstrapDecodingError {
-    #[error("Failed to deserialize Bootstrap config: {0}")]
-    Deserialization(#[from] serde_json::Error),
-    #[error("Missing bootstrap property: `CEDARLING_LOG_TTL`. This property is required if `CEDARLING_LOG_TYPE` is set to Memory.")]
-    MissingLogTTL,
-    #[error("Multiple store options were provided. Make sure you only one of these properties is set: `CEDARLING_POLICY_STORE_URI` or `CEDARLING_LOCAL_POLICY_STORE`")]
-    ConflictingPolicyStores,
-    #[error("No Policy store was provided.")]
-    MissingPolicyStore,
-    #[error(
-        "Unsupported policy store file format for: {0}. Supported formats include: JSON, YAML"
-    )]
-    UnsupportedPolicyStoreFileFormat(String),
-}
-
 impl BootstrapConfig {
     /// Construct an instance from BootstrapConfigRaw
-    pub fn from_raw_config(raw: &BootstrapConfigRaw) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn from_raw_config(raw: &BootstrapConfigRaw) -> Result<Self, BootstrapConfigLoadingError> {
+        if !raw.workload_authz.is_enabled() && !raw.user_authz.is_enabled() {
+            return Err(BootstrapConfigLoadingError::BothPrincipalsDisabled);
+        }
+
         // Decode LogCofig
         let log_type = match raw.log_type {
             LoggerType::Off => LogTypeConfig::Off,
             LoggerType::Memory => LogTypeConfig::Memory(MemoryLogConfig {
-                log_ttl: raw.log_ttl.ok_or(BootstrapDecodingError::MissingLogTTL)?,
+                log_ttl: raw
+                    .log_ttl
+                    .ok_or(BootstrapConfigLoadingError::MissingLogTTL)?,
             }),
             LoggerType::StdOut => LogTypeConfig::StdOut,
             LoggerType::Lock => LogTypeConfig::Lock,
         };
-        let log_config = LogConfig { log_type };
+        let log_config = LogConfig {
+            log_type,
+            log_level: raw.log_level,
+        };
 
         // Decode policy store
         let policy_store_config = match (
+            raw.local_policy_store.clone(),
             raw.policy_store_uri.clone(),
             raw.policy_store_local_fn.clone(),
         ) {
             // Case: no policy store provided
-            (None, None) => Err(BootstrapDecodingError::MissingPolicyStore)?,
-
+            (None, None, None) => Err(BootstrapConfigLoadingError::MissingPolicyStore)?,
+            // Case: get the policy store from a JSON string
+            (Some(policy_store), None, None) => PolicyStoreConfig {
+                source: PolicyStoreSource::Json(policy_store),
+            },
             // Case: get the policy store from the lock master
-            (Some(policy_store_uri), None) => PolicyStoreConfig {
+            (None, Some(policy_store_uri), None) => PolicyStoreConfig {
                 source: PolicyStoreSource::LockMaster(policy_store_uri),
             },
-
             // Case: get the policy store from a local JSON file
-            (None, Some(raw_path)) => {
+            (None, None, Some(raw_path)) => {
                 let path = Path::new(&raw_path);
                 let file_ext = Path::new(&path)
                     .extension()
@@ -437,23 +478,55 @@ impl BootstrapConfig {
                 let source = match file_ext.as_deref() {
                     Some("json") => PolicyStoreSource::FileJson(path.into()),
                     Some("yaml") | Some("yml") => PolicyStoreSource::FileYaml(path.into()),
-                    _ => Err(BootstrapDecodingError::UnsupportedPolicyStoreFileFormat(
-                        raw_path,
-                    ))?,
+                    _ => Err(
+                        BootstrapConfigLoadingError::UnsupportedPolicyStoreFileFormat(raw_path),
+                    )?,
                 };
                 PolicyStoreConfig { source }
             },
-
             // Case: multiple polict stores were set
-            (Some(_), Some(_)) => Err(BootstrapDecodingError::ConflictingPolicyStores)?,
+            _ => Err(BootstrapConfigLoadingError::ConflictingPolicyStores)?,
         };
 
-        // Decode JWT Config
-        // TODO: update this once Jwt Service implements the new bootstrap properties
-        let jwt_config = match raw.jwt_sig_validation {
-            FeatureToggle::Disabled => JwtConfig::Disabled,
-            FeatureToggle::Enabled => JwtConfig::Enabled {
-                signature_algorithms: raw.jwt_signature_algorithms_supported.clone(),
+        // Load the jwks from a local file
+        let jwks = raw
+            .local_jwks
+            .as_ref()
+            .map(|path| {
+                fs::read_to_string(path).map_err(|e| {
+                    BootstrapConfigLoadingError::LoadLocalJwks(path.to_string(), e.to_string())
+                })
+            })
+            .transpose()?;
+
+        // JWT Config
+        let jwt_config = JwtConfig {
+            jwks,
+            jwt_sig_validation: raw.jwt_sig_validation.into(),
+            jwt_status_validation: raw.jwt_status_validation.into(),
+            id_token_trust_mode: raw.id_token_trust_mode,
+            signature_algorithms_supported: raw.jwt_signature_algorithms_supported.clone(),
+            access_token_config: TokenValidationConfig {
+                iss_validation: raw.at_iss_validation.into(),
+                jti_validation: raw.at_jti_validation.into(),
+                nbf_validation: raw.at_nbf_validation.into(),
+                exp_validation: raw.at_exp_validation.into(),
+                ..Default::default()
+            },
+            id_token_config: TokenValidationConfig {
+                iss_validation: raw.idt_iss_validation.into(),
+                aud_validation: raw.idt_aud_validation.into(),
+                sub_validation: raw.idt_sub_validation.into(),
+                exp_validation: raw.idt_exp_validation.into(),
+                iat_validation: raw.idt_iat_validation.into(),
+                ..Default::default()
+            },
+            userinfo_token_config: TokenValidationConfig {
+                iss_validation: raw.userinfo_iss_validation.into(),
+                aud_validation: raw.userinfo_aud_validation.into(),
+                sub_validation: raw.userinfo_sub_validation.into(),
+                exp_validation: raw.userinfo_exp_validation.into(),
+                ..Default::default()
             },
         };
 
@@ -461,6 +534,14 @@ impl BootstrapConfig {
             use_user_principal: raw.user_authz.is_enabled(),
             use_workload_principal: raw.workload_authz.is_enabled(),
             user_workload_operator: raw.usr_workload_bool_op,
+            decision_log_user_claims: raw.decision_log_user_claims.clone(),
+            decision_log_workload_claims: raw.decision_log_workload_claims.clone(),
+            decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
+            mapping_user: raw.mapping_user.clone(),
+            mapping_workload: raw.mapping_workload.clone(),
+            mapping_id_token: raw.mapping_id_token.clone(),
+            mapping_access_token: raw.mapping_access_token.clone(),
+            mapping_userinfo_token: raw.mapping_userinfo_token.clone(),
         };
 
         Ok(Self {

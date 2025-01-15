@@ -9,7 +9,6 @@ from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for_persistence
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 from jans.pycloudlib.persistence.sql import render_sql_properties
-from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.sql import override_simple_json_property
 from jans.pycloudlib.persistence.utils import render_base_properties
 from jans.pycloudlib.persistence.utils import render_salt
@@ -44,7 +43,6 @@ def main():
             render_hybrid_properties(hybrid_prop)
 
     if "sql" in persistence_groups:
-        sync_sql_password(manager)
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
         render_sql_properties(
             manager,
@@ -89,7 +87,7 @@ def main():
     if as_boolean(os.environ.get("CN_LOCK_ENABLED", "false")):
         configure_lock_logging()
 
-        with manager.lock.create_lock("lock-setup"):
+        with manager.create_lock("lock-setup"):
             persistence_setup = LockPersistenceSetup(manager)
             persistence_setup.import_ldif_files()
 

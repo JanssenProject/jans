@@ -4,15 +4,12 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
-use pyo3::prelude::*;
 use pyo3::Bound;
+use pyo3::prelude::*;
 
 pub(crate) mod bootstrap_config;
-mod jwt_config;
 
 pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<bootstrap_config::BootstrapConfig>()?;
-    m.add_class::<jwt_config::JwtConfig>()?;
-
     Ok(())
 }

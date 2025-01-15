@@ -24,7 +24,7 @@ RUN mkdir -p /opt/keycloak/logs \
 # ==============
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2024-10-27 08:54'
+ENV CN_BUILD_DATE='2024-12-20 09:15'
 
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-jans-spi-${CN_VERSION}.jar -P /opt/keycloak/providers \
     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-jans-spi-${CN_VERSION}-deps.zip -O /tmp/kc-jans-spi.zip \
@@ -35,12 +35,13 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-j
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=871c36da8a2550ee2febd7c0d72c521898b226c3
+ENV JANS_SOURCE_VERSION=856f9fed1d58a6d41503a0459bbe04f52b0bb8e7
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
-RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+ARG GIT_CLONE_DEPTH=100
+RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
@@ -65,11 +66,13 @@ RUN cd /tmp/jans \
 # Python
 # ======
 
+# default pip timeout
+ARG PIP_TIMEOUT=15
 COPY requirements.txt /app/requirements.txt
 RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.disabled \
     && python3 -m ensurepip \
-    && pip3 install --no-cache-dir -U pip wheel setuptools \
-    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && pip3 install --no-cache-dir -U pip wheel setuptools --timeout ${PIP_TIMEOUT} \
+    && pip3 install --no-cache-dir -r /app/requirements.txt --timeout ${PIP_TIMEOUT} \
     && pip3 uninstall -y pip wheel
 
 # =======
