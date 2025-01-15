@@ -6,7 +6,7 @@
 use super::attribute::Attribute;
 use super::deserialize::*;
 use super::*;
-use serde::{de, Deserialize};
+use serde::{Deserialize, de};
 use serde_json::Value;
 use std::collections::HashSet;
 
@@ -53,7 +53,7 @@ where
             de::Error::custom(format!("error while deserializing JSON Value to bool: {e}"))
         })?
         .unwrap_or(true);
-    let kind = deserialize_to_string::<D>(kind)?;
+    let kind = String::deserialize(&kind).map_err(de::Error::custom)?;
     let attr = match kind.as_str() {
         "Record" => {
             let attrs = attr
@@ -66,7 +66,7 @@ where
             return Err(de::Error::custom(format!(
                 "invalid type: {}, expected {}",
                 variant, "Record"
-            )))
+            )));
         },
     };
 
@@ -93,17 +93,14 @@ mod test_deserialize_entity_type {
             },
         });
         let entity_type = serde_json::from_value::<EntityType>(entity_type).unwrap();
-        assert_eq!(
-            entity_type,
-            EntityType {
-                member_of: None,
-                shape: Some(EntityShape::required(HashMap::from([
-                    ("name".into(), Attribute::string()),
-                    ("age".into(), Attribute::long())
-                ]))),
-                tags: None,
-            }
-        );
+        assert_eq!(entity_type, EntityType {
+            member_of: None,
+            shape: Some(EntityShape::required(HashMap::from([
+                ("name".into(), Attribute::string()),
+                ("age".into(), Attribute::long())
+            ]))),
+            tags: None,
+        });
     }
 
     #[test]
@@ -119,17 +116,14 @@ mod test_deserialize_entity_type {
             },
         });
         let with_member_of = serde_json::from_value::<EntityType>(with_member_of).unwrap();
-        assert_eq!(
-            with_member_of,
-            EntityType {
-                member_of: Some(HashSet::from(["UserGroup".into()])),
-                shape: Some(EntityShape::required(HashMap::from([
-                    ("name".into(), Attribute::string()),
-                    ("age".into(), Attribute::long())
-                ]))),
-                tags: None,
-            }
-        );
+        assert_eq!(with_member_of, EntityType {
+            member_of: Some(HashSet::from(["UserGroup".into()])),
+            shape: Some(EntityShape::required(HashMap::from([
+                ("name".into(), Attribute::string()),
+                ("age".into(), Attribute::long())
+            ]))),
+            tags: None,
+        });
     }
 
     #[test]
@@ -151,17 +145,14 @@ mod test_deserialize_entity_type {
             }
         });
         let with_tags = serde_json::from_value::<EntityType>(with_tags).unwrap();
-        assert_eq!(
-            with_tags,
-            EntityType {
-                member_of: None,
-                shape: Some(EntityShape::required(HashMap::from([
-                    ("name".into(), Attribute::string()),
-                    ("age".into(), Attribute::long())
-                ]))),
-                tags: Some(Attribute::set(Attribute::entity_or_common("String",)))
-            }
-        );
+        assert_eq!(with_tags, EntityType {
+            member_of: None,
+            shape: Some(EntityShape::required(HashMap::from([
+                ("name".into(), Attribute::string()),
+                ("age".into(), Attribute::long())
+            ]))),
+            tags: Some(Attribute::set(Attribute::entity_or_common("String",)))
+        });
     }
 
     #[test]
@@ -172,8 +163,9 @@ mod test_deserialize_entity_type {
             },
         });
         let err = serde_json::from_value::<EntityType>(entity_type).unwrap_err();
-        assert!(err
-            .to_string()
-            .contains("invalid type: Set, expected Record"));
+        assert!(
+            err.to_string()
+                .contains("invalid type: Set, expected Record")
+        );
     }
 }

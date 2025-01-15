@@ -5,7 +5,7 @@
 
 use super::deserialize::*;
 use super::*;
-use serde::{de, Deserialize};
+use serde::{Deserialize, de};
 use serde_json::Value;
 use std::collections::HashMap;
 
@@ -59,7 +59,7 @@ impl<'de> Deserialize<'de> for Attribute {
                 de::Error::custom(format!("error while deserializing JSON Value to bool: {e}"))
             })?
             .unwrap_or(true);
-        let kind = deserialize_to_string::<D>(kind)?;
+        let kind = String::deserialize(&kind).map_err(de::Error::custom)?;
         let attr = match kind.as_str() {
             "String" => Attribute::String { required },
             "Long" => Attribute::Long { required },
@@ -90,21 +90,21 @@ impl<'de> Deserialize<'de> for Attribute {
                 let name = attr
                     .remove("name")
                     .ok_or(de::Error::missing_field("name"))?;
-                let name = deserialize_to_string::<D>(name)?;
+                let name = String::deserialize(&name).map_err(de::Error::custom)?;
                 Self::Entity { required, name }
             },
             "Extension" => {
                 let name = attr
                     .remove("name")
                     .ok_or(de::Error::missing_field("name"))?;
-                let name = deserialize_to_string::<D>(name)?;
+                let name = String::deserialize(&name).map_err(de::Error::custom)?;
                 Self::Extension { required, name }
             },
             "EntityOrCommon" => {
                 let name = attr
                     .remove("name")
                     .ok_or(de::Error::missing_field("name"))?;
-                let name = deserialize_to_string::<D>(name)?;
+                let name = String::deserialize(&name).map_err(de::Error::custom)?;
                 Self::EntityOrCommon { required, name }
             },
             name => Self::EntityOrCommon {
