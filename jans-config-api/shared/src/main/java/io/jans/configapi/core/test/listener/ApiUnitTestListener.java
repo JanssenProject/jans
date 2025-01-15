@@ -45,12 +45,12 @@ public class ApiUnitTestListener implements ITestListener {
 
     @Override
     public void onStart(ITestContext context) {
-        Reporter.log("Test onStart ", false);
+        Reporter.log("Test onStart ", true);
     }
 
     @Override
     public void onFinish(ITestContext context) {
-        Reporter.log("Test onFinish ", false);
+        Reporter.log("Test onFinish ", true);
     }
 
     private void testFailed(ITestResult result) {
