@@ -64,9 +64,53 @@ This hypothetical flow is simple but will give you a good idea on how to interac
 
 ### The flow code
 
-The following code depicts the implementation.
+The below depicts the implementation:
 
-![enabled-2fa-methods](../../../assets/agama/challenge-flow.png)
+![co.acme.flows.emailOtp](../../../assets/agama/challenge-flow.png)
+
+<!--
+Flow co.acme.flows.emailOtp
+    Basepath "..."
+    
+obj = RRF "username-prompt.ftl"
+username = obj.username
+
+// Assumptions:
+// - username property holds the user name (in obj map)
+// - retrieveEmails method returns a list of e-mail addresses associated to the user
+// - the username entered always references an existing user 
+
+emails = Call co.acme.services.UserService#retrieveEmails username
+size = emails.length
+
+When size is 0
+    obj = { success: false, error: "No e-mails associated to this account" }
+    Finish obj
+    
+When size is 1
+    email = emails[0]
+Otherwise    
+    inj = { addresses: emails }
+    obj = RRF "email-prompt.ftl" inj
+    
+    // Assumption: obj.email contains the address the user chose
+    email = obj.email
+    
+passcode = Call co.acme.services.EmailService#sendRandomOTP email
+// Assumption: 
+// - method sendRandomOTP sends a message to the address passed and returns the OTP included in the message
+
+obj = RRF "passcode-prompt.ftl"
+// Assumption: obj.otp contains the code the user entered
+
+When obj.otp is passcode
+    // The next line is shorthand for { success: true, data: { userId: data.username } }
+    Finish username
+    
+obj = { success: false, error: "Wrong code entered. Try again another day" }
+Finish obj
+
+-->
 
 Flow `co.acme.flows.emailOtp` is self-explanatory and does not require further insight. Note the templates referenced in RRF directives don't necessarily have to exist, however, the template names will be included in the output of the endpoint as the flow executes. This serves as a hint or reference for the app to know the current point of execution and determine what should be shown in the UI. It will be more clearly seen in the next section.
 

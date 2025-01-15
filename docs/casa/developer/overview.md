@@ -109,7 +109,7 @@ This is probably the most common requirement. Visit this [page](./add-authn-meth
 
 ### Other forms of customization
 
-Most forms of customization can be tackled using flow cancellation. Through cancellation, a flow can be aborted while running and the control returned to one of its callers.  Learn more about this topic [here](../../janssen-server/developer/agama/advanced-usages#cancellation).
+Most forms of customization can be tackled using flow cancellation. Through cancellation, a flow can be aborted while running and the control returned to one of its callers.  Learn more about this topic [here](../../janssen-server/developer/agama/advanced-usages.md#cancellation).
 
 As an example, let's assume you want to add a _"don't have an account? register here"_ button in the initial screen of Casa flow. Here's what you can do:
 

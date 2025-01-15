@@ -12,4 +12,7 @@ public interface AuthorizationChallengeType extends BaseExternalType {
     boolean authorize(Object context);
 
     Map<String, String> getAuthenticationMethodClaims(Object context);
+
+    // prepare authzRequest - AuthzRequest class
+    void prepareAuthzRequest(Object context);
 }
