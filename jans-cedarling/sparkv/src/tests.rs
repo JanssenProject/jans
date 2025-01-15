@@ -67,7 +67,7 @@ fn test_get_item_return_none_if_expired() {
     _ = sparkv.set_with_ttl("key", "value", Duration::microseconds(40));
     assert_eq!(sparkv.get("key"), Some(&"value"));
 
-    std::thread::sleep(std::time::Duration::from_micros(40));
+    std::thread::sleep(std::time::Duration::from_micros(80));
     assert_eq!(sparkv.get("key"), None);
 }
 
