@@ -22,13 +22,13 @@ public class LinkBaseTest extends BaseTest {
     @BeforeMethod
     public void before() {
         boolean isAvailable = isAvailable(propertiesMap.get("linkConfigUrl"), null, null);
-        log.error("\n\n\n *** JANS-LINK Plugin isAvailable{} {}", isAvailable,"\n\n\n");
+        log.error("\n\n\n *** JANS-LINK Plugin isAvailable:{} {}", isAvailable,"\n\n\n");
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well
         if (!isAvailable) {
             throw new SkipException("JANS-LINK Plugin Not deployed");
         }else {
-            log.info("\n\n\n *** JANS-LINK Plugin is Deployed{} {}", "\n\n");
+            log.info("\n\n\n *** JANS-LINK Plugin is Deployed {}", "\n\n");
         }
     }
 

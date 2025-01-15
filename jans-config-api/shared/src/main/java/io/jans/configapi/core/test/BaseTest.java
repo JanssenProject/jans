@@ -151,7 +151,7 @@ public class BaseTest {
     }
 
     protected boolean isEndpointAvailable(final String url, final Map<String, String> headers, final Map<String, String> parameters)  {
-        log.info("*** Check if endpoint available - url:{}, headers:{}, parameters:{}", url, headers, parameters);
+        log.error("*** Check if endpoint available - url:{}, headers:{}, parameters:{}", url, headers, parameters);
         boolean isEndpointAvailable = false;
         try {
             Response response = getResteasyService().executeGet(url, headers, parameters);
@@ -164,6 +164,7 @@ public class BaseTest {
             
         } catch (Exception ex) {
             log.info("Endpoint:{} is NOT available", url);
+            ex.printStackTrace();
             isEndpointAvailable = false;
             return isEndpointAvailable;
         }

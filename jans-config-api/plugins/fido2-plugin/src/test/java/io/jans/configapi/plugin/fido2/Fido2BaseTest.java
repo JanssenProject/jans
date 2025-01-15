@@ -22,14 +22,15 @@ public class Fido2BaseTest extends BaseTest {
     // Execute before each test is run
     @BeforeMethod
     public void before() {
+        log.error("\n\n\n *** FIDO2 Plugin propertiesMap.get(fido2Url):{} {}", propertiesMap.get("fido2Url"), "\n\n\n");
         boolean isAvailable = isAvailable(propertiesMap.get("fido2Url"), null, null);
-        log.error("\n\n\n *** FIDO2 Plugin isAvailable{} {}", isAvailable, "\n\n\n");
+        log.error("\n\n\n *** FIDO2 Plugin isAvailable:{} {}", isAvailable, "\n\n\n");
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well
         if (!isAvailable) {
             throw new SkipException("FIDO2 Plugin Not deployed");
         }else {
-            log.info("\n\n\n *** FIDO2 Plugin is Deployed{} {}", "\n\n");
+            log.info("\n\n\n *** FIDO2 Plugin is Deployed {}", "\n\n");
         }
     }
 

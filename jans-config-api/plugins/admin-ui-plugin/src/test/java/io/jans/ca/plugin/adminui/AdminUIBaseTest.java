@@ -34,7 +34,7 @@ public class AdminUIBaseTest extends BaseTest {
         if (!isAvailable) {
             throw new SkipException("ADMIN-UI Plugin Not deployed");
         } else {
-            log.info("\n\n\n *** ADMIN-UI Plugin is Deployed{} {}", "\n\n");
+            log.info("\n\n\n *** ADMIN-UI Plugin is Deployed {}", "\n\n");
         }
     }
 

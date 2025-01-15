@@ -29,7 +29,7 @@ public class KcLinkBaseTest extends BaseTest {
         if (!isAvailable) {
             throw new SkipException("KC-LINK Plugin not deployed");
         }else {
-            log.info("\n\n\n *** KC-LINK Plugin is Deployed{} {}", "\n\n");
+            log.info("\n\n\n *** KC-LINK Plugin is Deployed {}", "\n\n");
         }
     }
 

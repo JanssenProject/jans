@@ -9337,17 +9337,17 @@ components:
           type: string
         selected:
           type: boolean
-        userCanEdit:
-          type: boolean
         adminCanEdit:
-          type: boolean
-        userCanView:
           type: boolean
         adminCanView:
           type: boolean
-        userCanAccess:
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -10988,10 +10988,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -11767,10 +11767,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
