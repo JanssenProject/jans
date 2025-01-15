@@ -9,6 +9,22 @@ use crate::{
     jwt::{Token, TokenClaimTypeError},
 };
 
+/// Enforces the trust mode setting set by the `CEDARLING_ID_TOKEN_TRUST_MODE`
+/// bootstrap property.
+///
+/// # Trust Modes
+///
+/// There are currently two trust modes:
+/// - None
+/// - Strict
+///
+/// # Strict Mode
+///
+/// Strict mode requires the following:
+/// - `id_token.aud` == `access_token.client_id`
+/// - if a Userinfo token is present:
+///     - `userinfo_token.aud` == `access_token.client_id`
+///     - `userinfo_token.sub` == `id_token.sub`
 pub fn enforce_id_tkn_trust_mode(tokens: &DecodedTokens) -> Result<(), IdTokenTrustModeError> {
     let access_tkn = tokens
         .access_token
@@ -78,7 +94,7 @@ pub enum IdTokenTrustModeError {
 
 #[cfg(test)]
 mod test {
-    use super::{enforce_id_tkn_trust_mode, IdTokenTrustModeError};
+    use super::{IdTokenTrustModeError, enforce_id_tkn_trust_mode};
     use crate::authz::entities::DecodedTokens;
     use crate::common::policy_store::TokenKind;
     use crate::jwt::{Token, TokenClaims};
