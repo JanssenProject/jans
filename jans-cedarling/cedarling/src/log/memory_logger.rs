@@ -50,8 +50,8 @@ impl LogWriter for MemoryLogger {
             Ok(json) => json,
             Err(err) => {
                 eprintln!("could not serialize LogEntry to serde_json::Value: {err:?}");
-                return
-            }
+                return;
+            },
         };
 
         let set_result = self
@@ -70,14 +70,18 @@ impl LogWriter for MemoryLogger {
 // Implementation of LogStorage
 impl LogStorage for MemoryLogger {
     fn pop_logs(&self) -> Vec<serde_json::Value> {
-        self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE)
+        self.storage
+            .lock()
+            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
             .drain()
-            .map(|(_k,value)| value )
+            .map(|(_k, value)| value)
             .collect()
     }
 
     fn get_log_by_id(&self, id: &str) -> Option<serde_json::Value> {
-        self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE)
+        self.storage
+            .lock()
+            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
             .get(id)
             .cloned()
     }
