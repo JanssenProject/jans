@@ -36,12 +36,12 @@ use std::time::Instant;
 pub use authorize_result::AuthorizeResult;
 use cedar_policy::{ContextJsonError, Entities, Entity, EntityUid};
 use entities::{
-    create_resource_entity, create_role_entities, create_token_entities, create_user_entity,
-    create_workload_entity, CreateCedarEntityError, CreateUserEntityError,
+    CEDAR_POLICY_SEPARATOR, CreateCedarEntityError, CreateUserEntityError,
     CreateWorkloadEntityError, DecodedTokens, ResourceEntityError, RoleEntityError,
-    CEDAR_POLICY_SEPARATOR,
+    create_resource_entity, create_role_entities, create_token_entities, create_user_entity,
+    create_workload_entity,
 };
-use merge_json::{merge_json_values, MergeError};
+use merge_json::{MergeError, merge_json_values};
 use request::Request;
 use serde_json::Value;
 use trust_mode::*;
@@ -128,7 +128,7 @@ impl Authz {
         let tokens = self.decode_tokens(&request)?;
 
         if let IdTokenTrustMode::Strict = self.config.authorization.id_token_trust_mode {
-            enforce_id_tkn_trust_mode(&tokens)?;
+            validate_id_tkn_trust_mode(&tokens)?;
         }
 
         // Parse action UID.

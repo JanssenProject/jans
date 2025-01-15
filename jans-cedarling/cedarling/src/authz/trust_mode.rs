@@ -25,7 +25,7 @@ use crate::{
 /// - if a Userinfo token is present:
 ///     - `userinfo_token.aud` == `access_token.client_id`
 ///     - `userinfo_token.sub` == `id_token.sub`
-pub fn enforce_id_tkn_trust_mode(tokens: &DecodedTokens) -> Result<(), IdTokenTrustModeError> {
+pub fn validate_id_tkn_trust_mode(tokens: &DecodedTokens) -> Result<(), IdTokenTrustModeError> {
     let access_tkn = tokens
         .access_token
         .as_ref()
@@ -94,7 +94,7 @@ pub enum IdTokenTrustModeError {
 
 #[cfg(test)]
 mod test {
-    use super::{IdTokenTrustModeError, enforce_id_tkn_trust_mode};
+    use super::{IdTokenTrustModeError, validate_id_tkn_trust_mode};
     use crate::authz::entities::DecodedTokens;
     use crate::common::policy_store::TokenKind;
     use crate::jwt::{Token, TokenClaims};
@@ -119,7 +119,7 @@ mod test {
             id_token: Some(id_token),
             userinfo_token: None,
         };
-        enforce_id_tkn_trust_mode(&tokens).expect("should not error");
+        validate_id_tkn_trust_mode(&tokens).expect("should not error");
     }
 
     #[test]
@@ -133,7 +133,7 @@ mod test {
             id_token: Some(id_token),
             userinfo_token: None,
         };
-        let err = enforce_id_tkn_trust_mode(&tokens).expect_err("should error");
+        let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(err, IdTokenTrustModeError::MissingAccessToken),
             "expected error due to missing access token, got: {:?}",
@@ -153,7 +153,7 @@ mod test {
             id_token: Some(id_token),
             userinfo_token: None,
         };
-        let err = enforce_id_tkn_trust_mode(&tokens).expect_err("should error");
+        let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(
                 err,
@@ -180,7 +180,7 @@ mod test {
             id_token: None,
             userinfo_token: None,
         };
-        let err = enforce_id_tkn_trust_mode(&tokens).expect_err("should error");
+        let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(err, IdTokenTrustModeError::MissingIdToken),
             "expected error due to missing id token, got: {:?}",
@@ -203,7 +203,7 @@ mod test {
             id_token: Some(id_token),
             userinfo_token: None,
         };
-        let err = enforce_id_tkn_trust_mode(&tokens).expect_err("should error");
+        let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(
                 err,
@@ -237,7 +237,7 @@ mod test {
             id_token: Some(id_token),
             userinfo_token: None,
         };
-        let err = enforce_id_tkn_trust_mode(&tokens).expect_err("should error");
+        let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(err, IdTokenTrustModeError::ClientIdIdTokenAudMismatch),
             "expected error due to the access_token's `client_id` not matching with the id_token's `aud`, got: {:?}",
@@ -267,7 +267,7 @@ mod test {
             id_token: Some(id_token),
             userinfo_token: Some(userinfo_token),
         };
-        enforce_id_tkn_trust_mode(&tokens).expect("should not error");
+        validate_id_tkn_trust_mode(&tokens).expect("should not error");
     }
 
     #[test]
@@ -289,7 +289,7 @@ mod test {
             id_token: Some(id_token),
             userinfo_token: Some(userinfo_token),
         };
-        let err = enforce_id_tkn_trust_mode(&tokens).expect_err("should error");
+        let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(
                 err,
@@ -327,7 +327,7 @@ mod test {
             id_token: Some(id_token),
             userinfo_token: Some(userinfo_token),
         };
-        let err = enforce_id_tkn_trust_mode(&tokens).expect_err("should error");
+        let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(err, IdTokenTrustModeError::SubMismatchIdTokenUserinfo),
             "expected error due to the id_token's `aud` not matching with the userinfo_token's `aud`, got: {:?}",
