@@ -62,16 +62,18 @@ fn get_tkn_claim_as_str(
     token: &Token,
     claim_name: &str,
 ) -> Result<Box<str>, IdTokenTrustModeError> {
-    let claim = token
+    token
         .get_claim(claim_name)
-        .ok_or(IdTokenTrustModeError::MissingRequiredClaim(
-            claim_name.to_string(),
-            token.kind,
-        ))?;
-    let claim_str = claim
-        .as_str()
-        .map_err(|e| IdTokenTrustModeError::TokenClaimTypeError(token.kind, e))?;
-    Ok(claim_str.into())
+        .ok_or_else(|| {
+            IdTokenTrustModeError::MissingRequiredClaim(claim_name.to_string(), token.kind)
+        })
+        .and_then(|claim| {
+            claim
+                .as_str()
+                .map(|s| s.into())
+                .map_err(|e| IdTokenTrustModeError::TokenClaimTypeError(token.kind, e))
+                .into()
+        })
 }
 
 #[derive(Debug, thiserror::Error)]
