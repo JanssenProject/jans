@@ -5,6 +5,8 @@ on:
     tags:
     - 'v**'
     - 'nightly'
+permissions:
+  contents: read
 jobs:
   publish_binary_packages:
     if: github.repository == 'JanssenProject/jans'
@@ -196,7 +198,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y python3 build-essential ca-certificates dbus systemd iproute2 gpg python3-pip python3-dev libpq-dev gcc
-        python3 -m pip install --upgrade pip
+        python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
         pip3 install shiv wheel setuptools
         echo "Building jans-linux-setup package"
         sudo chown -R runner:docker /home/runner/work/jans/jans        
@@ -337,7 +339,7 @@ jobs:
         gh release upload $VER *.zip *.sha256sum --clobber
   build_cedarling_python:
     if: github.repository == 'JanssenProject/jans'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
@@ -356,8 +358,8 @@ jobs:
         git_user_signingkey: true
         git_commit_gpgsign: true
 
-    - uses: actions/setup-python@v5
-    - uses: PyO3/maturin-action@v1
+    - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+    - uses: PyO3/maturin-action@ea5bac0f1ccd0ab11c805e2b804bfcb65dac2eab # v1.45.0
       with:
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_python
         command: build
@@ -373,9 +375,9 @@ jobs:
           TAG="0.0.0"
         fi
         cd ${{ github.workspace }}/jans-cedarling/target/wheels
-        sha256sum cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_34_x86_64.whl > cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_34_x86_64.whl.sha256sum
-        sha256sum cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_34_x86_64.whl > cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_34_x86_64.whl.sha256sum
-        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_34_x86_64.whl || echo "Failed to sign"
-        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_34_x86_64.whl || echo "Failed to sign"
+        sha256sum cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_31_x86_64.whl > cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_31_x86_64.whl.sha256sum
+        sha256sum cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_31_x86_64.whl > cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_31_x86_64.whl.sha256sum
+        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_31_x86_64.whl || echo "Failed to sign"
+        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_31_x86_64.whl || echo "Failed to sign"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${VERSION}" *.whl *.sha256sum *.asc
