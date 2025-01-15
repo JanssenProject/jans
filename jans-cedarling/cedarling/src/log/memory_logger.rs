@@ -38,6 +38,44 @@ impl MemoryLogger {
     }
 }
 
+/// In case of failure in MemoryLogger, log to stderr where supported.
+/// On WASM, stderr is not supported, so log to whatever the wasm logger uses.
+mod fallback {
+    use crate::LogLevel;
+
+    /// conform to Loggable requirement imposed by LogStrategy
+    #[derive(serde::Serialize)]
+    struct StrWrap<'a>(&'a str);
+
+    impl crate::log::interface::Loggable for StrWrap<'_> {
+        fn get_request_id(&self) -> uuid7::Uuid {
+            crate::log::log_entry::gen_uuid7()
+        }
+
+        fn get_log_level(&self) -> Option<LogLevel> {
+            // These must always be logged.
+            Some(LogLevel::TRACE)
+        }
+    }
+
+    /// Fetch the correct logger. That takes some work, and it's done on every
+    /// call. But this is a fallback logger, so it is not intended to be used
+    /// often, and in this case correctness and non-fallibility are far more
+    /// important than performance.
+    pub fn log(msg: &str) {
+        let log_config = crate::bootstrap_config::LogConfig{
+            log_type: crate::bootstrap_config::log_config::LogTypeConfig::StdOut,
+            // level is so that all messages passed here are logged.
+            log_level: LogLevel::TRACE,
+        };
+        // This should always be a LogStrategy::StdOut(StdOutLogger)
+        let log_strategy = crate::log::LogStrategy::new(&log_config);
+        use crate::log::interface::LogWriter;
+        // a string is always serializable
+        log_strategy.log_any(StrWrap(msg))
+    }
+}
+
 // Implementation of LogWriter
 impl LogWriter for MemoryLogger {
     fn log_any<T: Loggable>(&self, entry: T) {
@@ -49,7 +87,7 @@ impl LogWriter for MemoryLogger {
         let json = match serde_json::to_value(&entry) {
             Ok(json) => json,
             Err(err) => {
-                eprintln!("could not serialize LogEntry to serde_json::Value: {err:?}");
+                fallback::log(&format!("could not serialize LogEntry to serde_json::Value: {err:?}"));
                 return;
             },
         };
@@ -61,8 +99,7 @@ impl LogWriter for MemoryLogger {
             .set(&entry.get_request_id().to_string(), json);
 
         if let Err(err) = set_result {
-            // log error to stderr
-            eprintln!("could not store LogEntry to memory: {err:?}");
+            fallback::log(&format!("could not store LogEntry to memory: {err:?}"));
         };
     }
 }
@@ -209,5 +246,40 @@ mod tests {
             logger.get_log_ids().is_empty(),
             "Logs were not fully popped"
         );
+    }
+
+    #[test]
+    fn fallback_logger() {
+        struct FailSerialize;
+
+        impl serde::Serialize for FailSerialize {
+            fn serialize<S>(&self, _serializer: S) -> Result<S::Ok, S::Error>
+            where S: serde::Serializer {
+                Err(serde::ser::Error::custom("this always fails"))
+            }
+        }
+
+        impl crate::log::interface::Loggable for FailSerialize {
+            fn get_request_id(&self) -> uuid7::Uuid {
+                crate::log::log_entry::gen_uuid7()
+            }
+
+            fn get_log_level(&self) -> Option<LogLevel> {
+                // These must always be logged.
+                Some(LogLevel::TRACE)
+            }
+        }
+
+        let logger = create_memory_logger();
+        logger.log_any(FailSerialize);
+
+        // There isn't a good way, in unit tests, to verify the output was
+        // actually written to stderr/json console.
+        //
+        // To eyeball-verify it:
+        //   cargo test -- --nocapture fall
+        // and look in the output for
+        // "could not serialize LogEntry to serde_json::Value: Error(\"this always fails\", line: 0, column: 0)"
+        assert!(logger.pop_logs().is_empty(), "logger should be empty");
     }
 }

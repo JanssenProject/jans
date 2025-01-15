@@ -323,7 +323,7 @@ impl Loggable for &DecisionLogEntry<'_> {
 // TODO: maybe using wasm we can use `js_sys::Date::now()`
 // Static variable initialize only once at start of program and available during all program live cycle.
 // Import inside function guarantee that it is used only inside function.
-fn gen_uuid7() -> Uuid {
+pub fn gen_uuid7() -> Uuid {
     use std::sync::{LazyLock, Mutex};
     use uuid7::V7Generator;
 
