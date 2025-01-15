@@ -25,7 +25,7 @@ public class CustomConfigsFlowTest extends BaseTest {
         int status = page.getWebResponse().getStatusCode();
         String text = page.getVisibleText().toLowerCase();
 
-        if (status == 200) {
+        if (status == 410) {
             //See timeout.ftlh
             assertTextContained(text, "took", "more", "expected");
         } else if (status == 404) {
