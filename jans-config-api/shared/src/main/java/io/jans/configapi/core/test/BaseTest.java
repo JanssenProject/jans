@@ -155,7 +155,7 @@ public class BaseTest {
         boolean isEndpointAvailable = false;
         try {
             Response response = getResteasyService().executeGet(url, headers, parameters);
-            log.info("*** Check endpoint url:{}, response:{}", url, response);
+            log.error("*** \n\n\n Check endpoint url:{}, response:{} {}", url, response,"\n\n\n");
             if(response!=null && response.getStatus()== Status.NOT_FOUND.getStatusCode()) {                    
                 isEndpointAvailable = false;
             }else {
