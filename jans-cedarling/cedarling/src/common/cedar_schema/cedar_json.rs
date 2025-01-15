@@ -115,34 +115,25 @@ mod test_deserialize_json_cedar_schema {
         let schema = serde_json::from_value::<CedarSchemaJson>(schema).unwrap();
         let namespace = Namespace {
             entity_types: HashMap::from([
-                (
-                    "User".into(),
-                    EntityType {
-                        member_of: Some(HashSet::from(["UserGroup".into()])),
-                        shape: Some(EntityShape::required(HashMap::from([
-                            ("department".into(), Attribute::string()),
-                            ("jobLevel".into(), Attribute::long()),
-                        ]))),
-                        tags: None,
-                    },
-                ),
-                (
-                    "UserGroup".into(),
-                    EntityType {
-                        member_of: None,
-                        shape: None,
-                        tags: None,
-                    },
-                ),
+                ("User".into(), EntityType {
+                    member_of: Some(HashSet::from(["UserGroup".into()])),
+                    shape: Some(EntityShape::required(HashMap::from([
+                        ("department".into(), Attribute::string()),
+                        ("jobLevel".into(), Attribute::long()),
+                    ]))),
+                    tags: None,
+                }),
+                ("UserGroup".into(), EntityType {
+                    member_of: None,
+                    shape: None,
+                    tags: None,
+                }),
             ]),
             common_types: HashMap::new(),
             actions: HashMap::new(),
         };
-        assert_eq!(
-            schema,
-            CedarSchemaJson {
-                namespaces: HashMap::from([("Jans".into(), namespace)])
-            }
-        );
+        assert_eq!(schema, CedarSchemaJson {
+            namespaces: HashMap::from([("Jans".into(), namespace)])
+        });
     }
 }

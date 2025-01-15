@@ -58,7 +58,7 @@ public class NativeJansFlowBridge {
             }
             if (st == null) {
 
-                int timeout = aps.getEffectiveFlowTimeout(qname);
+                int timeout = aps.getEffectiveFlowTimeout(qname, nativeClient);
                 if (timeout <= 0) throw new Exception("Flow timeout negative or zero. " +
                         "Check your AS configuration or flow definition");                
                 long expireAt = System.currentTimeMillis() + 1000L * timeout;                

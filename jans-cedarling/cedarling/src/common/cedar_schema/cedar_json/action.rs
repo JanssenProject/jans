@@ -54,17 +54,14 @@ mod test_deserialize_action {
             }
         });
         let action = serde_json::from_value::<Action>(action).unwrap();
-        assert_eq!(
-            action,
-            Action {
-                member_of: None,
-                applies_to: AppliesTo {
-                    principal_types: HashSet::new(),
-                    resource_types: HashSet::new(),
-                    context: None,
-                },
-            }
-        );
+        assert_eq!(action, Action {
+            member_of: None,
+            applies_to: AppliesTo {
+                principal_types: HashSet::new(),
+                resource_types: HashSet::new(),
+                context: None,
+            },
+        });
 
         // Case: resource types is empty
         let action = json!({
@@ -74,17 +71,14 @@ mod test_deserialize_action {
             }
         });
         let action = serde_json::from_value::<Action>(action).unwrap();
-        assert_eq!(
-            action,
-            Action {
-                member_of: None,
-                applies_to: AppliesTo {
-                    principal_types: HashSet::from(["PrincipalEntityType1".into()]),
-                    resource_types: HashSet::new(),
-                    context: None,
-                },
-            }
-        );
+        assert_eq!(action, Action {
+            member_of: None,
+            applies_to: AppliesTo {
+                principal_types: HashSet::from(["PrincipalEntityType1".into()]),
+                resource_types: HashSet::new(),
+                context: None,
+            },
+        });
 
         // Case: only principal types is empty
         let action = json!({
@@ -94,17 +88,14 @@ mod test_deserialize_action {
             }
         });
         let action = serde_json::from_value::<Action>(action).unwrap();
-        assert_eq!(
-            action,
-            Action {
-                member_of: None,
-                applies_to: AppliesTo {
-                    principal_types: HashSet::new(),
-                    resource_types: HashSet::from(["ResourceEntityType1".into()]),
-                    context: None,
-                },
-            }
-        );
+        assert_eq!(action, Action {
+            member_of: None,
+            applies_to: AppliesTo {
+                principal_types: HashSet::new(),
+                resource_types: HashSet::from(["ResourceEntityType1".into()]),
+                context: None,
+            },
+        });
     }
 
     #[test]
@@ -118,20 +109,17 @@ mod test_deserialize_action {
             }
         });
         let action = serde_json::from_value::<Action>(action).unwrap();
-        assert_eq!(
-            action,
-            Action {
-                member_of: Some(HashSet::from([ActionGroup {
-                    id: "read".into(),
-                    kind: None
-                }])),
-                applies_to: AppliesTo {
-                    principal_types: HashSet::from(["User".into()]),
-                    resource_types: HashSet::from(["Photo".into()]),
-                    context: None,
-                },
-            }
-        );
+        assert_eq!(action, Action {
+            member_of: Some(HashSet::from([ActionGroup {
+                id: "read".into(),
+                kind: None
+            }])),
+            applies_to: AppliesTo {
+                principal_types: HashSet::from(["User".into()]),
+                resource_types: HashSet::from(["Photo".into()]),
+                context: None,
+            },
+        });
 
         // Case: an action group type is provided
         let action = json!({
@@ -145,20 +133,17 @@ mod test_deserialize_action {
             }
         });
         let action = serde_json::from_value::<Action>(action).unwrap();
-        assert_eq!(
-            action,
-            Action {
-                member_of: Some(HashSet::from([ActionGroup {
-                    id: "read".into(),
-                    kind: Some("My::Namespace::Action".into()),
-                }])),
-                applies_to: AppliesTo {
-                    principal_types: HashSet::from(["User".into()]),
-                    resource_types: HashSet::from(["Photo".into()]),
-                    context: None,
-                },
-            }
-        );
+        assert_eq!(action, Action {
+            member_of: Some(HashSet::from([ActionGroup {
+                id: "read".into(),
+                kind: Some("My::Namespace::Action".into()),
+            }])),
+            applies_to: AppliesTo {
+                principal_types: HashSet::from(["User".into()]),
+                resource_types: HashSet::from(["Photo".into()]),
+                context: None,
+            },
+        });
     }
 
     #[test]
@@ -178,20 +163,17 @@ mod test_deserialize_action {
             },
         });
         let action = serde_json::from_value::<Action>(action).unwrap();
-        assert_eq!(
-            action,
-            Action {
-                member_of: None,
-                applies_to: AppliesTo {
-                    principal_types: HashSet::from(["PrincipalEntityType1".into()]),
-                    resource_types: HashSet::from(["ResourceEntityType1".into()]),
-                    context: Some(Attribute::record(HashMap::from([
-                        ("field1".into(), Attribute::boolean()),
-                        ("field2".into(), Attribute::long()),
-                        ("field3".into(), Attribute::String { required: false })
-                    ]))),
-                },
-            }
-        );
+        assert_eq!(action, Action {
+            member_of: None,
+            applies_to: AppliesTo {
+                principal_types: HashSet::from(["PrincipalEntityType1".into()]),
+                resource_types: HashSet::from(["ResourceEntityType1".into()]),
+                context: Some(Attribute::record(HashMap::from([
+                    ("field1".into(), Attribute::boolean()),
+                    ("field2".into(), Attribute::long()),
+                    ("field3".into(), Attribute::String { required: false })
+                ]))),
+            },
+        });
     }
 }

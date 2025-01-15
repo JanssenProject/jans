@@ -7,7 +7,7 @@ use std::collections::HashMap;
 
 use regex;
 use regex::Regex;
-use serde::{de, Deserialize};
+use serde::{Deserialize, de};
 use serde_json::Value;
 
 /// Structure for storing `claim mappings`
@@ -309,20 +309,14 @@ mod test {
             "Acme::Email".to_string(),
             r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
             HashMap::from([
-                (
-                    "UID".to_string(),
-                    RegexFieldMapping {
-                        attr: "uid".to_string(),
-                        r#type: RegexFieldMappingType::String,
-                    },
-                ),
-                (
-                    "DOMAIN".to_string(),
-                    RegexFieldMapping {
-                        attr: "domain".to_string(),
-                        r#type: RegexFieldMappingType::String,
-                    },
-                ),
+                ("UID".to_string(), RegexFieldMapping {
+                    attr: "uid".to_string(),
+                    r#type: RegexFieldMappingType::String,
+                }),
+                ("DOMAIN".to_string(), RegexFieldMapping {
+                    attr: "domain".to_string(),
+                    r#type: RegexFieldMappingType::String,
+                }),
             ]),
         )
         .expect("regexp should parse correctly");
@@ -389,21 +383,15 @@ mod test {
             "Acme::Email".to_string(),
             r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
             HashMap::from([
-                (
-                    "UID".to_string(),
-                    RegexFieldMapping {
-                        attr: "uid".to_string(),
-                        r#type: RegexFieldMappingType::String,
-                    },
-                ),
-                (
-                    "DOMAIN".to_string(),
-                    RegexFieldMapping {
-                        attr: "domain".to_string(),
+                ("UID".to_string(), RegexFieldMapping {
+                    attr: "uid".to_string(),
+                    r#type: RegexFieldMappingType::String,
+                }),
+                ("DOMAIN".to_string(), RegexFieldMapping {
+                    attr: "domain".to_string(),
 
-                        r#type: RegexFieldMappingType::String,
-                    },
-                ),
+                    r#type: RegexFieldMappingType::String,
+                }),
             ]),
         )
         .expect("regexp should parse correctly");

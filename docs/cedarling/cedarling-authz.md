@@ -55,7 +55,9 @@ Action, Resource and Context is sent by the application in the authorization req
 this is a sample request from a hypothetical application:
 
 ```js
-input = { 
+const bootstrap_config = {...};
+const cedarling = await init(bootstrap_config);
+let input = { 
   "tokens": {
     "access_token": "eyJhbGc....", 
     "id_token": "eyJjbGc...", 
@@ -76,7 +78,7 @@ input = {
       }
     }
 
-decision_result = authz(input)
+decision_result = await cedarling(input)
 ```
 
 ## Automatically Adding Entity References to the Context
