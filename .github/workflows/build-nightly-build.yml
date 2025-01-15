@@ -42,4 +42,8 @@ jobs:
         gh release delete ${NIGHTLY_VERSION} --cleanup-tag --yes || echo "v${NIGHTLY_VERSION}" does not exist
         gh release delete ${NIGHTLY_VERSION} --cleanup-tag --yes || echo "v${NIGHTLY_VERSION}" does not exist
         git push --delete origin ${NIGHTLY_VERSION} || echo "v${NIGHTLY_VERSION}" does not exist
-        gh release create ${NIGHTLY_VERSION} --generate-notes --prerelease --title "${NIGHTLY_VERSION}" --target ${{ github.event.inputs.branch }}
+        TARGET_BRANCH=${{ github.event.inputs.branch }}
+        if [ -z "$TARGET_BRANCH" ]; then
+          TARGET_BRANCH="main"
+        fi
+        gh release create ${NIGHTLY_VERSION} --generate-notes --prerelease --title "${NIGHTLY_VERSION}" --target "${TARGET_BRANCH}"
