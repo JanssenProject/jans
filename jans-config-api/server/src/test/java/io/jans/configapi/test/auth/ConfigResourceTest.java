@@ -48,7 +48,7 @@ public class ConfigResourceTest extends ConfigServerBaseTest {
 
         Response response = request.method(HttpMethod.PATCH,
                 Entity.entity(json, MediaType.APPLICATION_JSON_PATCH_JSON));
-        log.info("Response for getApiConfigtion -  response:{}, response.getStatus():{}", response,
+        log.info("Response for patchgetApiConfigtion -  response:{}, response.getStatus():{}", response,
                 response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
     }

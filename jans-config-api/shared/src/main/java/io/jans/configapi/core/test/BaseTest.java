@@ -45,8 +45,8 @@ public class BaseTest {
 
     protected Logger log = LogManager.getLogger(getClass());
     protected Base64 base64;
-    protected Map<String, String> propertiesMap = null;
-    protected ResteasyService resteasyService = new ResteasyService();
+    protected static Map<String, String> propertiesMap = null;
+    protected ResteasyService resteasyService = new ResteasyService();;
     protected HttpService httpService = new HttpService();
     protected TokenService tokenService = new TokenService();
     protected String accessToken;
