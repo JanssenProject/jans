@@ -72,7 +72,6 @@ fn get_tkn_claim_as_str(
                 .as_str()
                 .map(|s| s.into())
                 .map_err(|e| IdTokenTrustModeError::TokenClaimTypeError(token.kind, e))
-                .into()
         })
 }
 
