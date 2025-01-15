@@ -39,7 +39,7 @@ pub fn validate_id_tkn_trust_mode(tokens: &DecodedTokens) -> Result<(), IdTokenT
     let id_tkn_aud = get_tkn_claim_as_str(id_tkn, "aud")?;
 
     if access_tkn_client_id != id_tkn_aud {
-        return Err(IdTokenTrustModeError::ClientIdIdTokenAudMismatch);
+        return Err(IdTokenTrustModeError::AccessTokenClientIdMismatch);
     }
 
     let userinfo_tkn = match tokens.userinfo_token.as_ref() {
@@ -77,7 +77,7 @@ fn get_tkn_claim_as_str(
 #[derive(Debug, thiserror::Error)]
 pub enum IdTokenTrustModeError {
     #[error("the access token's `client_id` does not match with the id token's `aud`")]
-    ClientIdIdTokenAudMismatch,
+    AccessTokenClientIdMismatch,
     #[error("an access token is required when using strict mode")]
     MissingAccessToken,
     #[error("an id token is required when using strict mode")]
@@ -239,7 +239,7 @@ mod test {
         };
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
-            matches!(err, IdTokenTrustModeError::ClientIdIdTokenAudMismatch),
+            matches!(err, IdTokenTrustModeError::AccessTokenClientIdMismatch),
             "expected error due to the access_token's `client_id` not matching with the id_token's `aud`, got: {:?}",
             err
         )
