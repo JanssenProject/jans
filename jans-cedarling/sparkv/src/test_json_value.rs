@@ -3,21 +3,22 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use serde_json;
 use crate::Config;
 use crate::SparKV;
+use serde_json;
 
 #[cfg(test)]
-fn json_value_size(value : &serde_json::Value) -> usize {
+fn json_value_size(value: &serde_json::Value) -> usize {
     std::mem::size_of::<serde_json::Value>()
         + match value {
             serde_json::Value::Null => 0,
             serde_json::Value::Bool(_) => 0,
             serde_json::Value::Number(_) => 0, // Incorrect if arbitrary_precision is enabled. oh well
             serde_json::Value::String(s) => s.capacity(),
-            serde_json::Value::Array(a) =>
+            serde_json::Value::Array(a) => {
                 a.iter().map(json_value_size).sum::<usize>()
-                + a.capacity() * std::mem::size_of::<serde_json::Value>(),
+                    + a.capacity() * std::mem::size_of::<serde_json::Value>()
+            },
             serde_json::Value::Object(o) => o
                 .iter()
                 .map(|(k, v)| {
@@ -89,7 +90,8 @@ fn second_json() -> serde_json::Value {
 #[test]
 fn simple_serde_json() {
     let config: Config = Config::new();
-    let mut sparkv = SparKV::<serde_json::Value>::with_config_and_sizer(config, Some(json_value_size));
+    let mut sparkv =
+        SparKV::<serde_json::Value>::with_config_and_sizer(config, Some(json_value_size));
     let json = first_json();
     sparkv.set("first", json.clone()).unwrap();
     let stored_first = sparkv.get("first").unwrap();
@@ -99,7 +101,8 @@ fn simple_serde_json() {
 #[test]
 fn type_serde_json() {
     let config: Config = Config::new();
-    let mut sparkv = SparKV::<serde_json::Value>::with_config_and_sizer(config, Some(json_value_size));
+    let mut sparkv =
+        SparKV::<serde_json::Value>::with_config_and_sizer(config, Some(json_value_size));
     let json = first_json();
     sparkv.set("first", json.clone()).unwrap();
 
@@ -117,7 +120,8 @@ fn fails_size_calculator() {
     let mut config: Config = Config::new();
     // set item size to something smaller than item
     config.max_item_size = json_value_size(&json) / 2;
-    let mut sparkv = SparKV::<serde_json::Value>::with_config_and_sizer(config, Some(json_value_size));
+    let mut sparkv =
+        SparKV::<serde_json::Value>::with_config_and_sizer(config, Some(json_value_size));
 
     let should_be_error = sparkv.set("first", json.clone());
     assert_eq!(should_be_error, Err(crate::Error::ItemSizeExceeded));
@@ -130,10 +134,16 @@ fn two_json_items() {
     sparkv.set("second", second_json()).unwrap();
 
     let fj = sparkv.get("first").unwrap();
-    assert_eq!(fj.pointer("/name").unwrap(), &serde_json::Value::String("first_json".into()));
+    assert_eq!(
+        fj.pointer("/name").unwrap(),
+        &serde_json::Value::String("first_json".into())
+    );
 
     let sj = sparkv.get("second").unwrap();
-    assert_eq!(sj.pointer("/name").unwrap(), &serde_json::Value::String("second_json".into()));
+    assert_eq!(
+        sj.pointer("/name").unwrap(),
+        &serde_json::Value::String("second_json".into())
+    );
 }
 
 #[test]
@@ -143,8 +153,8 @@ fn drain_all_json_items() {
     sparkv.set("second", second_json()).unwrap();
 
     let all_items = sparkv.drain();
-    let all_values = all_items.map(|(_,v)| v ).collect::<Vec<_>>();
-    assert_eq!(all_values, vec![first_json(),second_json()]);
+    let all_values = all_items.map(|(_, v)| v).collect::<Vec<_>>();
+    assert_eq!(all_values, vec![first_json(), second_json()]);
 
     assert!(sparkv.is_empty(), "sparkv not empty");
 }
@@ -157,8 +167,11 @@ fn rc_json_items() {
     sparkv.set("second", Rc::new(second_json())).unwrap();
 
     let all_items = sparkv.drain();
-    let all_values = all_items.map(|(_,v)| v ).collect::<Vec<_>>();
-    assert_eq!(all_values, vec![Rc::new(first_json()),Rc::new(second_json())]);
+    let all_values = all_items.map(|(_, v)| v).collect::<Vec<_>>();
+    assert_eq!(all_values, vec![
+        Rc::new(first_json()),
+        Rc::new(second_json())
+    ]);
 
     assert!(sparkv.is_empty(), "sparkv not empty");
 }

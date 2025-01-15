@@ -15,10 +15,13 @@ pub struct KvEntry<T> {
 }
 
 impl<T> KvEntry<T> {
-    pub fn new<S : AsRef<str>>(key: S, value: T, expiration: Duration) -> Self
-    {
+    pub fn new<S: AsRef<str>>(key: S, value: T, expiration: Duration) -> Self {
         let expired_at: DateTime<Utc> = Utc::now() + expiration;
-        Self { key: key.as_ref().into(), value, expired_at }
+        Self {
+            key: key.as_ref().into(),
+            value,
+            expired_at,
+        }
     }
 }
 
@@ -28,11 +31,7 @@ mod tests {
 
     #[test]
     fn test_new() {
-        let item = KvEntry::<String>::new(
-            "key",
-            "value".into(),
-            Duration::seconds(10),
-        );
+        let item = KvEntry::<String>::new("key", "value".into(), Duration::seconds(10));
         assert_eq!(item.key, "key");
         assert_eq!(item.value, "value");
         assert!(item.expired_at > Utc::now() + Duration::seconds(9));

@@ -29,20 +29,21 @@ pub struct SparKV<T> {
     /// If this function is not provided, the container will enforce
     /// `Config.max_item_size` on the basis of `std::mem::size_of_val` which
     /// probably won't be what you expect.
-    size_calculator : Option<fn(&T) -> usize>,
+    size_calculator: Option<fn(&T) -> usize>,
 }
 
 /// See the SparKV::iter function
-pub struct Iter<'a, T: 'a>
-{
-     btree_value_iter : std::collections::btree_map::Values<'a, String, KvEntry<T>>,
+pub struct Iter<'a, T: 'a> {
+    btree_value_iter: std::collections::btree_map::Values<'a, String, KvEntry<T>>,
 }
 
 impl<'a, T> Iterator for Iter<'a, T> {
-    type Item = (&'a String,&'a T);
+    type Item = (&'a String, &'a T);
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.btree_value_iter.next().map(|kventry| (&kventry.key, &kventry.value) )
+        self.btree_value_iter
+            .next()
+            .map(|kventry| (&kventry.key, &kventry.value))
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
@@ -51,16 +52,17 @@ impl<'a, T> Iterator for Iter<'a, T> {
 }
 
 /// See the SparKV::drain function
-pub struct DrainIter<T>
-{
-     value_iter : std::collections::btree_map::IntoValues<String, KvEntry<T>>,
+pub struct DrainIter<T> {
+    value_iter: std::collections::btree_map::IntoValues<String, KvEntry<T>>,
 }
 
 impl<T> Iterator for DrainIter<T> {
-    type Item = (String,T);
+    type Item = (String, T);
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.value_iter.next().map(|kventry| (kventry.key, kventry.value) )
+        self.value_iter
+            .next()
+            .map(|kventry| (kventry.key, kventry.value))
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
@@ -94,8 +96,7 @@ impl<T> SparKV<T> {
         }
     }
 
-    pub fn set(&mut self, key: &str, value: T) -> Result<(), Error>
-    {
+    pub fn set(&mut self, key: &str, value: T) -> Result<(), Error> {
         self.set_with_ttl(key, value, self.config.default_ttl)
     }
 
@@ -113,8 +114,7 @@ impl<T> SparKV<T> {
         Ok(())
     }
 
-    pub fn get(&self, key: &str) -> Option<&T>
-    {
+    pub fn get(&self, key: &str) -> Option<&T> {
         Some(&self.get_item(key)?.value)
     }
 
@@ -130,7 +130,9 @@ impl<T> SparKV<T> {
 
     /// Return an iterator of (key,value) : (&String,&T).
     pub fn iter(&self) -> Iter<T> {
-        Iter{ btree_value_iter: self.data.values() }
+        Iter {
+            btree_value_iter: self.data.values(),
+        }
     }
 
     /// Return an iterator of (key,value) : (String,T) which empties the container.
@@ -140,7 +142,9 @@ impl<T> SparKV<T> {
         // assume that slightly-expired entries should be returned.
         self.expiries.clear();
         let data_only = std::mem::take(&mut self.data);
-        DrainIter{ value_iter: data_only.into_values() }
+        DrainIter {
+            value_iter: data_only.into_values(),
+        }
     }
 
     pub fn pop(&mut self, key: &str) -> Option<T> {
@@ -167,15 +171,13 @@ impl<T> SparKV<T> {
         while let Some(exp_item) = self.expiries.peek().cloned() {
             if exp_item.is_expired() {
                 let kv_entry = self.data.get(&exp_item.key).unwrap();
-                if kv_entry.key == exp_item.key
-                    && kv_entry.expired_at == exp_item.expired_at
-                {
+                if kv_entry.key == exp_item.key && kv_entry.expired_at == exp_item.expired_at {
                     cleared_count += 1;
                     self.pop(&exp_item.key);
                 }
                 self.expiries.pop();
             } else {
-                break
+                break;
             }
         }
         cleared_count
@@ -210,7 +212,7 @@ impl<T> SparKV<T> {
     fn ensure_item_size(&self, value: &T) -> Result<(), Error> {
         if let Some(calc) = self.size_calculator {
             if calc(value) > self.config.max_item_size {
-                return Err(Error::ItemSizeExceeded)
+                return Err(Error::ItemSizeExceeded);
             }
         }
         Ok(())

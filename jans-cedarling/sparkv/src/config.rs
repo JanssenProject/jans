@@ -43,14 +43,8 @@ mod tests {
         let config: Config = Config::new();
         assert_eq!(config.max_items, 10_000);
         assert_eq!(config.max_item_size, 500_000);
-        assert_eq!(
-            config.max_ttl,
-            Duration::seconds(60 * 60)
-        );
-        assert_eq!(
-            config.default_ttl,
-            Duration::seconds(5 * 60)
-        );
+        assert_eq!(config.max_ttl, Duration::seconds(60 * 60));
+        assert_eq!(config.default_ttl, Duration::seconds(5 * 60));
         assert!(config.auto_clear_expired);
     }
 }

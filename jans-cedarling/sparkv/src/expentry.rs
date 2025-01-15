@@ -16,7 +16,7 @@ pub struct ExpEntry {
 }
 
 impl ExpEntry {
-    pub fn new<S : AsRef<str>>(key: S, expiration: Duration) -> Self {
+    pub fn new<S: AsRef<str>>(key: S, expiration: Duration) -> Self {
         let expired_at: DateTime<Utc> = Utc::now() + expiration;
         Self {
             key: key.as_ref().into(),
@@ -67,11 +67,7 @@ mod tests {
 
     #[test]
     fn test_from_kventry() {
-        let kv_entry = KvEntry::new(
-            "keyFromKV",
-            "value from KV",
-            Duration::seconds(10),
-        );
+        let kv_entry = KvEntry::new("keyFromKV", "value from KV", Duration::seconds(10));
         let exp_item = ExpEntry::from_kv_entry(&kv_entry);
         assert_eq!(exp_item.key, "keyFromKV");
         assert_eq!(exp_item.expired_at, kv_entry.expired_at);

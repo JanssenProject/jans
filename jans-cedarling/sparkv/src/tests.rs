@@ -97,7 +97,7 @@ fn test_set_should_fail_if_capacity_exceeded() {
 
 #[test]
 fn memsize_item_capacity_exceeded() {
-    let value : String = "jay".into();
+    let value: String = "jay".into();
 
     let mut config: Config = Config::new();
     config.max_item_size = std::mem::size_of_val(&value) / 2;
@@ -114,15 +114,18 @@ fn custom_item_capacity_exceeded() {
     let mut sparkv = SparKV::<&str>::with_config_and_sizer(config, Some(|s| s.len()));
 
     assert_eq!(Ok(()), sparkv.set("short", "value"));
-    assert_eq!(Err(crate::Error::ItemSizeExceeded), sparkv.set("long", "This is a value that exceeds 20 characters"));
+    assert_eq!(
+        Err(crate::Error::ItemSizeExceeded),
+        sparkv.set("long", "This is a value that exceeds 20 characters")
+    );
 }
 
 #[test]
 fn test_set_with_ttl() {
     let mut sparkv = SparKV::<String>::new();
     _ = sparkv.set("longest", "value".into());
-    _ = sparkv.set_with_ttl("longer", "value".into(), Duration::seconds(2),);
-    _ = sparkv.set_with_ttl("shorter", "value".into(), Duration::seconds(1),);
+    _ = sparkv.set_with_ttl("longer", "value".into(), Duration::seconds(2));
+    _ = sparkv.set_with_ttl("shorter", "value".into(), Duration::seconds(1));
 
     assert_eq!(sparkv.get("longer"), Some(&String::from("value")));
     assert_eq!(sparkv.get("shorter"), Some(&String::from("value")));
@@ -147,16 +150,13 @@ fn test_ensure_max_ttl() {
     assert!(set_result_long_def.is_err());
     assert_eq!(set_result_long_def.unwrap_err(), Error::TTLTooLong);
 
-    let set_result_ok =
-        sparkv.set_with_ttl("shorter", "ok".into(), Duration::seconds(3599));
+    let set_result_ok = sparkv.set_with_ttl("shorter", "ok".into(), Duration::seconds(3599));
     assert!(set_result_ok.is_ok());
 
-    let set_result_ok_2 =
-        sparkv.set_with_ttl("exact", "ok".into(), Duration::seconds(3600));
+    let set_result_ok_2 = sparkv.set_with_ttl("exact", "ok".into(), Duration::seconds(3600));
     assert!(set_result_ok_2.is_ok());
 
-    let set_result_not_ok =
-        sparkv.set_with_ttl("not", "not ok".into(), Duration::seconds(33601));
+    let set_result_not_ok = sparkv.set_with_ttl("not", "not ok".into(), Duration::seconds(33601));
     assert!(set_result_not_ok.is_err());
     assert_eq!(set_result_not_ok.unwrap_err(), Error::TTLTooLong);
 }
@@ -179,9 +179,9 @@ fn test_clear_expired() {
     let mut config: Config = Config::new();
     config.auto_clear_expired = false;
     let mut sparkv = SparKV::with_config(config);
-    _ = sparkv.set_with_ttl("not-yet-expired", "v", Duration::seconds(90),);
-    _ = sparkv.set_with_ttl("expiring", "value", Duration::milliseconds(1),);
-    _ = sparkv.set_with_ttl("not-expired", "value", Duration::seconds(60),);
+    _ = sparkv.set_with_ttl("not-yet-expired", "v", Duration::seconds(90));
+    _ = sparkv.set_with_ttl("expiring", "value", Duration::milliseconds(1));
+    _ = sparkv.set_with_ttl("not-expired", "value", Duration::seconds(60));
     std::thread::sleep(std::time::Duration::from_millis(2));
     assert_eq!(sparkv.len(), 3);
 
