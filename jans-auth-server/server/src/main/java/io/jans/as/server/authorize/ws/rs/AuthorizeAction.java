@@ -989,6 +989,20 @@ public class AuthorizeAction {
         }
 
         final Client client = clientService.getClient(clientId);
+        return getCheckedClientDisplayName(client);
+    }
+
+    public String getClientDisplayName(final Client client) {
+        log.trace("client {}", client);
+        
+        if (client == null) {
+        	getClientDisplayName();
+        }
+
+        return getCheckedClientDisplayName(client);
+    }
+
+	private String getCheckedClientDisplayName(final Client client) {
         if (StringUtils.isNotBlank(client.getClientName())) {
             return client.getClientName();
         }
@@ -998,7 +1012,7 @@ public class AuthorizeAction {
         }
 
         return "Unknown";
-    }
+	}
 
     public String getAuthReqId() {
         return authReqId;
