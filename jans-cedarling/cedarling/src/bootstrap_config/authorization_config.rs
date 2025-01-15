@@ -5,7 +5,6 @@
 
 use super::WorkloadBoolOp;
 use serde::Deserialize;
-use std::str::FromStr;
 
 /// Configuration to specify authorization workflow.
 /// - If we use user entity as principal.
@@ -92,19 +91,6 @@ pub enum IdTokenTrustMode {
     ///   - Its `aud` must match the `access_token`'s `client_id`.
     #[default]
     Strict,
-}
-
-impl FromStr for IdTokenTrustMode {
-    type Err = IdTknTrustModeParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let s = s.to_lowercase();
-        match s.as_str() {
-            "strict" => Ok(IdTokenTrustMode::Strict),
-            "none" => Ok(IdTokenTrustMode::None),
-            _ => Err(IdTknTrustModeParseError { trust_mode: s }),
-        }
-    }
 }
 
 /// Error when parsing [`IdTokenTrustMode`]
