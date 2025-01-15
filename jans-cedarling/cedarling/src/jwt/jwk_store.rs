@@ -7,8 +7,9 @@ use std::collections::{HashMap, HashSet};
 use std::fmt::Debug;
 use std::sync::Arc;
 
-use jsonwebtoken::jwk::Jwk;
 use jsonwebtoken::DecodingKey;
+use jsonwebtoken::jwk::Jwk;
+
 use serde::Deserialize;
 use serde_json::Value;
 use time::OffsetDateTime;
@@ -153,19 +154,21 @@ impl JwkStore {
     }
 
     /// Creates a JwkStore by fetching the keys from the given [`TrustedIssuer`].
-    pub fn new_from_trusted_issuer(
+    pub async fn new_from_trusted_issuer(
         store_id: TrustedIssuerId,
         issuer: &TrustedIssuer,
         http_client: &HttpClient,
     ) -> Result<Self, JwkStoreError> {
         // fetch openid configuration
-        let response = http_client.get(&issuer.openid_configuration_endpoint)?;
+        let response = http_client
+            .get(&issuer.openid_configuration_endpoint)
+            .await?;
         let openid_config = response
             .json::<OpenIdConfig>()
             .map_err(JwkStoreError::FetchOpenIdConfig)?;
 
         // fetch jwks
-        let response = http_client.get(&openid_config.jwks_uri)?;
+        let response = http_client.get(&openid_config.jwks_uri).await?;
 
         let mut store = Self::new_from_jwks_str(store_id, response.text())?;
         store.issuer = Some(openid_config.issuer.into());
@@ -233,8 +236,8 @@ mod test {
     use std::collections::HashMap;
     use std::time::Duration;
 
-    use jsonwebtoken::jwk::JwkSet;
     use jsonwebtoken::DecodingKey;
+    use jsonwebtoken::jwk::JwkSet;
     use mockito::Server;
     use serde_json::json;
     use time::OffsetDateTime;
@@ -313,9 +316,9 @@ mod test {
         );
     }
 
-    #[test]
-    fn can_load_from_trusted_issuers() {
-        let mut mock_server = Server::new();
+    #[tokio::test]
+    async fn can_load_from_trusted_issuers() {
+        let mut mock_server = Server::new_async().await;
 
         // Setup OpenId config endpoint
         let openid_config_json = json!({
@@ -349,10 +352,8 @@ mod test {
             "alg": "RS256",
             "kty": "RSA",
             "kid": kid2,
-        }
+        }]});
 
-        ]
-        });
         let jwks_endpoint = mock_server
             .mock("GET", "/jwks")
             .with_status(200)
@@ -375,6 +376,7 @@ mod test {
 
         let mut result =
             JwkStore::new_from_trusted_issuer("test".into(), &source_iss, &http_client)
+                .await
                 .expect("Should load JwkStore from Trusted Issuer");
         // We edit the `last_updated` from the result so that the comparison
         // wont fail because of the timestamp.

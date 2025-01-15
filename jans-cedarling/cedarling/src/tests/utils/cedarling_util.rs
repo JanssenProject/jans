@@ -53,13 +53,14 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
 }
 
 /// create [`Cedarling`] from [`PolicyStoreSource`]
-pub fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
+pub async fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
     Cedarling::new(&get_config(policy_source))
+        .await
         .expect("bootstrap config should initialize correctly")
 }
 
 /// create [`Cedarling`] from [`PolicyStoreSource`]
-pub fn get_cedarling_with_authorization_conf(
+pub async fn get_cedarling_with_authorization_conf(
     policy_source: PolicyStoreSource,
     auth_conf: AuthorizationConfig,
 ) -> Cedarling {
@@ -75,6 +76,7 @@ pub fn get_cedarling_with_authorization_conf(
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: auth_conf,
     })
+    .await
     .expect("bootstrap config should initialize correctly")
 }
 

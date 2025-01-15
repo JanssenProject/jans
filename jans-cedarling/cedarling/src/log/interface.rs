@@ -53,10 +53,10 @@ pub(crate) trait Loggable: serde::Serialize {
 /// interface for getting log entries from the storage
 pub trait LogStorage {
     /// return logs and remove them from the storage
-    fn pop_logs(&self) -> Vec<LogEntry>;
+    fn pop_logs(&self) -> Vec<serde_json::Value>;
 
     /// get specific log entry
-    fn get_log_by_id(&self, id: &str) -> Option<LogEntry>;
+    fn get_log_by_id(&self, id: &str) -> Option<serde_json::Value>;
 
     /// returns a list of all log ids
     fn get_log_ids(&self) -> Vec<String>;
