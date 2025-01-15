@@ -32,13 +32,6 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    AccessTokenEntitiesError,
-    AuthorizeError,
-    "Error encountered while creating access token entities"
-);
-
-create_exception!(
-    authorize_errors,
     CreateIdTokenEntityError,
     AuthorizeError,
     "Error encountered while creating id token entities"
@@ -50,12 +43,25 @@ create_exception!(
     AuthorizeError,
     "Error encountered while creating Userinfo_token entity"
 );
+create_exception!(
+    authorize_errors,
+    CreateAccessTokenEntityError,
+    AuthorizeError,
+    "Error encountered while creating access_token entity"
+);
 
 create_exception!(
     authorize_errors,
     CreateUserEntityError,
     AuthorizeError,
     "Error encountered while creating User entity"
+);
+
+create_exception!(
+    authorize_errors,
+    CreateWorkloadEntityError,
+    AuthorizeError,
+    "Error encountered while creating workload entity"
 );
 
 create_exception!(
@@ -88,14 +94,14 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    CreateRequestWorkloadEntityError,
+    WorkloadRequestValidationError,
     AuthorizeError,
     "Error encountered while creating cedar_policy::Request for workload entity principal"
 );
 
 create_exception!(
     authorize_errors,
-    CreateRequestUserEntityError,
+    UserRequestValidationError,
     AuthorizeError,
     "Error encountered while creating cedar_policy::Request for user entity principal"
 );
@@ -105,6 +111,20 @@ create_exception!(
     EntitiesError,
     AuthorizeError,
     "Error encountered while collecting all entities"
+);
+
+create_exception!(
+    authorize_errors,
+    EntitiesToJsonError,
+    AuthorizeError,
+    "Error encountered while parsing all entities to json for logging"
+);
+
+create_exception!(
+    authorize_errors,
+    AddEntitiesIntoContextError,
+    AuthorizeError,
+    "Error encountered while adding entities into context"
 );
 
 #[pyclass]
@@ -146,17 +166,20 @@ macro_rules! errors_functions {
 // For each possible case of `AuthorizeError`, we have created a corresponding Python exception that inherits from `cedarling::AuthorizeError`.
 errors_functions! {
     ProcessTokens => ProcessTokens,
-    AccessTokenEntities => AccessTokenEntitiesError,
     CreateIdTokenEntity => CreateIdTokenEntityError,
     CreateUserinfoTokenEntity => CreateUserinfoTokenEntityError,
+    CreateAccessTokenEntity => CreateAccessTokenEntityError,
     CreateUserEntity => CreateUserEntityError,
+    CreateWorkloadEntity => CreateWorkloadEntityError,
     ResourceEntity => ResourceEntityError,
     RoleEntity => RoleEntityError,
     Action => ActionError,
     CreateContext => CreateContextError,
-    CreateRequestWorkloadEntity => CreateRequestWorkloadEntityError,
-    CreateRequestUserEntity => CreateRequestUserEntityError,
-    Entities => EntitiesError
+    WorkloadRequestValidation => WorkloadRequestValidationError,
+    UserRequestValidation => UserRequestValidationError,
+    BuildContext => AddEntitiesIntoContextError,
+    Entities => EntitiesError,
+    EntitiesToJson => EntitiesToJsonError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {

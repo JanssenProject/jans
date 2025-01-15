@@ -1,9 +1,8 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
 //! Module for bootstrap configuration types
 //! to configure [`Cedarling`](crate::Cedarling)
 
@@ -12,6 +11,7 @@ pub(crate) mod jwt_config;
 pub(crate) mod log_config;
 pub(crate) mod policy_store_config;
 
+#[cfg(not(target_arch = "wasm32"))]
 use std::{fs, io, path::Path};
 
 pub use authorization_config::AuthorizationConfig;
@@ -51,11 +51,10 @@ impl BootstrapConfig {
     /// ```rust
     /// use cedarling::BootstrapConfig;
     ///
-    /// let config =
-    ///     BootstrapConfig::load_from_file("../test_files/bootstrap_props.json")
-    ///         .unwrap();
+    /// let config = BootstrapConfig::load_from_file("../test_files/bootstrap_props.json").unwrap();
     /// ```
-    pub fn load_from_file(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn load_from_file(path: &str) -> Result<Self, BootstrapConfigLoadingError> {
         let file_ext = Path::new(path)
             .extension()
             .and_then(|ext| ext.to_str())
@@ -80,6 +79,12 @@ impl BootstrapConfig {
 
         Ok(config)
     }
+
+    /// Loads a `BootstrapConfig` from a JSON string
+    pub fn load_from_json(config: &str) -> Result<Self, BootstrapConfigLoadingError> {
+        let raw = serde_json::from_str::<decode::BootstrapConfigRaw>(config)?;
+        Self::from_raw_config(&raw)
+    }
 }
 
 /// Represents errors that may occur while loading a `BootstrapConfig` from a file.
@@ -90,12 +95,14 @@ pub enum BootstrapConfigLoadingError {
     /// Supported formats include:
     /// - `.json`
     /// - `.yaml` or `.yml`
+    #[cfg(not(target_arch = "wasm32"))]
     #[error(
         "Unsupported bootstrap config file format for: {0}. Supported formats include: JSON, YAML"
     )]
     InvalidFileFormat(String),
 
     /// Error returned when the file cannot be read.
+    #[cfg(not(target_arch = "wasm32"))]
     #[error("Failed to read {0}: {1}")]
     ReadFile(String, io::Error),
 
@@ -106,17 +113,53 @@ pub enum BootstrapConfigLoadingError {
     /// Error returned when parsing the file as YAML fails.
     #[error("Failed to decode YAML string into BootstrapConfig: {0}")]
     DecodingYAML(#[from] serde_yml::Error),
+
+    /// Error returned when the boostrap property `CEDARLING_LOG_TTL` is missing.
+    #[error(
+        "Missing bootstrap property: `CEDARLING_LOG_TTL`. This property is required if \
+         `CEDARLING_LOG_TYPE` is set to Memory."
+    )]
+    MissingLogTTL,
+
+    /// Error returned when multiple policy store sources were provided.
+    #[error(
+        "Multiple store options were provided. Make sure you only one of these properties is set: \
+         `CEDARLING_POLICY_STORE_URI` or `CEDARLING_LOCAL_POLICY_STORE`"
+    )]
+    ConflictingPolicyStores,
+
+    /// Error returned when no policy store source was provided.
+    #[error("No Policy store was provided.")]
+    MissingPolicyStore,
+
+    /// Error returned when the policy store file is in an unsupported format.
+    #[error("Unsupported policy store file format for: {0}. Supported formats include: JSON, YAML")]
+    UnsupportedPolicyStoreFileFormat(String),
+
+    /// Error returned when failing to load a local JWKS
+    #[error("Failed to load local JWKS from {0}: {1}")]
+    LoadLocalJwks(String, String),
+
+    /// Error returned when both `CEDARLING_USER_AUTHZ` and `CEDARLING_WORKLOAD_AUTHZ` are disabled.
+    /// These two authentication configurations cannot be disabled at the same time.
+    #[error(
+        "Both `CEDARLING_USER_AUTHZ` and `CEDARLING_WORKLOAD_AUTHZ` cannot be disabled \
+         simultaneously."
+    )]
+    BothPrincipalsDisabled,
 }
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::bootstrap_config::decode::BootstrapConfigRaw;
-    use std::{collections::HashSet, path::Path};
+    use std::collections::HashSet;
+    use std::path::Path;
 
-    use crate::{BootstrapConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig};
     use jsonwebtoken::Algorithm;
     use test_utils::assert_eq;
+
+    use super::*;
+    use crate::bootstrap_config::decode::BootstrapConfigRaw;
+    use crate::{BootstrapConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig};
 
     #[test]
     fn can_deserialize_from_json() {
@@ -129,6 +172,7 @@ mod test {
             application_name: "My App".to_string(),
             log_config: LogConfig {
                 log_type: LogTypeConfig::StdOut,
+                log_level: crate::LogLevel::DEBUG,
             },
             policy_store_config: PolicyStoreConfig {
                 source: crate::PolicyStoreSource::FileJson(
@@ -165,6 +209,7 @@ mod test {
                 use_user_principal: true,
                 use_workload_principal: true,
                 user_workload_operator: WorkloadBoolOp::And,
+                ..Default::default()
             },
         };
 
@@ -182,6 +227,7 @@ mod test {
             application_name: "My App".to_string(),
             log_config: LogConfig {
                 log_type: LogTypeConfig::Memory(MemoryLogConfig { log_ttl: 60 }),
+                log_level: crate::LogLevel::DEBUG,
             },
             policy_store_config: PolicyStoreConfig {
                 source: crate::PolicyStoreSource::FileJson(
@@ -218,6 +264,7 @@ mod test {
                 use_user_principal: true,
                 use_workload_principal: true,
                 user_workload_operator: WorkloadBoolOp::And,
+                ..Default::default()
             },
         };
 

@@ -249,9 +249,9 @@ config:
     cnVaultAddr: http://localhost:8200
     # -- Verify connection to Vault.
     cnVaultVerify: false
-    # -- Path to file contains Vault AppRole role ID.
+    # -- Path to the file that contains Vault AppRole role ID.
     cnVaultRoleIdFile: /etc/certs/vault_role_id
-    # -- Path to file contains Vault AppRole secret ID.
+    # -- Path to the file that contains Vault AppRole secret ID.
     cnVaultSecretIdFile: /etc/certs/vault_secret_id
     # -- Vault namespace used to access the secrets.
     cnVaultNamespace: ""
@@ -259,7 +259,7 @@ config:
     cnVaultKvPath: secret
     # -- Base prefix name used to access secrets.
     cnVaultPrefix: jans
-    # -- Path to Vault AppRole.
+    # -- Path to the Vault AppRole.
     cnVaultAppRolePath: approle
     # [vault_envs] END
     # -- Value passed to Java option -XX:MaxRAMPercentage
@@ -778,6 +778,8 @@ global:
       lockConfigEnabled: false
       # -- Enable endpoint /jans-lock
       lockEnabled: false
+      # -- Enable endpoint /.well-known/authzen-configuration
+      authzenConfigEnabled: true
       # -- Lock config ingress resource labels. key app is taken
       lockConfigLabels: { }
       # -- Lock config ingress resource additional annotations.
@@ -814,11 +816,14 @@ global:
       u2fConfigLabels: { }
       # -- u2f config ingress resource additional annotations.
       u2fAdditionalAnnotations: { }
+      # -- authzen config ingress resource labels. key app is taken
+      authzenConfigLabels: { }
+      # -- authzen config ingress resource additional annotations.
+      authzenAdditionalAnnotations: { }
       # -- Auth server ingress resource labels. key app is taken
       authServerLabels: { }
       # -- Auth server ingress resource additional annotations.
       authServerAdditionalAnnotations: { }
-
 
     # -- Enable jans-lock as service running inside auth-server
     lockEnabled: false
@@ -1003,6 +1008,8 @@ global:
       fido2ConfigEnabled: false
       # -- Enable endpoint /jans-fido2
       fido2Enabled: false
+      # -- Enable endpoint /.well-known/webauthn
+      fido2WebauthnEnabled: false
       # -- fido2 config ingress resource labels. key app is taken
       fido2ConfigLabels: { }
       # -- fido2 config ingress resource additional annotations.
@@ -1011,6 +1018,10 @@ global:
       fido2Labels: { }
       # -- fido2 ingress resource additional annotations.
       fido2AdditionalAnnotations: { }
+      # -- fido2 webauthn ingress resource labels. key app is taken
+      fido2WebauthnLabels: { }
+      # -- fido2 webauthn ingress resource additional annotations.
+      fido2WebauthnAdditionalAnnotations: { }
   # -- GCE storage kind if using Google disks
   gcePdStorageType: pd-standard
   # -- Boolean flag to enable mapping global.lbIp  to global.fqdn inside pods on clouds that provide static ip for load balancers. On cloud that provide only addresses to the LB this flag will enable a script to actively scan config.configmap.lbAddr and update the hosts file inside the pods automatically.
@@ -1090,7 +1101,7 @@ global:
       scimConfigLabels: { }
       # -- SCIM config ingress resource additional annotations.
       scimConfigAdditionalAnnotations: { }
-      # -- SCIM config ingress resource labels. key app is taken
+      # -- SCIM ingress resource labels. key app is taken
       scimLabels: { }
       # -- SCIM ingress resource additional annotations.
       scimAdditionalAnnotations: { }
@@ -1150,6 +1161,10 @@ global:
     ingress:
       # Enable link endpoints /jans-link
       linkEnabled: true
+      # -- link ingress resource labels. key app is taken
+      linkLabels: { }
+      # -- link ingress resource additional annotations.
+      linkAdditionalAnnotations: { }
   saml:
     # — Add custom annotations for kubernetes resources for the service
     customAnnotations:
@@ -1175,19 +1190,23 @@ global:
       samlAdditionalAnnotations: { }
     # -- passing custom java options to saml. DO NOT PASS JAVA_OPTIONS in envs.
     cnCustomJavaOptions: ""
-  # -- Path to SQL password file
+  # -- Path to the SQL password file
   cnSqlPasswordFile: /etc/jans/conf/sql_password
   kc-scheduler:
     # -- Boolean flag to enable/disable the kc-scheduler cronjob chart.
     enabled: false
-  # -- Path to configuration schema file
+  # -- Path to the configuration schema file
   cnConfiguratorConfigurationFile: /etc/jans/conf/configuration.json
-  # -- Path to dumped configuration schema file
+  # -- Path to the dumped configuration schema file
   cnConfiguratorDumpFile: /etc/jans/conf/configuration.out.json
-  # -- Use custom configuration schema in existing secrets. Note, the secrets has to contain the key configuration.json or any basename as specified in cnConfiguratorConfigurationFile.
+  # -- Use custom configuration schema in existing Kubernetes secret. Note that the secret has to contain the configuration.json key or any basename as specified in cnConfiguratorConfigurationFile.
   cnConfiguratorCustomSchema:
-    # -- The name of the secrets used for storing custom configuration schema.
+    # -- The name of the Kubernetes secret used for storing custom configuration schema.
     secretName: ""
+  # -- Key to encrypt/decrypt configuration schema file using AES-256 CBC mode. Set the value to empty string to disable encryption/decryption, or 32 alphanumeric characters to enable it.
+  cnConfiguratorKey: ""
+  # -- Path to the file that contains the key to encrypt/decrypt the configuration schema file.
+  cnConfiguratorKeyFile: /etc/jans/conf/configuration.key
 
 # -- Nginx ingress definitions chart
 nginx-ingress:

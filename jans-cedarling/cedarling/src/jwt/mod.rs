@@ -1,9 +1,7 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 //! # `JwtEngine`
 //!
@@ -13,23 +11,24 @@
 //! - Validating the signatures of JWTs to ensure their integrity and authenticity.
 //! - Verifying the validity of JWTs based on claims such as expiration time and audience.
 
-mod http_client;
 mod issuers_store;
 mod jwk_store;
 mod key_service;
 #[cfg(test)]
 mod test_utils;
+mod token;
 mod validator;
+
+use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
+
+pub use jsonwebtoken::Algorithm;
+use key_service::{KeyService, KeyServiceError};
+pub use token::{Token, TokenClaim, TokenClaimTypeError, TokenClaims, TokenStr};
+use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
 
 use crate::common::policy_store::TrustedIssuer;
 use crate::{IdTokenTrustMode, JwtConfig};
-use key_service::{KeyService, KeyServiceError};
-use serde::de::DeserializeOwned;
-use std::collections::{HashMap, HashSet};
-use std::sync::Arc;
-use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
-
-pub use jsonwebtoken::Algorithm;
 
 /// Type alias for Trusted Issuers' ID.
 type TrustedIssuerId = Arc<str>;
@@ -45,15 +44,25 @@ pub enum JwtProcessingError {
     InvalidIdToken(#[source] JwtValidatorError),
     #[error("Invalid Userinfo token: {0}")]
     InvalidUserinfoToken(#[source] JwtValidatorError),
-    #[error("Validation failed: id_token audience does not match the access_token client_id. id_token.aud: {0:?}, access_token.client_id: {1:?}")]
+    #[error(
+        "Validation failed: id_token audience does not match the access_token client_id. \
+         id_token.aud: {0:?}, access_token.client_id: {1:?}"
+    )]
     IdTokenAudienceMismatch(String, String),
-    #[error("Validation failed: Userinfo token subject does not match the id_token subject. userinfo_token.sub: {0:?}, id_token.sub: {1:?}")]
+    #[error(
+        "Validation failed: Userinfo token subject does not match the id_token subject. \
+         userinfo_token.sub: {0:?}, id_token.sub: {1:?}"
+    )]
     UserinfoSubMismatch(String, String),
     #[error(
-        "Validation failed: Userinfo token audience ({0}) does not match the access_token client_id ({1})."
+        "Validation failed: Userinfo token audience ({0}) does not match the access_token \
+         client_id ({1})."
     )]
     UserinfoAudienceMismatch(String, String),
-    #[error("CEDARLING_ID_TOKEN_TRUST_MODE is set to 'Strict', but the {0} is missing a required claim: {1}")]
+    #[error(
+        "CEDARLING_ID_TOKEN_TRUST_MODE is set to 'Strict', but the {0} is missing a required \
+         claim: {1}"
+    )]
     MissingClaimsInStrictMode(&'static str, &'static str),
     #[error("Failed to deserialize from Value to String: {0}")]
     StringDeserialization(#[from] serde_json::Error),
@@ -61,9 +70,15 @@ pub enum JwtProcessingError {
 
 #[derive(Debug, thiserror::Error)]
 pub enum JwtServiceInitError {
-    #[error("Failed to initialize Key Service for JwtService due to a conflictig config: both a local JWKS and trusted issuers was provided.")]
+    #[error(
+        "Failed to initialize Key Service for JwtService due to a conflictig config: both a local \
+         JWKS and trusted issuers was provided."
+    )]
     ConflictingJwksConfig,
-    #[error("Failed to initialize Key Service for JwtService due to a missing config: no local JWKS or trusted issuers was provided.")]
+    #[error(
+        "Failed to initialize Key Service for JwtService due to a missing config: no local JWKS \
+         or trusted issuers was provided."
+    )]
     MissingJwksConfig,
     #[error("Failed to initialize Key Service: {0}")]
     KeyService(#[from] KeyServiceError),
@@ -77,11 +92,14 @@ pub struct JwtService {
     access_tkn_validator: JwtValidator,
     id_tkn_validator: JwtValidator,
     userinfo_tkn_validator: JwtValidator,
+    // TODO: implement the usage of this bootstrap property in
+    // the authz module.
+    #[allow(dead_code)]
     id_token_trust_mode: IdTokenTrustMode,
 }
 
 impl JwtService {
-    pub fn new(
+    pub async fn new(
         config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
     ) -> Result<Self, JwtServiceInitError> {
@@ -92,6 +110,7 @@ impl JwtService {
                 // Case: Trusted issuers provided
                 (true, None, Some(issuers)) => Some(
                     KeyService::new_from_trusted_issuers(issuers)
+                        .await
                         .map_err(JwtServiceInitError::KeyService)?,
                 ),
                 // Case: Local JWKS provided
@@ -159,118 +178,54 @@ impl JwtService {
         })
     }
 
-    pub fn process_tokens<'a, A, I, U>(
+    pub async fn process_token<'a>(
         &'a self,
-        access_token: &'a str,
-        id_token: &'a str,
-        userinfo_token: Option<&'a str>,
-    ) -> Result<ProcessTokensResult<'a, A, I, U>, JwtProcessingError>
-    where
-        A: DeserializeOwned,
-        I: DeserializeOwned,
-        U: DeserializeOwned,
-    {
-        let access_token = self
-            .access_tkn_validator
-            .process_jwt(access_token)
-            .map_err(JwtProcessingError::InvalidAccessToken)?;
-        let id_token = self
-            .id_tkn_validator
-            .process_jwt(id_token)
-            .map_err(JwtProcessingError::InvalidIdToken)?;
-        let userinfo_token = userinfo_token
-            .map(|jwt| self.userinfo_tkn_validator.process_jwt(jwt))
-            .transpose()
-            .map_err(JwtProcessingError::InvalidUserinfoToken)?;
-
-        // Additional checks for STRICT MODE
-        if self.id_token_trust_mode == IdTokenTrustMode::Strict {
-            // Check if id_token.sub == access_token.client_id
-            let id_tkn_aud =
-                id_token
-                    .claims
-                    .get("aud")
-                    .ok_or(JwtProcessingError::MissingClaimsInStrictMode(
-                        "id_token", "aud",
-                    ))?;
-            let access_tkn_client_id = access_token.claims.get("client_id").ok_or(
-                JwtProcessingError::MissingClaimsInStrictMode("access_token", "client_id"),
-            )?;
-            if id_tkn_aud != access_tkn_client_id {
-                Err(JwtProcessingError::IdTokenAudienceMismatch(
-                    serde_json::from_value::<String>(id_tkn_aud.clone())?,
-                    serde_json::from_value::<String>(access_tkn_client_id.clone())?,
-                ))?
-            }
-
-            // If userinfo token is present, check if:
-            // 1. userinfo_token.sub == id_token.sub
-            // 2. userinfo_token.aud == access_token.client_id
-            if let Some(token) = &userinfo_token {
-                let id_tkn_sub = id_token.claims.get("sub").ok_or(
-                    JwtProcessingError::MissingClaimsInStrictMode("ID Token", "sub"),
-                )?;
-                let usrinfo_sub = token.claims.get("sub").ok_or(
-                    JwtProcessingError::MissingClaimsInStrictMode("Userinfo Token", "sub"),
-                )?;
-                if usrinfo_sub != id_tkn_sub {
-                    Err(JwtProcessingError::UserinfoSubMismatch(
-                        serde_json::from_value::<String>(usrinfo_sub.clone())?,
-                        serde_json::from_value::<String>(id_tkn_sub.clone())?,
-                    ))?
-                }
-
-                let usrinfo_aud = token.claims.get("aud").ok_or(
-                    JwtProcessingError::MissingClaimsInStrictMode("Userinfo Token", "aud"),
-                )?;
-                if usrinfo_aud != access_tkn_client_id {
-                    Err(JwtProcessingError::UserinfoAudienceMismatch(
-                        serde_json::from_value::<String>(usrinfo_aud.clone())?,
-                        serde_json::from_value::<String>(access_tkn_client_id.clone())?,
-                    ))?
-                }
-            }
+        token: TokenStr<'a>,
+    ) -> Result<Token<'a>, JwtProcessingError> {
+        match token {
+            TokenStr::Access(tkn_str) => {
+                let token = self
+                    .access_tkn_validator
+                    .process_jwt(tkn_str)
+                    .map_err(JwtProcessingError::InvalidAccessToken)?;
+                let claims = serde_json::from_value::<TokenClaims>(token.claims)?;
+                Ok(Token::new_access(claims, token.trusted_iss))
+            },
+            TokenStr::Id(tkn_str) => {
+                let token = self
+                    .id_tkn_validator
+                    .process_jwt(tkn_str)
+                    .map_err(JwtProcessingError::InvalidIdToken)?;
+                let claims = serde_json::from_value::<TokenClaims>(token.claims)?;
+                Ok(Token::new_id(claims, token.trusted_iss))
+            },
+            TokenStr::Userinfo(tkn_str) => {
+                let token = self
+                    .userinfo_tkn_validator
+                    .process_jwt(tkn_str)
+                    .map_err(JwtProcessingError::InvalidUserinfoToken)?;
+                let claims = serde_json::from_value::<TokenClaims>(token.claims)?;
+                Ok(Token::new_userinfo(claims, token.trusted_iss))
+            },
         }
-
-        let userinfo_token = match userinfo_token {
-            Some(token) => token,
-            None => unimplemented!("Having no userinfo token is not yet supported."),
-        };
-
-        Ok(ProcessTokensResult {
-            access_token: serde_json::from_value::<A>(access_token.claims)?,
-            id_token: serde_json::from_value::<I>(id_token.claims)?,
-            userinfo_token: serde_json::from_value::<U>(userinfo_token.claims)?,
-            // we just assume that all the tokens have the same issuer so we get the
-            // issuer from the access token.
-            // this behavior might be changed in future
-            trusted_issuer: access_token.trusted_iss,
-        })
     }
 }
 
-#[derive(Debug)]
-pub struct ProcessTokensResult<'a, A, I, U> {
-    pub access_token: A,
-    pub id_token: I,
-    pub userinfo_token: U,
-    pub trusted_issuer: Option<&'a TrustedIssuer>,
-}
-
 #[cfg(test)]
-mod new_test {
-    use super::test_utils::*;
-    use super::JwtService;
-    use crate::IdTokenTrustMode;
-    use crate::JwtConfig;
-    use crate::TokenValidationConfig;
-    use jsonwebtoken::Algorithm;
-    use serde_json::json;
-    use serde_json::Value;
+mod test {
     use std::collections::HashSet;
 
+    use jsonwebtoken::Algorithm;
+    use serde_json::json;
+    use test_utils::assert_eq;
+    use tokio::test;
+
+    use super::test_utils::*;
+    use super::{JwtService, Token, TokenClaims, TokenStr};
+    use crate::{IdTokenTrustMode, JwtConfig, TokenValidationConfig};
+
     #[test]
-    pub fn can_validate_tokens() {
+    pub async fn can_validate_token() {
         // Generate token
         let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
         let access_tkn_claims = json!({
@@ -317,10 +272,34 @@ mod new_test {
             },
             None,
         )
+        .await
         .expect("Should create JwtService");
 
-        jwt_service
-            .process_tokens::<Value, Value, Value>(&access_tkn, &id_tkn, Some(&userinfo_tkn))
-            .expect("Should process JWTs");
+        // Test access_token
+        let access_tkn = jwt_service
+            .process_token(TokenStr::Access(&access_tkn))
+            .await
+            .expect("Should process access_token");
+        let expected_claims = serde_json::from_value::<TokenClaims>(access_tkn_claims)
+            .expect("Should create expected access_token claims");
+        assert_eq!(access_tkn, Token::new_access(expected_claims.into(), None));
+
+        // Test id_token
+        let id_tkn = jwt_service
+            .process_token(TokenStr::Id(&id_tkn))
+            .await
+            .expect("Should process id_token");
+        let expected_claims = serde_json::from_value::<TokenClaims>(id_tkn_claims)
+            .expect("Should create expected id_token claims");
+        assert_eq!(id_tkn, Token::new_id(expected_claims, None));
+
+        // Test userinfo_token
+        let userinfo_tkn = jwt_service
+            .process_token(TokenStr::Userinfo(&userinfo_tkn))
+            .await
+            .expect("Should process userinfo_token");
+        let expected_claims = serde_json::from_value::<TokenClaims>(userinfo_tkn_claims)
+            .expect("Should create expected userinfo_token claims");
+        assert_eq!(userinfo_tkn, Token::new_userinfo(expected_claims, None));
     }
 }

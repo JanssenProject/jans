@@ -37,9 +37,56 @@ on:
         description: 'Service'
         required: true
         default: "jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 jans-scim jans-keycloak-link jans-config-api jans-keycloak-integration jans-casa"
-
+concurrency:
+  group: run-once
+  cancel-in-progress: false
+permissions:
+  contents: read
 jobs:
+  cleanup:
+    runs-on: ubuntu-20.04
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      with:
+        egress-policy: audit
+    - name: Get version ID for 0.0.0-nightly
+      id: get_version_id
+      run: |
+        page=1
+        services=""
+        while true; do
+          response=$(gh api -H "Accept: application/vnd.github+json" \
+            /orgs/JanssenProject/packages?package_type=maven\&per_page=100\&page=$page)
+          names=$(echo "$response" | jq -r '.[].name')
+          if [ -z "$names" ]; then
+            break
+          fi
+          services="$services $names"
+          page=$((page + 1))
+        done
+        
+        services=$(echo "$services" | tr '\n' ' ' | sed 's/ *$//')
+        echo "Services: $services"
+          for service in $services; do
+            echo "Checking $service"
+            version_id=$(gh api -H "Accept: application/vnd.github+json" \
+              /orgs/JanssenProject/packages/maven/"${service}"/versions \
+              | jq -r '.[] | select(.name == "0.0.0-nightly") | .id')
+            echo "version_id=$version_id" >> $GITHUB_ENV
+            gh api --method DELETE \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /orgs/JanssenProject/packages/maven/"${service}"/versions/"${version_id}" || echo "Failed to delete $service"
+          done
+
   prep-matrix:
+    needs: cleanup
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -94,35 +141,18 @@ jobs:
       with:
         egress-policy: audit
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         ref: ${{ github.event.inputs.branch }}
 
-    - name: Get version ID for 0.0.0-nightly
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      id: get_version_id
-      run: |
-        version_id=$(gh api -H "Accept: application/vnd.github+json" \
-          /orgs/JanssenProject/packages/maven/io.jans.${{ matrix.service }}/versions \
-          | jq -r '.[] | select(.name == "0.0.0-nightly") | .id')
-        echo "version_id=$version_id" >> $GITHUB_ENV
-
-    - name: Delete existing 0.0.0-nightly version
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      run: |
-        gh api --method DELETE \
-          -H "Accept: application/vnd.github+json" \
-          -H "X-GitHub-Api-Version: 2022-11-28" \
-          /orgs/JanssenProject/packages/maven/io.jans.${{ matrix.service }}/versions/${{ env.version_id }}
-
     - name: Set up Java 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@7a6d8a8234af8eb26422e24e3006232cccaa061b # v4.6.0
       with:
         java-version: '17'
         distribution: 'adopt'
 
     - name: Set up Maven
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@7a6d8a8234af8eb26422e24e3006232cccaa061b # v4.6.0
       with:
         java-version: '17'
         distribution: 'adopt'
@@ -131,7 +161,8 @@ jobs:
     - name: Build ${{ matrix.service }}
       run: |
         if [ "${{ github.event_name }}" == "pull_request" ]; then
-          mvn -f ${{ matrix.service }}/pom.xml -Dcfg=${{ env.PROFILE_NAME }} -Dmaven.test.skip=${{ matrix.maven_skip_tests }} clean install -Drevision=${{ github.head_ref }}-nightly
+          revision=${{ github.sha }}-nightly
+          mvn -f ${{ matrix.service }}/pom.xml -Dcfg=${{ env.PROFILE_NAME }} -Dmaven.test.skip=${{ matrix.maven_skip_tests }} clean install -Drevision=$revision
         else
           mvn -f ${{ matrix.service }}/pom.xml -Dcfg=${{ env.PROFILE_NAME }} -Dmaven.test.skip=${{ matrix.maven_skip_tests }} clean install
         fi
@@ -144,7 +175,7 @@ jobs:
 
     - name: Archive results
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
       with:
         name: build-results
         path: ${{ matrix.service }}/target
@@ -153,27 +184,12 @@ jobs:
       if: failure()
       run: echo "Build failed"
 
-  cleanup:
-    if: github.event_name == 'push' && github.event.ref == 'refs/heads/main'
-    runs-on: ubuntu-20.04
-    steps:
-    - name: Harden Runner
-      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
-      with:
-        egress-policy: audit
-    - name: Clean up PR assets
-      run: |
-        versions=$(curl -s -H "Authorization: token ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" "https://maven.pkg.github.com/JanssenProject/jans/maven-metadata.xml" | grep -oP '(?<=<version>)[^<]+')
-
-        for version in $versions; do
-          if [[ $version == *-nightly ]]; then
-            curl -X DELETE -H "Authorization: token ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" "https://maven.pkg.github.com/JanssenProject/jans/io/jans/${{ matrix.service.project }}/$version"
-          fi
-        done
-
   run-tests:
     if: github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.project == 'jans-bom, jans-orm, jans-core, jans-lock/lock-server, agama, jans-auth-server, jans-link, jans-fido2, jans-scim, jans-keycloak-link, jans-config-api, jans-keycloak-integration, jans-casa')
-    permissions: write-all
+    permissions:
+      contents: read
+      packages: write
+    needs: cleanup
     runs-on: ubuntu-20.04
     env:
       MAVEN_SKIP_TESTS: false
@@ -200,18 +216,18 @@ jobs:
       with:
         egress-policy: audit
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         ref: ${{ github.event.inputs.branch }}
 
     - name: Set up Java 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@7a6d8a8234af8eb26422e24e3006232cccaa061b # v4.6.0
       with:
         java-version: '17'
         distribution: 'adopt'
 
     - name: Set up Maven
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@7a6d8a8234af8eb26422e24e3006232cccaa061b # v4.6.0
       with:
         java-version: '17'
         distribution: 'adopt'
@@ -278,13 +294,13 @@ jobs:
         ls /tmp/reports/
 
     - name: Upload Test Results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
       with:
         name: ${{ matrix.persistence }}-test-results
         path: /tmp/reports
 
     - name: Publish Test Report ${{ matrix.persistence }}
-      uses: starburstdata/action-testng-report@v1
+      uses: starburstdata/action-testng-report@f245422953fb97ec5075d07782a1b596124b7cc4 # v1.0.5
       with:
           report_paths: /tmp/reports/${{ matrix.persistence }}*.xml
           github_token: ${{ github.token }}

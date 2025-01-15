@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2024-11-15 09:19'
+ENV CN_BUILD_DATE='2024-12-20 09:07'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
@@ -70,13 +70,14 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=871c36da8a2550ee2febd7c0d72c521898b226c3
+ENV JANS_SOURCE_VERSION=856f9fed1d58a6d41503a0459bbe04f52b0bb8e7
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
-RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+ARG GIT_CLONE_DEPTH=100
+RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
@@ -102,23 +103,28 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/dynamic-conf.json /app/templates/jans-config-api/ \
     && cp ${JANS_SETUP_DIR}/setup_app/utils/printVersion.py /opt/jans/bin/printVersion.py \
+    && chmod +x /opt/jans/bin/printVersion.py \
     && ln -s /opt/jans/bin/printVersion.py /opt/jans/bin/show_version.py \
     && cp ${JANS_CONFIG_API_RESOURCES}/config-api-rs-protect.json /app/templates/jans-config-api/ \
     && mkdir -p org/eclipse/jetty \
     && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
     && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico \
     && cp ${JANS_SETUP_DIR}/static/scripts/facter /usr/bin/facter \
-    && chmod +x /usr/bin/facter
+    && chmod +x /usr/bin/facter \
+    && cp ${JANS_SETUP_DIR}/static/scripts/get_agama_lab_projects.py /opt/jans/bin/get_agama_lab_projects.py \
+    && chmod +x /opt/jans/bin/get_agama_lab_projects.py
 
 # ======
 # Python
 # ======
 
+# default pip timeout
+ARG PIP_TIMEOUT=15
 COPY requirements.txt /app/requirements.txt
 RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.disabled \
     && python3 -m ensurepip \
-    && pip3 install --no-cache-dir -U pip wheel setuptools \
-    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && pip3 install --no-cache-dir -U pip wheel setuptools --timeout ${PIP_TIMEOUT} \
+    && pip3 install --no-cache-dir -r /app/requirements.txt --timeout ${PIP_TIMEOUT} \
     && pip3 uninstall -y pip wheel
 
 # ==========
@@ -235,6 +241,10 @@ COPY templates /app/templates/
 RUN cp /app/templates/jans-config-api/jans-config-api.xml ${JETTY_BASE}/jans-config-api/webapps/
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
+
+# drop-replacement for jans-linux-setup jans_services_status.py script
+COPY contrib/external_healthcheck.py /opt/jans/bin/jans_services_status.py
+RUN chmod +x /opt/jans/bin/jans_services_status.py
 
 # unquote apiApprovedIssuer
 RUN sed -i 's/"${apiApprovedIssuer}"/${apiApprovedIssuer}/g' /app/templates/jans-config-api/dynamic-conf.json

@@ -500,15 +500,20 @@
 				<version>1.12.0</version>
 			</dependency>
 			<dependency>
-				<groupId>commons-beanutils</groupId>
-				<artifactId>commons-beanutils</artifactId>
-				<version>1.9.4</version>
-			</dependency>
-			<dependency>
 				<groupId>commons-collections</groupId>
 				<artifactId>commons-collections</artifactId>
 				<version>3.2.2</version>
 			</dependency>
+			<dependency>
+				<groupId>io.prometheus</groupId>
+				<artifactId>simpleclient_common</artifactId>
+				<version>0.9.0</version>
+			</dependency>
+            <dependency>
+                <groupId>net.agkn</groupId>
+                <artifactId>hll</artifactId>
+                <version>1.6.0</version>
+            </dependency>
 
 			<!-- Logging -->
 			<dependency>
@@ -605,7 +610,7 @@
 				<artifactId>jackson-dataformat-cbor</artifactId>
 				<version>${jackson.version}</version>
 			</dependency>
-		<!-- 	<dependency>
+			<!-- 	<dependency>
 				<groupId>jakarta.xml.bind</groupId>
 				<artifactId>jakarta.xml.bind-api</artifactId>
 				<version>2.3.3</version>
@@ -760,14 +765,14 @@
 			<dependency>
 			    <groupId>org.postgresql</groupId>
 			    <artifactId>postgresql</artifactId>
-			    <version>42.7.4</version>
+			    <version>42.6.1</version>
 			</dependency>
 
 			<!-- SQL Query -->
 			<dependency>
 			    <groupId>com.querydsl</groupId>
 			    <artifactId>querydsl-sql</artifactId>
-			    <version>4.4.0</version>
+			    <version>5.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.jsqlparser</groupId>
@@ -788,7 +793,7 @@
 				<artifactId>metrics-core</artifactId>
 				<version>4.2.12</version>
 			</dependency>
-			
+
 			<!-- Timer -->
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
@@ -832,7 +837,7 @@
 				<artifactId>velocity-engine-core</artifactId>
 				<version>2.3</version>
 			</dependency>
-			
+
 			<!-- Date/time utils -->
 			<dependency>
 				<groupId>joda-time</groupId>
@@ -897,8 +902,8 @@
 				<version>${mockito.version}</version>
 				<scope>test</scope>
 			</dependency>
-				
-            <!-- java compiler lib -->
+
+			<!-- java compiler lib -->
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>compiler</artifactId>
@@ -922,16 +927,10 @@
 				<scope>test</scope>
 			</dependency>
 
-			<!-- Use compatible with selenium-htmlunit-driver version -->
-			<dependency>
-				<groupId>net.sourceforge.htmlunit</groupId>
-				<artifactId>htmlunit</artifactId>
-				<version>2.44.0</version>
-			</dependency>
 			<dependency>
 				<groupId>org.seleniumhq.selenium</groupId>
 				<artifactId>htmlunit-driver</artifactId>
-				<version>2.44.0</version>
+				<version>4.13.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.w3c.css</groupId>
@@ -942,7 +941,7 @@
 			<dependency>
 				<groupId>org.seleniumhq.selenium</groupId>
 				<artifactId>htmlunit3-driver</artifactId>
-				<version>4.26.0</version>
+				<version>4.27.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

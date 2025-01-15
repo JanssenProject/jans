@@ -29,7 +29,7 @@ Kubernetes: `>=v1.22.0-0`
 | additionalLabels | object | `{}` | Additional labels that will be added across the gateway in the format of {mylabel: "myapp"} |
 | adminPassword | string | `"Test1234#"` | Admin password to log in to the UI. |
 | alb.ingress | bool | `false` | switches the service to Nodeport for ALB ingress |
-| auth-server | object | `{"appLoggers":{"auditStatsLogLevel":"INFO","auditStatsLogTarget":"FILE","authLogLevel":"INFO","authLogTarget":"STDOUT","enableStdoutLogPrefix":"true","httpLogLevel":"INFO","httpLogTarget":"FILE","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"authEncKeys":"RSA1_5 RSA-OAEP","authSigKeys":"RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512","enabled":true,"ingress":{"authServerAdditionalAnnotations":{},"authServerEnabled":true,"authServerLabels":{},"deviceCodeAdditionalAnnotations":{},"deviceCodeEnabled":true,"deviceCodeLabels":{},"firebaseMessagingAdditionalAnnotations":{},"firebaseMessagingEnabled":true,"firebaseMessagingLabels":{},"lockAdditionalAnnotations":{},"lockConfigAdditionalAnnotations":{},"lockConfigEnabled":false,"lockConfigLabels":{},"lockEnabled":false,"lockLabels":{},"openidAdditionalAnnotations":{},"openidConfigEnabled":true,"openidConfigLabels":{},"u2fAdditionalAnnotations":{},"u2fConfigEnabled":true,"u2fConfigLabels":{},"uma2AdditionalAnnotations":{},"uma2ConfigEnabled":true,"uma2ConfigLabels":{},"webdiscoveryAdditionalAnnotations":{},"webdiscoveryEnabled":true,"webdiscoveryLabels":{},"webfingerAdditionalAnnotations":{},"webfingerEnabled":true,"webfingerLabels":{}},"lockEnabled":false}` | Parameters used globally across all services helm charts. |
+| auth-server | object | `{"appLoggers":{"auditStatsLogLevel":"INFO","auditStatsLogTarget":"FILE","authLogLevel":"INFO","authLogTarget":"STDOUT","enableStdoutLogPrefix":"true","httpLogLevel":"INFO","httpLogTarget":"FILE","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"authEncKeys":"RSA1_5 RSA-OAEP","authSigKeys":"RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512","enabled":true,"ingress":{"authServerAdditionalAnnotations":{},"authServerEnabled":true,"authServerLabels":{},"authzenAdditionalAnnotations":{},"authzenConfigEnabled":true,"authzenConfigLabels":{},"deviceCodeAdditionalAnnotations":{},"deviceCodeEnabled":true,"deviceCodeLabels":{},"firebaseMessagingAdditionalAnnotations":{},"firebaseMessagingEnabled":true,"firebaseMessagingLabels":{},"lockAdditionalAnnotations":{},"lockConfigAdditionalAnnotations":{},"lockConfigEnabled":false,"lockConfigLabels":{},"lockEnabled":false,"lockLabels":{},"openidAdditionalAnnotations":{},"openidConfigEnabled":true,"openidConfigLabels":{},"u2fAdditionalAnnotations":{},"u2fConfigEnabled":true,"u2fConfigLabels":{},"uma2AdditionalAnnotations":{},"uma2ConfigEnabled":true,"uma2ConfigLabels":{},"webdiscoveryAdditionalAnnotations":{},"webdiscoveryEnabled":true,"webdiscoveryLabels":{},"webfingerAdditionalAnnotations":{},"webfingerEnabled":true,"webfingerLabels":{}},"lockEnabled":false}` | Parameters used globally across all services helm charts. |
 | auth-server-key-rotation | object | `{"additionalAnnotations":{},"additionalLabels":{},"customCommand":[],"customScripts":[],"dnsConfig":{},"dnsPolicy":"","enabled":true,"image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/certmanager","tag":"0.0.0-nightly"},"initKeysLife":48,"keysLife":48,"keysPushDelay":0,"keysPushStrategy":"NEWER","keysStrategy":"NEWER","lifecycle":{},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Responsible for regenerating auth-keys per x hours |
 | auth-server-key-rotation.additionalAnnotations | object | `{}` | Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"} |
 | auth-server-key-rotation.additionalLabels | object | `{}` | Additional labels that will be added across the gateway in the format of {mylabel: "myapp"} |
@@ -74,10 +74,13 @@ Kubernetes: `>=v1.22.0-0`
 | auth-server.authEncKeys | string | `"RSA1_5 RSA-OAEP"` | space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`) |
 | auth-server.authSigKeys | string | `"RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512"` | space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`) |
 | auth-server.enabled | bool | `true` | Boolean flag to enable/disable auth-server chart. You should never set this to false. |
-| auth-server.ingress | object | `{"authServerAdditionalAnnotations":{},"authServerEnabled":true,"authServerLabels":{},"deviceCodeAdditionalAnnotations":{},"deviceCodeEnabled":true,"deviceCodeLabels":{},"firebaseMessagingAdditionalAnnotations":{},"firebaseMessagingEnabled":true,"firebaseMessagingLabels":{},"lockAdditionalAnnotations":{},"lockConfigAdditionalAnnotations":{},"lockConfigEnabled":false,"lockConfigLabels":{},"lockEnabled":false,"lockLabels":{},"openidAdditionalAnnotations":{},"openidConfigEnabled":true,"openidConfigLabels":{},"u2fAdditionalAnnotations":{},"u2fConfigEnabled":true,"u2fConfigLabels":{},"uma2AdditionalAnnotations":{},"uma2ConfigEnabled":true,"uma2ConfigLabels":{},"webdiscoveryAdditionalAnnotations":{},"webdiscoveryEnabled":true,"webdiscoveryLabels":{},"webfingerAdditionalAnnotations":{},"webfingerEnabled":true,"webfingerLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
+| auth-server.ingress | object | `{"authServerAdditionalAnnotations":{},"authServerEnabled":true,"authServerLabels":{},"authzenAdditionalAnnotations":{},"authzenConfigEnabled":true,"authzenConfigLabels":{},"deviceCodeAdditionalAnnotations":{},"deviceCodeEnabled":true,"deviceCodeLabels":{},"firebaseMessagingAdditionalAnnotations":{},"firebaseMessagingEnabled":true,"firebaseMessagingLabels":{},"lockAdditionalAnnotations":{},"lockConfigAdditionalAnnotations":{},"lockConfigEnabled":false,"lockConfigLabels":{},"lockEnabled":false,"lockLabels":{},"openidAdditionalAnnotations":{},"openidConfigEnabled":true,"openidConfigLabels":{},"u2fAdditionalAnnotations":{},"u2fConfigEnabled":true,"u2fConfigLabels":{},"uma2AdditionalAnnotations":{},"uma2ConfigEnabled":true,"uma2ConfigLabels":{},"webdiscoveryAdditionalAnnotations":{},"webdiscoveryEnabled":true,"webdiscoveryLabels":{},"webfingerAdditionalAnnotations":{},"webfingerEnabled":true,"webfingerLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
 | auth-server.ingress.authServerAdditionalAnnotations | object | `{}` | Auth server ingress resource additional annotations. |
 | auth-server.ingress.authServerEnabled | bool | `true` | Enable Auth server endpoints /jans-auth |
 | auth-server.ingress.authServerLabels | object | `{}` | Auth server ingress resource labels. key app is taken |
+| auth-server.ingress.authzenAdditionalAnnotations | object | `{}` | authzen config ingress resource additional annotations. |
+| auth-server.ingress.authzenConfigEnabled | bool | `true` | Enable endpoint /.well-known/authzen-configuration |
+| auth-server.ingress.authzenConfigLabels | object | `{}` | authzen config ingress resource labels. key app is taken |
 | auth-server.ingress.deviceCodeAdditionalAnnotations | object | `{}` | device-code ingress resource additional annotations. |
 | auth-server.ingress.deviceCodeEnabled | bool | `true` | Enable endpoint /device-code |
 | auth-server.ingress.deviceCodeLabels | object | `{}` | device-code ingress resource labels. key app is taken |
@@ -131,6 +134,8 @@ Kubernetes: `>=v1.22.0-0`
 | cnConfiguratorCustomSchema | object | `{"secretName":""}` | Use custom configuration schema in existing secrets. Note, the secrets has to contain the key configuration.json or any basename as specified in cnConfiguratorConfigurationFile. |
 | cnConfiguratorCustomSchema.secretName | string | `""` | The name of the secrets used for storing custom configuration schema. |
 | cnConfiguratorDumpFile | string | `"/etc/jans/conf/configuration.out.json"` | Path to dumped configuration schema file |
+| cnConfiguratorKey | string | `""` | Key to encrypt/decrypt configuration schema file using AES-256 CBC mode. Set the value to empty string to disable encryption/decryption, or 32 alphanumeric characters to enable it. |
+| cnConfiguratorKeyFile | string | `"/etc/jans/conf/configuration.key"` | Path to file contains key to encrypt/decrypt configuration schema file. |
 | cnDocumentStoreType | string | `"DB"` | Document store type to use for shibboleth files DB. |
 | cnGoogleApplicationCredentials | string | `"/etc/jans/conf/google-credentials.json"` | Base64 encoded service account. The sa must have roles/secretmanager.admin to use Google secrets. Leave as this is a sensible default. |
 | cnPersistenceType | string | `"sql"` | Persistence backend to run Janssen with hybrid|sql. |
@@ -241,13 +246,16 @@ Kubernetes: `>=v1.22.0-0`
 | fido2.appLoggers.scriptLogTarget | string | `"FILE"` | fido2_script.log target |
 | fido2.enabled | bool | `true` | Boolean flag to enable/disable the fido2 chart. |
 | fido2.fido2ServiceName | string | `"fido2"` | Name of the fido2 service. Please keep it as default. |
-| fido2.ingress | object | `{"fido2AdditionalAnnotations":{},"fido2ConfigAdditionalAnnotations":{},"fido2ConfigEnabled":false,"fido2ConfigLabels":{},"fido2Enabled":false,"fido2Labels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
+| fido2.ingress | object | `{"fido2AdditionalAnnotations":{},"fido2ConfigAdditionalAnnotations":{},"fido2ConfigEnabled":false,"fido2ConfigLabels":{},"fido2Enabled":false,"fido2Labels":{},"fido2WebauthnAdditionalAnnotations":{},"fido2WebauthnEnabled":false,"fido2WebauthnLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
 | fido2.ingress.fido2AdditionalAnnotations | object | `{}` | fido2 ingress resource additional annotations. |
 | fido2.ingress.fido2ConfigAdditionalAnnotations | object | `{}` | fido2 config ingress resource additional annotations. |
 | fido2.ingress.fido2ConfigEnabled | bool | `false` | Enable endpoint /.well-known/fido2-configuration |
 | fido2.ingress.fido2ConfigLabels | object | `{}` | fido2 config ingress resource labels. key app is taken |
 | fido2.ingress.fido2Enabled | bool | `false` | Enable endpoint /jans-fido2 |
 | fido2.ingress.fido2Labels | object | `{}` | fido2 ingress resource labels. key app is taken |
+| fido2.ingress.fido2WebauthnAdditionalAnnotations | object | `{}` | fido2 webauthn ingress resource additional annotations. |
+| fido2.ingress.fido2WebauthnEnabled | bool | `false` | Enable endpoint /.well-known/webauthn |
+| fido2.ingress.fido2WebauthnLabels | object | `{}` | fido2 webauthn ingress resource labels. key app is taken |
 | fqdn | string | `"demoexample.jans.io"` | Fully qualified domain name to be used for Janssen installation. This address will be used to reach Janssen services. |
 | fullNameOverride | string | `""` |  |
 | hpa | object | `{"behavior":{},"enabled":true,"maxReplicas":10,"metrics":[],"minReplicas":1,"targetCPUUtilizationPercentage":50}` | Configure the HorizontalPodAutoscaler |
@@ -301,7 +309,9 @@ Kubernetes: `>=v1.22.0-0`
 | link.appLoggers.scriptLogLevel | string | `"INFO"` | cacherefresh_script.log level |
 | link.appLoggers.scriptLogTarget | string | `"FILE"` | cacherefresh_script.log target |
 | link.enabled | bool | `false` | Boolean flag to enable/disable the link chart. |
-| link.ingress | object | `{"linkEnabled":true}` | Enable endpoints in either istio or nginx ingress depending on users choice |
+| link.ingress | object | `{"linkAdditionalAnnotations":{},"linkEnabled":true,"linkLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
+| link.ingress.linkAdditionalAnnotations | object | `{}` | link ingress resource additional annotations. |
+| link.ingress.linkLabels | object | `{}` | link ingress resource labels. key app is taken |
 | link.linkServiceName | string | `"link"` | Name of the link service. Please keep it as default. |
 | livenessProbe | object | `{"exec":{"command":["python3","/app/jans_aio/jans_auth/healthcheck.py"]},"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5}` | Configure the liveness healthcheck for the auth server if needed. |
 | livenessProbe.exec | object | `{"command":["python3","/app/jans_aio/jans_auth/healthcheck.py"]}` | Executes the python3 healthcheck. https://github.com/JanssenProject/docker-jans-auth-server/blob/master/scripts/healthcheck.py |
@@ -346,7 +356,7 @@ Kubernetes: `>=v1.22.0-0`
 | scim.ingress.scimConfigEnabled | bool | `false` | Enable endpoint /.well-known/scim-configuration |
 | scim.ingress.scimConfigLabels | object | `{}` | SCIM config ingress resource labels. key app is taken |
 | scim.ingress.scimEnabled | bool | `false` | Enable SCIM endpoints /jans-scim |
-| scim.ingress.scimLabels | object | `{}` | SCIM config ingress resource labels. key app is taken |
+| scim.ingress.scimLabels | object | `{}` | SCIM ingress resource labels. key app is taken |
 | scim.scimServiceName | string | `"scim"` | Name of the scim service. Please keep it as default. |
 | service.name | string | `"http-aio"` | The name of the aio port within the aio service. Please keep it as default. |
 | service.port | int | `8080` | Port of the fido2 service. Please keep it as default. |
@@ -361,6 +371,3 @@ Kubernetes: `>=v1.22.0-0`
 | usrEnvs.secret | object | `{}` | Add custom secret envs to the service variable1: value1 |
 | volumeMounts | list | `[]` | Configure any additional volumesMounts that need to be attached to the containers |
 | volumes | list | `[]` | Configure any additional volumes that need to be attached to the pod |
-
-----------------------------------------------
-Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)

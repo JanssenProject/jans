@@ -4,8 +4,8 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
-use pyo3::prelude::*;
 use pyo3::Bound;
+use pyo3::prelude::*;
 
 pub(crate) mod authorize_result;
 mod authorize_result_response;
@@ -22,6 +22,7 @@ pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<decision::Decision>()?;
     m.add_class::<resource_data::ResourceData>()?;
     m.add_class::<request::Request>()?;
+    m.add_class::<request::Tokens>()?;
     m.add_class::<authorize_result_response::AuthorizeResultResponse>()?;
     m.add_class::<authorize_result::AuthorizeResult>()?;
 

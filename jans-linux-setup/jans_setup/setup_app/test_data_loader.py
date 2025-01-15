@@ -134,6 +134,13 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             )
 
         if Config.rdbm_type in ('mysql', 'pgsql'):
+            if Config.rdbm_type == 'mysql':
+                Config.templateRenderingDict['rdbm_schema_name'] = Config.rdbm_db
+                Config.templateRenderingDict['rdbm_name_str'] = Config.rdbm_type
+            else:
+                Config.templateRenderingDict['rdbm_schema_name'] = 'public'
+                Config.templateRenderingDict['rdbm_name_str'] = 'postgresql'
+
             template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-jans-auth-test-sql.properties.nrnd'))
             rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
             config_jans_auth_test_properties += '\n#sql\n' +  rendered_text
@@ -270,7 +277,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'tokenEndpointAuthMethodsSupported': [ 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt', 'tls_client_auth', 'self_signed_tls_client_auth', 'none' ],
                                     'sessionIdRequestParameterEnabled': True,
                                     'skipRefreshTokenDuringRefreshing': False,
-                                    'featureFlags': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'revoke_session', 'global_token_revocation', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par', 'ssa', 'status_list'],
+                                    'featureFlags': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'revoke_session', 'global_token_revocation', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par', 'ssa', 'status_list', 'access_evaluation'],
                                     'cleanServiceInterval':7200,
                                     'loggingLevel': 'TRACE',
                                     }

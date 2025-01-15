@@ -1,20 +1,17 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-use super::parse_option_string;
-use super::AgamaPolicyStore;
-use super::ParsePolicySetMessage;
-use super::PolicyStore;
-use crate::common::policy_store::parse_cedar_version;
+use std::str::FromStr;
+
 use base64::prelude::*;
 use serde::Deserialize;
 use serde_json::json;
-use std::str::FromStr;
 use test_utils::assert_eq;
+
+use super::{AgamaPolicyStore, ParsePolicySetMessage, PolicyStore, parse_option_string};
+use crate::common::policy_store::parse_cedar_version;
 
 /// Tests successful deserialization of a valid policy store JSON.
 #[test]
@@ -89,10 +86,12 @@ fn test_base64_decoding_error_in_policy_store() {
     });
 
     let policy_result = serde_json::from_str::<PolicyStore>(policy_store_json.to_string().as_str());
-    assert!(policy_result
-        .unwrap_err()
-        .to_string()
-        .contains(&ParsePolicySetMessage::Base64.to_string()));
+    assert!(
+        policy_result
+            .unwrap_err()
+            .to_string()
+            .contains(&ParsePolicySetMessage::Base64.to_string())
+    );
 }
 
 /// Tests for parsing error due to broken UTF-8 in the policy store.
@@ -139,10 +138,12 @@ fn test_policy_parsing_error_in_policy_store() {
     });
 
     let policy_result = serde_json::from_str::<PolicyStore>(policy_store_json.to_string().as_str());
-    assert!(policy_result
-        .unwrap_err()
-        .to_string()
-        .contains(&ParsePolicySetMessage::String.to_string()));
+    assert!(
+        policy_result
+            .unwrap_err()
+            .to_string()
+            .contains(&ParsePolicySetMessage::String.to_string())
+    );
 }
 
 /// Tests for broken policy parsing error in the policy store.
@@ -157,7 +158,13 @@ fn test_broken_policy_parsing_error_in_policy_store() {
     // TODO: this isn't really a human readable format but the current plan is to fetch it from
     // a which will respond with the policy encoded in base64. This could probably be improved
     // in the future once the structure of the project is clearer.
-    assert_eq!(err_msg, "policy_stores.ba1f39115ed86ed760ee0bea1d529b52189e5a117474: Errors encountered while parsing policies: [Error(\"unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)`\")] at line 4 column 5")
+    assert_eq!(
+        err_msg,
+        "policy_stores.ba1f39115ed86ed760ee0bea1d529b52189e5a117474: Errors encountered while \
+         parsing policies: [Error(\"unable to decode policy with id: \
+         840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content \
+         from human readable format: unexpected token `)`\")] at line 8 column 5"
+    )
 }
 
 /// Tests that a valid version string is accepted.

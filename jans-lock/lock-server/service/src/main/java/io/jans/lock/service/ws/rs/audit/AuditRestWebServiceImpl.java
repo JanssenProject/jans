@@ -22,6 +22,8 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.lock.service.audit.AuditService;
+import io.jans.lock.service.stat.StatResponseService;
+import io.jans.lock.service.stat.StatService;
 import io.jans.lock.util.ServerUtil;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -32,6 +34,8 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.SecurityContext;
 
+import static io.jans.lock.service.audit.AuditService.*;
+
 /**
  * Provides interface for audit REST web services
  *  
@@ -41,75 +45,98 @@ import jakarta.ws.rs.core.SecurityContext;
 @Path("/audit")
 public class AuditRestWebServiceImpl implements AuditRestWebService {
 
-    @Inject
+	private static final String LOG_PRINCIPAL_ID = "principalId";
+	private static final String LOG_CLIENT_ID = "clientId";
+	private static final String LOG_DECISION_RESULT = "decisionResult";
+	private static final String LOG_ACTION = "action";
+
+	private static final String LOG_DECISION_RESULT_ALLOW = "allow";
+	private static final String LOG_DECISION_RESULT_DENY = "deny";
+
+	@Inject
     private Logger log;
 
     @Inject
-    AuditService auditService;
+    private AuditService auditService;
+    
+    @Inject
+    private StatService statService;
 
     @Override
     public Response processHealthRequest(HttpServletRequest request, HttpServletResponse response,
             SecurityContext sec) {
-        log.info("Processing Health request - request:{}", request);
-        return processAuditRequest(request, "health");
+        log.info("Processing Health request - request: {}", request);
+        return processAuditRequest(request, AUDIT_HEALTH);
     }
 
 	@Override
 	public Response processBulkHealthRequest(HttpServletRequest request, HttpServletResponse response,
 			SecurityContext sec) {
-        log.info("Processing Bulk Health request - request:{}", request);
-        return processAuditRequest(request, "health/bulk");
+        log.info("Processing Bulk Health request - request: {}", request);
+        return processAuditRequest(request, AUDIT_HEALTH_BULK);
 	}
 
     @Override
     public Response processLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
-        log.info("Processing Log request - request:{}", request);
-        return processAuditRequest(request, "log");
-
+        log.info("Processing Log request - request: {}", request);
+        return processAuditRequest(request, AUDIT_LOG, true, false);
     }
 
 	@Override
 	public Response processBulkLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
-        log.info("Processing Bulk Log request - request:{}", request);
-        return processAuditRequest(request, "log/bulk");
+        log.info("Processing Bulk Log request - request: {}", request);
+        return processAuditRequest(request, AUDIT_LOG_BULK, true, true);
 	}
 
     @Override
     public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
-        log.info("Processing Telemetry request - request:{}", request);
-        return processAuditRequest(request, "telemetry");
+        log.info("Processing Telemetry request - request: {}", request);
+        return processAuditRequest(request, AUDIT_TELEMETRY);
 
     }
 
 	@Override
 	public Response processBulkTelemetryRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
-        log.info("Processing Bulk Telemetry request - request:{}", request);
-        return processAuditRequest(request, "telemetry/bulk");
+        log.info("Processing Bulk Telemetry request - request: {}", request);
+        return processAuditRequest(request, AUDIT_TELEMETRY_BULK);
 	}
 
-    private Response processAuditRequest(HttpServletRequest request, String requestType) {
-        log.info("Processing request - request:{}, requestType:{}", request, requestType);
+	private Response processAuditRequest(HttpServletRequest request, String requestType) {
+    	return processAuditRequest(request, requestType, false, false);
+    }
+
+    private Response processAuditRequest(HttpServletRequest request, String requestType, boolean reportStat, boolean bulkData) {
+        log.info("Processing request - request: {}, requestType: {}", request, requestType);
 
         Response.ResponseBuilder builder = Response.ok();
         builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
         builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
 
         JsonNode json = this.auditService.getJsonNode(request);
+        
+        if (reportStat) {
+        	if (bulkData) {
+        		reportBulkStat(json);
+        	} else {
+        		reportStat(json);
+        	}
+        }
+
         Response response = this.auditService.post(requestType, json.toString(), ContentType.APPLICATION_JSON);
-        log.debug("response:{}", response);
+        log.debug("response: {}", response);
 
         if (response != null) {
             log.debug(
-                    "Response for Access Token -  response.getStatus():{}, response.getStatusInfo():{}, response.getEntity().getClass():{}",
+                    "Response for Access Token -  response.getStatus(): {}, response.getStatusInfo(): {}, response.getEntity().getClass(): {}",
                     response.getStatus(), response.getStatusInfo(), response.getEntity().getClass());
             String entity = response.readEntity(String.class);
-            log.debug(" entity:{}", entity);
+            log.debug(" entity: {}", entity);
             builder.entity(entity);
 
             if (response.getStatusInfo().equals(Status.OK)) {
-                log.debug(" Status.CREATED:{}, entity:{}", Status.OK, entity);
+                log.debug(" Status.CREATED: {}, entity: {}", Status.OK, entity);
             } else {
-                log.error("Error while saving audit data - response.getStatusInfo():{}, entity:{}",
+                log.error("Error while saving audit data - response.getStatusInfo(): {}, entity: {}",
                         response.getStatusInfo(), entity);
                 builder.status(response.getStatusInfo());
             }
@@ -118,4 +145,41 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
         return builder.build();
     }
 
+	private void reportStat(JsonNode json) {
+		boolean hasClientId = json.hasNonNull(LOG_CLIENT_ID);
+		if (hasClientId) {
+			statService.reportActiveClient(json.get(LOG_CLIENT_ID).asText());
+		}
+
+		boolean hasPrincipalId = json.hasNonNull(LOG_PRINCIPAL_ID);
+		if (hasPrincipalId) {
+			statService.reportActiveUser(json.get(LOG_PRINCIPAL_ID).asText());
+		}
+
+		boolean hasВecisionResult = json.hasNonNull(LOG_DECISION_RESULT);
+		if (hasВecisionResult) {
+			String decisionResult = json.get(LOG_DECISION_RESULT).asText();
+			if (LOG_DECISION_RESULT_ALLOW.equals(decisionResult)) {
+				statService.reportAllow(LOG_DECISION_RESULT);
+			} else if (LOG_DECISION_RESULT_DENY.equals(decisionResult)) {
+				statService.reportDeny(LOG_DECISION_RESULT);
+			}
+		}
+
+		boolean hasAction = json.hasNonNull(LOG_ACTION);
+		if (hasAction) {
+			statService.reportOpearation(LOG_ACTION, json.get(LOG_ACTION).asText());
+		}
+	}
+
+	private void reportBulkStat(JsonNode json) {
+		if (!json.isArray()) {
+			log.error("Failed to calculate stat for bulk log entry: {}", json);
+		}
+		
+		for (JsonNode jsonItem : json) {
+			reportStat(jsonItem);
+		}
+		
+	}
 }

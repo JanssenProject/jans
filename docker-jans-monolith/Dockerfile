@@ -33,7 +33,7 @@ RUN systemctl set-default multi-user.target \
 RUN rm -f /lib/systemd/system/systemd*udev* \
     && rm -f /lib/systemd/system/getty.target
 
-HEALTHCHECK --interval=35s --timeout=4s CMD /opt/dist/scripts/jans-auth check | grep "Jetty running pid" || exit 1
+HEALTHCHECK --interval=35s --timeout=4s CMD /opt/jans/scripts/jans-auth check | grep "Jetty running pid" || exit 1
 
 # Ports required by jetty
 EXPOSE 443 8080 1636
@@ -42,7 +42,7 @@ EXPOSE 443 8080 1636
 # jans-linux-setup
 # =====================
 
-ENV JANS_SOURCE_VERSION=871c36da8a2550ee2febd7c0d72c521898b226c3
+ENV JANS_SOURCE_VERSION=856f9fed1d58a6d41503a0459bbe04f52b0bb8e7
 
 # cleanup
 RUN rm -rf /tmp/jans

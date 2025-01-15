@@ -1,28 +1,27 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 mod config;
 #[cfg(test)]
 mod test;
 
+use std::collections::HashMap;
+use std::sync::Arc;
+
+use base64::prelude::*;
+pub use config::*;
+use jsonwebtoken::{self as jwt, Algorithm, Validation, decode_header};
+use serde_json::Value;
+use url::Url;
+
 use super::issuers_store::TrustedIssuersStore;
 use super::key_service::KeyService;
 use crate::common::policy_store::TrustedIssuer;
-use base64::prelude::*;
-pub use config::*;
-use jsonwebtoken::{self as jwt};
-use jsonwebtoken::{decode_header, Algorithm, Validation};
-use serde_json::Value;
-use std::collections::HashMap;
-use std::sync::Arc;
-use url::Url;
 
 type IssuerId = String;
-pub type TokenClaims = Value;
+type TokenClaims = Value;
 
 /// Validates Json Web Tokens.
 pub struct JwtValidator {
@@ -156,23 +155,27 @@ impl JwtValidator {
         };
 
         let decode_result = jsonwebtoken::decode::<TokenClaims>(jwt, decoding_key.key, validation)
-            .map_err(|e| match e.kind() {
-                jsonwebtoken::errors::ErrorKind::InvalidToken => JwtValidatorError::InvalidShape,
-                jsonwebtoken::errors::ErrorKind::InvalidSignature => {
-                    JwtValidatorError::InvalidSignature(e)
-                },
-                jsonwebtoken::errors::ErrorKind::ExpiredSignature => {
-                    JwtValidatorError::ExpiredToken
-                },
-                jsonwebtoken::errors::ErrorKind::ImmatureSignature => {
-                    JwtValidatorError::ImmatureToken
-                },
-                jsonwebtoken::errors::ErrorKind::Base64(decode_error) => {
-                    JwtValidatorError::DecodeJwt(decode_error.to_string())
-                },
-                // the jsonwebtoken crate placed all it's errors onto a single enum, even the errors
-                // that wouldn't be returned when we call `decode`.
-                _ => JwtValidatorError::Unexpected(e),
+            .map_err(|e| {
+                match e.kind() {
+                    jsonwebtoken::errors::ErrorKind::InvalidToken => {
+                        JwtValidatorError::InvalidShape
+                    },
+                    jsonwebtoken::errors::ErrorKind::InvalidSignature => {
+                        JwtValidatorError::InvalidSignature(e)
+                    },
+                    jsonwebtoken::errors::ErrorKind::ExpiredSignature => {
+                        JwtValidatorError::ExpiredToken
+                    },
+                    jsonwebtoken::errors::ErrorKind::ImmatureSignature => {
+                        JwtValidatorError::ImmatureToken
+                    },
+                    jsonwebtoken::errors::ErrorKind::Base64(decode_error) => {
+                        JwtValidatorError::DecodeJwt(decode_error.to_string())
+                    },
+                    // the jsonwebtoken crate placed all it's errors onto a single enum, even the errors
+                    // that wouldn't be returned when we call `decode`.
+                    _ => JwtValidatorError::Unexpected(e),
+                }
             })?;
 
         Ok(ProcessedJwt {

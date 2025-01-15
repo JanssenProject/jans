@@ -26,6 +26,7 @@ import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.CacheControl;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +65,21 @@ public class ServerUtil {
     };
 
     private ServerUtil() {
+    }
+
+    /**
+     * Sanitized username before output by logger
+     * @param username username
+     *
+     * @return sanitized username
+     */
+    public static String sanitizeUsernameForLog(String username) {
+        if (username == null) {
+            return "unknown_user";
+        }
+        final int maximumUsernameLength = 50;
+        username = username.length() > maximumUsernameLength ? username.substring(0, maximumUsernameLength) : username;
+        return StringEscapeUtils.escapeJava(username).replaceAll("[\\r\\n]", "_");
     }
 
     public static Map<String, String[]> prepareForLogs(Map<String, String[]> parameters) {

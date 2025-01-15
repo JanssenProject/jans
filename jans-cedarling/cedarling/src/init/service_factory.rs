@@ -10,11 +10,11 @@
 use std::sync::Arc;
 
 use crate::bootstrap_config::BootstrapConfig;
-use crate::common::policy_store::PolicyStore;
+use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt::{JwtService, JwtServiceInitError};
 
 use super::service_config::ServiceConfig;
-use crate::authz::{Authz, AuthzConfig, AuthzInitError};
+use crate::authz::{Authz, AuthzConfig};
 use crate::common::app_types;
 use crate::log;
 
@@ -64,7 +64,7 @@ impl<'a> ServiceFactory<'a> {
     }
 
     // get policy store
-    pub fn policy_store(&self) -> PolicyStore {
+    pub fn policy_store(&self) -> PolicyStoreWithID {
         self.service_config.policy_store.clone()
     }
 
@@ -74,20 +74,20 @@ impl<'a> ServiceFactory<'a> {
     }
 
     // get jwt service
-    pub fn jwt_service(&mut self) -> Result<Arc<JwtService>, JwtServiceInitError> {
+    pub async fn jwt_service(&mut self) -> Result<Arc<JwtService>, ServiceInitError> {
         if let Some(jwt_service) = &self.container.jwt_service {
             Ok(jwt_service.clone())
         } else {
             let config = &self.bootstrap_config.jwt_config;
-            let trusted_issuers = self.policy_store().trusted_issuers;
-            let service = Arc::new(JwtService::new(config, trusted_issuers)?);
+            let trusted_issuers = self.policy_store().trusted_issuers.clone();
+            let service = Arc::new(JwtService::new(config, trusted_issuers).await?);
             self.container.jwt_service = Some(service.clone());
             Ok(service)
         }
     }
 
     // get authz service
-    pub fn authz_service(&mut self) -> Result<Arc<Authz>, AuthzInitError> {
+    pub async fn authz_service(&mut self) -> Result<Arc<Authz>, ServiceInitError> {
         if let Some(authz) = &self.container.authz_service {
             Ok(authz.clone())
         } else {
@@ -96,12 +96,19 @@ impl<'a> ServiceFactory<'a> {
                 pdp_id: self.pdp_id(),
                 application_name: self.application_name(),
                 policy_store: self.policy_store(),
-                jwt_service: self.jwt_service()?,
-                authorization: self.bootstrap_config.authorization_config,
+                jwt_service: self.jwt_service().await?,
+                authorization: self.bootstrap_config.authorization_config.clone(),
             };
             let service = Arc::new(Authz::new(config));
             self.container.authz_service = Some(service.clone());
             Ok(service)
         }
     }
+}
+
+/// Error type for failing to initialize a service
+#[derive(Debug, thiserror::Error)]
+pub enum ServiceInitError {
+    #[error(transparent)]
+    JwtService(#[from] JwtServiceInitError),
 }
