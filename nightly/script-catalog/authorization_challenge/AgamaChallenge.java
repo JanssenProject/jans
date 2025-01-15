@@ -20,6 +20,7 @@ import io.jans.agama.NativeJansFlowBridge;
 import io.jans.agama.engine.client.MiniBrowser;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Base64Util;
+import io.jans.as.server.authorize.ws.rs.AuthzRequest;
 import io.jans.util.*;
 
 import jakarta.servlet.ServletRequest;
@@ -141,12 +142,14 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
         
         if (!CdiUtil.bean(FlowUtils.class).serviceEnabled())
             return makeUnexpectedError(context, null, "Agama engine is disabled");   
+
+        AuthzRequest authRequest = context.getAuthzRequest();
         
-        if (!context.getAuthzRequest().isUseAuthorizationChallengeSession())            
+        if (!authRequest.isUseAuthorizationChallengeSession())            
             return makeMissingParamError(context, "Please set 'use_auth_session=true' in your request");
         
         ServletRequest servletRequest = context.getHttpRequest();
-        AuthorizationChallengeSession deviceSessionObject = context.getAuthzRequest().getAuthorizationChallengeSessionObject();
+        AuthorizationChallengeSession deviceSessionObject = authRequest.getAuthorizationChallengeSessionObject();
 
         boolean noSO = deviceSessionObject == null;
         scriptLogger.debug("There IS{} device session object", noSO ? " NO" : "");
@@ -313,5 +316,23 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
     public Map<String, String> getAuthenticationMethodClaims(Object context) {
         return Map.of();
     }
-    
+
+    @Override
+    public void prepareAuthzRequest(Object scriptContext) {
+        
+        ExternalScriptContext context = (ExternalScriptContext) scriptContext;
+        AuthzRequest authRequest = context.getAuthzRequest();
+
+        AuthorizationChallengeSession sessionObject = authRequest.getAuthorizationChallengeSessionObject();
+        if (sessionObject != null) {
+            Map<String, String> sessionAttributes = sessionObject.getAttributes().getAttributes();
+
+            // set scope from session into request object
+            String scopeFromSession = sessionAttributes.get("scope");
+            if (StringUtils.isNotBlank(scopeFromSession) && StringUtils.isBlank(authRequest.getScope())) {
+                authRequest.setScope(scopeFromSession);
+            }
+        }
+    }
+
 }
