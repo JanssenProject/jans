@@ -109,6 +109,7 @@ nav:
     - Restarting Services: janssen-server/vm-ops/restarting-services.md
     - Managing Key Rotation: janssen-server/vm-ops/managing-key-rotation.md
     - Certificates: janssen-server/vm-ops/certificates.md
+    - Jans Command: janssen-server/vm-ops/jans-command.md
   - Terraform and IaC:
     - janssen-server/terraform/README.md
   - Configuration Guide:
@@ -360,7 +361,6 @@ nav:
         - Monolith: janssen-server/reference/kubernetes/docker-jans-monolith.md
         - Persistence: janssen-server/reference/kubernetes/docker-jans-persistence-loader.md
         - SCIM: janssen-server/reference/kubernetes/docker-jans-scim.md
-    - jans command: janssen-server/reference/jans-command.md
     - Learning Reference: janssen-server/reference/learning-reference.md
   - FIDO Admin Guide:
     - janssen-server/fido/README.md

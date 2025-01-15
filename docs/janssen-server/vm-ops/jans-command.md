@@ -1,7 +1,9 @@
 ---
 tags:
-- command
-- jans
+- administration
+- vm
+- operations
+- jans wrapper command
 ---
 
 
