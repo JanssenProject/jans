@@ -21,22 +21,26 @@ mod jwt;
 mod lock;
 mod log;
 
+#[cfg(not(target_arch = "wasm32"))]
+#[cfg(feature = "blocking")]
+pub mod blocking;
+
 #[doc(hidden)]
 #[cfg(test)]
 mod tests;
 
 use std::sync::Arc;
 
-pub use authz::request::{Request, ResourceData, Tokens};
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
 use authz::Authz;
+pub use authz::request::{Request, ResourceData, Tokens};
 pub use authz::{AuthorizeError, AuthorizeResult};
 pub use bootstrap_config::*;
 use common::app_types;
+use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
-use init::ServiceFactory;
 use log::interface::LogWriter;
 use log::{LogEntry, LogType};
 pub use log::{LogLevel, LogStorage};
@@ -62,6 +66,13 @@ pub enum InitCedarlingError {
     /// Error while initializing a Service
     #[error(transparent)]
     ServiceInit(#[from] ServiceInitError),
+    /// Error while parse [`BootstrapConfigRaw`]
+    #[error(transparent)]
+    BootstrapConfigLoading(#[from] BootstrapConfigLoadingError),
+    #[cfg(feature = "blocking")]
+    /// Error while init tokio runtime
+    #[error(transparent)]
+    RuntimeInit(std::io::Error),
 }
 
 /// The instance of the Cedarling application.
@@ -74,11 +85,12 @@ pub struct Cedarling {
 
 impl Cedarling {
     /// Create a new instance of the Cedarling application.
-    pub fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
+    pub async fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
         let log = log::init_logger(&config.log_config);
         let pdp_id = app_types::PdpID::new();
 
         let service_config = ServiceConfig::new(config)
+            .await
             .inspect(|_| {
                 log.log(
                     LogEntry::new_with_data(pdp_id, None, LogType::System)
@@ -99,36 +111,36 @@ impl Cedarling {
 
         Ok(Cedarling {
             log,
-            authz: service_factory.authz_service()?,
+            authz: service_factory.authz_service().await?,
         })
     }
 
     /// Authorize request
     /// makes authorization decision based on the [`Request`]
-    pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        self.authz.authorize(request)
+    pub async fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
+        self.authz.authorize(request).await
     }
 
     /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.
     #[doc(hidden)]
     #[cfg(test)]
-    pub fn authorize_entities_data(
+    pub async fn authorize_entities_data(
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
-        let tokens = self.authz.decode_tokens(request)?;
-        self.authz.build_entities(request, &tokens)
+        let tokens = self.authz.decode_tokens(request).await?;
+        self.authz.build_entities(request, &tokens).await
     }
 }
 
 // implements LogStorage for Cedarling
 // we can use this methods outside crate only when import trait
 impl LogStorage for Cedarling {
-    fn pop_logs(&self) -> Vec<LogEntry> {
+    fn pop_logs(&self) -> Vec<serde_json::Value> {
         self.log.pop_logs()
     }
 
-    fn get_log_by_id(&self, id: &str) -> Option<LogEntry> {
+    fn get_log_by_id(&self, id: &str) -> Option<serde_json::Value> {
         self.log.get_log_by_id(id)
     }
 

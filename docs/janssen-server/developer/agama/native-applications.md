@@ -8,15 +8,15 @@ tags:
 
 # Agama flows in native applications
 
-Agama is a framework primarily focused on web flows, however, with the [Authorization Challenge](../../../script-catalog/authorization_challenge/authorization-challenge.md) endpoint of Jans Server, developers can  now run their flows outside the browser. This makes possible to offer secure, multi-step authentication flows from desktop and mobile applications without resorting to mechanisms like Web Views that degrade the user experience substantially.
+Agama is a framework primarily focused on web flows, however, with the [Authorization Challenge](../../../script-catalog/authorization_challenge/authorization-challenge.md) endpoint of Jans Server, developers can  now run their flows outside the browser. This makes possible to offer secure, multi-step authentication flows from desktop and mobile applications without resorting to mechanisms like Web Views that  substantially degrade the user experience.
 
 Additionally, the same already-familiar tools for authoring and deploying Agama projects can be used for the job. Moreover, the flows built for the web can be run in the native world without modification, requiring only to code the respective native UI and the logic that interacts with the Authorization Challenge endpoint, called "the endpoint" hereafter.
 
-In this document, we present an overview on how the endpoint works to make your Agama flows run without a web browser. Preliminar acquaintance with the following topics is recommended:
+In this document, we present an overview of how the endpoint works to make your Agama flows run without a web browser. Preliminar acquaintance with the following topics is recommended:
 
 - Agama [DSL](../../../agama/introduction.md#dsl) and `.gama` [format](../../../agama/gama-format.md)
-- Agama projects [deployment](../../../config-guide/auth-server-config/agama-project-configuration.md) in the Janssen Server 
-- [Execution rules](../../../agama/execution-rules.md) in the Jans Agama [engine](../../../agama/jans-agama-engine.md)
+- Agama projects [deployment](../../config-guide/auth-server-config/agama-project-configuration.md) in the Janssen Server 
+- [Execution rules](../../../agama/execution-rules.md) in the Jans Agama [engine](./jans-agama-engine.md)
 - A basic understanding of [OAuth 2.0 for First-Party Applications](https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-apps-02.html)
 
 ## How do flows actually run?
@@ -35,7 +35,7 @@ In a native setting no HTML markup is suppossed to be generated and replied - it
 
 Likewise, the "data submission" for the _fetch_ phase of RRF is performed by the app too. In this case, the relevant data grabbed from the user interaction is sent to the server side (via challenge endpoint) and becomes the result of the RRF (the value for the variable on the left-hand side of the instruction). Note both the input ("injected" data) and the output (result) is specified in JSON format.
 
-Once the _fetch_ occurs, the flow proceeds its execution as normal until another RRF instruction is hit, where the procedure described above takes place again.
+Once the _fetch_ occurs, the flow proceeds its execution until another RRF instruction is hit, where the procedure described above takes place again.
 
 Note this approach has two big benefits:
 
@@ -64,11 +64,55 @@ This hypothetical flow is simple but will give you a good idea on how to interac
 
 ### The flow code
 
-The following code depicts the implementation.
+The below depicts the implementation:
 
-![enabled-2fa-methods](../../assets/agama/challenge-flow.png)
+![co.acme.flows.emailOtp](../../../assets/agama/challenge-flow.png)
 
-Flow `co.acme.flows.emailOtp` is self-explanatory and does not require further insight. Note the templates referenced (in RRF directives) don't necessarily have to exist, however, the template names will be included in the output of the endpoint as the flow executes. This serves as a hint or reference for the app to know the current point of execution and determine what should be shown in the UI. It will be more clearly seen in the next section.
+<!--
+Flow co.acme.flows.emailOtp
+    Basepath "..."
+    
+obj = RRF "username-prompt.ftl"
+username = obj.username
+
+// Assumptions:
+// - username property holds the user name (in obj map)
+// - retrieveEmails method returns a list of e-mail addresses associated to the user
+// - the username entered always references an existing user 
+
+emails = Call co.acme.services.UserService#retrieveEmails username
+size = emails.length
+
+When size is 0
+    obj = { success: false, error: "No e-mails associated to this account" }
+    Finish obj
+    
+When size is 1
+    email = emails[0]
+Otherwise    
+    inj = { addresses: emails }
+    obj = RRF "email-prompt.ftl" inj
+    
+    // Assumption: obj.email contains the address the user chose
+    email = obj.email
+    
+passcode = Call co.acme.services.EmailService#sendRandomOTP email
+// Assumption: 
+// - method sendRandomOTP sends a message to the address passed and returns the OTP included in the message
+
+obj = RRF "passcode-prompt.ftl"
+// Assumption: obj.otp contains the code the user entered
+
+When obj.otp is passcode
+    // The next line is shorthand for { success: true, data: { userId: data.username } }
+    Finish username
+    
+obj = { success: false, error: "Wrong code entered. Try again another day" }
+Finish obj
+
+-->
+
+Flow `co.acme.flows.emailOtp` is self-explanatory and does not require further insight. Note the templates referenced in RRF directives don't necessarily have to exist, however, the template names will be included in the output of the endpoint as the flow executes. This serves as a hint or reference for the app to know the current point of execution and determine what should be shown in the UI. It will be more clearly seen in the next section.
 
 ## Running the flow
 
@@ -124,7 +168,7 @@ Content-Type: application/json
 
 While this may look like something wrong happened, it is not really the case. This is derived from the spec the endpoint adheres to, where the authorization server must report every intermediate response as an error with a 401 status code.
 
-The value of the `error` property references a section that contains the template path. Here it corresponds to the first RRF instruction reached in the execution (line 4 in the flow's code). Particularly this RRF does not have a second parameter, so there is only one property inside the `flow_paused` JSON object.
+The value of the `error` property references a section that contains the template path. Here it corresponds to the first RRF instruction reached in the execution (line 4 in the flow's code). Particularly this RRF was not invoked passing two parameters, so there is only one property inside the `flow_paused` JSON object.
 
 Note the presence of `auth_session`. This value allows the authorization server to associate subsequent requests issued by the app with this specific flow execution.
 
@@ -137,10 +181,10 @@ From here onwards, requests must contain the following parameters:
 |Name|Value|
 |-|-|
 |`use_auth_session`|true|
-|`auth_session`|The value obtained in the initial request|
+|`auth_session`|The value obtained in the previous request|
 |`data`|A JSON object value which will become the result of the RRF instruction the flow is paused at|
 
-!!! Note:
+!!! Note
     Whenever a request is missing the `auth_session` param, it is assumed the [inital request](#initial-request) is being attempted.
 
 Let's assume the user entered `Joan` as username in the app. A request like the below can then be issued so the variable `obj` at line 4 is assigned a value:
@@ -221,7 +265,7 @@ Content-Type: application/json
 
 This means we have hit line 37. 
 
-When a `Finish` instruction is reached it is fully executed and the error reported changes to `flow_finished`. What is left now is binding the user identified by `userId` (Joan) to the authorization request we have been handling (`BmAiCeArLdAa0`). This is how the user actually gets authenticated.
+When a `Finish` instruction is reached it is fully executed and the error reported in the response changes to `flow_finished`. What is left now is binding the user identified by `userId` (Joan) to the authorization request we have been handling (`BmAiCeArLdAa0`). This is how the user actually gets authenticated.
 
 ### Final request
 
@@ -251,7 +295,7 @@ At this point, the app can update the UI giving the user access to the actual ap
 
 So far we have been following the "happy" path in the example flow where all assumptions are met. This is unrealistic so here we offer an overview of how the endpoint behaves when abnormal conditions come up.
 
-!!! Note:
+!!! Note
     In this section, we stick to the terminology found [here](../../../agama/execution-rules.md#flows-lifecycle).
 
 ### Missing parameters
@@ -301,7 +345,7 @@ Content-Type: application/json
 }
 ```
 
-Note `auth_session` is not replied. As such, no more requests to the endpoint should be made passing an `auth_session` value obtained earlier.
+Note `auth_session` is not replied. As such, no more requests to the endpoint should be made passing the `auth_session` value obtained earlier.
 
 ### Engine errors
 
@@ -338,67 +382,67 @@ When a flow crashes, the error is reported in similar way the timeout is reporte
 
 1. An attempt to access a property or index of a `null` variable in Agama code
 
-```
-HTTP/1.1 500 Server Error
-Content-Type: application/json
-...
+    ```
+    HTTP/1.1 500 Server Error
+    Content-Type: application/json
+    ...
+    
+    {
+      "error": "engine_error",
+      "engine_error": {
+        "description": "Unexpected response to https://<jans-hostname>/jans-auth/fl/...",
+        "body": {
+          "title": "An unexpected error ocurred",
+          "message": "TypeError: Cannot read property \"x\" from null"
+        },
+        "contentType": "application/json",
+        "status": 500
+      }
+    }
+    ```
 
-{
-  "error": "engine_error",
-  "engine_error": {
-    "description": "Unexpected response to https://<jans-hostname>/jans-auth/fl/...",
-    "body": {
-      "title": "An unexpected error ocurred",
-      "message": "TypeError: Cannot read property \"x\" from null"
-    },
-    "contentType": "application/json",
-    "status": 500
-  }
-}
-```
+1. A variable does not meet the expected shape for a given Agama directive
 
-2. A variable does not meet the expected shape for a given Agama directive
+    ```
+    HTTP/1.1 500 Server Error
+    Content-Type: application/json
+    ...
+    
+    {
+      "error": "engine_error",
+      "engine_error": {
+        "description": "Unexpected response to https://<jans-hostname>/jans-auth/fl/...",
+        "body": {
+          "title": "An unexpected error ocurred",
+          "message": "TypeError: Data passed to RRF was not a map or Java equivalent"
+        },
+        "contentType": "application/json",
+        "status": 500
+      }
+    }
+    ```
 
-```
-HTTP/1.1 500 Server Error
-Content-Type: application/json
-...
+1. Indexing a string in Java beyond length
 
-{
-  "error": "engine_error",
-  "engine_error": {
-    "description": "Unexpected response to https://<jans-hostname>/jans-auth/fl/...",
-    "body": {
-      "title": "An unexpected error ocurred",
-      "message": "TypeError: Data passed to RRF was not a map or Java equivalent"
-    },
-    "contentType": "application/json",
-    "status": 500
-  }
-}
-```
-
-3. Indexing a string in Java beyond length
-
-```
-HTTP/1.1 500 Server Error
-Content-Type: application/json
-...
-
-{
-
-  "error": "engine_error",
-  "engine_error": {
-    "description": "Unexpected response to https://<jans-hostname>/jans-auth/fl/...",
-    "body": {
-      "title": "An unexpected error ocurred",
-      "message": "String index out of range: 100"
-    },
-    "contentType": "application/json",
-    "status": 500
-  }
-}
-```
+    ```
+    HTTP/1.1 500 Server Error
+    Content-Type: application/json
+    ...
+    
+    {
+    
+      "error": "engine_error",
+      "engine_error": {
+        "description": "Unexpected response to https://<jans-hostname>/jans-auth/fl/...",
+        "body": {
+          "title": "An unexpected error ocurred",
+          "message": "String index out of range: 100"
+        },
+        "contentType": "application/json",
+        "status": 500
+      }
+    }
+    ```
 
 ### Other errors
 

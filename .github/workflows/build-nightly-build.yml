@@ -2,6 +2,11 @@ name: Activate Nightly Build
 
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'The branch to build night release from'
+        required: false
+        default: 'main'
   schedule:
     - cron: "0 23 * * *"
 permissions:
@@ -37,4 +42,4 @@ jobs:
         gh release delete ${NIGHTLY_VERSION} --cleanup-tag --yes || echo "v${NIGHTLY_VERSION}" does not exist
         gh release delete ${NIGHTLY_VERSION} --cleanup-tag --yes || echo "v${NIGHTLY_VERSION}" does not exist
         git push --delete origin ${NIGHTLY_VERSION} || echo "v${NIGHTLY_VERSION}" does not exist
-        gh release create ${NIGHTLY_VERSION} --generate-notes --prerelease --title "${NIGHTLY_VERSION}"
+        gh release create ${NIGHTLY_VERSION} --generate-notes --prerelease --title "${NIGHTLY_VERSION}" --target ${{ github.event.inputs.branch }}
