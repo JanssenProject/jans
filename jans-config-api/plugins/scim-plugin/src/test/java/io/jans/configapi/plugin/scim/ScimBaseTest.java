@@ -23,11 +23,13 @@ public class ScimBaseTest extends BaseTest {
     @BeforeMethod
     public void before() {
         boolean isAvailable = isAvailable(propertiesMap.get("scimConfigUrl"), null, null);
-        log.info("\n\n\n *** SCIM Plugin isAvailable{}", isAvailable);
+        log.info("\n\n\n *** SCIM Plugin isAvailable{} {}", isAvailable, "\n\n\n");
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well
         if (!isAvailable) {
             throw new SkipException("SCIM Plugin not deployed");
+        }else {
+            log.info("\n\n\n *** SCIM Plugin is Deployed{} {}", "\n\n");
         }
     }
 

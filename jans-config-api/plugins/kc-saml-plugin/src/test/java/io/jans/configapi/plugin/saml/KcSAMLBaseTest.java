@@ -23,11 +23,13 @@ public class KcSAMLBaseTest extends BaseTest {
     @BeforeMethod
     public void before() {
         boolean isAvailable = isAvailable(propertiesMap.get("samlConfigUrl"), null, null);
-        log.info("\n\n\n *** KC-SAML Plugin isAvailable{}", isAvailable);
+        log.info("\n\n\n *** KC-SAML Plugin isAvailable{} {}", isAvailable, "\n\n\n");
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well
         if (!isAvailable) {
             throw new SkipException("KC-SAML Plugin not deployed");
+        }else {
+            log.info("\n\n\n *** KC-SAML Plugin is Deployed{} {}", "\n\n");
         }
     }
 

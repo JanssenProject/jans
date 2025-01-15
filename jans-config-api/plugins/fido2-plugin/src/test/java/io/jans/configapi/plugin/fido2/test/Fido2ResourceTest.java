@@ -21,7 +21,7 @@ public class Fido2ResourceTest extends Fido2BaseTest {
     @Parameters({ "test.issuer", "fido2Url" })
     @Test
     public void getFido2Configuration(final String issuer, final String fido2Url) {
-        log.info("getFido2Configuration() - accessToken:{}, issuer:{}, fido2Url:{}", accessToken, issuer, fido2Url);
+        log.error("\n\n getFido2Configuration() - accessToken:{}, issuer:{}, fido2Url:{}", accessToken, issuer, fido2Url);
 
         Builder request = getResteasyService().getClientBuilder(issuer + fido2Url);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);

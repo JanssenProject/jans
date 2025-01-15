@@ -23,11 +23,13 @@ public class KcLinkBaseTest extends BaseTest {
     @BeforeMethod
     public void before() {
         boolean isAvailable = isAvailable(propertiesMap.get("kcLinkConfigUrl"), null, null);
-        log.info("\n\n\n *** KC-LINK - isAvailable:{}", isAvailable);
+        log.error("\n\n\n *** KC-LINK - isAvailable:{} {}", isAvailable, "\n\n\n");
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well
         if (!isAvailable) {
             throw new SkipException("KC-LINK Plugin not deployed");
+        }else {
+            log.info("\n\n\n *** KC-LINK Plugin is Deployed{} {}", "\n\n");
         }
     }
 

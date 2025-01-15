@@ -23,11 +23,13 @@ public class UserBaseTest extends BaseTest {
     @BeforeMethod
     public void before() {
         boolean isAvailable = isAvailable(propertiesMap.get("userUrl"), null, null);
-        log.error("\n\n\n ******************** USER-MGT Plugin isAvailable{}", isAvailable);
+        log.error("\n\n\n ******************** USER-MGT Plugin isAvailable{} {}", isAvailable, "\n\n\n");
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well
         if (!isAvailable) {
             throw new SkipException("USER-MGT Plugin not deployed");
+        }else {
+            log.info("\n\n\n *** USER-MGT Plugin is Deployed{} {}", "\n\n");
         }
     }
 }
