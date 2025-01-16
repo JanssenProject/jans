@@ -8947,13 +8947,15 @@
 <li><strong>description</strong> : (<em>String</em>) A brief description of the trusted issuer, providing context for administrators.</li>
 <li><strong>openid_configuration_endpoint</strong> : (<em>String</em>) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at <code>/.well-known/openid-configuration</code>).</li>
 <li><strong>identity_source</strong> : (<em>Object</em>, <em>optional</em>) Metadata related to the tokens issued by this issuer.</li>
-<li><strong><code>access_tokens</code>, <code>id_tokens</code>, <code>userinfo_tokens</code>, and <code>tx_tokens</code></strong>: See: <a href="#token-metadata-schema">Token Metadata Schema</a>.</li>
+</ul>
+<p><strong>Notes</strong>:</p>
+<ul>
+<li>The <code>access_tokens</code>, <code>id_tokens</code>, <code>userinfo_tokens</code>, and <code>tx_tokens</code> fields will follow the <a href="#token-metadata-schema">Token Metadata Schema</a>.</li>
+<li>The <code>access_tokens</code> will contain a <code>trusted</code> and <code>principal_identifier</code> field in addition to the fields from the <code>Token Metadata Schema</code>.</li>
 </ul>
 <h3 id="token-metadata-schema">Token Metadata Schema<a class="headerlink" href="#token-metadata-schema" title="Permanent link">#</a></h3>
 <p>The Token Entity Metadata Schema defines how tokens are mapped, parsed, and transformed within Cedarling. It allows you to specify how to extract user IDs, roles, and other claims from a token using customizable parsers.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">bool</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;str&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;field name in token (e.g., &#39;email&#39;, &#39;sub&#39;, &#39;uid&#39;, etc.) or &#39;&#39; if not used&gt;&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;field for role assignment (e.g., &#39;role&#39;, &#39;memberOf&#39;, etc.) or &#39;&#39; if not used&gt;&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;claim_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -9141,7 +9143,7 @@ action &quot;Update&quot; appliesTo {
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-24T05:42:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-24</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-16T11:45:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-16</span>
       
         <br>
         Created:

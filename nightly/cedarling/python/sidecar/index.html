@@ -8588,7 +8588,7 @@
 <li>Ensure that you have installed <a href="https://docs.docker.com/engine/install/">docker</a> and <a href="https://docs.docker.com/compose/install/">docker compose</a>. </li>
 <li>Clone the <a href="https://github.com/JanssenProject/jans">Janssen</a> repository</li>
 <li>Navigate to <code>jans/jans-cedarling/flask-sidecar</code></li>
-<li>Edit the provided <code>secrets/bootstrap.json</code> file to your specifications. The configuration keys are described <a href="https://github.com/JanssenProject/jans/blob/ffe9f493e4a5c6b05f2adeeb8a6eba7eb83b103e/jans-cedarling/bindings/cedarling_python/cedarling_python.pyi#L9">here</a>. </li>
+<li>Edit the provided <code>secrets/bootstrap.json</code> file to your specifications. The configuration keys are described <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/cedarling_python.pyi#L10">here</a>. </li>
 <li>Run <code>docker compose up</code></li>
 <li>For cloud deployments, please use the provided Dockerfile and pass your bootstrap configuration via the environment variable <code>CEDARLING_BOOTSTRAP_CONFIG_FILE</code>.</li>
 <li>The sidecar runs on port 5000. OpenAPI documentation is available at <code>http://0.0.0.0:5000/swagger-ui</code></li>
@@ -8598,8 +8598,13 @@
 <p>Example request to the evaluation endpoint:</p>
 <div class="highlight"><pre><span></span><code>{
     &quot;subject&quot;: {
-        &quot;type&quot;: &quot;string&quot;,
-        &quot;id&quot;: &quot;string&quot;
+        &quot;type&quot;: &quot;JWT&quot;,
+        &quot;id&quot;: &quot;cedarling&quot;,
+        &quot;properties&quot;: {
+            &quot;access_token&quot;: &quot;&quot;,
+            &quot;id_token&quot;: &quot;&quot;,
+            &quot;userinfo_token&quot;: &quot;&quot;
+        }
     },
     &quot;resource&quot;: {
         &quot;type&quot;: &quot;Jans::Application&quot;,
@@ -8618,9 +8623,6 @@
         &quot;name&quot;: &quot;Jans::Action::\&quot;Read\&quot;&quot;
     },
     &quot;context&quot;: {
-        &quot;access_token&quot;: &quot;...&quot;,
-        &quot;id_token&quot;: &quot;...&quot;,
-        &quot;userinfo_token&quot;: &quot;...&quot;,
         &quot;device_health&quot;: [
             &quot;Healthy&quot;
         ],
@@ -8667,7 +8669,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-06T05:20:10+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-06</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-16T11:45:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-16</span>
       
         <br>
         Created:
