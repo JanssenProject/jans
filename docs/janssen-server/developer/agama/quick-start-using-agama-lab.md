@@ -266,9 +266,7 @@ from this project listing page.
     
     `Value/literal`: `creds.username`
 
-    
-
-    ![](../../../assets/agamalab-flow-passwd-edit-assignment-uid.png)
+    ![](../../../assets/agama-lab-flow-passwd-edit-assignment-uid.png)
 
 9. Create a conditional When block
 
