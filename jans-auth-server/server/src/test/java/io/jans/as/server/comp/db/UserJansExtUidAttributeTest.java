@@ -88,8 +88,9 @@ public class UserJansExtUidAttributeTest {
     @Produces
     @ApplicationScoped
     public StringEncrypter getStringEncrypter() throws EncryptionException {
-    	String saltFilePath = Paths.get(Paths.get("").toAbsolutePath().toString(), "target/conf/salt").toAbsolutePath().toString();
-    	FileConfiguration cryptoConfiguration = new FileConfiguration(saltFilePath);
+        String saltFilePath = Paths.get(Paths.get("").toAbsolutePath().toString(), "target/conf/salt").toAbsolutePath().toString();
+        FileConfiguration cryptoConfiguration = new FileConfiguration(saltFilePath);
+
         String encodeSalt = cryptoConfiguration.getString("encodeSalt");
 
         return StringEncrypter.instance(encodeSalt);
