@@ -29,18 +29,10 @@ impl ClaimMappings {
             .iter()
             .find_map(|(claim_name, mapping)| match mapping {
                 ClaimMapping::Regex(regex_mapping) => {
-                    if regex_mapping.cedar_policy_type == type_name {
-                        Some((claim_name, mapping))
-                    } else {
-                        None
-                    }
+                    (regex_mapping.cedar_policy_type == type_name).then_some((claim_name, mapping))
                 },
                 ClaimMapping::Json { r#type } => {
-                    if r#type == type_name {
-                        Some((claim_name, mapping))
-                    } else {
-                        None
-                    }
+                    (r#type == type_name).then_some((claim_name, mapping))
                 },
             })
     }
