@@ -237,7 +237,8 @@ RUN chmod 664 ${JETTY_BASE}/jans-scim/resources/log4j2.xml \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
     && chown 1000:0 ${JETTY_BASE}/jans-scim/webapps/jans-scim.xml \
-    && chown -R 1000:0 ${JETTY_HOME}/temp
+    && chown -R 1000:0 ${JETTY_HOME}/temp \
+    && chown -R 1000:0 /app/templates
 
 USER 1000
 

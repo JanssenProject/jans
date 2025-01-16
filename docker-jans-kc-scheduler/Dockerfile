@@ -160,7 +160,8 @@ RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jans
 RUN chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
     && chmod 664 /opt/java/lib/security/cacerts \
-    && chown -R 1000:0 /opt/kc-scheduler
+    && chown -R 1000:0 /opt/kc-scheduler \
+    && chown -R 1000:0 /app/templates
 
 USER 1000
 

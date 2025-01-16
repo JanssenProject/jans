@@ -203,7 +203,8 @@ RUN chmod -R g=u /etc/certs \
     && chown -R 1000:0 /opt/idp \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/keycloak/logs \
-    && chown -R 1000:0 /opt/keycloak/conf
+    && chown -R 1000:0 /opt/keycloak/conf \
+    && chown -R 1000:0 /app/templates
 
 USER 1000
 
