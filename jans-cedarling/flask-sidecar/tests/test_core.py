@@ -12,9 +12,15 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+test_core
+~~~~~~~~~
+This module consists of testcases for :module:`core` module.
 """
 
-from main.v1.resource import blp as evaluation_routes
 
-def register_routes(app):
-    app.register_blueprint(evaluation_routes, url_prefix="")
+def test_core_app():
+    """Test core app is a Flask app."""
+    from main.core import app
+
+    assert hasattr(app, "app_context")
