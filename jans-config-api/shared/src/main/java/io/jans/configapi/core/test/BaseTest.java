@@ -154,13 +154,12 @@ public class BaseTest {
         return isDeployed;
     }
 
-    protected boolean isEndpointAvailable(String url, final Map<String, String> headers,
-            final Map<String, String> parameters) {
-        log.info("*** Check if endpoint available - url:{}, headers:{}, parameters:{}", url, headers, parameters);
+    protected boolean isEndpointAvailable(String url, String accessToken) {
+        log.info("*** Check if endpoint available - url:{}, accessToken:{}", url, accessToken);
         boolean isEndpointAvailable = false;
         try {
             url = getIssuer() + url;
-            Response response = getResteasyService().executeGet(url, headers, parameters);
+            Response response = getResteasyService().executeGet(url, accessToken);
             log.error("*** \n\n\n Check endpoint url:{}, response:{} {}", url, response, "\n\n\n");
             if (response != null) {
                 log.error("*** \n\n\n Response for endpoint url:{}, response.getStatus():{} {}", url,

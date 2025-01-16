@@ -13,13 +13,14 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import org.apache.http.entity.ContentType;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.Response;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.entity.ContentType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ResteasyService implements Serializable {
 
@@ -53,6 +54,20 @@ public class ResteasyService implements Serializable {
             for (Map.Entry<String, String> header : headers.entrySet()) {
                 request.header(header.getKey(), header.getValue());
             }
+        }
+
+        Response response = request.get();
+        logger.error(" response:{}", response);
+
+        return response;
+    }
+
+    public Response executeGet(final String url, final String accessToken) {
+        logger.error("\n\n\n *** Execut GET - url:{}, accessToken:{}", url, accessToken);
+
+        Builder request = getClientBuilder(url);
+        if (StringUtils.isNotBlank(accessToken)) {
+            request.header(AUTHORIZATION, "Bearer " + accessToken);
         }
 
         Response response = request.get();
