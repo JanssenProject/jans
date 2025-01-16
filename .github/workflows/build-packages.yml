@@ -418,7 +418,8 @@ jobs:
         if [ "${TAG}" == "nightly" ]; then
           VERSION=nightly
           TAG="0.0.0"
-        fi        
+        fi
+        rm -rf pkg/.gitignore || echo "Failed to remove gitignore"
         tar -czvf cedarling_wasm_"${TAG}"_pkg.tar.gz -C pkg .
         sha256sum cedarling_wasm_"${TAG}"_pkg.tar.gz > cedarling_wasm_"${TAG}"_pkg.tar.gz.sha256sum
         gpg --armor --detach-sign cedarling_wasm_"${TAG}"_pkg.tar.gz || echo "Failed to sign"
