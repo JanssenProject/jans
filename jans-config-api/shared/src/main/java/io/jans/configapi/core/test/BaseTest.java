@@ -77,6 +77,10 @@ public class BaseTest {
         return getTokenService().getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
     }
 
+    protected String getIssuer() {
+        return propertiesMap.get("test.issuer");
+    }
+
     protected HttpService getHttpService() {
         return this.httpService;
     }
@@ -154,7 +158,7 @@ public class BaseTest {
         log.error("*** Check if endpoint available - url:{}, headers:{}, parameters:{}", url, headers, parameters);
         boolean isEndpointAvailable = false;
         try {
-            Response response = getResteasyService().executeGet(url, headers, parameters);
+            Response response = getResteasyService().executeGet(getIssuer()+url, headers, parameters);
             log.error("*** \n\n\n Check endpoint url:{}, response:{} {}", url, response,"\n\n\n");
             if(response!=null && response.getStatus()== Status.NOT_FOUND.getStatusCode()) {                    
                 isEndpointAvailable = false;
