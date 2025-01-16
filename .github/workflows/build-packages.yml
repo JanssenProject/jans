@@ -307,6 +307,8 @@ jobs:
         overwrite: true
   build_demo_packages:
     if: github.repository == 'JanssenProject/jans'
+    # Needs cedarling wasm as jans-tarp uses the wasm package
+    needs: build_cedarling_wasm
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
@@ -326,6 +328,15 @@ jobs:
         for i in $(ls -d */); do zip -r demo-${i%/}-$VER-source.zip $i && sha256sum demo-${i%/}-$VER-source.zip > demo-${i%/}-$VER-source.zip.sha256sum; done
         sudo rm demo-jans-tarp-$VER-source.zip demo-jans-tarp-$VER-source.zip.sha256sum
         cd jans-tarp
+        # Get the latest cedarling wasm package
+        TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+        if [ "${TAG}" == "nightly" ]; then
+          TAG="0.0.0"
+        fi
+        wget https://github.com/${{ github.repository }}/releases/download/"${VER}"/cedarling_wasm_"${TAG}"_pkg.tar.gz -O cedarling_wasm.tar.gz
+        mkdir wasm
+        tar -xvf cedarling_wasm.tar.gz -C wasm
+        # END Get the latest cedarling wasm package
         npm install
         npm run build
         npm run pack
