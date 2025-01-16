@@ -69,7 +69,7 @@ public class BaseTest {
         String scopes = propertiesMap.get("test.scopes");
         GrantType grantType = GrantType.fromString(strGrantType);
         this.accessToken = getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
-        log.info("\n\n accessToken:{}", accessToken);
+        log.info("accessToken:{}", accessToken);
     }
 
     protected String getToken(final String tokenUrl, final String clientId, final String clientSecret,
@@ -119,7 +119,7 @@ public class BaseTest {
     }
 
     protected String decodeFileValue(String value) {
-        log.info("\n\n decodeFileValue");
+        log.info("decodeFileValue");
         String decoded = value;
         if (value.startsWith(FILE_PREFIX)) {
             value = value.substring(FILE_PREFIX.length()); // remove the prefix
@@ -135,12 +135,12 @@ public class BaseTest {
             }
         }
 
-        log.info("\n\n decodeFileValue - decoded:{}", decoded);
+        log.info("decodeFileValue - decoded:{}", decoded);
         return decoded;
     }
 
     protected boolean isServiceDeployed(String serviceName) {
-        log.info("\n\n\n *** Check if  service is deployed - serviceName:{} :{}", serviceName ," *** \n\n\n");
+        log.info("*** Check if  service is deployed - serviceName:{} :{}", serviceName, " *** \n\n\n");
         boolean isDeployed = false;
         try {
             Class.forName(serviceName);
@@ -154,25 +154,31 @@ public class BaseTest {
         return isDeployed;
     }
 
-    protected boolean isEndpointAvailable(final String url, final Map<String, String> headers, final Map<String, String> parameters)  {
-        log.error("*** Check if endpoint available - url:{}, headers:{}, parameters:{}", url, headers, parameters);
+    protected boolean isEndpointAvailable(String url, final Map<String, String> headers,
+            final Map<String, String> parameters) {
+        log.info("*** Check if endpoint available - url:{}, headers:{}, parameters:{}", url, headers, parameters);
         boolean isEndpointAvailable = false;
         try {
-            Response response = getResteasyService().executeGet(getIssuer()+url, headers, parameters);
-            log.error("*** \n\n\n Check endpoint url:{}, response:{} {}", url, response,"\n\n\n");
-            if(response!=null && response.getStatus()== Status.NOT_FOUND.getStatusCode()) {                    
-                isEndpointAvailable = false;
-            }else {
-                isEndpointAvailable = true;
+            url = getIssuer() + url;
+            Response response = getResteasyService().executeGet(url, headers, parameters);
+            log.error("*** \n\n\n Check endpoint url:{}, response:{} {}", url, response, "\n\n\n");
+            if (response != null) {
+                log.error("*** \n\n\n Response for endpoint url:{}, response.getStatus():{} {}", url,
+                        response.getStatus(), "\n\n\n");
+                if (response.getStatus() == Status.NOT_FOUND.getStatusCode()) {
+                    isEndpointAvailable = false;
+                } else {
+                    isEndpointAvailable = true;
+                }
             }
-            
+
         } catch (Exception ex) {
             log.info("Endpoint:{} is NOT available", url);
             ex.printStackTrace();
             isEndpointAvailable = false;
             return isEndpointAvailable;
         }
-        log.info("*** \n\n\n Endpoint:{} available:{} {}", url, isEndpointAvailable,"\n\n\n");
+        log.info("*** \n\n\n Endpoint:{} available:{} {}", url, isEndpointAvailable, "\n\n\n");
         return isEndpointAvailable;
     }
 
