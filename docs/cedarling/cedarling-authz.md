@@ -83,14 +83,14 @@ decision_result = await cedarling(input)
 
 ## Automatically Adding Entity References to the Context
 
-Cedarling simplifies context creation by automatically including certain entities. This means you don't need to manually pass their references when using them in your policies. The following entities are automatically added to the context, along with their naming conventions in `lower_snake_case` format:
+Cedarling simplifies context creation by automatically including certain entities. This means you don't need to manually pass their references when using them in your policies. The following entities are automatically added to the context.
 
-- **Workload Entity**: `workload`
-- **User Entity**: `user`
-- **Resource Entity**: `resource`
-- **Access Token Entity**: `access_token`
-- **ID Token Entity**: `id_token`
-- **Userinfo Token Entity**: `userinfo_token`
+- Workload Entity
+- User Entity
+- Resource Entity
+- Access Token Entity
+- ID Token Entity
+- Userinfo Token Entity
 
 ### Example Policy
 

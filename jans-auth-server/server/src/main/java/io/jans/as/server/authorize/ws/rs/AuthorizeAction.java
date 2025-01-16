@@ -86,6 +86,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 @Named
 public class AuthorizeAction {
 
+    public static final String UNKNOWN = "Unknown";
     @Inject
     private Logger log;
 
@@ -985,7 +986,7 @@ public class AuthorizeAction {
         log.trace("client {}", clientId);
 
         if (StringUtils.isBlank(clientId)) {
-            return "Unknown";
+            return UNKNOWN;
         }
 
         final Client client = clientService.getClient(clientId);
@@ -994,15 +995,19 @@ public class AuthorizeAction {
 
     public String getClientDisplayName(final Client client) {
         log.trace("client {}", client);
-        
+
         if (client == null) {
-        	getClientDisplayName();
+            return UNKNOWN;
         }
 
         return getCheckedClientDisplayName(client);
     }
 
 	private String getCheckedClientDisplayName(final Client client) {
+        if (client == null) {
+            return UNKNOWN;
+        }
+
         if (StringUtils.isNotBlank(client.getClientName())) {
             return client.getClientName();
         }
@@ -1011,7 +1016,7 @@ public class AuthorizeAction {
             return client.getClientId();
         }
 
-        return "Unknown";
+        return UNKNOWN;
 	}
 
     public String getAuthReqId() {
