@@ -32,54 +32,6 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    CreateIdTokenEntityError,
-    AuthorizeError,
-    "Error encountered while creating id token entities"
-);
-
-create_exception!(
-    authorize_errors,
-    CreateUserinfoTokenEntityError,
-    AuthorizeError,
-    "Error encountered while creating Userinfo_token entity"
-);
-create_exception!(
-    authorize_errors,
-    CreateAccessTokenEntityError,
-    AuthorizeError,
-    "Error encountered while creating access_token entity"
-);
-
-create_exception!(
-    authorize_errors,
-    CreateUserEntityError,
-    AuthorizeError,
-    "Error encountered while creating User entity"
-);
-
-create_exception!(
-    authorize_errors,
-    CreateWorkloadEntityError,
-    AuthorizeError,
-    "Error encountered while creating workload entity"
-);
-
-create_exception!(
-    authorize_errors,
-    ResourceEntityError,
-    AuthorizeError,
-    "Error encountered while creating resource entity"
-);
-
-create_exception!(
-    authorize_errors,
-    RoleEntityError,
-    AuthorizeError,
-    "Error encountered while creating role entity"
-);
-
-create_exception!(
-    authorize_errors,
     ActionError,
     AuthorizeError,
     "Error encountered while parsing Action to EntityUid"
@@ -118,6 +70,13 @@ create_exception!(
     EntitiesToJsonError,
     AuthorizeError,
     "Error encountered while parsing all entities to json for logging"
+);
+
+create_exception!(
+    authorize_errors,
+    BuildEntitiesError,
+    AuthorizeError,
+    "Error encountered while building entities into context"
 );
 
 create_exception!(
@@ -166,17 +125,11 @@ macro_rules! errors_functions {
 // For each possible case of `AuthorizeError`, we have created a corresponding Python exception that inherits from `cedarling::AuthorizeError`.
 errors_functions! {
     ProcessTokens => ProcessTokens,
-    CreateIdTokenEntity => CreateIdTokenEntityError,
-    CreateUserinfoTokenEntity => CreateUserinfoTokenEntityError,
-    CreateAccessTokenEntity => CreateAccessTokenEntityError,
-    CreateUserEntity => CreateUserEntityError,
-    CreateWorkloadEntity => CreateWorkloadEntityError,
-    ResourceEntity => ResourceEntityError,
-    RoleEntity => RoleEntityError,
     Action => ActionError,
     CreateContext => CreateContextError,
     WorkloadRequestValidation => WorkloadRequestValidationError,
     UserRequestValidation => UserRequestValidationError,
+    BuildEntity => BuildEntitiesError,
     BuildContext => AddEntitiesIntoContextError,
     Entities => EntitiesError,
     EntitiesToJson => EntitiesToJsonError
