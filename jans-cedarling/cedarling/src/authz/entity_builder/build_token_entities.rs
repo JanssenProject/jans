@@ -231,7 +231,8 @@ mod test {
     fn can_build_access_tkn_entity() {
         let schema = test_schema();
         let issuers = test_issusers();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let builder =
+            EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
         let access_token = Token::new_access(
             TokenClaims::new(HashMap::from([
                 ("jti".to_string(), json!("tkn-123")),
@@ -251,7 +252,8 @@ mod test {
     fn can_build_id_tkn_entity() {
         let schema = test_schema();
         let issuers = test_issusers();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let builder =
+            EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
         let id_token = Token::new_id(
             TokenClaims::new(HashMap::from([
                 ("jti".to_string(), json!("tkn-123")),
@@ -269,7 +271,8 @@ mod test {
     fn can_build_userinfo_tkn_entity() {
         let schema = test_schema();
         let issuers = test_issusers();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let builder =
+            EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
         let userinfo_token = Token::new_userinfo(
             TokenClaims::new(HashMap::from([
                 ("jti".to_string(), json!("tkn-123")),
@@ -289,7 +292,8 @@ mod test {
     fn errors_when_given_incorrect_tkn_kind() {
         let schema = test_schema();
         let issuers = test_issusers();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let builder =
+            EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
         let tkn_claims = TokenClaims::new(HashMap::from([
             ("jti".to_string(), json!("tkn-123")),
             (

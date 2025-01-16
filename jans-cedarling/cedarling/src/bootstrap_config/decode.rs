@@ -3,21 +3,19 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::HashSet;
-use std::fmt::Display;
-use std::fs;
-use std::path::Path;
-use std::str::FromStr;
-
-use jsonwebtoken::Algorithm;
-use serde::{Deserialize, Deserializer, Serialize};
-
 use super::authorization_config::AuthorizationConfig;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, IdTokenTrustMode, JwtConfig, LogConfig,
     LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, TokenValidationConfig,
 };
 use crate::log::LogLevel;
+use jsonwebtoken::Algorithm;
+use serde::{Deserialize, Deserializer, Serialize};
+use std::collections::{HashMap, HashSet};
+use std::fmt::Display;
+use std::fs;
+use std::path::Path;
+use std::str::FromStr;
 
 #[derive(Deserialize, PartialEq, Debug, Default)]
 /// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
@@ -211,6 +209,17 @@ pub struct BootstrapConfigRaw {
     ///         the aud matches the access token client_id.
     #[serde(rename = "CEDARLING_ID_TOKEN_TRUST_MODE", default)]
     pub id_token_trust_mode: IdTokenTrustMode,
+
+    /// Defines the mapping of token names to entity references.
+    ///
+    /// This mapping determines where a token reference should be included by associating:
+    /// - `key`: The name of the token (e.g., a unique identifier for the token).
+    /// - `value`: The name of the entity the token is associated with (e.g., a resource or object).
+    ///
+    /// This field uses the `CEDARLING_TOKEN_ENTITY_MAPPER` key when serialized
+    /// and defaults to an empty map if not specified.
+    #[serde(rename = "CEDARLING_TOKEN_ENTITY_MAPPER", default)]
+    pub token_entity_mapper: HashMap<String, String>,
 
     /// If Enabled, the Cedarling will connect to the Lock Master for policies,
     /// and subscribe for SSE events.
@@ -542,6 +551,7 @@ impl BootstrapConfig {
             mapping_id_token: raw.mapping_id_token.clone(),
             mapping_access_token: raw.mapping_access_token.clone(),
             mapping_userinfo_token: raw.mapping_userinfo_token.clone(),
+            token_enitity_mapper: raw.token_entity_mapper.clone(),
         };
 
         Ok(Self {

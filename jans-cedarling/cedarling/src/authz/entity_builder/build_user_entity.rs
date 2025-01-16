@@ -134,7 +134,8 @@ mod test {
 
     fn test_successfully_building_user_entity(tokens: DecodedTokens) {
         let schema = test_schema();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, true);
+        let builder =
+            EntityBuilder::new(schema, EntityNames::default(), false, true, HashMap::new());
         let entity = builder
             .build_user_entity(&tokens, HashSet::new())
             .expect("expected to build user entity");
@@ -219,7 +220,8 @@ mod test {
             userinfo: Some(userinfo_token),
         };
 
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, true);
+        let builder =
+            EntityBuilder::new(schema, EntityNames::default(), false, true, HashMap::new());
         let err = builder
             .build_user_entity(&tokens, HashSet::new())
             .expect_err("expected to error while building the user entity");
@@ -249,7 +251,8 @@ mod test {
             userinfo: None,
         };
 
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, true);
+        let builder =
+            EntityBuilder::new(schema, EntityNames::default(), false, true, HashMap::new());
         let err = builder
             .build_user_entity(&tokens, HashSet::new())
             .expect_err("expected to error while building the user entity");
@@ -274,7 +277,8 @@ mod test {
             userinfo: Some(userinfo_token),
         };
         let schema = test_schema();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, true);
+        let builder =
+            EntityBuilder::new(schema, EntityNames::default(), false, true, HashMap::new());
         let roles = HashSet::from([
             "Role::\"role1\"".parse().unwrap(),
             "Role::\"role2\"".parse().unwrap(),

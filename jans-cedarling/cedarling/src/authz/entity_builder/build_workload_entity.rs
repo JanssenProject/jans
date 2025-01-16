@@ -25,11 +25,9 @@ impl EntityBuilder {
                 tokens.access.as_ref(),
                 vec![],
             ),
-            (
-                DEFAULT_ID_TKN_WORKLOAD_CLAIM,
-                tokens.id.as_ref(),
-                vec![ClaimAliasMap::new("aud", "client_id")],
-            ),
+            (DEFAULT_ID_TKN_WORKLOAD_CLAIM, tokens.id.as_ref(), vec![
+                ClaimAliasMap::new("aud", "client_id"),
+            ]),
         ]
         .into_iter()
         {
@@ -105,7 +103,8 @@ mod test {
         }))
         .unwrap();
         let iss = TrustedIssuer::default();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
+        let builder =
+            EntityBuilder::new(schema, EntityNames::default(), true, false, HashMap::new());
         let access_token = Token::new_access(
             TokenClaims::new(HashMap::from([
                 ("client_id".to_string(), json!("workload-123")),
@@ -153,7 +152,8 @@ mod test {
         }))
         .unwrap();
         let iss = TrustedIssuer::default();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
+        let builder =
+            EntityBuilder::new(schema, EntityNames::default(), true, false, HashMap::new());
         let id_token = Token::new_id(
             TokenClaims::new(HashMap::from([
                 ("aud".to_string(), json!("workload-123")),
@@ -245,7 +245,8 @@ mod test {
             },
             ..Default::default()
         };
-        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
+        let builder =
+            EntityBuilder::new(schema, EntityNames::default(), true, false, HashMap::new());
         let access_token = Token::new_access(
             TokenClaims::new(HashMap::from([
                 ("client_id".to_string(), json!("workload-123")),
@@ -339,7 +340,8 @@ mod test {
         }))
         .unwrap();
         let iss = TrustedIssuer::default();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
+        let builder =
+            EntityBuilder::new(schema, EntityNames::default(), true, false, HashMap::new());
         let access_token = Token::new_access(
             TokenClaims::new(HashMap::from([
                 ("client_id".to_string(), json!("workload-123")),
@@ -403,7 +405,8 @@ mod test {
         }))
         .unwrap();
         let iss = TrustedIssuer::default();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
+        let builder =
+            EntityBuilder::new(schema, EntityNames::default(), true, false, HashMap::new());
         let access_token = Token::new_access(TokenClaims::new(HashMap::new()), Some(&iss));
         let id_token = Token::new_id(TokenClaims::new(HashMap::new()), Some(&iss));
         let tokens = DecodedTokens {
@@ -450,7 +453,8 @@ mod test {
             }}}
         }))
         .unwrap();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
+        let builder =
+            EntityBuilder::new(schema, EntityNames::default(), true, false, HashMap::new());
         let tokens = DecodedTokens {
             access: None,
             id: None,

@@ -12,6 +12,7 @@ mod build_user_entity;
 mod build_workload_entity;
 mod mapping;
 
+use super::AuthorizeEntitiesData;
 use crate::common::cedar_schema::CEDAR_NAMESPACE_SEPARATOR;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::policy_store::TokenKind;
@@ -30,8 +31,6 @@ use std::collections::{HashMap, HashSet};
 use std::convert::Infallible;
 use std::fmt;
 use std::str::FromStr;
-
-use super::AuthorizeEntitiesData;
 
 const DEFAULT_WORKLOAD_ENTITY_NAME: &str = "Workload";
 const DEFAULT_USER_ENTITY_NAME: &str = "User";
@@ -103,6 +102,7 @@ pub struct EntityBuilder {
     entity_names: EntityNames,
     build_workload: bool,
     build_user: bool,
+    token_entity_mapping: HashMap<String, String>,
 }
 
 impl EntityBuilder {
@@ -111,12 +111,14 @@ impl EntityBuilder {
         entity_names: EntityNames,
         build_workload: bool,
         build_user: bool,
+        token_entity_mapping: HashMap<String, String>,
     ) -> Self {
         Self {
             schema,
             entity_names,
             build_workload,
             build_user,
+            token_entity_mapping,
         }
     }
 
@@ -125,6 +127,42 @@ impl EntityBuilder {
         tokens: &DecodedTokens,
         resource: &ResourceData,
     ) -> Result<AuthorizeEntitiesData, BuildCedarlingEntityError> {
+        let access_token = tokens
+            .access
+            .as_ref()
+            .map(|token| {
+                self.build_access_tkn_entity(token)
+                    .map_err(BuildCedarlingEntityError::AccessToken)
+            })
+            .transpose()?;
+
+        let id_token = tokens
+            .id
+            .as_ref()
+            .map(|token| {
+                self.build_id_tkn_entity(token)
+                    .map_err(BuildCedarlingEntityError::IdToken)
+            })
+            .transpose()?;
+
+        let userinfo_token = tokens
+            .userinfo
+            .as_ref()
+            .map(|token| {
+                self.build_userinfo_tkn_entity(token)
+                    .map_err(BuildCedarlingEntityError::UserinfoToken)
+            })
+            .transpose()?;
+
+        let _token_entities = [
+            access_token.as_ref(),
+            id_token.as_ref(),
+            userinfo_token.as_ref(),
+        ]
+        .iter()
+        .filter_map(|tkn| tkn.map(|tkn| (tkn.uid().to_string(), tkn)))
+        .collect::<HashMap<String, &Entity>>();
+
         let workload = if self.build_workload {
             Some(self.build_workload_entity(tokens)?)
         } else {
@@ -140,33 +178,6 @@ impl EntityBuilder {
             (Some(self.build_user_entity(tokens, parents)?), roles)
         } else {
             (None, vec![])
-        };
-
-        let access_token = if let Some(token) = tokens.access.as_ref() {
-            Some(
-                self.build_access_tkn_entity(token)
-                    .map_err(BuildCedarlingEntityError::AccessToken)?,
-            )
-        } else {
-            None
-        };
-
-        let id_token = if let Some(token) = tokens.id.as_ref() {
-            Some(
-                self.build_id_tkn_entity(token)
-                    .map_err(BuildCedarlingEntityError::IdToken)?,
-            )
-        } else {
-            None
-        };
-
-        let userinfo_token = if let Some(token) = tokens.userinfo.as_ref() {
-            Some(
-                self.build_userinfo_tkn_entity(token)
-                    .map_err(BuildCedarlingEntityError::UserinfoToken)?,
-            )
-        } else {
-            None
         };
 
         let resource = self.build_resource_entity(resource)?;

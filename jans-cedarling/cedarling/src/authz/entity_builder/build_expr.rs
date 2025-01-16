@@ -3,6 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use super::CEDAR_NAMESPACE_SEPARATOR;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
 use cedar_policy::{
@@ -12,8 +13,6 @@ use cedar_policy::{
 use serde_json::Value;
 use std::collections::HashMap;
 use std::str::FromStr;
-
-use super::CEDAR_NAMESPACE_SEPARATOR;
 
 impl Attribute {
     pub fn kind_str(&self) -> &str {

@@ -62,7 +62,7 @@ impl EntityBuilder {
                                     claim.value(),
                                 ),
                             ),
-                        ))
+                        ));
                     },
                 };
 
@@ -136,7 +136,8 @@ mod test {
 
     fn test_build_entity_from_str_claim(tokens: DecodedTokens) {
         let schema = test_schema();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let builder =
+            EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
         let entity = builder
             .try_build_role_entities(&tokens)
             .expect("expected to build role entities");
@@ -161,7 +162,8 @@ mod test {
             userinfo: Some(userinfo_token),
         };
         let schema = test_schema();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let builder =
+            EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
         let entity = builder
             .try_build_role_entities(&tokens)
             .expect("expected to build role entities");
@@ -269,7 +271,8 @@ mod test {
             id: Some(id_token),
             userinfo: Some(userinfo_token),
         };
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let builder =
+            EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
         let entities = builder
             .try_build_role_entities(&tokens)
             .expect("expected to build role entities");
