@@ -30,7 +30,7 @@ class ConsentGathering(ConsentGatheringType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     # Main consent-gather method. Must return True (if gathering performed successfully) or False (if fail).
     # All user entered values can be access via Map<String, String> context.getPageAttributes()
