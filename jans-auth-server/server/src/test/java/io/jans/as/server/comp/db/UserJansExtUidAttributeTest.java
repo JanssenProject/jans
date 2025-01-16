@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -87,10 +88,9 @@ public class UserJansExtUidAttributeTest {
     @Produces
     @ApplicationScoped
     public StringEncrypter getStringEncrypter() throws EncryptionException {
-    	log.info("Current folder: {}", (new File(".").getAbsolutePath()));
-    	System.out.println("Current folder: {}" +(new File(".").getAbsolutePath()));
+        String saltFilePath = Paths.get(Paths.get("").toAbsolutePath().toString(), "target/conf/salt").toAbsolutePath().toString();
+        FileConfiguration cryptoConfiguration = new FileConfiguration(saltFilePath);
 
-    	FileConfiguration cryptoConfiguration = new FileConfiguration("./target/conf/salt");
         String encodeSalt = cryptoConfiguration.getString("encodeSalt");
 
         return StringEncrypter.instance(encodeSalt);
