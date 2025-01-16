@@ -90,7 +90,7 @@ public class UserJansExtUidAttributeTest {
     	log.info("Current folder: {}", (new File(".").getAbsolutePath()));
     	System.out.println("Current folder: {}" +(new File(".").getAbsolutePath()));
 
-    	FileConfiguration cryptoConfiguration = new FileConfiguration(".\\target\\conf\\salt");
+    	FileConfiguration cryptoConfiguration = new FileConfiguration("./target/conf/salt");
         String encodeSalt = cryptoConfiguration.getString("encodeSalt");
 
         return StringEncrypter.instance(encodeSalt);
