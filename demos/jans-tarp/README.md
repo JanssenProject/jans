@@ -5,7 +5,7 @@
 [Demo Video](https://www.loom.com/share/b112b9c7214a4920812a2ebe9c36dbf5?sid=7a15d2e5-881e-4002-9b8c-902dd1d80cec)
 
 - This extension is for convenient testing of authentication flows on browser.
-- [Cedarling](https://docs.jans.io/head/cedarling/cedarling-overview/) is an embeddable stateful Policy Decision Point, or "PDP". Cedarling is integrated with Jans Tarp to make authorization post-authentication.
+- [Cedarling](https://docs.jans.io/head/cedarling/cedarling-overview/) is an embeddable stateful Policy Decision Point, or "PDP". Cedarling is integrated with Jans Tarp to make authorization decision post-authentication.
 
 ## Supporting Browser
 
