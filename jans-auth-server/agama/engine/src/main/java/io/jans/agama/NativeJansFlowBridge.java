@@ -42,7 +42,7 @@ public class NativeJansFlowBridge {
                 "agama" + ExecutionServlet.URL_SUFFIX;       
     }
     
-    public Boolean prepareFlow(String sessionId, String qname, String jsonInput) throws Exception {
+    public Boolean prepareFlow(String sessionId, String qname, String jsonInput, boolean nativeClient) throws Exception {
         
         logger.info("Preparing flow '{}'", qname);
         Boolean alreadyRunning = null;
@@ -58,7 +58,7 @@ public class NativeJansFlowBridge {
             }
             if (st == null) {
 
-                int timeout = aps.getEffectiveFlowTimeout(qname);
+                int timeout = aps.getEffectiveFlowTimeout(qname, nativeClient);
                 if (timeout <= 0) throw new Exception("Flow timeout negative or zero. " +
                         "Check your AS configuration or flow definition");                
                 long expireAt = System.currentTimeMillis() + 1000L * timeout;                
@@ -68,6 +68,7 @@ public class NativeJansFlowBridge {
                 st.setQname(qname);
                 st.setJsonInput(jsonInput);
                 st.setFinishBefore(expireAt);
+                st.setNativeClient(nativeClient);
                 aps.createFlowRun(sessionId, st, expireAt);
                 LogUtils.log("@w Effective timeout for this flow will be % seconds", timeout);
             }

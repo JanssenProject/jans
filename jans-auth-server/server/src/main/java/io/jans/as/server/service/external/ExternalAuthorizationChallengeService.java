@@ -3,6 +3,7 @@ package io.jans.as.server.service.external;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.server.authorize.ws.rs.AuthzRequest;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.service.external.context.ExternalScriptContext;
 import io.jans.model.custom.script.CustomScriptType;
@@ -104,6 +105,10 @@ public class ExternalAuthorizationChallengeService extends ExternalScriptService
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(script.getCustomScript(), ex);
+            throw new WebApplicationException(errorResponseFactory
+                    .newErrorResponse(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, executionContext.getAuthzRequest().getState(), "Unable to run authorization challenge script."))
+                    .build());
         }
 
         log.trace("Finished 'authorize' method, script name: {}, clientId: {}, result: {}", script.getName(), executionContext.getAuthzRequest().getClientId(), result);
@@ -129,5 +134,46 @@ public class ExternalAuthorizationChallengeService extends ExternalScriptService
 
         log.trace("Unable to find script by acr_values {}", acrValues);
         return getCustomScriptConfigurationByName(appConfiguration.getAuthorizationChallengeDefaultAcr());
+    }
+
+    public void externalPrepareAuthzRequest(AuthzRequest authzRequest) {
+        final List<String> acrValues = authzRequest.getAcrValuesList();
+        final CustomScriptConfiguration script = identifyScript(acrValues);
+        if (script == null) {
+            String msg = String.format("Unable to identify script by acr_values %s.", acrValues);
+            log.debug(msg);
+            throw new WebApplicationException(errorResponseFactory
+                    .newErrorResponse(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, authzRequest.getState(), msg))
+                    .build());
+        }
+
+        log.trace("Executing python 'prepareAuthzRequest' method, script name: {}, clientId: {}, scope: {}, authorizationChallengeSession: {}",
+                script.getName(), authzRequest.getClientId(), authzRequest.getScope(), authzRequest.getAuthorizationChallengeSession());
+
+        ExecutionContext executionContext = ExecutionContext.of(authzRequest);
+        executionContext.setScript(script);
+
+        try {
+            AuthorizationChallengeType authorizationChallengeType = (AuthorizationChallengeType) script.getExternalType();
+            final ExternalScriptContext scriptContext = new ExternalScriptContext(executionContext);
+            authorizationChallengeType.prepareAuthzRequest(scriptContext);
+
+            scriptContext.throwWebApplicationExceptionIfSet();
+        } catch (WebApplicationException e) {
+            if (log.isTraceEnabled()) {
+                log.trace("WebApplicationException from script", e);
+            }
+            throw e;
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
+            throw new WebApplicationException(errorResponseFactory
+                    .newErrorResponse(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, executionContext.getAuthzRequest().getState(), "Unable to run 'prepareAuthzRequest' method authorization challenge script."))
+                    .build());
+        }
+
+        log.trace("Finished 'prepareAuthzRequest' method, script name: {}, clientId: {}", script.getName(), executionContext.getAuthzRequest().getClientId());
     }
 }

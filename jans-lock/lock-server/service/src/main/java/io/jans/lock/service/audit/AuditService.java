@@ -22,6 +22,15 @@ import jakarta.ws.rs.core.Response;
 @ApplicationScoped
 public class AuditService {
 
+	public static final String AUDIT_TELEMETRY = "telemetry";
+	public static final String AUDIT_TELEMETRY_BULK = "telemetry/bulk";
+
+    public static final String AUDIT_LOG = "log";
+	public static final String AUDIT_LOG_BULK = "log/bulk";
+
+	public static final String AUDIT_HEALTH = "health";
+	public static final String AUDIT_HEALTH_BULK = "health/bulk";
+
     @Inject
     private Logger log;
 

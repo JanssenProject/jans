@@ -1,11 +1,17 @@
 [package]
 name = "cedarling"
-version = "1.2.0"
+version = "0.0.0-nightly"
 edition = "2021"
+description = "The Cedarling: a high-performance local authorization service powered by the Rust Cedar Engine."
+license = "Apache-2.0"
+
+[features]
+# blocking feature allows to use blocking cedarling client
+blocking = ["tokio/rt-multi-thread"]
 
 [dependencies]
 serde = { workspace = true }
-serde_json = { workspace = true }
+serde_json = { workspace = true, features = ["raw_value"] }
 serde_yml = "0.0.12"
 thiserror = { workspace = true }
 sparkv = { workspace = true }
@@ -14,8 +20,8 @@ cedar-policy = "4.2"
 base64 = "0.22.1"
 url = "2.5.2"
 lazy_static = "1.5.0"
-jsonwebtoken = "9.3.0"
-reqwest = { version = "0.12.8", features = ["blocking", "json"] }
+jsonwebtoken = { workspace = true }
+reqwest = { version = "0.12.8", features = ["json"] }
 bytes = "1.7.2"
 typed-builder = "0.20.0"
 semver = { version = "1.0.23", features = ["serde"] }
@@ -27,11 +33,17 @@ derive_more = { version = "1.0.0", features = [
 ] }
 time = { version = "0.3.36", features = ["wasm-bindgen"] }
 regex = "1.11.1"
-chrono = "0.4.38"
+chrono = { workspace = true }
+tokio = { version = "1.42.0", features = ["macros", "time"] }
+rand = "0.8.5"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+web-sys = { workspace = true, features = ["console"] }
+
 
 [dev-dependencies]
 # is used in testing
 test_utils = { workspace = true }
 rand = "0.8.5"
-jsonwebkey = { version = "0.3.5", features = ["generate", "jwt-convert"] }
+jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
 mockito = "1.5.0"

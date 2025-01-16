@@ -492,3 +492,4 @@ to test this Agama project.
 - Upon entering a valid user-name and password, the tarp should present a page
   with access token. 
   ![image](../../../assets/successful-tarp-auth-screen.png)
+

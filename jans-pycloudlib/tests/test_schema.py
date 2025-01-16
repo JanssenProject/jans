@@ -159,3 +159,51 @@ def test_random_optional_scopes(value):
 
     with pytest.raises(ValidationError):
         ConfigmapSchema().validate_optional_scopes(value)
+
+
+def test_load_schema_key(tmpdir):
+    from jans.pycloudlib.schema import load_schema_key
+
+    src = tmpdir.join("configuration.key")
+    src.write("abcd")
+    assert load_schema_key(str(src)) == "abcd"
+
+
+def test_maybe_encrypted_schema_file_missing():
+    from jans.pycloudlib.schema import maybe_encrypted_schema
+
+    _, err, _ = maybe_encrypted_schema("/path/to/schema/file", "/path/to/schema/key")
+    assert "error" in err
+
+
+def test_maybe_encrypted_schema(tmpdir):
+    from jans.pycloudlib.schema import maybe_encrypted_schema
+
+    src = tmpdir.join("configuration.json")
+    src.write("zLBGM41dAfA2JuIkVHRKa+/WwVo/8oQAdD0LUT3jGfhqp/euYdDhf+kTiKwfb1Sv28zYL12JlO+3oSl6ZlhiTw==")
+
+    src_key = tmpdir.join("configuration.key")
+    src_key.write("6Jsv61H7fbkeIkRvUpnZ98fu")
+
+    out, _, _ = maybe_encrypted_schema(str(src), str(src_key))
+    assert out == {"_configmap": {"hostname": "example.com"}}
+
+
+def test_schema_exclude_configmap(tmpdir):
+    from jans.pycloudlib.schema import load_schema_from_file
+
+    src = tmpdir.join("configuration.json")
+    src.write('{"_configmap": {}, "_secret": {"admin_password": "Test1234#"}}')
+
+    out, _, code = load_schema_from_file(str(src), exclude_configmap=True)
+    assert "_configmap" not in out and code == 0
+
+
+def test_schema_exclude_secret(tmpdir):
+    from jans.pycloudlib.schema import load_schema_from_file
+
+    src = tmpdir.join("configuration.json")
+    src.write('{"_configmap": {"city": "Austin", "country_code": "US", "admin_email": "s@example.com", "hostname": "example.com", "orgName": "Example Inc.", "state": "TX"}, "_secret": {}}')
+
+    out, _, code = load_schema_from_file(str(src), exclude_secret=True)
+    assert "_secret" not in out and code == 0

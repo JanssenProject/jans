@@ -9337,11 +9337,7 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
+        adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
@@ -9349,7 +9345,11 @@ components:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanEdit:
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -10988,10 +10988,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -11860,6 +11860,8 @@ components:
         x5cs256:
           type: string
         online_access:
+          type: boolean
+        authorization_challenge:
           type: boolean
         attributes:
           type: object

@@ -99,8 +99,8 @@ public class AuthorizationChallengeService {
         try {
             return authorize(authzRequest);
         } catch (WebApplicationException e) {
-            if (log.isErrorEnabled() && AuthzRequestService.canLogWebApplicationException(e))
-                log.error(e.getMessage(), e);
+            if (log.isTraceEnabled())
+                log.trace(e.getMessage(), e);
             throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -113,6 +113,8 @@ public class AuthorizationChallengeService {
 
     public void prepareAuthzRequest(AuthzRequest authzRequest) {
         authzRequest.setScope(ServerUtil.urlDecode(authzRequest.getScope()));
+
+        externalAuthorizationChallengeService.externalPrepareAuthzRequest(authzRequest);
 
         if (StringUtils.isNotBlank(authzRequest.getAuthorizationChallengeSession())) {
             final AuthorizationChallengeSession session = authorizationChallengeSessionService.getAuthorizationChallengeSession(authzRequest.getAuthorizationChallengeSession());
@@ -158,14 +160,14 @@ public class AuthorizationChallengeService {
         executionContext.setSessionId(sessionUser);
 
         if (user == null) {
-            log.trace("Executing external authentication challenge");
+            log.trace("Executing external authentication challenge ... (requestedScopes: {})", scopes);
 
             final boolean ok = externalAuthorizationChallengeService.externalAuthorize(executionContext);
             if (!ok) {
                 log.debug("Not allowed by authorization challenge script, client_id {}.", client.getClientId());
                 throw new WebApplicationException(errorResponseFactory
-                        .newErrorResponse(Response.Status.BAD_REQUEST)
-                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, state, "No allowed by authorization challenge script."))
+                        .newErrorResponse(Response.Status.UNAUTHORIZED)
+                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, state, "Not allowed by authorization challenge script."))
                         .build());
             }
 
@@ -178,6 +180,8 @@ public class AuthorizationChallengeService {
         }
 
         String grantAcr = executionContext.getScript() != null ? executionContext.getScript().getName() : authzRequest.getAcrValues();
+
+        log.trace("Creating authorization code grant with: scope {}, acr {}", scopes, grantAcr);
 
         AuthorizationCodeGrant authorizationGrant = authorizationGrantList.createAuthorizationCodeGrant(user, client, new Date());
         authorizationGrant.setNonce(authzRequest.getNonce());

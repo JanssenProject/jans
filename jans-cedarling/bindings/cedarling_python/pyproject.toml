@@ -4,7 +4,6 @@ build-backend = "maturin"
 
 [project]
 name = "cedarling_python"
-version = "1.2.0"
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Rust",

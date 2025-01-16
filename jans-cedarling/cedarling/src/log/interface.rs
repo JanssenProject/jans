@@ -25,6 +25,7 @@ pub(crate) trait LogWriter {
 pub(crate) trait Loggable: serde::Serialize {
     /// get unique request ID
     fn get_request_id(&self) -> Uuid;
+
     /// get log level for entity
     /// not all log entities have log level, only when `log_kind` == `System`
     fn get_log_level(&self) -> Option<LogLevel>;
@@ -34,13 +35,8 @@ pub(crate) trait Loggable: serde::Serialize {
     // is used to avoid boilerplate code
     fn can_log(&self, logger_level: LogLevel) -> bool {
         if let Some(entry_log_level) = self.get_log_level() {
-            if entry_log_level < logger_level {
-                // entry log level lower than logger level
-                false
-            } else {
-                // entry log higher or equal than logger level
-                true
-            }
+            // higher level is more important, ie closer to fatal
+            logger_level <= entry_log_level
         } else {
             // if `.get_log_level` return None
             // it means that `log_kind` != `System` and we should log it
@@ -53,10 +49,10 @@ pub(crate) trait Loggable: serde::Serialize {
 /// interface for getting log entries from the storage
 pub trait LogStorage {
     /// return logs and remove them from the storage
-    fn pop_logs(&self) -> Vec<LogEntry>;
+    fn pop_logs(&self) -> Vec<serde_json::Value>;
 
     /// get specific log entry
-    fn get_log_by_id(&self, id: &str) -> Option<LogEntry>;
+    fn get_log_by_id(&self, id: &str) -> Option<serde_json::Value>;
 
     /// returns a list of all log ids
     fn get_log_ids(&self) -> Vec<String>;

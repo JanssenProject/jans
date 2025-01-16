@@ -5,7 +5,15 @@
 
     <groupId>io.jans.casa.plugins</groupId>
     <artifactId>email_2fa-agama</artifactId>
-    <version>1.2.0</version>
+    <version>0.0.0-nightly</version>
+
+    <distributionManagement>
+	  <repository>
+          <id>github</id>
+          <name>GitHub Packages</name>
+          <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+      </repository>
+    </distributionManagement>
     
     <dependencies>
     </dependencies>

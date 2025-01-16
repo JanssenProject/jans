@@ -4,20 +4,22 @@
  *
  * Copyright (c) 2024 U-Zyn Chua
  */
+use chrono::Duration;
+use chrono::prelude::*;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct KvEntry {
+pub struct KvEntry<T> {
     pub key: String,
-    pub value: String,
-    pub expired_at: std::time::Instant,
+    pub value: T,
+    pub expired_at: DateTime<Utc>,
 }
 
-impl KvEntry {
-    pub fn new(key: &str, value: &str, expiration: std::time::Duration) -> Self {
-        let expired_at: std::time::Instant = std::time::Instant::now() + expiration;
+impl<T> KvEntry<T> {
+    pub fn new<S: AsRef<str>>(key: S, value: T, expiration: Duration) -> Self {
+        let expired_at: DateTime<Utc> = Utc::now() + expiration;
         Self {
-            key: String::from(key),
-            value: String::from(value),
+            key: key.as_ref().into(),
+            value,
             expired_at,
         }
     }
@@ -29,10 +31,10 @@ mod tests {
 
     #[test]
     fn test_new() {
-        let item = KvEntry::new("key", "value", std::time::Duration::from_secs(10));
+        let item = KvEntry::<String>::new("key", "value".into(), Duration::seconds(10));
         assert_eq!(item.key, "key");
         assert_eq!(item.value, "value");
-        assert!(item.expired_at > std::time::Instant::now() + std::time::Duration::from_secs(9));
-        assert!(item.expired_at <= std::time::Instant::now() + std::time::Duration::from_secs(10));
+        assert!(item.expired_at > Utc::now() + Duration::seconds(9));
+        assert!(item.expired_at <= Utc::now() + Duration::seconds(10));
     }
 }

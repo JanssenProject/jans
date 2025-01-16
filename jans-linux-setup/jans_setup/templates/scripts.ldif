@@ -532,7 +532,7 @@ jansEnabled: FALSE
 jansLevel: 1
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: java
-jansRevision: 11
+jansRevision: 1
 jansScr::%(discovery_discovery)s
 jansScrTyp: discovery
 
@@ -546,7 +546,7 @@ jansEnabled: true
 jansLevel: 1
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: java
-jansRevision: 11
+jansRevision: 1
 jansScr::%(authz_detail_authzdetail)s
 jansScrTyp: authz_detail
 
@@ -560,9 +560,24 @@ jansEnabled: true
 jansLevel: 1
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: java
-jansRevision: 11
+jansRevision: 1
 jansScr::%(authorization_challenge_authorizationchallenge)s
 jansScrTyp: authorization_challenge
+
+dn: inum=BADA-B000,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: Agama Authorization Challenge Script
+displayName: agama_challenge
+inum: BADA-B000
+jansEnabled: true
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
+jansConfProperty: {"value1":"finish_userid_db_attribute","value2":"uid","description":""}
+jansProgLng: java
+jansRevision: 1
+jansScrTyp: authorization_challenge
+jansScr::%(authorization_challenge_agamachallenge)s
 
 dn: inum=0300-BB00,ou=scripts,o=jans
 objectClass: jansCustomScr
@@ -574,7 +589,7 @@ jansEnabled: true
 jansLevel: 1
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: java
-jansRevision: 11
+jansRevision: 1
 jansScr::%(access_evaluation_accessevaluation)s
 jansScrTyp: access_evaluation
 

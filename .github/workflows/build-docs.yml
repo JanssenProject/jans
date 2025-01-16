@@ -170,10 +170,11 @@ jobs:
         # github.event_name != 'workflow_dispatch'
         id: set_versions
         run: |
+          GITHUB_EVENT_RELEASE_TAG_NAME="${{ github.event.release.tag_name }}"
           TAGS=$(gh release list -L 1000 -R ${{ github.repository }} | grep -o '^\v.*'| grep -v Draft | cut -f 1 | sed '/-/!{s/$/_/}' | sort -V | sed 's/_$//')
           LATEST=$(echo "${TAGS}" | tail -1)
           STABLE=$(echo "${TAGS}" | grep -v -- "nightly" | tail -1)
-          if [[ ${{ github.event.release.tag_name }} == 'nightly' ]]; then
+          if [[ "$GITHUB_EVENT_RELEASE_TAG_NAME" == 'nightly' ]]; then
             LATEST='nightly'
           fi
           echo "Latest is $LATEST and Stable is $STABLE"
@@ -206,6 +207,13 @@ jobs:
           git add index.yaml && git update-index --refresh
           cd ..
           # END move generated chart from a previous step
+          
+          # copy search from nightly to all other versions. This is to ensure that the search index is available for all versions
+          for folder in v*/; do
+            cp -r nightly/search "$folder"
+            git add $folder/search && git update-index --refresh
+          done
+          # END copy search from nightly to all other versions
 
           echo "Replacing release number markers with actual release number"
           cd ${LATEST}

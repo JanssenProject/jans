@@ -55,7 +55,8 @@ on:
       - '!**.txt'
 
   workflow_dispatch:
-
+permissions:
+  contents: read
 jobs:
   sonar-scan:
     name: sonar scan
@@ -82,7 +83,9 @@ jobs:
         jans-linux-setup
         jans-cli-tui
         jans-pycloudlib
-
+    permissions:
+        contents: read
+        pull-requests: read
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1

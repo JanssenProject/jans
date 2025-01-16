@@ -9,14 +9,10 @@ use std::str::FromStr;
 use cedar_policy::{EntityId, EntityTypeName, EntityUid, ParseErrors};
 
 /// Box to store authorization data
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Request {
-    /// Access token raw value
-    pub access_token: Option<String>,
-    /// Id Token raw value
-    pub id_token: Option<String>,
-    /// Userinfo Token raw value
-    pub userinfo_token: Option<String>,
+    /// Contains the JWTs that will be used for the AuthZ request
+    pub tokens: Tokens,
     /// cedar_policy action
     pub action: String,
     /// cedar_policy resource data
@@ -25,9 +21,23 @@ pub struct Request {
     pub context: serde_json::Value,
 }
 
+/// Contains the JWTs that will be used for the AuthZ request
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct Tokens {
+    /// Access token raw value
+    #[serde(default)]
+    pub access_token: Option<String>,
+    /// Id Token raw value
+    #[serde(default)]
+    pub id_token: Option<String>,
+    /// Userinfo Token raw value
+    #[serde(default)]
+    pub userinfo_token: Option<String>,
+}
+
 /// Cedar policy resource data
 /// fields represent EntityUid
-#[derive(serde::Deserialize, Debug, Clone)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct ResourceData {
     /// entity type name
     #[serde(rename = "type")]
