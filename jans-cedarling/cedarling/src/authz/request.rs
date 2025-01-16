@@ -4,9 +4,6 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::collections::HashMap;
-use std::str::FromStr;
-
-use cedar_policy::{EntityId, EntityTypeName, EntityUid, ParseErrors};
 
 /// Box to store authorization data
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -48,13 +45,4 @@ pub struct ResourceData {
     /// entity attributes
     #[serde(flatten)]
     pub payload: HashMap<String, serde_json::Value>,
-}
-
-impl ResourceData {
-    pub(crate) fn entity_uid(&self) -> Result<EntityUid, ParseErrors> {
-        Ok(EntityUid::from_type_name_and_id(
-            EntityTypeName::from_str(&self.resource_type)?,
-            EntityId::new(&self.id),
-        ))
-    }
 }

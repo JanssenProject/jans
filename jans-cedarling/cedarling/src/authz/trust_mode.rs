@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::entities::DecodedTokens;
+use super::entity_builder::DecodedTokens;
 use crate::{
     common::policy_store::TokenKind,
     jwt::{Token, TokenClaimTypeError},
@@ -27,11 +27,11 @@ use crate::{
 ///     - `userinfo_token.sub` == `id_token.sub`
 pub fn validate_id_tkn_trust_mode(tokens: &DecodedTokens) -> Result<(), IdTokenTrustModeError> {
     let access_tkn = tokens
-        .access_token
+        .access
         .as_ref()
         .ok_or(IdTokenTrustModeError::MissingAccessToken)?;
     let id_tkn = tokens
-        .id_token
+        .id
         .as_ref()
         .ok_or(IdTokenTrustModeError::MissingIdToken)?;
 
@@ -42,7 +42,7 @@ pub fn validate_id_tkn_trust_mode(tokens: &DecodedTokens) -> Result<(), IdTokenT
         return Err(IdTokenTrustModeError::AccessTokenClientIdMismatch);
     }
 
-    let userinfo_tkn = match tokens.userinfo_token.as_ref() {
+    let userinfo_tkn = match tokens.userinfo.as_ref() {
         Some(token) => token,
         None => return Ok(()),
     };
@@ -96,7 +96,7 @@ pub enum IdTokenTrustModeError {
 #[cfg(test)]
 mod test {
     use super::{IdTokenTrustModeError, validate_id_tkn_trust_mode};
-    use crate::authz::entities::DecodedTokens;
+    use crate::authz::entity_builder::DecodedTokens;
     use crate::common::policy_store::TokenKind;
     use crate::jwt::{Token, TokenClaims};
     use serde_json::json;
@@ -116,9 +116,9 @@ mod test {
             None,
         );
         let tokens = DecodedTokens {
-            access_token: Some(access_token),
-            id_token: Some(id_token),
-            userinfo_token: None,
+            access: Some(access_token),
+            id: Some(id_token),
+            userinfo: None,
         };
         validate_id_tkn_trust_mode(&tokens).expect("should not error");
     }
@@ -130,9 +130,9 @@ mod test {
             None,
         );
         let tokens = DecodedTokens {
-            access_token: None,
-            id_token: Some(id_token),
-            userinfo_token: None,
+            access: None,
+            id: Some(id_token),
+            userinfo: None,
         };
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
@@ -150,9 +150,9 @@ mod test {
             None,
         );
         let tokens = DecodedTokens {
-            access_token: Some(access_token),
-            id_token: Some(id_token),
-            userinfo_token: None,
+            access: Some(access_token),
+            id: Some(id_token),
+            userinfo: None,
         };
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
@@ -177,9 +177,9 @@ mod test {
             None,
         );
         let tokens = DecodedTokens {
-            access_token: Some(access_token),
-            id_token: None,
-            userinfo_token: None,
+            access: Some(access_token),
+            id: None,
+            userinfo: None,
         };
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
@@ -200,9 +200,9 @@ mod test {
         );
         let id_token = Token::new_id(TokenClaims::new(HashMap::new()), None);
         let tokens = DecodedTokens {
-            access_token: Some(access_token),
-            id_token: Some(id_token),
-            userinfo_token: None,
+            access: Some(access_token),
+            id: Some(id_token),
+            userinfo: None,
         };
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
@@ -234,9 +234,9 @@ mod test {
             None,
         );
         let tokens = DecodedTokens {
-            access_token: Some(access_token),
-            id_token: Some(id_token),
-            userinfo_token: None,
+            access: Some(access_token),
+            id: Some(id_token),
+            userinfo: None,
         };
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
@@ -264,9 +264,9 @@ mod test {
             None,
         );
         let tokens = DecodedTokens {
-            access_token: Some(access_token),
-            id_token: Some(id_token),
-            userinfo_token: Some(userinfo_token),
+            access: Some(access_token),
+            id: Some(id_token),
+            userinfo: Some(userinfo_token),
         };
         validate_id_tkn_trust_mode(&tokens).expect("should not error");
     }
@@ -286,9 +286,9 @@ mod test {
         );
         let userinfo_token = Token::new_userinfo(TokenClaims::new(HashMap::new()), None);
         let tokens = DecodedTokens {
-            access_token: Some(access_token),
-            id_token: Some(id_token),
-            userinfo_token: Some(userinfo_token),
+            access: Some(access_token),
+            id: Some(id_token),
+            userinfo: Some(userinfo_token),
         };
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
@@ -324,9 +324,9 @@ mod test {
             None,
         );
         let tokens = DecodedTokens {
-            access_token: Some(access_token),
-            id_token: Some(id_token),
-            userinfo_token: Some(userinfo_token),
+            access: Some(access_token),
+            id: Some(id_token),
+            userinfo: Some(userinfo_token),
         };
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(

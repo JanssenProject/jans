@@ -14,7 +14,7 @@ The sidecar is a containerized Flask project that uses the `cedarling_python` bi
 - Ensure that you have installed [docker](https://docs.docker.com/engine/install/) and [docker compose](https://docs.docker.com/compose/install/). 
 - Clone the [Janssen](https://github.com/JanssenProject/jans) repository
 - Navigate to `jans/jans-cedarling/flask-sidecar`
-- Edit the provided `secrets/bootstrap.json` file to your specifications. The configuration keys are described [here](https://github.com/JanssenProject/jans/blob/ffe9f493e4a5c6b05f2adeeb8a6eba7eb83b103e/jans-cedarling/bindings/cedarling_python/cedarling_python.pyi#L9). 
+- Edit the provided `secrets/bootstrap.json` file to your specifications. The configuration keys are described [here](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/cedarling_python.pyi#L10). 
 - Run `docker compose up`
   - For cloud deployments, please use the provided Dockerfile and pass your bootstrap configuration via the environment variable `CEDARLING_BOOTSTRAP_CONFIG_FILE`.
 - The sidecar runs on port 5000. OpenAPI documentation is available at `http://0.0.0.0:5000/swagger-ui`
@@ -28,8 +28,13 @@ Example request to the evaluation endpoint:
 ```
 {
 	"subject": {
-		"type": "string",
-		"id": "string"
+		"type": "JWT",
+		"id": "cedarling",
+		"properties": {
+			"access_token": "",
+			"id_token": "",
+			"userinfo_token": ""
+		}
 	},
 	"resource": {
 		"type": "Jans::Application",
@@ -48,9 +53,6 @@ Example request to the evaluation endpoint:
 		"name": "Jans::Action::\"Read\""
 	},
 	"context": {
-		"access_token": "...",
-		"id_token": "...",
-		"userinfo_token": "...",
 		"device_health": [
 			"Healthy"
 		],

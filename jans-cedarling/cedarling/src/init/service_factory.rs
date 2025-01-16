@@ -7,16 +7,14 @@
 
 //! Module to lazily initialize internal cedarling services
 
-use std::sync::Arc;
-
-use crate::bootstrap_config::BootstrapConfig;
-use crate::common::policy_store::PolicyStoreWithID;
-use crate::jwt::{JwtService, JwtServiceInitError};
-
 use super::service_config::ServiceConfig;
 use crate::authz::{Authz, AuthzConfig};
+use crate::bootstrap_config::BootstrapConfig;
 use crate::common::app_types;
+use crate::common::policy_store::PolicyStoreWithID;
+use crate::jwt::{JwtService, JwtServiceInitError};
 use crate::log;
+use std::sync::Arc;
 
 #[derive(Clone)]
 pub(crate) struct ServiceFactory<'a> {
