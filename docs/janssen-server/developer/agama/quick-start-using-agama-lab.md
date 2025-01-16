@@ -487,7 +487,7 @@ a browser extension based tool from the Janssen Project,
 to test this Agama project. 
 
 - [Install Jans Tarp browser plug-in](https://github.com/JanssenProject/jans/tree/main/demos/jans-tarp#installation-in-browser)
-- Follow [these instructions]() to test using the Janssen Server
+- Follow [these instructions](TODO: doc with instructions WIP) to test using the Janssen Server
 - In a successful test run, the browser should prompt user for the user-name and 
   password using the same user-interface that we built in the previous steps.
   ![image](../../../assets/agama-login.png)
