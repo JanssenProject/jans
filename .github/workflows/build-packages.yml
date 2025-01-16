@@ -409,16 +409,18 @@ jobs:
         cargo install wasm-pack
         wasm-pack build --release --target web
         ls pkg
-    #- name: Generate sha256sum and sign
-    #  id: sign-cedarling
-    #  working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
-    #  run: |
-    #    TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
-    #    VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
-    #    if [ "${TAG}" == "nightly" ]; then
-    #      VERSION=nightly
-    #      TAG="0.0.0"
-    #    fi
-    #    cd ${{ github.workspace }}/jans-cedarling/target/wheels
-    #    echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-    #    gh release upload "${VERSION}" *.whl *.sha256sum *.asc
+    - name: Archive and sign pkg contents
+      id: archive_pkg
+      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
+      run: |
+        TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+        VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+        if [ "${TAG}" == "nightly" ]; then
+          VERSION=nightly
+          TAG="0.0.0"
+        fi        
+        tar -czvf cedarling_wasm_"${TAG}"_pkg.tar.gz -C pkg .
+        sha256sum cedarling_wasm_"${TAG}"_pkg.tar.gz > cedarling_wasm_"${TAG}"_pkg.tar.gz.sha256sum
+        gpg --armor --detach-sign cedarling_wasm_"${TAG}"_pkg.tar.gz || echo "Failed to sign"
+        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
+        gh release upload "${VERSION}" *.tar.gz *.sha256sum *.asc
