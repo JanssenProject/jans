@@ -8954,8 +8954,52 @@
 </ul>
 <p>This hypothetical flow is simple but will give you a good idea on how to interact with the endpoint.</p>
 <h3 id="the-flow-code">The flow code<a class="headerlink" href="#the-flow-code" title="Permanent link">#</a></h3>
-<p>The following code depicts the implementation.</p>
-<p><img alt="enabled-2fa-methods" src="../../../../assets/agama/challenge-flow.png" /></p>
+<p>The below depicts the implementation:</p>
+<p><img alt="co.acme.flows.emailOtp" src="../../../../assets/agama/challenge-flow.png" /></p>
+<!--
+Flow co.acme.flows.emailOtp
+    Basepath "..."
+
+obj = RRF "username-prompt.ftl"
+username = obj.username
+
+// Assumptions:
+// - username property holds the user name (in obj map)
+// - retrieveEmails method returns a list of e-mail addresses associated to the user
+// - the username entered always references an existing user 
+
+emails = Call co.acme.services.UserService#retrieveEmails username
+size = emails.length
+
+When size is 0
+    obj = { success: false, error: "No e-mails associated to this account" }
+    Finish obj
+
+When size is 1
+    email = emails[0]
+Otherwise    
+    inj = { addresses: emails }
+    obj = RRF "email-prompt.ftl" inj
+
+    // Assumption: obj.email contains the address the user chose
+    email = obj.email
+
+passcode = Call co.acme.services.EmailService#sendRandomOTP email
+// Assumption: 
+// - method sendRandomOTP sends a message to the address passed and returns the OTP included in the message
+
+obj = RRF "passcode-prompt.ftl"
+// Assumption: obj.otp contains the code the user entered
+
+When obj.otp is passcode
+    // The next line is shorthand for { success: true, data: { userId: data.username } }
+    Finish username
+
+obj = { success: false, error: "Wrong code entered. Try again another day" }
+Finish obj
+
+-->
+
 <p>Flow <code>co.acme.flows.emailOtp</code> is self-explanatory and does not require further insight. Note the templates referenced in RRF directives don't necessarily have to exist, however, the template names will be included in the output of the endpoint as the flow executes. This serves as a hint or reference for the app to know the current point of execution and determine what should be shown in the UI. It will be more clearly seen in the next section.</p>
 <h2 id="running-the-flow">Running the flow<a class="headerlink" href="#running-the-flow" title="Permanent link">#</a></h2>
 <h3 id="requisites">Requisites<a class="headerlink" href="#requisites" title="Permanent link">#</a></h3>
@@ -9287,7 +9331,7 @@ Content-Type: application/json
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-13T13:07:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-14T11:58:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-14</span>
       
         <br>
         Created:
