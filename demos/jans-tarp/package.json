@@ -50,6 +50,6 @@
     "react-spinner-overlay": "^0.1.33",
     "styled-components": "^6.1.0",
     "uuid": "^9.0.0",
-    "wasm": "file:src/wasm"
+    "wasm": "file:wasm"
   }
 }

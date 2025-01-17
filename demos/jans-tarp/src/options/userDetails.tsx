@@ -15,7 +15,7 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-import __wbg_init, { init, Cedarling, AuthorizeResult } from "wasm";
+import __wbg_init, { init, Cedarling, AuthorizeResult } from 'wasm';
 
 const UserDetails = ({ data, notifyOnDataChange }) => {
     const [loading, setLoading] = useState(false);
@@ -61,9 +61,10 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                     await __wbg_init();
                     instance = await init(!isEmpty(cedarlingConfig?.cedarlingConfig) ? cedarlingConfig?.cedarlingConfig[0] : undefined);
                     let result: AuthorizeResult = await instance.authorize(reqObj);
+                    let logs = await instance.pop_logs();
                     setAuthzResult(result.json_string())
                     console.log("result:", result);
-                    let logs = await instance.pop_logs();
+                    logs.push(await instance.pop_logs());
                     if (logs.length != 0) {
                         let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
                         setAuthzLogs(pretty_logs.toString());
