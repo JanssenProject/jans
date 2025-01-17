@@ -3,7 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
+use std::env;
 use std::fmt::Display;
 use std::fs;
 use std::path::Path;
@@ -13,15 +14,20 @@ use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
 
 use super::authorization_config::AuthorizationConfig;
+use super::json_util::fallback_deserialize;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, IdTokenTrustMode, JwtConfig, LogConfig,
     LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, TokenValidationConfig,
 };
 use crate::log::LogLevel;
 
-#[derive(Deserialize, PartialEq, Debug, Default)]
+#[derive(Deserialize, Serialize, PartialEq, Debug, Default)]
 /// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
 /// from [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
+///
+/// This structure is used to deserialize values from ENV VARS so json keys is same as keys in environment variables
+//
+//  All fields should be available to parse from string, because env vars always string.
 pub struct BootstrapConfigRaw {
     ///  Human friendly identifier for the application
     #[serde(rename = "CEDARLING_APPLICATION_NAME")]
@@ -50,14 +56,17 @@ pub struct BootstrapConfigRaw {
     /// If `log_type` is set to [`LogType::Memory`], this is the TTL (time to live) of
     /// log entities in seconds.
     #[serde(rename = "CEDARLING_LOG_TTL", default)]
+    #[serde(deserialize_with = "fallback_deserialize")]
     pub log_ttl: Option<u64>,
 
     /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
     #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS", default)]
+    #[serde(deserialize_with = "fallback_deserialize")]
     pub decision_log_user_claims: Vec<String>,
 
     /// List of claims to map from user entity, such as ["client_id", "rp_id", ...]
     #[serde(rename = "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS", default)]
+    #[serde(deserialize_with = "fallback_deserialize")]
     pub decision_log_workload_claims: Vec<String>,
 
     /// Token claims that will be used for decision logging.
@@ -84,22 +93,27 @@ pub struct BootstrapConfigRaw {
 
     /// Mapping name of cedar schema User entity
     #[serde(rename = "CEDARLING_MAPPING_USER", default)]
+    #[serde(deserialize_with = "fallback_deserialize")]
     pub mapping_user: Option<String>,
 
     /// Mapping name of cedar schema Workload entity.
     #[serde(rename = "CEDARLING_MAPPING_WORKLOAD", default)]
+    #[serde(deserialize_with = "fallback_deserialize")]
     pub mapping_workload: Option<String>,
 
     /// Mapping name of cedar schema id_token entity.
     #[serde(rename = "CEDARLING_MAPPING_ID_TOKEN", default)]
+    #[serde(deserialize_with = "fallback_deserialize")]
     pub mapping_id_token: Option<String>,
 
     /// Mapping name of cedar schema access_token entity.
     #[serde(rename = "CEDARLING_MAPPING_ACCESS_TOKEN", default)]
+    #[serde(deserialize_with = "fallback_deserialize")]
     pub mapping_access_token: Option<String>,
 
     /// Mapping name of cedar schema userinfo_token entity.
     #[serde(rename = "CEDARLING_MAPPING_USERINFO_TOKEN", default)]
+    #[serde(deserialize_with = "fallback_deserialize")]
     pub mapping_userinfo_token: Option<String>,
 
     /// Path to a local file pointing containing a JWKS.
@@ -112,6 +126,7 @@ pub struct BootstrapConfigRaw {
 
     /// JSON object with policy store
     #[serde(rename = "CEDARLING_LOCAL_POLICY_STORE", default)]
+    #[serde(deserialize_with = "fallback_deserialize")]
     pub local_policy_store: Option<String>,
 
     /// Path to a Policy Store JSON file
@@ -126,6 +141,7 @@ pub struct BootstrapConfigRaw {
     ///
     /// This requires that an `iss` (Issuer) claim is present on each token.
     #[serde(rename = "CEDARLING_JWT_SIG_VALIDATION", default)]
+    #[serde(deserialize_with = "fallback_deserialize")]
     pub jwt_sig_validation: FeatureToggle,
 
     /// Whether to check the status of the JWT. On startup.
@@ -136,10 +152,12 @@ pub struct BootstrapConfigRaw {
     ///
     /// [`IETF Draft`]: https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/
     #[serde(rename = "CEDARLING_JWT_STATUS_VALIDATION", default)]
+    #[serde(deserialize_with = "fallback_deserialize")]
     pub jwt_status_validation: FeatureToggle,
 
     /// Cedarling will only accept tokens signed with these algorithms.
     #[serde(rename = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED", default)]
+    #[serde(deserialize_with = "fallback_deserialize")]
     pub jwt_signature_algorithms_supported: HashSet<Algorithm>,
 
     /// When enabled, the `iss` (Issuer) claim must be present in the Access Token and
@@ -222,6 +240,7 @@ pub struct BootstrapConfigRaw {
     ///
     /// ***Required*** if `LOCK == Enabled`.
     #[serde(rename = "CEDARLING_LOCK_MASTER_CONFIGURATION_URI", default)]
+    #[serde(deserialize_with = "fallback_deserialize")]
     pub lock_master_configuration_uri: Option<String>,
 
     /// Controls whether Cedarling should listen for SSE config updates.
@@ -239,14 +258,17 @@ pub struct BootstrapConfigRaw {
 
     /// How often to send log messages to Lock Master (0 to turn off trasmission).
     #[serde(rename = "CEDARLING_AUDIT_LOG_INTERVAL", default)]
+    #[serde(deserialize_with = "fallback_deserialize")]
     pub audit_log_interval: u64,
 
     /// How often to send health messages to Lock Master (0 to turn off transmission).
     #[serde(rename = "CEDARLING_AUDIT_HEALTH_INTERVAL", default)]
+    #[serde(deserialize_with = "fallback_deserialize")]
     pub audit_health_interval: u64,
 
     /// How often to send telemetry messages to Lock Master (0 to turn off transmission).
     #[serde(rename = "CEDARLING_AUDIT_TELEMETRY_INTERVAL", default)]
+    #[serde(deserialize_with = "fallback_deserialize")]
     pub audit_health_telemetry_interval: u64,
 
     /// Controls whether Cedarling should listen for updates from the Lock Server.
@@ -255,7 +277,7 @@ pub struct BootstrapConfigRaw {
 }
 
 /// Type of logger
-#[derive(Debug, PartialEq, Deserialize, Default)]
+#[derive(Debug, PartialEq, Deserialize, Serialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum LoggerType {
     /// Disabled logger
@@ -300,7 +322,7 @@ impl Display for LoggerType {
 }
 
 /// Enum varians that represent if feature is enabled or disabled
-#[derive(Debug, PartialEq, Deserialize, Default, Copy, Clone)]
+#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Copy, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum FeatureToggle {
     /// Represent as disabled.
@@ -428,7 +450,42 @@ pub struct ParseFeatureToggleError {
     value: String,
 }
 
+/// Get environment variables related to `Cedarling`
+#[cfg(not(target_arch = "wasm32"))]
+fn cedarling_env_vars() -> HashMap<String, serde_json::Value> {
+    env::vars()
+        .into_iter()
+        .filter_map(|(k, v)| {
+            k.starts_with("CEDARLING_")
+                .then_some((k, serde_json::json!(v)))
+        })
+        .collect()
+}
+
 impl BootstrapConfig {
+    /// Construct `BootstrapConfig` from environment variables and `BootstrapConfigRaw` config
+    //
+    // Simple implementation that map input structure to JSON map
+    // and map environment variables with prefix `CEDARLING_` to JSON map. And merge it.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn from_raw_config_and_env(
+        raw: Option<BootstrapConfigRaw>,
+    ) -> Result<Self, BootstrapConfigLoadingError> {
+        let mut json_config_params = serde_json::json!(raw.unwrap_or_default())
+            .as_object()
+            .map(|v| v.to_owned())
+            .unwrap_or_default();
+
+        cedarling_env_vars().into_iter().for_each(|(k, v)| {
+            // update map with values from env variables
+            json_config_params.insert(k, v);
+        });
+
+        let config_raw = BootstrapConfigRaw::deserialize(json_config_params)?;
+
+        Self::from_raw_config(&config_raw)
+    }
+
     /// Construct an instance from BootstrapConfigRaw
     pub fn from_raw_config(raw: &BootstrapConfigRaw) -> Result<Self, BootstrapConfigLoadingError> {
         if !raw.workload_authz.is_enabled() && !raw.user_authz.is_enabled() {
@@ -559,7 +616,7 @@ pub fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D:
 where
     D: Deserializer<'de>,
 {
-    let value = Option::<String>::deserialize(deserializer)?;
+    let value: Option<String> = fallback_deserialize(deserializer)?;
 
     Ok(value.filter(|s| !s.is_empty()))
 }

@@ -7,7 +7,7 @@ use std::collections::HashSet;
 use std::str::FromStr;
 
 use jsonwebtoken::Algorithm;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// The set of Bootstrap properties related to JWT validation.
 #[derive(Debug, PartialEq)]
@@ -178,7 +178,7 @@ impl TokenValidationConfig {
 }
 
 /// Defines the level of validation for ID tokens.
-#[derive(Debug, Clone, PartialEq, Default, Deserialize, Copy)]
+#[derive(Debug, Copy, Clone, PartialEq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum IdTokenTrustMode {
     /// No validation is performed on the ID token.
