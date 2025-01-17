@@ -290,7 +290,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
     && chown -R 1000:0 /opt/prometheus \
     && chown 1000:0 ${JETTY_BASE}/jans-auth/webapps/jans-auth.xml \
     && chown -R 1000:0 ${JETTY_HOME}/temp \
-    && chown -R 1000:0 ${JETTY_BASE}/jans-auth/_libs
+    && chown -R 1000:0 ${JETTY_BASE}/jans-auth/_libs \
+    && chown -R 1000:0 /app/templates
 
 USER 1000
 

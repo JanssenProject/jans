@@ -35,7 +35,7 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-j
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=aa1b2edaa8d7e3413bd57a7bd7cc86206086768b
+ENV JANS_SOURCE_VERSION=856f9fed1d58a6d41503a0459bbe04f52b0bb8e7
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -203,7 +203,8 @@ RUN chmod -R g=u /etc/certs \
     && chown -R 1000:0 /opt/idp \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/keycloak/logs \
-    && chown -R 1000:0 /opt/keycloak/conf
+    && chown -R 1000:0 /opt/keycloak/conf \
+    && chown -R 1000:0 /app/templates
 
 USER 1000
 

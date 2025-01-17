@@ -209,28 +209,12 @@ ___
 Exception raised by authorize_errors
 ___
 
-# authorize_errors.CreateAccessTokenEntityError
-Error encountered while creating access_token entity
+# authorize_errors.BuildEntitiesError
+Error encountered while building entities into context
 ___
 
 # authorize_errors.CreateContextError
 Error encountered while validating context according to the schema
-___
-
-# authorize_errors.CreateIdTokenEntityError
-Error encountered while creating id token entities
-___
-
-# authorize_errors.CreateUserEntityError
-Error encountered while creating User entity
-___
-
-# authorize_errors.CreateUserinfoTokenEntityError
-Error encountered while creating Userinfo_token entity
-___
-
-# authorize_errors.CreateWorkloadEntityError
-Error encountered while creating workload entity
 ___
 
 # authorize_errors.EntitiesError
@@ -243,14 +227,6 @@ ___
 
 # authorize_errors.ProcessTokens
 Error encountered while processing JWT token data
-___
-
-# authorize_errors.ResourceEntityError
-Error encountered while creating resource entity
-___
-
-# authorize_errors.RoleEntityError
-Error encountered while creating role entity
 ___
 
 # authorize_errors.UserRequestValidationError
