@@ -334,8 +334,10 @@ jobs:
           TAG="0.0.0"
         fi
         wget https://github.com/${{ github.repository }}/releases/download/"${VER}"/cedarling_wasm_"${TAG}"_pkg.tar.gz -O cedarling_wasm.tar.gz
-        mkdir wasm
-        tar -xvf cedarling_wasm.tar.gz -C wasm
+        mkdir -p src/wasm
+        tar -xvf cedarling_wasm.tar.gz -C src/wasm
+        rm cedarling_wasm.tar.gz
+        ls src/wasm
         # END Get the latest cedarling wasm package
         npm install
         npm run build
