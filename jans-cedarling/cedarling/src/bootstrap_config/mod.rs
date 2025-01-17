@@ -7,6 +7,7 @@
 //! to configure [`Cedarling`](crate::Cedarling)
 
 pub(crate) mod authorization_config;
+mod json_util;
 pub(crate) mod jwt_config;
 pub(crate) mod log_config;
 pub(crate) mod policy_store_config;
