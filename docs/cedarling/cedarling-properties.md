@@ -129,6 +129,11 @@ use cedarling::BootstrapConfig;
 
 let config =
     BootstrapConfig::load_from_file("./path/to/your/config.json").unwrap();
+
+// OR from environment variables
+let config =
+    BootstrapConfig::from_raw_config_and_env(None).unwrap();
+
 ```
 
 ### Loading From JSON
