@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_11">
+    <output url="file://$MODULE_DIR$/target/classes" />
+    <output-test url="file://$MODULE_DIR$/target/test-classes" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="jans-keycloak-link-model" />
+    <orderEntry type="library" name="Maven: io.jans:jans-link-model:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-link-service:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.resteasy:resteasy-cdi:6.0.3.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.spec.javax.ws.rs:jboss-jaxrs-api_3.0_spec:1.0.0.Final" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.interceptor:jakarta.interceptor-api:2.0.0" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.resteasy:resteasy-core-spi:6.0.3.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.resteasy:resteasy-core:6.0.3.Final" level="project" />
+    <orderEntry type="library" name="Maven: com.ibm.async:asyncutil:0.1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.weld:weld-api:4.0.SP1" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.resteasy:resteasy-servlet-initializer:6.0.3.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.resteasy:resteasy-jaxb-provider:6.0.3.Final" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.xml.bind:jakarta.xml.bind-api:3.0.1" level="project" />
+    <orderEntry type="library" name="Maven: com.sun.xml.bind:jaxb-impl:3.0.1" level="project" />
+    <orderEntry type="library" name="Maven: com.sun.xml.bind:jaxb-core:3.0.1" level="project" />
+    <orderEntry type="library" name="Maven: com.sun.activation:jakarta.activation:2.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.resteasy:resteasy-jackson2-provider:6.0.3.Final" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.13.4" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.13.4.2" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.13.4" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:jakarta:2.12.6" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:jakarta:2.12.6" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.module:jackson-module-jaxb-annotations:jakarta:2.12.6" level="project" />
+    <orderEntry type="library" name="Maven: com.github.java-json-tools:json-patch:1.13" level="project" />
+    <orderEntry type="library" name="Maven: com.github.java-json-tools:msg-simple:1.2" level="project" />
+    <orderEntry type="library" name="Maven: com.github.java-json-tools:btf:1.3" level="project" />
+    <orderEntry type="library" name="Maven: com.github.java-json-tools:jackson-coreutils:2.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: junit:junit:3.8.1" level="project" />
+    <orderEntry type="library" name="Maven: org.keycloak:keycloak-admin-client-jakarta:21.1.1" level="project" />
+    <orderEntry type="library" name="Maven: org.keycloak:keycloak-core:21.1.1" level="project" />
+    <orderEntry type="library" name="Maven: org.keycloak:keycloak-common:21.1.1" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.resteasy:resteasy-client:6.0.3.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.resteasy:resteasy-client-api:6.0.3.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpclient:4.5.13" level="project" />
+    <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.15" level="project" />
+    <orderEntry type="library" name="Maven: commons-io:commons-io:2.17.0" level="project" />
+    <orderEntry type="library" name="Maven: org.reactivestreams:reactive-streams:1.0.3" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.resteasy:resteasy-multipart-provider:6.0.3.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.james:apache-mime4j-dom:0.8.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.james:apache-mime4j-core:0.8.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.james:apache-mime4j-storage:0.8.3" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-core-service:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-core-model:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-annotation:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-model:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: org.json:json:20231013" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.annotation:jakarta.annotation-api:2.0.0" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-ldap:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-core:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-filter:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: com.unboundid:unboundid-ldapsdk:6.0.11" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.enterprise:jakarta.enterprise.cdi-api:3.0.0" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-couchbase:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-sql:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-dbcp2:2.12.0" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.transaction:jakarta.transaction-api:2.0.0" level="project" />
+    <orderEntry type="library" name="Maven: com.mysql:mysql-connector-j:8.4.0" level="project" />
+    <orderEntry type="library" name="Maven: com.google.protobuf:protobuf-java:3.25.5" level="project" />
+    <orderEntry type="library" name="Maven: org.postgresql:postgresql:42.6.1" level="project" />
+    <orderEntry type="library" name="Maven: com.querydsl:querydsl-sql:5.1.0" level="project" />
+    <orderEntry type="library" name="Maven: com.querydsl:querydsl-core:5.1.0" level="project" />
+    <orderEntry type="library" name="Maven: com.mysema.commons:mysema-commons-lang:0.2.4" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-spanner:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: com.github.jsqlparser:jsqlparser:4.5" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-hybrid:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-cdi:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-core-util:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.persistence:jakarta.persistence-api:3.0.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-api:2.23.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-core:2.23.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-1.2-api:2.23.1" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.36" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-slf4j-impl:2.23.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-configuration2:2.11.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.17.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-text:1.12.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-exec:1.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.4.15" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.13.4" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.servlet:jakarta.servlet-api:5.0.0" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-core-cache:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-core-message:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: io.swagger.core.v3:swagger-annotations-jakarta:2.2.19" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-core-document-store:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-util:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: javax.jcr:jcr:2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.jackrabbit:jackrabbit-core:2.21.13" level="project" />
+    <orderEntry type="library" name="Maven: concurrent:concurrent:1.3.4" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-collections4:4.4" level="project" />
+    <orderEntry type="library" name="Maven: commons-dbcp:commons-dbcp:1.4" level="project" />
+    <orderEntry type="library" name="Maven: commons-pool:commons-pool:1.5.4" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.jackrabbit:oak-jackrabbit-api:1.44.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.jackrabbit:jackrabbit-jcr-commons:2.21.13" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.jackrabbit:jackrabbit-data:2.21.13" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:jcl-over-slf4j:1.7.36" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.jackrabbit:jackrabbit-spi-commons:2.21.13" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.jackrabbit:jackrabbit-spi:2.21.13" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.tika:tika-core:2.4.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-core:3.6.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.jackrabbit:jackrabbit-jcr-rmi:2.21.13" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-core-script:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jython-standalone:2.7.3" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.ws.rs:jakarta.ws.rs-api:3.0.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-iostreams:2.23.1" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-core-cdi:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.inject:jakarta.inject-api:2.0.0" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.mail:jakarta.mail-api:2.1.2" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.activation:jakarta.activation-api:2.0.1" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.validation:jakarta.validation-api:3.0.0-M1" level="project" />
+    <orderEntry type="library" name="Maven: net.spy:spymemcached:2.12.3" level="project" />
+    <orderEntry type="library" name="Maven: redis.clients:jedis:3.9.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-pool2:2.12.0" level="project" />
+    <orderEntry type="library" name="Maven: net.jodah:expiringmap:0.5.10" level="project" />
+    <orderEntry type="library" name="Maven: io.dropwizard.metrics:metrics-core:4.2.12" level="project" />
+    <orderEntry type="library" name="Maven: com.google.guava:guava:32.1.1-jre" level="project" />
+    <orderEntry type="library" name="Maven: com.google.guava:failureaccess:1.0.1" level="project" />
+    <orderEntry type="library" name="Maven: com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava" level="project" />
+    <orderEntry type="library" name="Maven: com.google.code.findbugs:jsr305:3.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.checkerframework:checker-qual:3.33.0" level="project" />
+    <orderEntry type="library" name="Maven: com.google.errorprone:error_prone_annotations:2.18.0" level="project" />
+    <orderEntry type="library" name="Maven: com.google.j2objc:j2objc-annotations:2.8" level="project" />
+    <orderEntry type="library" name="Maven: com.sun.mail:jakarta.mail:1.6.7" level="project" />
+    <orderEntry type="library" name="Maven: javax.activation:activation:1.1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml:aalto-xml:1.3.0" level="project" />
+    <orderEntry type="library" name="Maven: org.codehaus.woodstox:stax2-api:4.2" level="project" />
+    <orderEntry type="library" name="Maven: org.bouncycastle:bcprov-jdk18on:1.78" level="project" />
+    <orderEntry type="library" name="Maven: org.bouncycastle:bcpkix-jdk18on:1.78" level="project" />
+    <orderEntry type="library" name="Maven: org.bouncycastle:bcutil-jdk18on:1.78" level="project" />
+    <orderEntry type="library" name="Maven: org.bouncycastle:bcmail-jdk18on:1.78" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-core-timer-weld:0.0.0-nightly" level="project" />
+    <orderEntry type="library" name="Maven: org.quartz-scheduler:quartz:2.4.0-rc2" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.weld.servlet:weld-servlet-core:4.0.3.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.weld.environment:weld-environment-common:4.0.3.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.weld:weld-core-impl:4.0.3.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.weld:weld-spi:4.0.SP1" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.weld.probe:weld-probe-core:4.0.3.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.weld.module:weld-jsf:4.0.3.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.weld.module:weld-web:4.0.3.Final" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.el:jakarta.el-api:5.0.0-RC1" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.logging:jboss-logging:3.4.3.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.classfilewriter:jboss-classfilewriter:1.2.5.Final" level="project" />
+    <orderEntry type="library" name="Maven: commons-beanutils:commons-beanutils:1.9.4" level="project" />
+    <orderEntry type="library" name="Maven: commons-logging:commons-logging:1.2" level="project" />
+    <orderEntry type="library" name="Maven: commons-collections:commons-collections:3.2.2" level="project" />
+  </component>
+</module>
