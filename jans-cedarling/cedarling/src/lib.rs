@@ -45,8 +45,6 @@ use log::interface::LogWriter;
 use log::{LogEntry, LogType};
 pub use log::{LogLevel, LogStorage};
 
-pub use crate::authz::entities::CreateCedarEntityError;
-
 #[doc(hidden)]
 pub mod bindings {
     pub use cedar_policy;
@@ -124,12 +122,12 @@ impl Cedarling {
     /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.
     #[doc(hidden)]
     #[cfg(test)]
-    pub async fn authorize_entities_data(
+    pub async fn build_entities(
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         let tokens = self.authz.decode_tokens(request).await?;
-        self.authz.build_entities(request, &tokens).await
+        self.authz.build_entities(request, &tokens)
     }
 }
 

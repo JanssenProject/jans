@@ -54,7 +54,7 @@ export default function RegisterClient({ isOpen, handleDialog }) {
   };
 
   const validateIssuer = async (e) => {
-    
+
     setIssuerError('');
     let issuer = e.target.value;
     if (issuer.length === 0) {
@@ -221,7 +221,7 @@ export default function RegisterClient({ isOpen, handleDialog }) {
             event.preventDefault();
           },
         }}
-         className="form-container"
+        className="form-container"
       >
         <DialogTitle>Register OIDC Client</DialogTitle>
         {loading ? (

@@ -186,8 +186,8 @@ def test_resource_entity_error():
     '''
     try:
         raise_authorize_error(load_bootstrap_config())
-    except authorize_errors.ResourceEntityError as e:
-        assert str(e) == "could not create resource entity: could not get attribute value from payload: type mismatch for key 'org_id'. expected: 'String', but found: 'number'"
+    except authorize_errors.BuildEntitiesError as e:
+        assert str(e) == "failed to build resource entity: failed to build `org_id` attribute: failed to build restricted expression: type mismatch for key 'org_id'. expected: 'string', but found: 'number'"
 
 
 def test_authorize_error():
@@ -199,4 +199,4 @@ def test_authorize_error():
     try:
         raise_authorize_error(load_bootstrap_config())
     except authorize_errors.AuthorizeError as e:
-        assert str(e) == "could not create resource entity: could not get attribute value from payload: type mismatch for key 'org_id'. expected: 'String', but found: 'number'"
+        assert str(e) == "failed to build resource entity: failed to build `org_id` attribute: failed to build restricted expression: type mismatch for key 'org_id'. expected: 'string', but found: 'number'"
