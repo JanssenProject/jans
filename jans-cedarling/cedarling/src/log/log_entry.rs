@@ -17,6 +17,7 @@ use super::interface::Loggable;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types::{self, ApplicationName};
 use crate::common::policy_store::PoliciesContainer;
+use crate::jwt::Token;
 
 /// ISO-8601 time format for [`chrono`]
 /// example: 2024-11-27T10:10:50.654Z
@@ -336,7 +337,7 @@ pub struct DecisionLogEntry<'a> {
     /// decision for request
     pub decision: Decision,
     /// Dictionary with the token type and claims which should be included in the log
-    pub tokens: LogTokensInfo<'a>,
+    pub tokens: NewLogTokensInfo<'a>,
     /// time in milliseconds spent for decision
     pub decision_time_ms: i64,
 }
@@ -483,4 +484,18 @@ pub struct LogTokensInfo<'a> {
     #[serde(rename = "Userinfo")]
     pub userinfo: Option<HashMap<&'a str, &'a serde_json::Value>>,
     pub access: Option<HashMap<&'a str, &'a serde_json::Value>>,
+}
+
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+pub struct NewLogTokensInfo<'a>(pub HashMap<&'a str, HashMap<&'a str, &'a serde_json::Value>>);
+
+impl<'a> NewLogTokensInfo<'a> {
+    pub fn new(tokens: &'a HashMap<String, Token>, decision_log_jwt_id: &'a str) -> Self {
+        let tokens_logging_info = tokens
+            .iter()
+            .map(|(tkn_name, tkn)| (tkn_name.as_str(), tkn.logging_info(decision_log_jwt_id)))
+            .collect::<HashMap<&'a str, HashMap<&'a str, &'a serde_json::Value>>>();
+
+        Self(tokens_logging_info)
+    }
 }

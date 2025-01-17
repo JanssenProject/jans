@@ -11,11 +11,11 @@
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types;
 use crate::common::policy_store::PolicyStoreWithID;
-use crate::jwt::{self, TokenStr};
+use crate::jwt::{self, Token};
 use crate::log::interface::LogWriter;
 use crate::log::{
     AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, DiagnosticsRefs, LogEntry,
-    LogLevel, LogTokensInfo, LogType, Logger, PrincipalLogEntry, UserAuthorizeInfo,
+    LogLevel, LogType, Logger, NewLogTokensInfo, PrincipalLogEntry, UserAuthorizeInfo,
     WorkloadAuthorizeInfo,
 };
 use build_ctx::*;
@@ -93,43 +93,13 @@ impl Authz {
     pub(crate) async fn decode_tokens<'a>(
         &'a self,
         request: &'a Request,
-    ) -> Result<DecodedTokens<'a>, AuthorizeError> {
-        let access = if let Some(tkn) = request.tokens.access_token.as_ref() {
-            Some(
-                self.config
-                    .jwt_service
-                    .process_token(TokenStr::Access(tkn))
-                    .await?,
-            )
-        } else {
-            None
-        };
-        let id = if let Some(tkn) = request.tokens.id_token.as_ref() {
-            Some(
-                self.config
-                    .jwt_service
-                    .process_token(TokenStr::Id(tkn))
-                    .await?,
-            )
-        } else {
-            None
-        };
-        let userinfo = if let Some(tkn) = request.tokens.userinfo_token.as_ref() {
-            Some(
-                self.config
-                    .jwt_service
-                    .process_token(TokenStr::Userinfo(tkn))
-                    .await?,
-            )
-        } else {
-            None
-        };
-
-        Ok(DecodedTokens {
-            access,
-            id,
-            userinfo,
-        })
+    ) -> Result<HashMap<String, Token<'a>>, AuthorizeError> {
+        let tokens = self
+            .config
+            .jwt_service
+            .validate_tokens(&request.tokens)
+            .await?;
+        Ok(tokens)
     }
 
     /// Evaluate Authorization Request
@@ -281,32 +251,13 @@ impl Authz {
             .as_ref()
             .map(|auth_info| &auth_info.diagnostics);
 
-        let tokens_logging_info = LogTokensInfo {
-            access: tokens.access.as_ref().map(|tkn| {
-                tkn.logging_info(
-                    self.config
-                        .authorization
-                        .decision_log_default_jwt_id
-                        .as_str(),
-                )
-            }),
-            id_token: tokens.id.as_ref().map(|tkn| {
-                tkn.logging_info(
-                    self.config
-                        .authorization
-                        .decision_log_default_jwt_id
-                        .as_str(),
-                )
-            }),
-            userinfo: tokens.userinfo.as_ref().map(|tkn| {
-                tkn.logging_info(
-                    self.config
-                        .authorization
-                        .decision_log_default_jwt_id
-                        .as_str(),
-                )
-            }),
-        };
+        let tokens_logging_info = NewLogTokensInfo::new(
+            &tokens,
+            self.config
+                .authorization
+                .decision_log_default_jwt_id
+                .as_str(),
+        );
 
         // Decision log
         // we log decision log before debug log, to avoid cloning diagnostic info
@@ -381,7 +332,7 @@ impl Authz {
     pub fn build_entities(
         &self,
         request: &Request,
-        tokens: &DecodedTokens<'_>,
+        tokens: &HashMap<String, Token>,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         Ok(self
             .entity_builder
@@ -403,11 +354,9 @@ struct ExecuteAuthorizeParameters<'a> {
 pub struct AuthorizeEntitiesData {
     pub workload: Option<Entity>,
     pub user: Option<Entity>,
-    pub access_token: Option<Entity>,
-    pub id_token: Option<Entity>,
-    pub userinfo_token: Option<Entity>,
     pub resource: Entity,
     pub roles: Vec<Entity>,
+    pub tokens: HashMap<String, Entity>,
 }
 
 impl AuthorizeEntitiesData {
@@ -424,17 +373,11 @@ impl AuthorizeEntitiesData {
 
     /// Create iterator to get all entities
     fn into_iter(self) -> impl Iterator<Item = Entity> {
-        vec![self.resource].into_iter().chain(self.roles).chain(
-            vec![
-                self.user,
-                self.workload,
-                self.access_token,
-                self.userinfo_token,
-                self.id_token,
-            ]
+        vec![self.resource]
             .into_iter()
-            .flatten(),
-        )
+            .chain(self.roles)
+            .chain(self.tokens.into_values())
+            .chain(vec![self.user, self.workload].into_iter().flatten())
     }
 
     /// Create iterator to get all entities
@@ -442,16 +385,11 @@ impl AuthorizeEntitiesData {
         vec![&self.resource]
             .into_iter()
             .chain(self.roles.iter())
+            .chain(self.tokens.values())
             .chain(
-                vec![
-                    self.user.as_ref(),
-                    self.workload.as_ref(),
-                    self.access_token.as_ref(),
-                    self.userinfo_token.as_ref(),
-                    self.id_token.as_ref(),
-                ]
-                .into_iter()
-                .flatten(),
+                vec![self.user.as_ref(), self.workload.as_ref()]
+                    .into_iter()
+                    .flatten(),
             )
     }
 

@@ -5,6 +5,8 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use std::collections::HashMap;
+
 // use cedarling::ResourceData;
 use super::resource_data::ResourceData;
 use pyo3::exceptions::PyRuntimeError;
@@ -34,6 +36,7 @@ use serde_pyobject::from_pyobject;
 #[pyclass(get_all, set_all)]
 pub struct Request {
     pub tokens: Tokens,
+    pub new_tokens: HashMap<String, String>,
     /// cedar_policy action
     pub action: String,
     /// cedar_policy resource data
@@ -94,6 +97,7 @@ impl Request {
     fn new(tokens: Tokens, action: String, resource: ResourceData, context: Py<PyDict>) -> Self {
         Self {
             tokens,
+            new_tokens: HashMap::new(), // TODO: replace tokens
             action,
             resource,
             context,
@@ -122,6 +126,7 @@ impl Request {
 
         Ok(cedarling::Request {
             tokens: self.tokens.clone().into(),
+            new_tokens: self.new_tokens.clone().into(),
             action: self.action.clone(),
             resource: self.resource.clone().into(),
             context,

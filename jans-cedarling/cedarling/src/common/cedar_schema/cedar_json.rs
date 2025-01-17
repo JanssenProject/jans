@@ -7,6 +7,7 @@
 
 use action::*;
 use attribute::*;
+use cedar_policy::ParseErrors;
 use entity_type::*;
 use serde::Deserialize;
 use std::{collections::HashMap, str::FromStr};
@@ -64,16 +65,16 @@ impl CedarSchemaJson {
     pub fn get_entity_from_full_name(
         &self,
         full_name: &str,
-    ) -> Option<(NamespaceName, &EntityType)> {
-        let full_name = cedar_policy::EntityTypeName::from_str(full_name).ok()?;
+    ) -> Result<Option<&EntityType>, ParseErrors> {
+        let full_name = cedar_policy::EntityTypeName::from_str(full_name)?;
         let namespace_name = full_name.namespace();
         if let Some(namespace) = self.namespaces.get(&namespace_name) {
             let base_name = full_name.basename();
             if let Some(entity_type) = namespace.entity_types.get(base_name) {
-                return Some((namespace_name, entity_type));
+                return Ok(Some(entity_type));
             }
         }
-        None
+        Ok(None)
     }
 }
 

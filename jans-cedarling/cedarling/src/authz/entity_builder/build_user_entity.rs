@@ -10,16 +10,16 @@ use std::collections::HashSet;
 impl EntityBuilder {
     pub fn build_user_entity(
         &self,
-        tokens: &DecodedTokens,
+        tokens: &HashMap<String, Token>,
         parents: HashSet<EntityUid>,
     ) -> Result<Entity, BuildUserEntityError> {
         let entity_name = self.entity_names.user.as_ref();
         let mut errors = vec![];
 
-        for token in [tokens.userinfo.as_ref(), tokens.id.as_ref()]
-            .iter()
-            .flatten()
-        {
+        let token_refs = [tokens.get("userinfo_token"), tokens.get("id_token")]
+            .into_iter()
+            .filter_map(|x| x);
+        for token in token_refs {
             let user_id_claim = token.user_mapping();
             match build_entity(
                 &self.schema,
@@ -27,11 +27,10 @@ impl EntityBuilder {
                 token,
                 user_id_claim,
                 Vec::new(),
-                &mut HashMap::new(),
                 parents.clone(),
             ) {
                 Ok(entity) => return Ok(entity),
-                Err(err) => errors.push((token.kind, err)),
+                Err(err) => errors.push((token.name.clone(), err)),
             }
         }
 
@@ -41,7 +40,7 @@ impl EntityBuilder {
 
 #[derive(Debug, thiserror::Error)]
 pub struct BuildUserEntityError {
-    pub errors: Vec<(TokenKind, BuildEntityError)>,
+    pub errors: Vec<(String, BuildEntityError)>,
 }
 
 impl fmt::Display for BuildUserEntityError {
@@ -69,7 +68,7 @@ mod test {
     use super::super::*;
     use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
     use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer};
-    use crate::jwt::{Token, TokenClaims};
+    use crate::jwt::TokenClaims;
     use cedar_policy::EvalResult;
     use serde_json::json;
     use std::collections::HashMap;
@@ -90,8 +89,10 @@ mod test {
             ..Default::default()
         };
         TrustedIssuer {
-            id_tokens: token_entity_metadata.clone(),
-            userinfo_tokens: token_entity_metadata,
+            tokens_metadata: HashMap::from([
+                ("id_token".to_string(), token_entity_metadata.clone()),
+                ("userinfo_token".to_string(), token_entity_metadata),
+            ]),
             ..Default::default()
         }
     }
@@ -105,7 +106,7 @@ mod test {
                         "attributes": {
                             "uid": { "type": "String" },
                             "domain": { "type": "String" },
-                        },
+                        }
                     },
                     "Url": {
                         "type": "Record",
@@ -133,7 +134,7 @@ mod test {
         .expect("should successfully create test schema")
     }
 
-    fn test_successfully_building_user_entity(tokens: DecodedTokens) {
+    fn test_successfully_building_user_entity(tokens: HashMap<String, Token<'_>>) {
         let schema = test_schema();
         let builder =
             EntityBuilder::new(schema, EntityNames::default(), false, true, HashMap::new());
@@ -173,7 +174,8 @@ mod test {
     #[test]
     fn can_build_using_userinfo_tkn() {
         let iss = test_iss();
-        let userinfo_token = Token::new_userinfo(
+        let userinfo_token = Token::new(
+            "userinfo_token",
             TokenClaims::new(HashMap::from([
                 ("email".to_string(), json!("test@email.com")),
                 ("sub".to_string(), json!("user-123")),
@@ -181,18 +183,15 @@ mod test {
             ])),
             Some(&iss),
         );
-        let tokens = DecodedTokens {
-            access: None,
-            id: None,
-            userinfo: Some(userinfo_token),
-        };
+        let tokens = HashMap::from([("userinfo_token".to_string(), userinfo_token)]);
         test_successfully_building_user_entity(tokens);
     }
 
     #[test]
     fn can_build_using_id_tkn() {
         let iss = test_iss();
-        let id_token = Token::new_id(
+        let id_token = Token::new(
+            "id_token",
             TokenClaims::new(HashMap::from([
                 ("email".to_string(), json!("test@email.com")),
                 ("sub".to_string(), json!("user-123")),
@@ -200,11 +199,7 @@ mod test {
             ])),
             Some(&iss),
         );
-        let tokens = DecodedTokens {
-            access: None,
-            id: Some(id_token),
-            userinfo: None,
-        };
+        let tokens = HashMap::from([("id_token".to_string(), id_token)]);
         test_successfully_building_user_entity(tokens);
     }
 
@@ -213,13 +208,16 @@ mod test {
         let iss = test_iss();
         let schema = test_schema();
 
-        let id_token = Token::new_id(TokenClaims::new(HashMap::new()), Some(&iss));
-        let userinfo_token = Token::new_userinfo(TokenClaims::new(HashMap::new()), Some(&iss));
-        let tokens = DecodedTokens {
-            access: None,
-            id: Some(id_token),
-            userinfo: Some(userinfo_token),
-        };
+        let id_token = Token::new("id_token", TokenClaims::new(HashMap::new()), Some(&iss));
+        let userinfo_token = Token::new(
+            "userinfo_token",
+            TokenClaims::new(HashMap::new()),
+            Some(&iss),
+        );
+        let tokens = HashMap::from([
+            ("id_token".to_string(), id_token),
+            ("userinfo_token".to_string(), userinfo_token),
+        ]);
 
         let builder =
             EntityBuilder::new(schema, EntityNames::default(), false, true, HashMap::new());
@@ -228,12 +226,12 @@ mod test {
             .expect_err("expected to error while building the user entity");
 
         assert_eq!(err.errors.len(), 2);
-        for (i, expected_kind) in [TokenKind::Userinfo, TokenKind::Id].iter().enumerate() {
+        for (i, expected_tkn) in ["userinfo_token", "id_token"].iter().enumerate() {
             assert!(
                 matches!(
                     err.errors[i],
-                    (ref tkn_kind, BuildEntityError::MissingClaim(ref claim_name))
-                        if tkn_kind == expected_kind &&
+                    (ref tkn_name, BuildEntityError::MissingClaim(ref claim_name))
+                        if tkn_name == expected_tkn &&
                             claim_name == "sub"
                 ),
                 "expected an error due to missing the `sub` claim, got: {:?}",
@@ -246,11 +244,7 @@ mod test {
     fn errors_when_tokens_unavailable() {
         let schema = test_schema();
 
-        let tokens = DecodedTokens {
-            access: None,
-            id: None,
-            userinfo: None,
-        };
+        let tokens = HashMap::new();
 
         let builder =
             EntityBuilder::new(schema, EntityNames::default(), false, true, HashMap::new());
@@ -264,7 +258,8 @@ mod test {
     #[test]
     fn can_build_entity_with_roles() {
         let iss = test_iss();
-        let userinfo_token = Token::new_userinfo(
+        let userinfo_token = Token::new(
+            "userinfo_token",
             TokenClaims::new(HashMap::from([
                 ("sub".to_string(), json!("user-123")),
                 ("email".to_string(), json!("someone@email.com")),
@@ -272,11 +267,7 @@ mod test {
             ])),
             Some(&iss),
         );
-        let tokens = DecodedTokens {
-            access: None,
-            id: None,
-            userinfo: Some(userinfo_token),
-        };
+        let tokens = HashMap::from([("userinfo_token".to_string(), userinfo_token)]);
         let schema = test_schema();
         let builder =
             EntityBuilder::new(schema, EntityNames::default(), false, true, HashMap::new());

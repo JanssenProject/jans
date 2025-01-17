@@ -17,19 +17,37 @@
         "HS256",
         "RS256"
     ],
-    "CEDARLING_AT_ISS_VALIDATION": "disabled",
-    "CEDARLING_AT_JTI_VALIDATION": "disabled",
-    "CEDARLING_AT_NBF_VALIDATION": "disabled",
-    "CEDARLING_AT_EXP_VALIDATION": "enabled",
-    "CEDARLING_IDT_ISS_VALIDATION": "enabled",
-    "CEDARLING_IDT_SUB_VALIDATION": "enabled",
-    "CEDARLING_IDT_EXP_VALIDATION": "enabled",
-    "CEDARLING_IDT_IAT_VALIDATION": "enabled",
-    "CEDARLING_IDT_AUD_VALIDATION": "enabled",
-    "CEDARLING_USERINFO_ISS_VALIDATION": "enabled",
-    "CEDARLING_USERINFO_SUB_VALIDATION": "enabled",
-    "CEDARLING_USERINFO_AUD_VALIDATION": "enabled",
-    "CEDARLING_USERINFO_EXP_VALIDATION": "enabled",
+    "CEDARLING_MAPPING_TOKENS": {
+        "access_token": "Test::Access_token",
+        "id_token": "Test::id_token",
+        "userinfo_token": "Test::Userinfo_token"
+    },
+    "CEDARLING_TOKEN_VALIDATION_SETTINGS": {
+        "access_token": {
+            "iss": "disabled",
+            "jti": "disabled",
+            "nbf": "disabled",
+            "exp": "enabled"
+        },
+        "id_token": {
+            "iss": "enabled",
+            "sub": "enabled",
+            "exp": "enabled",
+            "iat": "enabled",
+            "aud": "enabled"
+        },
+        "userinfo_token": {
+            "iss": "enabled",
+            "aud": "enabled",
+            "sub": "enabled",
+            "exp": "enabled"
+        }
+    },
+    "CEDARLING_TOKEN_ENTITY_MAPPER": {
+        "access_token": "Test::Workload",
+        "id_token": "Test::User",
+        "userinfo_token": "Test::User"
+    },
     "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
     "CEDARLING_LOCK": "disabled",
     "CEDARLING_LOCK_MASTER_CONFIGURATION_URI": null,

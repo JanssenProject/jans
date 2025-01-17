@@ -4,6 +4,9 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use crate::{AuthorizationConfig, JwtConfig, WorkloadBoolOp};
+use serde_json::json;
+use std::collections::HashMap;
+
 pub use crate::{
     BootstrapConfig, BootstrapConfigRaw, Cedarling, FeatureToggle, LogConfig, LogTypeConfig,
     PolicyStoreConfig, PolicyStoreSource,
@@ -24,6 +27,12 @@ pub fn get_raw_config(local_policy_store: &str) -> BootstrapConfigRaw {
         local_policy_store: Some(local_policy_store_json.to_string()),
         jwt_status_validation: FeatureToggle::Disabled,
         id_token_trust_mode: crate::IdTokenTrustMode::None,
+        token_validation_settings: serde_json::from_value(json!({
+            "access_token": {},
+            "id_token": {},
+            "userinfo_token": {},
+        }))
+        .unwrap(),
         ..Default::default()
     }
 }
@@ -44,6 +53,23 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::And,
+            mapping_user: Some("Jans::User".to_string()),
+            mapping_workload: Some("Jans::Workload".to_string()),
+            mapping_role: Some("Jans::Role".to_string()),
+            mapping_tokens: HashMap::from([
+                ("access_token".to_string(), "Jans::Access_token".to_string()),
+                ("id_token".to_string(), "Jans::id_token".to_string()),
+                (
+                    "userinfo_token".to_string(),
+                    "Jans::Userinfo_token".to_string(),
+                ),
+            ])
+            .into(),
+            token_enitity_mapper: HashMap::from([
+                ("access_token".to_string(), "Jans::Workload".to_string()),
+                ("id_token".to_string(), "Jans::User".to_string()),
+                ("userinfo_token".to_string(), "Jans::User".to_string()),
+            ]),
             ..Default::default()
         },
     }

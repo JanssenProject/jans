@@ -1,13 +1,13 @@
 // This software is available under the Apache-2.0 license.
+//
 // See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::HashSet;
-use std::str::FromStr;
-
 use jsonwebtoken::Algorithm;
 use serde::Deserialize;
+use std::collections::{HashMap, HashSet};
+use std::str::FromStr;
 
 /// The set of Bootstrap properties related to JWT validation.
 #[derive(Debug, PartialEq)]
@@ -57,12 +57,8 @@ pub struct JwtConfig {
     pub id_token_trust_mode: IdTokenTrustMode,
     /// Only tokens signed with algorithms in this list can be valid.
     pub signature_algorithms_supported: HashSet<Algorithm>,
-    /// Validation options related to the Access token
-    pub access_token_config: TokenValidationConfig,
-    /// Validation options related to the Id token
-    pub id_token_config: TokenValidationConfig,
-    /// Validation options related to the Userinfo token
-    pub userinfo_token_config: TokenValidationConfig,
+    /// Token validation settings
+    pub token_validation_settings: HashMap<String, TokenValidationConfig>,
 }
 
 /// Validation options related to JSON Web Tokens (JWT).
@@ -224,9 +220,17 @@ impl Default for JwtConfig {
             jwt_status_validation: true,
             id_token_trust_mode: IdTokenTrustMode::Strict,
             signature_algorithms_supported: HashSet::new(),
-            access_token_config: TokenValidationConfig::access_token(),
-            id_token_config: TokenValidationConfig::id_token(),
-            userinfo_token_config: TokenValidationConfig::userinfo_token(),
+            token_validation_settings: HashMap::from([
+                (
+                    "access_token".to_string(),
+                    TokenValidationConfig::access_token(),
+                ),
+                ("id_token".to_string(), TokenValidationConfig::id_token()),
+                (
+                    "userinfo_token".to_string(),
+                    TokenValidationConfig::userinfo_token(),
+                ),
+            ]),
         }
     }
 }
@@ -240,9 +244,11 @@ impl JwtConfig {
             jwt_status_validation: false,
             id_token_trust_mode: IdTokenTrustMode::None,
             signature_algorithms_supported: HashSet::new(),
-            access_token_config: TokenValidationConfig::default(),
-            id_token_config: TokenValidationConfig::default(),
-            userinfo_token_config: TokenValidationConfig::default(),
+            token_validation_settings: HashMap::from_iter(
+                ["access_token", "id_token", "userinfo_token"]
+                    .iter()
+                    .map(|tkn| (tkn.to_string(), TokenValidationConfig::default())),
+            ),
         }
         .allow_all_algorithms()
     }

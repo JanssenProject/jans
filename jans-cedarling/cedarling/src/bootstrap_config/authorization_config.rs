@@ -48,18 +48,43 @@ pub struct AuthorizationConfig {
     /// - `value`: The name of the entity the token is associated with (e.g., a resource or object).
     pub token_enitity_mapper: HashMap<String, String>,
 
-    /// Name of Cedar Context schema entity
+    /// Type Name of the User entity
     pub mapping_user: Option<String>,
 
-    /// Name of Cedar Workload schema entity
+    /// Type Name of the Workload entity
     pub mapping_workload: Option<String>,
 
-    /// Name of Cedar id_token schema entity
-    pub mapping_id_token: Option<String>,
+    /// Type Name of the Role entity
+    pub mapping_role: Option<String>,
 
-    /// Name of Cedar access_token schema entity
-    pub mapping_access_token: Option<String>,
+    /// Name of Cedar token schema entities
+    pub mapping_tokens: TokenEntityNames,
+}
 
-    /// Name of Cedar userinfo schema entity
-    pub mapping_userinfo_token: Option<String>,
+#[derive(Debug, Clone, PartialEq)]
+pub struct TokenEntityNames(pub HashMap<String, String>);
+
+impl Default for TokenEntityNames {
+    fn default() -> Self {
+        Self(HashMap::from([
+            ("access_token".to_string(), "Jans::Access_token".to_string()),
+            ("id_token".to_string(), "Jans::id_token".to_string()),
+            (
+                "userinfo_token".to_string(),
+                "Jans::Userinfo_token".to_string(),
+            ),
+        ]))
+    }
+}
+
+impl From<HashMap<String, String>> for TokenEntityNames {
+    fn from(value: HashMap<String, String>) -> Self {
+        Self(value)
+    }
+}
+
+impl Into<HashMap<String, String>> for TokenEntityNames {
+    fn into(self) -> HashMap<String, String> {
+        self.0
+    }
 }

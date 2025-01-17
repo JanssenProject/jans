@@ -16,19 +16,15 @@ impl EntityBuilder {
         resource: &ResourceData,
     ) -> Result<Entity, BuildResourceEntityError> {
         let entity_type_name = cedar_policy::EntityTypeName::from_str(&resource.resource_type)?;
-        let (_namespace_name, entity_type) = self
+        let entity_type = self
             .schema
-            .get_entity_from_base_name(entity_type_name.basename())
+            .get_entity_from_full_name(&entity_type_name.to_string())?
             .ok_or(BuildEntityError::EntityNotInSchema(
                 entity_type_name.to_string(),
             ))?;
 
-        let entity_attrs = build_entity_attrs_from_values(
-            &self.schema,
-            entity_type,
-            &resource.payload,
-            &mut HashMap::new(),
-        )?;
+        let entity_attrs =
+            build_entity_attrs_from_values(&self.schema, entity_type, &resource.payload)?;
 
         // Build cedar entity
         let entity_id =
@@ -130,7 +126,7 @@ mod test {
         let builder =
             EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
         let resource_data = ResourceData {
-            resource_type: "HttpRequest".to_string(),
+            resource_type: "Jans::HttpRequest".to_string(),
             id: "request-123".to_string(),
             payload: HashMap::from([
                 ("header".to_string(), json!({"Accept": "test"})),
@@ -226,7 +222,7 @@ mod test {
         let builder =
             EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
         let resource_data = ResourceData {
-            resource_type: "HttpRequest".to_string(),
+            resource_type: "Jans::HttpRequest".to_string(),
             id: "request-123".to_string(),
             payload: HashMap::new(),
         };
@@ -277,7 +273,7 @@ mod test {
         let builder =
             EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
         let resource_data = ResourceData {
-            resource_type: "HttpRequest".to_string(),
+            resource_type: "Jans::HttpRequest".to_string(),
             id: "request-123".to_string(),
             payload: HashMap::from([
                 (

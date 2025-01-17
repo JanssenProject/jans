@@ -4,14 +4,17 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::authorization_config::AuthorizationConfig;
+use super::token_entity_mapper::BsTknPrincipalMapper;
+use super::token_entity_mapping::BsTknEntityMapping;
+use super::token_validation_setting::BsTknValidationConfigs;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, IdTokenTrustMode, JwtConfig, LogConfig,
-    LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, TokenValidationConfig,
+    LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::fmt::Display;
 use std::fs;
 use std::path::Path;
@@ -88,17 +91,15 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_MAPPING_WORKLOAD", default)]
     pub mapping_workload: Option<String>,
 
-    /// Mapping name of cedar schema id_token entity.
-    #[serde(rename = "CEDARLING_MAPPING_ID_TOKEN", default)]
-    pub mapping_id_token: Option<String>,
+    /// Mapping name of cedar schema Workload entity.
+    #[serde(rename = "CEDARLING_MAPPING_ROLE", default)]
+    pub mapping_role: Option<String>,
 
-    /// Mapping name of cedar schema access_token entity.
-    #[serde(rename = "CEDARLING_MAPPING_ACCESS_TOKEN", default)]
-    pub mapping_access_token: Option<String>,
-
-    /// Mapping name of cedar schema userinfo_token entity.
-    #[serde(rename = "CEDARLING_MAPPING_USERINFO_TOKEN", default)]
-    pub mapping_userinfo_token: Option<String>,
+    /// Describes the mapping for **Token Name** -> **Token Entity**
+    ///
+    /// This tells cedarling the entity names of the given tokens
+    #[serde(rename = "CEDARLING_MAPPING_TOKENS", default)]
+    pub mapping_tokens: BsTknEntityMapping,
 
     /// Path to a local file pointing containing a JWKS.
     #[serde(
@@ -199,6 +200,10 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_USERINFO_EXP_VALIDATION", default)]
     pub userinfo_exp_validation: FeatureToggle,
 
+    /// Validation setting for each token
+    #[serde(rename = "CEDARLING_TOKEN_VALIDATION_SETTINGS", default)]
+    pub token_validation_settings: BsTknValidationConfigs,
+
     /// Varying levels of validations based on the preference of the developer.
     ///
     /// # Strict Mode
@@ -210,16 +215,12 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_ID_TOKEN_TRUST_MODE", default)]
     pub id_token_trust_mode: IdTokenTrustMode,
 
-    /// Defines the mapping of token names to entity references.
+    /// Describes the mapping for **Token Entity** -> **Principal Entity**
     ///
-    /// This mapping determines where a token reference should be included by associating:
-    /// - `key`: The name of the token (e.g., a unique identifier for the token).
-    /// - `value`: The name of the entity the token is associated with (e.g., a resource or object).
-    ///
-    /// This field uses the `CEDARLING_TOKEN_ENTITY_MAPPER` key when serialized
-    /// and defaults to an empty map if not specified.
+    /// This tells cedarling to put token entity references
+    /// in the target principal entities.
     #[serde(rename = "CEDARLING_TOKEN_ENTITY_MAPPER", default)]
-    pub token_entity_mapper: HashMap<String, String>,
+    pub token_entity_mapper: BsTknPrincipalMapper,
 
     /// If Enabled, the Cedarling will connect to the Lock Master for policies,
     /// and subscribe for SSE events.
@@ -515,28 +516,7 @@ impl BootstrapConfig {
             jwt_status_validation: raw.jwt_status_validation.into(),
             id_token_trust_mode: raw.id_token_trust_mode,
             signature_algorithms_supported: raw.jwt_signature_algorithms_supported.clone(),
-            access_token_config: TokenValidationConfig {
-                iss_validation: raw.at_iss_validation.into(),
-                jti_validation: raw.at_jti_validation.into(),
-                nbf_validation: raw.at_nbf_validation.into(),
-                exp_validation: raw.at_exp_validation.into(),
-                ..Default::default()
-            },
-            id_token_config: TokenValidationConfig {
-                iss_validation: raw.idt_iss_validation.into(),
-                aud_validation: raw.idt_aud_validation.into(),
-                sub_validation: raw.idt_sub_validation.into(),
-                exp_validation: raw.idt_exp_validation.into(),
-                iat_validation: raw.idt_iat_validation.into(),
-                ..Default::default()
-            },
-            userinfo_token_config: TokenValidationConfig {
-                iss_validation: raw.userinfo_iss_validation.into(),
-                aud_validation: raw.userinfo_aud_validation.into(),
-                sub_validation: raw.userinfo_sub_validation.into(),
-                exp_validation: raw.userinfo_exp_validation.into(),
-                ..Default::default()
-            },
+            token_validation_settings: raw.token_validation_settings.clone().into(),
         };
 
         let authorization_config = AuthorizationConfig {
@@ -548,10 +528,9 @@ impl BootstrapConfig {
             decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
             mapping_user: raw.mapping_user.clone(),
             mapping_workload: raw.mapping_workload.clone(),
-            mapping_id_token: raw.mapping_id_token.clone(),
-            mapping_access_token: raw.mapping_access_token.clone(),
-            mapping_userinfo_token: raw.mapping_userinfo_token.clone(),
-            token_enitity_mapper: raw.token_entity_mapper.clone(),
+            mapping_role: raw.mapping_role.clone(),
+            mapping_tokens: raw.mapping_tokens.clone().into(),
+            token_enitity_mapper: raw.token_entity_mapper.clone().into(),
         };
 
         Ok(Self {

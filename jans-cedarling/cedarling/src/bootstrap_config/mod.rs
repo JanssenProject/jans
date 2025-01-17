@@ -6,6 +6,11 @@
 //! Module for bootstrap configuration types
 //! to configure [`Cedarling`](crate::Cedarling)
 
+mod decode;
+mod token_entity_mapper;
+mod token_entity_mapping;
+mod token_validation_setting;
+
 pub(crate) mod authorization_config;
 pub(crate) mod jwt_config;
 pub(crate) mod log_config;
@@ -15,12 +20,10 @@ pub(crate) mod policy_store_config;
 use std::{fs, io, path::Path};
 
 pub use authorization_config::AuthorizationConfig;
-// reimport to useful import values in root module
+pub use decode::{BootstrapConfigRaw, FeatureToggle, LoggerType, WorkloadBoolOp};
 pub use jwt_config::*;
 pub use log_config::*;
 pub use policy_store_config::*;
-mod decode;
-pub use decode::{BootstrapConfigRaw, FeatureToggle, LoggerType, WorkloadBoolOp};
 
 /// Bootstrap configuration
 /// properties for configuration [`Cedarling`](crate::Cedarling) application.
@@ -151,15 +154,13 @@ pub enum BootstrapConfigLoadingError {
 
 #[cfg(test)]
 mod test {
-    use std::collections::HashSet;
-    use std::path::Path;
-
-    use jsonwebtoken::Algorithm;
-    use test_utils::assert_eq;
-
     use super::*;
     use crate::bootstrap_config::decode::BootstrapConfigRaw;
     use crate::{BootstrapConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig};
+    use jsonwebtoken::Algorithm;
+    use std::collections::{HashMap, HashSet};
+    use std::path::Path;
+    use test_utils::assert_eq;
 
     #[test]
     fn can_deserialize_from_json() {
@@ -185,30 +186,46 @@ mod test {
                 jwt_status_validation: false,
                 id_token_trust_mode: IdTokenTrustMode::Strict,
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
-                access_token_config: TokenValidationConfig {
-                    exp_validation: true,
-                    ..Default::default()
-                },
-                id_token_config: TokenValidationConfig {
-                    iss_validation: true,
-                    sub_validation: true,
-                    exp_validation: true,
-                    iat_validation: true,
-                    aud_validation: true,
-                    ..Default::default()
-                },
-                userinfo_token_config: TokenValidationConfig {
-                    iss_validation: true,
-                    sub_validation: true,
-                    aud_validation: true,
-                    exp_validation: true,
-                    ..Default::default()
-                },
+                token_validation_settings: HashMap::from([
+                    ("access_token".to_string(), TokenValidationConfig {
+                        exp_validation: true,
+                        ..Default::default()
+                    }),
+                    ("id_token".to_string(), TokenValidationConfig {
+                        iss_validation: true,
+                        aud_validation: true,
+                        sub_validation: true,
+                        iat_validation: true,
+                        exp_validation: true,
+                        ..Default::default()
+                    }),
+                    ("userinfo_token".to_string(), TokenValidationConfig {
+                        iss_validation: true,
+                        aud_validation: true,
+                        sub_validation: true,
+                        exp_validation: true,
+                        ..Default::default()
+                    }),
+                ]),
             },
             authorization_config: AuthorizationConfig {
                 use_user_principal: true,
                 use_workload_principal: true,
                 user_workload_operator: WorkloadBoolOp::And,
+                token_enitity_mapper: HashMap::from([
+                    ("access_token".to_string(), "Test::Workload".to_string()),
+                    ("id_token".to_string(), "Test::User".to_string()),
+                    ("userinfo_token".to_string(), "Test::User".to_string()),
+                ]),
+                mapping_tokens: HashMap::from([
+                    ("access_token".to_string(), "Test::Access_token".to_string()),
+                    ("id_token".to_string(), "Test::id_token".to_string()),
+                    (
+                        "userinfo_token".to_string(),
+                        "Test::Userinfo_token".to_string(),
+                    ),
+                ])
+                .into(),
                 ..Default::default()
             },
         };
@@ -240,30 +257,46 @@ mod test {
                 jwt_status_validation: false,
                 id_token_trust_mode: IdTokenTrustMode::Strict,
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
-                access_token_config: TokenValidationConfig {
-                    exp_validation: true,
-                    ..Default::default()
-                },
-                id_token_config: TokenValidationConfig {
-                    iss_validation: true,
-                    sub_validation: true,
-                    exp_validation: true,
-                    iat_validation: true,
-                    aud_validation: true,
-                    ..Default::default()
-                },
-                userinfo_token_config: TokenValidationConfig {
-                    iss_validation: true,
-                    sub_validation: true,
-                    aud_validation: true,
-                    exp_validation: true,
-                    ..Default::default()
-                },
+                token_validation_settings: HashMap::from([
+                    ("access_token".to_string(), TokenValidationConfig {
+                        exp_validation: true,
+                        ..Default::default()
+                    }),
+                    ("id_token".to_string(), TokenValidationConfig {
+                        iss_validation: true,
+                        sub_validation: true,
+                        exp_validation: true,
+                        iat_validation: true,
+                        aud_validation: true,
+                        ..Default::default()
+                    }),
+                    ("userinfo_token".to_string(), TokenValidationConfig {
+                        iss_validation: true,
+                        sub_validation: true,
+                        aud_validation: true,
+                        exp_validation: true,
+                        ..Default::default()
+                    }),
+                ]),
             },
             authorization_config: AuthorizationConfig {
                 use_user_principal: true,
                 use_workload_principal: true,
                 user_workload_operator: WorkloadBoolOp::And,
+                token_enitity_mapper: HashMap::from([
+                    ("access_token".to_string(), "Test::Workload".to_string()),
+                    ("id_token".to_string(), "Test::User".to_string()),
+                    ("userinfo_token".to_string(), "Test::User".to_string()),
+                ]),
+                mapping_tokens: HashMap::from([
+                    ("access_token".to_string(), "Test::Access_token".to_string()),
+                    ("id_token".to_string(), "Test::id_token".to_string()),
+                    (
+                        "userinfo_token".to_string(),
+                        "Test::Userinfo_token".to_string(),
+                    ),
+                ])
+                .into(),
                 ..Default::default()
             },
         };
