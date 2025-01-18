@@ -186,7 +186,7 @@ def test_resource_entity_error():
     '''
     try:
         raise_authorize_error(load_bootstrap_config())
-    except authorize_errors.BuildEntitiesError as e:
+    except authorize_errors.BuildEntityError as e:
         assert str(e) == "failed to build resource entity: failed to build `org_id` attribute: failed to build restricted expression: type mismatch for key 'org_id'. expected: 'string', but found: 'number'"
 
 
