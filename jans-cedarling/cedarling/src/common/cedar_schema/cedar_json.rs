@@ -76,6 +76,11 @@ impl CedarSchemaJson {
         }
         Ok(None)
     }
+
+    pub fn get_entity(&self, _type_name: &str) -> Result<Option<&EntityType>, ParseErrors> {
+        // TODO:
+        todo!("implement getting entity from a type name, whether or not it has a namespace")
+    }
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]

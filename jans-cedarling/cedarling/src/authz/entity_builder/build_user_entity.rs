@@ -28,6 +28,7 @@ impl EntityBuilder {
                 user_id_claim,
                 Vec::new(),
                 parents.clone(),
+                &HashMap::new(),
             ) {
                 Ok(entity) => return Ok(entity),
                 Err(err) => errors.push((token.name.clone(), err)),

@@ -17,18 +17,20 @@ impl EntityBuilder {
             .get_metadata()
             .and_then(|x| x.principal_identifier.as_deref())
             .unwrap_or(DEFAULT_TKN_PRINCIPAL_IDENTIFIER);
-        build_entity(
+        let tkn_entity = build_entity(
             &self.schema,
             entity_name,
             token,
             id_src_claim,
             Vec::new(),
             HashSet::new(),
+            &HashMap::new(),
         )
         .map_err(|err| BuildTokenEntityError {
             token_name: token.name.clone(),
             err,
-        })
+        })?;
+        Ok(tkn_entity)
     }
 }
 

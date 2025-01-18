@@ -5,12 +5,15 @@
 
 use super::*;
 use cedar_policy::Entity;
+use smol_str::SmolStr;
 use std::collections::HashSet;
 
 // Default claims to use for the Workload Entity's ID.
 const DEFAULT_ACCESS_TKN_WORKLOAD_CLAIM: &str = "client_id";
 const DEFAULT_ID_TKN_WORKLOAD_CLAIM: &str = "aud";
 
+// TODO: make a bootstrap property to control which tokens to use
+// to create this entity
 const DEFAULT_ACCESS_TKN_NAME: &str = "access_token";
 const DEFAULT_ID_TKN_NAME: &str = "id_token";
 
@@ -18,6 +21,7 @@ impl EntityBuilder {
     pub fn build_workload_entity(
         &self,
         tokens: &HashMap<String, Token>,
+        built_entities: &HashMap<SmolStr, SmolStr>,
     ) -> Result<Entity, BuildWorkloadEntityError> {
         let entity_name = self.entity_names.workload.as_ref();
         let mut errors = vec![];
@@ -42,8 +46,11 @@ impl EntityBuilder {
                     workload_id_claim,
                     claim_aliases,
                     HashSet::new(),
+                    built_entities,
                 ) {
-                    Ok(entity) => return Ok(entity),
+                    Ok(entity) => {
+                        return Ok(entity);
+                    },
                     Err(err) => errors.push((token.name.clone(), err)),
                 }
             }
@@ -116,7 +123,7 @@ mod test {
         );
         let tokens = HashMap::from([("access_token".to_string(), access_token)]);
         let entity = builder
-            .build_workload_entity(&tokens)
+            .build_workload_entity(&tokens, &HashMap::new())
             .expect("expeted to successfully build workload entity");
         assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
         assert_eq!(
@@ -162,7 +169,7 @@ mod test {
         );
         let tokens = HashMap::from([("id_token".to_string(), id_token)]);
         let entity = builder
-            .build_workload_entity(&tokens)
+            .build_workload_entity(&tokens, &HashMap::new())
             .expect("expected to successfully build workload entity");
         assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
         assert_eq!(
@@ -253,7 +260,7 @@ mod test {
         );
         let tokens = HashMap::from([("access_token".to_string(), access_token)]);
         let entity = builder
-            .build_workload_entity(&tokens)
+            .build_workload_entity(&tokens, &HashMap::new())
             .expect("expected to successfully build workload entity");
 
         assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
@@ -347,7 +354,7 @@ mod test {
         );
         let tokens = HashMap::from([("access_token".to_string(), access_token)]);
         let entity = builder
-            .build_workload_entity(&tokens)
+            .build_workload_entity(&tokens, &HashMap::new())
             .expect("expected to successfully build workload entity");
 
         assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
@@ -396,15 +403,14 @@ mod test {
         let iss = TrustedIssuer::default();
         let builder =
             EntityBuilder::new(schema, EntityNames::default(), true, false, HashMap::new());
-        let access_token =
-            Token::new("access_token", TokenClaims::new(HashMap::new()), Some(&iss));
+        let access_token = Token::new("access_token", TokenClaims::new(HashMap::new()), Some(&iss));
         let id_token = Token::new("id_token", TokenClaims::new(HashMap::new()), Some(&iss));
         let tokens = HashMap::from([
             ("access_token".to_string(), access_token),
             ("id_token".to_string(), id_token),
         ]);
         let err = builder
-            .build_workload_entity(&tokens)
+            .build_workload_entity(&tokens, &HashMap::new())
             .expect_err("expected to error while building the workload entity");
 
         assert_eq!(err.errors.len(), 2);
@@ -445,7 +451,9 @@ mod test {
         let builder =
             EntityBuilder::new(schema, EntityNames::default(), true, false, HashMap::new());
         let tokens = HashMap::new();
-        let err = builder.build_workload_entity(&tokens).unwrap_err();
+        let err = builder
+            .build_workload_entity(&tokens, &HashMap::new())
+            .unwrap_err();
 
         assert_eq!(err.errors.len(), 0);
     }
