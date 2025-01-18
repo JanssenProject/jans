@@ -454,7 +454,6 @@ pub struct ParseFeatureToggleError {
 #[cfg(not(target_arch = "wasm32"))]
 fn cedarling_env_vars() -> HashMap<String, serde_json::Value> {
     env::vars()
-        .into_iter()
         .filter_map(|(k, v)| {
             k.starts_with("CEDARLING_")
                 .then_some((k, serde_json::json!(v)))
