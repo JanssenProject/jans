@@ -62,13 +62,11 @@ impl Authz {
         let entity_names = EntityNames::from(&config.authorization);
         let build_workload = config.authorization.use_workload_principal;
         let build_user = config.authorization.use_user_principal;
-        let token_entity_mapping = config.authorization.token_enitity_mapper.clone();
         let entity_builder = entity_builder::EntityBuilder::new(
             json_schema,
             entity_names,
             build_workload,
             build_user,
-            token_entity_mapping,
         );
 
         config.log_service.log(

@@ -123,8 +123,7 @@ mod test {
             }
         }))
         .expect("should successfully create test schema");
-        let builder =
-            EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let resource_data = ResourceData {
             resource_type: "Jans::HttpRequest".to_string(),
             id: "request-123".to_string(),
@@ -219,8 +218,7 @@ mod test {
             }
         }))
         .expect("should successfully create test schema");
-        let builder =
-            EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let resource_data = ResourceData {
             resource_type: "Jans::HttpRequest".to_string(),
             id: "request-123".to_string(),
@@ -270,8 +268,7 @@ mod test {
             }
         }))
         .expect("should successfully create test schema");
-        let builder =
-            EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let resource_data = ResourceData {
             resource_type: "Jans::HttpRequest".to_string(),
             id: "request-123".to_string(),

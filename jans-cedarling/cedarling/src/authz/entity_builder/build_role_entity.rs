@@ -136,8 +136,7 @@ mod test {
 
     fn test_build_entity_from_str_claim(tokens: &HashMap<String, Token>) {
         let schema = test_schema();
-        let builder =
-            EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let entity = builder
             .try_build_role_entities(&tokens)
             .expect("expected to build role entities");
@@ -159,8 +158,7 @@ mod test {
         );
         let tokens = HashMap::from([("userinfo_token".to_string(), userinfo_token)]);
         let schema = test_schema();
-        let builder =
-            EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let entity = builder
             .try_build_role_entities(&tokens)
             .expect("expected to build role entities");
@@ -265,8 +263,7 @@ mod test {
             ("id_token".to_string(), id_token),
             ("userinfo_token".to_string(), userinfo_token),
         ]);
-        let builder =
-            EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let entities = builder
             .try_build_role_entities(&tokens)
             .expect("expected to build role entities");

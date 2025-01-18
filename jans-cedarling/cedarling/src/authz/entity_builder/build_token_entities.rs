@@ -173,8 +173,7 @@ mod test {
     fn can_build_access_tkn_entity() {
         let schema = test_schema();
         let issuers = test_issusers();
-        let builder =
-            EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let access_token = Token::new(
             "access_token",
             TokenClaims::new(HashMap::from([
@@ -193,8 +192,7 @@ mod test {
     fn can_build_id_tkn_entity() {
         let schema = test_schema();
         let issuers = test_issusers();
-        let builder =
-            EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let id_token = Token::new(
             "id_token",
             TokenClaims::new(HashMap::from([
@@ -213,8 +211,7 @@ mod test {
     fn can_build_userinfo_tkn_entity() {
         let schema = test_schema();
         let issuers = test_issusers();
-        let builder =
-            EntityBuilder::new(schema, EntityNames::default(), false, false, HashMap::new());
+        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let userinfo_token = Token::new(
             "userinfo_token",
             TokenClaims::new(HashMap::from([

@@ -165,7 +165,7 @@ impl JwtService {
                 validator
             } else {
                 // we just ignore input tokens that are not defined
-                // in the tokken entity mapper bootstrap config
+                // in the token entity mapper bootstrap config
                 //
                 // TODO: should we log that we skip some tokens?
                 continue;

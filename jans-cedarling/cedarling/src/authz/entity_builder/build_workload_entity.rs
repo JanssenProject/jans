@@ -111,8 +111,7 @@ mod test {
         }))
         .unwrap();
         let iss = TrustedIssuer::default();
-        let builder =
-            EntityBuilder::new(schema, EntityNames::default(), true, false, HashMap::new());
+        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let access_token = Token::new(
             "access_token",
             TokenClaims::new(HashMap::from([
@@ -157,8 +156,7 @@ mod test {
         }))
         .unwrap();
         let iss = TrustedIssuer::default();
-        let builder =
-            EntityBuilder::new(schema, EntityNames::default(), true, false, HashMap::new());
+        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let id_token = Token::new(
             "id_token",
             TokenClaims::new(HashMap::from([
@@ -247,8 +245,7 @@ mod test {
             })]),
             ..Default::default()
         };
-        let builder =
-            EntityBuilder::new(schema, EntityNames::default(), true, false, HashMap::new());
+        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let access_token = Token::new(
             "access_token",
             TokenClaims::new(HashMap::from([
@@ -339,8 +336,7 @@ mod test {
         }))
         .unwrap();
         let iss = TrustedIssuer::default();
-        let builder =
-            EntityBuilder::new(schema, EntityNames::default(), true, false, HashMap::new());
+        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let access_token = Token::new(
             "access_token",
             TokenClaims::new(HashMap::from([
@@ -401,8 +397,7 @@ mod test {
         }))
         .unwrap();
         let iss = TrustedIssuer::default();
-        let builder =
-            EntityBuilder::new(schema, EntityNames::default(), true, false, HashMap::new());
+        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let access_token = Token::new("access_token", TokenClaims::new(HashMap::new()), Some(&iss));
         let id_token = Token::new("id_token", TokenClaims::new(HashMap::new()), Some(&iss));
         let tokens = HashMap::from([
@@ -448,8 +443,7 @@ mod test {
             }}}
         }))
         .unwrap();
-        let builder =
-            EntityBuilder::new(schema, EntityNames::default(), true, false, HashMap::new());
+        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let tokens = HashMap::new();
         let err = builder
             .build_workload_entity(&tokens, &HashMap::new())

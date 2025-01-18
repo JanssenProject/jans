@@ -98,7 +98,6 @@ pub struct EntityBuilder {
     entity_names: EntityNames,
     build_workload: bool,
     build_user: bool,
-    token_entity_mapping: HashMap<String, String>,
 }
 
 impl EntityBuilder {
@@ -107,14 +106,12 @@ impl EntityBuilder {
         entity_names: EntityNames,
         build_workload: bool,
         build_user: bool,
-        token_entity_mapping: HashMap<String, String>,
     ) -> Self {
         Self {
             schema,
             entity_names,
             build_workload,
             build_user,
-            token_entity_mapping,
         }
     }
 
