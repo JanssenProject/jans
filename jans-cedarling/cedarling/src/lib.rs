@@ -85,6 +85,7 @@ impl Cedarling {
     /// Create a new instance of the Cedarling application.
     /// Initialize instance from enviroment variables and from config.
     /// Configuration structure has lower priority.
+    #[cfg(not(target_arch = "wasm32"))]
     pub async fn new_with_env(
         raw_config: Option<BootstrapConfigRaw>,
     ) -> Result<Cedarling, InitCedarlingError> {

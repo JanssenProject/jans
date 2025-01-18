@@ -3,6 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+// to avoid a lot of `cfg` macros
+#![allow(unused_imports)]
+
 use std::collections::{HashMap, HashSet};
 use std::env;
 use std::fmt::Display;
