@@ -9,19 +9,20 @@ use std::collections::HashMap;
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct BsTknPrincipalMapper(HashMap<String, String>);
 
+// TODO: it might be useful to implement mapping for multiple principals
 impl Default for BsTknPrincipalMapper {
     fn default() -> Self {
         Self(HashMap::from([
-            ("access_token".to_string(), "Jans::Workload".to_string()),
-            ("id_token".to_string(), "Jans::User".to_string()),
-            ("userinfo_token".to_string(), "Jans::User".to_string()),
+            ("access_token".to_string(), "Workload".to_string()),
+            ("id_token".to_string(), "User".to_string()),
+            ("userinfo_token".to_string(), "User".to_string()),
         ]))
     }
 }
 
-impl Into<HashMap<String, String>> for BsTknPrincipalMapper {
-    fn into(self) -> HashMap<String, String> {
-        self.0
+impl From<BsTknPrincipalMapper> for HashMap<String, String> {
+    fn from(value: BsTknPrincipalMapper) -> Self {
+        value.0
     }
 }
 

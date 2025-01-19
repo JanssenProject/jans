@@ -13,7 +13,6 @@ mod build_workload_entity;
 mod mapping;
 
 use super::AuthorizeEntitiesData;
-use crate::common::cedar_schema::CEDAR_NAMESPACE_SEPARATOR;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::jwt::{Token, TokenClaimTypeError};
 use crate::{AuthorizationConfig, ResourceData};
@@ -131,16 +130,21 @@ impl EntityBuilder {
             } else {
                 continue;
             };
-            let entity = self.build_tkn_entity(&entity_name, tkn)?;
+            let entity = self.build_tkn_entity(entity_name, tkn)?;
             built_entities.insert(
                 entity.uid().type_name().to_smolstr(),
                 entity.uid().id().escaped(),
             );
-            token_entities.insert(entity_name.to_string(), entity);
+            token_entities.insert(tkn_name.to_string(), entity);
         }
 
         let workload = if self.build_workload {
-            Some(self.build_workload_entity(tokens, &built_entities)?)
+            let workload_entity = self.build_workload_entity(tokens, &built_entities)?;
+            built_entities.insert(
+                workload_entity.uid().type_name().to_smolstr(),
+                workload_entity.uid().id().escaped(),
+            );
+            Some(workload_entity)
         } else {
             None
         };
@@ -149,9 +153,20 @@ impl EntityBuilder {
             let roles = self.try_build_role_entities(tokens)?;
             let parents = roles
                 .iter()
-                .map(|role| role.uid())
+                .map(|role| {
+                    built_entities.insert(
+                        role.uid().type_name().to_smolstr(),
+                        role.uid().id().escaped(),
+                    );
+                    role.uid()
+                })
                 .collect::<HashSet<EntityUid>>();
-            (Some(self.build_user_entity(tokens, parents)?), roles)
+            let user_entity = self.build_user_entity(tokens, parents, &built_entities)?;
+            built_entities.insert(
+                user_entity.uid().type_name().to_smolstr(),
+                user_entity.uid().id().escaped(),
+            );
+            (Some(user_entity), roles)
         } else {
             (None, vec![])
         };
@@ -186,18 +201,15 @@ fn build_entity(
         .to_owned();
 
     // Get entity namespace and type
-    let entity_name = entity_name.to_string();
-    let entity_type = schema
-        .get_entity_from_full_name(&entity_name)?
+    let (entity_type_name, type_schema) = schema
+        .get_entity_schema(entity_name)?
         .ok_or(BuildEntityError::EntityNotInSchema(entity_name.to_string()))?;
 
     // Build entity attributes
     let entity_attrs =
-        build_entity_attrs_from_tkn(schema, entity_type, token, claim_aliases, built_entities)?;
+        build_entity_attrs_from_tkn(schema, type_schema, token, claim_aliases, built_entities)?;
 
     // Build cedar entity
-    let entity_type_name = cedar_policy::EntityTypeName::from_str(&entity_name)
-        .map_err(BuildEntityError::ParseEntityTypeName)?;
     let entity_id = EntityId::from_str(&entity_id).map_err(BuildEntityError::ParseEntityId)?;
     let entity_uid = EntityUid::from_type_name_and_id(entity_type_name, entity_id);
     Ok(Entity::new(entity_uid, entity_attrs, parents)?)
@@ -259,7 +271,6 @@ mod test {
     };
     use cedar_policy::EvalResult;
     use serde_json::json;
-    use smol_str::ToSmolStr;
     use std::collections::HashMap;
 
     #[test]
@@ -319,91 +330,139 @@ mod test {
     #[test]
     fn can_build_entity_with_token_ref() {
         let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-        "Jans": {
-            "entityTypes": {
-                "Access_token": {
-                    "jti": { "type": "String" },
-                },
-                "Id_token": {
-                    "jti": { "type": "String" },
-                },
-                "Userinfo_token": {
-                    "jti": { "type": "String" },
-                },
-                "Workload": {
-                    "shape": {
-                        "type": "Record",
-                        "attributes":  {
-                            "access_token": { "type": "Entity", "name": "Access_token" },
-                            "id_token": { "type": "Entity", "name": "Id_token" },
-                            "userinfo_token": { "type": "Entity", "name": "Userinfo_token" },
-                        },
+            "Jans": {
+                "entityTypes": {
+                    "Resource": {},
+                    "Access_token": {},
+                    "Id_token": {},
+                    "Workload": {
+                        "shape": {
+                            "type": "Record",
+                            "attributes":  {
+                                "access_token": { "type": "Entity", "name": "Access_token" },
+                                "id_token": { "type": "Entity", "name": "Id_token" },
+                                "userinfo_token": { "type": "Entity", "name": "Userinfo_token" },
+                                "custom_token": { "type": "Entity", "name": "Custom_token" },
+                            },
+                        }
                     }
                 }
+            },
+            "Custom": {
+                "entityTypes": {
+                    "Custom_token": {},
+                    "Userinfo_token": {},
+                }
             }
-        }}))
+        }))
         .expect("should successfully build schema");
         let iss = TrustedIssuer::default();
-        let token = Token::new(
-            "access_token",
-            TokenClaims::new(HashMap::from([
-                ("client_id".to_string(), json!("workload-123")),
-                ("access_token".to_string(), json!("token-123")),
-                ("userinfo_token".to_string(), json!("token-321")),
-            ])),
-            Some(&iss),
-        );
-        let built_entities = HashMap::from([
-            ("Jans::Id_token".to_smolstr(), "token-123".to_smolstr()),
-            (
-                "Jans::Userinfo_token".to_smolstr(),
-                "token-123".to_smolstr(),
-            ),
-        ]);
-        let entity = build_entity(
-            &schema,
-            "Jans::Workload",
-            &token,
-            "client_id",
-            Vec::new(),
-            HashSet::new(),
-            &built_entities,
-        )
-        .expect("should successfully build entity");
-
-        assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
-
-        let access_tkn_uid = EntityUid::from_str("Jans::Access_token::\"token-123\"").unwrap();
-        let access_tkn_attr = entity
-            .attr("access_token")
-            .expect("expected workload entity to have an `access_token` attribute")
-            .unwrap();
-        assert!(
-            matches!(access_tkn_attr, EvalResult::EntityUid(ref uid) if uid == &access_tkn_uid),
-            "the access_token attribute should be an entity uid from the given token's claim"
+        let entity_builder = EntityBuilder::new(
+            schema,
+            EntityNames {
+                tokens: HashMap::from([
+                    ("access_token".to_string(), "Access_token".to_string()),
+                    ("id_token".to_string(), "Jans::Id_token".to_string()),
+                    (
+                        "userinfo_token".to_string(),
+                        "Custom::Userinfo_token".to_string(),
+                    ),
+                    ("custom_token".to_string(), "Custom_token".to_string()),
+                ]),
+                ..Default::default()
+            },
+            true,
+            false,
         );
 
-        let id_tkn_uid = EntityUid::from_str("Jans::Id_token::\"token-123\"").unwrap();
-        let id_tkn_attr = entity
-            .attr("id_token")
-            .expect("expected workload entity to have an `id_token` attribute")
-            .unwrap();
-        assert!(
-            matches!(id_tkn_attr, EvalResult::EntityUid(ref uid) if uid == &id_tkn_uid),
-            "the id_token attribute should be an entity uid from the already built token entities"
-        );
+        let tkn_names = ["access_token", "id_token", "userinfo_token", "custom_token"];
 
-        // This checks if the uid from the already built entities is prioritized over the uid from
-        // the given token's claim
-        let userinfo_tkn_uid = EntityUid::from_str("Jans::Userinfo_token::\"token-123\"").unwrap();
-        let userinfo_tkn_attr = entity
-            .attr("userinfo_token")
-            .expect("expected workload entity to have an `userinfo_token` attribute")
-            .unwrap();
-        assert!(
-            matches!(userinfo_tkn_attr, EvalResult::EntityUid(ref uid) if uid == &userinfo_tkn_uid),
-            "the userinfo_token attribute should be an entity uid from the already built token entities"
+        let tokens = tkn_names
+            .iter()
+            .map(|tkn_name| {
+                let token = Token::new(
+                    tkn_name,
+                    TokenClaims::new(HashMap::from([
+                        ("client_id".to_string(), json!(format!("{}_123", tkn_name))),
+                        ("jti".to_string(), json!(format!("{}_123", tkn_name))),
+                    ])),
+                    Some(&iss),
+                );
+                (tkn_name.to_string(), token)
+            })
+            .collect::<HashMap<String, Token>>();
+
+        let entities = entity_builder
+            .build_entities(&tokens, &ResourceData {
+                resource_type: "Resource".to_string(),
+                id: "res-123".to_string(),
+                payload: HashMap::new(),
+            })
+            .expect("build entities");
+
+        // Check if the token entities get created
+        assert_eq!(
+            entities
+                .tokens
+                .keys()
+                .map(|x| x.to_string())
+                .collect::<HashSet<String>>(),
+            tkn_names
+                .clone()
+                .iter()
+                .map(|x| x.to_string())
+                .collect::<HashSet<String>>(),
+            "should build all token entities",
         );
+        let entity_names = [
+            "Jans::Access_token",
+            "Jans::Id_token",
+            "Custom::Userinfo_token",
+            "Custom::Custom_token",
+        ];
+        let entity_ids = tkn_names
+            .iter()
+            .map(|name| format!("{}_123", name))
+            .collect::<Vec<String>>();
+        for ((tkn_name, entity_name), entity_ids) in
+            tkn_names.iter().zip(entity_names).zip(&entity_ids)
+        {
+            let entity = entities
+                .tokens
+                .get(*tkn_name)
+                .expect(&format!("build {} entity", tkn_name));
+            assert_eq!(
+                entity.uid().type_name().to_string(),
+                entity_name,
+                "wrong type name for {}",
+                tkn_name
+            );
+            assert_eq!(
+                entity.uid().id().escaped(),
+                entity_ids,
+                "entity id for {}",
+                tkn_name
+            );
+        }
+
+        // Check if the tokens get added to the workload entity
+        let workload_entity = entities.workload.expect("should built workload entity");
+        assert_eq!(
+            workload_entity.uid().type_name().to_string(),
+            "Jans::Workload"
+        );
+        assert_eq!(workload_entity.uid().id().escaped(), "access_token_123");
+        for ((tkn_name, entity_name), entity_id) in
+            tkn_names.iter().zip(entity_names).zip(entity_ids)
+        {
+            assert_eq!(
+                workload_entity.attr(tkn_name),
+                Some(Ok(EvalResult::EntityUid(
+                    EntityUid::from_str(&format!("{}::\"{}\"", entity_name, entity_id))
+                        .expect("build entity uid")
+                )))
+            );
+        }
     }
 
     #[test]

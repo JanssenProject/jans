@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::*;
-use cedar_policy::{EntityId, EntityTypeName, EntityUid};
+use cedar_policy::{EntityId, EntityTypeName, EntityUid, ParseErrors};
 use serde::Deserialize;
 
 #[derive(Debug, serde::Deserialize)]
@@ -30,24 +30,23 @@ impl EntityBuilder {
         &self,
         tokens: &HashMap<String, Token>,
     ) -> Result<Vec<Entity>, BuildRoleEntityError> {
-        // Get entity namespace and type
-        let mut entity_name = self.entity_names.role.to_string();
-        if let Some((namespace, _entity_type)) = self.schema.get_entity_from_base_name(&entity_name)
-        {
-            if !namespace.is_empty() {
-                entity_name = [namespace.as_str(), &entity_name].join(CEDAR_NAMESPACE_SEPARATOR);
-            }
-        }
+        // Check if the entity is in the schema
+        let entity_name = self.entity_names.role.to_string();
+        self.schema
+            .get_entity_schema(&entity_name)
+            .map_err(|e| BuildRoleEntityError::ParseTypeName(entity_name.clone(), e))?
+            .ok_or(BuildRoleEntityError::EntityNotInSchema(entity_name.clone()))?;
 
         let mut entities = HashMap::new();
 
+        // TODO: add custom tokens here
         let token_refs = [
             tokens.get("userinfo_token"),
             tokens.get("id_token"),
             tokens.get("access_token"),
         ]
         .into_iter()
-        .filter_map(|x| x);
+        .flatten();
 
         for token in token_refs {
             let role_claim = token.role_mapping();
@@ -93,14 +92,12 @@ fn build_entity(name: &str, id: &str) -> Result<Entity, BuildEntityError> {
 
 #[derive(Debug, thiserror::Error)]
 pub enum BuildRoleEntityError {
-    #[error("failed to build role entity from access token: {0}")]
-    Access(#[source] BuildEntityError),
-    #[error("failed to build role entity from id token: {0}")]
-    Id(#[source] BuildEntityError),
-    #[error("failed to build role entity from userinfo token: {0}")]
-    Userinfo(#[source] BuildEntityError),
     #[error("failed to build role entity from `{0}`: {1}")]
     Token(String, BuildEntityError),
+    #[error("failed to parse entity type name `{0}`: {1}")]
+    ParseTypeName(String, ParseErrors),
+    #[error("the entity `{0}` is not in the schema")]
+    EntityNotInSchema(String),
 }
 
 impl BuildRoleEntityError {

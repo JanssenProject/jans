@@ -14,12 +14,9 @@ pub struct BsTknEntityMapping(HashMap<String, String>);
 impl Default for BsTknEntityMapping {
     fn default() -> Self {
         Self(HashMap::from([
-            ("access_token".to_string(), "Jans::Access_token".to_string()),
-            ("id_token".to_string(), "Jans::id_token".to_string()),
-            (
-                "userinfo_token".to_string(),
-                "Jans::Userinfo_token".to_string(),
-            ),
+            ("access_token".to_string(), "Access_token".to_string()),
+            ("id_token".to_string(), "id_token".to_string()),
+            ("userinfo_token".to_string(), "Userinfo_token".to_string()),
         ]))
     }
 }

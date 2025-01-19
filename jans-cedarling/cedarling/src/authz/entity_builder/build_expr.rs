@@ -3,17 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::CEDAR_NAMESPACE_SEPARATOR;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
 use cedar_policy::{
-    EntityId, EntityTypeName, EntityUid, ExpressionConstructionError, ParseErrors,
-    RestrictedExpression,
+    EntityId, EntityUid, ExpressionConstructionError, ParseErrors, RestrictedExpression,
 };
 use serde_json::Value;
 use smol_str::{SmolStr, ToSmolStr};
 use std::collections::HashMap;
-use std::str::FromStr;
 
 impl Attribute {
     pub fn kind_str(&self) -> &str {
@@ -127,40 +124,39 @@ impl Attribute {
             // Handle Entity attributes
             Attribute::Entity { required, name } => {
                 // Check if the entity is in the schema
-                let mut name = name.to_string();
-                if let Some((namespace, _)) = schema.get_entity_from_base_name(&name) {
-                    if !namespace.is_empty() {
-                        name = [namespace, name.as_str()].join(CEDAR_NAMESPACE_SEPARATOR);
-                    }
+                let entity_type_name = if let Some((type_name, _type_schema)) = schema
+                    .get_entity_schema(name)
+                    .map_err(|e| BuildExprError::ParseTypeName(name.clone(), e))?
+                {
+                    type_name
                 } else if *required {
                     return Err(BuildExprError::EntityNotInSchema(name.to_string()));
                 } else {
                     return Ok(None);
-                }
+                };
 
                 // Get the entity id
-                let entity_type_name = EntityTypeName::from_str(&name)
-                    .map_err(|e| BuildExprError::ParseTypeName(name.to_string(), e))?;
                 let entity_id = if let Some(entity_id) =
                     built_entities.get(&entity_type_name.to_smolstr())
                 {
                     entity_id
-                } else if let Some(entity_id) = built_entities.get(entity_type_name.basename()) {
+                } else if let Some(entity_id) = built_entities.get(&entity_type_name.to_smolstr()) {
                     entity_id
                 } else if let Some(claim) = attr_src.get(src_key) {
                     claim
                         .as_str()
                         .ok_or(KeyedJsonTypeError::type_mismatch(src_key, "string", claim))?
                 } else if *required {
-                    return Err(BuildExprError::EntityReference(src_key.to_string(), name));
+                    return Err(BuildExprError::MissingBuiltEntityRef(
+                        src_key.to_string(),
+                        name.to_string(),
+                    ));
                 } else {
                     return Ok(None);
                 };
 
-                let type_name = cedar_policy::EntityTypeName::from_str(&name)
-                    .map_err(|e| BuildExprError::ParseTypeName(name.clone(), e))?;
                 let type_id = EntityId::new(entity_id);
-                let uid = EntityUid::from_type_name_and_id(type_name, type_id);
+                let uid = EntityUid::from_type_name_and_id(entity_type_name, type_id);
                 let expr = RestrictedExpression::new_entity_uid(uid);
                 Ok(Some(expr))
             },
@@ -188,7 +184,11 @@ impl Attribute {
             Attribute::EntityOrCommon { required, name } => {
                 if let Some((_namespace_name, attr)) = schema.get_common_type(name) {
                     attr.build_expr(attr_src, src_key, schema, built_entities)
-                } else if schema.get_entity_from_base_name(name).is_some() {
+                } else if schema
+                    .get_entity_schema(name)
+                    .map_err(|e| BuildExprError::ParseTypeName(name.clone(), e))?
+                    .is_some()
+                {
                     let attr = Attribute::Entity {
                         required: *required,
                         name: name.to_string(),
@@ -224,7 +224,7 @@ pub enum BuildExprError {
     #[error(
         "failed to build entity reference for '{0}' with type `{1}` because no entity of this type has been created yet"
     )]
-    EntityReference(String, String),
+    MissingBuiltEntityRef(String, String),
     #[error(transparent)]
     TypeMismatch(#[from] KeyedJsonTypeError),
     #[error(transparent)]

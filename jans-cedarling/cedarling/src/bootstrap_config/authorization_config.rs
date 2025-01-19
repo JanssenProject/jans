@@ -83,8 +83,8 @@ impl From<HashMap<String, String>> for TokenEntityNames {
     }
 }
 
-impl Into<HashMap<String, String>> for TokenEntityNames {
-    fn into(self) -> HashMap<String, String> {
-        self.0
+impl From<TokenEntityNames> for HashMap<String, String> {
+    fn from(value: TokenEntityNames) -> Self {
+        value.0
     }
 }
