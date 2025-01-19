@@ -141,65 +141,6 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED", default)]
     pub jwt_signature_algorithms_supported: HashSet<Algorithm>,
 
-    /// When enabled, the `iss` (Issuer) claim must be present in the Access Token and
-    /// the scheme must be https.
-    #[serde(rename = "CEDARLING_AT_ISS_VALIDATION", default)]
-    pub at_iss_validation: FeatureToggle,
-
-    /// When enabled, the `jti` (JWT ID) claim must be present in the Access Token.
-    #[serde(rename = "CEDARLING_AT_JTI_VALIDATION", default)]
-    pub at_jti_validation: FeatureToggle,
-
-    /// When enabled, the `nbf` (Not Before) claim must be present in the Access Token
-    /// and Cedarling will verify that the current date is after the `nbf`.
-    #[serde(rename = "CEDARLING_AT_NBF_VALIDATION", default)]
-    pub at_nbf_validation: FeatureToggle,
-
-    /// When enabled, the `exp` (Expiration) claim must be present in the Access Token
-    /// and not past the date specified.
-    #[serde(rename = "CEDARLING_AT_EXP_VALIDATION", default)]
-    pub at_exp_validation: FeatureToggle,
-
-    /// When enabled, the `iss` (Issuer) claim must be present in the ID Token and
-    /// the scheme must be https.
-    #[serde(rename = "CEDARLING_IDT_ISS_VALIDATION", default)]
-    pub idt_iss_validation: FeatureToggle,
-
-    /// When enabled, the `sub` (Subject) claim must be present in the ID Token.
-    #[serde(rename = "CEDARLING_IDT_SUB_VALIDATION", default)]
-    pub idt_sub_validation: FeatureToggle,
-
-    /// When enabled, the `exp` (Expiration) claim must be present in the ID Token
-    /// and not past the date specified.
-    #[serde(rename = "CEDARLING_IDT_EXP_VALIDATION", default)]
-    pub idt_exp_validation: FeatureToggle,
-
-    /// When enabled, the `iat` (Issued at) claim must be present in the ID Token.
-    #[serde(rename = "CEDARLING_IDT_IAT_VALIDATION", default)]
-    pub idt_iat_validation: FeatureToggle,
-
-    /// When enabled, the `aud` ( Audience) claim must be present in the ID Token.
-    #[serde(rename = "CEDARLING_IDT_AUD_VALIDATION", default)]
-    pub idt_aud_validation: FeatureToggle,
-
-    /// When enabled, the `iss` (Issuer) claim must be present in the Userinfo Token and
-    /// the scheme must be https.
-    #[serde(rename = "CEDARLING_USERINFO_ISS_VALIDATION", default)]
-    pub userinfo_iss_validation: FeatureToggle,
-
-    /// When enabled, the `sub` (Subject) claim must be present in the Userinfo Token.
-    #[serde(rename = "CEDARLING_USERINFO_SUB_VALIDATION", default)]
-    pub userinfo_sub_validation: FeatureToggle,
-
-    /// When enabled, the `aud` (Audience) claim must be present in the Userinfo Token.
-    #[serde(rename = "CEDARLING_USERINFO_AUD_VALIDATION", default)]
-    pub userinfo_aud_validation: FeatureToggle,
-
-    /// When enabled, the `exp` (Expiration) claim must be present in the Userinfo Token
-    /// and not past the date specified.
-    #[serde(rename = "CEDARLING_USERINFO_EXP_VALIDATION", default)]
-    pub userinfo_exp_validation: FeatureToggle,
-
     /// Validation setting for each token
     #[serde(rename = "CEDARLING_TOKEN_VALIDATION_SETTINGS", default)]
     pub token_validation_settings: BsTknValidationConfigs,
