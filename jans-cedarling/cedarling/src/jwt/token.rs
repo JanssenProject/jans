@@ -62,8 +62,6 @@ impl<'a> Token<'a> {
     }
 }
 
-// TODO: this wrapper might be unnecessary
-/// A struct holding information on a decoded JWT.
 #[derive(Debug, PartialEq, Default, Deserialize, Clone)]
 pub struct TokenClaims {
     #[serde(flatten)]
@@ -77,11 +75,6 @@ impl From<HashMap<String, Value>> for TokenClaims {
 }
 
 impl TokenClaims {
-    #[cfg(test)]
-    pub fn new(claims: HashMap<String, serde_json::Value>) -> Self {
-        Self { claims }
-    }
-
     pub fn get_claim(&self, name: &str) -> Option<TokenClaim> {
         self.claims.get(name).map(|value| TokenClaim {
             key: name.to_string(),

@@ -75,7 +75,6 @@ mod test {
     use super::super::*;
     use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
     use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer};
-    use crate::jwt::TokenClaims;
     use cedar_policy::EvalResult;
     use serde_json::json;
     use std::collections::HashMap;
@@ -182,11 +181,12 @@ mod test {
         let iss = test_iss();
         let userinfo_token = Token::new(
             "userinfo_token",
-            TokenClaims::new(HashMap::from([
+            HashMap::from([
                 ("email".to_string(), json!("test@email.com")),
                 ("sub".to_string(), json!("user-123")),
                 ("role".to_string(), json!(["admin", "user"])),
-            ])),
+            ])
+            .into(),
             Some(&iss),
         );
         let tokens = HashMap::from([("userinfo_token".to_string(), userinfo_token)]);
@@ -198,11 +198,12 @@ mod test {
         let iss = test_iss();
         let id_token = Token::new(
             "id_token",
-            TokenClaims::new(HashMap::from([
+            HashMap::from([
                 ("email".to_string(), json!("test@email.com")),
                 ("sub".to_string(), json!("user-123")),
                 ("role".to_string(), json!(["admin", "user"])),
-            ])),
+            ])
+            .into(),
             Some(&iss),
         );
         let tokens = HashMap::from([("id_token".to_string(), id_token)]);
@@ -214,12 +215,8 @@ mod test {
         let iss = test_iss();
         let schema = test_schema();
 
-        let id_token = Token::new("id_token", TokenClaims::new(HashMap::new()), Some(&iss));
-        let userinfo_token = Token::new(
-            "userinfo_token",
-            TokenClaims::new(HashMap::new()),
-            Some(&iss),
-        );
+        let id_token = Token::new("id_token", HashMap::new().into(), Some(&iss));
+        let userinfo_token = Token::new("userinfo_token", HashMap::new().into(), Some(&iss));
         let tokens = HashMap::from([
             ("id_token".to_string(), id_token),
             ("userinfo_token".to_string(), userinfo_token),
@@ -264,11 +261,12 @@ mod test {
         let iss = test_iss();
         let userinfo_token = Token::new(
             "userinfo_token",
-            TokenClaims::new(HashMap::from([
+            HashMap::from([
                 ("sub".to_string(), json!("user-123")),
                 ("email".to_string(), json!("someone@email.com")),
                 ("role".to_string(), json!(["role1", "role2", "role3"])),
-            ])),
+            ])
+            .into(),
             Some(&iss),
         );
         let tokens = HashMap::from([("userinfo_token".to_string(), userinfo_token)]);

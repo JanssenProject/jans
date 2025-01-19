@@ -267,10 +267,7 @@ impl BuildEntityError {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::{
-        common::{cedar_schema::cedar_json::CedarSchemaJson, policy_store::TrustedIssuer},
-        jwt::TokenClaims,
-    };
+    use crate::common::{cedar_schema::cedar_json::CedarSchemaJson, policy_store::TrustedIssuer};
     use cedar_policy::EvalResult;
     use serde_json::json;
     use std::collections::HashMap;
@@ -295,10 +292,11 @@ mod test {
         let iss = TrustedIssuer::default();
         let token = Token::new(
             "access_token",
-            TokenClaims::new(HashMap::from([
+            HashMap::from([
                 ("client_id".to_string(), json!("workload-123")),
                 ("name".to_string(), json!("somename")),
-            ])),
+            ])
+            .into(),
             Some(&iss),
         );
         let entity = build_entity(
@@ -384,10 +382,11 @@ mod test {
             .map(|tkn_name| {
                 let token = Token::new(
                     tkn_name,
-                    TokenClaims::new(HashMap::from([
+                    HashMap::from([
                         ("client_id".to_string(), json!(format!("{}_123", tkn_name))),
                         ("jti".to_string(), json!(format!("{}_123", tkn_name))),
-                    ])),
+                    ])
+                    .into(),
                     Some(&iss),
                 );
                 (tkn_name.to_string(), token)
@@ -484,10 +483,11 @@ mod test {
         let iss = TrustedIssuer::default();
         let token = Token::new(
             "access_token",
-            TokenClaims::new(HashMap::from([
+            HashMap::from([
                 ("client_id".to_string(), json!("workload-123")),
                 ("name".to_string(), json!("somename")),
-            ])),
+            ])
+            .into(),
             Some(&iss),
         );
 
@@ -514,7 +514,7 @@ mod test {
         let schema = serde_json::from_value::<CedarSchemaJson>(json!({}))
             .expect("should successfully build schema");
         let iss = TrustedIssuer::default();
-        let token = Token::new("access_token", TokenClaims::new(HashMap::new()), Some(&iss));
+        let token = Token::new("access_token", HashMap::new().into(), Some(&iss));
 
         let err = build_entity(
             &schema,
@@ -554,7 +554,7 @@ mod test {
         let iss = TrustedIssuer::default();
         let token = Token::new(
             "access_token",
-            TokenClaims::new(HashMap::from([("client_id".to_string(), json!(123))])),
+            HashMap::from([("client_id".to_string(), json!(123))]).into(),
             Some(&iss),
         );
         let err = build_entity(
@@ -586,10 +586,7 @@ mod test {
         let iss = TrustedIssuer::default();
         let token = Token::new(
             "access_token",
-            TokenClaims::new(HashMap::from([(
-                "client_id".to_string(),
-                json!("client-123"),
-            )])),
+            HashMap::from([("client_id".to_string(), json!("client-123"))]).into(),
             Some(&iss),
         );
 

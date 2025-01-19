@@ -46,7 +46,6 @@ mod test {
     use super::super::*;
     use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
     use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer};
-    use crate::jwt::TokenClaims;
     use cedar_policy::EvalResult;
     use serde_json::json;
     use std::collections::HashMap;
@@ -176,13 +175,14 @@ mod test {
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let access_token = Token::new(
             "access_token",
-            TokenClaims::new(HashMap::from([
+            HashMap::from([
                 ("jti".to_string(), json!("tkn-123")),
                 (
                     "trusted_issuer".to_string(),
                     json!("https://some-iss.com/.well-known/openid-configuration"),
                 ),
-            ])),
+            ])
+            .into(),
             Some(&issuers.get("test_iss").unwrap()),
         );
         test_build_entity("Jans::Access_token", access_token, &builder);
@@ -195,13 +195,14 @@ mod test {
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let id_token = Token::new(
             "id_token",
-            TokenClaims::new(HashMap::from([
+            HashMap::from([
                 ("jti".to_string(), json!("tkn-123")),
                 (
                     "trusted_issuer".to_string(),
                     json!("https://some-iss.com/.well-known/openid-configuration"),
                 ),
-            ])),
+            ])
+            .into(),
             Some(&issuers.get("test_iss").unwrap()),
         );
         test_build_entity("Jans::id_token", id_token, &builder);
@@ -214,13 +215,14 @@ mod test {
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let userinfo_token = Token::new(
             "userinfo_token",
-            TokenClaims::new(HashMap::from([
+            HashMap::from([
                 ("jti".to_string(), json!("tkn-123")),
                 (
                     "trusted_issuer".to_string(),
                     json!("https://some-iss.com/.well-known/openid-configuration"),
                 ),
-            ])),
+            ])
+            .into(),
             Some(&issuers.get("test_iss").unwrap()),
         );
         test_build_entity("Jans::Userinfo_token", userinfo_token, &builder);

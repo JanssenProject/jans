@@ -111,7 +111,6 @@ mod test {
     use super::super::*;
     use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
     use crate::common::policy_store::TrustedIssuer;
-    use crate::jwt::TokenClaims;
     use serde_json::json;
     use std::collections::HashMap;
 
@@ -147,10 +146,7 @@ mod test {
         let iss = TrustedIssuer::default();
         let userinfo_token = Token::new(
             "userinfo_token",
-            TokenClaims::new(HashMap::from([(
-                "role".to_string(),
-                json!(["admin", "user"]),
-            )])),
+            HashMap::from([("role".to_string(), json!(["admin", "user"]))]).into(),
             Some(&iss),
         );
         let tokens = HashMap::from([("userinfo_token".to_string(), userinfo_token)]);
@@ -176,7 +172,7 @@ mod test {
         let iss = TrustedIssuer::default();
         let userinfo_token = Token::new(
             "userinfo_token",
-            TokenClaims::new(HashMap::from([("role".to_string(), json!("admin"))])),
+            HashMap::from([("role".to_string(), json!("admin"))]).into(),
             Some(&iss),
         );
         let tokens = HashMap::from([("userinfo_token".to_string(), userinfo_token)]);
@@ -188,7 +184,7 @@ mod test {
         let iss = TrustedIssuer::default();
         let id_token = Token::new(
             "id_token",
-            TokenClaims::new(HashMap::from([("role".to_string(), json!("admin"))])),
+            HashMap::from([("role".to_string(), json!("admin"))]).into(),
             Some(&iss),
         );
         let tokens = HashMap::from([("id_token".to_string(), id_token)]);
@@ -200,7 +196,7 @@ mod test {
         let iss = TrustedIssuer::default();
         let access_token = Token::new(
             "access_token",
-            TokenClaims::new(HashMap::from([("role".to_string(), json!("admin"))])),
+            HashMap::from([("role".to_string(), json!("admin"))]).into(),
             Some(&iss),
         );
         let tokens = HashMap::from([("access_token".to_string(), access_token)]);
@@ -212,17 +208,17 @@ mod test {
         let iss = TrustedIssuer::default();
         let access_token = Token::new(
             "access_token",
-            TokenClaims::new(HashMap::from([("role".to_string(), json!("admin"))])),
+            HashMap::from([("role".to_string(), json!("admin"))]).into(),
             Some(&iss),
         );
         let id_token = Token::new(
             "id_token",
-            TokenClaims::new(HashMap::from([("role".to_string(), json!("admin"))])),
+            HashMap::from([("role".to_string(), json!("admin"))]).into(),
             Some(&iss),
         );
         let userinfo_token = Token::new(
             "userinfo_token",
-            TokenClaims::new(HashMap::from([("role".to_string(), json!("admin"))])),
+            HashMap::from([("role".to_string(), json!("admin"))]).into(),
             Some(&iss),
         );
         let tokens = HashMap::from([
@@ -239,20 +235,17 @@ mod test {
         let schema = test_schema();
         let access_token = Token::new(
             "access_token",
-            TokenClaims::new(HashMap::from([("role".to_string(), json!("role1"))])),
+            HashMap::from([("role".to_string(), json!("role1"))]).into(),
             Some(&iss),
         );
         let id_token = Token::new(
             "id_token",
-            TokenClaims::new(HashMap::from([("role".to_string(), json!("role2"))])),
+            HashMap::from([("role".to_string(), json!("role2"))]).into(),
             Some(&iss),
         );
         let userinfo_token = Token::new(
             "userinfo_token",
-            TokenClaims::new(HashMap::from([(
-                "role".to_string(),
-                json!(["role3", "role4"]),
-            )])),
+            HashMap::from([("role".to_string(), json!(["role3", "role4"]))]).into(),
             Some(&iss),
         );
         let tokens = HashMap::from([

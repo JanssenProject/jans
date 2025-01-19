@@ -155,16 +155,9 @@ pub enum BuildAttrErrorKind {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::{
-        common::{
-            cedar_schema::cedar_json::{
-                attribute::Attribute,
-                entity_type::{EntityShape, EntityType},
-            },
-            policy_store::TrustedIssuer,
-        },
-        jwt::TokenClaims,
-    };
+    use crate::common::cedar_schema::cedar_json::attribute::Attribute;
+    use crate::common::cedar_schema::cedar_json::entity_type::{EntityShape, EntityType};
+    use crate::common::policy_store::TrustedIssuer;
     use serde_json::json;
     use std::collections::HashMap;
 
@@ -192,10 +185,10 @@ mod test {
         let iss = TrustedIssuer::default();
         let token = Token::new(
             "access_token",
-            TokenClaims::new(HashMap::from([(
+            HashMap::from([(
                 "client_id".to_string(),
                 json!("workload-123"),
-            )])),
+            )]).into(),
             Some(&iss),
         );
 
@@ -237,7 +230,7 @@ mod test {
             }),
         };
         let iss = TrustedIssuer::default();
-        let token = Token::new("access_token", TokenClaims::new(HashMap::new()), Some(&iss));
+        let token = Token::new("access_token", HashMap::new().into(), Some(&iss));
 
         let err = build_entity_attrs_from_tkn(
             &schema,

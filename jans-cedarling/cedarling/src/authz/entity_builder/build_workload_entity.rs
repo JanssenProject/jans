@@ -88,7 +88,6 @@ mod test {
     use crate::authz::entity_builder::BuildEntityError;
     use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
     use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer};
-    use crate::jwt::TokenClaims;
     use cedar_policy::EvalResult;
     use serde_json::json;
     use std::collections::HashMap;
@@ -111,10 +110,11 @@ mod test {
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let access_token = Token::new(
             "access_token",
-            TokenClaims::new(HashMap::from([
+            HashMap::from([
                 ("client_id".to_string(), json!("workload-123")),
                 ("name".to_string(), json!("somename")),
-            ])),
+            ])
+            .into(),
             Some(&iss),
         );
         let tokens = HashMap::from([("access_token".to_string(), access_token)]);
@@ -156,10 +156,11 @@ mod test {
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let id_token = Token::new(
             "id_token",
-            TokenClaims::new(HashMap::from([
+            HashMap::from([
                 ("aud".to_string(), json!("workload-123")),
                 ("name".to_string(), json!("somename")),
-            ])),
+            ])
+            .into(),
             Some(&iss),
         );
         let tokens = HashMap::from([("id_token".to_string(), id_token)]);
@@ -245,11 +246,12 @@ mod test {
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let access_token = Token::new(
             "access_token",
-            TokenClaims::new(HashMap::from([
+            HashMap::from([
                 ("client_id".to_string(), json!("workload-123")),
                 ("email".to_string(), json!("test@example.com")),
                 ("url".to_string(), json!("https://test.com/example")),
-            ])),
+            ])
+            .into(),
             Some(&iss),
         );
         let tokens = HashMap::from([("access_token".to_string(), access_token)]);
@@ -336,13 +338,14 @@ mod test {
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let access_token = Token::new(
             "access_token",
-            TokenClaims::new(HashMap::from([
+            HashMap::from([
                 ("client_id".to_string(), json!("workload-123")),
                 (
                     "iss".to_string(),
                     json!("https://test.com/.well-known/openid-configuration"),
                 ),
-            ])),
+            ])
+            .into(),
             Some(&iss),
         );
         let tokens = HashMap::from([("access_token".to_string(), access_token)]);
@@ -395,8 +398,8 @@ mod test {
         .unwrap();
         let iss = TrustedIssuer::default();
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
-        let access_token = Token::new("access_token", TokenClaims::new(HashMap::new()), Some(&iss));
-        let id_token = Token::new("id_token", TokenClaims::new(HashMap::new()), Some(&iss));
+        let access_token = Token::new("access_token", HashMap::new().into(), Some(&iss));
+        let id_token = Token::new("id_token", HashMap::new().into(), Some(&iss));
         let tokens = HashMap::from([
             ("access_token".to_string(), access_token),
             ("id_token".to_string(), id_token),
