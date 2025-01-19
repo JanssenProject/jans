@@ -7,6 +7,10 @@ use super::*;
 use cedar_policy::{EntityId, EntityTypeName, EntityUid, ParseErrors};
 use serde::Deserialize;
 
+// TODO: make a bootstrap property to control which tokens to use
+// when creating token entities
+const DEFAULT_ROLE_ENTITY_TKN_SRCS: [&str; 3] = ["userinfo_token", "id_token", "access_token"];
+
 #[derive(Debug, serde::Deserialize)]
 #[serde(untagged)]
 enum UnifyClaims {
@@ -39,14 +43,10 @@ impl EntityBuilder {
 
         let mut entities = HashMap::new();
 
-        // TODO: add custom tokens here
-        let token_refs = [
-            tokens.get("userinfo_token"),
-            tokens.get("id_token"),
-            tokens.get("access_token"),
-        ]
-        .into_iter()
-        .flatten();
+        let token_refs = DEFAULT_ROLE_ENTITY_TKN_SRCS
+            .iter()
+            .map(|src| tokens.get(*src))
+            .flatten();
 
         for token in token_refs {
             let role_claim = token.role_mapping();
