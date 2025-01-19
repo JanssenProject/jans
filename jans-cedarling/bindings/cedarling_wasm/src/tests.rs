@@ -7,7 +7,7 @@
 #![allow(dead_code)]
 
 use crate::*;
-use cedarling::{ResourceData, Tokens};
+use cedarling::ResourceData;
 use serde::Deserialize;
 use serde_json::json;
 use std::{collections::HashMap, sync::LazyLock};
@@ -131,83 +131,7 @@ async fn test_run_cedarling() {
         .expect("init function should be initialized with js map");
 
     let request = Request {
-        tokens: Tokens {
-            access_token: Some(generate_token_using_claims(json!({
-              "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-              "code": "3e2a2012-099c-464f-890b-448160c2ab25",
-              "iss": "https://account.gluu.org",
-              "token_type": "Bearer",
-              "client_id": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-              "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-              "acr": "simple_password_auth",
-              "x5t#S256": "",
-              "nbf": 1731953030,
-              "scope": [
-                "role",
-                "openid",
-                "profile",
-                "email"
-              ],
-              "auth_time": 1731953027,
-              "exp": 1732121460,
-              "iat": 1731953030,
-              "jti": "uZUh1hDUQo6PFkBPnwpGzg",
-              "username": "Default Admin User",
-              "status": {
-                "status_list": {
-                  "idx": 306,
-                  "uri": "https://jans.test/jans-auth/restv1/status_list"
-                }
-              }
-            }))),
-            id_token: Some(generate_token_using_claims(json!({
-              "at_hash": "bxaCT0ZQXbv4sbzjSDrNiA",
-              "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-              "amr": [],
-              "iss": "https://account.gluu.org",
-              "nonce": "25b2b16b-32a2-42d6-8a8e-e5fa9ab888c0",
-              "sid": "6d443734-b7a2-4ed8-9d3a-1606d2f99244",
-              "jansOpenIDConnectVersion": "openidconnect-1.0",
-              "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-              "acr": "simple_password_auth",
-              "c_hash": "V8h4sO9NzuLKawPO-3DNLA",
-              "nbf": 1731953030,
-              "auth_time": 1731953027,
-              "exp": 1731956630,
-              "grant": "authorization_code",
-              "iat": 1731953030,
-              "jti": "ijLZO1ooRyWrgIn7cIdNyA",
-              "status": {
-                "status_list": {
-                  "idx": 307,
-                  "uri": "https://jans.test/jans-auth/restv1/status_list"
-                }
-              }
-            }))),
-            userinfo_token: Some(generate_token_using_claims(json!({
-              "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-              "email_verified": true,
-              "role": [
-                "CasaAdmin"
-              ],
-              "iss": "https://account.gluu.org",
-              "given_name": "Admin",
-              "middle_name": "Admin",
-              "inum": "a6a70301-af49-4901-9687-0bcdcf4e34fa",
-              "client_id": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-              "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-              "updated_at": 1731698135,
-              "name": "Default Admin User",
-              "nickname": "Admin",
-              "family_name": "User",
-              "jti": "OIn3g1SPSDSKAYDzENVoug",
-              "email": "admin@jans.test",
-              "jansAdminUIRole": [
-                "api-admin"
-              ]
-            }))),
-        },
-        new_tokens: HashMap::from([
+        tokens: HashMap::from([
             (
                 "access_token".to_string(),
                 generate_token_using_claims(json!({
@@ -350,83 +274,7 @@ async fn test_memory_log_interface() {
         .expect("init function should be initialized with js map");
 
     let request = Request {
-        tokens: Tokens {
-            access_token: Some(generate_token_using_claims(json!({
-              "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-              "code": "3e2a2012-099c-464f-890b-448160c2ab25",
-              "iss": "https://account.gluu.org",
-              "token_type": "Bearer",
-              "client_id": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-              "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-              "acr": "simple_password_auth",
-              "x5t#S256": "",
-              "nbf": 1731953030,
-              "scope": [
-                "role",
-                "openid",
-                "profile",
-                "email"
-              ],
-              "auth_time": 1731953027,
-              "exp": 1732121460,
-              "iat": 1731953030,
-              "jti": "uZUh1hDUQo6PFkBPnwpGzg",
-              "username": "Default Admin User",
-              "status": {
-                "status_list": {
-                  "idx": 306,
-                  "uri": "https://jans.test/jans-auth/restv1/status_list"
-                }
-              }
-            }))),
-            id_token: Some(generate_token_using_claims(json!({
-              "at_hash": "bxaCT0ZQXbv4sbzjSDrNiA",
-              "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-              "amr": [],
-              "iss": "https://account.gluu.org",
-              "nonce": "25b2b16b-32a2-42d6-8a8e-e5fa9ab888c0",
-              "sid": "6d443734-b7a2-4ed8-9d3a-1606d2f99244",
-              "jansOpenIDConnectVersion": "openidconnect-1.0",
-              "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-              "acr": "simple_password_auth",
-              "c_hash": "V8h4sO9NzuLKawPO-3DNLA",
-              "nbf": 1731953030,
-              "auth_time": 1731953027,
-              "exp": 1731956630,
-              "grant": "authorization_code",
-              "iat": 1731953030,
-              "jti": "ijLZO1ooRyWrgIn7cIdNyA",
-              "status": {
-                "status_list": {
-                  "idx": 307,
-                  "uri": "https://jans.test/jans-auth/restv1/status_list"
-                }
-              }
-            }))),
-            userinfo_token: Some(generate_token_using_claims(json!({
-              "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-              "email_verified": true,
-              "role": [
-                "CasaAdmin"
-              ],
-              "iss": "https://account.gluu.org",
-              "given_name": "Admin",
-              "middle_name": "Admin",
-              "inum": "a6a70301-af49-4901-9687-0bcdcf4e34fa",
-              "client_id": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-              "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-              "updated_at": 1731698135,
-              "name": "Default Admin User",
-              "nickname": "Admin",
-              "family_name": "User",
-              "jti": "OIn3g1SPSDSKAYDzENVoug",
-              "email": "admin@jans.test",
-              "jansAdminUIRole": [
-                "api-admin"
-              ]
-            }))),
-        },
-        new_tokens: HashMap::from([(
+        tokens: HashMap::from([(
             "access_token".to_string(),
             generate_token_using_claims(json!({
               "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
