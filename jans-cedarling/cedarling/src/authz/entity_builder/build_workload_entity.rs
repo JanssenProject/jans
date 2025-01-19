@@ -14,8 +14,7 @@ const DEFAULT_ID_TKN_WORKLOAD_CLAIM: &str = "aud";
 
 // TODO: make a bootstrap property to control which tokens to use
 // to create this entity
-const DEFAULT_ACCESS_TKN_NAME: &str = "access_token";
-const DEFAULT_ID_TKN_NAME: &str = "id_token";
+const DEFAULT_WORKLOAD_ENTITY_TKN_SRCS: [&str; 2] = ["access_token", "id_token"];
 
 impl EntityBuilder {
     pub fn build_workload_entity(
@@ -26,17 +25,15 @@ impl EntityBuilder {
         let entity_name = self.entity_names.workload.as_ref();
         let mut errors = vec![];
 
-        for (token_name, workload_id_claim, claim_aliases) in [
-            (
-                DEFAULT_ACCESS_TKN_NAME,
-                DEFAULT_ACCESS_TKN_WORKLOAD_CLAIM,
-                Vec::new(),
-            ),
-            (DEFAULT_ID_TKN_NAME, DEFAULT_ID_TKN_WORKLOAD_CLAIM, vec![
-                ClaimAliasMap::new("aud", "client_id"),
-            ]),
+        for ((workload_id_claim, claim_aliases), token_name) in [
+            (DEFAULT_ACCESS_TKN_WORKLOAD_CLAIM, Vec::new()),
+            (DEFAULT_ID_TKN_WORKLOAD_CLAIM, vec![ClaimAliasMap::new(
+                "aud",
+                "client_id",
+            )]),
         ]
         .into_iter()
+        .zip(DEFAULT_WORKLOAD_ENTITY_TKN_SRCS)
         {
             if let Some(token) = tokens.get(token_name) {
                 match build_entity(

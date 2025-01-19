@@ -31,6 +31,8 @@ use std::convert::Infallible;
 use std::fmt;
 use std::str::FromStr;
 
+// TODO: We could probably set the default to not have a namespace
+// once we support multiple namespaces
 const DEFAULT_WORKLOAD_ENTITY_NAME: &str = "Jans::Workload";
 const DEFAULT_USER_ENTITY_NAME: &str = "Jans::User";
 const DEFAULT_ACCESS_TKN_ENTITY_NAME: &str = "Jans::Access_token";

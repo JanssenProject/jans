@@ -1,11 +1,14 @@
 // This software is available under the Apache-2.0 license.
 // See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
-//
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::*;
 use cedar_policy::Entity;
 use std::collections::HashSet;
+
+// TODO: make a bootstrap property to control which tokens to use
+// to create this entity
+const DEFAULT_USER_ENTITY_TKN_SRCS: [&str; 2] = ["userinfo_token", "id_token"];
 
 impl EntityBuilder {
     pub fn build_user_entity(
@@ -17,7 +20,9 @@ impl EntityBuilder {
         let entity_name = self.entity_names.user.as_ref();
         let mut errors = vec![];
 
-        let token_refs = [tokens.get("userinfo_token"), tokens.get("id_token")]
+        let token_refs = DEFAULT_USER_ENTITY_TKN_SRCS
+            .iter()
+            .map(|x| tokens.get(*x))
             .into_iter()
             .flatten();
         for token in token_refs {
