@@ -34,7 +34,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: load-test-dcr-cm
-        image: ghcr.io/janssenproject/jans/loadtesting-jmeter:0.0.0-nightly
+        image: ghcr.io/janssenproject/jans/loadtesting-jmeter:1.3.0-1
         imagePullPolicy: Always
         name: load-test-dcr
         resources:
