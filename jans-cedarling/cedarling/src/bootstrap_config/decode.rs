@@ -464,7 +464,8 @@ fn get_cedarling_env_vars() -> HashMap<String, serde_json::Value> {
 }
 
 impl BootstrapConfig {
-    /// Construct `BootstrapConfig` from environment variables and `BootstrapConfigRaw` config
+    /// Construct `BootstrapConfig` from environment variables and `BootstrapConfigRaw` config.
+    /// Environment variables have bigger priority.
     //
     // Simple implementation that map input structure to JSON map
     // and map environment variables with prefix `CEDARLING_` to JSON map. And merge it.
