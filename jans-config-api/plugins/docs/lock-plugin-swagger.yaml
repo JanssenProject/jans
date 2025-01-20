@@ -488,7 +488,6 @@ paths:
           is mandatory if start_month and end_month parameters are not present.
         schema:
           type: string
-        example: 202012
       - name: start_month
         in: query
         description: Start-Month for which the stat report is to be fetched

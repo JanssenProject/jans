@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import javax.net.ssl.SSLContext;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.logging.log4j.LogManager;
@@ -56,6 +57,7 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
 
+@ApplicationScoped
 public class ConfigHttpService implements Serializable {
 
     private static final long serialVersionUID = -2398422090669045605L;

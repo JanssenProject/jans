@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 public class LockService {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String AUTHORIZATION = "Authorization";
-    private static final String AUTHORIZATION_BEARER = "Bearer";
 
     @Inject
     Logger logger;
@@ -32,11 +31,12 @@ public class LockService {
 
     public JsonNode getStat(String url, String token, String month, String startMonth, String endMonth, String format)
             throws JsonProcessingException {
+        logger.info("LockStatResource::getStatistics() - url:{}, token:{}, month:{},  startMonth:{}, endMonth:{}, format:{}", url, token, month, startMonth, endMonth, format);
         JsonNode jsonNode = null;
         Map<String, String> headers = new HashMap<>();
         headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
         if (StringUtils.isNotBlank(token)) {
-            headers.put(AUTHORIZATION, AUTHORIZATION_BEARER + "" + token);
+            headers.put(AUTHORIZATION, token);
         }
 
         // Query Param
