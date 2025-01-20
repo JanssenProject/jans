@@ -1,0 +1,43 @@
+{
+    "version": 3,
+    "plugin": {
+        "pattern": ".so",
+        "folder": "./"
+    },
+    "endpoints": [
+        {
+            "endpoint": "/test/{id}",
+            "backend": [
+                {
+                    "host": [
+                        "http://localhost:8080"
+                    ],
+                    "url_pattern": "/__health"
+                }
+            ]
+        },
+        {
+            "endpoint": "/protected",
+            "backend": [
+                {
+                    "host": [
+                        "http://localhost:8080"
+                    ],
+                    "url_pattern": "/__health"
+                }
+            ]
+        }
+    ],
+    "extra_config": {
+        "plugin/http-server": {
+            "name": [
+                "cedarling-krakend"
+            ],
+            "cedarling-krakend": {
+                "path": "/protected",
+                "sidecar_endpoint": "http://127.0.0.1:5000/cedarling/evaluation",
+                "namespace": "Jans"
+            }
+        }
+    }
+}
