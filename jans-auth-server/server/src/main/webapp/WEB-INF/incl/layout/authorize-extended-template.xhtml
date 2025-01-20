@@ -56,8 +56,8 @@
 								<li>
 									<table>
 										<tr>
-											<td><span class="user"><i
-													class="fa fa-user-circle"></i></span></td>
+											<td><span class="user"><!--<i
+													class="fa fa-user-circle"></i>  --></span></td>
 											<td><h:outputText value="#{_scope.description}" /></td>
 										</tr>
 									</table>
@@ -132,10 +132,6 @@
 						<ui:insert name="controlButttons" />
 					</div>
 				</div>
-				<center>
-					#{msgs['common.copyright']} <a href="http://www.gluu.org">Gluu</a>.
-					#{msgs['common.allRightsReserved']}
-				</center>
 			</div>
 		</h:form>
 	</ui:define>

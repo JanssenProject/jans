@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import './options.css'
 import Header from './header'
-import OIDCClients from './oidcClients'
+import HomePage from './homePage'
 import UserDetails from './userDetails'
+import { ILooseObject } from './ILooseObject'
 
 const Options = () => {
 
@@ -15,17 +16,26 @@ const Options = () => {
 
       if (!isEmpty(oidcClientResults) && Object.keys(oidcClientResults).length !== 0) {
 
-        chrome.storage.local.get(["loginDetails"], (loginDetailsResult) => {
+        chrome.storage.local.get(["loginDetails"], async (loginDetailsResult) => {
           if (!isEmpty(loginDetailsResult) && Object.keys(loginDetailsResult).length !== 0) {
             setOptionType('loginPage');
             setdata(loginDetailsResult);
           } else {
-            setOptionType('oidcClientPage');
-            setdata(oidcClientResults);
+            let collectedData = {};
+            setOptionType('homePage');
+            collectedData = { ...data, ...oidcClientResults };
+
+            let cedarlingConfig: ILooseObject = await new Promise((resolve, reject) => { chrome.storage.local.get(["cedarlingConfig"], (result) => { resolve(result); }) });
+
+            if (!isEmpty(cedarlingConfig) && Object.keys(cedarlingConfig).length !== 0) {
+              collectedData = { ...collectedData, ...cedarlingConfig };
+            }
+
+            setdata(collectedData);
           }
         });
       } else {
-        setOptionType('oidcClientPage');
+        setOptionType('homePage');
         setdata({});
       }
       setDataChanged(false);
@@ -42,9 +52,9 @@ const Options = () => {
 
   function renderPage({ optionType, data }) {
     switch (optionType) {
-      case 'oidcClientPage':
-        return <OIDCClients
-          data={data.oidcClients}
+      case 'homePage':
+        return <HomePage
+          data={data}
           notifyOnDataChange={handleDataChange}
         />
       case 'loginPage':
