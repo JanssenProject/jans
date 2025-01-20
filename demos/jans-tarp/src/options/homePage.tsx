@@ -5,11 +5,9 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import Password from '@mui/icons-material/Password';
 import LockPerson from '@mui/icons-material/LockPerson';
-import OIDCClients from './OIDCClients';
+import OIDCClients from './oidcClients';
 import Cedarling from './cedarling';
 import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
-import { styled } from '@mui/material/styles';
 
 interface TabPanelProps {
   children?: React.ReactNode;

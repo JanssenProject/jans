@@ -14,7 +14,7 @@ use test_utils::assert_eq;
 use tokio::test;
 
 use super::utils::*;
-use crate::{WorkloadBoolOp, cmp_decision, cmp_policy}; /* macros is defined in the cedarling\src\tests\utils\cedarling_util.rs */
+use crate::{WorkloadBoolOp, authorization_config::IdTokenTrustMode, cmp_decision, cmp_policy}; /* macros is defined in the cedarling\src\tests\utils\cedarling_util.rs */
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/policy-store_ok_2.yaml");
 
@@ -106,6 +106,7 @@ async fn success_test_for_principal_workload() {
             use_user_principal: false,
             use_workload_principal: true,
             user_workload_operator: Default::default(),
+            id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
     )
@@ -144,6 +145,7 @@ async fn success_test_for_principal_user() {
             use_user_principal: true,
             use_workload_principal: false,
             user_workload_operator: Default::default(),
+            id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
     )
@@ -186,6 +188,7 @@ async fn success_test_for_principal_person_role() {
             use_user_principal: true,
             use_workload_principal: false,
             user_workload_operator: Default::default(),
+            id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
     )
@@ -228,6 +231,7 @@ async fn success_test_for_principal_workload_role() {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::And,
+            id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
     )
@@ -276,6 +280,7 @@ async fn success_test_for_principal_workload_true_or_user_false() {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::Or,
+            id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
     )
@@ -324,6 +329,7 @@ async fn success_test_for_principal_workload_false_or_user_true() {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::Or,
+            id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
     )
@@ -372,6 +378,7 @@ async fn success_test_for_principal_workload_false_or_user_false() {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::Or,
+            id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
     )
@@ -419,6 +426,7 @@ async fn test_where_principal_workload_cant_be_applied() {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: Default::default(),
+            id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
     )
@@ -447,6 +455,7 @@ async fn test_where_principal_user_cant_be_applied() {
             use_user_principal: true,
             use_workload_principal: false,
             user_workload_operator: Default::default(),
+            id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
     )
