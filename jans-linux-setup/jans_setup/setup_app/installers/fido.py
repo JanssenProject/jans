@@ -57,6 +57,7 @@ class FidoInstaller(JettyInstaller):
     def generate_configuration(self):
         Config.fido_document_certs_inum = str(uuid.uuid4())
         Config.fido_document_tocs_inum = str(uuid.uuid4())
+        Config.Apple_WebAuthn_Root_CA_inum = str(uuid.uuid4())
         self.fido_document_creation_date = self.get_ldap_time()
 
     def render_import_templates(self):
@@ -74,6 +75,15 @@ class FidoInstaller(JettyInstaller):
 
         Config.templateRenderingDict['fido_document_tocs_base64'] = self.generate_base64_file(self.source_files[2][0], 1)
         Config.templateRenderingDict['fido_document_certs_base64'] = self.generate_base64_file(self.source_files[3][0], 1)
+        Config.templateRenderingDict['Apple_WebAuthn_Root_CA_base64'] = self.generate_base64_file(self.source_files[1][0], 1)
+
+        for f in ('yubico-u2f-ca-cert.crt', 'HyperFIDO_CA_Cert_V1.pem', 'HyperFIDO_CA_Cert_V2.pem'):
+            src = os.path.join(Config.install_dir, 'static/fido2/authenticator_cert/', f)
+            doc_var, _ = os.path.splitext(f)
+            doc_var = doc_var.replace('-','_')
+            setattr(Config, doc_var + '_inum', str(uuid.uuid4()))
+            Config.templateRenderingDict[doc_var + '_base64'] = self.generate_base64_file(src, 1)
+
 
         for tmp_ in (self.ldif_fido2, self.ldif_fido2_documents):
             self.renderTemplateInOut(tmp_, self.template_folder, self.output_folder)
@@ -83,29 +93,16 @@ class FidoInstaller(JettyInstaller):
 
 
     def create_folders(self):
-        for d in ('authenticator_cert', 'mds/cert', 'mds/toc', 'server_metadata'):
+        for d in ('mds/cert', 'mds/toc', 'server_metadata'):
             dpath = os.path.join(self.fido2ConfigFolder, d)
             self.run([paths.cmd_mkdir, '-p', dpath])
 
     def copy_static(self):
-        # Fido2 authenticator certs
-        target_dir = os.path.join(self.fido2ConfigFolder, 'authenticator_cert')
-        for f in ('yubico-u2f-ca-cert.crt', 'HyperFIDO_CA_Cert_V1.pem', 'HyperFIDO_CA_Cert_V2.pem'):
-            src = os.path.join(Config.install_dir, 'static/fido2/authenticator_cert/', f)
-            self.copyFile(src, target_dir)
-
         #copy fido2 server metadata
         src_dir = os.path.join(Config.install_dir, 'static/fido2/server_metadata')
         trgt_dir = os.path.join(self.fido2ConfigFolder, 'server_metadata')
         self.copy_tree(src_dir, trgt_dir, ignore='.dontdelete')
 
-        # copy Apple_WebAuthn_Root_CA
-        if os.path.exists(self.source_files[1][0]):
-            target_dir = os.path.join(self.fido2ConfigFolder, 'authenticator_cert')
-            self.run([paths.cmd_mkdir, '-p', target_dir])
-            self.copyFile(self.source_files[1][0], target_dir)
-
-        # copy external files
 
     def service_post_install_tasks(self):
         base.current_app.ConfigApiInstaller.install_plugin('fido2')
