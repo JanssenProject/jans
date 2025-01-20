@@ -86,6 +86,13 @@ impl BootstrapConfig {
         let raw = serde_json::from_str::<decode::BootstrapConfigRaw>(config)?;
         Self::from_raw_config(&raw)
     }
+
+    /// Load config environment variables.
+    /// If you need with fallback to applied config use [`Self::from_raw_config_and_env].
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn from_env() -> Result<Self, BootstrapConfigLoadingError> {
+        Self::from_raw_config_and_env(None)
+    }
 }
 
 /// Represents errors that may occur while loading a `BootstrapConfig` from a file.
