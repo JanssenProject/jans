@@ -23,8 +23,21 @@ pub(crate) trait LogWriter {
 }
 
 pub(crate) trait Loggable: serde::Serialize {
-    /// get unique request ID
-    fn get_request_id(&self) -> Uuid;
+    /// Get unique ID of entity
+    //  Is used in memory logger
+    fn get_id(&self) -> Uuid;
+
+    /// List of additional ids that entity can be related
+    //  Is used in memory logger
+    fn get_additional_ids() -> Vec<Uuid> {
+        Vec::new()
+    }
+
+    /// List of `tags` that entity can be related
+    //  Is used in memory logger
+    fn get_tags<'a>() -> Vec<&'a str> {
+        Vec::new()
+    }
 
     /// get log level for entity
     /// not all log entities have log level, only when `log_kind` == `System`
