@@ -49,8 +49,6 @@ public class LockStatResource extends BaseResource {
     @Inject
     LockService lockService;
 
-    @Inject
-
     @Operation(summary = "Provides basic statistic", description = "Provides basic statistic", operationId = "get-lock-stat", tags = {
             "Statistics" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.LOCK_READ_ACCESS, ApiAccessConstants.JANS_STAT }))
