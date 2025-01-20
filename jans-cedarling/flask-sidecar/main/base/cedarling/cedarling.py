@@ -47,6 +47,7 @@ class CedarlingInstance:
 
     def initialize_cedarling(self):
         bootstrap_dict = json.loads(self._bootstrap_config)
+        self.bootstrap_dict = bootstrap_dict
         bootstrap_instance = BootstrapConfig(bootstrap_dict)
         self._cedarling = Cedarling(bootstrap_instance)
 
@@ -143,22 +144,22 @@ class CedarlingInstance:
                 person_value = person_result.decision.value
             if workload_result is not None:
                 workload_value = workload_result.decision.value
-                person_diagnostic = self.generate_report(person_result, "reason")
-                person_error = self.generate_report(person_result, "error")
-                person_reason = self.get_reason(person_result)
-                workload_diagnostic = self.generate_report(workload_result, "reason")
-                workload_error = self.generate_report(workload_result, "error")
-                workload_reason = self.get_reason(workload_result)
-                result_dict["context"] = {
-                    "reason_admin": {
-                        "person evaluation": person_value,
-                        "person diagnostics": person_diagnostic,
-                        "person error": person_error,
-                        "person reason": person_reason,
-                        "workload evaluation": workload_value,
-                        "workload diagnostics": workload_diagnostic,
-                        "workload error": workload_error,
-                        "workload reason": workload_reason
-                    }
+            person_diagnostic = self.generate_report(person_result, "reason")
+            person_error = self.generate_report(person_result, "error")
+            person_reason = self.get_reason(person_result)
+            workload_diagnostic = self.generate_report(workload_result, "reason")
+            workload_error = self.generate_report(workload_result, "error")
+            workload_reason = self.get_reason(workload_result)
+            result_dict["context"] = {
+                "reason_admin": {
+                    "person evaluation": person_value,
+                    "person diagnostics": person_diagnostic,
+                    "person error": person_error,
+                    "person reason": person_reason,
+                    "workload evaluation": workload_value,
+                    "workload diagnostics": workload_diagnostic,
+                    "workload error": workload_error,
+                    "workload reason": workload_reason
                 }
+            }
         return result_dict

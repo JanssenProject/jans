@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import os
+import os, json
 from pathlib import Path
 from main.logger import logger
 
@@ -41,6 +41,11 @@ class BaseConfig:
         exit()
     with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
         CEDARLING_BOOTSTRAP_CONFIG = f.read()
+    try:
+        json.loads(CEDARLING_BOOTSTRAP_CONFIG)
+    except json.JSONDecodeError as e:
+        logger.warning(f"Failed to load bootstrap config: invalid JSON. {e}")
+        exit()
     SIDECAR_DEBUG_RESPONSE = os.getenv("SIDECAR_DEBUG_RESPONSE", "False")
     if SIDECAR_DEBUG_RESPONSE == "True":
         SIDECAR_DEBUG_RESPONSE = True
