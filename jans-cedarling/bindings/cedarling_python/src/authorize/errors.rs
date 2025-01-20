@@ -74,16 +74,23 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    BuildEntitiesError,
+    BuildContextError,
     AuthorizeError,
-    "Error encountered while building entities into context"
+    "Error encountered while building the request context"
 );
 
 create_exception!(
     authorize_errors,
-    AddEntitiesIntoContextError,
+    IdTokenTrustModeError,
     AuthorizeError,
-    "Error encountered while adding entities into context"
+    "Error encountered while running on strict id token trust mode"
+);
+
+create_exception!(
+    authorize_errors,
+    BuildEntityError,
+    AuthorizeError,
+    "Error encountered while running on strict id token trust mode"
 );
 
 #[pyclass]
@@ -129,10 +136,11 @@ errors_functions! {
     CreateContext => CreateContextError,
     WorkloadRequestValidation => WorkloadRequestValidationError,
     UserRequestValidation => UserRequestValidationError,
-    BuildEntity => BuildEntitiesError,
-    BuildContext => AddEntitiesIntoContextError,
     Entities => EntitiesError,
-    EntitiesToJson => EntitiesToJsonError
+    EntitiesToJson => EntitiesToJsonError,
+    BuildContext => BuildContextError,
+    IdTokenTrustMode => IdTokenTrustModeError,
+    BuildEntity => BuildEntityError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {

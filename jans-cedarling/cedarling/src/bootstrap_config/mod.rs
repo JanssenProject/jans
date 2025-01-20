@@ -184,7 +184,6 @@ mod test {
                 jwks: None,
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
-                id_token_trust_mode: IdTokenTrustMode::Strict,
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
                 access_token_config: TokenValidationConfig {
                     exp_validation: true,
@@ -239,7 +238,6 @@ mod test {
                 jwks: None,
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
-                id_token_trust_mode: IdTokenTrustMode::Strict,
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
                 access_token_config: TokenValidationConfig {
                     exp_validation: true,

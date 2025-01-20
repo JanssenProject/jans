@@ -1,6 +1,6 @@
 {
   "name": "jans-tarp",
-  "version": "0.0.0-nightly",
+  "version": "0.0.0",
   "description": "Relying Party tool in form of a Chrome Extension.",
   "main": "index.js",
   "license": "Apache",
@@ -50,6 +50,6 @@
     "react-spinner-overlay": "^0.1.33",
     "styled-components": "^6.1.0",
     "uuid": "^9.0.0",
-    "wasm": "file:src/wasm"
+    "wasm": "file:wasm"
   }
 }

@@ -13,16 +13,15 @@ use std::fs;
 use std::path::Path;
 use std::str::FromStr;
 
-use jsonwebtoken::Algorithm;
-use serde::{Deserialize, Deserializer, Serialize};
-
-use super::authorization_config::AuthorizationConfig;
+use super::authorization_config::{AuthorizationConfig, IdTokenTrustMode};
 use super::json_util::fallback_deserialize;
 use super::{
-    BootstrapConfig, BootstrapConfigLoadingError, IdTokenTrustMode, JwtConfig, LogConfig,
-    LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, TokenValidationConfig,
+    BootstrapConfig, BootstrapConfigLoadingError, JwtConfig, LogConfig, LogTypeConfig,
+    MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, TokenValidationConfig,
 };
 use crate::log::LogLevel;
+use jsonwebtoken::Algorithm;
+use serde::{Deserialize, Deserializer, Serialize};
 
 #[derive(Deserialize, Serialize, PartialEq, Debug, Default)]
 /// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
@@ -563,7 +562,6 @@ impl BootstrapConfig {
             jwks,
             jwt_sig_validation: raw.jwt_sig_validation.into(),
             jwt_status_validation: raw.jwt_status_validation.into(),
-            id_token_trust_mode: raw.id_token_trust_mode,
             signature_algorithms_supported: raw.jwt_signature_algorithms_supported.clone(),
             access_token_config: TokenValidationConfig {
                 iss_validation: raw.at_iss_validation.into(),
@@ -601,6 +599,7 @@ impl BootstrapConfig {
             mapping_id_token: raw.mapping_id_token.clone(),
             mapping_access_token: raw.mapping_access_token.clone(),
             mapping_userinfo_token: raw.mapping_userinfo_token.clone(),
+            id_token_trust_mode: raw.id_token_trust_mode,
         };
 
         Ok(Self {

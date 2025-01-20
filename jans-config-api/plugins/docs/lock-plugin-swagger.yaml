@@ -15,6 +15,7 @@ servers:
 tags:
 - name: Lock - Configuration
 - name: Lock - Audit
+- name: Lock - Statistics
 paths:
   /lock/audit/health/search:
     get:
@@ -468,6 +469,57 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock-config.write
+  /lock/stat:
+    get:
+      tags:
+      - Statistics
+      summary: Provides basic statistic
+      description: Provides basic statistic
+      operationId: get-lock-stat
+      parameters:
+      - name: Authorization
+        in: header
+        description: Authorization code
+        schema:
+          type: string
+      - name: month
+        in: query
+        description: Month for which the stat report is to be fetched. The parameter
+          is mandatory if start_month and end_month parameters are not present.
+        schema:
+          type: string
+      - name: start_month
+        in: query
+        description: Start-Month for which the stat report is to be fetched
+        schema:
+          type: string
+      - name: end_month
+        in: query
+        description: End-Month for which the stat report is to be fetched
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: Report format
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JsonNode'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/read-all
+        - jans_stat
 components:
   schemas:
     HealthEntry:
@@ -597,6 +649,13 @@ components:
         openIdIssuer:
           type: string
           description: OpenID issuer URL
+        statEnabled:
+          type: boolean
+          description: Active stat enabled
+        statTimerIntervalInSeconds:
+          type: integer
+          description: Statistical data capture time interval
+          format: int32
         tokenChannels:
           type: array
           description: List of token channel names
@@ -689,6 +748,8 @@ components:
           items:
             type: string
             description: List of Zip Uris with policies
+        errorReasonEnabled:
+          type: boolean
     OpaConfiguration:
       type: object
       properties:
@@ -700,6 +761,8 @@ components:
           description: OPA access token
       description: Opa Configuration
     JsonPatch:
+      type: object
+    JsonNode:
       type: object
   securitySchemes:
     oauth2:
