@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "flask-sidecar"
-version = "0.0.0"
+version = "1.3.0"
 description = "Sidecar for cedarling"
 authors = ["SafinWasi <6601566+SafinWasi@users.noreply.github.com>"]
 license = "Apache-2.0"
