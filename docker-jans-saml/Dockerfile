@@ -173,7 +173,7 @@ EXPOSE $CN_SAML_HTTP_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/saml" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.3.0" \
+    org.opencontainers.image.version="1.3.0-1" \
     org.opencontainers.image.title="Janssen SAML" \
     org.opencontainers.image.description=""
 

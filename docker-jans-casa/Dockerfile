@@ -206,7 +206,7 @@ EXPOSE $CN_CASA_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/casa" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.3.0" \
+    org.opencontainers.image.version="1.3.0-1" \
     org.opencontainers.image.title="Janssen Casa" \
     org.opencontainers.image.description="Self-service portal for people to manage their account security preferences in the Janssen, like 2FA"
 
