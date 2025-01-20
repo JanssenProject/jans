@@ -135,7 +135,7 @@ from this project listing page.
     store the reference in a variable called `authServiceRef`. This reference will 
     be used to validate the user credentials in the subsequent steps.
 
-    `class name`: `io,jans.server.service.AuthenticationService`
+    `class name`: `io.jans.server.service.AuthenticationService`
 
     `method name`: `class`
 
@@ -171,7 +171,7 @@ from this project listing page.
     
     `description`: `Get authentication service reference from the IDP`
 
-    ![](../../../assets/agamalab-flow-passwd-edit-cdiutil.png)
+    ![](../../../assets/agamalab-flow-passwd-editcdiutil.png)
 
 4. Create Assignment block
 
