@@ -6,6 +6,10 @@
 use serde::Deserialize;
 use std::collections::HashMap;
 
+/// Describes the mapping for **Token Entity** -> **Principal Entity**
+///
+/// This tells cedarling where to put token entity references in the
+/// target principal entities.
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct BsTknPrincipalMapper(HashMap<String, String>);
 

@@ -3,11 +3,13 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use super::authorization_config::TokenEntityNames;
 use serde::Deserialize;
 use std::collections::HashMap;
 
-use super::authorization_config::TokenEntityNames;
-
+/// Describes the mapping for **Token Name** -> **Token Entity Name**
+///
+/// This tells cedarling the entity names of the given tokens
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct BsTknEntityMapping(HashMap<String, String>);
 
