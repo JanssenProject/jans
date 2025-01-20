@@ -2106,6 +2106,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/janssen-server/vm-ops/jans-command/</loc>
+         <lastmod>2025-01-20</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/janssen-server/vm-ops/logs/</loc>
          <lastmod>2025-01-20</lastmod>
          <changefreq>daily</changefreq>
