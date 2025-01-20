@@ -6,10 +6,11 @@
 use serde::{Deserialize, Deserializer};
 use serde_json::Value;
 
-/// Helper function to convert Python-style list strings to JSON format
+/// Helper function to parse string to json, and fix some possible moments
 fn to_json(s: &str) -> Option<Value> {
     let mut json_string = s.trim().to_string();
 
+    // convert Python-style list strings to JSON format
     if json_string.starts_with('[') && json_string.ends_with(']') {
         let json_like = json_string.replace('\'', "\""); // Replace single quotes with double quotes
         json_string = json_like;
@@ -17,9 +18,10 @@ fn to_json(s: &str) -> Option<Value> {
 
     // Validate that the result is valid JSON
     if let Ok(value) = serde_json::from_str::<Value>(json_string.as_str()) {
-        return Some(value);
+        Some(value)
+    } else {
+        None
     }
-    None
 }
 
 /// Attempts to deserialize a value, falling back to JSON parsing if the value is a string.
