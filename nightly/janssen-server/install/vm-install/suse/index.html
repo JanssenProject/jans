@@ -1706,6 +1706,8 @@
         
           
         
+          
+        
       
       
         
@@ -1820,6 +1822,20 @@
     <li class="md-nav__item">
       <a href="../../../vm-ops/certificates/" class="md-nav__link">
         Certificates
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../vm-ops/jans-command/" class="md-nav__link">
+        Jans Command
       </a>
     </li>
   
@@ -7313,6 +7329,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_2">
@@ -7416,19 +7434,31 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../../../cedarling/cedarling-sidecar/" class="md-nav__link">
+        Sidecar
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
     
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
       
       
       
         
           
             
-          
-        
           
         
           
@@ -7440,14 +7470,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="../../../../cedarling/python/">Python</a>
           
-            <label for="__nav_2_7">
+            <label for="__nav_2_8">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="Python" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_7">
+        <label class="md-nav__title" for="__nav_2_8">
           <span class="md-nav__icon md-icon"></span>
           Python
         </label>
@@ -7463,20 +7493,6 @@
     <li class="md-nav__item">
       <a href="../../../../cedarling/python/usage/" class="md-nav__link">
         How to use
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../cedarling/python/sidecar/" class="md-nav__link">
-        Sidecar
       </a>
     </li>
   
@@ -8700,17 +8716,17 @@ needed for OpenID and FIDO.</li>
 <li>Download the release package from the GitHub Janssen Project
   <a href="https://github.com/JanssenProject/jans/releases">Releases</a></li>
 </ul>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.suse15.x86_64.rpm
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version.suse15.x86_64.rpm
 </code></pre></div>
 <ul>
 <li>Verify integrity of the downloaded package using published <code>sha256sum</code>.</li>
 </ul>
 <p>Download <code>sha256sum</code> file for the package</p>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.suse15.x86_64.rpm.sha256sum
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version.suse15.x86_64.rpm.sha256sum
 </code></pre></div>
 <p>Check the hash if it is matching. You may need to change your working directory
 to where both the rpm and sha256sum file are located.</p>
-<div class="highlight"><pre><span></span><code>sha256sum -c jans-0.0.0-nightly.suse15.x86_64.rpm.sha256sum
+<div class="highlight"><pre><span></span><code>sha256sum -c jans-replace-janssen-version.suse15.x86_64.rpm.sha256sum
 </code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
 <div class="highlight"><pre><span></span><code>&lt;package-name&gt;: OK
@@ -8718,7 +8734,7 @@ to where both the rpm and sha256sum file are located.</p>
 <ul>
 <li>Install the package</li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo zypper install ~/jans-0.0.0-nightly.suse15.x86_64.rpm
+<div class="highlight"><pre><span></span><code>sudo zypper install ~/jans-replace-janssen-version.suse15.x86_64.rpm
 </code></pre></div>
 <h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>

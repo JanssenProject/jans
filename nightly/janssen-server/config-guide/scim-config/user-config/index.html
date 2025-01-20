@@ -1619,6 +1619,8 @@
         
           
         
+          
+        
       
       
         
@@ -1733,6 +1735,20 @@
     <li class="md-nav__item">
       <a href="../../../vm-ops/certificates/" class="md-nav__link">
         Certificates
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../vm-ops/jans-command/" class="md-nav__link">
+        Jans Command
       </a>
     </li>
   
@@ -2528,6 +2544,20 @@
           <li class="md-nav__item">
   <a href="#update-user" class="md-nav__link">
     Update User
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#change-user-password" class="md-nav__link">
+    Change User Password
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manage-user-fido-devices" class="md-nav__link">
+    Manage User FIDO Devices
   </a>
   
 </li>
@@ -7415,6 +7445,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_2">
@@ -7518,19 +7550,31 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../../../cedarling/cedarling-sidecar/" class="md-nav__link">
+        Sidecar
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
     
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
       
       
       
         
           
             
-          
-        
           
         
           
@@ -7542,14 +7586,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="../../../../cedarling/python/">Python</a>
           
-            <label for="__nav_2_7">
+            <label for="__nav_2_8">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="Python" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_7">
+        <label class="md-nav__title" for="__nav_2_8">
           <span class="md-nav__icon md-icon"></span>
           Python
         </label>
@@ -7565,20 +7609,6 @@
     <li class="md-nav__item">
       <a href="../../../../cedarling/python/usage/" class="md-nav__link">
         How to use
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../cedarling/python/sidecar/" class="md-nav__link">
-        Sidecar
       </a>
     </li>
   
@@ -8742,6 +8772,20 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#change-user-password" class="md-nav__link">
+    Change User Password
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manage-user-fido-devices" class="md-nav__link">
+    Manage User FIDO Devices
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#delete-user" class="md-nav__link">
     Delete User
   </a>
@@ -9460,6 +9504,18 @@ jans cli -scim --schema-sample PatchRequest
 <h3 id="update-user">Update User<a class="headerlink" href="#update-user" title="Permanent link">#</a></h3>
 <p>To modify any user properties, find the user from search box and hit <code>Enter</code> to pop-up user details, update user details and finally hit on <code>Save</code> button to update the changes. </p>
 <p><img alt="update-user" src="../../../../assets/jans-tui-update-user.png" /></p>
+<h3 id="change-user-password">Change User Password<a class="headerlink" href="#change-user-password" title="Permanent link">#</a></h3>
+<p>No chance to recover user password, but you can change.
+To change password of a user navigate/or search user and press key <code>p</code> when the target user is higlighted.
+In the figure below, passowrd of user <strong>sakamura</strong> is being changed.</p>
+<p><img alt="Change User Password" src="../../../../assets/tui-user-change-password.png" /></p>
+<p>Once you write new password (it will be displayed while you type), go to button <code>&lt; Save &gt;</code> and press Enter.</p>
+<h3 id="manage-user-fido-devices">Manage User FIDO Devices<a class="headerlink" href="#manage-user-fido-devices" title="Permanent link">#</a></h3>
+<p>To view and manage users registered FIDO devices, first navigate/or search user and press key  <code>f</code> on the keyboard.
+If user has any registered FIDO device, a popup will appears as in image below:</p>
+<p><img alt="User FIDO Devices" src="../../../../assets/tui-ser-fido-device-list.png" /></p>
+<p>You can veiw details of a device by pressing Enter. To delete a device press key <code>d</code>, you will be
+prompted for confirmation.</p>
 <h3 id="delete-user">Delete User<a class="headerlink" href="#delete-user" title="Permanent link">#</a></h3>
 <p>To delete user, bring the control on the specific user row and press <code>delete</code> or <code>d</code> key from keyboard. It will show a pop-up for confirmation as below:</p>
 <p><img alt="delete-user" src="../../../../assets/jans-tui-delete-user.png" /></p>
@@ -9738,7 +9794,7 @@ response looks like
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-20T11:36:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-20</span>
       
         <br>
         Created:

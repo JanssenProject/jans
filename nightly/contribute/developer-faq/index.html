@@ -1617,6 +1617,8 @@
         
           
         
+          
+        
       
       
         
@@ -1731,6 +1733,20 @@
     <li class="md-nav__item">
       <a href="../../janssen-server/vm-ops/certificates/" class="md-nav__link">
         Certificates
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../janssen-server/vm-ops/jans-command/" class="md-nav__link">
+        Jans Command
       </a>
     </li>
   
@@ -7224,6 +7240,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_2">
@@ -7327,19 +7345,31 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../cedarling/cedarling-sidecar/" class="md-nav__link">
+        Sidecar
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
     
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
       
       
       
         
           
             
-          
-        
           
         
           
@@ -7351,14 +7381,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="../../cedarling/python/">Python</a>
           
-            <label for="__nav_2_7">
+            <label for="__nav_2_8">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="Python" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_7">
+        <label class="md-nav__title" for="__nav_2_8">
           <span class="md-nav__icon md-icon"></span>
           Python
         </label>
@@ -7374,20 +7404,6 @@
     <li class="md-nav__item">
       <a href="../../cedarling/python/usage/" class="md-nav__link">
         How to use
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../cedarling/python/sidecar/" class="md-nav__link">
-        Sidecar
       </a>
     </li>
   
@@ -8816,7 +8832,7 @@ you as a quick reference to generate Let's Encrypt CA certificates.</p>
 </div>
 <p>This installation uses Gluu Testing certificate.</p>
 <h3 id="download-installer">Download Installer<a class="headerlink" href="#download-installer" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-linux-setup/jans_setup/install.py -O install.py
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py -O install.py
 </code></pre></div>
 <h3 id="execute-installer">Execute Installer<a class="headerlink" href="#execute-installer" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>python3 install.py --profile=openbanking --args=&quot;-ob-key-fn=/opt/jans/jans-setup/openbanking/static/ob-gluu-test.key -static-kid=ob-gluu-test -jwks-uri=https://ox.gluu.org/icrby8xcvbcv/ob/ob-gluu-test.jwks --disable-ob-auth-script -ob-alias=ob-gluu-test&quot;

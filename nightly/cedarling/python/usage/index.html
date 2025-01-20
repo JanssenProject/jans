@@ -1617,6 +1617,8 @@
         
           
         
+          
+        
       
       
         
@@ -1731,6 +1733,20 @@
     <li class="md-nav__item">
       <a href="../../../janssen-server/vm-ops/certificates/" class="md-nav__link">
         Certificates
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../janssen-server/vm-ops/jans-command/" class="md-nav__link">
+        Jans Command
       </a>
     </li>
   
@@ -7226,6 +7242,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_2">
@@ -7328,6 +7346,20 @@
               
   
   
+  
+    <li class="md-nav__item">
+      <a href="../../cedarling-sidecar/" class="md-nav__link">
+        Sidecar
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
     
   
   
@@ -7335,15 +7367,13 @@
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" checked>
       
       
       
         
           
             
-          
-        
           
         
           
@@ -7355,14 +7385,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="../">Python</a>
           
-            <label for="__nav_2_7">
+            <label for="__nav_2_8">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="Python" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_7">
+        <label class="md-nav__title" for="__nav_2_8">
           <span class="md-nav__icon md-icon"></span>
           Python
         </label>
@@ -7434,20 +7464,6 @@
   
 </nav>
       
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../sidecar/" class="md-nav__link">
-        Sidecar
-      </a>
     </li>
   
 
@@ -8603,12 +8619,8 @@
 </ul>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code>(venv) $ python example.py
-Policy store location not provided, use &#39;CEDARLING_LOCAL_POLICY_STORE&#39; environment variable
-Used default policy store path: example_files/policy-store.json
-
-{&quot;id&quot;:&quot;0193414e-9672-786a-986c-57f48d41c4e4&quot;,&quot;time&quot;:1731967489,&quot;log_type&quot;:&quot;System&quot;,&quot;pdp_id&quot;:&quot;c0ec33ff-9482-4bdc-83f6-2925a41a3280&quot;,&quot;msg&quot;:&quot;configuration parsed successfully&quot;}
-{&quot;id&quot;:&quot;0193414e-9672-786a-986c-57f5379086c3&quot;,&quot;time&quot;:1731967489,&quot;log_type&quot;:&quot;System&quot;,&quot;pdp_id&quot;:&quot;c0ec33ff-9482-4bdc-83f6-2925a41a3280&quot;,&quot;msg&quot;:&quot;Cedarling Authz initialized successfully&quot;,&quot;application_id&quot;:&quot;TestApp&quot;}
-{&quot;id&quot;:&quot;0193414e-9676-7d8a-b55b-3f0097355851&quot;,&quot;time&quot;:1731967489,&quot;log_type&quot;:&quot;Decision&quot;,&quot;pdp_id&quot;:&quot;c0ec33ff-9482-4bdc-83f6-2925a41a3280&quot;,&quot;msg&quot;:&quot;Result of authorize.&quot;,&quot;application_id&quot;:&quot;TestApp&quot;,&quot;action&quot;:&quot;Jans::Action::\&quot;Read\&quot;&quot;,&quot;resource&quot;:&quot;Jans::Application::\&quot;some_id\&quot;&quot;,&quot;context&quot;:{&quot;user_agent&quot;:&quot;Linux&quot;,&quot;operating_system&quot;:&quot;Linux&quot;,&quot;network_type&quot;:&quot;Local&quot;,&quot;network&quot;:&quot;127.0.0.1&quot;,&quot;geolocation&quot;:[&quot;America&quot;],&quot;fraud_indicators&quot;:[&quot;Allowed&quot;],&quot;device_health&quot;:[&quot;Healthy&quot;],&quot;current_time&quot;:1731967489},&quot;person_principal&quot;:&quot;Jans::User::\&quot;qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0\&quot;&quot;,&quot;person_diagnostics&quot;:{&quot;reason&quot;:[&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;],&quot;errors&quot;:[]},&quot;person_decision&quot;:&quot;ALLOW&quot;,&quot;workload_principal&quot;:&quot;Jans::Workload::\&quot;d7f71bea-c38d-4caf-a1ba-e43c74a11a62\&quot;&quot;,&quot;workload_diagnostics&quot;:{&quot;reason&quot;:[&quot;444da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;],&quot;errors&quot;:[]},&quot;workload_decision&quot;:&quot;ALLOW&quot;,&quot;authorized&quot;:true}
+{&quot;request_id&quot;:&quot;019474da-12ee-7315-bb12-35f46a9bc2b2&quot;,&quot;timestamp&quot;:&quot;2025-01-17T09:20:36.334Z&quot;,&quot;log_kind&quot;:&quot;System&quot;,&quot;pdp_id&quot;:&quot;4cf7864b-50d4-4492-8cd1-3ddb424e2711&quot;,&quot;level&quot;:&quot;INFO&quot;,&quot;msg&quot;:&quot;Cedarling Authz initialized successfully&quot;,&quot;application_id&quot;:&quot;My App&quot;,&quot;cedar_lang_version&quot;:&quot;4.1.0&quot;,&quot;cedar_sdk_version&quot;:&quot;4.2.2&quot;}
+{&quot;request_id&quot;:&quot;019474da-12f3-74f1-8f3e-da7624806135&quot;,&quot;timestamp&quot;:&quot;2025-01-17T09:20:36.339Z&quot;,&quot;log_kind&quot;:&quot;Decision&quot;,&quot;pdp_id&quot;:&quot;4cf7864b-50d4-4492-8cd1-3ddb424e2711&quot;,&quot;policystore_id&quot;:&quot;gICAgcHJpbmNpcGFsIGlz&quot;,&quot;policystore_version&quot;:&quot;undefined&quot;,&quot;principal&quot;:&quot;User &amp; Workload&quot;,&quot;User&quot;:{&quot;email&quot;:{&quot;domain&quot;:&quot;jans.test&quot;,&quot;uid&quot;:&quot;admin&quot;},&quot;sub&quot;:&quot;qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0&quot;},&quot;Workload&quot;:{&quot;client_id&quot;:&quot;d7f71bea-c38d-4caf-a1ba-e43c74a11a62&quot;},&quot;diagnostics&quot;:{&quot;reason&quot;:[{&quot;id&quot;:&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;,&quot;description&quot;:&quot;simple policy example for principal user&quot;}],&quot;errors&quot;:[]},&quot;action&quot;:&quot;Jans::Action::\&quot;Read\&quot;&quot;,&quot;resource&quot;:&quot;Jans::Application::\&quot;some_id\&quot;&quot;,&quot;decision&quot;:&quot;ALLOW&quot;,&quot;tokens&quot;:{&quot;id_token&quot;:{&quot;jti&quot;:&quot;ijLZO1ooRyWrgIn7cIdNyA&quot;},&quot;Userinfo&quot;:{&quot;jti&quot;:&quot;OIn3g1SPSDSKAYDzENVoug&quot;},&quot;access&quot;:{&quot;jti&quot;:&quot;uZUh1hDUQo6PFkBPnwpGzg&quot;}},&quot;decision_time_ms&quot;:3}
 Result of workload authorization: ALLOW
 Policy ID used:
 444da5d85403f35ea76519ed1a18a33989f855bf1cf8
@@ -8620,7 +8632,8 @@ Policy ID used:
 Errors during authorization: 0
 </code></pre></div>
 <h2 id="explanation">Explanation<a class="headerlink" href="#explanation" title="Permanent link">#</a></h2>
-<p>Cedarling creates principal entities from the access, ID and userinfo tokens. The action, resource and context entities are declared in code. These four entities together form the <code>PARC</code> format that cedarling evaluates against policies provided in the policy store. The principal entities can be either User, Workload or Role. After forming the entities, cedarling evaluates them against the policies provided in the policy store. If entity is explicitly permitted by a policy, the result of the evaluation is <code>ALLOW</code>, otherwise it is <code>DENY</code>.</p>
+<p>Cedarling creates principal entities from either the access, ID and userinfo tokens, or a combination of the three depending on bootstrap configurations. For example, to create a Workload entity only one token is sufficient. But to create a user entity at least ID or Userinfo tokens are needed. This is defined by <code>CEDARLING_USER_AUTHZ</code> and <code>CEDARLING_WORKLOAD_AUTHZ</code> in the <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/cedarling_python.pyi#L10">bootstrap configuration</a>. Cedarling will make a best attempt to create entities based on tokens provided; if it is unable to do so it will raise an <code>EntitiesError</code> exception.
+The action, resource and context entities are declared in code. These four entities together form the <code>PARC</code> format that cedarling evaluates against policies provided in the policy store. The principal entities can be either User, Workload or Role. After forming the entities, cedarling evaluates them against the policies provided in the policy store. If entity is explicitly permitted by a policy, the result of the evaluation is <code>ALLOW</code>, otherwise it is <code>DENY</code>.</p>
 <p>In this case there are two policies in the store, one for User entities and one for Workload entities:</p>
 <div class="highlight"><pre><span></span><code>@444da5d85403f35ea76519ed1a18a33989f855bf1cf8
 permit(
@@ -8668,16 +8681,14 @@ permit(
 <span class="p">}</span>
 
 <span class="n">request</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span>
-    <span class="n">access_token</span><span class="p">,</span>
-    <span class="n">id_token</span><span class="p">,</span>
-    <span class="n">userinfo_token</span><span class="p">,</span>
+    <span class="n">tokens</span><span class="o">=</span><span class="n">Tokens</span><span class="p">(</span><span class="n">access_token</span><span class="p">,</span> <span class="n">id_token</span><span class="p">,</span> <span class="n">userinfo_token</span><span class="p">),</span>
     <span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">,</span>
     <span class="n">resource</span><span class="o">=</span><span class="n">resource</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
 
 <span class="n">authorize_result</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 <span class="k">assert</span> <span class="n">authorize_result</span><span class="o">.</span><span class="n">is_allowed</span><span class="p">()</span>
 </code></pre></div>
-<p>Cedarling will return <code>is_allowed()</code> as <code>True</code> only if both the User and Workload entity evaluations are <code>ALLOW</code>.</p>
+<p>Cedarling will return <code>is_allowed()</code> as <code>True</code> only if the authorization queries set in the bootstrap return <code>True</code>. In case of the example, both <code>CEDARLING_USER_AUTHZ</code> and <code>CEDARLING_WORKLOAD_AUTHZ</code> were set to <code>enabled</code>, so cedarling will only return True if both user and workload evaluations are true. </p>
 <h2 id="exposed-functions">Exposed functions<a class="headerlink" href="#exposed-functions" title="Permanent link">#</a></h2>
 <p>The <code>pyo3</code> binding for cedarling exposes a number of cedarling functions for you to use. The documentation on this can be found <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/PYTHON_TYPES.md">here</a>.</p>
 
@@ -8686,7 +8697,7 @@ permit(
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-12T17:40:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-20T11:32:10+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-20</span>
       
         <br>
         Created:
@@ -8731,13 +8742,13 @@ permit(
       
       
         
-        <a href="../sidecar/" class="md-footer__link md-footer__link--next" aria-label="Next: Sidecar" rel="next">
+        <a href="../../cedarling-wasm/" class="md-footer__link md-footer__link--next" aria-label="Next: WASM" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Sidecar
+              WASM
             </div>
           </div>
           <div class="md-footer__button md-icon">
