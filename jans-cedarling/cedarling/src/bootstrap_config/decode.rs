@@ -14,7 +14,7 @@ use std::path::Path;
 use std::str::FromStr;
 
 use super::authorization_config::{AuthorizationConfig, IdTokenTrustMode};
-use super::json_util::fallback_deserialize;
+use super::json_util::deserialize_or_parse_string_as_json;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, JwtConfig, LogConfig, LogTypeConfig,
     MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, TokenValidationConfig,
@@ -58,17 +58,17 @@ pub struct BootstrapConfigRaw {
     /// If `log_type` is set to [`LogType::Memory`], this is the TTL (time to live) of
     /// log entities in seconds.
     #[serde(rename = "CEDARLING_LOG_TTL", default)]
-    #[serde(deserialize_with = "fallback_deserialize")]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub log_ttl: Option<u64>,
 
     /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
     #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS", default)]
-    #[serde(deserialize_with = "fallback_deserialize")]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub decision_log_user_claims: Vec<String>,
 
     /// List of claims to map from user entity, such as ["client_id", "rp_id", ...]
     #[serde(rename = "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS", default)]
-    #[serde(deserialize_with = "fallback_deserialize")]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub decision_log_workload_claims: Vec<String>,
 
     /// Token claims that will be used for decision logging.
@@ -95,27 +95,27 @@ pub struct BootstrapConfigRaw {
 
     /// Mapping name of cedar schema User entity
     #[serde(rename = "CEDARLING_MAPPING_USER", default)]
-    #[serde(deserialize_with = "fallback_deserialize")]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub mapping_user: Option<String>,
 
     /// Mapping name of cedar schema Workload entity.
     #[serde(rename = "CEDARLING_MAPPING_WORKLOAD", default)]
-    #[serde(deserialize_with = "fallback_deserialize")]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub mapping_workload: Option<String>,
 
     /// Mapping name of cedar schema id_token entity.
     #[serde(rename = "CEDARLING_MAPPING_ID_TOKEN", default)]
-    #[serde(deserialize_with = "fallback_deserialize")]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub mapping_id_token: Option<String>,
 
     /// Mapping name of cedar schema access_token entity.
     #[serde(rename = "CEDARLING_MAPPING_ACCESS_TOKEN", default)]
-    #[serde(deserialize_with = "fallback_deserialize")]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub mapping_access_token: Option<String>,
 
     /// Mapping name of cedar schema userinfo_token entity.
     #[serde(rename = "CEDARLING_MAPPING_USERINFO_TOKEN", default)]
-    #[serde(deserialize_with = "fallback_deserialize")]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub mapping_userinfo_token: Option<String>,
 
     /// Path to a local file pointing containing a JWKS.
@@ -128,7 +128,7 @@ pub struct BootstrapConfigRaw {
 
     /// JSON object with policy store
     #[serde(rename = "CEDARLING_LOCAL_POLICY_STORE", default)]
-    #[serde(deserialize_with = "fallback_deserialize")]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub local_policy_store: Option<String>,
 
     /// Path to a Policy Store JSON file
@@ -143,7 +143,7 @@ pub struct BootstrapConfigRaw {
     ///
     /// This requires that an `iss` (Issuer) claim is present on each token.
     #[serde(rename = "CEDARLING_JWT_SIG_VALIDATION", default)]
-    #[serde(deserialize_with = "fallback_deserialize")]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_sig_validation: FeatureToggle,
 
     /// Whether to check the status of the JWT. On startup.
@@ -154,12 +154,12 @@ pub struct BootstrapConfigRaw {
     ///
     /// [`IETF Draft`]: https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/
     #[serde(rename = "CEDARLING_JWT_STATUS_VALIDATION", default)]
-    #[serde(deserialize_with = "fallback_deserialize")]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_status_validation: FeatureToggle,
 
     /// Cedarling will only accept tokens signed with these algorithms.
     #[serde(rename = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED", default)]
-    #[serde(deserialize_with = "fallback_deserialize")]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_signature_algorithms_supported: HashSet<Algorithm>,
 
     /// When enabled, the `iss` (Issuer) claim must be present in the Access Token and
@@ -242,7 +242,7 @@ pub struct BootstrapConfigRaw {
     ///
     /// ***Required*** if `LOCK == Enabled`.
     #[serde(rename = "CEDARLING_LOCK_MASTER_CONFIGURATION_URI", default)]
-    #[serde(deserialize_with = "fallback_deserialize")]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub lock_master_configuration_uri: Option<String>,
 
     /// Controls whether Cedarling should listen for SSE config updates.
@@ -260,17 +260,17 @@ pub struct BootstrapConfigRaw {
 
     /// How often to send log messages to Lock Master (0 to turn off trasmission).
     #[serde(rename = "CEDARLING_AUDIT_LOG_INTERVAL", default)]
-    #[serde(deserialize_with = "fallback_deserialize")]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub audit_log_interval: u64,
 
     /// How often to send health messages to Lock Master (0 to turn off transmission).
     #[serde(rename = "CEDARLING_AUDIT_HEALTH_INTERVAL", default)]
-    #[serde(deserialize_with = "fallback_deserialize")]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub audit_health_interval: u64,
 
     /// How often to send telemetry messages to Lock Master (0 to turn off transmission).
     #[serde(rename = "CEDARLING_AUDIT_TELEMETRY_INTERVAL", default)]
-    #[serde(deserialize_with = "fallback_deserialize")]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub audit_health_telemetry_interval: u64,
 
     /// Controls whether Cedarling should listen for updates from the Lock Server.
@@ -617,7 +617,7 @@ pub fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D:
 where
     D: Deserializer<'de>,
 {
-    let value: Option<String> = fallback_deserialize(deserializer)?;
+    let value: Option<String> = deserialize_or_parse_string_as_json(deserializer)?;
 
     Ok(value.filter(|s| !s.is_empty()))
 }

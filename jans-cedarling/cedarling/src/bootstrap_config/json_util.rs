@@ -26,7 +26,7 @@ fn to_json(s: &str) -> Option<Value> {
 
 /// Attempts to deserialize a value, falling back to JSON parsing if the value is a string.
 /// Returns the deserialized value or the original error if both attempts fail.
-pub fn fallback_deserialize<'de, D, T>(deserializer: D) -> Result<T, D::Error>
+pub fn deserialize_or_parse_string_as_json<'de, D, T>(deserializer: D) -> Result<T, D::Error>
 where
     D: Deserializer<'de>,
     T: Deserialize<'de>,
@@ -60,24 +60,24 @@ mod tests {
     /// - vector: Vec<i32> - tests array deserialization
     #[derive(Debug, Deserialize, PartialEq)]
     struct TestStruct {
-        #[serde(deserialize_with = "fallback_deserialize", default)]
+        #[serde(deserialize_with = "deserialize_or_parse_string_as_json", default)]
         value: i32,
-        #[serde(deserialize_with = "fallback_deserialize", default)]
+        #[serde(deserialize_with = "deserialize_or_parse_string_as_json", default)]
         optional: Option<String>,
-        #[serde(deserialize_with = "fallback_deserialize", default)]
+        #[serde(deserialize_with = "deserialize_or_parse_string_as_json", default)]
         vector_int: Vec<i32>,
-        #[serde(deserialize_with = "fallback_deserialize", default)]
+        #[serde(deserialize_with = "deserialize_or_parse_string_as_json", default)]
         vector_str: Vec<String>,
     }
 
     /// Additional test structure for more complex scenarios
     #[derive(Debug, Deserialize, PartialEq)]
     struct ComplexTestStruct {
-        #[serde(deserialize_with = "fallback_deserialize", default)]
+        #[serde(deserialize_with = "deserialize_or_parse_string_as_json", default)]
         boolean: bool,
-        #[serde(deserialize_with = "fallback_deserialize", default)]
+        #[serde(deserialize_with = "deserialize_or_parse_string_as_json", default)]
         float: f64,
-        #[serde(deserialize_with = "fallback_deserialize", default)]
+        #[serde(deserialize_with = "deserialize_or_parse_string_as_json", default)]
         nested: Option<TestStruct>,
     }
 
