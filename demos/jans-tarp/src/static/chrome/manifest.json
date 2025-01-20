@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "jans-tarp",
-  "version": "0.0.0-nightly",
+  "version": "0.0.0",
   "version_name": "nightly",
   "description": "Relying Party tool in form of a Chrome Extension. Please note that the manifest version field should be one to four dot-separated integers identifying the version of this extension. The descriptive version string can be stated in the `version_name` field. For more details see https://developer.chrome.com/docs/extensions/reference/manifest/version.",
   "icons": {

@@ -63,7 +63,7 @@ mod fallback {
     /// often, and in this case correctness and non-fallibility are far more
     /// important than performance.
     pub fn log(msg: &str) {
-        let log_config = crate::bootstrap_config::LogConfig{
+        let log_config = crate::bootstrap_config::LogConfig {
             log_type: crate::bootstrap_config::log_config::LogTypeConfig::StdOut,
             // level is so that all messages passed here are logged.
             log_level: LogLevel::TRACE,
@@ -87,7 +87,9 @@ impl LogWriter for MemoryLogger {
         let json = match serde_json::to_value(&entry) {
             Ok(json) => json,
             Err(err) => {
-                fallback::log(&format!("could not serialize LogEntry to serde_json::Value: {err:?}"));
+                fallback::log(&format!(
+                    "could not serialize LogEntry to serde_json::Value: {err:?}"
+                ));
                 return;
             },
         };
@@ -254,7 +256,9 @@ mod tests {
 
         impl serde::Serialize for FailSerialize {
             fn serialize<S>(&self, _serializer: S) -> Result<S::Ok, S::Error>
-            where S: serde::Serializer {
+            where
+                S: serde::Serializer,
+            {
                 Err(serde::ser::Error::custom("this always fails"))
             }
         }
