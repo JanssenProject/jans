@@ -50,8 +50,8 @@ public class LockStatResource extends BaseResource {
     LockService lockService;
 
     @Operation(summary = "Provides basic statistic", description = "Provides basic statistic", operationId = "get-lock-stat", tags = {
-            "Statistics" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.LOCK_READ_ACCESS, ApiAccessConstants.JANS_STAT }))
+            "Statistics" }, security = @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_READ_ACCESS,
+                    ApiAccessConstants.JANS_STAT }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Stats", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonNode.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -72,7 +72,11 @@ public class LockStatResource extends BaseResource {
         }
         JsonNode jsonNode = null;
         try {
-            logger.info("LockStatResource::getStatistics() - authorization:{}, month:{},  startMonth:{}, endMonth:{}, format:{}", authorization, month, startMonth, endMonth, format);
+            if (logger.isInfoEnabled()) {
+                logger.info(
+                        "LockStatResource::getStatistics() - authorization:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
+                        authorization, month, startMonth, endMonth, format);
+            }
             String url = getIssuer() + STAT_URL;
             jsonNode = this.lockService.getStat(url, authorization, month, startMonth, endMonth, format);
             logger.info("StatResource::getUserStatistics() - jsonNode:{} ", jsonNode);

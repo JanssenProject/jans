@@ -31,7 +31,11 @@ public class LockService {
 
     public JsonNode getStat(String url, String token, String month, String startMonth, String endMonth, String format)
             throws JsonProcessingException {
-        logger.info("LockStatResource::getStatistics() - url:{}, token:{}, month:{},  startMonth:{}, endMonth:{}, format:{}", url, token, month, startMonth, endMonth, format);
+        if (logger.isInfoEnabled()) {
+            logger.info(
+                    "LockStatResource::getStatistics() - url:{}, token:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
+                    url, token, month, startMonth, endMonth, format);
+        }
         JsonNode jsonNode = null;
         Map<String, String> headers = new HashMap<>();
         headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
