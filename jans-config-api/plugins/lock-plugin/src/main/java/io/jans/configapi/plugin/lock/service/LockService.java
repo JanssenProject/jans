@@ -4,6 +4,7 @@ import io.jans.configapi.core.util.Jackson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.service.ConfigHttpService;
 import io.jans.model.net.HttpServiceResponse;
 
@@ -34,7 +35,7 @@ public class LockService {
         if (logger.isInfoEnabled()) {
             logger.info(
                     "LockStatResource::getStatistics() - url:{}, token:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
-                    url, token, month, startMonth, endMonth, format);
+                    escapeLog(url), escapeLog(token), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth), escapeLog(format));
         }
         JsonNode jsonNode = null;
         Map<String, String> headers = new HashMap<>();

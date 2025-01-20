@@ -6,12 +6,14 @@
 
 package io.jans.configapi.plugin.lock.rest;
 
-import io.jans.configapi.plugin.lock.service.LockService;
+
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.plugin.lock.service.LockService;
 import io.jans.configapi.plugin.lock.util.Constants;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
@@ -75,7 +77,7 @@ public class LockStatResource extends BaseResource {
             if (logger.isInfoEnabled()) {
                 logger.info(
                         "LockStatResource::getStatistics() - authorization:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
-                        authorization, month, startMonth, endMonth, format);
+                        escapeLog(authorization), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth), escapeLog(format));
             }
             String url = getIssuer() + STAT_URL;
             jsonNode = this.lockService.getStat(url, authorization, month, startMonth, endMonth, format);
