@@ -454,7 +454,7 @@ pub struct ParseFeatureToggleError {
 
 /// Get environment variables related to `Cedarling`
 #[cfg(not(target_arch = "wasm32"))]
-fn cedarling_env_vars() -> HashMap<String, serde_json::Value> {
+fn get_cedarling_env_vars() -> HashMap<String, serde_json::Value> {
     env::vars()
         .filter_map(|(k, v)| {
             k.starts_with("CEDARLING_")
@@ -477,7 +477,7 @@ impl BootstrapConfig {
             .map(|v| v.to_owned())
             .unwrap_or_default();
 
-        cedarling_env_vars().into_iter().for_each(|(k, v)| {
+        get_cedarling_env_vars().into_iter().for_each(|(k, v)| {
             // update map with values from env variables
             json_config_params.insert(k, v);
         });
