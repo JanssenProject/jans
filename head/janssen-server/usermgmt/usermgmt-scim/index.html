@@ -7308,19 +7308,6 @@
     FIDO 2 devices
   </a>
   
-    <nav class="md-nav" aria-label="FIDO 2 devices">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#example-querying-enrolled-devices" class="md-nav__link">
-    Example: Querying Enrolled Devices
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -7415,6 +7402,8 @@
       
       
       
+        
+          
         
           
         
@@ -7539,19 +7528,31 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../../cedarling/cedarling-sidecar/" class="md-nav__link">
+        Sidecar
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
     
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
       
       
       
         
           
             
-          
-        
           
         
           
@@ -7563,14 +7564,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="../../../cedarling/python/">Python</a>
           
-            <label for="__nav_2_7">
+            <label for="__nav_2_8">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="Python" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_7">
+        <label class="md-nav__title" for="__nav_2_8">
           <span class="md-nav__icon md-icon"></span>
           Python
         </label>
@@ -7586,20 +7587,6 @@
     <li class="md-nav__item">
       <a href="../../../cedarling/python/usage/" class="md-nav__link">
         How to use
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../cedarling/python/sidecar/" class="md-nav__link">
-        Sidecar
       </a>
     </li>
   
@@ -8819,19 +8806,6 @@
     FIDO 2 devices
   </a>
   
-    <nav class="md-nav" aria-label="FIDO 2 devices">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#example-querying-enrolled-devices" class="md-nav__link">
-    Example: Querying Enrolled Devices
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -8986,309 +8960,26 @@
 <p>To know more about OAuth protection mode please visit <a href="https://docs.jans.io/v1.0.14/admin/scim/oauth-protection/">here</a>.
 The SCIM API endpoints are by default protected by (Bearer) OAuth 2.0 tokens. Depending on the operation, these tokens must have certain scopes for the operations to be authorized. We need a client to get Bearer token. </p>
 <h3 id="get-scim-client">Get SCIM Client<a class="headerlink" href="#get-scim-client" title="Permanent link">#</a></h3>
-<p>Let's obtain the credentials of this client first. In TUI, navigate to <code>Auth Server &gt; Clients</code>. In the search field type SCIM (uppercase). Highlight the row that matches a client named "SCIM Client" and press Enter. To see in <code>JSON</code> formate please press <code>d</code>.</p>
-<p>From the "Basic" section, grab the "client id" and "client secret". This secret is encrypted, to decrypt it, in a terminal run <code>/opt/jans/bin/encode.py -D ENCRYPTED-SECRET-HERE</code>.</p>
+<p>You can refer to <a href="../../config-guide/scim-config/user-config/#get-scim-client">here</a> for this topic</p>
 <h3 id="get-access-token">Get Access token<a class="headerlink" href="#get-access-token" title="Permanent link">#</a></h3>
-<p>Let's get a token, 
-<div class="highlight"><pre><span></span><code>curl -k -u &#39;CLIENT_ID:DECRYPTED_CLIENT_SECRET&#39; -k -d grant_type=client_credentials -d scope=&#39;https://jans.io/scim/users.read https://jans.io/scim/users write&#39; https://&lt;jans-server&gt;/jans-auth/restv1/token &gt; /tmp/token.json
-</code></pre></div>
-In response <code>token.json</code> we will get <code>access_token</code>
-<div class="highlight"><pre><span></span><code>{
-&quot;access_token&quot;:&quot;11a76589-7955-4247-9ca5-f3ad7884305...&quot;,
-&quot;scope&quot;:&quot;https://jans.io/scim/users.read&quot;,
-&quot;token_type&quot;:&quot;Bearer&quot;,
-&quot;expires_in&quot;:299
-}
-</code></pre></div></p>
+<p>You can refer to <a href="../../config-guide/scim-config/user-config/#get-access-token">here</a> for this topic</p>
 <h3 id="retrive-existing-user">Retrive existing User<a class="headerlink" href="#retrive-existing-user" title="Permanent link">#</a></h3>
-<p>To get an existing user </p>
-<p><div class="highlight"><pre><span></span><code>curl -k -G -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; --data-urlencode &#39;filter=displayName co &quot;Admin&quot;&#39; https://&lt;jans-server&gt;/jans-scim/restv1/v2/Users &gt; /tmp/user.json
-</code></pre></div>
-In response <code>user.json</code> we will get 
-<div class="highlight"><pre><span></span><code>{
-  &quot;schemas&quot;: [
-    &quot;urn:ietf:params:scim:api:messages:2.0:ListResponse&quot;
-  ],
-  &quot;totalResults&quot;: 1,
-  &quot;startIndex&quot;: 1,
-  &quot;itemsPerPage&quot;: 1,
-  &quot;Resources&quot;: [
-    {
-      &quot;schemas&quot;: [
-        &quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;
-      ],
-      &quot;id&quot;: &quot;5fdbb720-a1fd-477f-af92-b7c054f02c98&quot;,
-      &quot;meta&quot;: {
-        &quot;resourceType&quot;: &quot;User&quot;,
-        &quot;created&quot;: &quot;2023-06-12T14:54:09.531Z&quot;,
-        &quot;location&quot;: &quot;https://raju.jans13.me/jans-scim/restv1/v2/Users/5fdbb720-a1fd-477f-af92-b7c054f02c98&quot;
-      },
-      &quot;userName&quot;: &quot;admin&quot;,
-      &quot;name&quot;: {
-        &quot;familyName&quot;: &quot;...&quot;,
-        &quot;givenName&quot;: &quot;...&quot;,
-        &quot;middleName&quot;: &quot;...&quot;,
-        &quot;formatted&quot;: &quot;...&quot;
-      },
-      &quot;displayName&quot;: &quot;Admin&quot;,
-      &quot;active&quot;: true,
-      &quot;emails&quot;: [
-        {
-          &quot;value&quot;: &quot;example@gluu.org&quot;,
-          &quot;primary&quot;: false
-        }
-      ],
-      &quot;groups&quot;: [
-        {
-          &quot;value&quot;: &quot;60B7&quot;,
-          &quot;display&quot;: &quot;Jannsen Manager Group&quot;,
-          &quot;type&quot;: &quot;direct&quot;,
-          &quot;$ref&quot;: &quot;https://raju.jans13.me/jans-scim/restv1/v2/Groups/60B7&quot;
-        }
-      ]
-    }
-  ]
-}
-</code></pre></div></p>
+<p>You can refer to <a href="../../config-guide/scim-config/user-config/#retrive-existing-user">here</a> for this topic</p>
 <h2 id="creating-resource">Creating Resource<a class="headerlink" href="#creating-resource" title="Permanent link">#</a></h2>
 <h3 id="create-an-user">Create an User<a class="headerlink" href="#create-an-user" title="Permanent link">#</a></h3>
-<p>Let's start creating a dummy user. A client sends a POST request containing a "User" to the "/Users" endpoint. 
-<div class="highlight"><pre><span></span><code>POST /Users  HTTP/1.1
-Host: example.com
-Accept: application/scim+json
-Content-Type: application/scim+json
-Authorization: Bearer h480djs93hd8..
-Content-Length: ...
-
-{
-  &quot;schemas&quot;: [
-    &quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;
-  ],
-  &quot;userName&quot;: &quot;bjensen&quot;,
-  &quot;externalId&quot;: &quot;bjensen&quot;,
-  &quot;name&quot;: {
-    &quot;formatted&quot;: &quot;Ms. Barbara J Jensen III&quot;,
-    &quot;familyName&quot;: &quot;Jensen&quot;,
-    &quot;givenName&quot;: &quot;Barbara&quot;
-  }
-}
-</code></pre></div>
-Open a text editor and copy paste the json body, name as <code>input.json</code>.
-Hit on your terminal with bellow command.
-<div class="highlight"><pre><span></span><code>curl -k -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; -H &#39;Content-Type: application/scim+json&#39; -d @input.json -o output.json https://&lt;jans-server&gt;/jans-scim/restv1/v2/Users
-</code></pre></div>
-response looks like 
-<div class="highlight"><pre><span></span><code>{
-    &quot;schemas&quot;: [
-        &quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;
-    ],
-    &quot;id&quot;: &quot;e3009115-b890-4d8b-bd63-bbfef34aa583&quot;,
-    &quot;externalId&quot;: &quot;bjensen&quot;,
-    &quot;meta&quot;: {
-        &quot;resourceType&quot;: &quot;User&quot;,
-        &quot;created&quot;: &quot;2023-06-26T19:43:32.945Z&quot;,
-        &quot;lastModified&quot;: &quot;2023-06-26T19:43:32.945Z&quot;,
-        &quot;location&quot;: &quot;https://raju.jans13.me/jans-scim/restv1/v2/Users/e3009115-b890-4d8b-bd63-bbfef34aa583&quot;
-    },
-    &quot;userName&quot;: &quot;bjensen&quot;,
-    &quot;name&quot;: {
-        &quot;familyName&quot;: &quot;Jensen&quot;,
-        &quot;givenName&quot;: &quot;Barbara&quot;,
-        &quot;formatted&quot;: &quot;Ms. Barbara J Jensen III&quot;
-    }
-}
-</code></pre></div></p>
-<p>This new user has been given an <code>id</code>. If possible, inspect your <code>ou=people</code> branch and find the entry whose <code>inum</code> matches the <code>id</code> given. An easier option would be to via <strong>Jans TUI</strong> and go to <code>Users</code> and search "bjensen" to see the recently created user.</p>
+<p>You can refer to <a href="../../config-guide/scim-config/user-config/#create-an-user">here</a> for this topic</p>
 <h3 id="updating-a-userput">Updating a User(PUT)<a class="headerlink" href="#updating-a-userput" title="Permanent link">#</a></h3>
-<p>Overwrite your <code>input.json</code> with the following. Replace content in angle brackets accordingly:</p>
-<div class="highlight"><pre><span></span><code>{
-  &quot;schemas&quot;: [
-    &quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;
-  ],
-  &quot;id&quot;: &quot;e3009115-b890-4d8b-bd63-bbfef34aa583&quot;,
-  &quot;userName&quot;: &quot;bjensen&quot;,
-  &quot;externalId&quot;: &quot;bjensen&quot;,
-  &quot;name&quot;: {
-    &quot;formatted&quot;: &quot;Ms. Barbara J Jensen III&quot;,
-    &quot;familyName&quot;: &quot;Jensen&quot;,
-    &quot;givenName&quot;: &quot;Barbara&quot;
-  },
-  &quot;displayName&quot;: &quot;Jensen Barbara&quot;,
-  &quot;emails&quot;: [
-    {
-      &quot;value&quot;: &quot;jensen@example.com&quot;,
-      &quot;type&quot;: &quot;work&quot;,
-      &quot;primary&quot;: true
-    }
-  ]
-}
-</code></pre></div>
-<p>PUT with curl:</p>
-<div class="highlight"><pre><span></span><code>curl -k -X PUT -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; -H &#39;Content-Type: application/scim+json&#39; -d @input.json -o output.json https://&lt;jans-server&gt;/jans-scim/restv1/v2/Users/&lt;user-inum&gt;
-</code></pre></div>
-<p>Response <code>(output.json)</code> will show the same contents of a full retrieval.</p>
-<p>Please verify changes were applied whether by inspecting LDAP or issuing a GET. If you have followed the steps properly, you should notice a new e-mail added and the change in <code>displayName</code> attribute</p>
+<p>You can refer to <a href="../../config-guide/scim-config/user-config/#updating-a-userput">here</a> for this topic</p>
 <h3 id="updating-a-user-patch">Updating a User (PATCH)<a class="headerlink" href="#updating-a-user-patch" title="Permanent link">#</a></h3>
-<p>With patching, you can be very precise about the modifications you want to apply. Patching syntax follows JSON Patch spec (RFC 6902) closely. While it's not a must to read the RFC to learn how patch works, see section 3.5.2 of SCIM protocol (RFC 7644) to get the grasp.</p>
-<p>If you prefer reading code, <a href="https://github.com/JanssenProject/jans/tree/main/jans-scim/client/src/test/java/io/jans/scim2/client/patch">patch test cases</a> found in the Java scim-client project are worth to look at.</p>
-<p>The following is a simple example that illustrates the kind of modifications developers can achieve via <code>PATCH</code>. Overwrite your <code>input.json</code> with the following:</p>
-<div class="highlight"><pre><span></span><code>{
-  &quot;schemas&quot;: [
-    &quot;urn:ietf:params:scim:api:messages:2.0:PatchOp&quot;
-  ],
-  &quot;Operations&quot;: [
-    {
-      &quot;op&quot;: &quot;replace&quot;,
-      &quot;value&quot;: {
-        &quot;name&quot;: {
-          &quot;givenName&quot;: &quot;Joey&quot;
-        }
-      }
-    },
-    {
-      &quot;op&quot;: &quot;replace&quot;,
-      &quot;path&quot;: &quot;emails[type eq \&quot;work\&quot; or primary eq false].value&quot;,
-      &quot;value&quot;: &quot;jensen@example.com&quot;
-    },
-    {
-      &quot;op&quot;: &quot;add&quot;,
-      &quot;value&quot;: {
-        &quot;name&quot;: {
-          &quot;middleName&quot;: &quot;Jhon&quot;
-        }
-      }
-    },
-    {
-      &quot;op&quot;: &quot;add&quot;,
-      &quot;value&quot;: {
-        &quot;emails&quot;: [
-          {
-            &quot;primary&quot;: true,
-            &quot;value&quot;: &quot;my@own.mail&quot;
-          }
-        ],
-        &quot;phoneNumbers&quot;: [
-          {
-            &quot;type&quot;: &quot;home&quot;,
-            &quot;value&quot;: &quot;5 123 8901&quot;
-          },
-          {
-            &quot;value&quot;: &quot;5 123 8902&quot;
-          }
-        ]
-      }
-    },
-    {
-      &quot;op&quot;: &quot;remove&quot;,
-      &quot;path&quot;: &quot;name.middleName&quot;
-    },
-    {
-      &quot;op&quot;: &quot;remove&quot;,
-      &quot;path&quot;: &quot;phoneNumbers[value ew \&quot;01\&quot;].type&quot;
-    }
-  ]
-}
-</code></pre></div>
-<p>A collection of modification are provided under "Operations". They are processed in order of appearance. Also, every operation has a type; patching supports add, remove and replace.</p>
-<p>The first operations states the following: replace the value of <code>givenName</code> subattribute (that belongs to complex attribute <code>name</code>) with the string "Joey".</p>
-<p>Operations are easier to understand when using a "path". The second operation replaces the value subattribute inside the complex multi-valued attribute emails. Inside the square brackets, we find a filter expression, so the replacement does not apply to all emails in the list but only to those matching the criterion.</p>
-<p>So the second operation can be read as "set the value of value subattribute to string <code>jensen@example.com</code> where the type subattribute of the <code>email</code> equals to string "work" or if primary attribute is false".</p>
-<p>The third operation is similar to the first. It sets the value of a subattribute which was unassigned (null). You could have used "replace" operation in this case and results would have been identical.</p>
-<p>The fourth operation is more interesting. It adds to the current list of emails a new one. It supplies a couple of subattributes for the email to include: primary and value. Additionally, we set the value of (previously unassigned) phoneNumbers multi-valued attribute passing a list of elements.</p>
-<p>In the fifth operation, we remove the <code>middleName</code> attribute that was set in operation three. Note how we make explicit the path of data to nullify: "name.middleName".</p>
-<p>The sixth operation allows us to remove a specific subattribute of <code>phoneNumbers</code>. The aim is to nullify the "type" of the item whose phone number value ends with "01". The remove operation can also be used to remove a complete item from a list, or empty the whole list by providing a suitable value for "path".</p>
-<p>Now let's see it in action:</p>
-<div class="highlight"><pre><span></span><code>curl -k -X PATCH -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; -H &#39;Content-Type: application/scim+json&#39; -d @input.json -o output.json https://&lt;jans-server&gt;/jans-scim/restv1/v2/Users/&lt;user-inum&gt;
-</code></pre></div>
-<p>So far our resource look like this</p>
-<div class="highlight"><pre><span></span><code>{
-  &quot;schemas&quot;: [
-    &quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;
-  ],
-  &quot;id&quot;: &quot;e3009115-b890-4d8b-bd63-bbfef34aa583&quot;,
-  &quot;externalId&quot;: &quot;bjensen&quot;,
-  &quot;meta&quot;: {
-    &quot;resourceType&quot;: &quot;User&quot;,
-    &quot;created&quot;: &quot;2023-06-26T19:43:32.945Z&quot;,
-    &quot;lastModified&quot;: &quot;2023-06-26T22:34:27.465Z&quot;,
-    &quot;location&quot;: &quot;https://raju.jans13.me/jans-scim/restv1/v2/Users/e3009115-b890-4d8b-bd63-bbfef34aa583&quot;
-  },
-  &quot;userName&quot;: &quot;bjensen&quot;,
-  &quot;name&quot;: {
-    &quot;familyName&quot;: &quot;Jensen&quot;,
-    &quot;givenName&quot;: &quot;Joey&quot;,
-    &quot;formatted&quot;: &quot;Ms. Barbara J Jensen III&quot;
-  },
-  &quot;displayName&quot;: &quot;Jensen Barbara&quot;,
-  &quot;active&quot;: false,
-  &quot;emails&quot;: [
-    {
-      &quot;value&quot;: &quot;my@own.mail&quot;,
-      &quot;primary&quot;: true
-    },
-    {
-      &quot;value&quot;: &quot;jensen@example.com&quot;,
-      &quot;type&quot;: &quot;work&quot;,
-      &quot;primary&quot;: false
-    }
-  ],
-  &quot;phoneNumbers&quot;: [
-    {
-      &quot;value&quot;: &quot;5 123 8901&quot;
-    },
-    {
-      &quot;value&quot;: &quot;5 123 8902&quot;
-    }
-  ]
-}
-</code></pre></div>
-<p>Note the primary subattribute accompanying <code>email</code> "my@own.mail" is false but when inserted we provided <code>true</code>. This is because the SCIM specification states that after modifications are applied to resources <strong>(PUT or PATCH)</strong>, there cannot be more than one item in a multi-valued attribute with primary value set as <code>true</code>.</p>
-<p>To see more sample <code>JSON</code> payloads, check the <code>.json</code> files used by the scim-client test cases referenced above.</p>
+<p>You can refer to <a href="../../config-guide/scim-config/user-config/#updating-a-user-patch">here</a> for this topic</p>
 <h3 id="deleting-users">Deleting Users<a class="headerlink" href="#deleting-users" title="Permanent link">#</a></h3>
-<p>For deleting, the <code>DELETE</code>method of <code>HTTP</code> is used.</p>
-<p>No input file is used in this case. A delete request could be the following:</p>
-<div class="highlight"><pre><span></span><code>curl -k -X DELETE -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; https://&lt;jans-server&gt;/jans-scim/restv1/v2/Users/&lt;user-inum&gt;
-</code></pre></div>
-<p>Use the inum of our dummy user, <strong>Jensen Barbara</strong>.</p>
-<p>Check your LDAP or via Jans TUI to see that <strong>Bjensen</strong> is gone.</p>
+<p>You can refer to <a href="../../config-guide/scim-config/user-config/#deleting-users">here</a> for this topic</p>
 <h2 id="how-is-scim-data-stored">How is SCIM data stored?<a class="headerlink" href="#how-is-scim-data-stored" title="Permanent link">#</a></h2>
-<p>SCIM <a href="https://datatracker.ietf.org/doc/html/rfc7643">schema spec</a> does not use LDAP attribute names but a different naming convention for resource attributes (note this is not the case of custom attributes where the SCIM name used is that of the LDAP attribute).</p>
-<p>It is possible to determine if a given LDAP attribute is being mapped to a SCIM attribute. For that you need to check in Jans TUI <code>Auth-Server &gt;&gt; Attributes</code> and click on any attributes. Check <code>Include in SCIM Extension:</code> is <code>true</code> or <code>false</code>. Whenever you try to map any LDAP attribute to a SCIM attribute keep it's value <code>true</code>.  </p>
+<p>You can refer to <a href="../../scim/monitoring/#how-is-scim-data-stored">here</a> for this topic</p>
 <h2 id="fido-devices">FIDO Devices<a class="headerlink" href="#fido-devices" title="Permanent link">#</a></h2>
-<p>A FIDO device represents a user credential stored in the Jans Server database that is compliant with the <a href="https://fidoalliance.org/">FIDO</a> standard. These devices are used as a second factor in a setting of strong authentication.</p>
-<p>FIDO devices were superseded by <a href="#fido-2-devices">FIDO 2</a> devices in Jans Server.</p>
+<p>You can refer to <a href="../../fido/monitoring/#fido-devices">here</a> for this topic.</p>
 <h2 id="fido-2-devices">FIDO 2 devices<a class="headerlink" href="#fido-2-devices" title="Permanent link">#</a></h2>
-<p>FIDO 2 devices are credentials that adhere to the more current Fido 2.0 initiative (WebAuthn + CTAP). Examples of FIDO 2 devices are USB security keys and Super Gluu devices.</p>
-<p>The SCIM endpoints for FIDO 2 allow application developers to query, update and delete already existing devices. Addition of devices do not take place through the service since this process requires direct end-user interaction, ie. device enrolling.</p>
-<p>The schema attributes for a device of this kind can be found by hitting the URL  <code>https://&lt;jans-server&gt;/jans-scim/restv1/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:Fido2Device</code></p>
-<p>To distinguish between regular FIDO2 and SuperGluu devices, note only SuperGluu entries have the attribute <code>deviceData</code> populated (i.e. not null)</p>
-<h3 id="example-querying-enrolled-devices">Example: Querying Enrolled Devices<a class="headerlink" href="#example-querying-enrolled-devices" title="Permanent link">#</a></h3>
-<p>Say we are interested in having a list of Super Gluu devices users have enrolled and whose operating system is iOS. We may issue a query like this:</p>
-<div class="highlight"><pre><span></span><code>curl -k -G -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; --data-urlencode 
-&#39;filter=deviceData co &quot;ios&quot;&#39; -d count=10 https://&lt;jans-server&gt;/jans-scim/restv1/v2/Fido2Devices
-</code></pre></div>
-<p>The response will be like:</p>
-<div class="highlight"><pre><span></span><code>{
-  &quot;totalResults&quot;: ...,
-  &quot;itemsPerPage&quot;: ...,
-  &quot;startIndex&quot;: 1,
-  &quot;schemas&quot;: [
-    &quot;urn:ietf:params:scim:api:messages:2.0:ListResponse&quot;
-  ],
-  &quot;Resources&quot;: [
-    {
-      &quot;id&quot;: &quot;...&quot;,
-      &quot;meta&quot;: {...},
-      &quot;schemas&quot;: [&quot;urn:ietf:params:scim:schemas:core:2.0:Fido2Device&quot;],
-      &quot;userId&quot;: &quot;...&quot;,
-      ...
-      &quot;deviceData&quot;: &quot;{...}&quot;,
-      &quot;displayName&quot;: ...,
-    },
-    ...
-  ]
-}
-</code></pre></div>
+<p>You can refer to <a href="../../fido/monitoring/#fido2-devices">here</a> for this topic.</p>
 <h2 id="potential-performance-issues-with-group-endpoints">Potential performance issues with Group endpoints<a class="headerlink" href="#potential-performance-issues-with-group-endpoints" title="Permanent link">#</a></h2>
 <p>In SCIM a group resource basically consists of an identifier, a display name, and a collection of members associated to it. Also, every member is made up of a user identifier, his display name, and other attributes. As a consequence, retrieving group information requires making a correlation with existing user data. Since Gluu database model does not follow a relational database pattern this may entail a considerable amount of user queries when groups contain thousands of members.</p>
 <p>While this could have been workarounded by storing members' display names inside group entries, this brings additional problems to deal with.</p>
@@ -9343,7 +9034,7 @@ response looks like
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-13T10:48:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-20T11:36:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-20</span>
       
         <br>
         Created:
