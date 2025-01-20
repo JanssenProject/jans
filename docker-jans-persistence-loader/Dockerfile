@@ -180,7 +180,8 @@ RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 1000
 # adjust ownership and permission
 RUN chmod -R g=u /app/custom_ldif \
     && chmod -R g=u /etc/certs \
-    && chmod -R g=u /etc/jans
+    && chmod -R g=u /etc/jans \
+    && chown -R 1000:0 /app/templates
 
 USER 1000
 

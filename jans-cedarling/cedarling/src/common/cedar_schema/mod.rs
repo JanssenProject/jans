@@ -3,8 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-pub(crate) use cedar_json::CedarSchemaJson;
 pub(crate) mod cedar_json;
+pub(crate) const CEDAR_NAMESPACE_SEPARATOR: &str = "::";
 
 /// cedar_schema value which specifies both encoding and content_type
 ///

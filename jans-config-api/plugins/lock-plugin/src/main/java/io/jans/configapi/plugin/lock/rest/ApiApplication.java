@@ -18,7 +18,10 @@ import java.util.Set;
 
         license = @License(name = "Apache 2.0", url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),
 
-        tags = { @Tag(name = "Lock - Configuration"), @Tag(name = "Lock - Audit") },
+        tags = { @Tag(name = "Lock - Configuration"),
+                 @Tag(name = "Lock - Audit"),
+                 @Tag(name = "Lock - Statistics")
+                 },
 
         servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 

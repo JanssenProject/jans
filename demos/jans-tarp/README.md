@@ -2,9 +2,10 @@
 
 ## Relying Party tool in form of a Browser Extension.
 
-[Demo Video](https://www.loom.com/share/6bfe8c5556a94abea05467e3deead8a2?sid=b65c81d9-c1a1-475c-b89b-c105887d31ad)
+[Demo Video](https://www.loom.com/share/b112b9c7214a4920812a2ebe9c36dbf5?sid=7a15d2e5-881e-4002-9b8c-902dd1d80cec)
 
-This extension is for convenient testing of authentication flows on browser.
+- This extension is for convenient testing of authentication flows on browser.
+- [Cedarling](https://docs.jans.io/head/cedarling/cedarling-overview/) is an embeddable stateful Policy Decision Point, or "PDP". Cedarling is integrated with Jans Tarp to make authorization decision post-authentication.
 
 ## Supporting Browser
 
@@ -18,9 +19,10 @@ This extension is for convenient testing of authentication flows on browser.
 ## Build
 
 1. Change directory to the project directory (`/jans-tarp`).
-2. Run `npm install`.
-3. Run `npm run build`. It will create Chrome and Firefox build in `/jans-tarp/dist/chrome` and `/jans-tarp/dist/firefox` directories respectively.
-4. To pack the build into a zip file run `npm run pack`. This command will pack  Chrome and Firefox builds in zip files at `/jans-tarp/release`.
+2. Download and extract Cedarling WASM bindings from https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_wasm_{version}_pkg.tar.gz to `/jans-tarp/src/wasm`.
+3. Run `npm install`.
+4. Run `npm run build`. It will create Chrome and Firefox build in `/jans-tarp/dist/chrome` and `/jans-tarp/dist/firefox` directories respectively.
+5. To pack the build into a zip file run `npm run pack`. This command will pack  Chrome and Firefox builds in zip files at `/jans-tarp/release`.
 
 ## Releases
 
@@ -52,6 +54,28 @@ When you are testing Janssen IdP with self-signed cert then follow below steps b
 2. Accept the security risk due to self-signed cert and continue.
 
 ![self-signed cert risk](./docs/images/untrusted_cert_risk.png)
+
+## Testing using Jans Tarp
+
+* Setup Jans-Tarp. [Instructions](https://github.com/JanssenProject/jans/tree/main/demos/jans-tarp)
+* Configuration to run Agama flow
+* Add Your Jans Auth server host , Client expiry date, Scopes and click on `Register` client. It will register new OP Client on your Auth server.
+
+![image](./docs/images/tarp-client-reg.png)
+
+* Add `Acr values` and `Scopes ` click on Trigger Auth Code flow.
+
+![image](./docs/images/authentication-flow-input.png)
+
+* It will trigger agama flow and show login screen to you. You can use TUI to add testing user.
+
+![image](./docs/images/agamapw-login.png)
+
+* After successful auth, it will show you below screen
+
+![image](./docs/images/successful-tarp-auth-screen.png)
+
+
 
 ## Testing with Keycloak (installed on localhost)
 
