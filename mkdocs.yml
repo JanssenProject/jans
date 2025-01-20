@@ -109,6 +109,7 @@ nav:
     - Restarting Services: janssen-server/vm-ops/restarting-services.md
     - Managing Key Rotation: janssen-server/vm-ops/managing-key-rotation.md
     - Certificates: janssen-server/vm-ops/certificates.md
+    - Jans Command: janssen-server/vm-ops/jans-command.md
   - Terraform and IaC:
     - janssen-server/terraform/README.md
   - Configuration Guide:
@@ -281,6 +282,7 @@ nav:
       - Agama Best Practices:  janssen-server/developer/agama/agama-best-practices.md
       - Advanced usages: janssen-server/developer/agama/advanced-usages.md
       - Engine and bridge configurations: janssen-server/developer/agama/engine-bridge-config.md
+      - Agama flows in native applications: janssen-server/developer/agama/native-applications.md
       - FAQ: janssen-server/developer/agama/faq.md
       - Quick Start Using Agama Lab: janssen-server/developer/agama/quick-start-using-agama-lab.md
     - External Libraries: janssen-server/developer/external-libraries.md
@@ -410,10 +412,10 @@ nav:
   - JWT: 'cedarling/cedarling-jwt.md'
   - Logs: 'cedarling/cedarling-logs.md'
   - Properties: 'cedarling/cedarling-properties.md'
+  - Sidecar: 'cedarling/cedarling-sidecar.md'
   - Python:
       - cedarling/python/README.md
       - How to use: cedarling/python/usage.md
-      - Sidecar: cedarling/python/sidecar.md
   - WASM: 'cedarling/cedarling-wasm.md'
   - iOS: 'cedarling/cedarling-ios.md'
   - Android: 'cedarling/cedarling-android.md'

@@ -13,7 +13,7 @@ RUN apk update \
 # KC scheduler
 # ============
 
-ENV CN_VERSION=0.0.0-nightly
+ENV CN_VERSION=1.3.0
 ENV CN_BUILD_DATE='2024-12-20 09:15'
 ENV SCHEDULER_HOME=/opt/kc-scheduler
 
@@ -38,7 +38,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/codehaus/janino/janino/3.1.9/jani
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=aa1b2edaa8d7e3413bd57a7bd7cc86206086768b
+ENV JANS_SOURCE_VERSION=040ff17942019bc10433ce17d819b8d8474f13c8
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -139,7 +139,7 @@ EXPOSE $CN_SAML_HTTP_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/kc-scheduler" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="0.0.0-nightly" \
+    org.opencontainers.image.version="1.3.0-1" \
     org.opencontainers.image.title="Janssen KC scheduler" \
     org.opencontainers.image.description=""
 
@@ -160,7 +160,8 @@ RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jans
 RUN chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
     && chmod 664 /opt/java/lib/security/cacerts \
-    && chown -R 1000:0 /opt/kc-scheduler
+    && chown -R 1000:0 /opt/kc-scheduler \
+    && chown -R 1000:0 /app/templates
 
 USER 1000
 

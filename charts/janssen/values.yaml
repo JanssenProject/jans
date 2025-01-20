@@ -47,7 +47,7 @@ auth-server:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/auth-server
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.3.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -126,7 +126,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/certmanager
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.3.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -249,9 +249,9 @@ config:
     cnVaultAddr: http://localhost:8200
     # -- Verify connection to Vault.
     cnVaultVerify: false
-    # -- Path to file contains Vault AppRole role ID.
+    # -- Path to the file that contains Vault AppRole role ID.
     cnVaultRoleIdFile: /etc/certs/vault_role_id
-    # -- Path to file contains Vault AppRole secret ID.
+    # -- Path to the file that contains Vault AppRole secret ID.
     cnVaultSecretIdFile: /etc/certs/vault_secret_id
     # -- Vault namespace used to access the secrets.
     cnVaultNamespace: ""
@@ -259,7 +259,7 @@ config:
     cnVaultKvPath: secret
     # -- Base prefix name used to access secrets.
     cnVaultPrefix: jans
-    # -- Path to Vault AppRole.
+    # -- Path to the Vault AppRole.
     cnVaultAppRolePath: approle
     # [vault_envs] END
     # -- Value passed to Java option -XX:MaxRAMPercentage
@@ -326,7 +326,7 @@ config:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/configurator
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.3.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Organization name. Used for certificate creation.
@@ -420,7 +420,7 @@ config-api:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/config-api
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.3.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -525,7 +525,7 @@ fido2:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/fido2
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.3.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -635,7 +635,7 @@ casa:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/casa
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.3.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1190,19 +1190,23 @@ global:
       samlAdditionalAnnotations: { }
     # -- passing custom java options to saml. DO NOT PASS JAVA_OPTIONS in envs.
     cnCustomJavaOptions: ""
-  # -- Path to SQL password file
+  # -- Path to the SQL password file
   cnSqlPasswordFile: /etc/jans/conf/sql_password
   kc-scheduler:
     # -- Boolean flag to enable/disable the kc-scheduler cronjob chart.
     enabled: false
-  # -- Path to configuration schema file
+  # -- Path to the configuration schema file
   cnConfiguratorConfigurationFile: /etc/jans/conf/configuration.json
-  # -- Path to dumped configuration schema file
+  # -- Path to the dumped configuration schema file
   cnConfiguratorDumpFile: /etc/jans/conf/configuration.out.json
-  # -- Use custom configuration schema in existing secrets. Note, the secrets has to contain the key configuration.json or any basename as specified in cnConfiguratorConfigurationFile.
+  # -- Use custom configuration schema in existing Kubernetes secret. Note that the secret has to contain the configuration.json key or any basename as specified in cnConfiguratorConfigurationFile.
   cnConfiguratorCustomSchema:
-    # -- The name of the secrets used for storing custom configuration schema.
+    # -- The name of the Kubernetes secret used for storing custom configuration schema.
     secretName: ""
+  # -- Key to encrypt/decrypt configuration schema file using AES-256 CBC mode. Set the value to empty string to disable encryption/decryption, or 32 alphanumeric characters to enable it.
+  cnConfiguratorKey: ""
+  # -- Path to the file that contains the key to encrypt/decrypt the configuration schema file.
+  cnConfiguratorKeyFile: /etc/jans/conf/configuration.key
 
 # -- Nginx ingress definitions chart
 nginx-ingress:
@@ -1250,7 +1254,7 @@ persistence:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/persistence-loader
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.3.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -1336,7 +1340,7 @@ scim:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/scim
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.3.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1446,7 +1450,7 @@ link:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/link
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.3.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1555,7 +1559,7 @@ saml:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/saml
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.3.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1636,7 +1640,7 @@ kc-scheduler:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/kc-scheduler
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.3.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.

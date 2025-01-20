@@ -448,6 +448,7 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
                 <TextField {...params} label="Scopes" />
               )}
             />
+            
             <FormControlLabel control={<Checkbox color="success" onChange={() => setDisplayToken(!displayToken)}/>} label="Display Access Token and ID Token after authentication" />
           </Stack>
         </DialogContent>

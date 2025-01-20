@@ -9,7 +9,7 @@
     <parent>
         <groupId>io.jans</groupId>
         <artifactId>jans-auth-server-parent</artifactId>
-        <version>0.0.0-nightly</version>
+        <version>1.3.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     
@@ -219,6 +219,15 @@
             <artifactId>zip4j</artifactId>
             <version>2.11.5</version>
         </dependency>
+        
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>oauth2-oidc-sdk</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
 
         <!-- TESTS -->
         <dependency>
@@ -235,11 +244,6 @@
             <groupId>io.jans</groupId>
             <artifactId>agama-inbound</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
             <scope>test</scope>
         </dependency>
         <!-- Needed for htmlunit <-> log4j2 intergration -->

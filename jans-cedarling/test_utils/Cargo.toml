@@ -1,8 +1,11 @@
 [package]
 name = "test_utils"
-version = "0.0.0-nightly"
+version = "1.3.0"
 edition = "2021"
 
 [dependencies]
 pretty_assertions = "1"
 serde_json = { workspace = true }
+jsonwebtoken = { workspace = true }
+jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
+serde = { workspace = true }

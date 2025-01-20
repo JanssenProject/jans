@@ -11,8 +11,8 @@ pub(crate) mod jwt_config;
 pub(crate) mod log_config;
 pub(crate) mod policy_store_config;
 
-use std::path::Path;
-use std::{fs, io};
+#[cfg(not(target_arch = "wasm32"))]
+use std::{fs, io, path::Path};
 
 pub use authorization_config::AuthorizationConfig;
 // reimport to useful import values in root module
@@ -53,6 +53,7 @@ impl BootstrapConfig {
     ///
     /// let config = BootstrapConfig::load_from_file("../test_files/bootstrap_props.json").unwrap();
     /// ```
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn load_from_file(path: &str) -> Result<Self, BootstrapConfigLoadingError> {
         let file_ext = Path::new(path)
             .extension()
@@ -94,12 +95,14 @@ pub enum BootstrapConfigLoadingError {
     /// Supported formats include:
     /// - `.json`
     /// - `.yaml` or `.yml`
+    #[cfg(not(target_arch = "wasm32"))]
     #[error(
         "Unsupported bootstrap config file format for: {0}. Supported formats include: JSON, YAML"
     )]
     InvalidFileFormat(String),
 
     /// Error returned when the file cannot be read.
+    #[cfg(not(target_arch = "wasm32"))]
     #[error("Failed to read {0}: {1}")]
     ReadFile(String, io::Error),
 
@@ -130,14 +133,12 @@ pub enum BootstrapConfigLoadingError {
     MissingPolicyStore,
 
     /// Error returned when the policy store file is in an unsupported format.
-    #[error(
-        "Unsupported policy store file format for: {0}. Supported formats include: JSON, YAML"
-    )]
+    #[error("Unsupported policy store file format for: {0}. Supported formats include: JSON, YAML")]
     UnsupportedPolicyStoreFileFormat(String),
 
     /// Error returned when failing to load a local JWKS
     #[error("Failed to load local JWKS from {0}: {1}")]
-    LoadLocalJwks(String, std::io::Error),
+    LoadLocalJwks(String, String),
 
     /// Error returned when both `CEDARLING_USER_AUTHZ` and `CEDARLING_WORKLOAD_AUTHZ` are disabled.
     /// These two authentication configurations cannot be disabled at the same time.
@@ -182,7 +183,6 @@ mod test {
                 jwks: None,
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
-                id_token_trust_mode: IdTokenTrustMode::Strict,
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
                 access_token_config: TokenValidationConfig {
                     exp_validation: true,
@@ -237,7 +237,6 @@ mod test {
                 jwks: None,
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
-                id_token_trust_mode: IdTokenTrustMode::Strict,
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
                 access_token_config: TokenValidationConfig {
                     exp_validation: true,

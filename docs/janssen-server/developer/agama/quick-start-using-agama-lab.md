@@ -387,7 +387,7 @@ Server deployment
 
 ## Test
 
-1. [Setup](https://github.com/JanssenProject/jans/tree/main/demos/jans-tent) Janssen Tent
+1. [Setup](https://github.com/JanssenProject/jans/tree/v1.2.0/demos/jans-tent) Janssen Tent
 2. Change the configuration as given below in `config.py`
 
      ```

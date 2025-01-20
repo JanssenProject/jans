@@ -46,7 +46,7 @@
 							<h:outputFormat
 								value="#{msgs['authorize.requestingPermissionForScopes']}">
 								<f:param
-									value="#{authorizeAction.clientDisplayName}" />
+									value="#{authorizeAction.getClientDisplayName(client)}" />
 							</h:outputFormat>
 						</p>
 					</h3>
@@ -56,8 +56,8 @@
 								<li>
 									<table>
 										<tr>
-											<td><span class="user"><i
-													class="fa fa-user-circle"></i></span></td>
+											<td><span class="user"><!--<i
+													class="fa fa-user-circle"></i>  --></span></td>
 											<td><h:outputText value="#{_scope.description}" /></td>
 										</tr>
 									</table>
@@ -132,10 +132,6 @@
 						<ui:insert name="controlButttons" />
 					</div>
 				</div>
-				<center>
-					#{msgs['common.copyright']} <a href="http://www.gluu.org">Gluu</a>.
-					#{msgs['common.allRightsReserved']}
-				</center>
 			</div>
 		</h:form>
 	</ui:define>
