@@ -109,6 +109,7 @@ nav:
     - Restarting Services: janssen-server/vm-ops/restarting-services.md
     - Managing Key Rotation: janssen-server/vm-ops/managing-key-rotation.md
     - Certificates: janssen-server/vm-ops/certificates.md
+    - Jans Command: janssen-server/vm-ops/jans-command.md
   - Terraform and IaC:
     - janssen-server/terraform/README.md
   - Configuration Guide:
