@@ -1,12 +1,13 @@
 {
   "name": "jans-tarp",
-  "version": "0.0.0-nightly",
+  "version": "0.0.0",
   "description": "Relying Party tool in form of a Chrome Extension.",
   "main": "index.js",
   "license": "Apache",
   "scripts": {
     "watch": "webpack --watch --progress --config webpack.dev.js",
     "build": "webpack --mode=production --progress --config webpack.prod.js",
+    "build-dev": "webpack --mode=development --progress --config webpack.dev.js",
     "pack": "node pack.js"
   },
   "devDependencies": {
@@ -38,6 +39,7 @@
     "autoprefixer": "^10.4.7",
     "axios": "^1.4.0",
     "dayjs": "^1.11.10",
+    "json-edit-react": "^1.19.2",
     "jwt-decode": "^4.0.0",
     "moment": "^2.29.4",
     "postcss": "^8.4.14",
@@ -47,6 +49,7 @@
     "react-select": "^5.7.3",
     "react-spinner-overlay": "^0.1.33",
     "styled-components": "^6.1.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "wasm": "file:wasm"
   }
 }

@@ -9,6 +9,7 @@ services:
       - FLASK_APP=main.core:app
       - APP_MODE=${APP_MODE:-development}
       - CEDARLING_BOOTSTRAP_CONFIG_FILE=/run/secrets/cedarling_bootstrap_config_file
+      - SIDECAR_DEBUG_RESPOSE={SIDECAR_DEBUG_RESPOSE:-False}
     secrets:
       - cedarling_bootstrap_config_file
 secrets:

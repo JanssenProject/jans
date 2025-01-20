@@ -8,18 +8,18 @@ use chrono::Duration;
 use chrono::prelude::*;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct KvEntry {
+pub struct KvEntry<T> {
     pub key: String,
-    pub value: String,
+    pub value: T,
     pub expired_at: DateTime<Utc>,
 }
 
-impl KvEntry {
-    pub fn new(key: &str, value: &str, expiration: Duration) -> Self {
+impl<T> KvEntry<T> {
+    pub fn new<S: AsRef<str>>(key: S, value: T, expiration: Duration) -> Self {
         let expired_at: DateTime<Utc> = Utc::now() + expiration;
         Self {
-            key: String::from(key),
-            value: String::from(value),
+            key: key.as_ref().into(),
+            value,
             expired_at,
         }
     }
@@ -31,14 +31,10 @@ mod tests {
 
     #[test]
     fn test_new() {
-        let item = KvEntry::new(
-            "key",
-            "value",
-            Duration::new(10, 0).expect("a valid duration"),
-        );
+        let item = KvEntry::<String>::new("key", "value".into(), Duration::seconds(10));
         assert_eq!(item.key, "key");
         assert_eq!(item.value, "value");
-        assert!(item.expired_at > Utc::now() + Duration::new(9, 0).expect("a valid duration"));
-        assert!(item.expired_at <= Utc::now() + Duration::new(10, 0).expect("a valid duration"));
+        assert!(item.expired_at > Utc::now() + Duration::seconds(9));
+        assert!(item.expired_at <= Utc::now() + Duration::seconds(10));
     }
 }
