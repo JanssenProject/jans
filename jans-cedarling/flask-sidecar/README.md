@@ -43,13 +43,36 @@ For running via poetry, the sidecar supports the following environment variables
 - Set environment variables like so:
 ```
 APP_MODE=development
+CEDARLING_BOOTSTRAP_CONFIG_FILE=/path/to/bootstrap.json
+SIDECAR_DEBUG_RESPONSE=False
 ```
 
 ## Tests
 
 Not yet implemented
 
-## Docker Instructions
+# Docker Instructions
+
+- Create a file called `bootstrap.json`. You may use this [sample](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/flask-sidecar/secrets/bootstrap.json) file. 
+- Modify the file to your specifications. Configuration values are described [here](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/cedarling_python.pyi).
+- Pull the docker image:
+	```
+	docker pull ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
+	```
+- Run the docker image, replacing `</absolute/path/to/bootstrap.json>` with the absolute path to your bootstrap file: 
+
+	```bash 
+	docker run -d \
+		-e APP_MODE='development' \
+		-e CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json \
+		-e SIDECAR_DEBUG_RESPONSE=False \
+		--mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json \
+		-p 5000:5000\
+		ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
+	```
+- The service is running on `http://0.0.0.0:5000`. OpenAPI documentation is available at `/swagger-ui`
+
+## Docker Compose Instructions (for development)
 
 - Clone the [Janssen](https://github.com/JanssenProject/jans) repository
 - Navigate to `jans/jans-cedarling/flask-sidecar/`
