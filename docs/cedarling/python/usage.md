@@ -16,12 +16,8 @@ In this example, we will show an example Python script that calls the `cedarling
 
 ```
 (venv) $ python example.py
-Policy store location not provided, use 'CEDARLING_LOCAL_POLICY_STORE' environment variable
-Used default policy store path: example_files/policy-store.json
-
-{"id":"0193414e-9672-786a-986c-57f48d41c4e4","time":1731967489,"log_type":"System","pdp_id":"c0ec33ff-9482-4bdc-83f6-2925a41a3280","msg":"configuration parsed successfully"}
-{"id":"0193414e-9672-786a-986c-57f5379086c3","time":1731967489,"log_type":"System","pdp_id":"c0ec33ff-9482-4bdc-83f6-2925a41a3280","msg":"Cedarling Authz initialized successfully","application_id":"TestApp"}
-{"id":"0193414e-9676-7d8a-b55b-3f0097355851","time":1731967489,"log_type":"Decision","pdp_id":"c0ec33ff-9482-4bdc-83f6-2925a41a3280","msg":"Result of authorize.","application_id":"TestApp","action":"Jans::Action::\"Read\"","resource":"Jans::Application::\"some_id\"","context":{"user_agent":"Linux","operating_system":"Linux","network_type":"Local","network":"127.0.0.1","geolocation":["America"],"fraud_indicators":["Allowed"],"device_health":["Healthy"],"current_time":1731967489},"person_principal":"Jans::User::\"qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0\"","person_diagnostics":{"reason":["840da5d85403f35ea76519ed1a18a33989f855bf1cf8"],"errors":[]},"person_decision":"ALLOW","workload_principal":"Jans::Workload::\"d7f71bea-c38d-4caf-a1ba-e43c74a11a62\"","workload_diagnostics":{"reason":["444da5d85403f35ea76519ed1a18a33989f855bf1cf8"],"errors":[]},"workload_decision":"ALLOW","authorized":true}
+{"request_id":"019474da-12ee-7315-bb12-35f46a9bc2b2","timestamp":"2025-01-17T09:20:36.334Z","log_kind":"System","pdp_id":"4cf7864b-50d4-4492-8cd1-3ddb424e2711","level":"INFO","msg":"Cedarling Authz initialized successfully","application_id":"My App","cedar_lang_version":"4.1.0","cedar_sdk_version":"4.2.2"}
+{"request_id":"019474da-12f3-74f1-8f3e-da7624806135","timestamp":"2025-01-17T09:20:36.339Z","log_kind":"Decision","pdp_id":"4cf7864b-50d4-4492-8cd1-3ddb424e2711","policystore_id":"gICAgcHJpbmNpcGFsIGlz","policystore_version":"undefined","principal":"User & Workload","User":{"email":{"domain":"jans.test","uid":"admin"},"sub":"qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"},"Workload":{"client_id":"d7f71bea-c38d-4caf-a1ba-e43c74a11a62"},"diagnostics":{"reason":[{"id":"840da5d85403f35ea76519ed1a18a33989f855bf1cf8","description":"simple policy example for principal user"}],"errors":[]},"action":"Jans::Action::\"Read\"","resource":"Jans::Application::\"some_id\"","decision":"ALLOW","tokens":{"id_token":{"jti":"ijLZO1ooRyWrgIn7cIdNyA"},"Userinfo":{"jti":"OIn3g1SPSDSKAYDzENVoug"},"access":{"jti":"uZUh1hDUQo6PFkBPnwpGzg"}},"decision_time_ms":3}
 Result of workload authorization: ALLOW
 Policy ID used:
 444da5d85403f35ea76519ed1a18a33989f855bf1cf8
@@ -35,7 +31,8 @@ Errors during authorization: 0
 
 ## Explanation
 
-Cedarling creates principal entities from the access, ID and userinfo tokens. The action, resource and context entities are declared in code. These four entities together form the `PARC` format that cedarling evaluates against policies provided in the policy store. The principal entities can be either User, Workload or Role. After forming the entities, cedarling evaluates them against the policies provided in the policy store. If entity is explicitly permitted by a policy, the result of the evaluation is `ALLOW`, otherwise it is `DENY`.
+Cedarling creates principal entities from either the access, ID and userinfo tokens, or a combination of the three depending on bootstrap configurations. For example, to create a Workload entity only one token is sufficient. But to create a user entity at least ID or Userinfo tokens are needed. This is defined by `CEDARLING_USER_AUTHZ` and `CEDARLING_WORKLOAD_AUTHZ` in the [bootstrap configuration](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/cedarling_python.pyi#L10). Cedarling will make a best attempt to create entities based on tokens provided; if it is unable to do so it will raise an `EntitiesError` exception.
+The action, resource and context entities are declared in code. These four entities together form the `PARC` format that cedarling evaluates against policies provided in the policy store. The principal entities can be either User, Workload or Role. After forming the entities, cedarling evaluates them against the policies provided in the policy store. If entity is explicitly permitted by a policy, the result of the evaluation is `ALLOW`, otherwise it is `DENY`.
 
 In this case there are two policies in the store, one for User entities and one for Workload entities:
 
@@ -91,9 +88,7 @@ context = {
 }
 
 request = Request(
-    access_token,
-    id_token,
-    userinfo_token,
+    tokens=Tokens(access_token, id_token, userinfo_token),
     action=action,
     resource=resource, context=context)
 
@@ -101,7 +96,7 @@ authorize_result = instance.authorize(request)
 assert authorize_result.is_allowed()
 ```
 
-Cedarling will return `is_allowed()` as `True` only if both the User and Workload entity evaluations are `ALLOW`.
+Cedarling will return `is_allowed()` as `True` only if the authorization queries set in the bootstrap return `True`. In case of the example, both `CEDARLING_USER_AUTHZ` and `CEDARLING_WORKLOAD_AUTHZ` were set to `enabled`, so cedarling will only return True if both user and workload evaluations are true. 
 
 ## Exposed functions
 

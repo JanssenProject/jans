@@ -84,7 +84,6 @@ function Row(props: { row: ReturnType<typeof createData>, notifyOnDataChange }) 
             let clientArr = []
             if (!!result.oidcClients) {
                 clientArr = result.oidcClients;
-
                 chrome.storage.local.set({ oidcClients: clientArr.filter(obj => obj.clientId !== row.clientId) });
             }
         });
@@ -93,7 +92,7 @@ function Row(props: { row: ReturnType<typeof createData>, notifyOnDataChange }) 
 
     return (
         <React.Fragment>
-            <AuthFlowInputs isOpen={open} handleDialog={handleDialog} client={row} notifyOnDataChange={notifyOnDataChange}/>
+            <AuthFlowInputs isOpen={open} handleDialog={handleDialog} client={row} notifyOnDataChange={notifyOnDataChange} />
             <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
                 <TableCell>
                     <Tooltip title="Delete Client from jans-tarp">
