@@ -8,6 +8,6 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-orm-parent</artifactId>
-		<version>0.0.0-nightly</version>
+		<version>1.3.0</version>
 	</parent>
 </project>
