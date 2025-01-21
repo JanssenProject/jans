@@ -29,14 +29,81 @@ Krakend recommends building via their builder docker image, to produce builds th
     docker run -it -v "$PWD:/app" -w /app krakend/builder:2.9.0-linux-generic go build -buildmode=plugin -o yourplugin.so .
     ```
 
+    - For ARM64 Docker targets:
+
+    ```bash
+    docker run -it -v "$PWD:/app" -w /app \
+        -e "CGO_ENABLED=1" \
+        -e "CC=aarch64-linux-musl-gcc" \
+        -e "GOARCH=arm64" \
+        -e "GOHOSTARCH=amd64" \
+        krakend/builder:2.9.0 \
+        go build -ldflags='-extldflags=-fuse-ld=bfd -extld=aarch64-linux-musl-gcc' \
+        -buildmode=plugin -o yourplugin.so .
+    ```
+
+    - For ARM64 on-premise installs:
+
+    ```bash
+    docker run -it -v "$PWD:/app" -w /app \
+        -e "CGO_ENABLED=1" \
+        -e "CC=aarch64-linux-musl-gcc" \
+        -e "GOARCH=arm64" \
+        -e "GOHOSTARCH=amd64" \
+        krakend/builder:2.9.1-linux-generic \
+        go build -ldflags='-extldflags=-fuse-ld=bfd -extld=aarch64-linux-musl-gcc' \
+        -buildmode=plugin -o yourplugin.so .
+    ```
+
 This will create a plugin build for KrakenD version `2.9.0`. If you are using a different version of KrakenD, replace the build tag in the command like so: `krakend/builder:x.y.z`.
+
+Check [KrakenD](https://www.krakend.io/docs/extending/injecting-plugins/) documentation on how to load plugins.
+
+## Prerequisites
+
+To test the plugin, you will need:
+- A cedarling policy store with a policy for our gateway. To create this, please follow [these](https://github.com/JanssenProject/jans/wiki/Cedarling-Hello-World-%5BWIP%5D#setup-policy-store) steps.
+- An instance of the cedarling sidecar, using the policy store mentioned above. Please follow [these](https://github.com/JanssenProject/jans/wiki/Cedarling-Hello-World-%5BWIP%5D#setup-sidecar) steps. 
+- For our demo, we will use this sample policy as outlined in the instructions:
+    ```
+    @id("allow_one")
+    permit(
+        principal is gatewayDemo::Workload,
+        action == gatewayDemo::Action::"GET",
+        resource is gatewayDemo::HTTP_Request
+    )
+    when {
+        (principal["client_id"]) == "d7f71bea-c38d-4caf-a1ba-e43c74a11a62"
+    };
+    ```
+- A [KrakenD server installation](https://www.krakend.io/docs/overview/installing/). For development purposes, the binary install is recommended for debugging purposes. For production setups, the Docker method is recommended.
+- The plugin `.so` file for your architecture. For Mac OS hosts, ARM64 is required.
+- A configuration file. Sample configuration is provided in [krakend.json](./krakend.json).
 
 ## Configuration
 
-See `krakend.json` to see an example KrakenD configuration which loads the plugin. The following table describes the plugin-specific configuration keys. These keys are mandatory and must be provided.
+See `krakend.json` to see an example KrakenD configuration which loads the plugin. The following table describes the plugin-specific configuration keys. These keys are mandatory and must be provided. Additional configuration is described in [KrakenD documentation](https://www.krakend.io/docs/configuration/structure/).
+
+The `namespace` field in the configuration
 
 | Field | Type | Example | Description |
 |-------|------|---------|-------------|
 | path   | String  | /protected | KrakenD endpoint to protect |
 | sidecar_endpoint | String | http://127.0.0.1:5000/cedarling/evaluation | Sidecar evaluation URL |
 | namespace | String | Jans | Cedar namespace being used by the sidecar |
+
+## Running
+
+1. Start the cedarling sidecar. The sample config expects the sidecar to be running on port 5000
+2. Place `krakend.json` and the plugin `.so` file in your current working directory
+2. Run the KrakenD server: `krakend run -c krakend.json`
+3. KrakenD is running on `http://127.0.0.1:8080`
+4. Test with no authentication: `curl http://127.0.0.1:8080/protected`. You should get a 403 Forbidden
+5. Test with authentication:
+
+```bash
+ACCESS_TOKEN=eyJraWQiOiJjb25uZWN0X2Y5YTAwN2EyLTZkMGItNDkyYS05MGNkLWYwYzliMWMyYjVkYl9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJxenhuMVNjcmI5bFd0R3hWZWRNQ2t5LVFsX0lMc3BaYVFBNmZ5dVlrdHcwIiwiY29kZSI6IjNlMmEyMDEyLTA5OWMtNDY0Zi04OTBiLTQ0ODE2MGMyYWIyNSIsImlzcyI6Imh0dHBzOi8vYWNjb3VudC5nbHV1Lm9yZyIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJjbGllbnRfaWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhdWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhY3IiOiJzaW1wbGVfcGFzc3dvcmRfYXV0aCIsIng1dCNTMjU2IjoiIiwibmJmIjoxNzMxOTUzMDMwLCJzY29wZSI6WyJyb2xlIiwib3BlbmlkIiwicHJvZmlsZSIsImVtYWlsIl0sImF1dGhfdGltZSI6MTczMTk1MzAyNywiZXhwIjoxNzMyMTIxNDYwLCJpYXQiOjE3MzE5NTMwMzAsImp0aSI6InVaVWgxaERVUW82UEZrQlBud3BHemciLCJ1c2VybmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjMwNiwidXJpIjoiaHR0cHM6Ly9qYW5zLnRlc3QvamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0.Pt-Y7F-hfde_WP7ZYwyvvSS11rKYQWGZXTzjH_aJKC5VPxzOjAXqI3Igr6gJLsP1aOd9WJvOPchflZYArctopXMWClbX_TxpmADqyCMsz78r4P450TaMKj-WKEa9cL5KtgnFa0fmhZ1ZWolkDTQ_M00Xr4EIvv4zf-92Wu5fOrdjmsIGFot0jt-12WxQlJFfs5qVZ9P-cDjxvQSrO1wbyKfHQ_txkl1GDATXsw5SIpC5wct92vjAVm5CJNuv_PE8dHAY-KfPTxOuDYBuWI5uA2Yjd1WUFyicbJgcmYzUSVt03xZ0kQX9dxKExwU2YnpDorfwebaAPO7G114Bkw208g
+curl http://127.0.0.1:8080/protected -H "Authorization: Bearer $ACCESS_TOKEN"
+```
+
+6. KrakenD is configured to respond with the health check response if authentication succeeds. 
