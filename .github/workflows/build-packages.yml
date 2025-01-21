@@ -438,3 +438,56 @@ jobs:
         gpg --armor --detach-sign cedarling_wasm_"${TAG}"_pkg.tar.gz || echo "Failed to sign"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${VERSION}" *.tar.gz *.sha256sum *.asc
+  build_cedarling_krakend:
+    if: github.repository == 'JanssenProject/jans'
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        krakend-builder-image: [ 'builder:2.9.0', 'builder:2.9.0-linux-generic' ]
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      with:
+        egress-policy: audit
+
+    - name: Checkout
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - name: Import GPG key
+      id: import_gpg
+      continue-on-error: true
+      uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
+      with:
+        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+        git_user_signingkey: true
+        git_commit_gpgsign: true
+    - name: Set environment variables
+      run: |
+        TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+        VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+        if [ "${TAG}" == "nightly" ]; then
+          VERSION=nightly
+          TAG="0.0.0"
+        fi
+        echo TAG=${TAG} >> $GITHUB_ENV
+        echo VERSION=${VERSION} >> $GITHUB_ENV
+        KRAKEND_BUILDER_IMAGE=${{ matrix.krakend-builder-image }}
+        KRAKEND_BUILDER_IMAGE=${KRAKEND_BUILDER_IMAGE/:/-}
+        echo KRAKEND_BUILDER_IMAGE=${KRAKEND_BUILDER_IMAGE} >> $GITHUB_ENV
+    - name: Build plugin for AMD64 
+      working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
+      run: |
+        docker run -it -v "$PWD:/app" -w /app krakend/"${{ matrix.krakend-builder-image }}" go build -buildmode=plugin -o cedarling-krakend-amd64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so .
+    - name: Build plugin for ARM64
+      working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
+      run: |
+        docker run -it -v "$PWD:/app" -w /app -e "CGO_ENABLED=1" -e "CC=aarch64-linux-musl-gcc" -e "GOARCH=arm64" -e "GOHOSTARCH=amd64" krakend/"${{ matrix.krakend-builder-image }}" go build -ldflags='-extldflags=-fuse-ld=bfd -extld=aarch64-linux-musl-gcc' -buildmode=plugin -o  cedarling-krakend-arm64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so .
+    - name: Generate sha256sum and sign
+      working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
+      run: |
+        sha256sum cedarling-krakend-amd64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so >> cedarling-krakend-amd64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so.sha256sum
+        sha256sum cedarling-krakend-arm64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so >> cedarling-krakend-arm64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so.sha256sum
+        gpg --armor --detach-sign cedarling-krakend-amd64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so || echo "Failed to sign"
+        gpg --armor --detach-sign cedarling-krakend-arm64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so || echo "Failed to sign"
+        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
+        gh release upload "${{ env.VERSION }}" *.so *.sha256sum *.asc
