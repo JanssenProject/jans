@@ -134,6 +134,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix: ${{ fromJson(needs.prep-matrix.outputs.matrix) }}
+      fail-fast: false
 
     steps:
     - name: Harden Runner

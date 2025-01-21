@@ -1,6 +1,6 @@
 apiVersion: v2
 name: link
-version: 0.0.0-nightly
+version: 1.3.0
 kubeVersion: ">=v1.22.0-0"
 description: Jans Link
 type: application
@@ -15,4 +15,4 @@ maintainers:
     email: support@jans.io
     url: https://github.com/moabu
 icon: https://github.com/JanssenProject/jans/raw/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
-appVersion: "0.0.0-nightly"
+appVersion: "1.3.0"
