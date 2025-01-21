@@ -104,13 +104,13 @@ mod tests {
 
     use super::*;
     use crate::common::app_types::PdpID;
-    use crate::log::{LogEntry, LogType};
+    use crate::log::{LogEntry, LogType, gen_uuid7};
 
     #[test]
     fn write_log_ok() {
         // Create a log entry
         let log_entry = LogEntry {
-            base: crate::log::BaseLogEntry::new(PdpID::new(), LogType::Decision),
+            base: crate::log::BaseLogEntry::new(PdpID::new(), LogType::Decision, gen_uuid7()),
             application_id: Some("test_app".to_string().into()),
             auth_info: None,
             msg: "Test message".to_string(),

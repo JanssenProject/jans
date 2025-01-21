@@ -73,7 +73,7 @@ fn test_log_memory_logger() {
     };
     let strategy = LogStrategy::new(&config);
     let entry = LogEntry {
-        base: BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision),
+        base: BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision, gen_uuid7()),
         application_id: Some("test_app".to_string().into()),
         auth_info: None,
         msg: "Test message".to_string(),
@@ -123,14 +123,14 @@ fn test_log_memory_logger() {
     assert_eq!(strategy.get_log_ids().len(), 2);
     assert_eq!(
         strategy
-            .get_log_by_id(&entry1.get_request_id().to_string())
+            .get_log_by_id(&entry1.get_id().to_string())
             .unwrap(),
         entry1_json,
         "Failed to get log entry by id"
     );
     assert_eq!(
         strategy
-            .get_log_by_id(&entry2.get_request_id().to_string())
+            .get_log_by_id(&entry2.get_id().to_string())
             .unwrap(),
         entry2_json,
         "Failed to get log entry by id"
@@ -153,7 +153,7 @@ fn test_log_memory_logger() {
 fn test_log_stdout_logger() {
     // Arrange
     let log_entry = LogEntry {
-        base: BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision),
+        base: BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision, gen_uuid7()),
         application_id: Some("test_app".to_string().into()),
         auth_info: None,
         msg: "Test message".to_string(),
@@ -205,13 +205,13 @@ fn test_log_storage_for_only_writer() {
     assert_eq!(strategy.get_log_ids().len(), 0);
     assert!(
         strategy
-            .get_log_by_id(&entry1.get_request_id().to_string())
+            .get_log_by_id(&entry1.get_id().to_string())
             .is_none(),
         "We should not have entry1 entry in the memory logger"
     );
     assert!(
         strategy
-            .get_log_by_id(&entry2.get_request_id().to_string())
+            .get_log_by_id(&entry2.get_id().to_string())
             .is_none(),
         "We should not have entry2 entry in the memory logger"
     );

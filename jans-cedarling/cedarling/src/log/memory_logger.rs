@@ -48,7 +48,7 @@ mod fallback {
     struct StrWrap<'a>(&'a str);
 
     impl crate::log::interface::Loggable for StrWrap<'_> {
-        fn get_request_id(&self) -> uuid7::Uuid {
+        fn get_id(&self) -> uuid7::Uuid {
             crate::log::log_entry::gen_uuid7()
         }
 
@@ -98,7 +98,7 @@ impl LogWriter for MemoryLogger {
             .storage
             .lock()
             .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
-            .set(&entry.get_request_id().to_string(), json);
+            .set(&entry.get_id().to_string(), json);
 
         if let Err(err) = set_result {
             fallback::log(&format!("could not store LogEntry to memory: {err:?}"));
@@ -187,16 +187,12 @@ mod tests {
         // check that we have two entries in the log database
         assert_eq!(logger.get_log_ids().len(), 2);
         assert_eq!(
-            logger
-                .get_log_by_id(&entry1.get_request_id().to_string())
-                .unwrap(),
+            logger.get_log_by_id(&entry1.get_id().to_string()).unwrap(),
             entry1_json,
             "Failed to get log entry by id"
         );
         assert_eq!(
-            logger
-                .get_log_by_id(&entry2.get_request_id().to_string())
-                .unwrap(),
+            logger.get_log_by_id(&entry2.get_id().to_string()).unwrap(),
             entry2_json,
             "Failed to get log entry by id"
         );
@@ -264,7 +260,7 @@ mod tests {
         }
 
         impl crate::log::interface::Loggable for FailSerialize {
-            fn get_request_id(&self) -> uuid7::Uuid {
+            fn get_id(&self) -> uuid7::Uuid {
                 crate::log::log_entry::gen_uuid7()
             }
 

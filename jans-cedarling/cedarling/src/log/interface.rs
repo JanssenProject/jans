@@ -29,13 +29,13 @@ pub(crate) trait Loggable: serde::Serialize {
 
     /// List of additional ids that entity can be related
     //  Is used in memory logger
-    fn get_additional_ids() -> Vec<Uuid> {
+    fn get_additional_ids(&self) -> Vec<Uuid> {
         Vec::new()
     }
 
     /// List of `tags` that entity can be related
     //  Is used in memory logger
-    fn get_tags<'a>() -> Vec<&'a str> {
+    fn get_tags(&self) -> Vec<&str> {
         Vec::new()
     }
 

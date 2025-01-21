@@ -10,7 +10,7 @@ use std::collections::{HashMap, HashSet};
 use std::fmt::Display;
 use std::hash::Hash;
 
-use uuid7::Uuid;
+use uuid7::{Uuid, uuid7};
 
 use super::LogLevel;
 use super::interface::Loggable;
@@ -56,7 +56,7 @@ impl LogEntry {
         log_type: LogType,
     ) -> LogEntry {
         Self {
-            base: BaseLogEntry::new(pdp_id, log_type),
+            base: BaseLogEntry::new(pdp_id, log_type, gen_uuid7()),
             // We use uuid v7 because it is generated based on the time and sortable.
             // and we need sortable ids to use it in the sparkv database.
             // Sparkv store data in BTree. So we need have correct order of ids.
@@ -97,8 +97,8 @@ impl LogEntry {
 }
 
 impl Loggable for LogEntry {
-    fn get_request_id(&self) -> Uuid {
-        self.base.get_request_id()
+    fn get_id(&self) -> Uuid {
+        self.base.get_id()
     }
 
     fn get_log_level(&self) -> Option<LogLevel> {
@@ -342,8 +342,16 @@ pub struct DecisionLogEntry<'a> {
 }
 
 impl Loggable for &DecisionLogEntry<'_> {
-    fn get_request_id(&self) -> Uuid {
-        self.base.get_request_id()
+    fn get_id(&self) -> Uuid {
+        self.base.get_id()
+    }
+
+    fn get_additional_ids(&self) -> Vec<Uuid> {
+        vec![self.base.request_id]
+    }
+
+    fn get_tags(&self) -> Vec<&str> {
+        vec!["decision"]
     }
 
     fn get_log_level(&self) -> Option<LogLevel> {
@@ -377,7 +385,10 @@ pub fn gen_uuid7() -> Uuid {
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct BaseLogEntry {
-    /// unique identifier for this event
+    /// Unique identifier for this event.
+    /// It should be uuid7
+    pub id: Uuid,
+    /// identifier for bunch of events (whole request)
     pub request_id: Uuid,
     /// Time of decision, in ISO-8601 time format
     /// This field is optional. Can be none if we can't have access to clock (WASM)
@@ -393,7 +404,7 @@ pub struct BaseLogEntry {
 }
 
 impl BaseLogEntry {
-    pub(crate) fn new(pdp_id: app_types::PdpID, log_type: LogType) -> Self {
+    pub(crate) fn new(pdp_id: app_types::PdpID, log_type: LogType, request_id: Uuid) -> Self {
         let local_time_string = chrono::Local::now().format(ISO8601).to_string();
 
         let default_log_level = if log_type == LogType::System {
@@ -403,10 +414,8 @@ impl BaseLogEntry {
         };
 
         Self {
-            // We use uuid v7 because it is generated based on the time and sortable.
-            // and we need sortable ids to use it in the sparkv database.
-            // Sparkv store data in BTree. So we need have correct order of ids.
-            request_id: gen_uuid7(),
+            id: uuid7(),
+            request_id,
             timestamp: Some(local_time_string),
             log_kind: log_type,
             pdp_id: pdp_id.0,
@@ -416,7 +425,7 @@ impl BaseLogEntry {
 }
 
 impl Loggable for BaseLogEntry {
-    fn get_request_id(&self) -> Uuid {
+    fn get_id(&self) -> Uuid {
         self.request_id
     }
 
