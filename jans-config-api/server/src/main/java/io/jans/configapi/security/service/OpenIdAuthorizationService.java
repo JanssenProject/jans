@@ -113,7 +113,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         acccessToken = validateScope(acccessToken, tokenScopes, resourceInfo, issuer);
 
         boolean isAuthorized = externalAuthorization(token, issuer, method, path);
-        logger.debug("Custom authorization - isAuthorized:{}", isAuthorized);
+        logger.error("Custom authorization - isAuthorized:{}", isAuthorized);
 
         return acccessToken;
     }
@@ -160,11 +160,18 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                         + ", however token scopes: " + tokenScopes,
                         Response.status(Response.Status.UNAUTHORIZED).build());
             }
+            
+            //If no scope is missing
+            if (missingScopes == null || missingScopes.isEmpty()) {
+                logger.error(" No missing scopes and hence returning original accessToken");
+                return accessToken;
+            }
 
+            logger.error("Generating new token with authSpecificScope");
             // Generate token with required resourceScopes
             resourceScopes.addAll(authSpecificScope);
             accessToken = openIdService.requestAccessToken(authUtil.getClientId(), resourceScopes);
-            logger.debug("Introspecting new accessToken:{}", accessToken);
+            logger.error("Introspecting new accessToken:{}", accessToken);
 
             // Introspect
             IntrospectionResponse introspectionResponse = openIdService

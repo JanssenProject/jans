@@ -61,19 +61,19 @@ public class OpenIdProtectionService implements ProtectionService {
         try {
             String token = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
             boolean authFound = StringUtils.isNotEmpty(token);
-            log.info("Authorization header {} found", authFound ? "" : "not");
+            log.error("Authorization header {} found", authFound ? "" : "not");
             
             if (!authFound) {
-                log.info("Request is missing authorization header");
+                log.error("Request is missing authorization header");
                 // See section 3.12 RFC 7644
                 return simpleResponse(UNAUTHORIZED, "No authorization header found");
             }
             
             token = token.replaceFirst("Bearer\\s+","");
-            log.debug("Validating token {}", token);
+            log.error("Validating token {}", token);
 
             List<String> scopes = getRequestedScopes(resourceInfo);
-            log.info("Call requires scopes: {}", scopes);
+            log.error("Call requires scopes: {}", scopes);
 
             Jwt jwt = tokenAsJwt(token);
             if (jwt == null) {

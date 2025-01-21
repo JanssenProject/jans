@@ -35,10 +35,10 @@ public class LockService {
         if (logger.isInfoEnabled()) {
             logger.info(
                     "LockStatResource::getStatistics() - url:{}, token:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
-                    escapeLog(url), escapeLog(token), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth), escapeLog(format));
+                    escapeLog(url), escapeLog(token), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth),
+                    escapeLog(format));
         }
-        logger.error(
-                "LockStatResource::getStatistics() - url:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
+        logger.error("LockStatResource::getStatistics() - url:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
                 url, month, startMonth, endMonth, format);
         JsonNode jsonNode = null;
         Map<String, String> headers = new HashMap<>();
@@ -56,11 +56,25 @@ public class LockService {
         HttpServiceResponse httpServiceResponse = configHttpService.executeGet(url, headers, data);
         logger.error(" stat httpServiceResponse:{}", httpServiceResponse);
         if (httpServiceResponse != null) {
-            logger.error(" stat httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}", httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(), httpServiceResponse.getHttpResponse().getEntity());
+            logger.error(
+                    " stat httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
+                    httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
+                    httpServiceResponse.getHttpResponse().getEntity());
             jsonNode = getResponseJsonNode(httpServiceResponse, Status.OK);
         }
         logger.error(" stat jsonNode:{}", jsonNode);
         return jsonNode;
+    }
+
+    public JsonNode getResponseJsonNode(HttpServiceResponse serviceResponse, Status status)
+            throws JsonProcessingException {
+        JsonNode jsonNode = null;
+
+        if (serviceResponse == null) {
+            return jsonNode;
+        }
+
+        return getResponseJsonNode(getResponseEntityString(serviceResponse, status));
     }
 
     public String getResponseEntityString(HttpServiceResponse serviceResponse, Status status) {
@@ -83,21 +97,10 @@ public class LockService {
         return jsonString;
     }
 
-    public JsonNode getResponseJsonNode(HttpServiceResponse serviceResponse, Status status)
-            throws JsonProcessingException {
-        JsonNode jsonNode = null;
-
-        if (serviceResponse == null) {
-            return jsonNode;
-        }
-
-        return getResponseJsonNode(getResponseEntityString(serviceResponse, status));
-    }
-
     public JsonNode getResponseJsonNode(String jsonSring) throws JsonProcessingException {
         JsonNode jsonNode = null;
 
-        if (StringUtils.isNotBlank(jsonSring)) {
+        if (StringUtils.isBlank(jsonSring)) {
             return jsonNode;
         }
 
