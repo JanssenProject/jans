@@ -14,6 +14,7 @@ use std::path::Path;
 use std::str::FromStr;
 
 use super::authorization_config::{AuthorizationConfig, IdTokenTrustMode};
+use super::default_values::*;
 use super::json_util::deserialize_or_parse_string_as_json;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, JwtConfig, LogConfig, LogTypeConfig,
@@ -73,7 +74,10 @@ pub struct BootstrapConfigRaw {
 
     /// Token claims that will be used for decision logging.
     /// Default is jti, but perhaps some other claim is needed.
-    #[serde(rename = "CEDARLING_DECISION_LOG_DEFAULT_JWT_ID", default)]
+    #[serde(
+        rename = "CEDARLING_DECISION_LOG_DEFAULT_JWT_ID",
+        default = "default_jti"
+    )]
     pub decision_log_default_jwt_id: String,
 
     /// When `enabled`, Cedar engine authorization is queried for a User principal.
@@ -278,6 +282,30 @@ pub struct BootstrapConfigRaw {
     pub listen_sse: FeatureToggle,
 }
 
+impl BootstrapConfigRaw {
+    /// Construct `BootstrapConfig` from environment variables and `BootstrapConfigRaw` config.
+    /// Environment variables have bigger priority.
+    //
+    // Simple implementation that map input structure to JSON map
+    // and map environment variables with prefix `CEDARLING_` to JSON map. And merge it.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn from_raw_config_and_env(
+        raw: Option<BootstrapConfigRaw>,
+    ) -> Result<Self, BootstrapConfigLoadingError> {
+        let mut json_config_params = serde_json::json!(raw.unwrap_or_default())
+            .as_object()
+            .map(|v| v.to_owned())
+            .unwrap_or_default();
+
+        get_cedarling_env_vars().into_iter().for_each(|(k, v)| {
+            // update map with values from env variables
+            json_config_params.insert(k, v);
+        });
+
+        Ok(BootstrapConfigRaw::deserialize(json_config_params)?)
+    }
+}
+
 /// Type of logger
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default)]
 #[serde(rename_all = "lowercase")]
@@ -473,18 +501,7 @@ impl BootstrapConfig {
     pub fn from_raw_config_and_env(
         raw: Option<BootstrapConfigRaw>,
     ) -> Result<Self, BootstrapConfigLoadingError> {
-        let mut json_config_params = serde_json::json!(raw.unwrap_or_default())
-            .as_object()
-            .map(|v| v.to_owned())
-            .unwrap_or_default();
-
-        get_cedarling_env_vars().into_iter().for_each(|(k, v)| {
-            // update map with values from env variables
-            json_config_params.insert(k, v);
-        });
-
-        let config_raw = BootstrapConfigRaw::deserialize(json_config_params)?;
-
+        let config_raw = BootstrapConfigRaw::from_raw_config_and_env(raw)?;
         Self::from_raw_config(&config_raw)
     }
 
@@ -621,4 +638,200 @@ where
     let value: Option<String> = deserialize_or_parse_string_as_json(deserializer)?;
 
     Ok(value.filter(|s| !s.is_empty()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::{
+        env,
+        sync::{LazyLock, Mutex},
+    };
+    use test_utils::assert_eq;
+
+    static ENV_MUTEX: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
+
+    fn with_env_vars<F>(vars: Vec<(&str, &str)>, test: F)
+    where
+        F: FnOnce(),
+    {
+        // Ensure only one test modifies env vars at a time
+        let _lock = ENV_MUTEX.lock().unwrap();
+
+        // Create a fresh environment by clearing all CEDARLING_* vars
+        let mut all_vars = Vec::new();
+        for (key, value) in env::vars() {
+            let key_clone = key.clone();
+            all_vars.push((key, value));
+            env::remove_var(&key_clone);
+        }
+
+        // Set new env vars
+        for (key, value) in &vars {
+            env::set_var(key, value);
+        }
+
+        test();
+
+        // Clean up
+        for (key, _) in &vars {
+            env::remove_var(key);
+        }
+
+        // Restore original environment
+        for (key, value) in all_vars {
+            env::set_var(&key, value);
+        }
+    }
+
+    /// Tests that the default configuration values are correctly set when no environment variables
+    /// or raw config is provided.
+    #[test]
+    fn test_from_raw_config_and_env_defaults() {
+        with_env_vars(vec![], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+            assert_eq!(
+                config.application_name, "",
+                "Application name should be empty by default"
+            );
+            assert_eq!(
+                config.policy_store_uri, None,
+                "Policy store URI should be None by default"
+            );
+            assert_eq!(
+                config.policy_store_id, "",
+                "Policy store ID should be empty by default"
+            );
+            assert_eq!(
+                config.log_type,
+                LoggerType::Off,
+                "Logger should be off by default"
+            );
+            assert_eq!(
+                config.log_level,
+                LogLevel::WARN,
+                "Default log level should be WARN"
+            );
+            assert_eq!(config.log_ttl, None, "Log TTL should be None by default");
+            assert!(
+                config.decision_log_user_claims.is_empty(),
+                "Decision log user claims should be empty by default"
+            );
+            assert!(
+                config.decision_log_workload_claims.is_empty(),
+                "Decision log workload claims should be empty by default"
+            );
+            assert_eq!(
+                config.decision_log_default_jwt_id, "",
+                "Default JWT ID for decision logging should be ''"
+            );
+            assert_eq!(
+                config.user_authz,
+                FeatureToggle::Disabled,
+                "User authorization should be disabled by default"
+            );
+            assert_eq!(
+                config.workload_authz,
+                FeatureToggle::Disabled,
+                "Workload authorization should be disabled by default"
+            );
+            assert_eq!(
+                config.usr_workload_bool_op,
+                WorkloadBoolOp::And,
+                "Default user-workload boolean operator should be AND"
+            );
+        });
+    }
+
+    /// Tests that configuration values are correctly set when only a raw config is provided.
+    #[test]
+    fn test_from_raw_config_and_env() {
+        with_env_vars(vec![], || {
+            let raw = BootstrapConfigRaw {
+                application_name: "test-app".to_string(),
+                log_type: LoggerType::Memory,
+                log_level: LogLevel::DEBUG,
+                ..Default::default()
+            };
+
+            let config = BootstrapConfigRaw::from_raw_config_and_env(Some(raw)).unwrap();
+
+            assert_eq!(config.application_name, "test-app");
+            assert_eq!(config.log_type, LoggerType::Memory);
+            assert_eq!(config.log_level, LogLevel::DEBUG);
+        });
+    }
+
+    /// Tests that configuration values are correctly set when only environment variables are provided.
+    #[test]
+    fn test_from_raw_config_and_env_with_env_vars() {
+        with_env_vars(
+            vec![
+                ("CEDARLING_APPLICATION_NAME", "env-app"),
+                ("CEDARLING_LOG_TYPE", "memory"),
+                ("CEDARLING_LOG_LEVEL", "DEBUG"),
+            ],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+                assert_eq!(config.application_name, "env-app");
+                assert_eq!(config.log_type, LoggerType::Memory);
+                assert_eq!(config.log_level, LogLevel::DEBUG);
+            },
+        );
+    }
+
+    /// Tests that environment variables override raw config values when both are provided.
+    #[test]
+    fn test_from_raw_config_and_env_vars_override() {
+        with_env_vars(
+            vec![
+                ("CEDARLING_APPLICATION_NAME", "env-app"),
+                ("CEDARLING_LOG_TYPE", "memory"),
+            ],
+            || {
+                let raw = BootstrapConfigRaw {
+                    application_name: "test-app".to_string(),
+                    log_type: LoggerType::StdOut,
+                    log_level: LogLevel::INFO,
+                    ..Default::default()
+                };
+
+                let config = BootstrapConfigRaw::from_raw_config_and_env(Some(raw)).unwrap();
+
+                // Env vars should override raw config
+                assert_eq!(config.application_name, "env-app");
+                assert_eq!(config.log_type, LoggerType::Memory);
+
+                // Fields not set in env should use raw config values
+                assert_eq!(config.log_level, LogLevel::INFO);
+            },
+        );
+    }
+
+    /// Tests that an error is returned when an invalid environment variable value is provided.
+    #[test]
+    fn test_from_raw_config_and_env_invalid_env_var() {
+        with_env_vars(vec![("CEDARLING_LOG_TYPE", "invalid")], || {
+            let result = BootstrapConfigRaw::from_raw_config_and_env(None);
+            assert!(result.is_err());
+        });
+    }
+
+    /// Tests that empty string values in environment variables are handled correctly.
+    #[test]
+    fn test_from_raw_config_and_env_empty_strings() {
+        with_env_vars(
+            vec![
+                ("CEDARLING_APPLICATION_NAME", ""),
+                ("CEDARLING_POLICY_STORE_URI", ""),
+            ],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+                assert_eq!(config.application_name, "");
+                assert_eq!(config.policy_store_uri, None);
+            },
+        );
+    }
 }
