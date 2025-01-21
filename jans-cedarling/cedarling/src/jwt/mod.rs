@@ -19,8 +19,8 @@ mod test_utils;
 mod token;
 mod validator;
 
+use crate::JwtConfig;
 use crate::common::policy_store::TrustedIssuer;
-use crate::{IdTokenTrustMode, JwtConfig};
 use key_service::{KeyService, KeyServiceError};
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
@@ -91,10 +91,6 @@ pub enum JwtServiceInitError {
 
 pub struct JwtService {
     validators: HashMap<String, JwtValidator>,
-    // TODO: implement the usage of this bootstrap property in
-    // the authz module.
-    #[allow(dead_code)]
-    id_token_trust_mode: IdTokenTrustMode,
 }
 
 impl JwtService {
@@ -149,10 +145,7 @@ impl JwtService {
             );
         }
 
-        Ok(Self {
-            id_token_trust_mode: config.id_token_trust_mode,
-            validators,
-        })
+        Ok(Self { validators })
     }
 
     pub async fn validate_tokens<'a>(
@@ -189,7 +182,7 @@ impl JwtService {
 mod test {
     use super::test_utils::*;
     use super::{JwtService, Token, TokenClaims};
-    use crate::{IdTokenTrustMode, JwtConfig, TokenValidationConfig};
+    use crate::{JwtConfig, TokenValidationConfig};
     use jsonwebtoken::Algorithm;
     use serde_json::json;
     use std::collections::{HashMap, HashSet};
@@ -235,7 +228,6 @@ mod test {
                 jwks: Some(local_jwks),
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
-                id_token_trust_mode: IdTokenTrustMode::Strict,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
                 token_validation_settings: HashMap::from([
                     (

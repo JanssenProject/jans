@@ -3,13 +3,15 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::{AuthorizationConfig, JwtConfig, WorkloadBoolOp, token_settings::TokenConfigs};
-use std::collections::HashMap;
-
+use crate::token_settings::TokenConfigs;
+use crate::{
+    AuthorizationConfig, JwtConfig, WorkloadBoolOp, authorization_config::IdTokenTrustMode,
+};
 pub use crate::{
     BootstrapConfig, BootstrapConfigRaw, Cedarling, FeatureToggle, LogConfig, LogTypeConfig,
     PolicyStoreConfig, PolicyStoreSource,
 };
+use std::collections::HashMap;
 
 /// fixture for [`BootstrapConfigRaw`]
 pub fn get_raw_config(local_policy_store: &str) -> BootstrapConfigRaw {
@@ -25,8 +27,8 @@ pub fn get_raw_config(local_policy_store: &str) -> BootstrapConfigRaw {
         log_type: crate::LoggerType::StdOut,
         local_policy_store: Some(local_policy_store_json.to_string()),
         jwt_status_validation: FeatureToggle::Disabled,
-        id_token_trust_mode: crate::IdTokenTrustMode::None,
         token_configs: TokenConfigs::without_validation(),
+        id_token_trust_mode: IdTokenTrustMode::None,
         ..Default::default()
     }
 }
@@ -59,6 +61,7 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
                 ),
             ])
             .into(),
+            id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
     }

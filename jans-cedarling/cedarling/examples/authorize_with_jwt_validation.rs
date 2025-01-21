@@ -3,14 +3,13 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::{HashMap, HashSet};
-
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LogConfig,
-    LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
-    TokenValidationConfig, WorkloadBoolOp,
+    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
+    PolicyStoreConfig, PolicyStoreSource, Request, ResourceData, TokenValidationConfig,
+    WorkloadBoolOp,
 };
 use jsonwebtoken::Algorithm;
+use std::collections::{HashMap, HashSet};
 
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../test_files/policy-store_with_trusted_issuers_ok.yaml");
@@ -24,7 +23,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         jwks: None,
         jwt_sig_validation: true,
         jwt_status_validation: false,
-        id_token_trust_mode: IdTokenTrustMode::None,
         signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
         token_validation_settings: HashMap::from([
             (

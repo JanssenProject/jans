@@ -4,9 +4,9 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource, Request, ResourceData, TokenValidationConfig,
-    WorkloadBoolOp,
+    AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LogConfig,
+    LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
+    TokenValidationConfig, WorkloadBoolOp,
 };
 use std::collections::{HashMap, HashSet};
 
@@ -27,7 +27,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             jwks: None,
             jwt_sig_validation: false,
             jwt_status_validation: false,
-            id_token_trust_mode: cedarling::IdTokenTrustMode::None,
             signature_algorithms_supported: HashSet::new(),
             token_validation_settings: HashMap::from_iter(
                 ["access_token", "id_token", "userinfo_token", "custom_token"]
@@ -43,6 +42,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             decision_log_default_jwt_id: "jti".to_string(),
             decision_log_user_claims: vec!["client_id".to_string(), "username".to_string()],
             decision_log_workload_claims: vec!["org_id".to_string()],
+            id_token_trust_mode: IdTokenTrustMode::None,
             mapping_tokens: HashMap::from([
                 ("access_token".to_string(), "Access_token".to_string()),
                 ("id_token".to_string(), "id_token".to_string()),

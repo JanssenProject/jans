@@ -17,7 +17,7 @@ pub(crate) mod token_settings;
 #[cfg(not(target_arch = "wasm32"))]
 use std::{fs, io, path::Path};
 
-pub use authorization_config::AuthorizationConfig;
+pub use authorization_config::{AuthorizationConfig, IdTokenTrustMode};
 pub use decode::{BootstrapConfigRaw, FeatureToggle, LoggerType, WorkloadBoolOp};
 pub use jwt_config::*;
 pub use log_config::*;
@@ -182,7 +182,6 @@ mod test {
                 jwks: None,
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
-                id_token_trust_mode: IdTokenTrustMode::Strict,
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
                 token_validation_settings: HashMap::from([
                     ("access_token".to_string(), TokenValidationConfig {
@@ -248,7 +247,6 @@ mod test {
                 jwks: None,
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
-                id_token_trust_mode: IdTokenTrustMode::Strict,
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
                 token_validation_settings: HashMap::from([
                     ("access_token".to_string(), TokenValidationConfig {

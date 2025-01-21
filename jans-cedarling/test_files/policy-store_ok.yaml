@@ -47,12 +47,11 @@ policy_stores:
         namespace Jans {
           type Url = {"host": String, "path": String, "protocol": String};
           entity Access_token = {"aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String};
-          entity Custom_token = {"aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String};
           entity Issue = {"country": String, "org_id": String};
           entity Role;
           entity TrustedIssuer = {"issuer_entity_id": Url};
           entity User in [Role] = {"country": String, "email": String, "sub": String, "username": String, "access_token": Access_token};
-          entity Workload = {"client_id": String, "iss": TrustedIssuer, "name": String, "org_id": String, access_token: Access_token, custom_token: Custom_token};
+          entity Workload = {"client_id": String, "iss": TrustedIssuer, "name": String, "org_id": String, access_token: Access_token};
           entity id_token = {"acr": String, "amr": String, "aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String, "sub": String};
           entity Userinfo_token  = {"iss": String, "jti": String, "client_id": String};
           type Context = {

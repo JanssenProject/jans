@@ -8,6 +8,7 @@
 //! - evaluate if authorization is granted for *user*
 //! - evaluate if authorization is granted for *client* / *workload *
 
+use crate::authorization_config::IdTokenTrustMode;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types;
 use crate::common::policy_store::PolicyStoreWithID;
@@ -27,14 +28,16 @@ use std::collections::HashMap;
 use std::io::Cursor;
 use std::str::FromStr;
 use std::sync::Arc;
-
-pub use authorize_result::AuthorizeResult;
+use trust_mode::*;
 
 mod authorize_result;
 mod build_ctx;
+mod trust_mode;
 
 pub(crate) mod entity_builder;
 pub(crate) mod request;
+
+pub use authorize_result::AuthorizeResult;
 
 /// Configuration to Authz to initialize service without errors
 pub(crate) struct AuthzConfig {
@@ -109,6 +112,10 @@ impl Authz {
         let schema = &self.config.policy_store.schema;
 
         let tokens = self.decode_tokens(&request).await?;
+
+        if let IdTokenTrustMode::Strict = self.config.authorization.id_token_trust_mode {
+            validate_id_tkn_trust_mode(&tokens)?;
+        }
 
         // Parse action UID.
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
@@ -427,6 +434,9 @@ pub enum AuthorizeError {
     /// Error encountered while building the context for the request
     #[error("Failed to build context: {0}")]
     BuildContext(#[from] BuildContextError),
+    /// Error encountered while building the context for the request
+    #[error("error while running on strict id token trust mode: {0}")]
+    IdTokenTrustMode(#[from] IdTokenTrustModeError),
     /// Error encountered while building Cedar Entities
     #[error(transparent)]
     BuildEntity(#[from] BuildCedarlingEntityError),
