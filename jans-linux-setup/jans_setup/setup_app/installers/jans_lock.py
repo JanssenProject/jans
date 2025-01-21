@@ -57,9 +57,7 @@ class JansLockInstaller(JettyInstaller):
         self.create_client()
 
         if Config.persistence_type == 'sql' and Config.rdbm_type == 'pgsql':
-            self.dbUtils.set_jans_auth_conf_dynamic({'lockMessageConfig': {'enableTokenMessages': True, 'tokenMessagesChannel': 'jans_token'}})
             Config.lock_message_provider_type = 'POSTGRES'
-
 
         self.apache_lock_config()
 
