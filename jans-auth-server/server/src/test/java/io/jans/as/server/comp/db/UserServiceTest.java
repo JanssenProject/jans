@@ -297,7 +297,7 @@ public class UserServiceTest {
         assertNotNull(user.getAuthenticator());
         assertNotNull(user.getAuthenticator().getAuthenticators());
         assertEquals(user.getAuthenticator().getAuthenticators().size(), 1);
-        assertEquals(userAuthenticatorService.getUserAuthenticatorsByType(user, "type1"), Arrays.asList(new UserAuthenticator("id2", "type2")));
+        assertEquals(userAuthenticatorService.getUserAuthenticatorsByType(user, "type2"), Arrays.asList(new UserAuthenticator("id2", "type2")));
 
     }
 

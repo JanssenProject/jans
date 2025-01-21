@@ -33,13 +33,17 @@ The recommended way to include cedarling in a Python project is to compile it to
   ```
 - The wheel will be available in `target/wheels/`
 
-## Including in projects
+- If you are developing a simple project in a `venv` setup, you can run `maturin develop --release` and maturin will install the wheel into the currently activated virtual environment. After that, you may run your code directly from the command line.
 
-If you are developing a simple project in a `venv` setup, in the previous section you can run `maturin develop --release` and maturin will install the wheel into the currently activated virtual environment. After that, you may run your code directly from the command line.
+## Including in projects
 
 In case of more complicated projects with a dependency manager such as [poetry](https://python-poetry.org/), you can either install the wheel via the command line:
 ```
 poetry add path/to/wheel.whl
+```
+Or install it into the virtual environment managed by poetry:
+```
+poetry run pip install path/to/wheel.whl
 ```
 or include it as a static dependency in the [dependencies](https://python-poetry.org/docs/pyproject/#dependencies-and-dependency-groups) section of your `pyproject.toml`:
 ```
