@@ -10,6 +10,7 @@ mod build_role_entity;
 mod build_token_entities;
 mod build_user_entity;
 mod build_workload_entity;
+mod built_entities;
 mod mapping;
 
 use super::AuthorizeEntitiesData;
@@ -23,9 +24,9 @@ use build_role_entity::BuildRoleEntityError;
 pub use build_token_entities::BuildTokenEntityError;
 use build_user_entity::BuildUserEntityError;
 use build_workload_entity::BuildWorkloadEntityError;
+use built_entities::BuiltEntities;
 use cedar_policy::{Entity, EntityId, EntityUid};
 use serde_json::Value;
-use smol_str::{SmolStr, ToSmolStr};
 use std::collections::{HashMap, HashSet};
 use std::convert::Infallible;
 use std::fmt;
@@ -121,9 +122,7 @@ impl EntityBuilder {
         tokens: &HashMap<String, Token>,
         resource: &ResourceData,
     ) -> Result<AuthorizeEntitiesData, BuildCedarlingEntityError> {
-        // We keep track of the entities we already built so
-        // it's easy to get a reference later
-        let mut built_entities = HashMap::new();
+        let mut built_entities = BuiltEntities::default();
 
         let mut token_entities = HashMap::new();
         for (tkn_name, tkn) in tokens.iter() {
@@ -132,20 +131,14 @@ impl EntityBuilder {
             } else {
                 continue;
             };
-            let entity = self.build_tkn_entity(entity_name, tkn)?;
-            built_entities.insert(
-                entity.uid().type_name().to_smolstr(),
-                entity.uid().id().escaped(),
-            );
+            let entity = self.build_tkn_entity(entity_name, tkn, &built_entities)?;
+            built_entities.insert(&entity);
             token_entities.insert(tkn_name.to_string(), entity);
         }
 
         let workload = if self.build_workload {
             let workload_entity = self.build_workload_entity(tokens, &built_entities)?;
-            built_entities.insert(
-                workload_entity.uid().type_name().to_smolstr(),
-                workload_entity.uid().id().escaped(),
-            );
+            built_entities.insert(&workload_entity);
             Some(workload_entity)
         } else {
             None
@@ -156,18 +149,12 @@ impl EntityBuilder {
             let parents = roles
                 .iter()
                 .map(|role| {
-                    built_entities.insert(
-                        role.uid().type_name().to_smolstr(),
-                        role.uid().id().escaped(),
-                    );
+                    built_entities.insert(role);
                     role.uid()
                 })
                 .collect::<HashSet<EntityUid>>();
             let user_entity = self.build_user_entity(tokens, parents, &built_entities)?;
-            built_entities.insert(
-                user_entity.uid().type_name().to_smolstr(),
-                user_entity.uid().id().escaped(),
-            );
+            built_entities.insert(&user_entity);
             (Some(user_entity), roles)
         } else {
             (None, vec![])
@@ -193,7 +180,7 @@ fn build_entity(
     id_src_claim: &str,
     claim_aliases: Vec<ClaimAliasMap>,
     parents: HashSet<EntityUid>,
-    built_entities: &HashMap<SmolStr, SmolStr>,
+    built_entities: &BuiltEntities,
 ) -> Result<Entity, BuildEntityError> {
     // Get entity Id from the specified token claim
     let entity_id = token
@@ -306,7 +293,7 @@ mod test {
             "client_id",
             Vec::new(),
             HashSet::new(),
-            &HashMap::new(),
+            &BuiltEntities::default(),
         )
         .expect("should successfully build entity");
 
@@ -498,7 +485,7 @@ mod test {
             "client_id",
             Vec::new(),
             HashSet::new(),
-            &HashMap::new(),
+            &BuiltEntities::default(),
         )
         .expect_err("should error while parsing entity type name");
 
@@ -523,7 +510,7 @@ mod test {
             "client_id",
             Vec::new(),
             HashSet::new(),
-            &HashMap::new(),
+            &BuiltEntities::default(),
         )
         .expect_err("should error while parsing entity type name");
 
@@ -564,7 +551,7 @@ mod test {
             "client_id",
             Vec::new(),
             HashSet::new(),
-            &HashMap::new(),
+            &BuiltEntities::default(),
         )
         .expect_err("should error due to unexpected json type");
 
@@ -597,7 +584,7 @@ mod test {
             "client_id",
             Vec::new(),
             HashSet::new(),
-            &HashMap::new(),
+            &BuiltEntities::default(),
         )
         .expect_err("should error due to entity not being in the schema");
         assert!(

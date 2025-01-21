@@ -17,7 +17,7 @@ pub fn build_entity_attrs_from_tkn(
     entity_type: &EntityType,
     token: &Token,
     claim_aliases: Vec<ClaimAliasMap>,
-    built_entities: &HashMap<SmolStr, SmolStr>,
+    built_entities: &BuiltEntities,
 ) -> Result<HashMap<String, RestrictedExpression>, BuildAttrError> {
     let mut entity_attrs = HashMap::new();
 
@@ -90,7 +90,7 @@ pub fn build_entity_attrs_from_values(
             src
         };
 
-        let expression = match attr.build_expr(src, attr_name, schema, &HashMap::new()) {
+        let expression = match attr.build_expr(src, attr_name, schema, &BuiltEntities::default()) {
             Ok(expr) => expr,
             Err(err) if attr.is_required() => {
                 return Err(BuildAttrError::new(attr_name, err.into()))?;
@@ -197,7 +197,7 @@ mod test {
             &entity_type,
             &token,
             Vec::new(),
-            &HashMap::new(),
+            &BuiltEntities::default(),
         )
         .expect("should build entity attrs");
         // RestrictedExpression does not implement PartialEq so the best we can do is check
@@ -237,7 +237,7 @@ mod test {
             &entity_type,
             &token,
             Vec::new(),
-            &HashMap::new(),
+            &BuiltEntities::default(),
         )
         .expect_err("should error due to missing source");
         assert!(
