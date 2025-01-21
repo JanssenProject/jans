@@ -17,7 +17,7 @@ use crate::log::interface::LogWriter;
 use crate::log::{
     AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, DiagnosticsRefs, LogEntry,
     LogLevel, LogTokensInfo, LogType, Logger, PrincipalLogEntry, UserAuthorizeInfo,
-    WorkloadAuthorizeInfo,
+    WorkloadAuthorizeInfo, gen_uuid7,
 };
 use build_ctx::*;
 use cedar_policy::{Entities, Entity, EntityUid};
@@ -138,6 +138,10 @@ impl Authz {
     /// - evaluate if authorization is granted for *workload*
     pub async fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
         let start_time = Utc::now();
+        // We use uuid v7 because it is generated based on the time and sortable.
+        // and we need sortable ids to use it in the sparkv database.
+        // Sparkv store data in BTree. So we need have correct order of ids.
+        let request_id = gen_uuid7();
 
         let schema = &self.config.policy_store.schema;
 
@@ -316,7 +320,7 @@ impl Authz {
         // Decision log
         // we log decision log before debug log, to avoid cloning diagnostic info
         self.config.log_service.as_ref().log_any(&DecisionLogEntry {
-            base: BaseLogEntry::new(self.config.pdp_id, LogType::Decision),
+            base: BaseLogEntry::new(self.config.pdp_id, LogType::Decision, request_id),
             policystore_id: self.config.policy_store.id.as_str(),
             policystore_version: self.config.policy_store.get_store_version(),
             principal: PrincipalLogEntry::new(&self.config.authorization),
