@@ -8700,13 +8700,13 @@ sudo yum -y module enable mod_auth_openidc
 <li>Download the release package from the Github Janssen Project
   <a href="https://github.com/JanssenProject/jans/releases">Releases</a></li>
 </ul>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.3.0/jans-1.3.0.el8.x86_64.rpm -P ~/
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.3.0/jans-1.3.0-stable.el8.x86_64.rpm -P ~/
 </code></pre></div>
 <ul>
 <li>
 <p>Verify integrity of the downloaded package using published <code>sha256sum</code>.</p>
 <p>Download <code>sha256sum</code> file for the package</p>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.3.0/jans-1.3.0.el8.x86_64.rpm.sha256sum -P ~/
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.3.0/jans-1.3.0-stable.el8.x86_64.rpm.sha256sum -P ~/
 </code></pre></div>
 <p>Check the hash if it is matching.</p>
 <div class="highlight"><pre><span></span><code>sha256sum -c jans-1.3.0-el8.x86_64.rpm.sha256sum
