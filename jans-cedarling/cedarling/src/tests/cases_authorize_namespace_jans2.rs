@@ -37,11 +37,6 @@ async fn test_namespace_jans2() {
         ),
     ])
     .into();
-    bs_config.authorization_config.token_enitity_mapper = HashMap::from([
-        ("access_token".to_string(), "Jans2::Workload".to_string()),
-        ("id_token".to_string(), "Jans2::User".to_string()),
-        ("userinfo_token".to_string(), "Jans2::User".to_string()),
-    ]);
     let cedarling = Cedarling::new(&bs_config)
         .await
         .expect("bootstrap config should initialize correctly");

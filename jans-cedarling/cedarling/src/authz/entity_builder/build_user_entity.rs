@@ -22,9 +22,8 @@ impl EntityBuilder {
 
         let token_refs = DEFAULT_USER_ENTITY_TKN_SRCS
             .iter()
-            .map(|x| tokens.get(*x))
-            .into_iter()
-            .flatten();
+            .flat_map(|x| tokens.get(*x));
+
         for token in token_refs {
             let user_id_claim = token.user_mapping();
             match build_entity(

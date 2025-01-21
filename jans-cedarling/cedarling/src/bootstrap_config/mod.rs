@@ -7,14 +7,12 @@
 //! to configure [`Cedarling`](crate::Cedarling)
 
 mod decode;
-mod token_entity_mapper;
-mod token_entity_mapping;
-mod token_validation_setting;
 
 pub(crate) mod authorization_config;
 pub(crate) mod jwt_config;
 pub(crate) mod log_config;
 pub(crate) mod policy_store_config;
+pub(crate) mod token_settings;
 
 #[cfg(not(target_arch = "wasm32"))]
 use std::{fs, io, path::Path};
@@ -212,11 +210,6 @@ mod test {
                 use_user_principal: true,
                 use_workload_principal: true,
                 user_workload_operator: WorkloadBoolOp::And,
-                token_enitity_mapper: HashMap::from([
-                    ("access_token".to_string(), "Test::Workload".to_string()),
-                    ("id_token".to_string(), "Test::User".to_string()),
-                    ("userinfo_token".to_string(), "Test::User".to_string()),
-                ]),
                 mapping_tokens: HashMap::from([
                     ("access_token".to_string(), "Test::Access_token".to_string()),
                     ("id_token".to_string(), "Test::id_token".to_string()),
@@ -283,11 +276,6 @@ mod test {
                 use_user_principal: true,
                 use_workload_principal: true,
                 user_workload_operator: WorkloadBoolOp::And,
-                token_enitity_mapper: HashMap::from([
-                    ("access_token".to_string(), "Test::Workload".to_string()),
-                    ("id_token".to_string(), "Test::User".to_string()),
-                    ("userinfo_token".to_string(), "Test::User".to_string()),
-                ]),
                 mapping_tokens: HashMap::from([
                     ("access_token".to_string(), "Test::Access_token".to_string()),
                     ("id_token".to_string(), "Test::id_token".to_string()),

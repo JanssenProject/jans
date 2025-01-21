@@ -6,9 +6,7 @@
 //! In this test cases we check mapping entities using Bootstrap properties:
 //! CEDARLING_MAPPING_USER
 //! CEDARLING_MAPPING_WORKLOAD
-//! CEDARLING_MAPPING_ID_TOKEN
-//! CEDARLING_MAPPING_ACCESS_TOKEN
-//! CEDARLING_MAPPING_USERINFO_TOKEN
+//! CEDARLING_TOKEN_CONFIGS
 
 use super::utils::*;
 use crate::authz::entity_builder::{
@@ -16,7 +14,7 @@ use crate::authz::entity_builder::{
 };
 use crate::{AuthorizeError, Cedarling, cmp_decision, cmp_policy};
 use cedarling_util::get_raw_config;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::sync::LazyLock;
 use test_utils::assert_eq;
 use tokio::test;
@@ -118,18 +116,18 @@ async fn test_custom_mapping() {
     let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
     raw_config.mapping_user = Some("Jans::MappedUser".to_string());
     raw_config.mapping_workload = Some("Jans::MappedWorkload".to_string());
-    raw_config.mapping_tokens = HashMap::from([
-        (
-            "access_token".to_string(),
-            "Jans::MappedAccess_token".to_string(),
-        ),
-        ("id_token".to_string(), "Jans::MappedIdToken".to_string()),
-        (
-            "userinfo_token".to_string(),
-            "Jans::MappedUserinfo_token".to_string(),
-        ),
-    ])
-    .into();
+    raw_config.token_configs = serde_json::from_value(json!({
+        "access_token": {
+            "entity_type_name": "Jans::MappedAccess_token",
+        },
+        "id_token": {
+            "entity_type_name": "Jans::MappedIdToken",
+        },
+        "userinfo_token": {
+            "entity_type_name": "Jans::MappedUserinfo_token",
+        },
+    }))
+    .expect("valid token configs");
 
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
@@ -277,10 +275,12 @@ async fn test_failed_workload_mapping() {
 #[test]
 async fn test_failed_id_token_mapping() {
     let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
-
-    raw_config
-        .mapping_tokens
-        .set_mapping("id_token", "MappedIdTokenNotExist");
+    raw_config.token_configs = serde_json::from_value(json!({
+        "id_token": {
+            "entity_type_name": "MappedIdTokenNotExist",
+        },
+    }))
+    .expect("valid token configs");
 
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
@@ -320,9 +320,12 @@ async fn test_failed_id_token_mapping() {
 async fn test_failed_access_token_mapping() {
     let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
 
-    raw_config
-        .mapping_tokens
-        .set_mapping("access_token", "MappedAccess_tokenNotExist");
+    raw_config.token_configs = serde_json::from_value(json!({
+        "access_token": {
+            "entity_type_name": "MappedAccess_tokenNotExist",
+        },
+    }))
+    .expect("valid token configs");
 
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
@@ -359,9 +362,12 @@ async fn test_failed_access_token_mapping() {
 async fn test_failed_userinfo_token_mapping() {
     let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
 
-    raw_config
-        .mapping_tokens
-        .set_mapping("userinfo_token", "MappedUserinfo_tokenNotExist");
+    raw_config.token_configs = serde_json::from_value(json!({
+        "userinfo_token": {
+            "entity_type_name": "MappedUserinfo_tokenNotExist",
+        },
+    }))
+    .expect("valid token configs");
 
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");

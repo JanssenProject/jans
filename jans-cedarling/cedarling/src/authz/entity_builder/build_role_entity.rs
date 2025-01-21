@@ -45,8 +45,7 @@ impl EntityBuilder {
 
         let token_refs = DEFAULT_ROLE_ENTITY_TKN_SRCS
             .iter()
-            .map(|src| tokens.get(*src))
-            .flatten();
+            .filter_map(|src| tokens.get(*src));
 
         for token in token_refs {
             let role_claim = token.role_mapping();

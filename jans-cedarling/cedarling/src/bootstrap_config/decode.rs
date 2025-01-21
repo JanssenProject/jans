@@ -4,9 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::authorization_config::AuthorizationConfig;
-use super::token_entity_mapper::BsTknPrincipalMapper;
-use super::token_entity_mapping::BsTknEntityMapping;
-use super::token_validation_setting::BsTknValidationConfigs;
+use super::token_settings::TokenConfigs;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, IdTokenTrustMode, JwtConfig, LogConfig,
     LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
@@ -95,12 +93,6 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_MAPPING_ROLE", default)]
     pub mapping_role: Option<String>,
 
-    /// Describes the mapping for **Token Name** -> **Token Entity**
-    ///
-    /// This tells cedarling the entity names of the given tokens
-    #[serde(rename = "CEDARLING_MAPPING_TOKENS", default)]
-    pub mapping_tokens: BsTknEntityMapping,
-
     /// Path to a local file pointing containing a JWKS.
     #[serde(
         rename = "CEDARLING_LOCAL_JWKS",
@@ -141,9 +133,10 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED", default)]
     pub jwt_signature_algorithms_supported: HashSet<Algorithm>,
 
-    /// Validation setting for each token
-    #[serde(rename = "CEDARLING_TOKEN_VALIDATION_SETTINGS", default)]
-    pub token_validation_settings: BsTknValidationConfigs,
+    /// Configuration for token-based entities, mapping token names to their
+    /// respective settings.
+    #[serde(rename = "CEDARLING_TOKEN_CONFIGS", default)]
+    pub token_configs: TokenConfigs,
 
     /// Varying levels of validations based on the preference of the developer.
     ///
@@ -155,13 +148,6 @@ pub struct BootstrapConfigRaw {
     ///         the aud matches the access token client_id.
     #[serde(rename = "CEDARLING_ID_TOKEN_TRUST_MODE", default)]
     pub id_token_trust_mode: IdTokenTrustMode,
-
-    /// Describes the mapping for **Token Entity** -> **Principal Entity**
-    ///
-    /// This tells cedarling to put token entity references
-    /// in the target principal entities.
-    #[serde(rename = "CEDARLING_TOKEN_ENTITY_MAPPER", default)]
-    pub token_entity_mapper: BsTknPrincipalMapper,
 
     /// If Enabled, the Cedarling will connect to the Lock Master for policies,
     /// and subscribe for SSE events.
@@ -457,7 +443,7 @@ impl BootstrapConfig {
             jwt_status_validation: raw.jwt_status_validation.into(),
             id_token_trust_mode: raw.id_token_trust_mode,
             signature_algorithms_supported: raw.jwt_signature_algorithms_supported.clone(),
-            token_validation_settings: raw.token_validation_settings.clone().into(),
+            token_validation_settings: raw.token_configs.clone().into(),
         };
 
         let authorization_config = AuthorizationConfig {
@@ -470,8 +456,7 @@ impl BootstrapConfig {
             mapping_user: raw.mapping_user.clone(),
             mapping_workload: raw.mapping_workload.clone(),
             mapping_role: raw.mapping_role.clone(),
-            mapping_tokens: raw.mapping_tokens.clone().into(),
-            token_enitity_mapper: raw.token_entity_mapper.clone().into(),
+            mapping_tokens: raw.token_configs.clone().into(),
         };
 
         Ok(Self {

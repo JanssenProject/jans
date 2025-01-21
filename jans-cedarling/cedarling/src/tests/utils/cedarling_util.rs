@@ -3,8 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::{AuthorizationConfig, JwtConfig, WorkloadBoolOp};
-use serde_json::json;
+use crate::{AuthorizationConfig, JwtConfig, WorkloadBoolOp, token_settings::TokenConfigs};
 use std::collections::HashMap;
 
 pub use crate::{
@@ -27,12 +26,7 @@ pub fn get_raw_config(local_policy_store: &str) -> BootstrapConfigRaw {
         local_policy_store: Some(local_policy_store_json.to_string()),
         jwt_status_validation: FeatureToggle::Disabled,
         id_token_trust_mode: crate::IdTokenTrustMode::None,
-        token_validation_settings: serde_json::from_value(json!({
-            "access_token": {},
-            "id_token": {},
-            "userinfo_token": {},
-        }))
-        .unwrap(),
+        token_configs: TokenConfigs::without_validation(),
         ..Default::default()
     }
 }
@@ -65,11 +59,6 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
                 ),
             ])
             .into(),
-            token_enitity_mapper: HashMap::from([
-                ("access_token".to_string(), "Jans::Workload".to_string()),
-                ("id_token".to_string(), "Jans::User".to_string()),
-                ("userinfo_token".to_string(), "Jans::User".to_string()),
-            ]),
             ..Default::default()
         },
     }

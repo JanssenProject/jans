@@ -193,7 +193,7 @@ request = Request(
         "access_token": access_token,
         "id_token": id_token,
         "userinfo_token": userinfo_token,
-    }
+    },
     action=action,
     resource=resource, context=context)
 

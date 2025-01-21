@@ -18,10 +18,10 @@ const BOOTSTRAP_CONFIG = {
         "HS256",
         "RS256"
     ],
-    "CEDARLING_TOKEN_VALIDATION_SETTINGS": {
-        "access_token": {},
-        "id_token": {},
-        "userinfo_token": {},
+    "CEDARLING_TOKEN_CONFIGS": {
+        "access_token": { "entity_type_name": "Access_token" },
+        "id_token": { "entity_type_name": "id_token" },
+        "userinfo_token": { "entity_type_name": "Userinfo_token" },
     },
     "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
     "CEDARLING_LOCK": "disabled",
