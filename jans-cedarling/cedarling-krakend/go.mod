@@ -1,3 +1,3 @@
-module krakend-server-example
+module cedarling-krakend
 
 go 1.22.9
