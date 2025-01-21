@@ -115,7 +115,7 @@ from this project listing page.
     flow editor. Refer to [this](https://gluu.org/agama/project-editor/) guide if you need to understand how 
     to create, delete and configure nodes.
 
-2. Create `AuthenticationService` Call block
+2. Create `PasswordService` Call block
 
     Drag the colored dot available on the right edge of the `start` node to 
     create the next node in the flow. A list of available node types will be
@@ -131,15 +131,17 @@ from this project listing page.
     Click the `Call` block and then click :material-pencil: to open the 
     configuration screen. Add configuration values as shown below.  
     This configuration will fetch a reference of the 
-    `AuthenticationService` class and 
-    store the reference in a variable called `authServiceRef`. This reference will 
+    `PasswordService` class and 
+    store the reference in a variable called `validationService`. This reference will 
     be used to validate the user credentials in the subsequent steps.
 
-    `class name`: `io.jans.server.service.AuthenticationService`
+    `class name`: `org.gluu.agama.pw.PasswordService`
 
-    `method name`: `class`
+    `method name`: `getInstance`
 
-    `assign result to`: `authServiceRef`
+    `Arguments` : `conf`
+
+    `assign result to`: `validationService`
 
     `title`: `Get authentication service reference`
 
@@ -148,36 +150,13 @@ from this project listing page.
    
     ![](../../../assets/agamalab-flow-passwd-edit-call.png)
 
-3.  Create `CdiUtil` Call block
 
-    To perform authentication we will also need a reference of the `CdiUtil` class. To fetch a `CdiUtil`
-    reference from the IDP, we will need to pass `AuthenticationService` reference 
-    as an input. Use the steps and configuration below to do this.
-
-    After the `AuthenticationService` create a new `Call` node.
-   
-    Click on the newly created `Call` block and by clicking :material-pencil: open the configuration page.
-    Input values as shown below in the configuration screen.
-
-    `class name`: `io.jans.service.cdi.util.CdiUtil`
-
-    `method name`: `bean`
-
-    `arguments`: `authServiceRef`
-
-    `assign result to`: `cdiUtilRef`
-
-    `title`: `Get authentication service reference`
-    
-    `description`: `Get authentication service reference from the IDP`
-
-    ![](../../../assets/agamalab-flow-passwd-editcdiutil.png)
 
 4. Create Assignment block
 
     Next, we need to create an empty variable that the flow will use in the future to store authentication results. 
 
-    Create an `Assignment` block after the `CdiUtil` call block and configure it as shown below.
+    Create an `Assignment` block after the `PasswordService` call block and configure it as shown below.
 
     ![](../../../assets/agamalab-flow-passwd-edit-assignment.png)
 
@@ -247,7 +226,7 @@ from this project listing page.
     Click on the newly created `Call` block. Click :material-pencil:. 
     Configure it as shown below.
 
-    ![](../../../assets/agamalab-flow-passwd-edit-cdiutil-instance.png)
+    ![](../../../assets/agamalab-flow-passwd-edit-validationService-instance.png)
 
 8. Create an Assignment block
 
