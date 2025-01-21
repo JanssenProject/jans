@@ -120,26 +120,26 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
     private String validateScope(String accessToken, List<String> tokenScopes, ResourceInfo resourceInfo, String issuer)
             throws WebApplicationException {
-        logger.debug("Validate scope, accessToken:{}, tokenScopes:{}, resourceInfo: {}, issuer: {}", accessToken,
+        logger.error("Validate scope, accessToken:{}, tokenScopes:{}, resourceInfo: {}, issuer: {}", accessToken,
                 tokenScopes, resourceInfo, issuer);
         try {
             // Get resource scope
             Map<ProtectionScopeType, List<String>> resourceScopesByType = getRequestedScopes(resourceInfo);
             List<String> resourceScopes = getAllScopeList(resourceScopesByType);
-            logger.debug("Validate scope, resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType,
+            logger.error("Validate scope, resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType,
                     resourceScopes);
 
             // find missing scopes
             List<String> missingScopes = findMissingScopes(resourceScopesByType, tokenScopes);
-            logger.debug("missingScopes:{}", missingScopes);
+            logger.error("missingScopes:{}", missingScopes);
 
             // Check if resource requires auth server specific scope
             List<String> authSpecificScope = getAuthSpecificScopeRequired(resourceInfo);
-            logger.debug(" resourceScopes:{}, authSpecificScope:{} ", resourceScopes, authSpecificScope);
+            logger.error(" resourceScopes:{}, authSpecificScope:{} ", resourceScopes, authSpecificScope);
 
             // If No auth scope required OR if token contains the authSpecificScope
             if ((authSpecificScope == null || authSpecificScope.isEmpty())) {
-                logger.debug("Validating token scopes as no authSpecificScope required");
+                logger.error("Validating token scopes as no authSpecificScope required");
                 if ((missingScopes != null && !missingScopes.isEmpty())) {
                     logger.error("Insufficient scopes! Required scope:{} -  however token scopes:{}", resourceScopes,
                             tokenScopes);
@@ -180,7 +180,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                         Response.status(Response.Status.UNAUTHORIZED).build());
             }
 
-            logger.info("Token scopes Valid Returning accessToken:{}", accessToken);
+            logger.error("Token scopes Valid Returning accessToken:{}", accessToken);
             return AUTHENTICATION_SCHEME + accessToken;
         } catch (Exception ex) {
             if (logger.isErrorEnabled()) {

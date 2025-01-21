@@ -21,6 +21,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -30,10 +31,12 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -56,6 +59,8 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
+
+
 
 @ApplicationScoped
 public class ConfigHttpService implements Serializable {
@@ -220,18 +225,21 @@ public class ConfigHttpService implements Serializable {
         if (parameters != null && !parameters.isEmpty()) {
             StringBuilder query = new StringBuilder();
             int i = 0;
-            for (String key : parameters.keySet()) {
-
+            for (Iterator<String> iterator = parameters.keySet().iterator(); iterator.hasNext(); ) {
+                String key = iterator.next();
                 String value = parameters.get(key);
-                if (value != null && value.length() > 0) {
+                log.error("\n\n\n Final key:{}, value:{}", key, value);
+                if (StringUtils.isNotBlank(value)) {
                     String delim = (i == 0) ? "?" : "&" + URLEncoder.encode(key, StandardCharsets.UTF_8) + "=";
                     query.append(delim);
                     query.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
+                    i++;
+                    log.error("\n\n\n Final i:{}, query:{}", i, query);
                 }
             }
             requestUri = requestUri + query.toString();
             log.error("\n\n\n Final requestUri:{}", requestUri);
-            httpGet = new HttpGet(requestUri + query.toString());
+            httpGet = new HttpGet(requestUri);
         }
 
         try {
