@@ -351,10 +351,6 @@ class PropertiesUtils(SetupUtils):
                 if prompt == 'y':
                     Config.install_jans_lock = True
 
-            if Config.install_jans_lock:
-                prompt = self.getPrompt("  Install OPA?", self.getDefaultOption(Config.install_opa))[0].lower()
-                Config.install_opa = prompt == 'y'
-
         if Config.installed_instance and Config.install_jans_lock:
             Config.addPostSetupService.append('install_jans_lock')
 
