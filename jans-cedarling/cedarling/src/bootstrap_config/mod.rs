@@ -7,11 +7,11 @@
 //! to configure [`Cedarling`](crate::Cedarling)
 
 pub(crate) mod authorization_config;
-mod default_values;
-mod json_util;
+
 pub(crate) mod jwt_config;
 pub(crate) mod log_config;
 pub(crate) mod policy_store_config;
+pub(crate) mod raw_config;
 
 #[cfg(not(target_arch = "wasm32"))]
 use std::{fs, io, path::Path};
@@ -22,7 +22,7 @@ pub use jwt_config::*;
 pub use log_config::*;
 pub use policy_store_config::*;
 mod decode;
-pub use decode::{BootstrapConfigRaw, FeatureToggle, LoggerType, WorkloadBoolOp};
+pub use raw_config::{BootstrapConfigRaw, FeatureToggle, LoggerType, WorkloadBoolOp};
 
 /// Bootstrap configuration
 /// properties for configuration [`Cedarling`](crate::Cedarling) application.
@@ -65,13 +65,13 @@ impl BootstrapConfig {
             Some("json") => {
                 let config_json = fs::read_to_string(path)
                     .map_err(|e| BootstrapConfigLoadingError::ReadFile(path.to_string(), e))?;
-                let raw = serde_json::from_str::<decode::BootstrapConfigRaw>(&config_json)?;
+                let raw = serde_json::from_str::<BootstrapConfigRaw>(&config_json)?;
                 BootstrapConfig::from_raw_config(&raw)?
             },
             Some("yaml") | Some("yml") => {
                 let config_json = fs::read_to_string(path)
                     .map_err(|e| BootstrapConfigLoadingError::ReadFile(path.to_string(), e))?;
-                let raw = serde_yml::from_str::<decode::BootstrapConfigRaw>(&config_json)?;
+                let raw = serde_yml::from_str::<BootstrapConfigRaw>(&config_json)?;
                 BootstrapConfig::from_raw_config(&raw)?
             },
             _ => Err(BootstrapConfigLoadingError::InvalidFileFormat(
@@ -84,7 +84,7 @@ impl BootstrapConfig {
 
     /// Loads a `BootstrapConfig` from a JSON string
     pub fn load_from_json(config: &str) -> Result<Self, BootstrapConfigLoadingError> {
-        let raw = serde_json::from_str::<decode::BootstrapConfigRaw>(config)?;
+        let raw = serde_json::from_str::<BootstrapConfigRaw>(config)?;
         Self::from_raw_config(&raw)
     }
 
@@ -166,8 +166,8 @@ mod test {
     use jsonwebtoken::Algorithm;
     use test_utils::assert_eq;
 
+    use super::raw_config::BootstrapConfigRaw;
     use super::*;
-    use crate::bootstrap_config::decode::BootstrapConfigRaw;
     use crate::{BootstrapConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig};
 
     #[test]

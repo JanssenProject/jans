@@ -6,6 +6,16 @@
 use serde::{Deserialize, Deserializer};
 use serde_json::Value;
 
+/// Custom parser for an Option<String> which returns `None` if the string is empty.
+pub fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value: Option<String> = deserialize_or_parse_string_as_json(deserializer)?;
+
+    Ok(value.filter(|s| !s.is_empty()))
+}
+
 /// Helper function to parse string to json, and fix some possible moments
 fn to_json(s: &str) -> Option<Value> {
     let mut json_string = s.trim().to_string();
