@@ -217,6 +217,7 @@ mod test {
                 use_user_principal: true,
                 use_workload_principal: true,
                 user_workload_operator: WorkloadBoolOp::And,
+                decision_log_default_jwt_id: "jti".to_string(),
                 ..Default::default()
             },
         };
@@ -271,6 +272,7 @@ mod test {
                 use_user_principal: true,
                 use_workload_principal: true,
                 user_workload_operator: WorkloadBoolOp::And,
+                decision_log_default_jwt_id: "jti".to_string(),
                 ..Default::default()
             },
         };
