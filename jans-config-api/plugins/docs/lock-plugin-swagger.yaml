@@ -469,7 +469,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock-config.write
-  /lock/stat:
+  /lock/lockStat:
     get:
       tags:
       - Statistics

@@ -194,8 +194,8 @@ public class ConfigHttpService implements Serializable {
         return executePost(httpClient, uri, authCode, null, postData, contentType, null);
     }
 
-    public HttpServiceResponse executePost(String uri, String authCode, String postData,
-            ContentType contentType, String authType) {
+    public HttpServiceResponse executePost(String uri, String authCode, String postData, ContentType contentType,
+            String authType) {
         return executePost(this.getHttpsClient(), uri, authCode, null, postData, contentType, authType);
     }
 
@@ -210,7 +210,7 @@ public class ConfigHttpService implements Serializable {
     public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers,
             Map<String, String> parameters) {
         HttpGet httpGet = new HttpGet(requestUri);
-
+        log.error("requestUri{}, headers:{}, parameters:{}", requestUri, headers, parameters);
         if (headers != null) {
             for (Entry<String, String> headerEntry : headers.entrySet()) {
                 httpGet.setHeader(headerEntry.getKey(), headerEntry.getValue());
@@ -218,23 +218,25 @@ public class ConfigHttpService implements Serializable {
         }
 
         if (parameters != null && !parameters.isEmpty()) {
-            StringBuilder query = new StringBuilder("");
+            StringBuilder query = new StringBuilder();
+            int i = 0;
             for (String key : parameters.keySet()) {
 
                 String value = parameters.get(key);
                 if (value != null && value.length() > 0) {
-
-                    String delim = "&" + URLEncoder.encode(key, StandardCharsets.UTF_8) + "=";
-                    query.append(delim.substring(1));
+                    String delim = (i == 0) ? "?" : "&" + URLEncoder.encode(key, StandardCharsets.UTF_8) + "=";
+                    query.append(delim);
                     query.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
                 }
             }
+            requestUri = requestUri + query.toString();
+            log.error("\n\n\n Final requestUri:{}", requestUri);
             httpGet = new HttpGet(requestUri + query.toString());
         }
 
         try {
             HttpResponse httpResponse = httpClient.execute(httpGet);
-
+            log.error("httpResponse:{}", httpResponse);
             return new HttpServiceResponse(httpGet, httpResponse);
         } catch (IOException ex) {
             log.error("Failed to execute get request", ex);

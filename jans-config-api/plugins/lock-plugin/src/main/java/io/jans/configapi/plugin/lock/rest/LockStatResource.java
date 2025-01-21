@@ -79,9 +79,13 @@ public class LockStatResource extends BaseResource {
                         "LockStatResource::getStatistics() - authorization:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
                         escapeLog(authorization), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth), escapeLog(format));
             }
+            
+            logger.error(
+                    "LockStatResource::getStatistics() - authorization:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
+                    authorization, month, startMonth, endMonth, format);
             String url = getIssuer() + STAT_URL;
             jsonNode = this.lockService.getStat(url, authorization, month, startMonth, endMonth, format);
-            logger.info("StatResource::getUserStatistics() - jsonNode:{} ", jsonNode);
+            logger.error("StatResource::getUserStatistics() - jsonNode:{} ", jsonNode);
         } catch (Exception ex) {
             logger.error(" Error while fetching lock stat is", ex);
             throwBadRequestException(ex);

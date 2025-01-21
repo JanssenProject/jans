@@ -37,6 +37,9 @@ public class LockService {
                     "LockStatResource::getStatistics() - url:{}, token:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
                     escapeLog(url), escapeLog(token), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth), escapeLog(format));
         }
+        logger.error(
+                "LockStatResource::getStatistics() - url:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
+                url, month, startMonth, endMonth, format);
         JsonNode jsonNode = null;
         Map<String, String> headers = new HashMap<>();
         headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
@@ -51,11 +54,12 @@ public class LockService {
         data.put("end-month", endMonth);
         data.put("format", format);
         HttpServiceResponse httpServiceResponse = configHttpService.executeGet(url, headers, data);
-        logger.info(" stat httpServiceResponse:{}", httpServiceResponse);
+        logger.error(" stat httpServiceResponse:{}", httpServiceResponse);
         if (httpServiceResponse != null) {
+            logger.error(" stat httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}", httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(), httpServiceResponse.getHttpResponse().getEntity());
             jsonNode = getResponseJsonNode(httpServiceResponse, Status.OK);
         }
-        logger.info(" stat jsonNode:{}", jsonNode);
+        logger.error(" stat jsonNode:{}", jsonNode);
         return jsonNode;
     }
 
@@ -75,7 +79,7 @@ public class LockService {
             jsonString = entity.toString();
 
         }
-        logger.info(" stat jsonString:{}", jsonString);
+        logger.error(" stat jsonString:{}", jsonString);
         return jsonString;
     }
 
