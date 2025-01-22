@@ -9,7 +9,7 @@
     <parent>
         <groupId>io.jans</groupId>
         <artifactId>jans-core-parent</artifactId>
-        <version>1.3.0</version>
+        <version>0.0.0-nightly</version>
     </parent>
     <properties>
         <skip.swagger.client.generation>true</skip.swagger.client.generation>
