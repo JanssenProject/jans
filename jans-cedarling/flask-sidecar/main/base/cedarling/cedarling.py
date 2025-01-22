@@ -50,8 +50,7 @@ class CedarlingInstance:
 
     def initialize_cedarling(self):
         bootstrap_dict = json.loads(self._bootstrap_config)
-        # load data from config and environment
-        bootstrap_instance = BootstrapConfig.from_env(bootstrap_dict)
+        bootstrap_instance = BootstrapConfig(bootstrap_dict)
         self._cedarling = Cedarling(bootstrap_instance)
 
     def get_cedarling_instance(self) -> Cedarling:

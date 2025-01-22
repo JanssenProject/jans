@@ -37,16 +37,13 @@ class BaseConfig:
     API_SPEC_OPTIONS = {
         "x-internal-id": "1",
     }
-    CEDARLING_BOOTSTRAP_CONFIG = None
     CEDARLING_BOOTSTRAP_CONFIG_FILE = os.getenv(
         "CEDARLING_BOOTSTRAP_CONFIG_FILE", None)
     if CEDARLING_BOOTSTRAP_CONFIG_FILE is None:
-        logger.warning(
-            "Cedarling bootstrap file not found, will be used data from env only")
-        # exit()
-    else:
-        with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
-            CEDARLING_BOOTSTRAP_CONFIG = f.read()
+        logger.warning("Cedarling bootstrap file not found")
+        exit()
+    with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
+        CEDARLING_BOOTSTRAP_CONFIG = f.read()
     SIDECAR_DEBUG_RESPONSE = os.getenv("SIDECAR_DEBUG_RESPONSE", "False")
     if SIDECAR_DEBUG_RESPONSE == "True":
         SIDECAR_DEBUG_RESPONSE = True
