@@ -8,8 +8,14 @@ services:
     environment:
       - FLASK_APP=main.core:app
       - APP_MODE=${APP_MODE:-development}
-      - CEDARLING_BOOTSTRAP_CONFIG_FILE=/run/secrets/cedarling_bootstrap_config_file
+      # uncomment it (and edit) if you want ot use config file
+      # - CEDARLING_BOOTSTRAP_CONFIG_FILE=/run/secrets/cedarling_bootstrap_config_file
       - SIDECAR_DEBUG_RESPOSE={SIDECAR_DEBUG_RESPOSE:-False}
+      # You can specify any env vars from documentation of `Cedarling`.
+      # Env vars configuration have bigger priority than config from file.
+      # https://docs.jans.io/head/cedarling/cedarling-properties/
+      - CEDARLING_APPLICATION_NAME=Cedarling sidecar
+      # this can be others 
     secrets:
       - cedarling_bootstrap_config_file
 secrets:
