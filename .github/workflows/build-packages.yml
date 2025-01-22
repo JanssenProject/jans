@@ -443,7 +443,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        krakend-builder-image: [ 'builder:2.9.0' ]
+        krakend-builder-image: [ 'builder:2.9.0', 'builder:2.9.0-linux-generic' ]
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
@@ -481,7 +481,7 @@ jobs:
     - name: Build plugin for ARM64
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       run: |
-        docker run -i -v "$PWD:/app" -w /app -e "CGO_ENABLED=1" -e "CC=aarch64-linux-musl-gcc" -e "GOARCH=arm64" -e "GOHOSTARCH=amd64" krakend/"${{ matrix.krakend-builder-image }}" go build -ldflags='-extldflags=-fuse-ld=bfd -extld=aarch64-linux-musl-gcc' -buildmode=plugin -o  cedarling-krakend-arm64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so .
+        docker run -i -v "$PWD:/app" -w /app -e "CGO_ENABLED=1" -e "CC=arch64-linux-gnu-gcc" -e "GOARCH=arm64" -e "GOHOSTARCH=amd64" krakend/"${{ matrix.krakend-builder-image }}" go build -ldflags='-extldflags=-fuse-ld=bfd -extld=arch64-linux-gnu-gcc' -buildmode=plugin -o  cedarling-krakend-arm64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so .
     - name: Generate sha256sum and sign
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       run: |
