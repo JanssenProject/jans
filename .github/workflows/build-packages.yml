@@ -481,7 +481,11 @@ jobs:
     - name: Build plugin for ARM64
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       run: |
-        docker run -i -v "$PWD:/app" -w /app -e "CGO_ENABLED=1" -e "CC=arch64-linux-musl-gcc" -e "GOARCH=arm64" -e "GOHOSTARCH=amd64" krakend/"${{ matrix.krakend-builder-image }}" go build -ldflags='-extldflags=-fuse-ld=bfd -extld=arch64-linux-musl-gcc' -buildmode=plugin -o  cedarling-krakend-arm64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so .
+        CC="aarch64-linux-musl-gcc"
+        if [ "${{ matrix.krakend-builder-image }}" == "builder:2.9.0-linux-generic" ]; then
+          CC="aarch64-linux-gnu-gcc"
+        fi
+        docker run -i -v "$PWD:/app" -w /app -e "CGO_ENABLED=1" -e "CC=$CC" -e "GOARCH=arm64" -e "GOHOSTARCH=amd64" krakend/"${{ matrix.krakend-builder-image }}" go build -ldflags='-extldflags=-fuse-ld=bfd -extld=$CC' -buildmode=plugin -o  cedarling-krakend-arm64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so .
     - name: Generate sha256sum and sign
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       run: |
