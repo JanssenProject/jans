@@ -12,7 +12,7 @@ use crate::authorization_config::IdTokenTrustMode;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types;
 use crate::common::policy_store::PolicyStoreWithID;
-use crate::jwt::{self, TokenStr};
+use crate::jwt::{self, JwtProcessingError, TokenStr};
 use crate::log::interface::LogWriter;
 use crate::log::{
     AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, DiagnosticsRefs, LogEntry,
@@ -38,6 +38,7 @@ pub(crate) mod entity_builder;
 pub(crate) mod request;
 
 pub use authorize_result::AuthorizeResult;
+pub use authorize_result::PrincipalResult;
 
 /// Configuration to Authz to initialize service without errors
 pub(crate) struct AuthzConfig {
@@ -94,7 +95,7 @@ impl Authz {
     pub(crate) async fn decode_tokens<'a>(
         &'a self,
         request: &'a Request,
-    ) -> Result<DecodedTokens<'a>, AuthorizeError> {
+    ) -> Result<DecodedTokens<'a>, JwtProcessingError> {
         let access = if let Some(tkn) = request.tokens.access_token.as_ref() {
             Some(
                 self.config
@@ -141,31 +142,45 @@ impl Authz {
 
         let schema = &self.config.policy_store.schema;
 
-        let tokens = self.decode_tokens(&request).await?;
+        let tokens = match self.decode_tokens(&request).await {
+            Ok(tokens) => tokens,
+            Err(e) => return Ok(AuthorizeResult::from(e)),
+        };
 
         if let IdTokenTrustMode::Strict = self.config.authorization.id_token_trust_mode {
-            validate_id_tkn_trust_mode(&tokens)?;
+            if let Err(e) = validate_id_tkn_trust_mode(&tokens) {
+                return Ok(AuthorizeResult::from(e));
+            };
         }
 
         // Parse action UID.
-        let action = cedar_policy::EntityUid::from_str(request.action.as_str())
-            .map_err(AuthorizeError::Action)?;
+        let action = match cedar_policy::EntityUid::from_str(request.action.as_str()) {
+            Ok(action) => action,
+            Err(e) => return Ok(AuthorizeResult::from(AuthorizeError::Action(e))),
+        };
 
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
-        let entities_data = self
+        let entities_data = match self
             .entity_builder
-            .build_entities(&tokens, &request.resource)?;
+            .build_entities(&tokens, &request.resource)
+        {
+            Ok(entities) => entities,
+            Err(e) => return Ok(AuthorizeResult::from(e)),
+        };
 
         // Get entity UIDs what we will be used on authorize check
         let resource_uid = entities_data.resource.uid();
 
-        let context = build_context(
+        let context = match build_context(
             &self.config,
             request.context.clone(),
             &entities_data,
             &schema.schema,
             &action,
-        )?;
+        ) {
+            Ok(ctx) => ctx,
+            Err(e) => return Ok(AuthorizeResult::from(e)),
+        };
 
         let workload_principal = entities_data.workload.as_ref().map(|e| e.uid()).to_owned();
         let user_principal = entities_data.user.as_ref().map(|e| e.uid()).to_owned();
@@ -197,6 +212,7 @@ impl Authz {
                     decision: authz_result.decision().into(),
                 };
 
+                let principal_uid_str = principal.to_string();
                 let workload_entity_claims = get_entity_claims(
                     self.config
                         .authorization
@@ -207,7 +223,7 @@ impl Authz {
                 );
 
                 (
-                    Some(authz_result),
+                    Some((principal_uid_str, authz_result)),
                     Some(authz_info),
                     Some(workload_entity_claims),
                 )
@@ -239,6 +255,7 @@ impl Authz {
                     decision: authz_result.decision().into(),
                 };
 
+                let principal_uid_str = principal.to_string();
                 let user_entity_claims = get_entity_claims(
                     self.config
                         .authorization
@@ -249,7 +266,7 @@ impl Authz {
                 );
 
                 (
-                    Some(authz_result),
+                    Some((principal_uid_str, authz_result)),
                     Some(authz_info),
                     Some(user_entity_claims),
                 )
@@ -257,10 +274,18 @@ impl Authz {
                 (None, None, None)
             };
 
+        let reason_principals = [workload_authz_result.clone(), user_authz_result.clone()]
+            .into_iter()
+            .filter_map(|x| x.map(|(uid, response)| (uid, PrincipalResult::from(response))))
+            .collect::<HashMap<String, PrincipalResult>>();
+
+        let workload_uid = workload_authz_result.as_ref().map(|x| x.0.as_str());
+        let user_uid = user_authz_result.as_ref().map(|x| x.0.as_str());
         let result = AuthorizeResult::new(
+            workload_uid,
+            user_uid,
             self.config.authorization.user_workload_operator,
-            workload_authz_result,
-            user_authz_result,
+            reason_principals,
         );
 
         // measure time how long request executes

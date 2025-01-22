@@ -84,26 +84,50 @@ async fn test_default_mapping() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
         "request result should be allowed for workload"
     );
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["1"],
         "reason of permit workload should be '1'"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
-        "request result should be allowed for person"
+        "request result should be allowed for user"
     );
 
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["2", "3"],
-        "reason of permit person should be '2','3'"
+        "reason of permit user should be '2','3'"
     );
 
     assert!(result.decision, "request result should be allowed");
@@ -139,27 +163,51 @@ async fn test_custom_mapping() {
         .expect("request should be parsed without errors");
 
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::MappedWorkload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["6",],
         "reason of permit workload should be '6'"
     );
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::MappedWorkload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
         "request result should be allowed for workload"
     );
 
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::MappedUser::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["5"],
-        "reason of permit person should be '5'"
+        "reason of permit user should be '5'"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::MappedUser::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
-        "request result should be allowed for person"
+        "request result should be allowed for user"
     );
 
     assert!(result.decision, "request result should be allowed");
@@ -182,10 +230,15 @@ async fn test_failed_user_mapping() {
 
     let request = REQUEST.clone();
 
-    let err = cedarling
+    let result = cedarling
         .authorize(request)
         .await
-        .expect_err("request should be parsed with mapping error");
+        .expect("request should be parsed succesfully");
+    assert_eq!(result.decision, false, "decision should be deny");
+    let err = result
+        .reason_input
+        .as_ref()
+        .expect("there should be an error due to the input");
 
     match err {
         AuthorizeError::BuildEntity(BuildCedarlingEntityError::User(error)) => {
@@ -230,10 +283,15 @@ async fn test_failed_workload_mapping() {
 
     let request = REQUEST.clone();
 
-    let err = cedarling
+    let result = cedarling
         .authorize(request)
         .await
-        .expect_err("request should be parsed with mapping error");
+        .expect("request should be parsed successfully");
+    assert_eq!(result.decision, false, "decision should be deny");
+    let err = result
+        .reason_input
+        .as_ref()
+        .expect("there should be an error due to the input");
 
     match err {
         AuthorizeError::BuildEntity(BuildCedarlingEntityError::Workload(error)) => {
@@ -261,7 +319,7 @@ async fn test_failed_workload_mapping() {
         },
         _ => panic!(
             "expected BuildEntity(BuildCedarlingEntityError::Workload(_))) error, got: {:?}",
-            err
+            result
         ),
     }
 }
@@ -282,16 +340,21 @@ async fn test_failed_id_token_mapping() {
 
     let request = REQUEST.clone();
 
-    let err = cedarling
+    let result = cedarling
         .authorize(request)
         .await
-        .expect_err("request should be parsed with mapping error");
+        .expect("request should be parsed successfully");
+    assert_eq!(result.decision, false, "decision should be deny");
+    let err = result
+        .reason_input
+        .as_ref()
+        .expect("there should be an error due to the input");
 
     match err {
         AuthorizeError::BuildEntity(BuildCedarlingEntityError::IdToken(
             BuildTokenEntityError { token_kind, err },
         )) => {
-            assert_eq!(token_kind, TokenKind::Id);
+            assert_eq!(token_kind, &TokenKind::Id);
             assert!(
                 matches!(err, BuildEntityError::EntityNotInSchema(ref name) if name == "MappedIdTokenNotExist"),
                 "expected EntityNotInSchema(\"MappedIdTokenNotExist\") got: {:?}",
@@ -321,16 +384,21 @@ async fn test_failed_access_token_mapping() {
 
     let request = REQUEST.clone();
 
-    let err = cedarling
+    let result = cedarling
         .authorize(request)
         .await
-        .expect_err("request should be parsed with mapping error");
+        .expect("request should be parsed successfully");
+    assert_eq!(result.decision, false, "decision should be deny");
+    let err = result
+        .reason_input
+        .as_ref()
+        .expect("there should be an error due to the input");
 
     match err {
         AuthorizeError::BuildEntity(BuildCedarlingEntityError::AccessToken(
             BuildTokenEntityError { token_kind, err },
         )) => {
-            assert_eq!(token_kind, TokenKind::Access);
+            assert_eq!(token_kind, &TokenKind::Access);
             assert!(
                 matches!(err, BuildEntityError::EntityNotInSchema(ref name) if name == "MappedAccess_tokenNotExist"),
                 "expected EntityNotInSchema(\"MappedAccess_tokenNotExist\") got: {:?}",
@@ -357,16 +425,21 @@ async fn test_failed_userinfo_token_mapping() {
 
     let request = REQUEST.clone();
 
-    let err = cedarling
+    let result = cedarling
         .authorize(request)
         .await
-        .expect_err("request should be parsed with mapping error");
+        .expect("request should be parsed successfully");
+    assert_eq!(result.decision, false, "decision should be deny");
+    let err = result
+        .reason_input
+        .as_ref()
+        .expect("there should be an error due to the input");
 
     match err {
         AuthorizeError::BuildEntity(BuildCedarlingEntityError::UserinfoToken(
             BuildTokenEntityError { token_kind, err },
         )) => {
-            assert_eq!(token_kind, TokenKind::Userinfo);
+            assert_eq!(token_kind, &TokenKind::Userinfo);
             assert!(
                 matches!(err, BuildEntityError::EntityNotInSchema(ref name) if name == "MappedUserinfo_tokenNotExist"),
                 "expected EntityNotInSchema(\"MappedUserinfo_tokenNotExist\") got: {:?}",

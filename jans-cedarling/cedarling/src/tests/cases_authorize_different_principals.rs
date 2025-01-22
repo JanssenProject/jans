@@ -72,26 +72,50 @@ async fn success_test_for_all_principals() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
         "request result should be allowed for workload"
     );
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["1"],
         "reason of permit workload should be '1'"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
-        "request result should be allowed for person"
+        "request result should be allowed for user"
     );
 
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["2", "3"],
-        "reason of permit person should be '2'"
+        "reason of permit user should be '2'"
     );
 
     assert!(result.decision, "request result should be allowed");
@@ -121,17 +145,35 @@ async fn success_test_for_principal_workload() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
         "request result should be allowed for workload"
     );
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["1"],
         "reason of permit workload should be '1'"
     );
 
-    assert!(result.person.is_none(), "result for person should be none");
+    assert!(
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .is_none(),
+        "result for user should be none"
+    );
 
     assert!(result.decision, "request result should be allowed");
 }
@@ -160,28 +202,40 @@ async fn success_test_for_principal_user() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
-        "request result should be allowed for person"
+        "request result should be allowed for user"
     );
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["2"],
-        "reason of permit person should be '2'"
+        "reason of permit user should be '2'"
     );
 
     assert!(
-        result.workload.is_none(),
+        result.reason_principals.get("workload").is_none(),
         "result for workload should be none"
     );
 
     assert!(result.decision, "request result should be allowed");
 }
 
-/// Check if action executes for next principals: Person (only)
+/// Check if action executes for next principals: User (only)
 /// check for user and role
 #[test]
-async fn success_test_for_principal_person_role() {
+async fn success_test_for_principal_user_role() {
     let cedarling = get_cedarling_with_authorization_conf(
         PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
         crate::AuthorizationConfig {
@@ -203,26 +257,38 @@ async fn success_test_for_principal_person_role() {
         .expect("request should be parsed without errors");
 
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["2", "3"],
-        "reason of permit person should be '2'"
+        "reason of permit user should be '2'"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
-        "request result should be allowed for person"
+        "request result should be allowed for user"
     );
 
     assert!(
-        result.workload.is_none(),
+        result.reason_principals.get("workload").is_none(),
         "result for workload should be none"
     );
 
     assert!(result.decision, "request result should be allowed");
 }
 
-/// Check if action executes for next principals: Workload AND Person (Role)
+/// Check if action executes for next principals: Workload AND User (Role)
 #[test]
 async fn success_test_for_principal_workload_role() {
     let cedarling = get_cedarling_with_authorization_conf(
@@ -246,31 +312,55 @@ async fn success_test_for_principal_workload_role() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
         "request result should be allowed for workload"
     );
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["1"],
         "reason of permit workload should be '1'"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
-        "request result should be allowed for person"
+        "request result should be allowed for user"
     );
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["3"],
-        "reason of permit person should be '3'"
+        "reason of permit user should be '3'"
     );
 
     assert!(result.decision, "request result should be allowed");
 }
 
-/// Check if action executes for next principals: Workload (true) OR Person (false)
+/// Check if action executes for next principals: Workload (true) OR User (false)
 /// is used operator OR
 #[test]
 async fn success_test_for_principal_workload_true_or_user_false() {
@@ -295,31 +385,55 @@ async fn success_test_for_principal_workload_true_or_user_false() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
         "request result should be allowed for workload"
     );
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["1"],
         "reason of permit workload should be '1'"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Deny,
-        "request result should be allowed for person"
+        "request result should be allowed for user"
     );
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Vec::new() as Vec<String>,
-        "reason of permit person should be empty"
+        "reason of permit user should be empty"
     );
 
     assert!(result.decision, "request result should be allowed");
 }
 
-/// Check if action executes for next principals: Workload (false) OR Person (true)
+/// Check if action executes for next principals: Workload (false) OR User (true)
 /// is used operator OR
 #[test]
 async fn success_test_for_principal_workload_false_or_user_true() {
@@ -344,31 +458,55 @@ async fn success_test_for_principal_workload_false_or_user_true() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Deny,
         "request result should be not allowed for workload"
     );
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Vec::new() as Vec<String>,
         "reason of permit workload should be empty"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
-        "request result should be allowed for person"
+        "request result should be allowed for user"
     );
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["2"],
-        "reason of permit person should be '2'"
+        "reason of permit user should be '2'"
     );
 
     assert!(result.decision, "request result should be allowed");
 }
 
-/// Check if action executes for next principals: Workload (false) OR Person (false)
+/// Check if action executes for next principals: Workload (false) OR User (false)
 /// is used operator OR
 #[test]
 async fn success_test_for_principal_workload_false_or_user_false() {
@@ -393,25 +531,49 @@ async fn success_test_for_principal_workload_false_or_user_false() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Deny,
         "request result should be not allowed for workload"
     );
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Vec::new() as Vec<String>,
         "reason of permit workload should be empty"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Deny,
-        "request result should be not allowed for person"
+        "request result should be not allowed for user"
     );
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Vec::new() as Vec<String>,
-        "reason of permit person should be empty"
+        "reason of permit user should be empty"
     );
 
     assert!(!result.decision, "request result should be not allowed");

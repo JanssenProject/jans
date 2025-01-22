@@ -5,23 +5,26 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use cedar_policy::Decision;
-use serde::ser::SerializeStruct;
-use serde::{Serialize, Serializer};
-use std::collections::HashSet;
-
+use super::AuthorizeError;
 use crate::bootstrap_config::WorkloadBoolOp;
+use cedar_policy::{Decision, PolicyId};
+use serde::{Serialize, Serializer};
+use std::collections::{HashMap, HashSet};
 
 /// Result of authorization and evaluation cedar policy
 /// based on the [Request](crate::models::request::Request) and policy store
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Serialize)]
 pub struct AuthorizeResult {
-    /// Result of authorization where principal is `Jans::Workload`
-    #[serde(serialize_with = "serialize_opt_response")]
-    pub workload: Option<cedar_policy::Response>,
-    /// Result of authorization where principal is `Jans::User`
-    #[serde(serialize_with = "serialize_opt_response")]
-    pub person: Option<cedar_policy::Response>,
+    /// Authorization results for each principal
+    #[serde(skip_serializing_if = "HashMap::is_empty")]
+    pub reason_principals: HashMap<String, PrincipalResult>,
+
+    /// Reasons why the authorization failed due to malformed inputs
+    #[serde(
+        serialize_with = "serialize_reason_input",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub reason_input: Option<AuthorizeError>,
 
     /// Result of authorization
     /// true means `ALLOW`
@@ -31,52 +34,84 @@ pub struct AuthorizeResult {
     pub decision: bool,
 }
 
-/// Custom serializer for an Option<String> which converts `None` to an empty string and vice versa.
-pub fn serialize_opt_response<S>(
-    value: &Option<cedar_policy::Response>,
+impl<E> From<E> for AuthorizeResult
+where
+    E: Into<AuthorizeError>,
+{
+    fn from(value: E) -> Self {
+        Self {
+            reason_principals: HashMap::new(),
+            reason_input: Some(value.into()),
+            decision: false,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct PrincipalResult {
+    pub decision: Option<Decision>,
+    pub reason_input: Option<String>,
+    pub reason_policy: Option<HashSet<PolicyId>>,
+    #[serde(
+        serialize_with = "serialize_errors_policy",
+        skip_serializing_if = "Vec::is_empty"
+    )]
+    pub errors_policy: Vec<cedar_policy::AuthorizationError>,
+}
+
+impl From<cedar_policy::Response> for PrincipalResult {
+    fn from(response: cedar_policy::Response) -> Self {
+        let reason_policy = response.diagnostics().reason().cloned().collect();
+        let errors_policy = response.diagnostics().errors().cloned().collect();
+
+        Self {
+            decision: Some(response.decision()),
+            reason_input: None,
+            reason_policy: Some(reason_policy),
+            errors_policy,
+        }
+    }
+}
+
+fn serialize_reason_input<S>(
+    error: &Option<AuthorizeError>,
     serializer: S,
 ) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
 {
-    match value {
-        None => serializer.serialize_none(),
-        Some(response) => {
-            let decision = match response.decision() {
-                Decision::Allow => "allow",
-                Decision::Deny => "deny",
-            };
+    error.as_ref().map(|e| e.to_string()).serialize(serializer)
+}
 
-            let diagnostics = response.diagnostics();
-            let reason = diagnostics
-                .reason()
-                .map(|r| r.to_string())
-                .collect::<HashSet<String>>();
-            let errors = diagnostics
-                .errors()
-                .map(|e| e.to_string())
-                .collect::<HashSet<String>>();
-
-            let mut state = serializer.serialize_struct("Response", 3)?;
-            state.serialize_field("decision", decision)?;
-            state.serialize_field("reason", &reason)?;
-            state.serialize_field("errors", &errors)?;
-            state.end()
-        },
-    }
+fn serialize_errors_policy<S>(
+    errors: &Vec<cedar_policy::AuthorizationError>,
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    let str_errors = errors.iter().map(|e| e.to_string()).collect::<String>();
+    str_errors.serialize(serializer)
 }
 
 impl AuthorizeResult {
     /// Builder function for AuthorizeResult
     pub(crate) fn new(
+        workload_entity_type_name: Option<&str>,
+        user_entity_type_name: Option<&str>,
         user_workload_operator: WorkloadBoolOp,
-        workload: Option<cedar_policy::Response>,
-        person: Option<cedar_policy::Response>,
+        reason_principals: HashMap<String, PrincipalResult>,
     ) -> Self {
+        let decision = calc_decision(
+            workload_entity_type_name,
+            user_entity_type_name,
+            &reason_principals,
+            &user_workload_operator,
+        );
         Self {
-            decision: calc_decision(&user_workload_operator, &workload, &person),
-            workload,
-            person,
+            decision,
+            reason_input: None,
+            reason_principals,
         }
     }
 
@@ -98,20 +133,38 @@ impl AuthorizeResult {
 /// If person and workload is present will be used operator (AND or OR) based on `CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION` bootstrap property.
 /// If none present return false.
 fn calc_decision(
+    workload_entity_type_name: Option<&str>,
+    user_entity_type_name: Option<&str>,
+    reason_principals: &HashMap<String, PrincipalResult>,
     user_workload_operator: &WorkloadBoolOp,
-    workload: &Option<cedar_policy::Response>,
-    person: &Option<cedar_policy::Response>,
 ) -> bool {
-    let workload_allowed = workload
-        .as_ref()
-        .map(|response| response.decision() == Decision::Allow);
+    println!("workload mapping: {:?}", workload_entity_type_name);
+    println!("user mapping: {:?}", user_entity_type_name);
+    println!("reason principals: {:?}", reason_principals.keys());
 
-    let person_allowed = person
-        .as_ref()
-        .map(|response| response.decision() == Decision::Allow);
+    let workload_allowed = workload_entity_type_name.as_ref().and_then(|type_name| {
+        reason_principals.get(*type_name).and_then(|res| {
+            res.decision.and_then(|decision| match decision {
+                Decision::Allow => Some(true),
+                Decision::Deny => Some(false),
+            })
+        })
+    });
+
+    let user_allowed = user_entity_type_name.as_ref().and_then(|type_name| {
+        reason_principals.get(*type_name).and_then(|res| {
+            res.decision.and_then(|decision| match decision {
+                Decision::Allow => Some(true),
+                Decision::Deny => Some(false),
+            })
+        })
+    });
+
+    println!("workload_allowed: {:?}", workload_allowed);
+    println!("user_allowed: {:?}", user_allowed);
 
     // cover each possible case when any of value is Some or None
-    match (workload_allowed, person_allowed) {
+    match (workload_allowed, user_allowed) {
         (None, None) => false,
         (None, Some(person)) => person,
         (Some(workload), None) => workload,

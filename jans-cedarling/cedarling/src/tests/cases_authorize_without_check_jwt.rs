@@ -66,26 +66,50 @@ async fn success_test_role_string() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
         "request result should be allowed for workload"
     );
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["1"],
         "reason of permit workload should be '1'"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
-        "request result should be allowed for person"
+        "request result should be allowed for user"
     );
 
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["2", "3"],
-        "reason of permit person should be '2','3'"
+        "reason of permit user should be '2','3'"
     );
 
     assert!(result.decision, "request result should be allowed");
@@ -145,26 +169,50 @@ async fn forbid_test_role_guest() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
         "request result should be allowed for workload"
     );
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["1"],
         "reason of permit workload should be '1'"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Deny,
-        "request result should be not allowed for person with role Guest"
+        "request result should be not allowed for user with role Guest"
     );
 
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["4"],
-        "reason of permit person should be '2' and '4'"
+        "reason of permit user should be '2' and '4'"
     );
 
     assert!(!result.decision, "request result should be not allowed");
@@ -224,27 +272,51 @@ async fn success_test_role_array() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
         "request result should be allowed for workload"
     );
 
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["1"],
         "reason of permit workload should be '1'"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
-        "request result should be allowed for person"
+        "request result should be allowed for user"
     );
 
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["2", "3"],
-        "reason of permit person should be '2','3'"
+        "reason of permit user should be '2','3'"
     );
 
     assert!(result.decision, "request result should be allowed");
@@ -305,27 +377,51 @@ async fn success_test_no_role() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
         "request result should be allowed for workload"
     );
 
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["1"],
         "reason of permit workload should be '1'"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
-        "request result should be allowed for person"
+        "request result should be allowed for user"
     );
 
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["2"],
-        "reason of permit person should be '2'"
+        "reason of permit user should be '2'"
     );
 
     assert!(
@@ -387,27 +483,51 @@ async fn success_test_user_data_in_id_token() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
         "request result should be allowed for workload"
     );
 
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["1"],
         "reason of permit workload should be '1'"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
-        "request result should be allowed for person"
+        "request result should be allowed for user"
     );
 
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["2", "3"],
-        "reason of permit person should be '2','3'"
+        "reason of permit user should be '2','3'"
     );
 
     assert!(result.decision, "request result should be allowed");
@@ -466,27 +586,51 @@ async fn all_forbid() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Deny,
         "request result should be forbidden for workload"
     );
 
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Vec::new() as Vec<String>,
         "reason of permit workload should be empty"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Deny,
-        "request result should be forbidden for person with role Guest"
+        "request result should be forbidden for user with role Guest"
     );
 
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["4"],
-        "reason of forbid person should empty, no forbid rule"
+        "reason of forbid user should empty, no forbid rule"
     );
 
     assert!(!result.decision, "request result should be not allowed");
@@ -543,33 +687,58 @@ async fn only_workload_permit() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
         "request result should be allowed for workload"
     );
 
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["1"],
         "reason of permit workload should be '1'"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Deny,
-        "request result should be forbidden for person"
+        "request result should be forbidden for user"
     );
-
-    cmp_decision!(
-        result.person,
-        Decision::Deny,
-        "request result should be forbidden for person"
+    println!(
+        "user decision: {:?}",
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect("should have user principal")
     );
 
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["4"],
-        "reason of forbid person should empty, no forbid rule"
+        "reason of forbid user should empty, no forbid rule"
     );
 
     assert!(!result.decision, "request result should be not allowed");
@@ -627,27 +796,51 @@ async fn only_person_permit() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Deny,
         "request result should be forbidden for workload"
     );
 
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Vec::new() as Vec<String>,
         "reason of permit workload should be empty"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
-        "request result should be allowed for person"
+        "request result should be allowed for user"
     );
 
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["2"],
-        "reason of forbid person should '2'"
+        "reason of forbid user should '2'"
     );
 
     assert!(!result.decision, "request result should be not allowed");
@@ -704,25 +897,37 @@ async fn only_user_role_permit() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect("should have workload principal"),
         Decision::Deny,
         "request result should be forbidden for workload"
     );
 
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect("should have workload principal"),
         Vec::new() as Vec<String>,
         "reason of permit workload should be empty"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect("should have user principal"),
         Decision::Allow,
-        "request result should be forbidden for person"
+        "request result should be forbidden for user"
     );
 
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect("should have user principal"),
         vec!["3"],
         "reason of forbid person '3', permit for role Admin"
     );
@@ -780,27 +985,51 @@ async fn only_workload_and_person_permit() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
         "request result should be allowed for workload"
     );
 
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["1"],
         "reason of permit workload should be '1'"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
-        "request result should be allowed for person"
+        "request result should be allowed for user"
     );
 
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["2"],
-        "reason of permit person should '2'"
+        "reason of permit user should '2'"
     );
 
     assert!(result.decision, "request result should be allowed");
@@ -856,27 +1085,51 @@ async fn only_workload_and_role_permit() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
-        "request result should be allowed for workload"
+        "request result should be allowed for Workload"
     );
 
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["1"],
         "reason of permit workload should be '1'"
     );
 
     cmp_decision!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
-        "request result should be not allowed for person"
+        "request result should be not allowed for user"
     );
 
     cmp_policy!(
-        result.person,
+        result
+            .reason_principals
+            .get("Jans::User::\"some_sub\"")
+            .expect(&format!(
+                "should have user principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["3"],
-        "reason of forbid person should be none, but we have permit for role"
+        "reason of forbid user should be none, but we have permit for role"
     );
 
     assert!(result.decision, "request result should be allowed");
@@ -942,12 +1195,24 @@ async fn success_test_role_string_with_abac() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         Decision::Allow,
         "request result should be allowed for workload"
     );
     cmp_policy!(
-        result.workload,
+        result
+            .reason_principals
+            .get("Jans::Workload::\"some_client_id\"")
+            .expect(&format!(
+                "should have workload principal: {:?}",
+                result.reason_principals.keys()
+            )),
         vec!["1"],
         "reason of permit workload should be '1'"
     );
