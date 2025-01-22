@@ -4,13 +4,16 @@ import io.jans.configapi.core.util.Jackson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+
 import static io.jans.as.model.util.Util.escapeLog;
+import io.jans.configapi.plugin.lock.util.LockClientFactory;
 import io.jans.configapi.core.service.ConfigHttpService;
 import io.jans.model.net.HttpServiceResponse;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,24 +24,28 @@ import org.slf4j.Logger;
 
 @ApplicationScoped
 public class LockService {
+
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String AUTHORIZATION = "Authorization";
-
+    
     @Inject
     Logger logger;
 
     @Inject
     ConfigHttpService configHttpService;
 
+    @Inject
+    LockClientFactory lockClientFactory;
+
     public JsonNode getStat(String url, String token, String month, String startMonth, String endMonth, String format)
             throws JsonProcessingException {
         if (logger.isInfoEnabled()) {
             logger.info(
                     "LockStatResource::getStatistics() - url:{}, token:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
-                    escapeLog(url), escapeLog(token), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth),
-                    escapeLog(format));
+                    escapeLog(url), escapeLog(token), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth), escapeLog(format));
         }
-        logger.error("LockStatResource::getStatistics() - url:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
+        logger.error(
+                "LockStatResource::getStatistics() - url:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
                 url, month, startMonth, endMonth, format);
         JsonNode jsonNode = null;
         Map<String, String> headers = new HashMap<>();
@@ -56,11 +63,33 @@ public class LockService {
         HttpServiceResponse httpServiceResponse = configHttpService.executeGet(url, headers, data);
         logger.error(" stat httpServiceResponse:{}", httpServiceResponse);
         if (httpServiceResponse != null) {
-            logger.error(
-                    " stat httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
-                    httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
-                    httpServiceResponse.getHttpResponse().getEntity());
+            logger.error(" stat httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}", httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(), httpServiceResponse.getHttpResponse().getEntity());
             jsonNode = getResponseJsonNode(httpServiceResponse, Status.OK);
+        }
+        logger.error(" stat jsonNode:{}", jsonNode);
+        return jsonNode;
+    }
+
+    
+    public JsonNode getStatData(String url, String token, String month, String startMonth, String endMonth, String format)
+            throws JsonProcessingException {
+        if (logger.isInfoEnabled()) {
+            logger.info(
+                    "LockStatResource::getStatistics() - url:{}, token:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
+                    escapeLog(url), escapeLog(token), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth),
+                    escapeLog(format));
+        }
+        logger.error("LockStatResource::getStatistics() - url:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
+                url, month, startMonth, endMonth, format);
+        JsonNode jsonNode = null;
+
+        Response response = LockClientFactory.getStat(url, token, month, startMonth, endMonth, format);
+        logger.error(" stat response:{}", response);
+        if (response != null) {
+            logger.error(" stat response.getStatus():{}, response.getEntity():{}", response.getStatus(),
+                    response.getEntity());
+            String jsonString = response.getEntity().toString();
+            jsonNode = getResponseJsonNode(jsonString);
         }
         logger.error(" stat jsonNode:{}", jsonNode);
         return jsonNode;

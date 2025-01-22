@@ -214,14 +214,10 @@ public class ConfigHttpService implements Serializable {
 
     public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers,
             Map<String, String> parameters) {
-        HttpGet httpGet = new HttpGet(requestUri);
+      
+        log.error("\n\n requestUri{}, headers:{}, parameters:{}", requestUri, headers, parameters);
+      
         log.error("requestUri{}, headers:{}, parameters:{}", requestUri, headers, parameters);
-        if (headers != null) {
-            for (Entry<String, String> headerEntry : headers.entrySet()) {
-                httpGet.setHeader(headerEntry.getKey(), headerEntry.getValue());
-            }
-        }
-
         if (parameters != null && !parameters.isEmpty()) {
             StringBuilder query = new StringBuilder();
             int i = 0;
@@ -238,10 +234,15 @@ public class ConfigHttpService implements Serializable {
                 }
             }
             requestUri = requestUri + query.toString();
-            log.error("\n\n\n Final requestUri:{}", requestUri);
-            httpGet = new HttpGet(requestUri);
+            log.error("\n\n\n Final requestUri:{}", requestUri);           
         }
-
+        
+        HttpGet httpGet = new HttpGet(requestUri);
+        if (headers != null) {
+            for (Entry<String, String> headerEntry : headers.entrySet()) {
+                httpGet.setHeader(headerEntry.getKey(), headerEntry.getValue());
+            }
+        }
         try {
             HttpResponse httpResponse = httpClient.execute(httpGet);
             log.error("httpResponse:{}", httpResponse);

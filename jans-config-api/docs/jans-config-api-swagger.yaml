@@ -9335,17 +9335,17 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        selected:
-          type: boolean
         whitePagesCanView:
           type: boolean
-        userCanView:
-          type: boolean
-        adminCanEdit:
+        selected:
           type: boolean
         adminCanView:
           type: boolean
+        adminCanEdit:
+          type: boolean
         userCanEdit:
+          type: boolean
+        userCanView:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -11767,10 +11767,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
