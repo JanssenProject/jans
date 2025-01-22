@@ -37,6 +37,7 @@ class BaseConfig:
     API_SPEC_OPTIONS = {
         "x-internal-id": "1",
     }
+    CEDARLING_BOOTSTRAP_CONFIG = None
     CEDARLING_BOOTSTRAP_CONFIG_FILE = os.getenv(
         "CEDARLING_BOOTSTRAP_CONFIG_FILE", None)
     if CEDARLING_BOOTSTRAP_CONFIG_FILE is None:
