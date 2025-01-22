@@ -443,7 +443,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        krakend-builder-image: [ 'builder:2.9.0', 'builder:2.9.0-linux-generic' ]
+        krakend-builder-image: [ 'builder:2.9.0' ]
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
