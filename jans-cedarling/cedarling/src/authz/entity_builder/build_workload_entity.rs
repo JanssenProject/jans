@@ -25,11 +25,9 @@ impl EntityBuilder {
                 tokens.access.as_ref(),
                 vec![],
             ),
-            (
-                DEFAULT_ID_TKN_WORKLOAD_CLAIM,
-                tokens.id.as_ref(),
-                vec![ClaimAliasMap::new("aud", "client_id")],
-            ),
+            (DEFAULT_ID_TKN_WORKLOAD_CLAIM, tokens.id.as_ref(), vec![
+                ClaimAliasMap::new("aud", "client_id"),
+            ]),
         ]
         .into_iter()
         {
@@ -67,11 +65,16 @@ impl fmt::Display for BuildWorkloadEntityError {
         } else {
             writeln!(
                 f,
-                "failed to create Workload Entity due to the following errors:"
+                "failed to create Workload Entity due to the following errors: [{}]",
+                self.errors
+                    .iter()
+                    .map(|(tkn, err)| format!(
+                        "tried building workload entity using `{}` but failed: {}",
+                        tkn, err
+                    ))
+                    .collect::<Vec<String>>()
+                    .join(", ")
             )?;
-            for (token_kind, error) in &self.errors {
-                writeln!(f, "- TokenKind {:?}: {}", token_kind, error)?;
-            }
         }
         Ok(())
     }

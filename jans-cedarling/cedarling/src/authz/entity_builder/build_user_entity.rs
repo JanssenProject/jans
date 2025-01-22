@@ -53,11 +53,16 @@ impl fmt::Display for BuildUserEntityError {
         } else {
             writeln!(
                 f,
-                "failed to create User Entity due to the following errors:"
+                "failed to create User Entity due to the following errors: [{}]",
+                self.errors
+                    .iter()
+                    .map(|(tkn, err)| format!(
+                        "tried building user entity using `{}` but failed: {}",
+                        tkn, err
+                    ))
+                    .collect::<Vec<String>>()
+                    .join(", ")
             )?;
-            for (token_kind, error) in &self.errors {
-                writeln!(f, "- TokenKind {:?}: {}", token_kind, error)?;
-            }
         }
         Ok(())
     }
