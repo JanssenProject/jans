@@ -16,13 +16,20 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
+import static io.jans.lock.service.audit.AuditService.AUDIT_HEALTH;
+import static io.jans.lock.service.audit.AuditService.AUDIT_HEALTH_BULK;
+import static io.jans.lock.service.audit.AuditService.AUDIT_LOG;
+import static io.jans.lock.service.audit.AuditService.AUDIT_LOG_BULK;
+import static io.jans.lock.service.audit.AuditService.AUDIT_TELEMETRY;
+import static io.jans.lock.service.audit.AuditService.AUDIT_TELEMETRY_BULK;
+
 import org.apache.http.entity.ContentType;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.jans.lock.service.DataMapperService;
 import io.jans.lock.service.audit.AuditService;
-import io.jans.lock.service.stat.StatResponseService;
 import io.jans.lock.service.stat.StatService;
 import io.jans.lock.util.ServerUtil;
 import jakarta.enterprise.context.Dependent;
@@ -33,8 +40,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.SecurityContext;
-
-import static io.jans.lock.service.audit.AuditService.*;
 
 /**
  * Provides interface for audit REST web services
@@ -55,6 +60,9 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
 
 	@Inject
     private Logger log;
+    
+    @Inject
+    private DataMapperService dataMapperService;
 
     @Inject
     private AuditService auditService;
@@ -112,7 +120,7 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
         builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
         builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
 
-        JsonNode json = this.auditService.getJsonNode(request);
+        JsonNode json = getJsonNode(request);
         
         if (reportStat) {
         	if (bulkData) {
@@ -143,6 +151,23 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
         }
 
         return builder.build();
+    }
+
+    public JsonNode getJsonNode(HttpServletRequest request) {
+    	JsonNode jsonBody = null;
+        if (request == null) {
+            return jsonBody;
+        }
+
+        try {
+        	jsonBody = dataMapperService.readTree(request.getInputStream());
+            log.debug(" jsonBody:{}", jsonBody);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("Exception while retriving json from request is - ", ex);
+        }
+
+        return jsonBody;
     }
 
 	private void reportStat(JsonNode json) {

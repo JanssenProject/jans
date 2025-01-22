@@ -41,7 +41,7 @@ sudo rpm -import automation-jans-public-gpg.asc
   [Releases](https://github.com/JanssenProject/jans/releases)
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version.el8.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el8.x86_64.rpm -P ~/
 ```
 
 - Verify integrity of the downloaded package using published `sha256sum`.
@@ -49,25 +49,25 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
     Download `sha256sum` file for the package
 
     ```shell
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version.el8.x86_64.rpm.sha256sum -P ~/
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el8.x86_64.rpm.sha256sum -P ~/
     ```
 
     Check the hash if it is matching.
 
     ```shell
-    sha256sum -c jans-replace-janssen-version-el8.x86_64.rpm.sha256sum
+    sha256sum -c jans-replace-janssen-version-stable-el8.x86_64.rpm.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text
-    jans-replace-janssen-version-el8.x86_64.rpm: OK
+    jans-replace-janssen-version-stable-el8.x86_64.rpm: OK
     ```
   
 - Install the package
 
 ```
-sudo yum install ~/jans-replace-janssen-version-el8.x86_64.rpm
+sudo yum install ~/jans-replace-janssen-version-stable-el8.x86_64.rpm
 ```
 
 ## Run the setup script
