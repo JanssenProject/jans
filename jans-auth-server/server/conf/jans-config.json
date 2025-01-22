@@ -519,7 +519,7 @@
         "interruptionErrorPage": "timeout.ftlh",
         "crashErrorPage": "crash.ftlh",
         "finishedFlowPage": "finished.ftlh",
-        "startEndUrlMapping": { "agama/agama.xhtml": "postlogin.htm", "agama/consent.xhtml": "agama/consent_authorize.htm" }
+        "startEndUrlMapping": { "agama/agama.xhtml": "postlogin.htm", "agama/consent.xhtml": "agama/consent_authorize.htm" },
         "defaultResponseHeaders": {
             "Cache-Control": "max-age=0, no-store"
         },
