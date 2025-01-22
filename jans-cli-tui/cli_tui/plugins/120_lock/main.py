@@ -46,25 +46,6 @@ class Plugin(DialogUtils):
     def create_widgets(self):
         self.schema = self.app.cli_object.get_schema_from_reference('Lock', '#/components/schemas/AppConfiguration')
 
-
-        self.opa_config_base_url = common_data.app.getTitledText(
-                    title=_("Base URL"),
-                    name='baseUrl',
-                    value=self.data.get('opaConfiguration', {}).get('baseUrl', ''),
-                    style=cli_style.edit_text,
-                    jans_help=_("Base URL for OPA"),
-                    widget_style=cli_style.black_bg_widget
-                )
-
-        self.opa_config_accessToken = common_data.app.getTitledText(
-                    title=_("Access Token"),
-                    name='accessToken',
-                    value=self.data.get('opaConfiguration', {}).get('accessToken', ''),
-                    style=cli_style.edit_text,
-                    jans_help=_("Access token for OPA"),
-                    widget_style=cli_style.black_bg_widget
-                )
-
         self.working_container = HSplit([
 
                 common_data.app.getTitledText(
@@ -160,14 +141,9 @@ class Plugin(DialogUtils):
                 common_data.app.getTitledText(
                     title=_("PDP Type"),
                     name='pdpType',
-                    value=self.data.get('pdpType', 'OPA'),
+                    value=self.data.get('pdpType', ''),
                     style=cli_style.edit_text,
                     widget_style=cli_style.black_bg_widget
-                ),
-
-                Frame(
-                    title=_("OPA Configuration"),
-                    body=HSplit([self.opa_config_base_url, self.opa_config_accessToken]),
                 ),
 
                 common_data.app.getTitledText(
@@ -242,10 +218,6 @@ class Plugin(DialogUtils):
 
         async def lock_config_coroutine():
             lock_config = self.make_data_from_dialog(tabs={'lock_config': self.working_container})
-            lock_config['opaConfiguration'] = {
-                'baseUrl': self.opa_config_base_url.me.text,
-                'accessToken': self.opa_config_accessToken.me.text,
-            }
 
             cli_args = {'operation_id': 'put-lock-properties', 'data': lock_config}
             common_data.app.start_progressing(_("Saving Lock configuration"))
