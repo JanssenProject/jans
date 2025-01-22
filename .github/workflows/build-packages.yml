@@ -474,9 +474,9 @@ jobs:
         KRAKEND_BUILDER_IMAGE=${{ matrix.krakend-builder-image }}
         KRAKEND_BUILDER_IMAGE=${KRAKEND_BUILDER_IMAGE/:/-}
         echo KRAKEND_BUILDER_IMAGE=${KRAKEND_BUILDER_IMAGE} >> $GITHUB_ENV
-        CC="aarch64-linux-musl-gcc" >> $GITHUB_ENV
+        echo CC="aarch64-linux-musl-gcc" >> $GITHUB_ENV
         if [ "${{ matrix.krakend-builder-image }}" == "builder:2.9.0-linux-generic" ]; then
-          CC="aarch64-linux-gnu-gcc" >> $GITHUB_ENV
+          echo CC="aarch64-linux-gnu-gcc" >> $GITHUB_ENV
         fi
     - name: Build plugin for AMD64 
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
