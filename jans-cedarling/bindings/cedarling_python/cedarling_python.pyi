@@ -171,6 +171,8 @@ class AuthorizeResult:
 
     def person(self) -> AuthorizeResultResponse | None: ...
 
+    def reason_input(self) -> String | None: ...
+
 
 @final
 class AuthorizeResultResponse:

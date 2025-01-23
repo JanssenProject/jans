@@ -38,9 +38,14 @@ impl AuthorizeResult {
         self.inner.workload.clone().map(|v| v.into())
     }
 
-    /// Get the decision value for person/user
-    fn person(&self) -> Option<AuthorizeResultResponse> {
-        self.inner.person.clone().map(|v| v.into())
+    /// Get the decision value for user
+    fn user(&self) -> Option<AuthorizeResultResponse> {
+        self.inner.user.clone().map(|v| v.into())
+    }
+
+    /// The reason why the result was DENY in case it was because of a bad input
+    fn reason_input(&self) -> Option<String> {
+        self.inner.reason_input.as_ref().map(|e| e.to_string())
     }
 }
 

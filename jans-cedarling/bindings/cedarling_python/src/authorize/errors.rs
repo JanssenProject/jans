@@ -18,79 +18,9 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    DecodeTokens,
+    LoggingError,
     AuthorizeError,
-    "Error encountered while decoding JWT token data"
-);
-
-create_exception!(
-    authorize_errors,
-    ProcessTokens,
-    AuthorizeError,
-    "Error encountered while processing JWT token data"
-);
-
-create_exception!(
-    authorize_errors,
-    ActionError,
-    AuthorizeError,
-    "Error encountered while parsing Action to EntityUid"
-);
-
-create_exception!(
-    authorize_errors,
-    CreateContextError,
-    AuthorizeError,
-    "Error encountered while validating context according to the schema"
-);
-
-create_exception!(
-    authorize_errors,
-    WorkloadRequestValidationError,
-    AuthorizeError,
-    "Error encountered while creating cedar_policy::Request for workload entity principal"
-);
-
-create_exception!(
-    authorize_errors,
-    UserRequestValidationError,
-    AuthorizeError,
-    "Error encountered while creating cedar_policy::Request for user entity principal"
-);
-
-create_exception!(
-    authorize_errors,
-    EntitiesError,
-    AuthorizeError,
-    "Error encountered while collecting all entities"
-);
-
-create_exception!(
-    authorize_errors,
-    EntitiesToJsonError,
-    AuthorizeError,
-    "Error encountered while parsing all entities to json for logging"
-);
-
-create_exception!(
-    authorize_errors,
-    BuildContextError,
-    AuthorizeError,
-    "Error encountered while building the request context"
-);
-
-create_exception!(
-    authorize_errors,
-    IdTokenTrustModeError,
-    AuthorizeError,
-    "Error encountered while running on strict id token trust mode"
-);
-
-create_exception!(
-    authorize_errors,
-    BuildEntityError,
-    AuthorizeError,
-    "Error encountered while running on strict id token trust mode"
+    "Error encountered while trying to write logs"
 );
 
 #[pyclass]
@@ -131,16 +61,7 @@ macro_rules! errors_functions {
 // This function is used to convert `cedarling::AuthorizeError` to a Python exception.
 // For each possible case of `AuthorizeError`, we have created a corresponding Python exception that inherits from `cedarling::AuthorizeError`.
 errors_functions! {
-    ProcessTokens => ProcessTokens,
-    Action => ActionError,
-    CreateContext => CreateContextError,
-    WorkloadRequestValidation => WorkloadRequestValidationError,
-    UserRequestValidation => UserRequestValidationError,
-    Entities => EntitiesError,
-    EntitiesToJson => EntitiesToJsonError,
-    BuildContext => BuildContextError,
-    IdTokenTrustMode => IdTokenTrustModeError,
-    BuildEntity => BuildEntityError
+    Logging => LoggingError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {

@@ -8,7 +8,8 @@ from cedarling_python import Cedarling
 from cedarling_python import ResourceData, Request
 import time
 
-bootstrap_config = BootstrapConfig.load_from_file("./example_files/sample_bootstrap_props.yaml")
+bootstrap_config = BootstrapConfig.load_from_file(
+    "./example_files/sample_bootstrap_props.yaml")
 
 # initialize cedarling instance
 # all values in the bootstrap_config is parsed and validated at this step.
@@ -222,16 +223,16 @@ for diagnostic in workload_diagnostic.errors:
 
 print()
 
-# watch on the decision for person
-person_result = authorize_result.person()
-print(f"Result of person authorization: {person_result.decision}")
-person_diagnostic = person_result.diagnostics
+# watch on the decision for user
+user_result = authorize_result.user()
+print(f"Result of user authorization: {user_result.decision}")
+user_diagnostic = user_result.diagnostics
 print("Policy ID used:")
-for diagnostic in person_diagnostic.reason:
+for diagnostic in user_diagnostic.reason:
     print(diagnostic)
 
-print(f"Errors during authorization: {len(person_diagnostic.errors)}")
-for diagnostic in person_diagnostic.errors:
+print(f"Errors during authorization: {len(user_diagnostic.errors)}")
+for diagnostic in user_diagnostic.errors:
     print(diagnostic)
 
 print()
