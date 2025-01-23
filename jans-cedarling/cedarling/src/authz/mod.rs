@@ -37,7 +37,6 @@ pub(crate) mod entity_builder;
 pub(crate) mod request;
 
 pub use authorize_result::AuthorizeResult;
-pub use authorize_result::PrincipalResult;
 
 /// Configuration to Authz to initialize service without errors
 pub(crate) struct AuthzConfig {
@@ -211,7 +210,6 @@ impl Authz {
                     decision: authz_result.decision().into(),
                 };
 
-                let principal_uid_str = principal.to_string();
                 let workload_entity_claims = get_entity_claims(
                     self.config
                         .authorization
@@ -222,7 +220,7 @@ impl Authz {
                 );
 
                 (
-                    Some((principal_uid_str, authz_result)),
+                    Some(authz_result),
                     Some(authz_info),
                     Some(workload_entity_claims),
                 )
@@ -254,7 +252,6 @@ impl Authz {
                     decision: authz_result.decision().into(),
                 };
 
-                let principal_uid_str = principal.to_string();
                 let user_entity_claims = get_entity_claims(
                     self.config
                         .authorization
@@ -265,7 +262,7 @@ impl Authz {
                 );
 
                 (
-                    Some((principal_uid_str, authz_result)),
+                    Some(authz_result),
                     Some(authz_info),
                     Some(user_entity_claims),
                 )
@@ -273,18 +270,10 @@ impl Authz {
                 (None, None, None)
             };
 
-        let reason_principals = [workload_authz_result.clone(), user_authz_result.clone()]
-            .into_iter()
-            .filter_map(|x| x.map(|(uid, response)| (uid, PrincipalResult::from(response))))
-            .collect::<HashMap<String, PrincipalResult>>();
-
-        let workload_uid = workload_authz_result.as_ref().map(|x| x.0.as_str());
-        let user_uid = user_authz_result.as_ref().map(|x| x.0.as_str());
         let result = AuthorizeResult::new(
-            workload_uid,
-            user_uid,
             self.config.authorization.user_workload_operator,
-            reason_principals,
+            workload_authz_result,
+            user_authz_result,
         );
 
         // measure time how long request executes

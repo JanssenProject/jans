@@ -63,49 +63,25 @@ async fn test_namespace_jans2() {
         .expect("request should be parsed without errors");
 
     cmp_decision!(
-        result
-            .reason_principals
-            .get("Jans2::Workload::\"some_client_id\"")
-            .expect(&format!(
-                "should have workload principal: {:?}",
-                result.reason_principals.keys()
-            )),
+        result.workload,
         Decision::Allow,
         "request result should be allowed for workload"
     );
 
     cmp_policy!(
-        result
-            .reason_principals
-            .get("Jans2::Workload::\"some_client_id\"")
-            .expect(&format!(
-                "should have workload principal: {:?}",
-                result.reason_principals.keys()
-            )),
+        result.workload,
         vec!["1"],
         "reason of permit workload should be '1'"
     );
 
     cmp_decision!(
-        result
-            .reason_principals
-            .get("Jans2::User::\"some_sub\"")
-            .expect(&format!(
-                "should have user principal: {:?}",
-                result.reason_principals.keys()
-            )),
+        result.user,
         Decision::Allow,
         "request result should be allowed for user"
     );
 
     cmp_policy!(
-        result
-            .reason_principals
-            .get("Jans2::User::\"some_sub\"")
-            .expect(&format!(
-                "should have user principal: {:?}",
-                result.reason_principals.keys()
-            )),
+        result.user,
         vec!["2"],
         "reason of permit user should be '2'"
     );
