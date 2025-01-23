@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::WorkloadBoolOp;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// Configuration to specify authorization workflow.
 /// - If we use user entity as principal.
@@ -76,7 +76,7 @@ pub struct AuthorizationConfig {
 }
 
 /// Defines the level of validation for ID tokens.
-#[derive(Debug, Clone, PartialEq, Default, Deserialize, Copy)]
+#[derive(Debug, Clone, PartialEq, Default, Deserialize, Serialize, Copy)]
 #[serde(rename_all = "lowercase")]
 pub enum IdTokenTrustMode {
     /// No validation is performed on the ID token.
