@@ -139,7 +139,7 @@ from this project listing page.
 
     `method name`: `class`
 
-    `assign result to`: `authService`
+    `assign result to`: `authServiceRef`
 
     `title`: `New Authentication Service `
 
@@ -333,27 +333,29 @@ from this project listing page.
     generated code.
 
     ```
-    Flow co.acme.password
+      Flow co.acme.password
         Basepath ""
-    // Get Authentication service reference from the IDP
-    authServiceRef = Call io.jans.server.service.AuthenticationService#class 
-    // Get CdiUtil reference from the IDP
-    cdiUtilRef = Call io.jans.service.cdi.util.CdiUtil#bean authService
-    // Empty result object 
+    // create new authentication service instance
+    authServiceRef = Call io.jans.as.server.service.AuthenticationService#class 
+    // Get authentication service reference from the IDP
+    cdiUtilRef = Call io.jans.service.cdi.util.CdiUtil#bean authServiceRef
+    // Empty result object
     authResult = {}
     // Retry 3 times to get correct username and password 
     Repeat 3 times max
-        // Loads the login page for username and password input 
+        // Loads the login page for username and password input
         creds = RRF "login.ftlh" authResult
-        // Validate username and password 
-        authResult.success = Call cdiUtil#authenticate creds.username creds.password
+        // Validate username and password
+        authResult.success = Call cdiUtilRef authenticate creds.username creds.password
         // Keep the username if the user needs to retry authentication 
-        authResult.uid = "creds.username"
+        authResult.uid = creds.username
+        // check if the authentication was successful 
         When authResult.success is true
               // Return username in case of successful authentication 
               Finish authResult.uid
     // Max number of failed authentication attempts reached. Return False to end the flow
     Finish false
+
     ```
 
 ### Design user interface
