@@ -195,6 +195,17 @@ label.light {
   z-index: 1; /* Ensure loader stays above the form */
 }
 
+.image-container {
+  display: flex;
+  flex-direction: column; /* Stack content vertically */
+  align-items: center; /* Optional: Center align other content */
+}
+
+.image-container img {
+  max-width: 100%; /* Ensure responsiveness */
+  height: auto;
+}
+
 @media screen and (min-width: 480px) {
 
   form {
