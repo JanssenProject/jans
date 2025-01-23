@@ -659,9 +659,8 @@ class Plugin(DialogUtils):
                 cur_data = cur_data[pprop]
             return cur_data, '/'.join(items_)
 
-
         changes = []
-        new_data = self.make_data_from_dialog(tabs={'main_': self.tabs['main_']})
+        new_data = self.make_data_from_dialog(tabs={'main_': self.tabs['main_'].content})
 
         replace = 'replace'
         add = 'add'
