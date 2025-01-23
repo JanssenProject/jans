@@ -151,6 +151,12 @@ use cedarling::BootstrapConfig;
 
 let config =
     BootstrapConfig::load_from_file("./path/to/your/config.json").unwrap();
+
+// Load the bootstrap config from the environment variables. Properties that are not defined will be assigned a default value.
+let config = BootstrapConfig::from_env().unwrap();
+
+// Load the bootstrap config from the environment variables and a given config if env var is not present.
+let config = BootstrapConfig::from_raw_config_and_env(Some(BootstrapConfigRaw { ... })).unwrap();
 ```
 
 ### Loading From JSON

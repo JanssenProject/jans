@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::WorkloadBoolOp;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// Configuration to specify authorization workflow.
@@ -102,7 +102,7 @@ impl From<TokenEntityNames> for HashMap<String, String> {
 }
 
 /// Defines the level of validation for ID tokens.
-#[derive(Debug, Clone, PartialEq, Default, Deserialize, Copy)]
+#[derive(Debug, Clone, PartialEq, Default, Deserialize, Serialize, Copy)]
 #[serde(rename_all = "lowercase")]
 pub enum IdTokenTrustMode {
     /// No validation is performed on the ID token.

@@ -23,7 +23,7 @@ if [ -z "$INSTALLED_JANSSEN_NAME" ]; then
 fi
 
 if [ -z "$JANSSEN_VERSION" ]; then
-    JANSSEN_VERSION="1.3.0-1"
+    JANSSEN_VERSION="0.0.0-nightly"
 fi
 
 if [ -z "$JANSSEN_SERVICE_NAME" ]; then

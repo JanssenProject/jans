@@ -1,6 +1,6 @@
 [package]
 name = "cedarling"
-version = "1.3.0"
+version = "0.0.0-nightly"
 edition = "2021"
 description = "The Cedarling: a high-performance local authorization service powered by the Rust Cedar Engine."
 license = "Apache-2.0"

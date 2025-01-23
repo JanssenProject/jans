@@ -12,16 +12,16 @@ pub(crate) mod authorization_config;
 pub(crate) mod jwt_config;
 pub(crate) mod log_config;
 pub(crate) mod policy_store_config;
-pub(crate) mod token_settings;
+pub(crate) mod raw_config;
 
 #[cfg(not(target_arch = "wasm32"))]
 use std::{fs, io, path::Path};
 
 pub use authorization_config::{AuthorizationConfig, IdTokenTrustMode};
-pub use decode::{BootstrapConfigRaw, FeatureToggle, LoggerType, WorkloadBoolOp};
 pub use jwt_config::*;
 pub use log_config::*;
 pub use policy_store_config::*;
+pub use raw_config::{BootstrapConfigRaw, FeatureToggle, LoggerType, WorkloadBoolOp};
 
 /// Bootstrap configuration
 /// properties for configuration [`Cedarling`](crate::Cedarling) application.
@@ -64,13 +64,13 @@ impl BootstrapConfig {
             Some("json") => {
                 let config_json = fs::read_to_string(path)
                     .map_err(|e| BootstrapConfigLoadingError::ReadFile(path.to_string(), e))?;
-                let raw = serde_json::from_str::<decode::BootstrapConfigRaw>(&config_json)?;
+                let raw = serde_json::from_str::<BootstrapConfigRaw>(&config_json)?;
                 BootstrapConfig::from_raw_config(&raw)?
             },
             Some("yaml") | Some("yml") => {
                 let config_json = fs::read_to_string(path)
                     .map_err(|e| BootstrapConfigLoadingError::ReadFile(path.to_string(), e))?;
-                let raw = serde_yml::from_str::<decode::BootstrapConfigRaw>(&config_json)?;
+                let raw = serde_yml::from_str::<BootstrapConfigRaw>(&config_json)?;
                 BootstrapConfig::from_raw_config(&raw)?
             },
             _ => Err(BootstrapConfigLoadingError::InvalidFileFormat(
@@ -83,8 +83,15 @@ impl BootstrapConfig {
 
     /// Loads a `BootstrapConfig` from a JSON string
     pub fn load_from_json(config: &str) -> Result<Self, BootstrapConfigLoadingError> {
-        let raw = serde_json::from_str::<decode::BootstrapConfigRaw>(config)?;
+        let raw = serde_json::from_str::<BootstrapConfigRaw>(config)?;
         Self::from_raw_config(&raw)
+    }
+
+    /// Load config environment variables.
+    /// If you need with fallback to applied config use [`Self::from_raw_config_and_env].
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn from_env() -> Result<Self, BootstrapConfigLoadingError> {
+        Self::from_raw_config_and_env(None)
     }
 }
 
@@ -152,8 +159,8 @@ pub enum BootstrapConfigLoadingError {
 
 #[cfg(test)]
 mod test {
+    use super::raw_config::BootstrapConfigRaw;
     use super::*;
-    use crate::bootstrap_config::decode::BootstrapConfigRaw;
     use crate::{BootstrapConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig};
     use jsonwebtoken::Algorithm;
     use std::collections::{HashMap, HashSet};
@@ -218,6 +225,7 @@ mod test {
                     ),
                 ])
                 .into(),
+                decision_log_default_jwt_id: "jti".to_string(),
                 ..Default::default()
             },
         };
@@ -283,6 +291,7 @@ mod test {
                     ),
                 ])
                 .into(),
+                decision_log_default_jwt_id: "jti".to_string(),
                 ..Default::default()
             },
         };

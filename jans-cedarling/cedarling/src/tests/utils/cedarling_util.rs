@@ -3,10 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::token_settings::TokenConfigs;
-use crate::{
-    AuthorizationConfig, JwtConfig, WorkloadBoolOp, authorization_config::IdTokenTrustMode,
-};
+use crate::authorization_config::IdTokenTrustMode;
+use crate::raw_config::token_settings::TokenConfigs;
+use crate::{AuthorizationConfig, JwtConfig, WorkloadBoolOp};
 pub use crate::{
     BootstrapConfig, BootstrapConfigRaw, Cedarling, FeatureToggle, LogConfig, LogTypeConfig,
     PolicyStoreConfig, PolicyStoreSource,

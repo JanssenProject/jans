@@ -3,8 +3,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::{FeatureToggle, TokenValidationConfig, authorization_config::TokenEntityNames};
-use serde::Deserialize;
+use super::super::TokenValidationConfig;
+use super::super::authorization_config::TokenEntityNames;
+use super::FeatureToggle;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// Configuration for token-based entities, mapping token names to their
@@ -13,7 +15,7 @@ use std::collections::HashMap;
 /// Each entry in this map associates a token identifier (String) with its
 /// corresponding `TokenEntityConfig` settings. These settings define the
 /// entity type and claim validation rules
-#[derive(Debug, Deserialize, PartialEq, Clone)]
+#[derive(Debug, Deserialize, PartialEq, Clone, Serialize)]
 pub struct TokenConfigs(HashMap<String, TokenConfig>);
 
 /// Detailed configuration for a single token-based entity.
@@ -21,7 +23,7 @@ pub struct TokenConfigs(HashMap<String, TokenConfig>);
 /// This struct defines the entity type name and the validation settings for
 /// various claims associated with the token. Each claim validation setting is
 /// represented as a `FeatureToggle`.
-#[derive(Debug, Deserialize, PartialEq, Clone)]
+#[derive(Debug, Deserialize, PartialEq, Clone, Serialize)]
 pub struct TokenConfig {
     /// The name of the Cedar entity type associated with this token.
     entity_type_name: String,
@@ -29,7 +31,7 @@ pub struct TokenConfig {
     claims: ClaimsValidationConfig,
 }
 
-#[derive(Debug, Deserialize, PartialEq, Clone, Default)]
+#[derive(Debug, Deserialize, PartialEq, Clone, Default, Serialize)]
 #[serde(default)]
 pub struct ClaimsValidationConfig {
     /// Toggle for validating the `iss` (issuer) claim.
