@@ -15,23 +15,22 @@ use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt::{self, JwtProcessingError, TokenStr};
 use crate::log::interface::LogWriter;
 use crate::log::{
-    AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, DiagnosticsRefs, LogEntry,
-    LogLevel, LogTokensInfo, LogType, Logger, PrincipalLogEntry, UserAuthorizeInfo,
-    WorkloadAuthorizeInfo,
+    Diagnostics, LogEntry, LogLevel, LogType, Logger, UserAuthorizeInfo, WorkloadAuthorizeInfo,
 };
 use build_ctx::*;
 use cedar_policy::{Entities, Entity, EntityUid};
 use chrono::Utc;
 use entity_builder::*;
+use log_authz::{LogAuthzArgs, LoggingError};
 use request::Request;
 use std::collections::HashMap;
-use std::io::Cursor;
 use std::str::FromStr;
 use std::sync::Arc;
 use trust_mode::*;
 
 mod authorize_result;
 mod build_ctx;
+mod log_authz;
 mod trust_mode;
 
 pub(crate) mod entity_builder;
@@ -293,93 +292,18 @@ impl Authz {
             .signed_duration_since(start_time)
             .num_milliseconds();
 
-        // FROM THIS POINT WE ONLY MAKE LOGS
-
-        // getting entities as json
-        let mut entities_raw_json = Vec::new();
-        let cursor = Cursor::new(&mut entities_raw_json);
-
-        entities.write_to_json(cursor)?;
-        let entities_json: serde_json::Value = serde_json::from_slice(entities_raw_json.as_slice())
-            .map_err(AuthorizeError::EntitiesToJson)?;
-
-        let user_authz_diagnostic = user_authz_info
-            .as_ref()
-            .map(|auth_info| &auth_info.diagnostics);
-
-        let workload_authz_diagnostic = user_authz_info
-            .as_ref()
-            .map(|auth_info| &auth_info.diagnostics);
-
-        let tokens_logging_info = LogTokensInfo {
-            access: tokens.access.as_ref().map(|tkn| {
-                tkn.logging_info(
-                    self.config
-                        .authorization
-                        .decision_log_default_jwt_id
-                        .as_str(),
-                )
-            }),
-            id_token: tokens.id.as_ref().map(|tkn| {
-                tkn.logging_info(
-                    self.config
-                        .authorization
-                        .decision_log_default_jwt_id
-                        .as_str(),
-                )
-            }),
-            userinfo: tokens.userinfo.as_ref().map(|tkn| {
-                tkn.logging_info(
-                    self.config
-                        .authorization
-                        .decision_log_default_jwt_id
-                        .as_str(),
-                )
-            }),
-        };
-
-        // Decision log
-        // we log decision log before debug log, to avoid cloning diagnostic info
-        self.config.log_service.as_ref().log_any(&DecisionLogEntry {
-            base: BaseLogEntry::new(self.config.pdp_id, LogType::Decision),
-            policystore_id: self.config.policy_store.id.as_str(),
-            policystore_version: self.config.policy_store.get_store_version(),
-            principal: PrincipalLogEntry::new(&self.config.authorization),
-            user: user_entity_claims,
-            workload: workload_entity_claims,
-            lock_client_id: None,
-            action: request.action.clone(),
-            resource: resource_uid.to_string(),
-            decision: result.decision.into(),
-            tokens: tokens_logging_info,
-            decision_time_ms: elapsed_ms,
-            diagnostics: DiagnosticsRefs::new(&[
-                &user_authz_diagnostic,
-                &workload_authz_diagnostic,
-            ]),
-        });
-
-        // DEBUG LOG
-        // Log all result information about both authorize checks.
-        // Where principal is `"Jans::Workload"` and where principal is `"Jans::User"`.
-        self.config.log_service.as_ref().log(
-            LogEntry::new_with_data(
-                self.config.pdp_id,
-                Some(self.config.application_name.clone()),
-                LogType::System,
-            )
-            .set_level(LogLevel::DEBUG)
-            .set_auth_info(AuthorizationLogInfo {
-                action: request.action.clone(),
-                context: request.context.clone(),
-                resource: resource_uid.to_string(),
-                entities: entities_json,
-                person_authorize_info: user_authz_info,
-                workload_authorize_info: workload_authz_info,
-                authorized: result.decision,
-            })
-            .set_message("Result of authorize.".to_string()),
-        );
+        self.log_authz(LogAuthzArgs {
+            tokens,
+            entities: &entities,
+            user_authz_info,
+            workload_authz_info,
+            user_entity_claims,
+            workload_entity_claims,
+            request: &request,
+            resource: resource_uid,
+            result: &result,
+            elapsed_ms,
+        })?;
 
         Ok(result)
     }
@@ -507,10 +431,10 @@ pub enum AuthorizeError {
     #[error("could not create context: {0}")]
     CreateContext(#[from] cedar_policy::ContextJsonError),
     /// Error encountered while creating [`cedar_policy::Request`] for workload entity principal
-    #[error("The request for `Workload` does not conform to the schema: {0}")]
+    #[error("the request for `Workload` does not conform to the schema: {0}")]
     WorkloadRequestValidation(cedar_policy::RequestValidationError),
     /// Error encountered while creating [`cedar_policy::Request`] for user entity principal
-    #[error("The request for `User` does not conform to the schema: {0}")]
+    #[error("the request for `User` does not conform to the schema: {0}")]
     UserRequestValidation(cedar_policy::RequestValidationError),
     /// Error encountered while collecting all entities
     #[error("could not collect all entities: {0}")]
@@ -519,7 +443,7 @@ pub enum AuthorizeError {
     #[error("could convert entities to json: {0}")]
     EntitiesToJson(serde_json::Error),
     /// Error encountered while building the context for the request
-    #[error("Failed to build context: {0}")]
+    #[error("failed to build context: {0}")]
     BuildContext(#[from] BuildContextError),
     /// Error encountered while building the context for the request
     #[error("error while running on strict id token trust mode: {0}")]
@@ -527,6 +451,9 @@ pub enum AuthorizeError {
     /// Error encountered while building Cedar Entities
     #[error(transparent)]
     BuildEntity(#[from] BuildCedarlingEntityError),
+    /// Error encountered while logging the request
+    #[error("failed to log authorization request: {0}")]
+    Logging(#[from] LoggingError),
 }
 
 #[derive(Debug, derive_more::Error, derive_more::Display)]

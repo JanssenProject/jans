@@ -84,7 +84,7 @@ where
 }
 
 fn serialize_errors_policy<S>(
-    errors: &Vec<cedar_policy::AuthorizationError>,
+    errors: &[cedar_policy::AuthorizationError],
     serializer: S,
 ) -> Result<S::Ok, S::Error>
 where
@@ -138,30 +138,23 @@ fn calc_decision(
     reason_principals: &HashMap<String, PrincipalResult>,
     user_workload_operator: &WorkloadBoolOp,
 ) -> bool {
-    println!("workload mapping: {:?}", workload_entity_type_name);
-    println!("user mapping: {:?}", user_entity_type_name);
-    println!("reason principals: {:?}", reason_principals.keys());
-
     let workload_allowed = workload_entity_type_name.as_ref().and_then(|type_name| {
         reason_principals.get(*type_name).and_then(|res| {
-            res.decision.and_then(|decision| match decision {
-                Decision::Allow => Some(true),
-                Decision::Deny => Some(false),
+            res.decision.map(|decision| match decision {
+                Decision::Allow => true,
+                Decision::Deny => false,
             })
         })
     });
 
     let user_allowed = user_entity_type_name.as_ref().and_then(|type_name| {
         reason_principals.get(*type_name).and_then(|res| {
-            res.decision.and_then(|decision| match decision {
-                Decision::Allow => Some(true),
-                Decision::Deny => Some(false),
+            res.decision.map(|decision| match decision {
+                Decision::Allow => true,
+                Decision::Deny => false,
             })
         })
     });
-
-    println!("workload_allowed: {:?}", workload_allowed);
-    println!("user_allowed: {:?}", user_allowed);
 
     // cover each possible case when any of value is Some or None
     match (workload_allowed, user_allowed) {

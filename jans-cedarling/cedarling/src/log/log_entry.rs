@@ -6,17 +6,15 @@
 //! # Log entry
 //! The module contains structs for logging events.
 
-use std::collections::{HashMap, HashSet};
-use std::fmt::Display;
-use std::hash::Hash;
-
-use uuid7::Uuid;
-
 use super::LogLevel;
 use super::interface::Loggable;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types::{self, ApplicationName};
 use crate::common::policy_store::PoliciesContainer;
+use std::collections::{HashMap, HashSet};
+use std::fmt::Display;
+use std::hash::Hash;
+use uuid7::Uuid;
 
 /// ISO-8601 time format for [`chrono`]
 /// example: 2024-11-27T10:10:50.654Z
@@ -134,7 +132,6 @@ pub struct AuthorizationLogInfo {
     /// Workload authorize info
     #[serde(flatten)]
     pub workload_authorize_info: Option<WorkloadAuthorizeInfo>,
-
     /// is authorized
     pub authorized: bool,
 }

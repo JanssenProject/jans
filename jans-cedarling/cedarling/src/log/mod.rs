@@ -49,26 +49,26 @@
 //!
 //!  Currently only [MemoryLogger](`memory_logger::MemoryLogger`) implement this.
 
-pub mod interface;
-mod log_entry;
+#[cfg(test)]
+mod test;
+
 mod log_level;
-pub(crate) mod log_strategy;
 mod memory_logger;
 mod nop_logger;
 mod stdout_logger;
 
+pub mod interface;
+
+pub(crate) mod log_entry;
+pub(crate) mod log_strategy;
+pub(crate) use log_strategy::LogStrategy;
+
+pub use interface::LogStorage;
 pub use log_entry::*;
 pub use log_level::*;
 
-#[cfg(test)]
-mod test;
-
-use std::sync::Arc;
-
-pub use interface::LogStorage;
-pub(crate) use log_strategy::LogStrategy;
-
 use crate::bootstrap_config::log_config::LogConfig;
+use std::sync::Arc;
 
 /// Type alias for logger that is used in application
 pub(crate) type Logger = Arc<LogStrategy>;
