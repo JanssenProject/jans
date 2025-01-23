@@ -8,9 +8,9 @@
 
    1.3 Execute script: `python3 jans-jans-linux-setup-gluu2flex-migration/jans-linux-setup/tools/gluu2flex-migration/gluu2flex.py`
 
-   1.4 You need do copy directory `jans-jans-linux-setup-gluu2flex-migration/jans-linux-setup/tools/gluu2flex-migration`
+   1.4 You need do copy directory `jans-jans-linux-setup-gluu2flex-migration/jans-linux-setup/`
        to target Janssen instance, thus make tarball:
-       `tar -zcf gluu_source.tgz jans-jans-linux-setup-gluu2flex-migration/jans-linux-setup/tools/gluu2flex-migration`
+       `tar -zcf gluu_source.tgz jans-jans-linux-setup-gluu2flex-migration/jans-linux-setup/`
 
 ## 2. Install Jannsen instance (on a fresh VM):
 
@@ -23,6 +23,4 @@
    2.4 Install a fresh Janssen Instance with salt of Gluu Instance, for example: `python3 install.py --args="-encode-salt=0xZ6nwAjvZlz8nOovDIZFSJT"`
       NOTE!!: Replace your salt
 
-   2.6 Copy source directory to setup directory:
-      `cp -r jans-jans-linux-setup-gluu2flex-migration/jans-linux-setup/tools/gluu2flex-migration/ /opt/jans/jans-setup/tools`
-   2.5 Execute migratin script: `python3 /opt/jans/jans-setup/tools/gluu2flex-migration/gluu2flex.py`
+   2.5 Execute migratin script: `python3 jans-jans-linux-setup-gluu2flex-migration/jans-linux-setup/tools/gluu2flex-migration/gluu2flex.py`

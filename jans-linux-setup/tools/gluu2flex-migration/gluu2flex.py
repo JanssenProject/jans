@@ -389,6 +389,7 @@ class Gluu2FlexMigrator:
             base.current_app.app_info['jans_version'] = base.current_app.app_info['JANS_APP_VERSION'] + base.current_app.app_info['JANS_BUILD']
 
         print("Downloading Python dependencies")
+        downloads.download_pymysql()
         downloads.download_sqlalchemy()
         downloads.download_cryptography()
         downloads.download_pyjwt()
