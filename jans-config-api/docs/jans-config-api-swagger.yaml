@@ -9341,13 +9341,13 @@ components:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanView:
-          type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
+        userCanView:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean

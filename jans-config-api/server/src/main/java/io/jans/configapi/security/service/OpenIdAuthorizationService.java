@@ -113,33 +113,33 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         acccessToken = validateScope(acccessToken, tokenScopes, resourceInfo, issuer);
 
         boolean isAuthorized = externalAuthorization(token, issuer, method, path);
-        logger.error("Custom authorization - isAuthorized:{}", isAuthorized);
+        logger.debug("Custom authorization - isAuthorized:{}", isAuthorized);
 
         return acccessToken;
     }
 
     private String validateScope(String accessToken, List<String> tokenScopes, ResourceInfo resourceInfo, String issuer)
             throws WebApplicationException {
-        logger.error("Validate scope, accessToken:{}, tokenScopes:{}, resourceInfo: {}, issuer: {}", accessToken,
+        logger.info("Validate scope, accessToken:{}, tokenScopes:{}, resourceInfo: {}, issuer: {}", accessToken,
                 tokenScopes, resourceInfo, issuer);
         try {
             // Get resource scope
             Map<ProtectionScopeType, List<String>> resourceScopesByType = getRequestedScopes(resourceInfo);
             List<String> resourceScopes = getAllScopeList(resourceScopesByType);
-            logger.error("Validate scope, resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType,
+            logger.debug("Validate scope, resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType,
                     resourceScopes);
 
             // find missing scopes
             List<String> missingScopes = findMissingScopes(resourceScopesByType, tokenScopes);
-            logger.error("missingScopes:{}", missingScopes);
+            logger.info("missingScopes:{}", missingScopes);
 
             // Check if resource requires auth server specific scope
             List<String> authSpecificScope = getAuthSpecificScopeRequired(resourceInfo);
-            logger.error(" resourceScopes:{}, authSpecificScope:{} ", resourceScopes, authSpecificScope);
+            logger.info(" resourceScopes:{}, authSpecificScope:{} ", resourceScopes, authSpecificScope);
 
             // If No auth scope required OR if token contains the authSpecificScope
             if ((authSpecificScope == null || authSpecificScope.isEmpty())) {
-                logger.error("Validating token scopes as no authSpecificScope required");
+                logger.info("Validating token scopes as no authSpecificScope required");
                 if ((missingScopes != null && !missingScopes.isEmpty())) {
                     logger.error("Insufficient scopes! Required scope:{} -  however token scopes:{}", resourceScopes,
                             tokenScopes);
@@ -163,15 +163,15 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             
             //If no scope is missing
             if (missingScopes == null || missingScopes.isEmpty()) {
-                logger.error(" No missing scopes and hence returning original accessToken");
+                logger.info(" No missing scopes and hence returning original accessToken");
                 return accessToken;
             }
 
-            logger.error("Generating new token with authSpecificScope");
+            logger.info("Generating new token with authSpecificScope");
             // Generate token with required resourceScopes
             resourceScopes.addAll(authSpecificScope);
             accessToken = openIdService.requestAccessToken(authUtil.getClientId(), resourceScopes);
-            logger.error("Introspecting new accessToken:{}", accessToken);
+            logger.debug("Introspecting new accessToken:{}", accessToken);
 
             // Introspect
             IntrospectionResponse introspectionResponse = openIdService
@@ -187,7 +187,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                         Response.status(Response.Status.UNAUTHORIZED).build());
             }
 
-            logger.error("Token scopes Valid Returning accessToken:{}", accessToken);
+            logger.info("Token scopes Valid Returning accessToken:{}", accessToken);
             return AUTHENTICATION_SCHEME + accessToken;
         } catch (Exception ex) {
             if (logger.isErrorEnabled()) {

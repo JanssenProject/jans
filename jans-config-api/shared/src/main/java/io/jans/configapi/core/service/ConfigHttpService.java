@@ -60,8 +60,6 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
 
-
-
 @ApplicationScoped
 public class ConfigHttpService implements Serializable {
 
@@ -214,29 +212,26 @@ public class ConfigHttpService implements Serializable {
 
     public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers,
             Map<String, String> parameters) {
-      
-        log.error("\n\n requestUri{}, headers:{}, parameters:{}", requestUri, headers, parameters);
-      
-        log.error("requestUri{}, headers:{}, parameters:{}", requestUri, headers, parameters);
+
+        log.info("\n\n requestUri{}, headers:{}, parameters:{}", requestUri, headers, parameters);
+
         if (parameters != null && !parameters.isEmpty()) {
             StringBuilder query = new StringBuilder();
             int i = 0;
-            for (Iterator<String> iterator = parameters.keySet().iterator(); iterator.hasNext(); ) {
+            for (Iterator<String> iterator = parameters.keySet().iterator(); iterator.hasNext();) {
                 String key = iterator.next();
                 String value = parameters.get(key);
-                log.error("\n\n\n Final key:{}, value:{}", key, value);
                 if (StringUtils.isNotBlank(value)) {
-                    String delim = (i == 0) ? "?" : "&"; 
+                    String delim = (i == 0) ? "?" : "&";
                     query.append(delim + URLEncoder.encode(key, StandardCharsets.UTF_8) + "=");
                     query.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
                     i++;
-                    log.error("\n\n\n Final i:{}, query:{}", i, query);
                 }
             }
             requestUri = requestUri + query.toString();
-            log.error("\n\n\n Final requestUri:{}", requestUri);           
+            log.info("\n\n\n Final requestUri:{}", requestUri);
         }
-        
+
         HttpGet httpGet = new HttpGet(requestUri);
         if (headers != null) {
             for (Entry<String, String> headerEntry : headers.entrySet()) {
@@ -245,7 +240,7 @@ public class ConfigHttpService implements Serializable {
         }
         try {
             HttpResponse httpResponse = httpClient.execute(httpGet);
-            log.error("httpResponse:{}", httpResponse);
+            log.info("httpResponse:{}", httpResponse);
             return new HttpServiceResponse(httpGet, httpResponse);
         } catch (IOException ex) {
             log.error("Failed to execute get request", ex);

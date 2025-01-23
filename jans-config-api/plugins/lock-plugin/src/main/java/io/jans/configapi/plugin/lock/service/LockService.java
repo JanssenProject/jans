@@ -8,13 +8,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.model.exception.ApiApplicationException;
 import io.jans.configapi.core.service.ConfigHttpService;
-import io.jans.configapi.plugin.lock.util.LockClientFactory;
 import io.jans.model.net.HttpServiceResponse;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+
 import jakarta.ws.rs.core.Response.Status;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,9 +36,6 @@ public class LockService {
     @Inject
     ConfigHttpService configHttpService;
 
-    @Inject
-    LockClientFactory lockClientFactory;
-
     public JsonNode getStat(String url, String token, String month, String startMonth, String endMonth, String format)
             throws ApiApplicationException, JsonProcessingException {
         if (logger.isInfoEnabled()) {
@@ -48,55 +44,33 @@ public class LockService {
                     escapeLog(url), escapeLog(token), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth),
                     escapeLog(format));
         }
-        logger.error("LockStatResource::getStatistics() - url:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
-                url, month, startMonth, endMonth, format);
+
         JsonNode jsonNode = null;
+
+        // Request headers
         Map<String, String> headers = new HashMap<>();
         headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
         if (StringUtils.isNotBlank(token)) {
             headers.put(AUTHORIZATION, token);
         }
 
-        // Query Param
+        // Query Parameter
         Map<String, String> data = new HashMap<>();
         data.put("month", month);
         data.put("start-month", startMonth);
         data.put("end-month", endMonth);
         data.put("format", format);
         HttpServiceResponse httpServiceResponse = configHttpService.executeGet(url, headers, data);
-        logger.error(" stat httpServiceResponse:{}", httpServiceResponse);
+        
+        logger.info(" stat httpServiceResponse:{}", httpServiceResponse);
         if (httpServiceResponse != null) {
-            logger.error(
+            logger.info(
                     " stat httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
                     httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
                     httpServiceResponse.getHttpResponse().getEntity());
             jsonNode = getResponseJsonNode(httpServiceResponse);
         }
-        logger.error(" stat jsonNode:{}", jsonNode);
-        return jsonNode;
-    }
-
-    public JsonNode getStatData(String url, String token, String month, String startMonth, String endMonth,
-            String format) throws JsonProcessingException {
-        if (logger.isInfoEnabled()) {
-            logger.info(
-                    "LockStatResource::getStatistics() - url:{}, token:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
-                    escapeLog(url), escapeLog(token), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth),
-                    escapeLog(format));
-        }
-        logger.error("LockStatResource::getStatistics() - url:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
-                url, month, startMonth, endMonth, format);
-        JsonNode jsonNode = null;
-
-        Response response = LockClientFactory.getStat(url, token, month, startMonth, endMonth, format);
-        logger.error(" stat response:{}", response);
-        if (response != null) {
-            logger.error(" stat response.getStatus():{}, response.getEntity():{}", response.getStatus(),
-                    response.getEntity());
-            String jsonString = response.getEntity().toString();
-            jsonNode = getResponseJsonNode(jsonString);
-        }
-        logger.error(" stat jsonNode:{}", jsonNode);
+        logger.info(" stat jsonNode:{}", jsonNode);
         return jsonNode;
     }
 
@@ -108,7 +82,7 @@ public class LockService {
             return jsonNode;
         }
 
-        return getResponseJsonNode(getResponseEntityString(serviceResponse));
+        return getResponseJsonNode(getResponseEntityString(serviceResponse), "response");
     }
 
     public String getResponseEntityString(HttpServiceResponse serviceResponse) throws ApiApplicationException {
@@ -126,31 +100,32 @@ public class LockService {
                 return jsonString;
             }
             try {
-                jsonString = entity.toString();
-                logger.error(" stat jsonString:{}", jsonString);
-
                 jsonString = EntityUtils.toString(entity, "UTF-8");
-                logger.error("\n\n New jsonString:{}", jsonString);
             } catch (Exception ex) {
                 logger.error("Error while getting entity using EntityUtils is ", ex);
             }
-        }
 
-        if (httpResponse.getStatusLine().getStatusCode() == Status.OK.getStatusCode()) {
-            return jsonString;
-        } else {
-            throw new ApiApplicationException(httpResponse.getStatusLine().getStatusCode(), jsonString);
+            if (httpResponse.getStatusLine() != null
+                    && httpResponse.getStatusLine().getStatusCode() == Status.OK.getStatusCode()) {
+                return jsonString;
+            } else {
+                throw new ApiApplicationException(httpResponse.getStatusLine().getStatusCode(), jsonString);
+            }
         }
+        return jsonString;
     }
 
-    public JsonNode getResponseJsonNode(String jsonSring) throws JsonProcessingException {
+    public JsonNode getResponseJsonNode(String jsonSring, String nodeName) throws JsonProcessingException {
         JsonNode jsonNode = null;
 
         if (StringUtils.isBlank(jsonSring)) {
             return jsonNode;
         }
-
-        return Jackson.asJsonNode(jsonSring);
+        jsonNode = Jackson.asJsonNode(jsonSring);
+        if (StringUtils.isNotBlank(nodeName) && jsonNode != null && jsonNode.get(nodeName) != null) {
+            jsonNode = jsonNode.get("response");
+        }
+        return jsonNode;
     }
 
 }

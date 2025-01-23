@@ -488,12 +488,12 @@ paths:
           is mandatory if start_month and end_month parameters are not present.
         schema:
           type: string
-      - name: start_month
+      - name: start-month
         in: query
         description: Start-Month for which the stat report is to be fetched
         schema:
           type: string
-      - name: end_month
+      - name: end-month
         in: query
         description: End-Month for which the stat report is to be fetched
         schema:
@@ -671,9 +671,6 @@ components:
         tokenUrl:
           type: string
           description: Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint
-        groupScopeEnabled:
-          type: boolean
-          description: Group scope enabled
         endpointGroups:
           type: object
           additionalProperties:
@@ -707,9 +704,6 @@ components:
         externalLoggerConfiguration:
           type: string
           description: The path to the external log4j2 logging configuration
-        metricChannel:
-          type: string
-          description: Channel for metric reports
         metricReporterInterval:
           type: integer
           description: The interval for metric reporter in seconds
@@ -725,11 +719,6 @@ components:
           type: integer
           description: Time interval for the Clean Service in seconds
           format: int32
-        opaConfiguration:
-          $ref: '#/components/schemas/OpaConfiguration'
-        pdpType:
-          type: string
-          description: PDP type
         policiesJsonUrisAuthorizationToken:
           type: string
           description: Authorization token to access Json Uris
@@ -748,18 +737,14 @@ components:
           items:
             type: string
             description: List of Zip Uris with policies
+        messageConsumerType:
+          type: string
+          description: PubSub consumer service
+        policyConsumerType:
+          type: string
+          description: Policy consumer service
         errorReasonEnabled:
           type: boolean
-    OpaConfiguration:
-      type: object
-      properties:
-        baseUrl:
-          type: string
-          description: Base OPA URL
-        accessToken:
-          type: string
-          description: OPA access token
-      description: Opa Configuration
     JsonPatch:
       type: object
     JsonNode:
