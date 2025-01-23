@@ -218,6 +218,7 @@ public class AgamaPersistenceService {
             status.setTemplatePath(null);
             status.setTemplateDataModel(null);
             status.setExternalRedirectUrl(null);
+            status.setStartUrl(null);
 
             run.setEncodedContinuation(null);
             run.setHash(null);
