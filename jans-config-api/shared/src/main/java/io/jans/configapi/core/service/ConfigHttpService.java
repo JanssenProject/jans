@@ -226,8 +226,8 @@ public class ConfigHttpService implements Serializable {
                 String value = parameters.get(key);
                 log.error("\n\n\n Final key:{}, value:{}", key, value);
                 if (StringUtils.isNotBlank(value)) {
-                    String delim = (i == 0) ? "?" : "&" + URLEncoder.encode(key, StandardCharsets.UTF_8) + "=";
-                    query.append(delim);
+                    String delim = (i == 0) ? "?" : "&"; 
+                    query.append(delim + URLEncoder.encode(key, StandardCharsets.UTF_8) + "=");
                     query.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
                     i++;
                     log.error("\n\n\n Final i:{}, query:{}", i, query);

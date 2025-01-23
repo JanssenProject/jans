@@ -6,11 +6,10 @@
 
 package io.jans.configapi.plugin.lock.rest;
 
-
-
 import com.fasterxml.jackson.databind.JsonNode;
 
 import static io.jans.as.model.util.Util.escapeLog;
+import io.jans.configapi.core.model.exception.ApiApplicationException;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.lock.service.LockService;
@@ -59,7 +58,8 @@ public class LockStatResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { Constants.LOCK_READ_ACCESS, ApiAccessConstants.JANS_STAT }, groupScopes = {}, superScopes = {
+    @ProtectedApi(scopes = { Constants.LOCK_READ_ACCESS,
+            ApiAccessConstants.JANS_STAT }, groupScopes = {}, superScopes = {
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStatistics(
@@ -76,15 +76,19 @@ public class LockStatResource extends BaseResource {
             if (logger.isInfoEnabled()) {
                 logger.info(
                         "LockStatResource::getStatistics() - authorization:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
-                        escapeLog(authorization), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth), escapeLog(format));
+                        escapeLog(authorization), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth),
+                        escapeLog(format));
             }
-            
+
             logger.error(
                     "LockStatResource::getStatistics() - authorization:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
                     authorization, month, startMonth, endMonth, format);
             String url = getIssuer() + STAT_URL;
             jsonNode = this.lockService.getStat(url, authorization, month, startMonth, endMonth, format);
             logger.error("StatResource::getUserStatistics() - jsonNode:{} ", jsonNode);
+        } catch (ApiApplicationException aex) {
+            logger.error(" ApiApplicationException while fetching lock stat is", aex);
+            throwInternalServerException("Stat Error", aex);
         } catch (Exception ex) {
             logger.error(" Error while fetching lock stat is", ex);
             throwBadRequestException(ex);
