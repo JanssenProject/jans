@@ -168,7 +168,10 @@ pub struct AuthorizeResult {
     pub workload: Option<AuthorizeResultResponse>,
     /// Result of authorization where principal is `Jans::User`
     #[wasm_bindgen(getter_with_clone)]
-    pub person: Option<AuthorizeResultResponse>,
+    pub user: Option<AuthorizeResultResponse>,
+
+    #[wasm_bindgen(getter_with_clone)]
+    pub reason_input: Option<String>,
 
     /// Result of authorization
     /// true means `ALLOW`
@@ -192,9 +195,10 @@ impl From<cedarling::AuthorizeResult> for AuthorizeResult {
             workload: value
                 .workload
                 .map(|v| AuthorizeResultResponse { inner: Rc::new(v) }),
-            person: value
-                .person
+            user: value
+                .user
                 .map(|v| AuthorizeResultResponse { inner: Rc::new(v) }),
+            reason_input: value.reason_input.as_ref().map(|x| x.to_string()),
             decision: value.decision,
         }
     }
