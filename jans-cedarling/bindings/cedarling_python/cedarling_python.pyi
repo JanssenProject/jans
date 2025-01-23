@@ -112,6 +112,25 @@ class BootstrapConfig:
         """
         ...
 
+    @staticmethod
+    def from_env(options: Dict | None = None) -> BootstrapConfig:
+        """
+        Loads the configuration from environment variables.
+
+        Reads environment variables matching the configuration keys listed in the
+        class documentation. All required keys must be present in the environment.
+        You can specify dict, but keys from environment variables have bigger priority.
+
+        Returns:
+            BootstrapConfig: An instance of the configuration class.
+
+        Raises:
+            KeyError: If any required environment variable is missing.
+            ValueError: If a provided value is invalid or extraction fails.
+        """
+        ...
+
+
 @final
 class Cedarling:
 
@@ -138,6 +157,7 @@ class Request:
                  action: str,
                  resource: ResourceData,
                  context: Dict[str, Any]) -> None: ...
+
 
 @final
 class Tokens:

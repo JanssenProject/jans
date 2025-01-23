@@ -39,6 +39,14 @@ use pyo3::types::PyDict;
 ///     :returns: A BootstrapConfig instance
 ///
 ///     :raises ValueError: If a provided value is invalid or decoding fails.
+///
+/// .. method:: from_env(config=None) -> BootstrapConfig
+///
+///     Loads the bootstrap config from environment variables, optionally merging with provided config.
+///
+///     :param config: Optional dictionary with additional configuration to merge with environment variables.
+///     :returns: A BootstrapConfig instance
+///     :raises ValueError: If a provided value is invalid or decoding fails.
 #[pyclass]
 pub struct BootstrapConfig {
     inner: cedarling::BootstrapConfig,
@@ -52,6 +60,23 @@ impl BootstrapConfig {
             .map_err(|e| PyValueError::new_err(e.to_string()))?;
         let inner = cedarling::BootstrapConfig::from_raw_config(&source)
             .map_err(|e| PyValueError::new_err(e.to_string()))?;
+        Ok(Self { inner })
+    }
+
+    #[staticmethod]
+    #[pyo3(signature = (config=None))]
+    fn from_env(config: Option<Bound<'_, PyDict>>) -> PyResult<Self> {
+        let inner = if let Some(c) = config {
+            let source: cedarling::BootstrapConfigRaw = serde_pyobject::from_pyobject(c)
+                .map_err(|e| PyValueError::new_err(e.to_string()))?;
+
+            cedarling::BootstrapConfig::from_raw_config_and_env(Some(source))
+                .map_err(|e| PyValueError::new_err(e.to_string()))?
+        } else {
+            cedarling::BootstrapConfig::from_raw_config_and_env(None)
+                .map_err(|e| PyValueError::new_err(e.to_string()))?
+        };
+
         Ok(Self { inner })
     }
 

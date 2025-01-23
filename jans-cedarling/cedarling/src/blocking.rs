@@ -7,10 +7,10 @@
 
 //! Blocking client of Cedarling
 
-use crate::Cedarling as AsyncCedarling;
 use crate::{
     AuthorizeError, AuthorizeResult, BootstrapConfig, InitCedarlingError, LogStorage, Request,
 };
+use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
 use std::sync::Arc;
 use tokio::runtime::Runtime;
 
@@ -23,7 +23,17 @@ pub struct Cedarling {
 }
 
 impl Cedarling {
-    /// Builder
+    /// Create a new instance of the Cedarling application.
+    /// Initialize instance from enviroment variables and from config.
+    /// Configuration structure has lower priority.
+    pub fn new_with_env(
+        raw_config: Option<BootstrapConfigRaw>,
+    ) -> Result<Cedarling, InitCedarlingError> {
+        let config = BootstrapConfig::from_raw_config_and_env(raw_config)?;
+        Self::new(&config)
+    }
+
+    /// Create a new instance of the Cedarling application.
     pub fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
         let rt = Runtime::new().map_err(InitCedarlingError::RuntimeInit)?;
 

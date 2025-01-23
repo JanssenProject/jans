@@ -7,8 +7,24 @@ from cedarling_python import BootstrapConfig, Tokens
 from cedarling_python import Cedarling
 from cedarling_python import ResourceData, Request
 import time
+import yaml
+import os
 
-bootstrap_config = BootstrapConfig.load_from_file("./example_files/sample_bootstrap_props.yaml")
+
+def load_yaml_to_env(yaml_path):
+    with open(yaml_path, 'r') as file:
+        config = yaml.safe_load(file)
+
+    for key, value in config.items():
+        if value is not None:  # Skip null values
+            os.environ[key] = str(value)
+
+
+bootstrap_config = BootstrapConfig.load_from_file(
+    "./example_files/sample_bootstrap_props.yaml")
+
+# Create config from environment variables
+# bootstrap_config = BootstrapConfig.from_env()
 
 # initialize cedarling instance
 # all values in the bootstrap_config is parsed and validated at this step.
