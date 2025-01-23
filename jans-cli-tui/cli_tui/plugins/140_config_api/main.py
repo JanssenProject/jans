@@ -5,6 +5,7 @@ from typing import Any, Optional
 from functools import partial
 
 import prompt_toolkit
+from prompt_toolkit.layout import ScrollablePane
 from prompt_toolkit.layout.containers import HSplit, DynamicContainer, VSplit, Window, HorizontalAlign
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.layout.dimension import D
@@ -99,7 +100,7 @@ class Plugin(DialogUtils):
                         add_handler=add_acr_validation
                         )
 
-        self.tabs['main_'] = HSplit([
+        self.tabs['main_'] = ScrollablePane(content=HSplit([
 
                         self.app.getTitledText(
                             _("Maximum Number of Result Per Page"),
@@ -204,6 +205,7 @@ class Plugin(DialogUtils):
                     ],
                     width=D(),
                     )
+                , height=D(), display_arrows=False, show_scrollbar=True)
 
         self.agama_configuration_mandatory_attributes_widget = JansLabelWidget(
                         title = _("Mandatory Attributes"),
