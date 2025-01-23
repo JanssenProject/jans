@@ -5,7 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::AuthorizeError;
+use super::BadInputError;
 use crate::bootstrap_config::WorkloadBoolOp;
 use cedar_policy::{Decision, PolicyId};
 use serde::{Serialize, Serializer, ser::SerializeStruct};
@@ -27,7 +27,7 @@ pub struct AuthorizeResult {
         serialize_with = "serialize_reason_input",
         skip_serializing_if = "Option::is_none"
     )]
-    pub reason_input: Option<AuthorizeError>,
+    pub reason_input: Option<BadInputError>,
 
     /// Result of authorization
     /// true means `ALLOW`
@@ -74,7 +74,7 @@ where
 
 impl<E> From<E> for AuthorizeResult
 where
-    E: Into<AuthorizeError>,
+    E: Into<BadInputError>,
 {
     fn from(value: E) -> Self {
         Self {
@@ -113,7 +113,7 @@ impl From<cedar_policy::Response> for PrincipalResult {
 }
 
 fn serialize_reason_input<S>(
-    error: &Option<AuthorizeError>,
+    error: &Option<BadInputError>,
     serializer: S,
 ) -> Result<S::Ok, S::Error>
 where

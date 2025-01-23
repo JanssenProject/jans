@@ -15,7 +15,7 @@ use crate::authz::entity_builder::{
     BuildCedarlingEntityError, BuildEntityError, BuildTokenEntityError,
 };
 use crate::common::policy_store::TokenKind;
-use crate::{AuthorizeError, Cedarling, cmp_decision, cmp_policy};
+use crate::{BadInputError, Cedarling, cmp_decision, cmp_policy};
 use cedarling_util::get_raw_config;
 use std::collections::HashSet;
 use std::sync::LazyLock;
@@ -193,7 +193,7 @@ async fn test_failed_user_mapping() {
         .expect("there should be an error due to the input");
 
     match err {
-        AuthorizeError::BuildEntity(BuildCedarlingEntityError::User(error)) => {
+        BadInputError::BuildEntity(BuildCedarlingEntityError::User(error)) => {
             assert_eq!(error.errors.len(), 2, "there should be 2 errors");
 
             let (token_kind, err) = &error.errors[0];
@@ -246,7 +246,7 @@ async fn test_failed_workload_mapping() {
         .expect("there should be an error due to the input");
 
     match err {
-        AuthorizeError::BuildEntity(BuildCedarlingEntityError::Workload(error)) => {
+        BadInputError::BuildEntity(BuildCedarlingEntityError::Workload(error)) => {
             assert_eq!(error.errors.len(), 2, "there should be 2 errors");
 
             // check for access token error
@@ -303,9 +303,10 @@ async fn test_failed_id_token_mapping() {
         .expect("there should be an error due to the input");
 
     match err {
-        AuthorizeError::BuildEntity(BuildCedarlingEntityError::IdToken(
-            BuildTokenEntityError { token_kind, err },
-        )) => {
+        BadInputError::BuildEntity(BuildCedarlingEntityError::IdToken(BuildTokenEntityError {
+            token_kind,
+            err,
+        })) => {
             assert_eq!(token_kind, &TokenKind::Id);
             assert!(
                 matches!(err, BuildEntityError::EntityNotInSchema(ref name) if name == "MappedIdTokenNotExist"),
@@ -347,7 +348,7 @@ async fn test_failed_access_token_mapping() {
         .expect("there should be an error due to the input");
 
     match err {
-        AuthorizeError::BuildEntity(BuildCedarlingEntityError::AccessToken(
+        BadInputError::BuildEntity(BuildCedarlingEntityError::AccessToken(
             BuildTokenEntityError { token_kind, err },
         )) => {
             assert_eq!(token_kind, &TokenKind::Access);
@@ -388,7 +389,7 @@ async fn test_failed_userinfo_token_mapping() {
         .expect("there should be an error due to the input");
 
     match err {
-        AuthorizeError::BuildEntity(BuildCedarlingEntityError::UserinfoToken(
+        BadInputError::BuildEntity(BuildCedarlingEntityError::UserinfoToken(
             BuildTokenEntityError { token_kind, err },
         )) => {
             assert_eq!(token_kind, &TokenKind::Userinfo);

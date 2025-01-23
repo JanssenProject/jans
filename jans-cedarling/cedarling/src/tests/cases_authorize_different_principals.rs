@@ -438,11 +438,12 @@ async fn test_where_principal_workload_cant_be_applied() {
     let result = cedarling
         .authorize(request)
         .await
-        .expect_err("request should be parsed with error");
+        .expect("request should be successful");
+    assert_eq!(result.decision, false, "decision should be false");
 
     assert!(matches!(
-        result,
-        crate::AuthorizeError::WorkloadRequestValidation(_)
+        result.reason_input,
+        Some(crate::BadInputError::WorkloadRequestValidation(_))
     ))
 }
 
@@ -467,11 +468,11 @@ async fn test_where_principal_user_cant_be_applied() {
     let result = cedarling
         .authorize(request)
         .await
-        .expect_err("request should be parsed with error");
+        .expect("request should successful");
+    assert_eq!(result.decision, false, "decision should be false");
 
-    assert!(
-        matches!(result, crate::AuthorizeError::UserRequestValidation(_)),
-        "expected error UserRequestValidation, got: {}",
-        result
-    )
+    assert!(matches!(
+        result.reason_input,
+        Some(crate::BadInputError::UserRequestValidation(_))
+    ),)
 }

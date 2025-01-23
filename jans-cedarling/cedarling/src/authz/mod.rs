@@ -154,7 +154,7 @@ impl Authz {
         // Parse action UID.
         let action = match cedar_policy::EntityUid::from_str(request.action.as_str()) {
             Ok(action) => action,
-            Err(e) => return Ok(AuthorizeResult::from(AuthorizeError::Action(e))),
+            Err(e) => return Ok(AuthorizeResult::from(BadInputError::Action(e))),
         };
 
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
@@ -185,21 +185,29 @@ impl Authz {
 
         // Convert [`AuthorizeEntitiesData`] to  [`cedar_policy::Entities`] structure,
         // hold all entities that will be used on authorize check.
-        let entities = entities_data.entities(Some(&schema.schema))?;
+        let entities = match entities_data.entities(Some(&schema.schema)) {
+            Ok(entities) => entities,
+            Err(e) => return Ok(AuthorizeResult::from(BadInputError::from(e))),
+        };
 
         let (workload_authz_result, workload_authz_info, workload_entity_claims) =
             if let Some(workload) = workload_principal {
                 let principal = workload;
 
-                let authz_result = self
-                    .execute_authorize(ExecuteAuthorizeParameters {
-                        entities: &entities,
-                        principal: principal.clone(),
-                        action: action.clone(),
-                        resource: resource_uid.clone(),
-                        context: context.clone(),
-                    })
-                    .map_err(AuthorizeError::WorkloadRequestValidation)?;
+                let authz_result = match self.execute_authorize(ExecuteAuthorizeParameters {
+                    entities: &entities,
+                    principal: principal.clone(),
+                    action: action.clone(),
+                    resource: resource_uid.clone(),
+                    context: context.clone(),
+                }) {
+                    Ok(result) => result,
+                    Err(e) => {
+                        return Ok(AuthorizeResult::from(
+                            BadInputError::WorkloadRequestValidation(e),
+                        ));
+                    },
+                };
 
                 let authz_info = WorkloadAuthorizeInfo {
                     principal: principal.to_string(),
@@ -233,15 +241,20 @@ impl Authz {
             if let Some(user) = user_principal {
                 let principal = user;
 
-                let authz_result = self
-                    .execute_authorize(ExecuteAuthorizeParameters {
-                        entities: &entities,
-                        principal: principal.clone(),
-                        action: action.clone(),
-                        resource: resource_uid.clone(),
-                        context: context.clone(),
-                    })
-                    .map_err(AuthorizeError::UserRequestValidation)?;
+                let authz_result = match self.execute_authorize(ExecuteAuthorizeParameters {
+                    entities: &entities,
+                    principal: principal.clone(),
+                    action: action.clone(),
+                    resource: resource_uid.clone(),
+                    context: context.clone(),
+                }) {
+                    Ok(result) => result,
+                    Err(e) => {
+                        return Ok(AuthorizeResult::from(BadInputError::UserRequestValidation(
+                            e,
+                        )));
+                    },
+                };
 
                 let authz_info = UserAuthorizeInfo {
                     principal: principal.to_string(),
@@ -325,7 +338,7 @@ impl Authz {
         &self,
         request: &Request,
         tokens: &DecodedTokens<'_>,
-    ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
+    ) -> Result<AuthorizeEntitiesData, BadInputError> {
         Ok(self
             .entity_builder
             .build_entities(tokens, &request.resource)?)
@@ -410,6 +423,14 @@ impl AuthorizeEntitiesData {
 /// Error type for Authorization Service
 #[derive(thiserror::Error, Debug)]
 pub enum AuthorizeError {
+    /// Error encountered while logging the request
+    #[error("failed to log authorization request: {0}")]
+    Logging(#[from] LoggingError),
+}
+
+/// Error returned because of invalid or malformed inputs to [`Authz::authorize`]
+#[derive(thiserror::Error, Debug)]
+pub enum BadInputError {
     /// Error encountered while processing JWT token data
     #[error(transparent)]
     ProcessTokens(#[from] jwt::JwtProcessingError),
@@ -440,9 +461,6 @@ pub enum AuthorizeError {
     /// Error encountered while building Cedar Entities
     #[error(transparent)]
     BuildEntity(#[from] BuildCedarlingEntityError),
-    /// Error encountered while logging the request
-    #[error("failed to log authorization request: {0}")]
-    Logging(#[from] LoggingError),
 }
 
 #[derive(Debug, derive_more::Error, derive_more::Display)]

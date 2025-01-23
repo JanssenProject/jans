@@ -35,7 +35,7 @@ use std::sync::Arc;
 use authz::AuthorizeEntitiesData;
 use authz::Authz;
 pub use authz::request::{Request, ResourceData, Tokens};
-pub use authz::{AuthorizeError, AuthorizeResult};
+pub use authz::{AuthorizeError, AuthorizeResult, BadInputError};
 pub use bootstrap_config::*;
 use common::app_types;
 use init::ServiceFactory;
@@ -125,7 +125,7 @@ impl Cedarling {
     pub async fn build_entities(
         &self,
         request: &Request,
-    ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
+    ) -> Result<AuthorizeEntitiesData, BadInputError> {
         let tokens = self.authz.decode_tokens(request).await?;
         self.authz.build_entities(request, &tokens)
     }
