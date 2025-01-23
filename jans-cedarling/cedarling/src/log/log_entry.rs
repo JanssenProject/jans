@@ -337,7 +337,7 @@ pub struct DecisionLogEntry<'a> {
     /// decision for request
     pub decision: Decision,
     /// Dictionary with the token type and claims which should be included in the log
-    pub tokens: NewLogTokensInfo<'a>,
+    pub tokens: LogTokensInfo<'a>,
     /// time in milliseconds spent for decision
     pub decision_time_ms: i64,
 }
@@ -479,17 +479,9 @@ impl serde::Serialize for PrincipalLogEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
-pub struct LogTokensInfo<'a> {
-    pub id_token: Option<HashMap<&'a str, &'a serde_json::Value>>,
-    #[serde(rename = "Userinfo")]
-    pub userinfo: Option<HashMap<&'a str, &'a serde_json::Value>>,
-    pub access: Option<HashMap<&'a str, &'a serde_json::Value>>,
-}
+pub struct LogTokensInfo<'a>(pub HashMap<&'a str, HashMap<&'a str, &'a serde_json::Value>>);
 
-#[derive(Debug, Clone, PartialEq, serde::Serialize)]
-pub struct NewLogTokensInfo<'a>(pub HashMap<&'a str, HashMap<&'a str, &'a serde_json::Value>>);
-
-impl<'a> NewLogTokensInfo<'a> {
+impl<'a> LogTokensInfo<'a> {
     pub fn new(tokens: &'a HashMap<String, Token>, decision_log_jwt_id: &'a str) -> Self {
         let tokens_logging_info = tokens
             .iter()

@@ -16,7 +16,7 @@ use crate::jwt::{self, Token};
 use crate::log::interface::LogWriter;
 use crate::log::{
     AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, DiagnosticsRefs, LogEntry,
-    LogLevel, LogType, Logger, NewLogTokensInfo, PrincipalLogEntry, UserAuthorizeInfo,
+    LogLevel, LogTokensInfo, LogType, Logger, PrincipalLogEntry, UserAuthorizeInfo,
     WorkloadAuthorizeInfo,
 };
 use build_ctx::*;
@@ -256,7 +256,7 @@ impl Authz {
             .as_ref()
             .map(|auth_info| &auth_info.diagnostics);
 
-        let tokens_logging_info = NewLogTokensInfo::new(
+        let tokens_logging_info = LogTokensInfo::new(
             &tokens,
             self.config
                 .authorization
