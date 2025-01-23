@@ -12,9 +12,7 @@ package io.jans.lock.util;
  */
 public class Constants {
 
-    private Constants() {
-    }
-
+    private Constants() {}
 
     public static final String MONTH = "month";
 }

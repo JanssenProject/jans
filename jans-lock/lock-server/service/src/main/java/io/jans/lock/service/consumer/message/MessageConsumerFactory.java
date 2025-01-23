@@ -90,7 +90,7 @@ public class MessageConsumerFactory {
 	@Produces
 	@ApplicationScoped
 	public MessageConsumer produceMessageConsumer() {
-		String messageConsumerType = appConfiguration.getPdpType();
+		String messageConsumerType = appConfiguration.getMessageConsumerType();
 		MessageConsumer messageConsumer = getMessageConsumer(messageConsumerType);
 		
 		return messageConsumer;

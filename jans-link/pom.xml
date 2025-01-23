@@ -2,12 +2,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.jans</groupId>
 	<artifactId>jans-link-server-parent</artifactId>
-	<version>1.3.0</version>
+	<version>0.0.0-nightly</version>
 
     <parent>
 	    <groupId>io.jans</groupId>
 	    <artifactId>jans-bom</artifactId>
-	    <version>1.3.0</version>
+	    <version>0.0.0-nightly</version>
     </parent>
 
 	<modules>

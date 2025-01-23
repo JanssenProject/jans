@@ -34,6 +34,14 @@ Methods
     :returns: A BootstrapConfig instance
 
     :raises ValueError: If a provided value is invalid or decoding fails.
+
+.. method:: from_env(config=None) -> BootstrapConfig
+
+    Loads the bootstrap config from environment variables, optionally merging with provided config.
+
+    :param config: Optional dictionary with additional configuration to merge with environment variables.
+    :returns: A BootstrapConfig instance
+    :raises ValueError: If a provided value is invalid or decoding fails.
 ___
 
 Cedarling
