@@ -19,7 +19,6 @@ import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.document.store.model.Document;
-import io.jans.service.document.store.provider.DBDocumentStoreProvider;
 import io.jans.service.document.store.service.DBDocumentService;
 
 import io.jans.util.exception.InvalidAttributeException;
@@ -33,11 +32,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.*;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -65,9 +62,6 @@ public class AssetService {
 
     @Inject
     AuthUtil authUtil;
-
-    @Inject
-    DBDocumentStoreProvider dBDocumentStoreProvider;
 
     @Inject
     DocumentStoreService documentStoreService;
