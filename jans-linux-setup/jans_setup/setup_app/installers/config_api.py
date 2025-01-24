@@ -250,12 +250,9 @@ class ConfigApiInstaller(JettyInstaller):
         self.logIt("Updating jansServiceModule for Config Api")
 
         # find configuration dn
-        ldif_parser = myLdifParser(self.config_ldif_fn)
-        ldif_parser.parse()
-        for dn, _ in ldif_parser.entries:
-            if 'ou=configuration' in dn:
-                config_api_config_dn = dn
-                break
+        jans_config = base.read_properties_file(Config.jans_properties_fn)
+        config_api_config_dn = jans_config['configApi_ConfigurationEntryDN']
+
 
         jans_service_modules = []
 

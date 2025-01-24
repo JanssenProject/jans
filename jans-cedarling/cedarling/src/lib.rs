@@ -45,8 +45,6 @@ use log::interface::LogWriter;
 use log::{LogEntry, LogType};
 pub use log::{LogLevel, LogStorage};
 
-pub use crate::authz::entities::CreateCedarEntityError;
-
 #[doc(hidden)]
 pub mod bindings {
     pub use cedar_policy;
@@ -84,6 +82,17 @@ pub struct Cedarling {
 }
 
 impl Cedarling {
+    /// Create a new instance of the Cedarling application.
+    /// Initialize instance from enviroment variables and from config.
+    /// Configuration structure has lower priority.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub async fn new_with_env(
+        raw_config: Option<BootstrapConfigRaw>,
+    ) -> Result<Cedarling, InitCedarlingError> {
+        let config = BootstrapConfig::from_raw_config_and_env(raw_config)?;
+        Self::new(&config).await
+    }
+
     /// Create a new instance of the Cedarling application.
     pub async fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
         let log = log::init_logger(&config.log_config);
@@ -124,12 +133,12 @@ impl Cedarling {
     /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.
     #[doc(hidden)]
     #[cfg(test)]
-    pub async fn authorize_entities_data(
+    pub async fn build_entities(
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         let tokens = self.authz.decode_tokens(request).await?;
-        self.authz.build_entities(request, &tokens).await
+        self.authz.build_entities(request, &tokens)
     }
 }
 

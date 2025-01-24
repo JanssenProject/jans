@@ -16,7 +16,7 @@ serde_yml = "0.0.12"
 thiserror = { workspace = true }
 sparkv = { workspace = true }
 uuid7 = { version = "1.1.0", features = ["serde", "uuid"] }
-cedar-policy = "4.2"
+cedar-policy = { version = "4.2", features = ["partial-eval"] }
 base64 = "0.22.1"
 url = "2.5.2"
 lazy_static = "1.5.0"

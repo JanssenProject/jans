@@ -188,14 +188,14 @@ Kubernetes: `>=v1.22.0-0`
 | config.configmap.cnSqlDbUser | string | `"jans"` | SQL database username. |
 | config.configmap.cnSqldbUserPassword | string | `"Test1234#"` | SQL password  injected the secrets . |
 | config.configmap.cnVaultAddr | string | `"http://localhost:8200"` | Base URL of Vault. |
-| config.configmap.cnVaultAppRolePath | string | `"approle"` | Path to Vault AppRole. |
+| config.configmap.cnVaultAppRolePath | string | `"approle"` | Path to the Vault AppRole. |
 | config.configmap.cnVaultKvPath | string | `"secret"` | Path to Vault KV secrets engine. |
 | config.configmap.cnVaultNamespace | string | `""` | Vault namespace used to access the secrets. |
 | config.configmap.cnVaultPrefix | string | `"jans"` | Base prefix name used to access secrets. |
 | config.configmap.cnVaultRoleId | string | `""` | Vault AppRole RoleID. |
-| config.configmap.cnVaultRoleIdFile | string | `"/etc/certs/vault_role_id"` | Path to file contains Vault AppRole role ID. |
+| config.configmap.cnVaultRoleIdFile | string | `"/etc/certs/vault_role_id"` | Path to the file that contains Vault AppRole role ID. |
 | config.configmap.cnVaultSecretId | string | `""` | Vault AppRole SecretID. |
-| config.configmap.cnVaultSecretIdFile | string | `"/etc/certs/vault_secret_id"` | Path to file contains Vault AppRole secret ID. |
+| config.configmap.cnVaultSecretIdFile | string | `"/etc/certs/vault_secret_id"` | Path to the file that contains Vault AppRole secret ID. |
 | config.configmap.cnVaultVerify | bool | `false` | Verify connection to Vault. |
 | config.configmap.kcAdminPassword | string | `"Test1234#"` | Keycloak  admin UI password |
 | config.configmap.kcAdminUsername | string | `"admin"` | Keycloak admin UI username |
@@ -340,17 +340,17 @@ Kubernetes: `>=v1.22.0-0`
 | global.casa.ingress.casaEnabled | bool | `false` | Enable casa endpoints /casa |
 | global.casa.ingress.casaLabels | object | `{}` | Casa ingress resource labels. key app is taken |
 | global.cloud.testEnviroment | bool | `false` | Boolean flag if enabled will strip resources requests and limits from all services. |
-| global.cnConfiguratorConfigurationFile | string | `"/etc/jans/conf/configuration.json"` | Path to configuration schema file |
-| global.cnConfiguratorCustomSchema | object | `{"secretName":""}` | Use custom configuration schema in existing secrets. Note, the secrets has to contain the key configuration.json or any basename as specified in cnConfiguratorConfigurationFile. |
-| global.cnConfiguratorCustomSchema.secretName | string | `""` | The name of the secrets used for storing custom configuration schema. |
-| global.cnConfiguratorDumpFile | string | `"/etc/jans/conf/configuration.out.json"` | Path to dumped configuration schema file |
+| global.cnConfiguratorConfigurationFile | string | `"/etc/jans/conf/configuration.json"` | Path to the configuration schema file |
+| global.cnConfiguratorCustomSchema | object | `{"secretName":""}` | Use custom configuration schema in existing Kubernetes secret. Note that the secret has to contain the configuration.json key or any basename as specified in cnConfiguratorConfigurationFile. |
+| global.cnConfiguratorCustomSchema.secretName | string | `""` | The name of the Kubernetes secret used for storing custom configuration schema. |
+| global.cnConfiguratorDumpFile | string | `"/etc/jans/conf/configuration.out.json"` | Path to the dumped configuration schema file |
 | global.cnConfiguratorKey | string | `""` | Key to encrypt/decrypt configuration schema file using AES-256 CBC mode. Set the value to empty string to disable encryption/decryption, or 32 alphanumeric characters to enable it. |
-| global.cnConfiguratorKeyFile | string | `"/etc/jans/conf/configuration.key"` | Path to file contains key to encrypt/decrypt configuration schema file. |
+| global.cnConfiguratorKeyFile | string | `"/etc/jans/conf/configuration.key"` | Path to the file that contains the key to encrypt/decrypt the configuration schema file. |
 | global.cnDocumentStoreType | string | `"DB"` | Document store type to use for shibboleth files DB. |
 | global.cnGoogleApplicationCredentials | string | `"/etc/jans/conf/google-credentials.json"` | Base64 encoded service account. The sa must have roles/secretmanager.admin to use Google secrets. Leave as this is a sensible default. |
 | global.cnPersistenceType | string | `"sql"` | Persistence backend to run Janssen with hybrid|sql |
 | global.cnPrometheusPort | string | `""` | Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number. |
-| global.cnSqlPasswordFile | string | `"/etc/jans/conf/sql_password"` | Path to SQL password file |
+| global.cnSqlPasswordFile | string | `"/etc/jans/conf/sql_password"` | Path to the SQL password file |
 | global.config-api.appLoggers | object | `{"configApiLogLevel":"INFO","configApiLogTarget":"STDOUT","enableStdoutLogPrefix":"true","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
 | global.config-api.appLoggers.configApiLogLevel | string | `"INFO"` | configapi.log level |
 | global.config-api.appLoggers.configApiLogTarget | string | `"STDOUT"` | configapi.log target |

@@ -122,6 +122,7 @@ And print response
 Scenario: Get an openid connect scopes by inum
 Given url mainUrl
 And header Authorization = 'Bearer ' + accessToken
+And param pattern = '1800' 	
 When method GET
 Then status 200
 And print response

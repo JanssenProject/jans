@@ -6,6 +6,7 @@
 
 package io.jans.orm.util.properties;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -77,9 +78,9 @@ public class FileConfiguration {
 						
 			this.loaded = true;
 		} catch (ConfigurationException ex) {
-			LOG.error(String.format("Failed to load '%s' configuration file from config folder", this.fileName));
+			LOG.error(String.format("Failed to load '%s' configuration file from config folder. Current folder: '%s'", this.fileName, (new File(".").getAbsolutePath())));
 		} catch (Exception e) {
-			LOG.error(String.format("Failed to load '%s' configuration file from config folder", this.fileName));
+			LOG.error(String.format("Failed to load '%s' configuration file from config folder. Current folder: '%s'", this.fileName, (new File(".").getAbsolutePath())));
 			LOG.error(e.getMessage(), e);
 		}
 	}

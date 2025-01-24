@@ -53,19 +53,19 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 
     ```shell
     cd /tmp
-    sha256sum -c jans_replace-janssen-version.ubuntu22.04_amd64.deb.sha256sum
+    sha256sum -c jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text
-    jans_replace-janssen-version.ubuntu22.04_amd64.deb.sha256sum: OK
+    jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum: OK
     ```
 
 - Install the package
 
 ```
-sudo apt install  ./jans_replace-janssen-version.ubuntu22.04_amd64.deb
+sudo apt install  ./jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
 ```
 
 ### Ubuntu 20.04
@@ -89,19 +89,19 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 
     ```shell
     cd /tmp
-    sha256sum -c jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum
+    sha256sum -c jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text
-    jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum: OK
+    jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb.sha256sum: OK
     ```
 
 - Install the package
 
 ```
-sudo apt install  ./jans_replace-janssen-version.ubuntu20.04_amd64.deb
+sudo apt install  ./jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb
 ```
 
 ## Run the setup script
