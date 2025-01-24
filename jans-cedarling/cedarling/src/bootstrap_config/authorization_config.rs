@@ -4,6 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::WorkloadBoolOp;
+use serde::{Deserialize, Serialize};
 
 /// Configuration to specify authorization workflow.
 /// - If we use user entity as principal.
@@ -54,4 +55,47 @@ pub struct AuthorizationConfig {
 
     /// Name of Cedar userinfo schema entity
     pub mapping_userinfo_token: Option<String>,
+
+    /// Sets the validation level for ID tokens.
+    ///
+    /// The available levels are [`None`] and [`Strict`].
+    ///
+    /// # Strict Mode
+    ///
+    /// In `Strict` mode, the following conditions must be met for a token
+    /// to be considered valid:
+    ///
+    /// - The `id_token`'s `aud` (audience) must match the `access_token`'s `client_id`
+    /// - If a Userinfo token is present:
+    ///     - Its `sub` (subject) must match the `id_token`'s `sub`.
+    ///     - Its `aud` (audience) must match the `access_token`'s `client_id`.
+    ///
+    /// [`None`]: IdTokenTrustMode::None
+    /// [`Strict`]: IdTokenTrustMode::Strict
+    pub id_token_trust_mode: IdTokenTrustMode,
+}
+
+/// Defines the level of validation for ID tokens.
+#[derive(Debug, Clone, PartialEq, Default, Deserialize, Serialize, Copy)]
+#[serde(rename_all = "lowercase")]
+pub enum IdTokenTrustMode {
+    /// No validation is performed on the ID token.
+    None,
+    /// Strict validation of the ID token.
+    ///
+    /// In this mode, the following conditions must be met:
+    ///
+    /// - The `id_token`'s `aud` (audience) must match the `access_token`'s `client_id`.
+    /// - If a Userinfo token is present:
+    ///   - Its `sub` (subject) must match the `id_token`'s `sub`.
+    ///   - Its `aud` must match the `access_token`'s `client_id`.
+    #[default]
+    Strict,
+}
+
+/// Error when parsing [`IdTokenTrustMode`]
+#[derive(Default, Debug, derive_more::Display, derive_more::Error)]
+#[display("Invalid `IdTokenTrustMode`: {trust_mode}. should be `strict` or `none`")]
+pub struct IdTknTrustModeParseError {
+    trust_mode: String,
 }

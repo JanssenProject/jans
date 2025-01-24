@@ -307,6 +307,8 @@ jobs:
         overwrite: true
   build_demo_packages:
     if: github.repository == 'JanssenProject/jans'
+    # Needs cedarling wasm as jans-tarp uses the wasm package
+    needs: build_cedarling_wasm
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
@@ -326,6 +328,17 @@ jobs:
         for i in $(ls -d */); do zip -r demo-${i%/}-$VER-source.zip $i && sha256sum demo-${i%/}-$VER-source.zip > demo-${i%/}-$VER-source.zip.sha256sum; done
         sudo rm demo-jans-tarp-$VER-source.zip demo-jans-tarp-$VER-source.zip.sha256sum
         cd jans-tarp
+        # Get the latest cedarling wasm package
+        TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+        if [ "${TAG}" == "nightly" ]; then
+          TAG="0.0.0"
+        fi
+        wget https://github.com/${{ github.repository }}/releases/download/"${VER}"/cedarling_wasm_"${TAG}"_pkg.tar.gz -O cedarling_wasm.tar.gz
+        mkdir -p wasm
+        tar -xvf cedarling_wasm.tar.gz -C wasm
+        rm cedarling_wasm.tar.gz
+        ls wasm
+        # END Get the latest cedarling wasm package
         npm install
         npm run build
         npm run pack
@@ -381,3 +394,105 @@ jobs:
         gpg --armor --detach-sign cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_31_x86_64.whl || echo "Failed to sign"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${VERSION}" *.whl *.sha256sum *.asc
+  build_cedarling_wasm:
+    if: github.repository == 'JanssenProject/jans'
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      with:
+        egress-policy: audit
+
+    - name: Checkout
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - name: Import GPG key
+      id: import_gpg
+      continue-on-error: true
+      uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
+      with:
+        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+        git_user_signingkey: true
+        git_commit_gpgsign: true
+    - name: Build WASM build
+      id: sign-cedarling
+      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
+      run: |
+        rustup update stable && rustup default stable
+        cargo install wasm-pack
+        wasm-pack build --release --target web
+        ls pkg
+    - name: Archive and sign pkg contents
+      id: archive_pkg
+      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
+      run: |
+        TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+        VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+        if [ "${TAG}" == "nightly" ]; then
+          VERSION=nightly
+          TAG="0.0.0"
+        fi
+        rm -rf pkg/.gitignore || echo "Failed to remove gitignore"
+        tar -czvf cedarling_wasm_"${TAG}"_pkg.tar.gz -C pkg .
+        sha256sum cedarling_wasm_"${TAG}"_pkg.tar.gz > cedarling_wasm_"${TAG}"_pkg.tar.gz.sha256sum
+        gpg --armor --detach-sign cedarling_wasm_"${TAG}"_pkg.tar.gz || echo "Failed to sign"
+        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
+        gh release upload "${VERSION}" *.tar.gz *.sha256sum *.asc
+  build_cedarling_krakend:
+    if: github.repository == 'JanssenProject/jans'
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        krakend-builder-image: [ 'builder:2.9.0', 'builder:2.9.0-linux-generic' ]
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      with:
+        egress-policy: audit
+
+    - name: Checkout
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - name: Import GPG key
+      id: import_gpg
+      continue-on-error: true
+      uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
+      with:
+        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+        git_user_signingkey: true
+        git_commit_gpgsign: true
+    - name: Set environment variables
+      run: |
+        TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+        VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+        if [ "${TAG}" == "nightly" ]; then
+          VERSION=nightly
+          TAG="0.0.0"
+        fi
+        echo TAG=${TAG} >> $GITHUB_ENV
+        echo VERSION=${VERSION} >> $GITHUB_ENV
+        KRAKEND_BUILDER_IMAGE=${{ matrix.krakend-builder-image }}
+        KRAKEND_BUILDER_IMAGE=${KRAKEND_BUILDER_IMAGE/:/-}
+        echo KRAKEND_BUILDER_IMAGE=${KRAKEND_BUILDER_IMAGE} >> $GITHUB_ENV
+        echo CC="aarch64-linux-musl-gcc" >> $GITHUB_ENV
+        if [ "${{ matrix.krakend-builder-image }}" == "builder:2.9.0-linux-generic" ]; then
+          echo CC="aarch64-linux-gnu-gcc" >> $GITHUB_ENV
+        fi
+    - name: Build plugin for AMD64 
+      working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
+      run: |
+        docker run -i -v "$PWD:/app" -w /app krakend/"${{ matrix.krakend-builder-image }}" go build -buildmode=plugin -o cedarling-krakend-amd64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so .
+    - name: Build plugin for ARM64
+      working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
+      run: |
+
+        docker run -i -v "$PWD:/app" -w /app -e "CGO_ENABLED=1" -e "CC=${{ env.CC }}" -e "GOARCH=arm64" -e "GOHOSTARCH=amd64" krakend/"${{ matrix.krakend-builder-image }}" go build -ldflags='-extldflags=-fuse-ld=bfd -extld=${{ env.CC }}' -buildmode=plugin -o  cedarling-krakend-arm64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so .
+    - name: Generate sha256sum and sign
+      working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
+      run: |
+        sha256sum cedarling-krakend-amd64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so >> cedarling-krakend-amd64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so.sha256sum
+        sha256sum cedarling-krakend-arm64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so >> cedarling-krakend-arm64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so.sha256sum
+        gpg --armor --detach-sign cedarling-krakend-amd64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so || echo "Failed to sign"
+        gpg --armor --detach-sign cedarling-krakend-arm64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so || echo "Failed to sign"
+        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
+        gh release upload "${{ env.VERSION }}" *.so *.sha256sum *.asc

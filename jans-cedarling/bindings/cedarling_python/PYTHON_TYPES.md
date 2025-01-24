@@ -34,6 +34,14 @@ Methods
     :returns: A BootstrapConfig instance
 
     :raises ValueError: If a provided value is invalid or decoding fails.
+
+.. method:: from_env(config=None) -> BootstrapConfig
+
+    Loads the bootstrap config from environment variables, optionally merging with provided config.
+
+    :param config: Optional dictionary with additional configuration to merge with environment variables.
+    :returns: A BootstrapConfig instance
+    :raises ValueError: If a provided value is invalid or decoding fails.
 ___
 
 Cedarling
@@ -201,36 +209,20 @@ ___
 Error encountered while parsing Action to EntityUid
 ___
 
-# authorize_errors.AddEntitiesIntoContextError
-Error encountered while adding entities into context
-___
-
 # authorize_errors.AuthorizeError
 Exception raised by authorize_errors
 ___
 
-# authorize_errors.CreateAccessTokenEntityError
-Error encountered while creating access_token entity
+# authorize_errors.BuildContextError
+Error encountered while building the request context
+___
+
+# authorize_errors.BuildEntityError
+Error encountered while running on strict id token trust mode
 ___
 
 # authorize_errors.CreateContextError
 Error encountered while validating context according to the schema
-___
-
-# authorize_errors.CreateIdTokenEntityError
-Error encountered while creating id token entities
-___
-
-# authorize_errors.CreateUserEntityError
-Error encountered while creating User entity
-___
-
-# authorize_errors.CreateUserinfoTokenEntityError
-Error encountered while creating Userinfo_token entity
-___
-
-# authorize_errors.CreateWorkloadEntityError
-Error encountered while creating workload entity
 ___
 
 # authorize_errors.EntitiesError
@@ -241,16 +233,12 @@ ___
 Error encountered while parsing all entities to json for logging
 ___
 
+# authorize_errors.IdTokenTrustModeError
+Error encountered while running on strict id token trust mode
+___
+
 # authorize_errors.ProcessTokens
 Error encountered while processing JWT token data
-___
-
-# authorize_errors.ResourceEntityError
-Error encountered while creating resource entity
-___
-
-# authorize_errors.RoleEntityError
-Error encountered while creating role entity
 ___
 
 # authorize_errors.UserRequestValidationError

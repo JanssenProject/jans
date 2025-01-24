@@ -10,16 +10,17 @@
 //! CEDARLING_MAPPING_ACCESS_TOKEN
 //! CEDARLING_MAPPING_USERINFO_TOKEN
 
+use super::utils::*;
+use crate::authz::entity_builder::{
+    BuildCedarlingEntityError, BuildEntityError, BuildTokenEntityError,
+};
+use crate::common::policy_store::TokenKind;
+use crate::{AuthorizeError, Cedarling, cmp_decision, cmp_policy};
+use cedarling_util::get_raw_config;
 use std::collections::HashSet;
 use std::sync::LazyLock;
-use tokio::test;
-
-use cedarling_util::get_raw_config;
 use test_utils::assert_eq;
-
-use super::utils::*;
-use crate::common::policy_store::TokenKind;
-use crate::{AuthorizeError, Cedarling, CreateCedarEntityError, cmp_decision, cmp_policy};
+use tokio::test;
 
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../../test_files/policy-store_entity_mapping.yaml");
@@ -112,8 +113,6 @@ async fn test_default_mapping() {
 /// This function validates the mapping of users and workloads using the defined `cedar` schema.
 /// For other entities, currently, it is not possible to automatically validate the mapping.
 ///
-/// TODO: Add validation for `IdToken`, `Access_token`, and `Userinfo_token` once they are added to the context.
-///
 /// Note: Verified that the mapped entity types are present in the logs.
 #[test]
 async fn test_custom_mapping() {
@@ -189,14 +188,14 @@ async fn test_failed_user_mapping() {
         .expect_err("request should be parsed with mapping error");
 
     match err {
-        AuthorizeError::CreateUserEntity(error) => {
+        AuthorizeError::BuildEntity(BuildCedarlingEntityError::User(error)) => {
             assert_eq!(error.errors.len(), 2, "there should be 2 errors");
 
             let (token_kind, err) = &error.errors[0];
             assert_eq!(token_kind, &TokenKind::Userinfo);
             assert!(
-                matches!(err, CreateCedarEntityError::CouldNotFindEntity(ref err) if err == &entity_type),
-                "expected CouldNotFindEntity({}), got: {:?}",
+                matches!(err, BuildEntityError::EntityNotInSchema(ref err) if err == &entity_type),
+                "expected EntityNotInSchema({}), got: {:?}",
                 &entity_type,
                 err,
             );
@@ -204,13 +203,13 @@ async fn test_failed_user_mapping() {
             let (token_kind, err) = &error.errors[1];
             assert_eq!(token_kind, &TokenKind::Id);
             assert!(
-                matches!(err, CreateCedarEntityError::CouldNotFindEntity(ref err) if err == &entity_type),
-                "expected CouldNotFindEntity({}), got: {:?}",
+                matches!(err, BuildEntityError::EntityNotInSchema(ref err) if err == &entity_type),
+                "expected EntityNotInSchema({}), got: {:?}",
                 &entity_type,
                 err,
             );
         },
-        _ => panic!("expected error CreateWorkloadEntity"),
+        _ => panic!("expected error BuildCedarlingEntityError::User"),
     }
 }
 
@@ -237,14 +236,14 @@ async fn test_failed_workload_mapping() {
         .expect_err("request should be parsed with mapping error");
 
     match err {
-        AuthorizeError::CreateWorkloadEntity(error) => {
+        AuthorizeError::BuildEntity(BuildCedarlingEntityError::Workload(error)) => {
             assert_eq!(error.errors.len(), 2, "there should be 2 errors");
 
             // check for access token error
             let (token_kind, err) = &error.errors[0];
             assert_eq!(token_kind, &TokenKind::Access);
             assert!(
-                matches!(err, CreateCedarEntityError::CouldNotFindEntity(ref err) if err == &entity_type),
+                matches!(err, BuildEntityError::EntityNotInSchema(ref err) if err == &entity_type),
                 "expected CouldNotFindEntity(\"{}\"), got: {:?}",
                 &entity_type,
                 err,
@@ -254,13 +253,16 @@ async fn test_failed_workload_mapping() {
             let (token_kind, err) = &error.errors[1];
             assert_eq!(token_kind, &TokenKind::Id);
             assert!(
-                matches!(err, CreateCedarEntityError::CouldNotFindEntity(ref err) if err == &entity_type),
+                matches!(err, BuildEntityError::EntityNotInSchema(ref err) if err == &entity_type),
                 "expected CouldNotFindEntity(\"{}\"), got: {:?}",
                 &entity_type,
                 err,
             );
         },
-        _ => panic!("expected error CreateWorkloadEntity"),
+        _ => panic!(
+            "expected BuildEntity(BuildCedarlingEntityError::Workload(_))) error, got: {:?}",
+            err
+        ),
     }
 }
 
@@ -285,13 +287,22 @@ async fn test_failed_id_token_mapping() {
         .await
         .expect_err("request should be parsed with mapping error");
 
-    assert!(
-        matches!(
-            err,
-            AuthorizeError::CreateIdTokenEntity(CreateCedarEntityError::CouldNotFindEntity(_))
+    match err {
+        AuthorizeError::BuildEntity(BuildCedarlingEntityError::IdToken(
+            BuildTokenEntityError { token_kind, err },
+        )) => {
+            assert_eq!(token_kind, TokenKind::Id);
+            assert!(
+                matches!(err, BuildEntityError::EntityNotInSchema(ref name) if name == "MappedIdTokenNotExist"),
+                "expected EntityNotInSchema(\"MappedIdTokenNotExist\") got: {:?}",
+                err
+            );
+        },
+        _ => panic!(
+            "expected BuildEntity(BuildCedarlingEntityError::IdToken(_)) error, got: {:?}",
+            err
         ),
-        "should be error CouldNotFindEntity, got: {err:?}"
-    );
+    }
 }
 
 /// Check if we get error on mapping access_token to undefined entity
@@ -315,13 +326,19 @@ async fn test_failed_access_token_mapping() {
         .await
         .expect_err("request should be parsed with mapping error");
 
-    assert!(
-        matches!(
-            err,
-            AuthorizeError::CreateAccessTokenEntity(CreateCedarEntityError::CouldNotFindEntity(_))
-        ),
-        "should be error CouldNotFindEntity"
-    );
+    match err {
+        AuthorizeError::BuildEntity(BuildCedarlingEntityError::AccessToken(
+            BuildTokenEntityError { token_kind, err },
+        )) => {
+            assert_eq!(token_kind, TokenKind::Access);
+            assert!(
+                matches!(err, BuildEntityError::EntityNotInSchema(ref name) if name == "MappedAccess_tokenNotExist"),
+                "expected EntityNotInSchema(\"MappedAccess_tokenNotExist\") got: {:?}",
+                err
+            );
+        },
+        _ => panic!("expected BuildEntity error, got: {:?}", err),
+    }
 }
 
 /// Check if we get error on mapping userinfo_token to undefined entity
@@ -345,15 +362,19 @@ async fn test_failed_userinfo_token_mapping() {
         .await
         .expect_err("request should be parsed with mapping error");
 
-    assert!(
-        matches!(
-            err,
-            AuthorizeError::CreateUserinfoTokenEntity(CreateCedarEntityError::CouldNotFindEntity(
-                _
-            ))
-        ),
-        "should be error CouldNotFindEntity"
-    );
+    match err {
+        AuthorizeError::BuildEntity(BuildCedarlingEntityError::UserinfoToken(
+            BuildTokenEntityError { token_kind, err },
+        )) => {
+            assert_eq!(token_kind, TokenKind::Userinfo);
+            assert!(
+                matches!(err, BuildEntityError::EntityNotInSchema(ref name) if name == "MappedUserinfo_tokenNotExist"),
+                "expected EntityNotInSchema(\"MappedUserinfo_tokenNotExist\") got: {:?}",
+                err
+            );
+        },
+        _ => panic!("expected BuildEntity error, got: {:?}", err),
+    }
 }
 
 /// Check if we get roles mapping from all tokens.
@@ -416,7 +437,7 @@ async fn test_role_many_tokens_mapping() {
 
     // iterate over roles that created and filter expected roles
     let roles_left = cedarling
-        .authorize_entities_data(&request)
+        .build_entities(&request)
         .await
         .expect("should get authorize_entities_data without errors")
         .roles
