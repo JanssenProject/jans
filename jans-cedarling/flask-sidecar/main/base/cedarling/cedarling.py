@@ -162,4 +162,5 @@ class CedarlingInstance:
                     "workload reason": workload_reason
                 }
             }
+        logger.info(f"Cedarling evaluation result: {result_dict}")
         return result_dict
