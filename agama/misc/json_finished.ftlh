@@ -3,7 +3,8 @@
 {
 "success": ${success?c},
 <#if success>
-    "post_finish_url": "${webCtx.contextPath}/${data.post_finish_url}"
+    "post_finish_url": 
+        <#if (data.post_finish_url)??>"${webCtx.contextPath}/${data.post_finish_url}"<#else>null</#if>
 <#else>
     "error": "${jt.escStr(error!"")}"
 </#if>
