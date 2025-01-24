@@ -15,13 +15,9 @@ import org.testng.annotations.BeforeMethod;
 
 public class LinkBaseTest extends BaseTest {
 
-    protected boolean isAvailable(final String url, Map<String, String> headers, final Map<String, String> parameters) {
-        return isEndpointAvailable(url, headers, parameters);
-    }
-
     @BeforeMethod
     public void before() {
-        boolean isAvailable = isAvailable(propertiesMap.get("linkConfigUrl"), null, null);
+        boolean isAvailable = isEndpointAvailable(propertiesMap.get("linkConfigUrl"), accessToken);
         log.error("\n\n\n *** JANS-LINK Plugin isAvailable:{} {}", isAvailable,"\n\n\n");
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well

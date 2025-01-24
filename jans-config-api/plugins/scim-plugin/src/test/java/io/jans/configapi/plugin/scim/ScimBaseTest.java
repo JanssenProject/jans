@@ -22,7 +22,7 @@ public class ScimBaseTest extends BaseTest {
     // Execute before each test is run
     @BeforeMethod
     public void before() {
-        boolean isAvailable = isAvailable(propertiesMap.get("scimConfigUrl"), null, null);
+        boolean isAvailable = isEndpointAvailable(propertiesMap.get("scimConfigUrl"), accessToken);
         log.info("\n\n\n *** SCIM Plugin isAvailable:{} {}", isAvailable, "\n\n\n");
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well

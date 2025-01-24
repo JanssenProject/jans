@@ -15,14 +15,10 @@ import org.testng.annotations.BeforeMethod;
 
 public class KcSAMLBaseTest extends BaseTest {
 
-    protected boolean isAvailable(final String url, Map<String, String> headers, final Map<String, String> parameters) {
-        return isEndpointAvailable(url, headers, parameters);
-    }
-
     // Execute before each test is run
     @BeforeMethod
     public void before() {
-        boolean isAvailable = isAvailable(propertiesMap.get("samlConfigUrl"), null, null);
+        boolean isAvailable = isEndpointAvailable(propertiesMap.get("samlConfigUrl"), accessToken);
         log.info("\n\n\n *** KC-SAML Plugin isAvailable:{} {}", isAvailable, "\n\n\n");
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well

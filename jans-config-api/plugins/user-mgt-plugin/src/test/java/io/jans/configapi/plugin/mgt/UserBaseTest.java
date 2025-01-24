@@ -14,15 +14,11 @@ import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
 
 public class UserBaseTest extends BaseTest {
-
-    protected boolean isAvailable(final String url, Map<String, String> headers, final Map<String, String> parameters) {
-        return isEndpointAvailable(url, headers, parameters);
-    }
     
     // Execute before each test is run
     @BeforeMethod
     public void before() {
-        boolean isAvailable = isAvailable(propertiesMap.get("userUrl"), null, null);
+        boolean isAvailable = isEndpointAvailable(propertiesMap.get("userUrl"), accessToken);
         log.error("\n\n\n ******************** USER-MGT Plugin isAvailable:{} {}", isAvailable, "\n\n\n");
         // check condition, note once you condition is met the rest of the tests will be
         // skipped as well
