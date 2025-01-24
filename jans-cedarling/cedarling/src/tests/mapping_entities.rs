@@ -185,8 +185,9 @@ async fn test_failed_user_mapping() {
     let result = cedarling
         .authorize(request)
         .await
-        .expect("request should be parsed succesfully");
+        .expect("request should be parsed successfully");
     assert_eq!(result.decision, false, "decision should be deny");
+
     let err = result
         .reason_input
         .as_ref()
