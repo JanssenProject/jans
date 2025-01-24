@@ -412,7 +412,9 @@ nav:
   - JWT: 'cedarling/cedarling-jwt.md'
   - Logs: 'cedarling/cedarling-logs.md'
   - Properties: 'cedarling/cedarling-properties.md'
-  - Sidecar: 'cedarling/cedarling-sidecar.md'
+  - Sidecar: 
+      - cedarling/cedarling-sidecar.md
+      - KrakenD Plugin: cedarling/cedarling-krakend.md
   - Python:
       - cedarling/python/README.md
       - How to use: cedarling/python/usage.md
