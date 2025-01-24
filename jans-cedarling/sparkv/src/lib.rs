@@ -4,6 +4,7 @@
  *
  * Copyright (c) 2024 U-Zyn Chua
  */
+use std::collections::{BTreeMap, BinaryHeap, btree_map};
 
 mod config;
 mod error;
@@ -20,8 +21,8 @@ use chrono::prelude::*;
 
 pub struct SparKV<T> {
     pub config: Config,
-    data: std::collections::BTreeMap<String, KvEntry<T>>,
-    expiries: std::collections::BinaryHeap<ExpEntry>,
+    data: BTreeMap<String, KvEntry<T>>,
+    expiries: BinaryHeap<ExpEntry>,
     /// An optional function that calculates the memory size of a value.
     ///
     /// Used by `ensure_item_size`.
@@ -34,7 +35,7 @@ pub struct SparKV<T> {
 
 /// See the SparKV::iter function
 pub struct Iter<'a, T: 'a> {
-    btree_value_iter: std::collections::btree_map::Values<'a, String, KvEntry<T>>,
+    btree_value_iter: btree_map::Values<'a, String, KvEntry<T>>,
 }
 
 impl<'a, T> Iterator for Iter<'a, T> {
@@ -53,7 +54,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
 
 /// See the SparKV::drain function
 pub struct DrainIter<T> {
-    value_iter: std::collections::btree_map::IntoValues<String, KvEntry<T>>,
+    value_iter: btree_map::IntoValues<String, KvEntry<T>>,
 }
 
 impl<T> Iterator for DrainIter<T> {
@@ -79,8 +80,8 @@ impl<T> SparKV<T> {
     pub fn with_config(config: Config) -> Self {
         SparKV {
             config,
-            data: std::collections::BTreeMap::new(),
-            expiries: std::collections::BinaryHeap::new(),
+            data: BTreeMap::new(),
+            expiries: BinaryHeap::new(),
             // This will underestimate the size of most things.
             size_calculator: Some(|v| std::mem::size_of_val(v)),
         }
@@ -90,8 +91,8 @@ impl<T> SparKV<T> {
     pub fn with_config_and_sizer(config: Config, sizer: Option<fn(&T) -> usize>) -> Self {
         SparKV {
             config,
-            data: std::collections::BTreeMap::new(),
-            expiries: std::collections::BinaryHeap::new(),
+            data: BTreeMap::new(),
+            expiries: BinaryHeap::new(),
             size_calculator: sizer,
         }
     }
