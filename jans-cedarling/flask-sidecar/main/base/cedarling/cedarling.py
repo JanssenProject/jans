@@ -24,7 +24,6 @@ from cedarling_python import (
 )
 from main.logger import logger
 from flask import Flask
-import json
 import typing as _t
 
 DictType = _t.Dict[str, _t.Any]
@@ -34,24 +33,26 @@ KEYS_LIST = ["access_token", "id_token", "userinfo_token"]
 class CedarlingInstance:
 
     def __init__(self, app=None):
-        self._bootstrap_config: str
+        self._bootstrap_config: str | None
         self._cedarling: Cedarling
         if app is not None:
             self.init_app(app)
 
     def init_app(self, app: Flask):
-        self._bootstrap_config = app.config.get(
-            "CEDARLING_BOOTSTRAP_CONFIG", "{}")
-        self.debug_response: bool = app.config.get(
-            "SIDECAR_DEBUG_RESPONSE", False)
+        self._bootstrap_config = app.config.get("CEDARLING_BOOTSTRAP_CONFIG", None)
+        self.debug_response: bool = app.config.get("SIDECAR_DEBUG_RESPONSE", False)
         app.extensions = getattr(app, "extensions", {})
         app.extensions["cedarling_client"] = self
         self.initialize_cedarling()
 
     def initialize_cedarling(self):
-        bootstrap_dict = json.loads(self._bootstrap_config)
-        bootstrap_instance = BootstrapConfig(bootstrap_dict)
-        self._cedarling = Cedarling(bootstrap_instance)
+        if self._bootstrap_config is None:
+            print("Loading from environment variables")
+            bootstrap_config = BootstrapConfig.from_env()
+        else:
+            print("Here")
+            bootstrap_config = BootstrapConfig.load_from_json(self._bootstrap_config) 
+        self._cedarling = Cedarling(bootstrap_config)
 
     def get_cedarling_instance(self) -> Cedarling:
         return self._cedarling

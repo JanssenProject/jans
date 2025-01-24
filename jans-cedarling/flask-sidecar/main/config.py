@@ -17,6 +17,7 @@ limitations under the License.
 import os
 from pathlib import Path
 from main.logger import logger
+from dotenv import load_dotenv
 
 
 def get_instance_path(parent_dir=""):
@@ -37,13 +38,14 @@ class BaseConfig:
     API_SPEC_OPTIONS = {
         "x-internal-id": "1",
     }
+    CEDARLING_BOOTSTRAP_CONFIG = None
     CEDARLING_BOOTSTRAP_CONFIG_FILE = os.getenv(
         "CEDARLING_BOOTSTRAP_CONFIG_FILE", None)
     if CEDARLING_BOOTSTRAP_CONFIG_FILE is None:
-        logger.warning("Cedarling bootstrap file not found")
-        exit()
-    with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
-        CEDARLING_BOOTSTRAP_CONFIG = f.read()
+        logger.warning("Cedarling bootstrap file not found, falling back to environment variables")
+    else:
+        with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
+            CEDARLING_BOOTSTRAP_CONFIG = f.read()
     SIDECAR_DEBUG_RESPONSE = os.getenv("SIDECAR_DEBUG_RESPONSE", "False")
     if SIDECAR_DEBUG_RESPONSE == "True":
         SIDECAR_DEBUG_RESPONSE = True
@@ -55,15 +57,12 @@ class TestingConfig(BaseConfig):
     TESTING = True
     DEBUG = True
 
-
 class DevelopmentConfig(BaseConfig):
     DEVELOPMENT = True
     DEBUG = True
 
-
 class ProductionConfig(BaseConfig):
     DEVELOPMENT = False
-
 
 config = {
     "testing": TestingConfig,
@@ -71,7 +70,6 @@ config = {
     "development": DevelopmentConfig,
     "production": ProductionConfig
 }
-
 
 class ConfigLoader:
 
