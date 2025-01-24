@@ -71,7 +71,7 @@ public class ResteasyService implements Serializable {
         }
 
         Response response = request.get();
-        logger.error(" response:{}", response);
+        logger.error("\n\n\n response:{}", response);
 
         return response;
     }
@@ -86,12 +86,15 @@ public class ResteasyService implements Serializable {
         StringBuilder query = null;
         if (parameters != null && !parameters.isEmpty()) {
             query = new StringBuilder("");
+            int i = 0;
             for (Map.Entry<String, String> entry : parameters.entrySet()) {
+                String key = entry.getKey();
                 String value = entry.getValue();
-                if (value != null && value.length() > 0) {
-                    String delim = "&" + URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8) + "=";
-                    query.append(delim.substring(1));
+                 if (value != null && value.length() > 0) {
+                    String delim = (i==0) ? "?" : "&" ;
+                    query.append(delim + URLEncoder.encode(key, StandardCharsets.UTF_8) + "=");
                     query.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
+                    i++;
                 }
             }
         }

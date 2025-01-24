@@ -190,5 +190,14 @@ public class BaseTest {
         return getResteasyService().executeGet(url, clientId, clientSecret, authType, authCode, parameters,
                 contentType);
     }
+    
+    protected Response executePost(final String url, final Map<String, String> parameters,
+            ContentType contentType) {
+        log.info(
+                "Data for executing GET request -  url:{}, clientId:{}, clientSecret:{} , authType:{}, authCode:{} , parameters:{}, contentType:{}",
+                url, clientId, clientSecret, authType, authCode, parameters, contentType);
+        return getResteasyService().executeGet(url, clientId, clientSecret, authType, authCode, parameters,
+                contentType);
+    }
 
 }
