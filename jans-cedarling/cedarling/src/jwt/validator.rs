@@ -20,7 +20,6 @@ use super::issuers_store::TrustedIssuersStore;
 use super::key_service::KeyService;
 use crate::common::policy_store::TrustedIssuer;
 
-type IssuerId = String;
 type TokenClaims = Value;
 
 /// Validates Json Web Tokens.
@@ -28,7 +27,7 @@ pub struct JwtValidator {
     config: JwtValidatorConfig,
     key_service: Arc<Option<KeyService>>,
     validators: HashMap<Algorithm, Validation>,
-    iss_store: TrustedIssuersStore,
+    iss_store: Arc<TrustedIssuersStore>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -41,6 +40,7 @@ impl JwtValidator {
     pub fn new(
         config: JwtValidatorConfig,
         key_service: Arc<Option<KeyService>>,
+        iss_store: Arc<TrustedIssuersStore>,
     ) -> Result<Self, JwtValidatorError> {
         if *config.sig_validation && key_service.is_none() {
             Err(JwtValidatorError::MissingKeyService)?;
@@ -64,8 +64,6 @@ impl JwtValidator {
                 (*alg, validation)
             })
             .collect::<HashMap<Algorithm, Validation>>();
-
-        let iss_store = TrustedIssuersStore::new(config.trusted_issuers.clone());
 
         Ok(Self {
             config,

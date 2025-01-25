@@ -13,22 +13,26 @@
 
 mod issuers_store;
 mod jwk_store;
+mod jwt_cache;
 mod key_service;
 #[cfg(test)]
 mod test_utils;
 mod token;
 mod validator;
 
+use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
+use issuers_store::TrustedIssuersStore;
 pub use jsonwebtoken::Algorithm;
+use jwt_cache::JwtCache;
 use key_service::{KeyService, KeyServiceError};
 pub use token::{Token, TokenClaimTypeError, TokenClaims, TokenStr};
 use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
 
-use crate::common::policy_store::TrustedIssuer;
 use crate::JwtConfig;
+use crate::common::policy_store::TrustedIssuer;
 
 /// Type alias for Trusted Issuers' ID.
 type TrustedIssuerId = Arc<str>;
@@ -92,6 +96,8 @@ pub struct JwtService {
     access_tkn_validator: JwtValidator,
     id_tkn_validator: JwtValidator,
     userinfo_tkn_validator: JwtValidator,
+    jwt_cache: RefCell<JwtCache>,
+    iss_store: Arc<TrustedIssuersStore>,
 }
 
 impl JwtService {
@@ -123,7 +129,9 @@ impl JwtService {
         // prepare shared configs
         let sig_validation: Arc<_> = config.jwt_sig_validation.into();
         let status_validation: Arc<_> = config.jwt_status_validation.into();
-        let trusted_issuers: Arc<_> = trusted_issuers.clone().into();
+        let iss_store = Arc::new(TrustedIssuersStore::new(
+            trusted_issuers.clone().unwrap_or_default(),
+        ));
         let algs_supported: Arc<HashSet<Algorithm>> =
             config.signature_algorithms_supported.clone().into();
 
@@ -131,60 +139,78 @@ impl JwtService {
             JwtValidatorConfig {
                 sig_validation: sig_validation.clone(),
                 status_validation: status_validation.clone(),
-                trusted_issuers: trusted_issuers.clone(),
                 algs_supported: algs_supported.clone(),
                 required_claims: config.access_token_config.required_claims(),
                 validate_exp: config.access_token_config.exp_validation,
                 validate_nbf: config.access_token_config.nbf_validation,
             },
             key_service.clone(),
+            iss_store.clone(),
         )?;
 
         let id_tkn_validator = JwtValidator::new(
             JwtValidatorConfig {
                 sig_validation: sig_validation.clone(),
                 status_validation: status_validation.clone(),
-                trusted_issuers: trusted_issuers.clone(),
                 algs_supported: algs_supported.clone(),
                 required_claims: config.id_token_config.required_claims(),
                 validate_exp: config.id_token_config.exp_validation,
                 validate_nbf: config.id_token_config.nbf_validation,
             },
             key_service.clone(),
+            iss_store.clone(),
         )?;
 
         let userinfo_tkn_validator = JwtValidator::new(
             JwtValidatorConfig {
                 sig_validation: sig_validation.clone(),
                 status_validation: status_validation.clone(),
-                trusted_issuers: trusted_issuers.clone(),
                 algs_supported: algs_supported.clone(),
                 required_claims: config.userinfo_token_config.required_claims(),
                 validate_exp: config.userinfo_token_config.exp_validation,
                 validate_nbf: config.userinfo_token_config.nbf_validation,
             },
             key_service.clone(),
+            iss_store.clone(),
         )?;
 
         Ok(Self {
             access_tkn_validator,
             id_tkn_validator,
             userinfo_tkn_validator,
+            jwt_cache: RefCell::new(JwtCache::new()),
+            iss_store,
         })
     }
 
     pub async fn process_token<'a>(
         &'a self,
-        token: TokenStr<'a>,
+        token_str: TokenStr<'a>,
     ) -> Result<Token<'a>, JwtProcessingError> {
-        match token {
+        // First to get the token from cache
+        if let Some(cached_claims) = self.jwt_cache.borrow().get(token_str.as_str()) {
+            let cached_claims = cached_claims.clone();
+            let iss = cached_claims
+                .get("iss")
+                .and_then(|iss| iss.as_str())
+                .and_then(|iss_str| self.iss_store.get(iss_str));
+            let token = match token_str {
+                TokenStr::Access(_) => Token::new_access(cached_claims.into(), iss),
+                TokenStr::Id(_) => Token::new_id(cached_claims.into(), iss),
+                TokenStr::Userinfo(_) => Token::new_userinfo(cached_claims.into(), iss),
+            };
+            return Ok(token);
+        }
+
+        // If cached cant be found, continue with the decoding process
+        let token = match token_str {
             TokenStr::Access(tkn_str) => {
                 let token = self
                     .access_tkn_validator
                     .process_jwt(tkn_str)
                     .map_err(JwtProcessingError::InvalidAccessToken)?;
                 let claims = serde_json::from_value::<TokenClaims>(token.claims)?;
-                Ok(Token::new_access(claims, token.trusted_iss))
+                Token::new_access(claims, token.trusted_iss)
             },
             TokenStr::Id(tkn_str) => {
                 let token = self
@@ -192,7 +218,7 @@ impl JwtService {
                     .process_jwt(tkn_str)
                     .map_err(JwtProcessingError::InvalidIdToken)?;
                 let claims = serde_json::from_value::<TokenClaims>(token.claims)?;
-                Ok(Token::new_id(claims, token.trusted_iss))
+                Token::new_id(claims, token.trusted_iss)
             },
             TokenStr::Userinfo(tkn_str) => {
                 let token = self
@@ -200,9 +226,20 @@ impl JwtService {
                     .process_jwt(tkn_str)
                     .map_err(JwtProcessingError::InvalidUserinfoToken)?;
                 let claims = serde_json::from_value::<TokenClaims>(token.claims)?;
-                Ok(Token::new_userinfo(claims, token.trusted_iss))
+                Token::new_userinfo(claims, token.trusted_iss)
             },
+        };
+
+        if let Err(err) = self
+            .jwt_cache
+            .borrow_mut()
+            .insert(&token_str.as_str(), &token)
+        {
+            // TODO: pass this on to the logger
+            eprintln!("failed to insert the token to cache: {}", err);
         }
+
+        Ok(token)
     }
 }
 

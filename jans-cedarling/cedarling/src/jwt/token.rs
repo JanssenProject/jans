@@ -19,7 +19,17 @@ pub enum TokenStr<'a> {
     Userinfo(&'a str),
 }
 
-#[derive(Debug, PartialEq)]
+impl<'a> TokenStr<'a> {
+    pub fn as_str(&self) -> &'a str {
+        match self {
+            TokenStr::Access(str) => *str,
+            TokenStr::Id(str) => *str,
+            TokenStr::Userinfo(str) => *str,
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
 pub struct Token<'a> {
     pub kind: TokenKind,
     pub iss: Option<&'a TrustedIssuer>,
@@ -143,7 +153,9 @@ impl TokenClaim<'_> {
 }
 
 #[derive(Debug, thiserror::Error, PartialEq)]
-#[error("type mismatch for token claim '{key}'. expected: '{expected_type}', but found: '{actual_type}'")]
+#[error(
+    "type mismatch for token claim '{key}'. expected: '{expected_type}', but found: '{actual_type}'"
+)]
 pub struct TokenClaimTypeError {
     pub key: String,
     pub expected_type: String,

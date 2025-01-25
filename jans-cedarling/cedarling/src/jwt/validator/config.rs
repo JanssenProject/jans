@@ -3,13 +3,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::sync::Arc;
 
 use jsonwebtoken::Algorithm;
-
-use super::IssuerId;
-use crate::common::policy_store::TrustedIssuer;
 
 /// Validation options related to JSON Web Tokens (JWT).
 ///
@@ -30,8 +27,6 @@ pub struct JwtValidatorConfig {
     /// [`IETF Draft`]: https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/
     #[allow(dead_code)]
     pub status_validation: Arc<bool>,
-    /// List of trusted issuers used to check the JWT status.
-    pub trusted_issuers: Arc<Option<HashMap<IssuerId, TrustedIssuer>>>,
     /// Algorithms supported as defined in the Bootstrap properties.
     ///
     /// Tokens not signed with an algorithm within this HashSet will immediately be invalid.
@@ -60,13 +55,11 @@ impl JwtValidatorConfig {
     fn id_token(
         sig_validation: Arc<bool>,
         status_validation: Arc<bool>,
-        trusted_issuers: Arc<Option<HashMap<IssuerId, TrustedIssuer>>>,
         algs_supported: Arc<HashSet<Algorithm>>,
     ) -> Self {
         Self {
             sig_validation,
             status_validation,
-            trusted_issuers,
             algs_supported,
             required_claims: HashSet::from(["iss", "aud", "sub", "exp"].map(|x| x.into())),
             validate_exp: true,
@@ -86,13 +79,11 @@ impl JwtValidatorConfig {
     fn userinfo_token(
         sig_validation: Arc<bool>,
         status_validation: Arc<bool>,
-        trusted_issuers: Arc<Option<HashMap<IssuerId, TrustedIssuer>>>,
         algs_supported: Arc<HashSet<Algorithm>>,
     ) -> Self {
         Self {
             sig_validation,
             status_validation,
-            trusted_issuers,
             algs_supported,
             required_claims: HashSet::from(["iss", "aud", "sub", "exp"].map(|x| x.into())),
             validate_exp: true,
