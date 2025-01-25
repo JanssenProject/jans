@@ -9,11 +9,13 @@ use std::collections::{BTreeMap, BinaryHeap, btree_map};
 mod config;
 mod error;
 mod expentry;
+mod index;
 mod kventry;
 
 pub use config::Config;
 pub use error::Error;
 pub use expentry::ExpEntry;
+use index::HashMapIndex;
 pub use kventry::KvEntry;
 
 use chrono::Duration;
@@ -22,6 +24,7 @@ use chrono::prelude::*;
 pub struct SparKV<T> {
     pub config: Config,
     data: BTreeMap<String, KvEntry<T>>,
+    index: HashMapIndex,
     expiries: BinaryHeap<ExpEntry>,
     /// An optional function that calculates the memory size of a value.
     ///
@@ -82,6 +85,7 @@ impl<T> SparKV<T> {
             config,
             data: BTreeMap::new(),
             expiries: BinaryHeap::new(),
+            index: HashMapIndex::new(),
             // This will underestimate the size of most things.
             size_calculator: Some(|v| std::mem::size_of_val(v)),
         }
@@ -93,6 +97,7 @@ impl<T> SparKV<T> {
             config,
             data: BTreeMap::new(),
             expiries: BinaryHeap::new(),
+            index: HashMapIndex::new(),
             size_calculator: sizer,
         }
     }
@@ -111,6 +116,8 @@ impl<T> SparKV<T> {
         let exp_item: ExpEntry = ExpEntry::from_kv_entry(&item);
 
         self.expiries.push(exp_item);
+        self.index
+            .add_key_value(index::IndexKey(key.into()), index::ValueKey(key.into()));
         self.data.insert(key.into(), item);
         Ok(())
     }
@@ -142,6 +149,7 @@ impl<T> SparKV<T> {
     pub fn drain(&mut self) -> DrainIter<T> {
         // assume that slightly-expired entries should be returned.
         self.expiries.clear();
+        self.index.clear();
         let data_only = std::mem::take(&mut self.data);
         DrainIter {
             value_iter: data_only.into_values(),
@@ -151,6 +159,8 @@ impl<T> SparKV<T> {
     pub fn pop(&mut self, key: &str) -> Option<T> {
         self.clear_expired_if_auto();
         let item = self.data.remove(key)?;
+        self.index.remove_value_key(&index::ValueKey(item.key));
+
         // Does not delete expiry entry from BinaryHeap as it's expensive.
         Some(item.value)
     }
@@ -179,6 +189,7 @@ impl<T> SparKV<T> {
                     cleared_count += 1;
                     self.pop(&exp_item.key);
                 }
+                // remove current item
                 self.expiries.pop();
             } else {
                 break;
@@ -187,10 +198,35 @@ impl<T> SparKV<T> {
         cleared_count
     }
 
+    /// Add additional index key for an existing value.
+    /// If key not found do nothing.
+    pub fn add_additional_index(&mut self, key: &str, index_key: &str) {
+        if !self.data.contains_key(key) {
+            return;
+        }
+        let value_key = index::ValueKey(key.into());
+        self.index
+            .add_key_value(index::IndexKey(index_key.into()), value_key);
+    }
+
+    /// Get values by index key.
+    /// Iterator is sorted by value keys.
+    pub fn get_by_index_key<'a>(&'a self, index_key: &'a str) -> impl Iterator<Item = &'a T> {
+        let mut keys = self
+            .index
+            .get_by_index_key(&index::IndexKey(index_key.into()))
+            .collect::<Vec<_>>();
+        keys.sort();
+
+        keys.into_iter()
+            .filter_map(move |value_key| self.data.get(&value_key.0).map(|entry| &entry.value))
+    }
+
     /// Empty the container. That is, remove all key-values and expiries.
     pub fn clear(&mut self) {
         self.data.clear();
         self.expiries.clear();
+        self.index.clear();
     }
 
     fn clear_expired_if_auto(&mut self) {
