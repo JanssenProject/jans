@@ -36,8 +36,8 @@ class BaseConfig:
         "x-internal-id": "1",
     }
     CEDARLING_BOOTSTRAP_CONFIG = None
-    CEDARLING_BOOTSTRAP_CONFIG_FILE = os.getenv("CEDARLING_BOOTSTRAP_CONFIG_FILE", None)
-    if CEDARLING_BOOTSTRAP_CONFIG_FILE is None:
+    CEDARLING_BOOTSTRAP_CONFIG_FILE = os.getenv("CEDARLING_BOOTSTRAP_CONFIG_FILE", "None")
+    if CEDARLING_BOOTSTRAP_CONFIG_FILE == "None":
         logger.info("Cedarling bootstrap file not found, falling back to environment variables")
     else:
         with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
