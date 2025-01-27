@@ -8,8 +8,6 @@ package io.jans.configapi.plugin.scim;
 
 import io.jans.configapi.core.test.BaseTest;
 
-import java.util.Map;
-
 import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
 

@@ -223,13 +223,13 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
         Pair<Boolean, Deployment> p = getDeploymentP(projectName);
         Deployment d = p.getSecond();
-        logger.debug("Set Agama project configs projectName:{}, Deployment:{}", projectName, d);
+        logger.debug("Set Agama project configs Deployment:{}",  d);
         if (d == null) return errorResponse(p.getFirst(), projectName);
 
         Map<String, Boolean> results = new HashMap<>();
         Set<String> flowIds = Optional.ofNullable(d.getDetails().getFlowsError())
                 .map(Map::keySet).orElse(Collections.emptySet());
-        logger.debug("Set Agama project configs projectName:{}, flowIds:{}", projectName, flowIds);
+        logger.debug("Set Agama project configs  flowIds:{}",  flowIds);
         for (String qname : flowsConfigs.keySet()) {
             if (qname != null && flowIds.contains(qname)) {
 
@@ -254,7 +254,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
                         projectName.replaceAll("[\n\r]", "_"));
             }
         } 
-        logger.debug("Final Agama project configs projectName:{}, results:{}", projectName, results);
+        logger.debug("Final Agama project configs results:{}", results);
         return Response.ok(results).build();
 
     }
