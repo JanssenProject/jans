@@ -74,6 +74,15 @@ impl Cedarling {
         Ok(Self { inner })
     }
 
+    /// Authorize request
+    fn authorize(&self, request: Bound<'_, Request>) -> Result<AuthorizeResult, PyErr> {
+        let cedarling_instance = self
+            .inner
+            .authorize(request.borrow().to_cedarling()?)
+            .map_err(authorize_error_to_py)?;
+        Ok(cedarling_instance.into())
+    }
+
     /// return logs and remove them from the storage
     fn pop_logs(&self) -> PyResult<Vec<PyObject>> {
         let logs = self.inner.pop_logs();
@@ -102,13 +111,24 @@ impl Cedarling {
         self.inner.get_log_ids()
     }
 
-    /// Authorize request
-    fn authorize(&self, request: Bound<'_, Request>) -> Result<AuthorizeResult, PyErr> {
-        let cedarling_instance = self
-            .inner
-            .authorize(request.borrow().to_cedarling()?)
-            .map_err(authorize_error_to_py)?;
-        Ok(cedarling_instance.into())
+    fn get_logs_by_tag(&self, tag: &str) -> PyResult<Vec<PyObject>> {
+        let logs = self.inner.get_logs_by_tag(tag);
+
+        Python::with_gil(|py| -> PyResult<Vec<PyObject>> {
+            logs.iter()
+                .map(|entry| log_entry_to_py(py, entry))
+                .collect::<PyResult<Vec<PyObject>>>()
+        })
+    }
+
+    fn get_logs_by_id_and_tag(&self, id: &str, tag: &str) -> PyResult<Vec<PyObject>> {
+        let logs = self.inner.get_logs_by_id_and_tag(id, tag);
+
+        Python::with_gil(|py| -> PyResult<Vec<PyObject>> {
+            logs.iter()
+                .map(|entry| log_entry_to_py(py, entry))
+                .collect::<PyResult<Vec<PyObject>>>()
+        })
     }
 }
 
