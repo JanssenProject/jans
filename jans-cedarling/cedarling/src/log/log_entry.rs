@@ -13,7 +13,7 @@ use std::hash::Hash;
 use uuid7::{Uuid, uuid7};
 
 use super::LogLevel;
-use super::interface::Loggable;
+use super::interface::{Indexed, Loggable};
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types::{self, ApplicationName};
 use crate::common::policy_store::PoliciesContainer;
@@ -96,18 +96,22 @@ impl LogEntry {
     }
 }
 
-impl Loggable for LogEntry {
+impl Indexed for LogEntry {
     fn get_id(&self) -> Uuid {
         self.base.get_id()
     }
+}
 
+impl Loggable for LogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }
 }
 
 /// Type of log entry
-#[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize, strum::IntoStaticStr,
+)]
 pub enum LogType {
     Decision,
     System,
@@ -168,7 +172,9 @@ pub struct WorkloadAuthorizeInfo {
 }
 
 /// Cedar-policy decision of the authorization
-#[derive(Debug, Clone, PartialEq, Eq, Copy, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Debug, Clone, PartialEq, Eq, Copy, serde::Serialize, serde::Deserialize, strum::AsRefStr,
+)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum Decision {
     /// Determined that the request should be allowed
@@ -341,7 +347,7 @@ pub struct DecisionLogEntry<'a> {
     pub decision_time_ms: i64,
 }
 
-impl Loggable for &DecisionLogEntry<'_> {
+impl Indexed for &DecisionLogEntry<'_> {
     fn get_id(&self) -> Uuid {
         self.base.get_id()
     }
@@ -351,9 +357,11 @@ impl Loggable for &DecisionLogEntry<'_> {
     }
 
     fn get_tags(&self) -> Vec<&str> {
-        vec!["decision"]
+        self.base.get_tags()
     }
+}
 
+impl Loggable for &DecisionLogEntry<'_> {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }
@@ -424,11 +432,28 @@ impl BaseLogEntry {
     }
 }
 
-impl Loggable for BaseLogEntry {
+impl Indexed for BaseLogEntry {
     fn get_id(&self) -> Uuid {
         self.request_id
     }
 
+    fn get_additional_ids(&self) -> Vec<Uuid> {
+        vec![self.request_id]
+    }
+
+    fn get_tags(&self) -> Vec<&'static str> {
+        let mut tags = Vec::with_capacity(2);
+        tags.push(self.log_kind.into());
+
+        if let Some(level) = self.level {
+            tags.push(level.into());
+        }
+
+        tags
+    }
+}
+
+impl Loggable for BaseLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.level
     }

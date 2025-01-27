@@ -66,4 +66,18 @@ impl LogStorage for LogStrategy {
             _ => Vec::new(),
         }
     }
+
+    fn get_logs_by_tag(&self, tag: &str) -> Vec<serde_json::Value> {
+        match self {
+            Self::MemoryLogger(memory_logger) => memory_logger.get_logs_by_tag(tag),
+            _ => Vec::new(),
+        }
+    }
+
+    fn get_logs_by_id_and_tag(&self, id: &str, tag: &str) -> Vec<serde_json::Value> {
+        match self {
+            Self::MemoryLogger(memory_logger) => memory_logger.get_logs_by_id_and_tag(id, tag),
+            _ => Vec::new(),
+        }
+    }
 }

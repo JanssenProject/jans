@@ -9,7 +9,7 @@
 
 use std::io::Write;
 
-use interface::{LogWriter, Loggable};
+use interface::{Indexed, LogWriter};
 use nop_logger::NopLogger;
 use stdout_logger::StdOutLogger;
 use test_utils::assert_eq;

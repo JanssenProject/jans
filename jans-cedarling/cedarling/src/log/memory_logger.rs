@@ -9,7 +9,7 @@ use std::sync::Mutex;
 use sparkv::{Config as ConfigSparKV, SparKV};
 
 use super::LogLevel;
-use super::interface::{LogStorage, LogWriter, Loggable};
+use super::interface::{LogStorage, LogWriter, Loggable, composite_key};
 use crate::bootstrap_config::log_config::MemoryLogConfig;
 
 const STORAGE_MUTEX_EXPECT_MESSAGE: &str = "MemoryLogger storage mutex should unlock";
@@ -47,11 +47,13 @@ mod fallback {
     #[derive(serde::Serialize)]
     struct StrWrap<'a>(&'a str);
 
-    impl crate::log::interface::Loggable for StrWrap<'_> {
+    impl crate::log::interface::Indexed for StrWrap<'_> {
         fn get_id(&self) -> uuid7::Uuid {
             crate::log::log_entry::gen_uuid7()
         }
+    }
 
+    impl crate::log::interface::Loggable for StrWrap<'_> {
         fn get_log_level(&self) -> Option<LogLevel> {
             // These must always be logged.
             Some(LogLevel::TRACE)
@@ -94,14 +96,17 @@ impl LogWriter for MemoryLogger {
             },
         };
 
-        let set_result = self
-            .storage
-            .lock()
-            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
-            .set(&entry.get_id().to_string(), json);
+        let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
+
+        let entry_id = entry.get_id().to_string();
+        let set_result = storage.set(&entry_id, json);
 
         if let Err(err) = set_result {
             fallback::log(&format!("could not store LogEntry to memory: {err:?}"));
+        } else {
+            for index_key in entry.get_index_keys() {
+                storage.add_additional_index(entry_id.as_str(), index_key.as_str());
+            }
         };
     }
 }
@@ -131,12 +136,33 @@ impl LogStorage for MemoryLogger {
             .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
             .get_keys()
     }
+
+    fn get_logs_by_tag(&self, tag: &str) -> Vec<serde_json::Value> {
+        self.storage
+            .lock()
+            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
+            .get_by_index_key(tag)
+            .map(|v| v.to_owned())
+            .collect()
+    }
+
+    fn get_logs_by_id_and_tag(&self, id: &str, tag: &str) -> Vec<serde_json::Value> {
+        let key = composite_key(id, tag);
+
+        self.storage
+            .lock()
+            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
+            .get_by_index_key(&key)
+            .map(|v| v.to_owned())
+            .collect()
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use test_utils::assert_eq;
 
+    use super::super::interface::Indexed;
     use super::super::{AuthorizationLogInfo, LogEntry, LogType};
     use super::*;
     use crate::common::app_types;
@@ -259,11 +285,13 @@ mod tests {
             }
         }
 
-        impl crate::log::interface::Loggable for FailSerialize {
+        impl crate::log::interface::Indexed for FailSerialize {
             fn get_id(&self) -> uuid7::Uuid {
                 crate::log::log_entry::gen_uuid7()
             }
+        }
 
+        impl crate::log::interface::Loggable for FailSerialize {
             fn get_log_level(&self) -> Option<LogLevel> {
                 // These must always be logged.
                 Some(LogLevel::TRACE)

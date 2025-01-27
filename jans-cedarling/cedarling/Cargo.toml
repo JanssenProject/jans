@@ -36,6 +36,7 @@ regex = "1.11.1"
 chrono = { workspace = true }
 tokio = { version = "1.42.0", features = ["macros", "time"] }
 rand = "0.8.5"
+strum = { version = "0.26", features = ["derive"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { workspace = true, features = ["console"] }

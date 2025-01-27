@@ -6,6 +6,8 @@
 //! Log interface
 //! Contains the interface for logging. And getting log information from storage.
 
+use std::iter::once;
+
 use uuid7::Uuid;
 
 use super::{LogEntry, LogLevel};
@@ -22,7 +24,13 @@ pub(crate) trait LogWriter {
     }
 }
 
-pub(crate) trait Loggable: serde::Serialize {
+const SEPARATOR: &str = "__";
+
+pub(crate) fn composite_key(id: &str, tag: &str) -> String {
+    [id, tag].join(SEPARATOR)
+}
+
+pub(crate) trait Indexed {
     /// Get unique ID of entity
     //  Is used in memory logger
     fn get_id(&self) -> Uuid;
@@ -39,6 +47,50 @@ pub(crate) trait Loggable: serde::Serialize {
         Vec::new()
     }
 
+    fn get_index_keys(&self) -> Vec<String> {
+        let tags = self.get_tags();
+
+        let id: String = self.get_id().to_string();
+
+        let ids = self
+            .get_additional_ids()
+            .into_iter()
+            .chain(once(self.get_id()))
+            .map(|v| v.to_string())
+            .collect::<Vec<String>>();
+
+        let id_and_tags = tags
+            .iter()
+            .map(|tag| composite_key(&id, *tag))
+            .collect::<Vec<String>>();
+
+        let additional_id_and_tag = self
+            .get_additional_ids()
+            .into_iter()
+            .map(|id| id.to_string())
+            .flat_map(|id| tags.iter().map(move |tag| composite_key(&id, *tag)))
+            .collect::<Vec<String>>();
+
+        let tags_iter = self
+            .get_tags()
+            .into_iter()
+            .map(Into::<String>::into)
+            .collect::<Vec<String>>();
+
+        let mut result = Vec::with_capacity(
+            ids.len() + id_and_tags.len() + additional_id_and_tag.len() + tags_iter.len(),
+        );
+
+        result.extend(ids);
+        result.extend(id_and_tags);
+        result.extend(additional_id_and_tag);
+        result.extend(tags_iter);
+
+        result
+    }
+}
+
+pub(crate) trait Loggable: serde::Serialize + Indexed {
     /// get log level for entity
     /// not all log entities have log level, only when `log_kind` == `System`
     fn get_log_level(&self) -> Option<LogLevel>;
@@ -69,4 +121,10 @@ pub trait LogStorage {
 
     /// returns a list of all log ids
     fn get_log_ids(&self) -> Vec<String>;
+
+    /// get logs by tag, like `log_kind` or `log level`
+    fn get_logs_by_tag(&self, tag: &str) -> Vec<serde_json::Value>;
+
+    /// get log by id and tag, like `request_id` + `log_kind`
+    fn get_logs_by_id_and_tag(&self, id: &str, tag: &str) -> Vec<serde_json::Value>;
 }
