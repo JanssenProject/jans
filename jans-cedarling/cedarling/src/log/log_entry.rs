@@ -100,6 +100,14 @@ impl Indexed for LogEntry {
     fn get_id(&self) -> Uuid {
         self.base.get_id()
     }
+
+    fn get_additional_ids(&self) -> Vec<Uuid> {
+        self.base.get_additional_ids()
+    }
+
+    fn get_tags(&self) -> Vec<&str> {
+        self.base.get_tags()
+    }
 }
 
 impl Loggable for LogEntry {

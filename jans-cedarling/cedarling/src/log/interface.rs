@@ -37,15 +37,11 @@ pub(crate) trait Indexed {
 
     /// List of additional ids that entity can be related
     //  Is used in memory logger
-    fn get_additional_ids(&self) -> Vec<Uuid> {
-        Vec::new()
-    }
+    fn get_additional_ids(&self) -> Vec<Uuid>;
 
     /// List of `tags` that entity can be related
     //  Is used in memory logger
-    fn get_tags(&self) -> Vec<&str> {
-        Vec::new()
-    }
+    fn get_tags(&self) -> Vec<&str>;
 
     fn get_index_keys(&self) -> Vec<String> {
         let tags = self.get_tags();
@@ -71,8 +67,7 @@ pub(crate) trait Indexed {
             .flat_map(|id| tags.iter().map(move |tag| composite_key(&id, *tag)))
             .collect::<Vec<String>>();
 
-        let tags_iter = self
-            .get_tags()
+        let tags_iter = tags
             .into_iter()
             .map(Into::<String>::into)
             .collect::<Vec<String>>();

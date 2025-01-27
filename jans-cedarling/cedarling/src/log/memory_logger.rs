@@ -51,6 +51,14 @@ mod fallback {
         fn get_id(&self) -> uuid7::Uuid {
             crate::log::log_entry::gen_uuid7()
         }
+
+        fn get_additional_ids(&self) -> Vec<uuid7::Uuid> {
+            Vec::new()
+        }
+
+        fn get_tags(&self) -> Vec<&str> {
+            Vec::new()
+        }
     }
 
     impl crate::log::interface::Loggable for StrWrap<'_> {
@@ -288,6 +296,14 @@ mod tests {
         impl crate::log::interface::Indexed for FailSerialize {
             fn get_id(&self) -> uuid7::Uuid {
                 crate::log::log_entry::gen_uuid7()
+            }
+
+            fn get_additional_ids(&self) -> Vec<uuid7::Uuid> {
+                Vec::new()
+            }
+
+            fn get_tags(&self) -> Vec<&str> {
+                Vec::new()
             }
         }
 
