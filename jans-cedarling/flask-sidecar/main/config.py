@@ -17,15 +17,12 @@ limitations under the License.
 import os
 from pathlib import Path
 from main.logger import logger
-from dotenv import load_dotenv
-
 
 def get_instance_path(parent_dir=""):
     parent_dir = parent_dir or Path.home()
     instance_path = Path(parent_dir).joinpath(".cloud")
     instance_path.mkdir(parents=True, exist_ok=True)
     return instance_path.resolve()
-
 
 class BaseConfig:
     API_TITLE = "Cedarling Sidecar"
@@ -39,10 +36,9 @@ class BaseConfig:
         "x-internal-id": "1",
     }
     CEDARLING_BOOTSTRAP_CONFIG = None
-    CEDARLING_BOOTSTRAP_CONFIG_FILE = os.getenv(
-        "CEDARLING_BOOTSTRAP_CONFIG_FILE", None)
+    CEDARLING_BOOTSTRAP_CONFIG_FILE = os.getenv("CEDARLING_BOOTSTRAP_CONFIG_FILE", None)
     if CEDARLING_BOOTSTRAP_CONFIG_FILE is None:
-        logger.warning("Cedarling bootstrap file not found, falling back to environment variables")
+        logger.info("Cedarling bootstrap file not found, falling back to environment variables")
     else:
         with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
             CEDARLING_BOOTSTRAP_CONFIG = f.read()
@@ -51,7 +47,6 @@ class BaseConfig:
         SIDECAR_DEBUG_RESPONSE = True
     else:
         SIDECAR_DEBUG_RESPONSE = False
-
 
 class TestingConfig(BaseConfig):
     TESTING = True
