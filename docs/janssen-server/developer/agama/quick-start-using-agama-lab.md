@@ -16,11 +16,11 @@ an IDP.
 
 Major Steps involved in this process are:
 
-- [Create A New Agama project on the Agama Lab](#create-a-new-agama-project)
-- [Defining The Authentication Flow](#defining-the-authentication-flow)
-- [Design User Interface](#design-user-interface)
-- [Deploy Agama Project](#deploy-agama-project)
-- [Test Using Tarp](#testing-using-janssen-tarp)
+- [Create a new Agama project on the Agama Lab](#create-a-new-agama-project)
+- [Defining the authentication flow](#defining-the-authentication-flow)
+- [Design the user interface](#design-user-interface)
+- [Deploy Agama project](#deploy-agama-project)
+- [Test using Tarp](#testing-using-janssen-tarp)
 
 This guide covers steps above in the following sections.
 
@@ -74,7 +74,7 @@ the project. Select the `development` repository by clicking on
     ![](../../../assets/agama-lab-add-git-repo.png)
 
 
-4. Project dashboard with all the existing projects (if any) from the GitHub
+4. The project dashboard with all the existing projects (if any) from the GitHub
 repository will be shown. New projects can be created, edited, and deleted 
 from this project listing page.
 
@@ -131,8 +131,8 @@ from this project listing page.
     Click the `Call` block and then click :material-pencil: to open the 
     configuration screen. Add configuration values as shown below.  
     This configuration will fetch a reference of the 
-    `PasswordService` class and 
-    store the reference in a variable called `AuthenticationService`. This reference will 
+    `AuthenticationService` class and 
+    store the reference in a variable called `authServiceRef`. This reference will 
     be used to validate the user credentials in the subsequent steps.
 
     `class name`: `io.jans.as.server.service.AuthenticationService`
@@ -141,9 +141,9 @@ from this project listing page.
 
     `assign result to`: `authServiceRef`
 
-    `title`: `New Authentication Service `
+    `title`: `Get authentication service reference `
 
-    `description`: `create new authentication service instance`
+    `description`: `Get authentication service reference from the IDP`
 
    
     ![](../../../assets/agamalab-flow-passwd-call.png)
@@ -167,9 +167,9 @@ from this project listing page.
 
     `assign result to`: `cdiUtilRef`
 
-    `title`: `Get authentication service reference`
+    `title`: `Get CdiUtil service reference`
     
-    `description`: `Get authentication service reference from the IDP`
+    `description`: `Get CdiUtil service reference from the IDP`
 
     ![](../../../assets/agamalab-flow-passwd-editcdiutil.png)
 
@@ -178,7 +178,7 @@ from this project listing page.
 
     Next, we need to create an empty variable that the flow will use in the future to store authentication results. 
 
-    Create an `Assignment` block after the `PasswordService` call block and configure it as shown below.
+    Create an `Assignment` block after the `CdiUtil` call block and configure it as shown below.
 
     ![](../../../assets/agamalab-flow-passwd-edit-assignment.png)
 
@@ -252,8 +252,8 @@ from this project listing page.
 
 8. Create an Assignment block
 
-    In case of authentication failure, the user will be prompted for reentering the
-    credentials on the sign-in page. We want to show the username to the user while reentering the
+    In case of authentication failure, the user will be prompted for re-entering the
+    credentials on the sign-in page. We want to show the username to the user while re-entering the
     password on the web page. For this, we will save the username in a variable using the `Assignment` block.
 
     Create a new assignment block after the `Validate Credentials` block.
@@ -333,29 +333,29 @@ from this project listing page.
     generated code.
 
     ```
-      Flow co.acme.password
+    Flow co.acme.password
         Basepath ""
-    // create new authentication service instance
-    authServiceRef = Call io.jans.as.server.service.AuthenticationService#class 
     // Get authentication service reference from the IDP
+    authServiceRef = Call io.jans.as.server.service.AuthenticationService#class 
+    // Get CdiUtil service reference from the IDP
     cdiUtilRef = Call io.jans.service.cdi.util.CdiUtil#bean authServiceRef
-    // Empty result object
+    // Empty Result object
     authResult = {}
-    // Retry 3 times to get correct username and password 
+    // Retry 3 times get correct username and password 
     Repeat 3 times max
-        // Loads the login page for username and password input
+        // loads the login page for username and password input
         creds = RRF "login.ftlh" authResult
-        // Validate username and password
+        // validate username and password
         authResult.success = Call cdiUtilRef authenticate creds.username creds.password
-        // Keep the username if the user needs to retry authentication 
+        // Keep the username if the user need to retry authentication 
         authResult.uid = creds.username
         // check if the authentication was successful 
         When authResult.success is true
               // Return username in case of successful authentication 
               Finish authResult.uid
-    // Max number of failed authentication attempts reached. Return False to end the flow
-    Finish false
-
+    // Max number of failed authentication attempts reached. return false to and the flow 
+    it_hlxnh = {success:false, error: "Maximum authentication attempts reached. Authentication failed."}
+    Finish it_hlxnh
     ```
 
 ### Design user interface
