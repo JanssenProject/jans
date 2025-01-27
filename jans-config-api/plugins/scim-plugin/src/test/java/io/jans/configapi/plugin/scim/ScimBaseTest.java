@@ -15,9 +15,6 @@ import org.testng.annotations.BeforeMethod;
 
 public class ScimBaseTest extends BaseTest {
 
-    protected boolean isAvailable(final String url, Map<String, String> headers, final Map<String, String> parameters) {
-        return isEndpointAvailable(url, headers, parameters);
-    }
 
     // Execute before each test is run
     @BeforeMethod
