@@ -7475,10 +7475,63 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+      
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2_7">
+          Sidecar
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Sidecar" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          Sidecar
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
       <a href="../cedarling-sidecar/" class="md-nav__link">
-        Sidecar
+        Flask Sidecar
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-krakend/" class="md-nav__link">
+        KrakenD Plugin
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -8877,6 +8930,12 @@
 
 <span class="kd">let</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
 <span class="w">    </span><span class="n">BootstrapConfig</span>::<span class="n">load_from_file</span><span class="p">(</span><span class="s">&quot;./path/to/your/config.json&quot;</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w"></span>
+
+<span class="c1">// Load the bootstrap config from the environment variables. Properties that are not defined will be assigned a default value.</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BootstrapConfig</span>::<span class="n">from_env</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w"></span>
+
+<span class="c1">// Load the bootstrap config from the environment variables and a given config if env var is not present.</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BootstrapConfig</span>::<span class="n">from_raw_config_and_env</span><span class="p">(</span><span class="nb">Some</span><span class="p">(</span><span class="n">BootstrapConfigRaw</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">..</span><span class="p">.</span><span class="w"> </span><span class="p">})).</span><span class="n">unwrap</span><span class="p">();</span><span class="w"></span>
 </code></pre></div>
 <h3 id="loading-from-json">Loading From JSON<a class="headerlink" href="#loading-from-json" title="Permanent link">#</a></h3>
 <p>Below is an example of a bootstrap config in JSON format. Not all fields should be specified, almost all have default value.</p>
@@ -9007,7 +9066,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-12T17:40:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-22T20:46:19+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-22</span>
       
         <br>
         Created:
@@ -9052,13 +9111,13 @@
       
       
         
-        <a href="../cedarling-sidecar/" class="md-footer__link md-footer__link--next" aria-label="Next: Sidecar" rel="next">
+        <a href="../cedarling-sidecar/" class="md-footer__link md-footer__link--next" aria-label="Next: Flask Sidecar" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Sidecar
+              Flask Sidecar
             </div>
           </div>
           <div class="md-footer__button md-icon">

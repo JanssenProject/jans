@@ -7413,10 +7413,63 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+      
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2_7">
+          Sidecar
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Sidecar" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          Sidecar
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../../../cedarling/cedarling-sidecar/" class="md-nav__link">
-        Sidecar
+        Flask Sidecar
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../cedarling/cedarling-krakend/" class="md-nav__link">
+        KrakenD Plugin
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -9628,7 +9681,7 @@
 <td>config.configmap.cnVaultAppRolePath</td>
 <td>string</td>
 <td><code>"approle"</code></td>
-<td>Path to Vault AppRole.</td>
+<td>Path to the Vault AppRole.</td>
 </tr>
 <tr>
 <td>config.configmap.cnVaultKvPath</td>
@@ -9658,7 +9711,7 @@
 <td>config.configmap.cnVaultRoleIdFile</td>
 <td>string</td>
 <td><code>"/etc/certs/vault_role_id"</code></td>
-<td>Path to file contains Vault AppRole role ID.</td>
+<td>Path to the file that contains Vault AppRole role ID.</td>
 </tr>
 <tr>
 <td>config.configmap.cnVaultSecretId</td>
@@ -9670,7 +9723,7 @@
 <td>config.configmap.cnVaultSecretIdFile</td>
 <td>string</td>
 <td><code>"/etc/certs/vault_secret_id"</code></td>
-<td>Path to file contains Vault AppRole secret ID.</td>
+<td>Path to the file that contains Vault AppRole secret ID.</td>
 </tr>
 <tr>
 <td>config.configmap.cnVaultVerify</td>
@@ -10089,7 +10142,7 @@
 <tr>
 <td>global</td>
 <td>object</td>
-<td><code>{"alb":{"ingress":false},"auth-server":{"appLoggers":{"auditStatsLogLevel":"INFO","auditStatsLogTarget":"FILE","authLogLevel":"INFO","authLogTarget":"STDOUT","enableStdoutLogPrefix":"true","httpLogLevel":"INFO","httpLogTarget":"FILE","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"authEncKeys":"RSA1_5 RSA-OAEP","authServerServiceName":"auth-server","authSigKeys":"RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512","cnCustomJavaOptions":"","customAnnotations":{"deployment":{},"destinationRule":{},"horizontalPodAutoscaler":{},"pod":{},"podDisruptionBudget":{},"secret":{},"service":{},"virtualService":{}},"enabled":true,"ingress":{"authServerAdditionalAnnotations":{},"authServerEnabled":true,"authServerLabels":{},"deviceCodeAdditionalAnnotations":{},"deviceCodeEnabled":true,"deviceCodeLabels":{},"firebaseMessagingAdditionalAnnotations":{},"firebaseMessagingEnabled":true,"firebaseMessagingLabels":{},"lockAdditionalAnnotations":{},"lockConfigAdditionalAnnotations":{},"lockConfigEnabled":false,"lockConfigLabels":{},"lockEnabled":false,"lockLabels":{},"openidAdditionalAnnotations":{},"openidConfigEnabled":true,"openidConfigLabels":{},"u2fAdditionalAnnotations":{},"u2fConfigEnabled":true,"u2fConfigLabels":{},"uma2AdditionalAnnotations":{},"uma2ConfigEnabled":true,"uma2ConfigLabels":{},"webdiscoveryAdditionalAnnotations":{},"webdiscoveryEnabled":true,"webdiscoveryLabels":{},"webfingerAdditionalAnnotations":{},"webfingerEnabled":true,"webfingerLabels":{}},"lockEnabled":false},"auth-server-key-rotation":{"customAnnotations":{"cronjob":{},"secret":{},"service":{}},"enabled":true,"initKeysLife":48},"awsStorageType":"io1","azureStorageAccountType":"Standard_LRS","azureStorageKind":"Managed","casa":{"appLoggers":{"casaLogLevel":"INFO","casaLogTarget":"STDOUT","enableStdoutLogPrefix":"true","timerLogLevel":"INFO","timerLogTarget":"FILE"},"casaServiceName":"casa","cnCustomJavaOptions":"","customAnnotations":{"deployment":{},"destinationRule":{},"horizontalPodAutoscaler":{},"pod":{},"podDisruptionBudget":{},"secret":{},"service":{},"virtualService":{}},"enabled":true,"ingress":{"casaAdditionalAnnotations":{},"casaEnabled":false,"casaLabels":{}}},"cloud":{"testEnviroment":false},"cnAwsConfigFile":"/etc/jans/conf/aws_config_file","cnAwsSecretsReplicaRegionsFile":"/etc/jans/conf/aws_secrets_replica_regions","cnAwsSharedCredentialsFile":"/etc/jans/conf/aws_shared_credential_file","cnConfiguratorConfigurationFile":"/etc/jans/conf/configuration.json","cnConfiguratorCustomSchema":{"secretName":""},"cnConfiguratorDumpFile":"/etc/jans/conf/configuration.out.json","cnDocumentStoreType":"DB","cnGoogleApplicationCredentials":"/etc/jans/conf/google-credentials.json","cnPersistenceType":"sql","cnPrometheusPort":"","cnSqlPasswordFile":"/etc/jans/conf/sql_password","config":{"customAnnotations":{"clusterRoleBinding":{},"configMap":{},"job":{},"role":{},"roleBinding":{},"secret":{},"service":{},"serviceAccount":{}},"enabled":true},"config-api":{"appLoggers":{"configApiLogLevel":"INFO","configApiLogTarget":"STDOUT","enableStdoutLogPrefix":"true","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"cnCustomJavaOptions":"","configApiServerServiceName":"config-api","customAnnotations":{"deployment":{},"destinationRule":{},"horizontalPodAutoscaler":{},"pod":{},"podDisruptionBudget":{},"service":{},"virtualService":{}},"enabled":true,"ingress":{"configApiAdditionalAnnotations":{},"configApiEnabled":true,"configApiLabels":{}},"plugins":"fido2,scim,user-mgt"},"configAdapterName":"kubernetes","configSecretAdapter":"kubernetes","fido2":{"appLoggers":{"enableStdoutLogPrefix":"true","fido2LogLevel":"INFO","fido2LogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"cnCustomJavaOptions":"","customAnnotations":{"deployment":{},"destinationRule":{},"horizontalPodAutoscaler":{},"pod":{},"podDisruptionBudget":{},"secret":{},"service":{},"virtualService":{}},"enabled":true,"fido2ServiceName":"fido2","ingress":{"fido2AdditionalAnnotations":{},"fido2ConfigAdditionalAnnotations":{},"fido2ConfigEnabled":false,"fido2ConfigLabels":{},"fido2Enabled":false,"fido2Labels":{}}},"fqdn":"demoexample.jans.io","gcePdStorageType":"pd-standard","isFqdnRegistered":false,"istio":{"additionalAnnotations":{},"additionalLabels":{},"enabled":false,"gateways":[],"ingress":false,"namespace":"istio-system"},"jobTtlSecondsAfterFinished":300,"kc-scheduler":{"enabled":false},"lbIp":"22.22.22.22","link":{"appLoggers":{"enableStdoutLogPrefix":"true","linkLogLevel":"INFO","linkLogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"cnCustomJavaOptions":"","customAnnotations":{"deployment":{},"destinationRule":{},"horizontalPodAutoscaler":{},"pod":{},"podDisruptionBudget":{},"service":{},"virtualService":{}},"enabled":false,"ingress":{"linkEnabled":true},"linkServiceName":"link"},"nginx-ingress":{"enabled":true},"persistence":{"customAnnotations":{"job":{},"secret":{},"service":{}},"enabled":true},"saml":{"cnCustomJavaOptions":"","customAnnotations":{"deployment":{},"destinationRule":{},"horizontalPodAutoscaler":{},"pod":{},"podDisruptionBudget":{},"secret":{},"service":{},"virtualService":{}},"enabled":false,"ingress":{"samlAdditionalAnnotations":{},"samlEnabled":false,"samlLabels":{}},"samlServiceName":"saml"},"scim":{"appLoggers":{"enableStdoutLogPrefix":"true","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scimLogLevel":"INFO","scimLogTarget":"STDOUT","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"cnCustomJavaOptions":"","customAnnotations":{"deployment":{},"destinationRule":{},"horizontalPodAutoscaler":{},"pod":{},"podDisruptionBudget":{},"secret":{},"service":{},"virtualService":{}},"enabled":true,"ingress":{"scimAdditionalAnnotations":{},"scimConfigAdditionalAnnotations":{},"scimConfigEnabled":false,"scimConfigLabels":{},"scimEnabled":false,"scimLabels":{}},"scimServiceName":"scim"},"serviceAccountName":"default","storageClass":{"allowVolumeExpansion":true,"allowedTopologies":[],"mountOptions":["debug"],"parameters":{},"provisioner":"microk8s.io/hostpath","reclaimPolicy":"Retain","volumeBindingMode":"WaitForFirstConsumer"},"usrEnvs":{"normal":{},"secret":{}}}</code></td>
+<td><code>{"alb":{"ingress":false},"auth-server":{"appLoggers":{"auditStatsLogLevel":"INFO","auditStatsLogTarget":"FILE","authLogLevel":"INFO","authLogTarget":"STDOUT","enableStdoutLogPrefix":"true","httpLogLevel":"INFO","httpLogTarget":"FILE","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"authEncKeys":"RSA1_5 RSA-OAEP","authServerServiceName":"auth-server","authSigKeys":"RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512","cnCustomJavaOptions":"","customAnnotations":{"deployment":{},"destinationRule":{},"horizontalPodAutoscaler":{},"pod":{},"podDisruptionBudget":{},"secret":{},"service":{},"virtualService":{}},"enabled":true,"ingress":{"authServerAdditionalAnnotations":{},"authServerEnabled":true,"authServerLabels":{},"authzenAdditionalAnnotations":{},"authzenConfigEnabled":true,"authzenConfigLabels":{},"deviceCodeAdditionalAnnotations":{},"deviceCodeEnabled":true,"deviceCodeLabels":{},"firebaseMessagingAdditionalAnnotations":{},"firebaseMessagingEnabled":true,"firebaseMessagingLabels":{},"lockAdditionalAnnotations":{},"lockConfigAdditionalAnnotations":{},"lockConfigEnabled":false,"lockConfigLabels":{},"lockEnabled":false,"lockLabels":{},"openidAdditionalAnnotations":{},"openidConfigEnabled":true,"openidConfigLabels":{},"u2fAdditionalAnnotations":{},"u2fConfigEnabled":true,"u2fConfigLabels":{},"uma2AdditionalAnnotations":{},"uma2ConfigEnabled":true,"uma2ConfigLabels":{},"webdiscoveryAdditionalAnnotations":{},"webdiscoveryEnabled":true,"webdiscoveryLabels":{},"webfingerAdditionalAnnotations":{},"webfingerEnabled":true,"webfingerLabels":{}},"lockEnabled":false},"auth-server-key-rotation":{"customAnnotations":{"cronjob":{},"secret":{},"service":{}},"enabled":true,"initKeysLife":48},"awsStorageType":"io1","azureStorageAccountType":"Standard_LRS","azureStorageKind":"Managed","casa":{"appLoggers":{"casaLogLevel":"INFO","casaLogTarget":"STDOUT","enableStdoutLogPrefix":"true","timerLogLevel":"INFO","timerLogTarget":"FILE"},"casaServiceName":"casa","cnCustomJavaOptions":"","customAnnotations":{"deployment":{},"destinationRule":{},"horizontalPodAutoscaler":{},"pod":{},"podDisruptionBudget":{},"secret":{},"service":{},"virtualService":{}},"enabled":true,"ingress":{"casaAdditionalAnnotations":{},"casaEnabled":false,"casaLabels":{}}},"cloud":{"testEnviroment":false},"cnAwsConfigFile":"/etc/jans/conf/aws_config_file","cnAwsSecretsReplicaRegionsFile":"/etc/jans/conf/aws_secrets_replica_regions","cnAwsSharedCredentialsFile":"/etc/jans/conf/aws_shared_credential_file","cnConfiguratorConfigurationFile":"/etc/jans/conf/configuration.json","cnConfiguratorCustomSchema":{"secretName":""},"cnConfiguratorDumpFile":"/etc/jans/conf/configuration.out.json","cnConfiguratorKey":"","cnConfiguratorKeyFile":"/etc/jans/conf/configuration.key","cnDocumentStoreType":"DB","cnGoogleApplicationCredentials":"/etc/jans/conf/google-credentials.json","cnPersistenceType":"sql","cnPrometheusPort":"","cnSqlPasswordFile":"/etc/jans/conf/sql_password","config":{"customAnnotations":{"clusterRoleBinding":{},"configMap":{},"job":{},"role":{},"roleBinding":{},"secret":{},"service":{},"serviceAccount":{}},"enabled":true},"config-api":{"appLoggers":{"configApiLogLevel":"INFO","configApiLogTarget":"STDOUT","enableStdoutLogPrefix":"true","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"cnCustomJavaOptions":"","configApiServerServiceName":"config-api","customAnnotations":{"deployment":{},"destinationRule":{},"horizontalPodAutoscaler":{},"pod":{},"podDisruptionBudget":{},"service":{},"virtualService":{}},"enabled":true,"ingress":{"configApiAdditionalAnnotations":{},"configApiEnabled":true,"configApiLabels":{}},"plugins":"fido2,scim,user-mgt"},"configAdapterName":"kubernetes","configSecretAdapter":"kubernetes","fido2":{"appLoggers":{"enableStdoutLogPrefix":"true","fido2LogLevel":"INFO","fido2LogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"cnCustomJavaOptions":"","customAnnotations":{"deployment":{},"destinationRule":{},"horizontalPodAutoscaler":{},"pod":{},"podDisruptionBudget":{},"secret":{},"service":{},"virtualService":{}},"enabled":true,"fido2ServiceName":"fido2","ingress":{"fido2AdditionalAnnotations":{},"fido2ConfigAdditionalAnnotations":{},"fido2ConfigEnabled":false,"fido2ConfigLabels":{},"fido2Enabled":false,"fido2Labels":{},"fido2WebauthnAdditionalAnnotations":{},"fido2WebauthnEnabled":false,"fido2WebauthnLabels":{}}},"fqdn":"demoexample.jans.io","gcePdStorageType":"pd-standard","isFqdnRegistered":false,"istio":{"additionalAnnotations":{},"additionalLabels":{},"enabled":false,"gateways":[],"ingress":false,"namespace":"istio-system"},"jobTtlSecondsAfterFinished":300,"kc-scheduler":{"enabled":false},"lbIp":"22.22.22.22","link":{"appLoggers":{"enableStdoutLogPrefix":"true","linkLogLevel":"INFO","linkLogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"cnCustomJavaOptions":"","customAnnotations":{"deployment":{},"destinationRule":{},"horizontalPodAutoscaler":{},"pod":{},"podDisruptionBudget":{},"service":{},"virtualService":{}},"enabled":false,"ingress":{"linkAdditionalAnnotations":{},"linkEnabled":true,"linkLabels":{}},"linkServiceName":"link"},"nginx-ingress":{"enabled":true},"persistence":{"customAnnotations":{"job":{},"secret":{},"service":{}},"enabled":true},"saml":{"cnCustomJavaOptions":"","customAnnotations":{"deployment":{},"destinationRule":{},"horizontalPodAutoscaler":{},"pod":{},"podDisruptionBudget":{},"secret":{},"service":{},"virtualService":{}},"enabled":false,"ingress":{"samlAdditionalAnnotations":{},"samlEnabled":false,"samlLabels":{}},"samlServiceName":"saml"},"scim":{"appLoggers":{"enableStdoutLogPrefix":"true","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scimLogLevel":"INFO","scimLogTarget":"STDOUT","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"cnCustomJavaOptions":"","customAnnotations":{"deployment":{},"destinationRule":{},"horizontalPodAutoscaler":{},"pod":{},"podDisruptionBudget":{},"secret":{},"service":{},"virtualService":{}},"enabled":true,"ingress":{"scimAdditionalAnnotations":{},"scimConfigAdditionalAnnotations":{},"scimConfigEnabled":false,"scimConfigLabels":{},"scimEnabled":false,"scimLabels":{}},"scimServiceName":"scim"},"serviceAccountName":"default","storageClass":{"allowVolumeExpansion":true,"allowedTopologies":[],"mountOptions":["debug"],"parameters":{},"provisioner":"microk8s.io/hostpath","reclaimPolicy":"Retain","volumeBindingMode":"WaitForFirstConsumer"},"usrEnvs":{"normal":{},"secret":{}}}</code></td>
 <td>Parameters used globally across all services helm charts.</td>
 </tr>
 <tr>
@@ -10227,7 +10280,7 @@
 <tr>
 <td>global.auth-server.ingress</td>
 <td>object</td>
-<td><code>{"authServerAdditionalAnnotations":{},"authServerEnabled":true,"authServerLabels":{},"deviceCodeAdditionalAnnotations":{},"deviceCodeEnabled":true,"deviceCodeLabels":{},"firebaseMessagingAdditionalAnnotations":{},"firebaseMessagingEnabled":true,"firebaseMessagingLabels":{},"lockAdditionalAnnotations":{},"lockConfigAdditionalAnnotations":{},"lockConfigEnabled":false,"lockConfigLabels":{},"lockEnabled":false,"lockLabels":{},"openidAdditionalAnnotations":{},"openidConfigEnabled":true,"openidConfigLabels":{},"u2fAdditionalAnnotations":{},"u2fConfigEnabled":true,"u2fConfigLabels":{},"uma2AdditionalAnnotations":{},"uma2ConfigEnabled":true,"uma2ConfigLabels":{},"webdiscoveryAdditionalAnnotations":{},"webdiscoveryEnabled":true,"webdiscoveryLabels":{},"webfingerAdditionalAnnotations":{},"webfingerEnabled":true,"webfingerLabels":{}}</code></td>
+<td><code>{"authServerAdditionalAnnotations":{},"authServerEnabled":true,"authServerLabels":{},"authzenAdditionalAnnotations":{},"authzenConfigEnabled":true,"authzenConfigLabels":{},"deviceCodeAdditionalAnnotations":{},"deviceCodeEnabled":true,"deviceCodeLabels":{},"firebaseMessagingAdditionalAnnotations":{},"firebaseMessagingEnabled":true,"firebaseMessagingLabels":{},"lockAdditionalAnnotations":{},"lockConfigAdditionalAnnotations":{},"lockConfigEnabled":false,"lockConfigLabels":{},"lockEnabled":false,"lockLabels":{},"openidAdditionalAnnotations":{},"openidConfigEnabled":true,"openidConfigLabels":{},"u2fAdditionalAnnotations":{},"u2fConfigEnabled":true,"u2fConfigLabels":{},"uma2AdditionalAnnotations":{},"uma2ConfigEnabled":true,"uma2ConfigLabels":{},"webdiscoveryAdditionalAnnotations":{},"webdiscoveryEnabled":true,"webdiscoveryLabels":{},"webfingerAdditionalAnnotations":{},"webfingerEnabled":true,"webfingerLabels":{}}</code></td>
 <td>Enable endpoints in either istio or nginx ingress depending on users choice</td>
 </tr>
 <tr>
@@ -10247,6 +10300,24 @@
 <td>object</td>
 <td><code>{}</code></td>
 <td>Auth server ingress resource labels. key app is taken</td>
+</tr>
+<tr>
+<td>global.auth-server.ingress.authzenAdditionalAnnotations</td>
+<td>object</td>
+<td><code>{}</code></td>
+<td>authzen config ingress resource additional annotations.</td>
+</tr>
+<tr>
+<td>global.auth-server.ingress.authzenConfigEnabled</td>
+<td>bool</td>
+<td><code>true</code></td>
+<td>Enable endpoint /.well-known/authzen-configuration</td>
+</tr>
+<tr>
+<td>global.auth-server.ingress.authzenConfigLabels</td>
+<td>object</td>
+<td><code>{}</code></td>
+<td>authzen config ingress resource labels. key app is taken</td>
 </tr>
 <tr>
 <td>global.auth-server.ingress.deviceCodeAdditionalAnnotations</td>
@@ -10522,25 +10593,37 @@
 <td>global.cnConfiguratorConfigurationFile</td>
 <td>string</td>
 <td><code>"/etc/jans/conf/configuration.json"</code></td>
-<td>Path to configuration schema file</td>
+<td>Path to the configuration schema file</td>
 </tr>
 <tr>
 <td>global.cnConfiguratorCustomSchema</td>
 <td>object</td>
 <td><code>{"secretName":""}</code></td>
-<td>Use custom configuration schema in existing secrets. Note, the secrets has to contain the key configuration.json or any basename as specified in cnConfiguratorConfigurationFile.</td>
+<td>Use custom configuration schema in existing Kubernetes secret. Note that the secret has to contain the configuration.json key or any basename as specified in cnConfiguratorConfigurationFile.</td>
 </tr>
 <tr>
 <td>global.cnConfiguratorCustomSchema.secretName</td>
 <td>string</td>
 <td><code>""</code></td>
-<td>The name of the secrets used for storing custom configuration schema.</td>
+<td>The name of the Kubernetes secret used for storing custom configuration schema.</td>
 </tr>
 <tr>
 <td>global.cnConfiguratorDumpFile</td>
 <td>string</td>
 <td><code>"/etc/jans/conf/configuration.out.json"</code></td>
-<td>Path to dumped configuration schema file</td>
+<td>Path to the dumped configuration schema file</td>
+</tr>
+<tr>
+<td>global.cnConfiguratorKey</td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Key to encrypt/decrypt configuration schema file using AES-256 CBC mode. Set the value to empty string to disable encryption/decryption, or 32 alphanumeric characters to enable it.</td>
+</tr>
+<tr>
+<td>global.cnConfiguratorKeyFile</td>
+<td>string</td>
+<td><code>"/etc/jans/conf/configuration.key"</code></td>
+<td>Path to the file that contains the key to encrypt/decrypt the configuration schema file.</td>
 </tr>
 <tr>
 <td>global.cnDocumentStoreType</td>
@@ -10570,7 +10653,7 @@
 <td>global.cnSqlPasswordFile</td>
 <td>string</td>
 <td><code>"/etc/jans/conf/sql_password"</code></td>
-<td>Path to SQL password file</td>
+<td>Path to the SQL password file</td>
 </tr>
 <tr>
 <td>global.config-api.appLoggers</td>
@@ -10773,7 +10856,7 @@
 <tr>
 <td>global.fido2.ingress</td>
 <td>object</td>
-<td><code>{"fido2AdditionalAnnotations":{},"fido2ConfigAdditionalAnnotations":{},"fido2ConfigEnabled":false,"fido2ConfigLabels":{},"fido2Enabled":false,"fido2Labels":{}}</code></td>
+<td><code>{"fido2AdditionalAnnotations":{},"fido2ConfigAdditionalAnnotations":{},"fido2ConfigEnabled":false,"fido2ConfigLabels":{},"fido2Enabled":false,"fido2Labels":{},"fido2WebauthnAdditionalAnnotations":{},"fido2WebauthnEnabled":false,"fido2WebauthnLabels":{}}</code></td>
 <td>Enable endpoints in either istio or nginx ingress depending on users choice</td>
 </tr>
 <tr>
@@ -10811,6 +10894,24 @@
 <td>object</td>
 <td><code>{}</code></td>
 <td>fido2 ingress resource labels. key app is taken</td>
+</tr>
+<tr>
+<td>global.fido2.ingress.fido2WebauthnAdditionalAnnotations</td>
+<td>object</td>
+<td><code>{}</code></td>
+<td>fido2 webauthn ingress resource additional annotations.</td>
+</tr>
+<tr>
+<td>global.fido2.ingress.fido2WebauthnEnabled</td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>Enable endpoint /.well-known/webauthn</td>
+</tr>
+<tr>
+<td>global.fido2.ingress.fido2WebauthnLabels</td>
+<td>object</td>
+<td><code>{}</code></td>
+<td>fido2 webauthn ingress resource labels. key app is taken</td>
 </tr>
 <tr>
 <td>global.fqdn</td>
@@ -10959,8 +11060,20 @@
 <tr>
 <td>global.link.ingress</td>
 <td>object</td>
-<td><code>{"linkEnabled":true}</code></td>
+<td><code>{"linkAdditionalAnnotations":{},"linkEnabled":true,"linkLabels":{}}</code></td>
 <td>Enable endpoints in either istio or nginx ingress depending on users choice</td>
+</tr>
+<tr>
+<td>global.link.ingress.linkAdditionalAnnotations</td>
+<td>object</td>
+<td><code>{}</code></td>
+<td>link ingress resource additional annotations.</td>
+</tr>
+<tr>
+<td>global.link.ingress.linkLabels</td>
+<td>object</td>
+<td><code>{}</code></td>
+<td>link ingress resource labels. key app is taken</td>
 </tr>
 <tr>
 <td>global.link.linkServiceName</td>
@@ -11128,7 +11241,7 @@
 <td>global.scim.ingress.scimLabels</td>
 <td>object</td>
 <td><code>{}</code></td>
-<td>SCIM config ingress resource labels. key app is taken</td>
+<td>SCIM ingress resource labels. key app is taken</td>
 </tr>
 <tr>
 <td>global.scim.scimServiceName</td>
@@ -12008,15 +12121,13 @@
 </tr>
 </tbody>
 </table>
-<hr />
-<p>Autogenerated from chart metadata using <a href="https://github.com/norwoodj/helm-docs/releases/v1.14.2">helm-docs v1.14.2</a></p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-22T06:12:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-22</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-22T10:02:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-22</span>
       
         <br>
         Created:
