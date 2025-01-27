@@ -361,7 +361,7 @@ impl Indexed for &DecisionLogEntry<'_> {
     }
 
     fn get_additional_ids(&self) -> Vec<Uuid> {
-        vec![self.base.request_id]
+        self.base.get_additional_ids()
     }
 
     fn get_tags(&self) -> Vec<&str> {
@@ -442,7 +442,7 @@ impl BaseLogEntry {
 
 impl Indexed for BaseLogEntry {
     fn get_id(&self) -> Uuid {
-        self.request_id
+        self.id
     }
 
     fn get_additional_ids(&self) -> Vec<Uuid> {

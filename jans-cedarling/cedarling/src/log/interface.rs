@@ -6,8 +6,6 @@
 //! Log interface
 //! Contains the interface for logging. And getting log information from storage.
 
-use std::iter::once;
-
 use uuid7::Uuid;
 
 use super::{LogEntry, LogLevel};
@@ -46,25 +44,15 @@ pub(crate) trait Indexed {
     fn get_index_keys(&self) -> Vec<String> {
         let tags = self.get_tags();
 
-        let id: String = self.get_id().to_string();
-
-        let ids = self
+        let additional_ids = self
             .get_additional_ids()
             .into_iter()
-            .chain(once(self.get_id()))
             .map(|v| v.to_string())
             .collect::<Vec<String>>();
 
-        let id_and_tags = tags
+        let additional_id_and_tag = additional_ids
             .iter()
-            .map(|tag| composite_key(&id, *tag))
-            .collect::<Vec<String>>();
-
-        let additional_id_and_tag = self
-            .get_additional_ids()
-            .into_iter()
-            .map(|id| id.to_string())
-            .flat_map(|id| tags.iter().map(move |tag| composite_key(&id, *tag)))
+            .flat_map(|id| tags.iter().map(move |tag| composite_key(id, tag)))
             .collect::<Vec<String>>();
 
         let tags_iter = tags
@@ -73,11 +61,10 @@ pub(crate) trait Indexed {
             .collect::<Vec<String>>();
 
         let mut result = Vec::with_capacity(
-            ids.len() + id_and_tags.len() + additional_id_and_tag.len() + tags_iter.len(),
+            additional_ids.len() + additional_id_and_tag.len() + tags_iter.len(),
         );
 
-        result.extend(ids);
-        result.extend(id_and_tags);
+        result.extend(additional_ids);
         result.extend(additional_id_and_tag);
         result.extend(tags_iter);
 
