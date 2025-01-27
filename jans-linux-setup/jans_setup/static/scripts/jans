@@ -10,10 +10,20 @@ from collections import OrderedDict
 
 JANS_JETTY_DIR = '/opt/jans/jetty'
 JANS_SERVICES = os.listdir(JANS_JETTY_DIR)
+ADMIN_UI_INSTALLED = os.path.exists(
+            os.path.join(
+                    JANS_JETTY_DIR,
+                    'jans-config-api/custom/libs/gluu-flex-admin-ui-plugin.jar'
+                    )
+            )
+
+if ADMIN_UI_INSTALLED and 'restart' in sys.argv:
+    JANS_SERVICES.append('admin-ui')
 
 if len(sys.argv) > 1 and sys.argv[1] == 'cli':
     cli_args = sys.argv[2:]
     sys.argv = sys.argv[:2]
+
 
 parser = argparse.ArgumentParser(description="A top-level wrapper script for Janssen")
 subparsers = parser.add_subparsers(dest='command')
@@ -67,6 +77,23 @@ def logs():
         print(f"   {os.path.join(log_dir, log)}")
 
 def service_command(todo):
+    if argsp.service == 'admin-ui':
+        if todo != 'restart':
+            print("\033[93mOnly \033[1mrestart\033[0m \033[93mcommand is available for admin-ui\033[0m")
+        else:
+            httpd_name = None
+            for sname in ('httpd', 'apache2'):
+                if os.popen(f'systemctl show --no-pager {sname} | grep LoadState=loaded').read().strip():
+                    httpd_name = sname
+                    break
+            if not httpd_name:
+                print("\033[93mUnable to determine httpd server name\033[0m")
+                return
+            for sub_service in ('jans-config-api', httpd_name):
+                argsp.service = sub_service
+                service_command('restart')
+        return
+
     services = [argsp.service] if argsp.service else JANS_SERVICES
     if todo == 'stop':
         services = reversed(services)
