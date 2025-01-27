@@ -47,10 +47,9 @@ class CedarlingInstance:
 
     def initialize_cedarling(self):
         if self._bootstrap_config is None:
-            print("Loading from environment variables")
+            logger.info("Loading bootstrap from environment")
             bootstrap_config = BootstrapConfig.from_env()
         else:
-            print("Here")
             bootstrap_config = BootstrapConfig.load_from_json(self._bootstrap_config) 
         self._cedarling = Cedarling(bootstrap_config)
 
