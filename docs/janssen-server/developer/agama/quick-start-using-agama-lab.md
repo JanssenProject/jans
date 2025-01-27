@@ -43,7 +43,7 @@ We will use [Agama Lab](https://cloud.gluu.org/agama-lab/) to create a simple
 username-password based user authentication project. The authentication flow 
 will be similar to the one shown below.
 
-![](../../../assets/agama-lab-flow-quick-start-guide.png)
+![](../../../assets/image-agama-lab-flow-quick-start-guide.png)
 
 An Agama project may include multiple components. For example, an authentication
 flow, a user interface, assets like organization's logo, external libraries, etc. 
@@ -146,7 +146,7 @@ from this project listing page.
     `description`: `Get authentication service reference from the IDP`
 
    
-    ![](../../../assets/agamalab-flow-passwd-call.png)
+    ![](../../../assets/image-agama-lab-edit-authn-instance.png)
 
 3.  Create `CdiUtil` Call block
 
@@ -178,7 +178,9 @@ from this project listing page.
 
     Next, we need to create an empty variable that the flow will use in the future to store authentication results. 
 
-    Create an `Assignment` block after the `CdiUtil` call block and configure it as shown below.
+    Create `Assignment` block after the `CdiUtil` call block and configure it as shown below.
+
+    `Resultant variabl`: `authResult`
 
     ![](../../../assets/agamalab-flow-passwd-edit-assignment.png)
 
@@ -325,7 +327,7 @@ from this project listing page.
 
      The completed flow looks like below:
 
-     ![](../../../assets/agama-lab-flow-quick-start-guide.png)
+     ![](../../../assets/image-agama-lab-flow-quick-start-guide.png)
 
 11. Check generated code
 
@@ -334,28 +336,28 @@ from this project listing page.
 
     ```
     Flow co.acme.password
-        Basepath ""
+     Basepath ""
     // Get authentication service reference from the IDP
     authServiceRef = Call io.jans.as.server.service.AuthenticationService#class 
     // Get CdiUtil service reference from the IDP
     cdiUtilRef = Call io.jans.service.cdi.util.CdiUtil#bean authServiceRef
-    // Empty Result object
+    // Create empty object to store the authentication result
     authResult = {}
-    // Retry 3 times get correct username and password 
+    // Retry 3 times to get the correct username and password 
     Repeat 3 times max
-        // loads the login page for username and password input
+        // Load login page for username and password input
         creds = RRF "login.ftlh" authResult
-        // validate username and password
+        // Validate username and password with IDP
         authResult.success = Call cdiUtilRef authenticate creds.username creds.password
-        // Keep the username if the user need to retry authentication 
+        // Keep the username to show on when user is retrying authentication
         authResult.uid = creds.username
-        // check if the authentication was successful 
+        // Check if the authentication was successful 
         When authResult.success is true
-              // Return username in case of successful authentication 
+              // Authentication successful. Return the username.
               Finish authResult.uid
-    // Max number of failed authentication attempts reached. return false to and the flow 
-    it_hlxnh = {success:false, error: "Maximum authentication attempts reached. Authentication failed."}
-    Finish it_hlxnh
+    // Max number of failed authentication attempts reached. return error and end the flow 
+    it_nslqj = {success:false, error: "Maximum authentication attempts reached. Authentication failed."}
+    Finish it_nslqj
     ```
 
 ### Design user interface
