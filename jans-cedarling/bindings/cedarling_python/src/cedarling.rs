@@ -63,7 +63,7 @@ use serde_pyobject::to_pyobject;
 ///
 ///     :returns: A list of log entries filtered by the tag, each converted to a Python dictionary.
 ///
-/// .. method:: get_log_by_request_id(self, id: str) -> List[dict]
+/// .. method:: get_logs_by_request_id(self, id: str) -> List[dict]
 ///
 ///     Retrieves log entries associated with a specific request ID. Each log entry is converted to a Python dictionary containing fields like 'id', 'timestamp', and 'message'.
 ///
@@ -146,7 +146,7 @@ impl Cedarling {
     }
 
     /// Returns a list of log entries by request id.
-    fn get_log_by_request_id(&self, request_id: &str) -> PyResult<Vec<PyObject>> {
+    fn get_logs_by_request_id(&self, request_id: &str) -> PyResult<Vec<PyObject>> {
         let logs = self.inner.get_log_by_request_id(request_id);
         Python::with_gil(|py| -> PyResult<Vec<PyObject>> {
             logs.iter()

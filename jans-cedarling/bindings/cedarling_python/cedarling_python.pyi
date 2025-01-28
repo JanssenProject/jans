@@ -112,10 +112,13 @@ class BootstrapConfig:
         """
         ...
 
+
 @final
 class Cedarling:
 
     def __init__(self, config: BootstrapConfig) -> None: ...
+
+    def authorize(self, request: Request) -> AuthorizeResult: ...
 
     def pop_logs(self) -> List[Dict]: ...
 
@@ -123,7 +126,12 @@ class Cedarling:
 
     def get_log_ids(self) -> List[str]: ...
 
-    def authorize(self, request: Request) -> AuthorizeResult: ...
+    def get_logs_by_tag(self, tag: str) -> List[Dict]: ...
+
+    def get_log_by_request_id(self, request_id: str) -> List[Dict]: ...
+
+    def get_logs_by_request_id_and_tag(
+        self, request_id: str, tag: str) -> List[Dict]: ...
 
 
 @final
@@ -138,6 +146,7 @@ class Request:
                  action: str,
                  resource: ResourceData,
                  context: Dict[str, Any]) -> None: ...
+
 
 @final
 class Tokens:
@@ -170,6 +179,8 @@ class AuthorizeResult:
     def workload(self) -> AuthorizeResultResponse | None: ...
 
     def person(self) -> AuthorizeResultResponse | None: ...
+
+    def request_id(self) -> str: ...
 
 
 @final
