@@ -9,20 +9,11 @@ To run the API:
 - Install [poetry](https://python-poetry.org/docs/#installation)
 - Clone the [Janssen](https://github.com/JanssenProject/jans) repository:
     ```
-    git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans
-    ```
-    ```
-    cd jans
-    ```
-    ```
-    git sparse-checkout init --cone
-    ```
-    ```
-    git checkout main
-    ```
-
-    ```
-    git sparse-checkout set jans-cedarling
+    git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans \
+    && cd jans \
+    && git sparse-checkout init --cone \
+    && git checkout main \
+    && git sparse-checkout set jans-cedarling
     ```
 - Navigate to `jans-cedarling/flask-sidecar`
 - Run `poetry install` to install dependencies
@@ -149,7 +140,7 @@ CEDARLING_WORKLOAD_AUTHZ=enabled
 CEDARLING_ID_TOKEN_TRUST_MODE=none
 ...
 ```
-- 
+
 - Run `docker compose -f docker-compose-env.yml up`
 - The service is running on `http://0.0.0.0:5000`. OpenAPI documentation is available at `/swagger-ui`
 
