@@ -115,7 +115,7 @@ from this project listing page.
     flow editor. Refer to [this](https://gluu.org/agama/project-editor/) guide if you need to understand how 
     to create, delete and configure nodes.
 
-2. Create `AuthenticationService` Call block
+2. Create `Get class reference` Call block
 
     Drag the colored dot available on the right edge of the `start` node to 
     create the next node in the flow. A list of available node types will be
@@ -130,31 +130,32 @@ from this project listing page.
 
     Click the `Call` block and then click :material-pencil: to open the 
     configuration screen. Add configuration values as shown below.  
-    This configuration will fetch a reference of the 
+    This configuration will fetch a class reference of the 
     `AuthenticationService` class and 
-    store the reference in a variable called `authServiceRef`. This reference will 
-    be used to validate the user credentials in the subsequent steps.
+    store the reference in a variable called `authServiceClass`. This reference will 
+    be used to fetch an instance of this class from IDP in the subsequent steps.
 
     `class name`: `io.jans.as.server.service.AuthenticationService`
 
     `method name`: `class`
 
-    `assign result to`: `authServiceRef`
+    `assign result to`: `authServiceClass`
 
-    `title`: `Get authentication service reference `
+    `title`: `Get class reference`
 
-    `description`: `Get authentication service reference from the IDP`
+    `description`: `Get authentication service class reference from the IDP`
 
    
     ![](../../../assets/image-agama-lab-edit-authn-instance.png)
 
-3.  Create `CdiUtil` Call block
+3.  Create `Get instance reference` Call block
 
-    To perform authentication we will also need a reference of the `CdiUtil` class. To fetch a `CdiUtil`
-    reference from the IDP, we will need to pass `AuthenticationService` reference 
+    To perform authentication we will also need an instance reference of the `AuthenticationService` class. To fetch this
+    reference from the IDP, we will use `CdiUtil` class's `bean` method and
+    pass the class reference of the `AuthenticationService`  
     as an input. Use the steps and configuration below to do this.
 
-    After the `AuthenticationService` create a new `Call` node.
+    After the `Get class reference` node, create a new `Call` node.
    
     Click on the newly created `Call` block and by clicking :material-pencil: open the configuration page.
     Input values as shown below in the configuration screen.
@@ -163,13 +164,13 @@ from this project listing page.
 
     `method name`: `bean`
 
-    `arguments`: `authServiceRef`
+    `arguments`: `authServiceClass`
 
-    `assign result to`: `cdiUtilRef`
+    `assign result to`: `authService`
 
-    `title`: `Get CdiUtil service reference`
+    `title`: `Get instance reference`
     
-    `description`: `Get CdiUtil service reference from the IDP`
+    `description`: `Get authentication service instance reference from the IDP`
 
     ![](../../../assets/agamalab-flow-passwd-editcdiutil.png)
 
@@ -178,9 +179,9 @@ from this project listing page.
 
     Next, we need to create an empty variable that the flow will use in the future to store authentication results. 
 
-    Create `Assignment` block after the `CdiUtil` call block and configure it as shown below.
+    Create an `Assignment` block after the `Get instance reference` call block and configure it as shown below.
 
-    `Resultant variabl`: `authResult`
+    `Resultant variable`: `authResult`
 
     ![](../../../assets/agamalab-flow-passwd-edit-assignment.png)
 
@@ -191,7 +192,7 @@ from this project listing page.
     Repeat block creates a loop to iterate over certain steps(blocks). We will create a repeat loop that allows
     3 retries if the authentication fails.
     
-    Create a Repeat block after the `Result Object` block 
+    Create a Repeat block after the `Create result object` block 
 
     ![](../../../assets/agama-create-repeat.png)
 
@@ -252,26 +253,7 @@ from this project listing page.
 
     ![](../../../assets/agamalab-flow-passwd-edit-cdiUtil-instance.png)
 
-8. Create an Assignment block
-
-    In case of authentication failure, the user will be prompted for re-entering the
-    credentials on the sign-in page. We want to show the username to the user while re-entering the
-    password on the web page. For this, we will save the username in a variable using the `Assignment` block.
-
-    Create a new assignment block after the `Validate Credentials` block.
-
-    ![](../../../assets/agama-lab-create-assignment-uid.png)
-
-    Click on the newly created `Assignment` block. Click :material-pencil:.
-    Input values as shown below in the configuration screen.
-
-    `Resultant variable`: `authResult.uid`
-    
-    `Value/literal`: `creds.username`
-
-    ![](../../../assets/agama-lab-flow-passwd-edit-assignment-uid.png)
-
-9. Create a conditional When block
+8. Create a conditional When block
 
     `When` block represents the [When](../../../agama/language-reference.md#conditionals-and-branching)
    instruction of Agama DSL.
@@ -288,7 +270,7 @@ from this project listing page.
 
     ![](../../../assets/agama-lab-flow-password-edit-when.png)
 
-10. Create Finish blocks
+9. Create Finish blocks
 
      The `Finish` block represents the [Flow finish](../../../agama/language-reference.md#flow-finish) instruction of Agama DSL.
 
@@ -329,7 +311,7 @@ from this project listing page.
 
      ![](../../../assets/image-agama-lab-flow-quick-start-guide.png)
 
-11. Check generated code
+10. Check generated code
 
     The flow is translated into [Agama DSL](../../../agama/language-reference.md). Click the `Code` button to see the 
     generated code.
