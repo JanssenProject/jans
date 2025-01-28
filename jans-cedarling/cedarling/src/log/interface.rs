@@ -95,18 +95,21 @@ pub(crate) trait Loggable: serde::Serialize + Indexed {
 /// Log Storage
 /// interface for getting log entries from the storage
 pub trait LogStorage {
-    /// return logs and remove them from the storage
+    /// Return logs and remove them from the storage
     fn pop_logs(&self) -> Vec<serde_json::Value>;
 
-    /// get specific log entry
+    /// Get specific log entry
     fn get_log_by_id(&self, id: &str) -> Option<serde_json::Value>;
 
-    /// returns a list of all log ids
+    /// Returns a list of all log ids
     fn get_log_ids(&self) -> Vec<String>;
 
-    /// get logs by tag, like `log_kind` or `log level`
+    /// Get logs by tag, like `log_kind` or `log level`.
+    /// Tag can be `log_kind`, `log_level`.
     fn get_logs_by_tag(&self, tag: &str) -> Vec<serde_json::Value>;
 
-    /// get log by id and tag, like `request_id` + `log_kind`
-    fn get_logs_by_id_and_tag(&self, id: &str, tag: &str) -> Vec<serde_json::Value>;
+    /// Get log by request_id and tag, like composite key `request_id` + `log_kind`.
+    /// Tag can be `log_kind`, `log_level`.
+    fn get_logs_by_request_id_and_tag(&self, request_id: &str, tag: &str)
+    -> Vec<serde_json::Value>;
 }

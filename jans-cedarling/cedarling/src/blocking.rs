@@ -58,7 +58,7 @@ impl LogStorage for Cedarling {
         self.instance.get_logs_by_tag(tag)
     }
 
-    fn get_logs_by_id_and_tag(&self, id: &str, tag: &str) -> Vec<serde_json::Value> {
-        self.instance.get_logs_by_id_and_tag(id, tag)
+    fn get_logs_by_request_id_and_tag(&self, id: &str, tag: &str) -> Vec<serde_json::Value> {
+        self.instance.get_logs_by_request_id_and_tag(id, tag)
     }
 }

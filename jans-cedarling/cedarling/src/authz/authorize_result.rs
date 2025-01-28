@@ -32,7 +32,7 @@ pub struct AuthorizeResult {
     pub decision: bool,
 
     /// Request ID, generated per each request call, is used to get logs from memory logger
-    pub request_id: uuid7::Uuid,
+    pub request_id: String,
 }
 
 /// Custom serializer for an Option<String> which converts `None` to an empty string and vice versa.
@@ -82,7 +82,7 @@ impl AuthorizeResult {
             decision: calc_decision(&user_workload_operator, &workload, &person),
             workload,
             person,
-            request_id,
+            request_id: request_id.to_string(),
         }
     }
 

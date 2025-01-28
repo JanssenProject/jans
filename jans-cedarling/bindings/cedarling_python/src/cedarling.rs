@@ -122,7 +122,7 @@ impl Cedarling {
     }
 
     fn get_logs_by_id_and_tag(&self, id: &str, tag: &str) -> PyResult<Vec<PyObject>> {
-        let logs = self.inner.get_logs_by_id_and_tag(id, tag);
+        let logs = self.inner.get_logs_by_request_id_and_tag(id, tag);
 
         Python::with_gil(|py| -> PyResult<Vec<PyObject>> {
             logs.iter()

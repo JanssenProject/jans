@@ -154,8 +154,12 @@ impl LogStorage for MemoryLogger {
             .collect()
     }
 
-    fn get_logs_by_id_and_tag(&self, id: &str, tag: &str) -> Vec<serde_json::Value> {
-        let key = composite_key(id, tag);
+    fn get_logs_by_request_id_and_tag(
+        &self,
+        request_id: &str,
+        tag: &str,
+    ) -> Vec<serde_json::Value> {
+        let key = composite_key(request_id, tag);
 
         self.storage
             .lock()
