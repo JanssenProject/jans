@@ -469,7 +469,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock-config.write
-  /lock/stat:
+  /lock/lockStat:
     get:
       tags:
       - Statistics
@@ -488,12 +488,12 @@ paths:
           is mandatory if start_month and end_month parameters are not present.
         schema:
           type: string
-      - name: start_month
+      - name: start-month
         in: query
         description: Start-Month for which the stat report is to be fetched
         schema:
           type: string
-      - name: end_month
+      - name: end-month
         in: query
         description: End-Month for which the stat report is to be fetched
         schema:
