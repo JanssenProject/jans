@@ -141,6 +141,8 @@ impl Authz {
         // We use uuid v7 because it is generated based on the time and sortable.
         // and we need sortable ids to use it in the sparkv database.
         // Sparkv store data in BTree. So we need have correct order of ids.
+        //
+        // Request ID should be passed to each log entry for tracing in logs and to get log entities from memory logger
         let request_id = gen_uuid7();
 
         let schema = &self.config.policy_store.schema;
@@ -265,6 +267,7 @@ impl Authz {
             self.config.authorization.user_workload_operator,
             workload_authz_result,
             user_authz_result,
+            request_id,
         );
 
         // measure time how long request executes
