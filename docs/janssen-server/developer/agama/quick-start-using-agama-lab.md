@@ -175,7 +175,7 @@ from this project listing page.
     ![](../../../assets/agamalab-flow-passwd-editcdiutil.png)
 
 
-4. Create Assignment block
+4. Create `result object` Assignment block
 
     Next, we need to create an empty variable that the flow will use in the future to store authentication results. 
 
@@ -201,7 +201,7 @@ from this project listing page.
 
     ![](../../../assets/agamalab-flow-passwd-edit-repeat.png)
 
-6. Create an RRF block
+6. Create a `Show login form` RRF block
 
     `RRF` block represents the [RRF](../../../agama/language-reference.md#rrf)
    instruction of Agama DSL.
@@ -238,7 +238,7 @@ from this project listing page.
     At this stage, let's save the flow using the `Save` button. This creates a new
     commit in your GitHub repository.
 
-7. Create a Call block
+7. Create `validate credentials` call block
 
     Create a `Call` block to process the username and password received from the user (in RRF) and
     validate them. The result of the validation is stored in a variable.
@@ -261,7 +261,7 @@ from this project listing page.
     Create a conditional check using the `When` block to check if the 
     user credentials were successfully validated.
 
-    Create a new `When` block after the `Assignment` block.
+    Create a new `When` block after the `Validate credentials` block.
 
     ![](../../../assets/agama-lab-flow-password-create-when.png)
 
