@@ -108,8 +108,13 @@ pub trait LogStorage {
     /// Tag can be `log_kind`, `log_level`.
     fn get_logs_by_tag(&self, tag: &str) -> Vec<serde_json::Value>;
 
+    /// Get logs by request_id.
+    /// Return log entries that match the given request_id.
+    fn get_log_by_request_id(&self, request_id: &str) -> Vec<serde_json::Value>;
+
     /// Get log by request_id and tag, like composite key `request_id` + `log_kind`.
     /// Tag can be `log_kind`, `log_level`.
+    /// Return log entries that match the given request_id and tag.
     fn get_logs_by_request_id_and_tag(&self, request_id: &str, tag: &str)
     -> Vec<serde_json::Value>;
 }

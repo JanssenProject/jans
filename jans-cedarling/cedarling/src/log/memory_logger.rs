@@ -154,6 +154,15 @@ impl LogStorage for MemoryLogger {
             .collect()
     }
 
+    fn get_log_by_request_id(&self, request_id: &str) -> Vec<serde_json::Value> {
+        self.storage
+            .lock()
+            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
+            .get_by_index_key(request_id)
+            .map(|v| v.to_owned())
+            .collect()
+    }
+
     fn get_logs_by_request_id_and_tag(
         &self,
         request_id: &str,
