@@ -141,11 +141,6 @@ from this project listing page.
 
     `assign result to`: `authServiceClass`
 
-    `title`: `Get class reference`
-
-    `description`: `Get authentication service class reference from the IDP`
-
-   
     ![](../../../assets/image-agama-lab-edit-authn-instance.png)
 
 3.  Create `Get instance reference` Call block
@@ -167,10 +162,6 @@ from this project listing page.
     `arguments`: `authServiceClass`
 
     `assign result to`: `authService`
-
-    `title`: `Get instance reference`
-    
-    `description`: `Get authentication service instance reference from the IDP`
 
     ![](../../../assets/agamalab-flow-passwd-editcdiutil.png)
 
@@ -226,6 +217,12 @@ from this project listing page.
     Click on the newly created `RRF` block. Click :material-pencil:. Input values as shown below in the configuration
     screen. 
 
+    `Template path`: `login.ftlh`
+
+    `Data variable to inject`: `authResult`
+
+    `Assign resutl to`: `creds`
+
     ![](../../../assets/agamalab-flow-passwd-edit-rrf.png)
     
     
@@ -250,6 +247,14 @@ from this project listing page.
 
     Click on the newly created `Call` block. Click :material-pencil:. 
     Configure it as shown below.
+
+    `Variable name`: `authService`
+
+    `Method name`: `authenticate`
+
+    `Arguments`: `creds.username` and `creds.password`
+
+    `Assign result to`: `authResult.success`
 
     ![](../../../assets/agamalab-flow-passwd-edit-cdiUtil-instance.png)
 
