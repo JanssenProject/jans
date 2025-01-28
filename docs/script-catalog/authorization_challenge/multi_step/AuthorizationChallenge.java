@@ -130,6 +130,8 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
         boolean newSave = sessionObject == null;
         if (newSave) {
             sessionObject = authorizationChallengeSessionService.newAuthorizationChallengeSession();
+            context.getAuthzRequest().setAuthorizationChallengeSessionObject(authorizationChallengeSessionObject);
+            context.getAuthzRequest().setAuthorizationChallengeSession(authorizationChallengeSessionObject.getId());
         }
 
         String username = context.getHttpRequest().getParameter(USERNAME_PARAMETER);

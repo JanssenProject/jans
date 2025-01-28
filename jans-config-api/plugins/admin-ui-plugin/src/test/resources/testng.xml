@@ -1,0 +1,30 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Config-API" parallel="false">
+
+    <parameter name="propertiesFile" value="target/test-classes/test.properties" />
+	
+	<listeners>
+        <listener class-name="io.jans.configapi.core.test.listener.AlterSuiteListener" />
+        <listener class-name="io.jans.configapi.core.test.listener.SkipTestsListener" />
+    </listeners>
+	
+	<test name="OAuth2" enabled="true">
+        <classes>
+             <class name="io.jans.ca.plugin.adminui.test.OAuth2ResourceTest" />
+        </classes>
+    </test>
+
+  
+    <test name="Logging" enabled="true">
+        <classes>
+             <class name="io.jans.ca.plugin.adminui.test.AuditLoggingResourceTest" />
+        </classes>
+    </test>
+	
+	<test name="License" enabled="true">
+        <classes>
+             <class name="io.jans.ca.plugin.adminui.test.LicenseResourceTest" />
+        </classes>
+    </test>
+</suite>
