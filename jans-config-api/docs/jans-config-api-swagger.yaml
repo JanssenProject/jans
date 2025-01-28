@@ -9335,13 +9335,13 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        userCanEdit:
-          type: boolean
-        adminCanView:
-          type: boolean
         adminCanEdit:
           type: boolean
         userCanView:
+          type: boolean
+        adminCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
@@ -11769,10 +11769,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

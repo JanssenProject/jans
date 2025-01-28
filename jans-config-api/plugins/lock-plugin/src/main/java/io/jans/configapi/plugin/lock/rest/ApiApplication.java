@@ -48,6 +48,7 @@ public class ApiApplication extends Application {
 
         classes.add(LockConfigResource.class);
         classes.add(AuditResource.class);
+        classes.add(LockStatResource.class);
 
         return classes;
     }

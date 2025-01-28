@@ -6,11 +6,10 @@
 
 package io.jans.configapi.plugin.lock.rest;
 
-
-
 import com.fasterxml.jackson.databind.JsonNode;
 
 import static io.jans.as.model.util.Util.escapeLog;
+import io.jans.configapi.core.model.exception.ApiApplicationException;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.lock.service.LockService;
@@ -66,8 +65,8 @@ public class LockStatResource extends BaseResource {
     public Response getStatistics(
             @Parameter(description = "Authorization code") @HeaderParam("Authorization") String authorization,
             @Parameter(description = "Month for which the stat report is to be fetched. The parameter is mandatory if start_month and end_month parameters are not present.") @QueryParam(value = "month") String month,
-            @Parameter(description = "Start-Month for which the stat report is to be fetched") @QueryParam(value = "start_month") String startMonth,
-            @Parameter(description = "End-Month for which the stat report is to be fetched") @QueryParam(value = "end_month") String endMonth,
+            @Parameter(description = "Start-Month for which the stat report is to be fetched") @QueryParam(value = "start-month") String startMonth,
+            @Parameter(description = "End-Month for which the stat report is to be fetched") @QueryParam(value = "end-month") String endMonth,
             @Parameter(description = "Report format") @QueryParam(value = "format") String format) {
         if (StringUtils.isBlank(format)) {
             format = "";
@@ -77,11 +76,15 @@ public class LockStatResource extends BaseResource {
             if (logger.isInfoEnabled()) {
                 logger.info(
                         "LockStatResource::getStatistics() - authorization:{}, month:{},  startMonth:{}, endMonth:{}, format:{}",
-                        escapeLog(authorization), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth), escapeLog(format));
+                        escapeLog(authorization), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth),
+                        escapeLog(format));
             }
             String url = getIssuer() + STAT_URL;
             jsonNode = this.lockService.getStat(url, authorization, month, startMonth, endMonth, format);
             logger.info("StatResource::getUserStatistics() - jsonNode:{} ", jsonNode);
+        } catch (ApiApplicationException aex) {
+            logger.error(" ApiApplicationException while fetching lock stat is", aex);
+            throwInternalServerException("Stat Error", aex);
         } catch (Exception ex) {
             logger.error(" Error while fetching lock stat is", ex);
             throwBadRequestException(ex);
