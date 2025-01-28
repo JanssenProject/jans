@@ -318,11 +318,11 @@ from this project listing page.
 
     ```
     Flow co.acme.password
-     Basepath ""
-    // Get authentication service reference from the IDP
-    authServiceRef = Call io.jans.as.server.service.AuthenticationService#class 
-    // Get CdiUtil service reference from the IDP
-    cdiUtilRef = Call io.jans.service.cdi.util.CdiUtil#bean authServiceRef
+        Basepath ""
+    // Get authentication service class reference from the IDP
+    authServiceClass = Call io.jans.as.server.service.AuthenticationService#class 
+    // Get authentication service instance reference from the IDP
+    authService = Call io.jans.service.cdi.util.CdiUtil#bean authServiceClass
     // Create empty object to store the authentication result
     authResult = {}
     // Retry 3 times to get the correct username and password 
@@ -330,16 +330,14 @@ from this project listing page.
         // Load login page for username and password input
         creds = RRF "login.ftlh" authResult
         // Validate username and password with IDP
-        authResult.success = Call cdiUtilRef authenticate creds.username creds.password
-        // Keep the username to show on when user is retrying authentication
-        authResult.uid = creds.username
+        authResult.success = Call authService authenticate creds.username creds.password
         // Check if the authentication was successful 
         When authResult.success is true
               // Authentication successful. Return the username.
-              Finish authResult.uid
+              Finish creds.username
     // Max number of failed authentication attempts reached. return error and end the flow 
-    it_nslqj = {success:false, error: "Maximum authentication attempts reached. Authentication failed."}
-    Finish it_nslqj
+    it_yrwmc = {success:false, error: "Maximum authentication attempts reached. Authentication failed."}
+    Finish it_yrwmc
     ```
 
 ### Design user interface
