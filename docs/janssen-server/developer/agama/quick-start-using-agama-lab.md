@@ -35,6 +35,8 @@ we will assume that a personal account is being used.
 - Two new public GitHub repositories in your GitHub Account. These repositories
 will be used as [development repository](https://gluu.org/agama/flow-designer/) and [release repository](https://gluu.org/agama/flow-designer/). Each repository should have at least one 
 commit. 
+- Agama Lab should have permissions to access the development and the release repositories. This can be configured
+using the [Agama Lab GitHub app](https://gluu.org/agama/how-to-integrate-agama%e2%80%90lab-github-app-with-your-github-account/) in your user account. 
 
 
 ## Create a new Agama project
