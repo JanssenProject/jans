@@ -119,6 +119,14 @@ from this project listing page.
 
 2. Create `Get class reference` Call block
 
+    To perform authentication we need to validate username and password 
+    provided by the user with the IDP. This operation is done using an instance
+    reference of `AuthenticationService` class.
+
+    To get the instance reference from the IDP, we first need the class
+    reference of the `AuthenticationService` class. That is what we will do 
+    in this step.
+
     Drag the colored dot available on the right edge of the `start` node to 
     create the next node in the flow. A list of available node types will be
     presented. 
@@ -137,6 +145,8 @@ from this project listing page.
     store the reference in a variable called `authServiceClass`. This reference will 
     be used to fetch an instance of this class from IDP in the subsequent steps.
 
+    `Call type`: `Call static method`
+
     `class name`: `io.jans.as.server.service.AuthenticationService`
 
     `method name`: `class`
@@ -147,15 +157,18 @@ from this project listing page.
 
 3.  Create `Get instance reference` Call block
 
-    To perform authentication we will also need an instance reference of the `AuthenticationService` class. To fetch this
-    reference from the IDP, we will use `CdiUtil` class's `bean` method and
+    In this step, we will fetch the instance reference of the `AuthenticationService`
+    using the class reference that we obtained in the previous step. To fetch this 
+    instance reference from the IDP, we will use `CdiUtil` class's `bean` method and
     pass the class reference of the `AuthenticationService`  
-    as an input. Use the steps and configuration below to do this.
+    as an input to it. Use the steps and configuration below to do this.
 
     After the `Get class reference` node, create a new `Call` node.
    
     Click on the newly created `Call` block and by clicking :material-pencil: open the configuration page.
     Input values as shown below in the configuration screen.
+
+    `Call type`: `Call static method`
 
     `class name`: `io.jans.service.cdi.util.CdiUtil`
 
@@ -172,7 +185,7 @@ from this project listing page.
 
     Next, we need to create an empty variable that the flow will use in the future to store authentication results. 
 
-    Create an `Assignment` block after the `Get instance reference` call block and configure it as shown below.
+    Create a `Assignment` block after the `Get instance reference` call block and configure it as shown below.
 
     `Resultant variable`: `authResult`
 
@@ -197,7 +210,8 @@ from this project listing page.
 6. Create a `Show login form` RRF block
 
     `RRF` block represents the [RRF](../../../agama/language-reference.md#rrf)
-   instruction of Agama DSL.
+   instruction of Agama DSL. We will present the login form to the user using
+   this node.
 
     Create an RRF block after the `Retry Authentication` block. 
     
@@ -223,7 +237,7 @@ from this project listing page.
 
     `Data variable to inject`: `authResult`
 
-    `Assign resutl to`: `creds`
+    `Assign result to`: `creds`
 
     ![](../../../assets/agamalab-flow-passwd-edit-rrf.png)
     
@@ -242,13 +256,15 @@ from this project listing page.
     Create a `Call` block to process the username and password received from the user (in RRF) and
     validate them. The result of the validation is stored in a variable.
     
-    Create a new call block after the `Login page` block.
+    Create a new call block after the `Show login page` block.
 
 
     ![](../../../assets/agama-lab-create-cdiutil-instance.png)
 
     Click on the newly created `Call` block. Click :material-pencil:. 
     Configure it as shown below.
+
+    `Call type`: `Call method on instance`
 
     `Variable name`: `authService`
 
@@ -290,7 +306,7 @@ from this project listing page.
      username. This will be achieved by adding a Finish block to the `Condition met` branch of the `When` block. And if authentication fails after 3
      attempts, we need another `Finish` block following the `Repeat` block.
 
-     Drag and drop colored dot on the lower vertex of the `When` block to create
+     Drag and drop the colored dot on the lower vertex of the `When` block to create
      a `Condition met` branch. Create a `Finish` block on this branch.
 
      ![](../../../assets/agamalab-flow-passwd-create-finish.png)
@@ -438,23 +454,27 @@ _This will render the page in the visual editor_.
 
 At this point we have all the components of an Agama project ready, and they are 
 stored in
-the development repository. Next step is to publish the project into its own 
-release repository. This process will create a release of this project, the 
-first release in the release repository. Artifacts linked to the release in the
+the development repository. Next step is to publish the project into the 
+release repository. Publishing will create the first release of this project 
+in the release repository. Artifacts linked to the release in the
 release repository contain the `.gama` package. This `.gama` package is used
 to deploy the project in the IDP.
 
-_To publish the project, click on any of the files in the left project explorer, and click `Publish Project`._
+To publish the project, click on any of the files in the left project explorer, 
+and click `Publish Project`.
 
 ![](../../../assets/agamalab-flow-passwd-publish-project.png)
 
-Enter a desired version number and the web link to the GitHub release repository. Click `Publish`
+Enter a desired version number for the first release and the web link to the 
+GitHub release repository. Click `Publish`
 
 ![](../../../assets/agamalab-flow-passwd-publish-project-gh.png)
 
-Upon successful publish, Agama Lab `Releases` dashboard is shown. It lists all projects that are released.
+Upon successful publishing, the Agama Lab `Releases` dashboard is shown. 
+It lists the project that we released.
 
-Click on the project name to go to the GitHub repository release page where `.gama` file has been released
+Click on the project name to go to the GitHub repository release page where 
+`.gama` file has been released
 
 ![](../../../assets/agama-lab-flow-passwd-release-list.png)
 
@@ -464,7 +484,7 @@ Download the `.gama` file from here to deploy on to the Janssen Server.
 
 ## Deploy Agama project
 
-1. Download the `.gama` file from the `releases` section of the release repository
+1. Download the `.gama` file on the Janssen Server.
    
 2. Open Janssen Server [TUI](../../config-guide/config-tools/jans-tui/README.md) 
   and upload the `.gama` package using [these instructions](https://docs.jans.io/head/janssen-server/config-guide/auth-server-config/agama-project-configuration/#agama-project-screen)
