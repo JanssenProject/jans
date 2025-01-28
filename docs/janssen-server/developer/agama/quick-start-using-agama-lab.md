@@ -429,25 +429,27 @@ _This will render the page in the visual editor_.
 
 ![](../../../assets/agama-lab-flow-render-template.png)
 
-### Release the project
+### Publish the project
 
 At this point we have all the components of an Agama project ready, and they are 
 stored in
-the development repository. In order to deploy the project on an IDP, 
-We need to build a `.gama` package from these components. We can build a `.gama`
-package by releasing the project to the release repository.
+the development repository. Next step is to publish the project into its own 
+release repository. This process will create a release of this project, the 
+first release in the release repository. Artifacts linked to the release in the
+release repository contain the `.gama` package. This `.gama` package is used
+to deploy the project in the IDP.
 
-_To release the project, click on any of the files in the left project explorer, and click `Release Project`._
+_To publish the project, click on any of the files in the left project explorer, and click `Publish Project`._
 
-![](../../../assets/agamalab-flow-passwd-release-project.png)
+![](../../../assets/agamalab-flow-passwd-publish-project.png)
 
-_Enter a desired version number and click `Save`_
+Enter a desired version number and the web link to the GitHub release repository. Click `Publish`
 
-![](../../../assets/agamalab-flow-passwd-release-project-gh.png)
+![](../../../assets/agamalab-flow-passwd-publish-project-gh.png)
 
-Upon successful release, Agama Lab `Releases` dashboard is shown. It lists all projects that are released.
+Upon successful publish, Agama Lab `Releases` dashboard is shown. It lists all projects that are released.
 
-_Click on the project name to go to the GitHub repository release page where `.gama` file has been released_
+Click on the project name to go to the GitHub repository release page where `.gama` file has been released
 
 ![](../../../assets/agama-lab-flow-passwd-release-list.png)
 
