@@ -34,13 +34,16 @@ use serde_pyobject::to_pyobject;
 ///
 ///     :param config: A `BootstrapConfig` object with startup settings.
 ///
+/// .. method:: authorize(self, request: Request) -> AuthorizeResult
+///
+///     Execute authorize request
+///     :param request: Request struct for authorize.
+///
 /// .. method:: pop_logs(self) -> List[dict]
 ///
 ///     Retrieves and removes all logs from storage.
 ///
 ///     :returns: A list of log entries as Python objects.
-///
-///     :raises ValueError: If an error occurs while fetching logs.
 ///
 /// .. method:: get_log_by_id(self, id: str) -> dict|None
 ///
@@ -48,16 +51,35 @@ use serde_pyobject::to_pyobject;
 ///
 ///     :param id: The log entry ID.
 ///
-///     :raises ValueError: If an error occurs while fetching the log.
-///
 /// .. method:: get_log_ids(self) -> List[str]
 ///
 ///     Retrieves all stored log IDs.
 ///
-/// .. method:: authorize(self, request: Request) -> AuthorizeResult
+/// .. method:: get_logs_by_tag(self, tag: str) -> List[dict]
 ///
-///     Execute authorize request
-///     :param request: Request struct for authorize.
+///     Retrieves all logs matching a specific tag. Tags can be 'log_kind', 'log_level' params from log entries.
+///
+///     :param tag: A string specifying the tag type.
+///
+///     :returns: A list of log entries filtered by the tag, each converted to a Python dictionary.
+///
+/// .. method:: get_log_by_request_id(self, id: str) -> List[dict]
+///
+///     Retrieves log entries associated with a specific request ID. Each log entry is converted to a Python dictionary containing fields like 'id', 'timestamp', and 'message'.
+///
+///     :param id: The unique identifier for the request.
+///
+///     :returns: A list of dictionaries, each representing a log entry related to the specified request ID.
+///
+/// .. method:: get_logs_by_request_id_and_tag(self, id: str, tag: str) -> List[dict]
+///
+///     Retrieves all logs associated with a specific request ID and tag. The tag can be 'log_kind', 'log_level' params from log entries.
+///
+///     :param id: The request ID as a string.
+///
+///     :param tag: The tag type as a string.
+///
+///     :returns: A list of log entries matching both the request ID and tag, each converted to a Python dictionary.
 ///
 #[derive(Clone)]
 #[pyclass]
@@ -83,7 +105,7 @@ impl Cedarling {
         Ok(cedarling_instance.into())
     }
 
-    /// return logs and remove them from the storage
+    /// Return logs and remove them from the storage
     fn pop_logs(&self) -> PyResult<Vec<PyObject>> {
         let logs = self.inner.pop_logs();
         Python::with_gil(|py| -> PyResult<Vec<PyObject>> {
@@ -93,7 +115,7 @@ impl Cedarling {
         })
     }
 
-    /// get specific log entry
+    /// Get specific log entry
     fn get_log_by_id(&self, id: &str) -> PyResult<Option<PyObject>> {
         // It doesn't follow a functional approach because handling all types properly challenging
         // and this code easy to read
@@ -106,11 +128,13 @@ impl Cedarling {
         }
     }
 
-    /// returns a list of all log ids
+    /// Returns a list of all log ids
     fn get_log_ids(&self) -> Vec<String> {
         self.inner.get_log_ids()
     }
 
+    /// Returns a list of log entries by tag.
+    /// Tag can be `log_kind`, `log_level`.
     fn get_logs_by_tag(&self, tag: &str) -> PyResult<Vec<PyObject>> {
         let logs = self.inner.get_logs_by_tag(tag);
 
@@ -121,7 +145,19 @@ impl Cedarling {
         })
     }
 
-    fn get_logs_by_id_and_tag(&self, id: &str, tag: &str) -> PyResult<Vec<PyObject>> {
+    /// Returns a list of log entries by request id.
+    fn get_log_by_request_id(&self, request_id: &str) -> PyResult<Vec<PyObject>> {
+        let logs = self.inner.get_log_by_request_id(request_id);
+        Python::with_gil(|py| -> PyResult<Vec<PyObject>> {
+            logs.iter()
+                .map(|entry| log_entry_to_py(py, entry))
+                .collect::<PyResult<Vec<PyObject>>>()
+        })
+    }
+
+    /// Returns a list of all log entries by request id and tag.
+    /// Tag can be `log_kind`, `log_level`.
+    fn get_logs_by_request_id_and_tag(&self, id: &str, tag: &str) -> PyResult<Vec<PyObject>> {
         let logs = self.inner.get_logs_by_request_id_and_tag(id, tag);
 
         Python::with_gil(|py| -> PyResult<Vec<PyObject>> {
