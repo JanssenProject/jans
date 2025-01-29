@@ -147,7 +147,7 @@ impl Cedarling {
 
     /// Returns a list of log entries by request id.
     fn get_logs_by_request_id(&self, request_id: &str) -> PyResult<Vec<PyObject>> {
-        let logs = self.inner.get_log_by_request_id(request_id);
+        let logs = self.inner.get_logs_by_request_id(request_id);
         Python::with_gil(|py| -> PyResult<Vec<PyObject>> {
             logs.iter()
                 .map(|entry| log_entry_to_py(py, entry))

@@ -99,6 +99,22 @@ ALLOW_DECISION_STR = "ALLOW"
 DENY_DECISION_STR = "DENY"
 
 
+# Create resouce with type "Jans::Issue" from cedar-policy schema.
+RESOURCE = ResourceData.from_dict({
+    "type": "Jans::Issue",
+    "id": "random_id",
+    "org_id": "some_long_id",
+    "country": "US"
+})
+
+REQUEST = Request(
+    tokens=Tokens(ACCESS_TOKEN, ID_TOKEN, USERINFO_TOKEN),
+    action='Jans::Action::"Update"',
+    context={},
+    resource=RESOURCE,
+)
+
+
 def test_authorize_ok():
     '''
     Test create correct cedarling requst where Resource.org_id is same as Workload.org_id.
@@ -106,22 +122,7 @@ def test_authorize_ok():
     '''
     instance = Cedarling(load_bootstrap_config())
 
-    # Create resouce with type "Jans::Issue" from cedar-policy schema.
-    resource = ResourceData.from_dict({
-        "type": "Jans::Issue",
-        "id": "random_id",
-        "org_id": "some_long_id",
-        "country": "US"
-    })
-
-    request = Request(
-        tokens=Tokens(ACCESS_TOKEN, ID_TOKEN, USERINFO_TOKEN),
-        action='Jans::Action::"Update"',
-        context={}, 
-        resource=resource,
-    )
-
-    authorize_result = instance.authorize(request)
+    authorize_result = instance.authorize(REQUEST)
     assert authorize_result.is_allowed(), "request should be allowed"
 
     workload_result = authorize_result.workload()
