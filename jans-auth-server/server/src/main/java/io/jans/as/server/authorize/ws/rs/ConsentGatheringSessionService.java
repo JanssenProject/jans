@@ -179,9 +179,9 @@ public class ConsentGatheringSessionService {
             return null;
         }
 
-        final Map<String, String> acrToConsent = appConfiguration.getAcrToConsentScriptNameMapping();
+        final Map<String, String> acrToConsent = appConfiguration.getAcrToAgamaConsentFlowMapping();
         if (acrToConsent == null || acrToConsent.isEmpty()) {
-            log.debug("determineConsentFlow - 'acrToConsentScriptNameMapping' configuration property is empty, return null for 'consent_flow'");
+            log.debug("determineConsentFlow - 'acrToAgamaConsentFlowMapping' configuration property is empty, return null for 'consent_flow'");
             return null;
         }
 
