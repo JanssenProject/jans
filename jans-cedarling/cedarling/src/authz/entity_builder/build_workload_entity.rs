@@ -113,7 +113,7 @@ mod test {
             Some(iss.clone()),
         );
         let tokens = DecodedTokens {
-            access: Some(access_token),
+            access: Some(access_token.into()),
             id: None,
             userinfo: None,
         };
@@ -162,7 +162,7 @@ mod test {
         );
         let tokens = DecodedTokens {
             access: None,
-            id: Some(id_token),
+            id: Some(id_token.into()),
             userinfo: None,
         };
         let entity = builder
@@ -254,7 +254,7 @@ mod test {
             Some(iss.clone()),
         );
         let tokens = DecodedTokens {
-            access: Some(access_token),
+            access: Some(access_token.into()),
             id: None,
             userinfo: None,
         };
@@ -350,7 +350,7 @@ mod test {
             Some(iss.clone()),
         );
         let tokens = DecodedTokens {
-            access: Some(access_token),
+            access: Some(access_token.into()),
             id: None,
             userinfo: None,
         };
@@ -406,8 +406,8 @@ mod test {
         let access_token = Token::new_access(TokenClaims::new(HashMap::new()), Some(iss.clone()));
         let id_token = Token::new_id(TokenClaims::new(HashMap::new()), Some(iss.clone()));
         let tokens = DecodedTokens {
-            access: Some(access_token),
-            id: Some(id_token),
+            access: Some(access_token.into()),
+            id: Some(id_token.into()),
             userinfo: None,
         };
         let err = builder

@@ -116,8 +116,8 @@ mod test {
             None,
         );
         let tokens = DecodedTokens {
-            access: Some(access_token),
-            id: Some(id_token),
+            access: Some(access_token.into()),
+            id: Some(id_token.into()),
             userinfo: None,
         };
         validate_id_tkn_trust_mode(&tokens).expect("should not error");
@@ -131,7 +131,7 @@ mod test {
         );
         let tokens = DecodedTokens {
             access: None,
-            id: Some(id_token),
+            id: Some(id_token.into()),
             userinfo: None,
         };
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
@@ -150,8 +150,8 @@ mod test {
             None,
         );
         let tokens = DecodedTokens {
-            access: Some(access_token),
-            id: Some(id_token),
+            access: Some(access_token.into()),
+            id: Some(id_token.into()),
             userinfo: None,
         };
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
@@ -177,7 +177,7 @@ mod test {
             None,
         );
         let tokens = DecodedTokens {
-            access: Some(access_token),
+            access: Some(access_token.into()),
             id: None,
             userinfo: None,
         };
@@ -200,8 +200,8 @@ mod test {
         );
         let id_token = Token::new_id(TokenClaims::new(HashMap::new()), None);
         let tokens = DecodedTokens {
-            access: Some(access_token),
-            id: Some(id_token),
+            access: Some(access_token.into()),
+            id: Some(id_token.into()),
             userinfo: None,
         };
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
@@ -234,8 +234,8 @@ mod test {
             None,
         );
         let tokens = DecodedTokens {
-            access: Some(access_token),
-            id: Some(id_token),
+            access: Some(access_token.into()),
+            id: Some(id_token.into()),
             userinfo: None,
         };
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
@@ -264,9 +264,9 @@ mod test {
             None,
         );
         let tokens = DecodedTokens {
-            access: Some(access_token),
-            id: Some(id_token),
-            userinfo: Some(userinfo_token),
+            access: Some(access_token.into()),
+            id: Some(id_token.into()),
+            userinfo: Some(userinfo_token.into()),
         };
         validate_id_tkn_trust_mode(&tokens).expect("should not error");
     }
@@ -286,9 +286,9 @@ mod test {
         );
         let userinfo_token = Token::new_userinfo(TokenClaims::new(HashMap::new()), None);
         let tokens = DecodedTokens {
-            access: Some(access_token),
-            id: Some(id_token),
-            userinfo: Some(userinfo_token),
+            access: Some(access_token.into()),
+            id: Some(id_token.into()),
+            userinfo: Some(userinfo_token.into()),
         };
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
@@ -324,9 +324,9 @@ mod test {
             None,
         );
         let tokens = DecodedTokens {
-            access: Some(access_token),
-            id: Some(id_token),
-            userinfo: Some(userinfo_token),
+            access: Some(access_token.into()),
+            id: Some(id_token.into()),
+            userinfo: Some(userinfo_token.into()),
         };
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(

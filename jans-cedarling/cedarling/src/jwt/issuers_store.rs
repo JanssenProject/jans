@@ -6,7 +6,7 @@
 use crate::common::policy_store::TrustedIssuer;
 use std::collections::{HashMap, hash_map};
 use std::sync::Arc;
-use url::Url;
+use url::{ParseError, Url};
 
 type IssuerId = String; // e.g. '7ca8ccc6e8682ad91f47e651cf7e3dcea4f8133663ae'
 type IssuerOrigin = String; // e.g. 'https://account.gluu.org'
@@ -26,25 +26,21 @@ impl TrustedIssuersStore {
     // NOTE: once this store is initialized, it is not expected that the source
     // will be updated. If ever Cedarling supports updating the Trusted Issuers in the
     // future, make sure this implementation is updated.
-    pub fn new(issuers: HashMap<IssuerId, TrustedIssuer>) -> Self {
-        let issuers = issuers
-            .values()
-            .map(|iss| {
-                // TODO: Handle error
-                let endpoint = Url::parse(&iss.openid_configuration_endpoint).expect(&format!(
-                    "failed to parse url: {}",
-                    iss.openid_configuration_endpoint
-                ));
-                let iss_origin: IssuerOrigin = endpoint.origin().ascii_serialization();
-                (iss_origin, iss.clone().into())
-            })
-            .collect::<HashMap<IssuerOrigin, Arc<TrustedIssuer>>>();
+    pub fn new(issuers: HashMap<IssuerId, TrustedIssuer>) -> Result<Self, ParseError> {
+        let mut issuers_store = HashMap::new();
+        for iss in issuers.values() {
+            let endpoint = Url::parse(&iss.openid_configuration_endpoint)?;
+            let iss_origin: IssuerOrigin = endpoint.origin().ascii_serialization();
+            issuers_store.insert(iss_origin, iss.clone().into());
+        }
 
-        Self { issuers }
+        Ok(Self {
+            issuers: issuers_store,
+        })
     }
 
     pub fn get(&self, iss_url: &str) -> Option<Arc<TrustedIssuer>> {
-        self.issuers.get(iss_url).map(|x| x.clone())
+        self.issuers.get(iss_url).cloned()
     }
 
     pub fn iter(&self) -> hash_map::Iter<'_, String, Arc<TrustedIssuer>> {

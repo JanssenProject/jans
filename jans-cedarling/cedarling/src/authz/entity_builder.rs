@@ -30,6 +30,7 @@ use std::collections::{HashMap, HashSet};
 use std::convert::Infallible;
 use std::fmt;
 use std::str::FromStr;
+use std::sync::Arc;
 
 use super::AuthorizeEntitiesData;
 
@@ -41,9 +42,9 @@ const DEFAULT_USERINFO_TKN_ENTITY_NAME: &str = "Userinfo_token";
 const DEFAULT_ROLE_ENTITY_NAME: &str = "Role";
 
 pub struct DecodedTokens {
-    pub access: Option<Token>,
-    pub id: Option<Token>,
-    pub userinfo: Option<Token>,
+    pub access: Option<Arc<Token>>,
+    pub id: Option<Arc<Token>>,
+    pub userinfo: Option<Arc<Token>>,
 }
 
 /// The names of the entities in the schema

@@ -159,7 +159,7 @@ mod test {
         let tokens = DecodedTokens {
             access: None,
             id: None,
-            userinfo: Some(userinfo_token),
+            userinfo: Some(userinfo_token.into()),
         };
         let schema = test_schema();
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
@@ -188,7 +188,7 @@ mod test {
         let tokens = DecodedTokens {
             access: None,
             id: None,
-            userinfo: Some(userinfo_token),
+            userinfo: Some(userinfo_token.into()),
         };
         test_build_entity_from_str_claim(tokens);
     }
@@ -202,7 +202,7 @@ mod test {
         );
         let tokens = DecodedTokens {
             access: None,
-            id: Some(id_token),
+            id: Some(id_token.into()),
             userinfo: None,
         };
         test_build_entity_from_str_claim(tokens);
@@ -216,7 +216,7 @@ mod test {
             Some(iss.clone()),
         );
         let tokens = DecodedTokens {
-            access: Some(access_token),
+            access: Some(access_token.into()),
             id: None,
             userinfo: None,
         };
@@ -239,9 +239,9 @@ mod test {
             Some(iss.clone()),
         );
         let tokens = DecodedTokens {
-            access: Some(access_token),
-            id: Some(id_token),
-            userinfo: Some(userinfo_token),
+            access: Some(access_token.into()),
+            id: Some(id_token.into()),
+            userinfo: Some(userinfo_token.into()),
         };
         test_build_entity_from_str_claim(tokens);
     }
@@ -266,9 +266,9 @@ mod test {
             Some(iss.clone()),
         );
         let tokens = DecodedTokens {
-            access: Some(access_token),
-            id: Some(id_token),
-            userinfo: Some(userinfo_token),
+            access: Some(access_token.into()),
+            id: Some(id_token.into()),
+            userinfo: Some(userinfo_token.into()),
         };
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let entities = builder

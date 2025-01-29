@@ -185,7 +185,7 @@ mod test {
         let tokens = DecodedTokens {
             access: None,
             id: None,
-            userinfo: Some(userinfo_token),
+            userinfo: Some(userinfo_token.into()),
         };
         test_successfully_building_user_entity(tokens);
     }
@@ -203,7 +203,7 @@ mod test {
         );
         let tokens = DecodedTokens {
             access: None,
-            id: Some(id_token),
+            id: Some(id_token.into()),
             userinfo: None,
         };
         test_successfully_building_user_entity(tokens);
@@ -219,8 +219,8 @@ mod test {
             Token::new_userinfo(TokenClaims::new(HashMap::new()), Some(iss.clone()));
         let tokens = DecodedTokens {
             access: None,
-            id: Some(id_token),
-            userinfo: Some(userinfo_token),
+            id: Some(id_token.into()),
+            userinfo: Some(userinfo_token.into()),
         };
 
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, true);
@@ -275,7 +275,7 @@ mod test {
         let tokens = DecodedTokens {
             access: None,
             id: None,
-            userinfo: Some(userinfo_token),
+            userinfo: Some(userinfo_token.into()),
         };
         let schema = test_schema();
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, true);

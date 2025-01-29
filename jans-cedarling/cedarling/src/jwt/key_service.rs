@@ -250,8 +250,8 @@ mod test {
             .expect(1)
             .create();
 
-        let key_service = KeyService::new_from_trusted_issuers(Arc::new(TrustedIssuersStore::new(
-            HashMap::from([
+        let key_service = KeyService::new_from_trusted_issuers(Arc::new(
+            TrustedIssuersStore::new(HashMap::from([
                 ("first".to_string(), TrustedIssuer {
                     name: "First IDP".to_string(),
                     description: "".to_string(),
@@ -270,8 +270,9 @@ mod test {
                     ),
                     ..Default::default()
                 }),
-            ]),
-        )))
+            ]))
+            .expect("should create trusted issuers store"),
+        ))
         .await
         .expect("Should load KeyService from trusted issuers");
 

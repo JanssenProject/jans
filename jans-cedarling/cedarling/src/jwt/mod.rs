@@ -25,9 +25,10 @@ use std::sync::{Arc, RwLock};
 
 use issuers_store::TrustedIssuersStore;
 pub use jsonwebtoken::Algorithm;
-use jwt_cache::JwtCache;
+use jwt_cache::{JwtCache, JwtCacheError};
 use key_service::{KeyService, KeyServiceError};
 pub use token::{Token, TokenClaimTypeError, TokenClaims, TokenStr};
+use url::ParseError;
 use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
 
 use crate::JwtConfig;
@@ -71,6 +72,8 @@ pub enum JwtProcessingError {
     StringDeserialization(#[from] serde_json::Error),
     #[error("failed to get lock for the JWT cache: {0}")]
     CacheLockPoisoned(String),
+    #[error(transparent)]
+    JwtCacheError(#[from] JwtCacheError),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -91,6 +94,8 @@ pub enum JwtServiceInitError {
     UnsupportedAlgorithm(String),
     #[error("Failed to initialize JwtValidator: {0}")]
     InitJwtValidator(#[from] JwtValidatorError),
+    #[error("failed to parse issuer url: {0}")]
+    FailedToParseIssUrl(#[from] ParseError),
 }
 
 pub struct JwtService {
@@ -107,7 +112,7 @@ impl JwtService {
     ) -> Result<Self, JwtServiceInitError> {
         let iss_store = Arc::new(TrustedIssuersStore::new(
             trusted_issuers.clone().unwrap_or_default(),
-        ));
+        )?);
 
         let key_service: Arc<_> =
             match (&config.jwt_sig_validation, &config.jwks, &trusted_issuers) {
@@ -186,7 +191,7 @@ impl JwtService {
     pub async fn process_token<'a>(
         &'a self,
         token_str: TokenStr<'a>,
-    ) -> Result<Token, JwtProcessingError> {
+    ) -> Result<Arc<Token>, JwtProcessingError> {
         // First to get the token from cache
         if let Some(cached_tkn) = self
             .jwt_cache
@@ -194,7 +199,7 @@ impl JwtService {
             .map_err(|e| JwtProcessingError::CacheLockPoisoned(e.to_string()))?
             .get(&token_str)
         {
-            return Ok((*cached_tkn).clone());
+            return Ok(cached_tkn);
         }
 
         // If cached cant be found, continue with the decoding process
@@ -225,16 +230,11 @@ impl JwtService {
             },
         };
 
-        // TODO: remove clone
-        if let Err(err) = self
+        let token = self
             .jwt_cache
             .write()
             .map_err(|e| JwtProcessingError::CacheLockPoisoned(e.to_string()))?
-            .insert(token_str, token.clone())
-        {
-            // TODO: pass this on to the logger
-            eprintln!("failed to insert the token to cache: {}", err);
-        }
+            .insert(token_str, token)?;
 
         Ok(token)
     }
@@ -310,7 +310,7 @@ mod test {
             .expect("Should process access_token");
         let expected_claims = serde_json::from_value::<TokenClaims>(access_tkn_claims)
             .expect("Should create expected access_token claims");
-        assert_eq!(access_tkn, Token::new_access(expected_claims.into(), None));
+        assert_eq!(*access_tkn, Token::new_access(expected_claims.into(), None));
 
         // Test id_token
         let id_tkn = jwt_service
@@ -319,7 +319,7 @@ mod test {
             .expect("Should process id_token");
         let expected_claims = serde_json::from_value::<TokenClaims>(id_tkn_claims)
             .expect("Should create expected id_token claims");
-        assert_eq!(id_tkn, Token::new_id(expected_claims, None));
+        assert_eq!(*id_tkn, Token::new_id(expected_claims, None));
 
         // Test userinfo_token
         let userinfo_tkn = jwt_service
@@ -328,6 +328,6 @@ mod test {
             .expect("Should process userinfo_token");
         let expected_claims = serde_json::from_value::<TokenClaims>(userinfo_tkn_claims)
             .expect("Should create expected userinfo_token claims");
-        assert_eq!(userinfo_tkn, Token::new_userinfo(expected_claims, None));
+        assert_eq!(*userinfo_tkn, Token::new_userinfo(expected_claims, None));
     }
 }
