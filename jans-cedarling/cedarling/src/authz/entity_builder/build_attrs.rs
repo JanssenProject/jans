@@ -152,18 +152,13 @@ pub enum BuildAttrErrorKind {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::{
-        common::{
-            cedar_schema::cedar_json::{
-                attribute::Attribute,
-                entity_type::{EntityShape, EntityType},
-            },
-            policy_store::TrustedIssuer,
-        },
-        jwt::TokenClaims,
-    };
+    use crate::common::cedar_schema::cedar_json::attribute::Attribute;
+    use crate::common::cedar_schema::cedar_json::entity_type::{EntityShape, EntityType};
+    use crate::common::policy_store::TrustedIssuer;
+    use crate::jwt::TokenClaims;
     use serde_json::json;
     use std::collections::HashMap;
+    use std::sync::Arc;
 
     #[test]
     fn can_build_entity_attrs_from_tkn() {
@@ -186,13 +181,13 @@ mod test {
                 attrs: HashMap::from([("client_id".to_string(), Attribute::string())]),
             }),
         };
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let token = Token::new_access(
             TokenClaims::new(HashMap::from([(
                 "client_id".to_string(),
                 json!("workload-123"),
             )])),
-            Some(&iss),
+            Some(iss.clone()),
         );
 
         let attrs = build_entity_attrs_from_tkn(&schema, &entity_type, &token, Vec::new())
@@ -226,8 +221,8 @@ mod test {
                 attrs: HashMap::from([("client_id".to_string(), Attribute::string())]),
             }),
         };
-        let iss = TrustedIssuer::default();
-        let token = Token::new_access(TokenClaims::new(HashMap::new()), Some(&iss));
+        let iss = Arc::new(TrustedIssuer::default());
+        let token = Token::new_access(TokenClaims::new(HashMap::new()), Some(iss.clone()));
 
         let err = build_entity_attrs_from_tkn(&schema, &entity_type, &token, Vec::new())
             .expect_err("should error due to missing source");

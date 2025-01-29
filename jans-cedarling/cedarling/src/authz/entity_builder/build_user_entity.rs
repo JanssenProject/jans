@@ -13,6 +13,7 @@ impl EntityBuilder {
         tokens: &DecodedTokens,
         parents: HashSet<EntityUid>,
     ) -> Result<Entity, BuildUserEntityError> {
+        println!("building user entity");
         let entity_name = self.entity_names.user.as_ref();
         let mut errors = vec![];
 
@@ -72,9 +73,10 @@ mod test {
     use cedar_policy::EvalResult;
     use serde_json::json;
     use std::collections::HashMap;
+    use std::sync::Arc;
     use test_utils::assert_eq;
 
-    fn test_iss() -> TrustedIssuer {
+    fn test_iss() -> Arc<TrustedIssuer> {
         let token_entity_metadata = TokenEntityMetadata {
             claim_mapping: serde_json::from_value::<ClaimMappings>(json!({
                 "email": {
@@ -93,6 +95,7 @@ mod test {
             userinfo_tokens: token_entity_metadata,
             ..Default::default()
         }
+        .into()
     }
 
     fn test_schema() -> CedarSchemaJson {
@@ -177,7 +180,7 @@ mod test {
                 ("sub".to_string(), json!("user-123")),
                 ("role".to_string(), json!(["admin", "user"])),
             ])),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let tokens = DecodedTokens {
             access: None,
@@ -196,7 +199,7 @@ mod test {
                 ("sub".to_string(), json!("user-123")),
                 ("role".to_string(), json!(["admin", "user"])),
             ])),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let tokens = DecodedTokens {
             access: None,
@@ -211,8 +214,9 @@ mod test {
         let iss = test_iss();
         let schema = test_schema();
 
-        let id_token = Token::new_id(TokenClaims::new(HashMap::new()), Some(&iss));
-        let userinfo_token = Token::new_userinfo(TokenClaims::new(HashMap::new()), Some(&iss));
+        let id_token = Token::new_id(TokenClaims::new(HashMap::new()), Some(iss.clone()));
+        let userinfo_token =
+            Token::new_userinfo(TokenClaims::new(HashMap::new()), Some(iss.clone()));
         let tokens = DecodedTokens {
             access: None,
             id: Some(id_token),
@@ -266,7 +270,7 @@ mod test {
                 ("email".to_string(), json!("someone@email.com")),
                 ("role".to_string(), json!(["role1", "role2", "role3"])),
             ])),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let tokens = DecodedTokens {
             access: None,

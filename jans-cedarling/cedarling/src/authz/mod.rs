@@ -94,7 +94,7 @@ impl Authz {
     pub(crate) async fn decode_tokens<'a>(
         &'a self,
         request: &'a Request,
-    ) -> Result<DecodedTokens<'a>, AuthorizeError> {
+    ) -> Result<DecodedTokens, AuthorizeError> {
         let access = if let Some(tkn) = request.tokens.access_token.as_ref() {
             Some(
                 self.config
@@ -386,7 +386,7 @@ impl Authz {
     pub fn build_entities(
         &self,
         request: &Request,
-        tokens: &DecodedTokens<'_>,
+        tokens: &DecodedTokens,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         Ok(self
             .entity_builder

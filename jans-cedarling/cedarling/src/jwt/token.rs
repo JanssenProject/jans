@@ -4,6 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::collections::HashMap;
+use std::sync::Arc;
 
 use serde::Deserialize;
 use serde_json::Value;
@@ -13,72 +14,61 @@ use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TokenKind,
 const DEFAULT_USER_ID_SRC_CLAIM: &str = "sub";
 const DEFAULT_ROLE_SRC_CLAIM: &str = "role";
 
+#[derive(Hash)]
 pub enum TokenStr<'a> {
     Access(&'a str),
     Id(&'a str),
     Userinfo(&'a str),
 }
 
-impl<'a> TokenStr<'a> {
-    pub fn as_str(&self) -> &'a str {
-        match self {
-            TokenStr::Access(str) => *str,
-            TokenStr::Id(str) => *str,
-            TokenStr::Userinfo(str) => *str,
-        }
-    }
-}
-
 #[derive(Debug, PartialEq, Clone)]
-pub struct Token<'a> {
+pub struct Token {
     pub kind: TokenKind,
-    pub iss: Option<&'a TrustedIssuer>,
+    pub iss: Arc<TrustedIssuer>,
     claims: TokenClaims,
 }
 
-impl<'a> Token<'a> {
-    pub fn new_access(claims: TokenClaims, iss: Option<&'a TrustedIssuer>) -> Token<'a> {
+impl Token {
+    pub fn new_access(claims: TokenClaims, iss: Option<Arc<TrustedIssuer>>) -> Token {
         Self {
             kind: TokenKind::Access,
-            iss,
+            iss: iss.unwrap_or_default(),
             claims,
         }
     }
 
-    pub fn new_id(claims: TokenClaims, iss: Option<&'a TrustedIssuer>) -> Token<'a> {
+    pub fn new_id(claims: TokenClaims, iss: Option<Arc<TrustedIssuer>>) -> Token {
         Self {
             kind: TokenKind::Id,
-            iss,
+            iss: iss.unwrap_or_default(),
             claims,
         }
     }
 
-    pub fn new_userinfo(claims: TokenClaims, iss: Option<&'a TrustedIssuer>) -> Token<'a> {
+    pub fn new_userinfo(claims: TokenClaims, iss: Option<Arc<TrustedIssuer>>) -> Token {
         Self {
             kind: TokenKind::Userinfo,
-            iss,
+            iss: iss.unwrap_or_default(),
             claims,
         }
     }
 
     pub fn metadata(&self) -> &TokenEntityMetadata {
-        self.iss.unwrap_or_default().token_metadata(self.kind)
+        self.iss.token_metadata(self.kind)
     }
 
     pub fn user_mapping(&self) -> &str {
         self.iss
-            .unwrap_or_default()
             .user_mapping(self.kind)
             .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM)
     }
 
     pub fn claim_mapping(&self) -> &ClaimMappings {
-        self.iss.unwrap_or_default().claim_mapping(self.kind)
+        self.iss.claim_mapping(self.kind)
     }
 
     pub fn role_mapping(&self) -> &str {
         self.iss
-            .unwrap_or_default()
             .role_mapping(self.kind)
             .unwrap_or(DEFAULT_ROLE_SRC_CLAIM)
     }
@@ -87,7 +77,7 @@ impl<'a> Token<'a> {
         self.claims.get_claim(name)
     }
 
-    pub fn logging_info(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
+    pub fn logging_info<'a>(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
         self.claims.logging_info(claim)
     }
 

@@ -20,9 +20,8 @@ mod test_utils;
 mod token;
 mod validator;
 
-use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
 use issuers_store::TrustedIssuersStore;
 pub use jsonwebtoken::Algorithm;
@@ -70,6 +69,8 @@ pub enum JwtProcessingError {
     MissingClaimsInStrictMode(&'static str, &'static str),
     #[error("Failed to deserialize from Value to String: {0}")]
     StringDeserialization(#[from] serde_json::Error),
+    #[error("failed to get lock for the JWT cache: {0}")]
+    CacheLockPoisoned(String),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -96,8 +97,7 @@ pub struct JwtService {
     access_tkn_validator: JwtValidator,
     id_tkn_validator: JwtValidator,
     userinfo_tkn_validator: JwtValidator,
-    jwt_cache: RefCell<JwtCache>,
-    iss_store: Arc<TrustedIssuersStore>,
+    jwt_cache: RwLock<JwtCache>,
 }
 
 impl JwtService {
@@ -105,13 +105,17 @@ impl JwtService {
         config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
     ) -> Result<Self, JwtServiceInitError> {
+        let iss_store = Arc::new(TrustedIssuersStore::new(
+            trusted_issuers.clone().unwrap_or_default(),
+        ));
+
         let key_service: Arc<_> =
             match (&config.jwt_sig_validation, &config.jwks, &trusted_issuers) {
                 // Case: no JWKS provided
                 (true, None, None) => Err(JwtServiceInitError::MissingJwksConfig)?,
                 // Case: Trusted issuers provided
-                (true, None, Some(issuers)) => Some(
-                    KeyService::new_from_trusted_issuers(issuers)
+                (true, None, Some(_)) => Some(
+                    KeyService::new_from_trusted_issuers(iss_store.clone())
                         .await
                         .map_err(JwtServiceInitError::KeyService)?,
                 ),
@@ -129,9 +133,6 @@ impl JwtService {
         // prepare shared configs
         let sig_validation: Arc<_> = config.jwt_sig_validation.into();
         let status_validation: Arc<_> = config.jwt_status_validation.into();
-        let iss_store = Arc::new(TrustedIssuersStore::new(
-            trusted_issuers.clone().unwrap_or_default(),
-        ));
         let algs_supported: Arc<HashSet<Algorithm>> =
             config.signature_algorithms_supported.clone().into();
 
@@ -178,28 +179,22 @@ impl JwtService {
             access_tkn_validator,
             id_tkn_validator,
             userinfo_tkn_validator,
-            jwt_cache: RefCell::new(JwtCache::new()),
-            iss_store,
+            jwt_cache: RwLock::new(JwtCache::new()),
         })
     }
 
     pub async fn process_token<'a>(
         &'a self,
         token_str: TokenStr<'a>,
-    ) -> Result<Token<'a>, JwtProcessingError> {
+    ) -> Result<Token, JwtProcessingError> {
         // First to get the token from cache
-        if let Some(cached_claims) = self.jwt_cache.borrow().get(token_str.as_str()) {
-            let cached_claims = cached_claims.clone();
-            let iss = cached_claims
-                .get("iss")
-                .and_then(|iss| iss.as_str())
-                .and_then(|iss_str| self.iss_store.get(iss_str));
-            let token = match token_str {
-                TokenStr::Access(_) => Token::new_access(cached_claims.into(), iss),
-                TokenStr::Id(_) => Token::new_id(cached_claims.into(), iss),
-                TokenStr::Userinfo(_) => Token::new_userinfo(cached_claims.into(), iss),
-            };
-            return Ok(token);
+        if let Some(cached_tkn) = self
+            .jwt_cache
+            .read()
+            .map_err(|e| JwtProcessingError::CacheLockPoisoned(e.to_string()))?
+            .get(&token_str)
+        {
+            return Ok((*cached_tkn).clone());
         }
 
         // If cached cant be found, continue with the decoding process
@@ -230,10 +225,12 @@ impl JwtService {
             },
         };
 
+        // TODO: remove clone
         if let Err(err) = self
             .jwt_cache
-            .borrow_mut()
-            .insert(&token_str.as_str(), &token)
+            .write()
+            .map_err(|e| JwtProcessingError::CacheLockPoisoned(e.to_string()))?
+            .insert(token_str, token.clone())
         {
             // TODO: pass this on to the logger
             eprintln!("failed to insert the token to cache: {}", err);

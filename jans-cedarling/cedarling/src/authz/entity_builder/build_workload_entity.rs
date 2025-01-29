@@ -25,11 +25,9 @@ impl EntityBuilder {
                 tokens.access.as_ref(),
                 vec![],
             ),
-            (
-                DEFAULT_ID_TKN_WORKLOAD_CLAIM,
-                tokens.id.as_ref(),
-                vec![ClaimAliasMap::new("aud", "client_id")],
-            ),
+            (DEFAULT_ID_TKN_WORKLOAD_CLAIM, tokens.id.as_ref(), vec![
+                ClaimAliasMap::new("aud", "client_id"),
+            ]),
         ]
         .into_iter()
         {
@@ -89,6 +87,7 @@ mod test {
     use cedar_policy::EvalResult;
     use serde_json::json;
     use std::collections::HashMap;
+    use std::sync::Arc;
 
     #[test]
     fn can_build_using_access_tkn() {
@@ -104,14 +103,14 @@ mod test {
             }}}
         }))
         .unwrap();
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let access_token = Token::new_access(
             TokenClaims::new(HashMap::from([
                 ("client_id".to_string(), json!("workload-123")),
                 ("name".to_string(), json!("somename")),
             ])),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let tokens = DecodedTokens {
             access: Some(access_token),
@@ -152,14 +151,14 @@ mod test {
             }}}
         }))
         .unwrap();
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let id_token = Token::new_id(
             TokenClaims::new(HashMap::from([
                 ("aud".to_string(), json!("workload-123")),
                 ("name".to_string(), json!("somename")),
             ])),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let tokens = DecodedTokens {
             access: None,
@@ -221,7 +220,7 @@ mod test {
             }}
         }))
         .unwrap();
-        let iss = TrustedIssuer {
+        let iss = Arc::new(TrustedIssuer {
             access_tokens: TokenEntityMetadata {
                 claim_mapping: serde_json::from_value::<ClaimMappings>(json!({
                     "email": {
@@ -244,7 +243,7 @@ mod test {
                 ..Default::default()
             },
             ..Default::default()
-        };
+        });
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let access_token = Token::new_access(
             TokenClaims::new(HashMap::from([
@@ -252,7 +251,7 @@ mod test {
                 ("email".to_string(), json!("test@example.com")),
                 ("url".to_string(), json!("https://test.com/example")),
             ])),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let tokens = DecodedTokens {
             access: Some(access_token),
@@ -338,7 +337,7 @@ mod test {
             }}
         }))
         .unwrap();
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let access_token = Token::new_access(
             TokenClaims::new(HashMap::from([
@@ -348,7 +347,7 @@ mod test {
                     json!("https://test.com/.well-known/openid-configuration"),
                 ),
             ])),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let tokens = DecodedTokens {
             access: Some(access_token),
@@ -402,10 +401,10 @@ mod test {
             }}}
         }))
         .unwrap();
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
-        let access_token = Token::new_access(TokenClaims::new(HashMap::new()), Some(&iss));
-        let id_token = Token::new_id(TokenClaims::new(HashMap::new()), Some(&iss));
+        let access_token = Token::new_access(TokenClaims::new(HashMap::new()), Some(iss.clone()));
+        let id_token = Token::new_id(TokenClaims::new(HashMap::new()), Some(iss.clone()));
         let tokens = DecodedTokens {
             access: Some(access_token),
             id: Some(id_token),

@@ -240,7 +240,7 @@ mod test {
                     json!("https://some-iss.com/.well-known/openid-configuration"),
                 ),
             ])),
-            Some(&issuers.get("test_iss").unwrap()),
+            Some(issuers.get("test_iss").unwrap().clone().into()),
         );
         test_build_entity("Access_token", access_token, |tkn| {
             builder.build_access_tkn_entity(tkn)
@@ -260,7 +260,7 @@ mod test {
                     json!("https://some-iss.com/.well-known/openid-configuration"),
                 ),
             ])),
-            Some(&issuers.get("test_iss").unwrap()),
+            Some(issuers.get("test_iss").unwrap().clone().into()),
         );
         test_build_entity("id_token", id_token, |tkn| builder.build_id_tkn_entity(tkn));
     }
@@ -278,7 +278,7 @@ mod test {
                     json!("https://some-iss.com/.well-known/openid-configuration"),
                 ),
             ])),
-            Some(&issuers.get("test_iss").unwrap()),
+            Some(issuers.get("test_iss").unwrap().clone().into()),
         );
         test_build_entity("Userinfo_token", userinfo_token, |tkn| {
             builder.build_userinfo_tkn_entity(tkn)
@@ -297,9 +297,9 @@ mod test {
                 json!("https://some-iss.com/.well-known/openid-configuration"),
             ),
         ]));
-        let iss = Some(issuers.get("test_iss").unwrap());
-        let access_token = Token::new_access(tkn_claims.clone(), iss);
-        let id_token = Token::new_id(tkn_claims.clone(), iss);
+        let iss = Some(issuers.get("test_iss").unwrap().clone().into());
+        let access_token = Token::new_access(tkn_claims.clone(), iss.clone());
+        let id_token = Token::new_id(tkn_claims.clone(), iss.clone());
         let userinfo_token = Token::new_userinfo(tkn_claims, iss);
 
         for tkn in [&id_token, &userinfo_token].iter() {

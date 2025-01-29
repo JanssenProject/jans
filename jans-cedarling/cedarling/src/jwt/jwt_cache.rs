@@ -3,16 +3,13 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::Token;
+use super::{Token, TokenStr};
 use chrono::{Duration, TimeDelta, Utc};
-use serde_json::Value;
 use sparkv::SparKV;
-use std::{
-    collections::HashMap,
-    hash::{DefaultHasher, Hash, Hasher},
-};
+use std::hash::{DefaultHasher, Hash, Hasher};
+use std::sync::Arc;
 
-pub struct JwtCache(SparKV<HashMap<String, Value>>);
+pub struct JwtCache(SparKV<Arc<Token>>);
 
 const DEFAULT_TTL: TimeDelta = Duration::hours(1);
 
@@ -21,16 +18,22 @@ impl JwtCache {
         Self(SparKV::new())
     }
 
-    pub fn insert(&mut self, jwt_str: &str, decoded_jwt: &Token<'_>) -> Result<(), JwtCacheError> {
-        let hash = hash_jwt(jwt_str);
+    pub fn insert(
+        &mut self,
+        jwt_str: TokenStr,
+        decoded_jwt: Token,
+    ) -> Result<Arc<Token>, JwtCacheError> {
+        let hash = hash_jwt(&jwt_str);
         let exp = decoded_jwt
             .get_claim("exp")
             .and_then(|x| x.value().as_i64());
 
+        let token = Arc::new(decoded_jwt);
+
         let ttl = if let Some(exp) = exp {
             let now = Utc::now().timestamp();
             if exp <= now {
-                return Ok(());
+                return Ok(token);
             }
             // we cap the TTL to 1 hr since that's the default max TLL in SparKV
             // otherwise, we get a TTLTooLong from SparKV
@@ -40,19 +43,18 @@ impl JwtCache {
             DEFAULT_TTL
         };
 
-        self.0
-            .set_with_ttl(&hash, decoded_jwt.claims_value().clone(), ttl)?;
+        self.0.set_with_ttl(&hash, token.clone(), ttl)?;
 
-        Ok(())
+        Ok(token)
     }
 
-    pub fn get(&self, jwt_str: &str) -> Option<&HashMap<String, Value>> {
+    pub fn get(&self, jwt_str: &TokenStr) -> Option<Arc<Token>> {
         let hash = hash_jwt(jwt_str);
-        self.0.get(&hash)
+        self.0.get(&hash).cloned()
     }
 }
 
-fn hash_jwt(jwt_str: &str) -> String {
+fn hash_jwt(jwt_str: &TokenStr) -> String {
     let mut s = DefaultHasher::new();
     jwt_str.hash(&mut s);
     format!("{:x}", s.finish())
@@ -67,7 +69,7 @@ pub enum JwtCacheError {
 #[cfg(test)]
 mod test {
     use super::JwtCache;
-    use crate::jwt::Token;
+    use crate::jwt::{Token, TokenStr};
     use chrono::Utc;
     use serde_json::json;
     use std::collections::HashMap;
@@ -79,8 +81,8 @@ mod test {
             HashMap::from([("aud".to_string(), json!("some_aud"))]).into(),
             None,
         );
-        cache
-            .insert("some.access.tkn", &access_tkn)
+        let access_tkn = cache
+            .insert(TokenStr::Access("some.access.tkn"), access_tkn)
             .expect("should insert token into cache");
 
         let id_tkn = Token::new_id(
@@ -92,7 +94,7 @@ mod test {
             None,
         );
         cache
-            .insert("some.id.tkn", &id_tkn)
+            .insert(TokenStr::Id("some.id.tkn"), id_tkn)
             .expect("should insert token into cache");
 
         let userinfo_exp = json!(Utc::now().timestamp() + 300);
@@ -104,28 +106,28 @@ mod test {
             .into(),
             None,
         );
-        cache
-            .insert("some.userinfo.tkn", &userinfo_tkn)
+        let userinfo_tkn = cache
+            .insert(TokenStr::Userinfo("some.userinfo.tkn"), userinfo_tkn)
             .expect("should insert token into cache");
 
         // Check access token
         assert_eq!(
-            cache.get("some.access.tkn"),
-            Some(access_tkn.claims_value()),
+            cache.get(&TokenStr::Access("some.access.tkn")),
+            Some(access_tkn),
             "should have correct access token in cache"
         );
 
         // Check id token
         assert_eq!(
-            cache.get("some.id.tkn"),
+            cache.get(&TokenStr::Id("some.id.tkn")),
             None,
             "should not have id token in the cache"
         );
 
         // Check userinfo token
         assert_eq!(
-            cache.get("some.userinfo.tkn"),
-            Some(userinfo_tkn.claims_value()),
+            cache.get(&TokenStr::Userinfo("some.userinfo.tkn")),
+            Some(userinfo_tkn),
             "should have correct userinfo token in cache"
         );
     }

@@ -62,7 +62,7 @@ impl EntityBuilder {
                                     claim.value(),
                                 ),
                             ),
-                        ))
+                        ));
                     },
                 };
 
@@ -117,6 +117,7 @@ mod test {
     use crate::jwt::{Token, TokenClaims};
     use serde_json::json;
     use std::collections::HashMap;
+    use std::sync::Arc;
 
     fn test_schema() -> CedarSchemaJson {
         serde_json::from_value::<CedarSchemaJson>(json!({
@@ -147,13 +148,13 @@ mod test {
 
     #[test]
     fn can_build_using_userinfo_tkn_vec_claim() {
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let userinfo_token = Token::new_userinfo(
             TokenClaims::new(HashMap::from([(
                 "role".to_string(),
                 json!(["admin", "user"]),
             )])),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let tokens = DecodedTokens {
             access: None,
@@ -179,10 +180,10 @@ mod test {
 
     #[test]
     fn can_build_using_userinfo_tkn_string_claim() {
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let userinfo_token = Token::new_userinfo(
             TokenClaims::new(HashMap::from([("role".to_string(), json!("admin"))])),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let tokens = DecodedTokens {
             access: None,
@@ -194,10 +195,10 @@ mod test {
 
     #[test]
     fn can_build_using_id_tkn() {
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let id_token = Token::new_id(
             TokenClaims::new(HashMap::from([("role".to_string(), json!("admin"))])),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let tokens = DecodedTokens {
             access: None,
@@ -209,10 +210,10 @@ mod test {
 
     #[test]
     fn can_build_using_access_tkn() {
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let access_token = Token::new_access(
             TokenClaims::new(HashMap::from([("role".to_string(), json!("admin"))])),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let tokens = DecodedTokens {
             access: Some(access_token),
@@ -224,18 +225,18 @@ mod test {
 
     #[test]
     fn ignores_duplicate_roles() {
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let access_token = Token::new_access(
             TokenClaims::new(HashMap::from([("role".to_string(), json!("admin"))])),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let id_token = Token::new_id(
             TokenClaims::new(HashMap::from([("role".to_string(), json!("admin"))])),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let userinfo_token = Token::new_userinfo(
             TokenClaims::new(HashMap::from([("role".to_string(), json!("admin"))])),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let tokens = DecodedTokens {
             access: Some(access_token),
@@ -247,22 +248,22 @@ mod test {
 
     #[test]
     fn can_create_multiple_different_roles_from_different_tokens() {
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let schema = test_schema();
         let access_token = Token::new_access(
             TokenClaims::new(HashMap::from([("role".to_string(), json!("role1"))])),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let id_token = Token::new_id(
             TokenClaims::new(HashMap::from([("role".to_string(), json!("role2"))])),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let userinfo_token = Token::new_userinfo(
             TokenClaims::new(HashMap::from([(
                 "role".to_string(),
                 json!(["role3", "role4"]),
             )])),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let tokens = DecodedTokens {
             access: Some(access_token),

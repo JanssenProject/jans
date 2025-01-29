@@ -3,9 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::HashMap;
-
 use crate::common::policy_store::TrustedIssuer;
+use std::collections::{HashMap, hash_map};
+use std::sync::Arc;
 use url::Url;
 
 type IssuerId = String; // e.g. '7ca8ccc6e8682ad91f47e651cf7e3dcea4f8133663ae'
@@ -19,7 +19,7 @@ type IssuerOrigin = String; // e.g. 'https://account.gluu.org'
 /// without requiring complex or iterative searches.
 #[derive(Default)]
 pub struct TrustedIssuersStore {
-    issuers: HashMap<IssuerOrigin, TrustedIssuer>,
+    issuers: HashMap<IssuerOrigin, Arc<TrustedIssuer>>,
 }
 
 impl TrustedIssuersStore {
@@ -30,16 +30,24 @@ impl TrustedIssuersStore {
         let issuers = issuers
             .values()
             .map(|iss| {
-                let endpoint = Url::parse(&iss.openid_configuration_endpoint).unwrap();
+                // TODO: Handle error
+                let endpoint = Url::parse(&iss.openid_configuration_endpoint).expect(&format!(
+                    "failed to parse url: {}",
+                    iss.openid_configuration_endpoint
+                ));
                 let iss_origin: IssuerOrigin = endpoint.origin().ascii_serialization();
-                (iss_origin, iss.clone())
+                (iss_origin, iss.clone().into())
             })
-            .collect::<HashMap<IssuerOrigin, TrustedIssuer>>();
+            .collect::<HashMap<IssuerOrigin, Arc<TrustedIssuer>>>();
 
         Self { issuers }
     }
 
-    pub fn get(&self, iss_domain: &str) -> Option<&TrustedIssuer> {
-        self.issuers.get(iss_domain)
+    pub fn get(&self, iss_url: &str) -> Option<Arc<TrustedIssuer>> {
+        self.issuers.get(iss_url).map(|x| x.clone())
+    }
+
+    pub fn iter(&self) -> hash_map::Iter<'_, String, Arc<TrustedIssuer>> {
+        self.issuers.iter()
     }
 }

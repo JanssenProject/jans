@@ -11,6 +11,7 @@ use jsonwebtoken::DecodingKey;
 use serde_json::{Value, json};
 
 use super::TrustedIssuerId;
+use super::issuers_store::TrustedIssuersStore;
 use super::jwk_store::{JwkStore, JwkStoreError};
 use crate::common::policy_store::TrustedIssuer;
 use crate::http::{HttpClient, HttpClientError};
@@ -19,7 +20,7 @@ pub struct DecodingKeyWithIss<'a> {
     /// The decoding key used to validate JWT signatures.
     pub key: &'a DecodingKey,
     /// The Trusted Issuer where the Key was fetched.
-    pub key_iss: Option<&'a TrustedIssuer>,
+    pub key_iss: Option<Arc<TrustedIssuer>>,
 }
 
 /// Manages Json Web Keys (JWK).
@@ -65,7 +66,7 @@ impl KeyService {
     ///
     /// Enables loading key stores from a local JSON file.
     pub async fn new_from_trusted_issuers(
-        trusted_issuers: &HashMap<String, TrustedIssuer>,
+        trusted_issuers: Arc<TrustedIssuersStore>,
     ) -> Result<Self, KeyServiceError> {
         let http_client = HttpClient::new(3, Duration::from_secs(3))?;
 
@@ -74,7 +75,7 @@ impl KeyService {
             let iss_id: Arc<str> = iss_id.as_str().into();
             key_stores.insert(
                 iss_id.clone(),
-                JwkStore::new_from_trusted_issuer(iss_id, iss, &http_client).await?,
+                JwkStore::new_from_trusted_issuer(iss_id, iss.clone(), &http_client).await?,
             );
         }
 
@@ -126,11 +127,13 @@ pub enum KeyServiceError {
 #[cfg(test)]
 mod test {
     use std::collections::HashMap;
+    use std::sync::Arc;
 
     use mockito::Server;
     use serde_json::json;
 
     use crate::common::policy_store::TrustedIssuer;
+    use crate::jwt::issuers_store::TrustedIssuersStore;
     use crate::jwt::key_service::KeyService;
 
     #[test]
@@ -178,24 +181,25 @@ mod test {
         let kid1 = "a50f6e70ef4b548a5fd9142eecd1fb8f54dce9ee";
         let kid2 = "73e25f9789119c7875d58087a78ac23f5ef2eda3";
 
-        let mut mock_server = Server::new_async().await;
+        let mut mock_server1 = Server::new_async().await;
+        let mut mock_server2 = Server::new_async().await;
 
         // Setup first OpenID config endpoint
-        let openid_config_endpoint1 = mock_server
-            .mock("GET", "/first/.well-known/openid-configuration")
+        let openid_config_endpoint1 = mock_server1
+            .mock("GET", "/.well-known/openid-configuration")
             .with_status(200)
             .with_body(
                 json!({
-                    "issuer": mock_server.url(),
-                    "jwks_uri": format!("{}/first/jwks", mock_server.url())
+                    "issuer": mock_server1.url(),
+                    "jwks_uri": format!("{}/jwks", mock_server1.url())
                 })
                 .to_string(),
             )
             .expect(1)
             .create();
         // Setup first JWKS endpoint
-        let jwks_endpoint1 = mock_server
-            .mock("GET", "/first/jwks")
+        let jwks_endpoint1 = mock_server1
+            .mock("GET", "/jwks")
             .with_status(200)
             .with_body(
                 json!({
@@ -214,21 +218,21 @@ mod test {
             .create();
 
         // Setup second OpenID config endpoint
-        let openid_config_endpoint2 = mock_server
-            .mock("GET", "/second/.well-known/openid-configuration")
+        let openid_config_endpoint2 = mock_server2
+            .mock("GET", "/.well-known/openid-configuration")
             .with_status(200)
             .with_body(
                 json!({
-                    "issuer": mock_server.url(),
-                    "jwks_uri": format!("{}/second/jwks", mock_server.url())
+                    "issuer": mock_server2.url(),
+                    "jwks_uri": format!("{}/jwks", mock_server2.url())
                 })
                 .to_string(),
             )
             .expect(1)
             .create();
         // Setup second JWKS endpoint
-        let jwks_endpoint2 = mock_server
-            .mock("GET", "/second/jwks")
+        let jwks_endpoint2 = mock_server2
+            .mock("GET", "/jwks")
             .with_status(200)
             .with_body(
                 json!({
@@ -246,28 +250,36 @@ mod test {
             .expect(1)
             .create();
 
-        let key_service = KeyService::new_from_trusted_issuers(&HashMap::from([
-            ("first".to_string(), TrustedIssuer {
-                name: "First IDP".to_string(),
-                description: "".to_string(),
-                openid_configuration_endpoint: format!(
-                    "{}/first/.well-known/openid-configuration",
-                    mock_server.url()
-                ),
-                ..Default::default()
-            }),
-            ("second".to_string(), TrustedIssuer {
-                name: "Second IDP".to_string(),
-                description: "".to_string(),
-                openid_configuration_endpoint: format!(
-                    "{}/second/.well-known/openid-configuration",
-                    mock_server.url()
-                ),
-                ..Default::default()
-            }),
-        ]))
+        let key_service = KeyService::new_from_trusted_issuers(Arc::new(TrustedIssuersStore::new(
+            HashMap::from([
+                ("first".to_string(), TrustedIssuer {
+                    name: "First IDP".to_string(),
+                    description: "".to_string(),
+                    openid_configuration_endpoint: format!(
+                        "{}/.well-known/openid-configuration",
+                        mock_server1.url()
+                    ),
+                    ..Default::default()
+                }),
+                ("second".to_string(), TrustedIssuer {
+                    name: "Second IDP".to_string(),
+                    description: "".to_string(),
+                    openid_configuration_endpoint: format!(
+                        "{}/.well-known/openid-configuration",
+                        mock_server2.url()
+                    ),
+                    ..Default::default()
+                }),
+            ]),
+        )))
         .await
         .expect("Should load KeyService from trusted issuers");
+
+        // Assert that each of the endpoints are only visited once.
+        openid_config_endpoint1.assert();
+        openid_config_endpoint2.assert();
+        jwks_endpoint1.assert();
+        jwks_endpoint2.assert();
 
         assert!(
             key_service.get_key(kid1).is_some(),
@@ -281,11 +293,5 @@ mod test {
             key_service.get_key("some unknown key id").is_none(),
             "Expected to not find a key"
         );
-
-        // Assert that each of the endpoints are only visited once.
-        openid_config_endpoint1.assert();
-        openid_config_endpoint2.assert();
-        jwks_endpoint1.assert();
-        jwks_endpoint2.assert();
     }
 }
