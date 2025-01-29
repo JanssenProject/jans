@@ -1,14 +1,11 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 
 export default function HelpDrawer({ isOpen, handleDrawer }) {
   const [open, setOpen] = React.useState(isOpen);
-
+  const [width, setWidth] = React.useState((window.innerWidth * 2)/3 )
   React.useEffect(() => {
     handleDrawer(isOpen)
     setOpen(isOpen);
@@ -20,88 +17,81 @@ export default function HelpDrawer({ isOpen, handleDrawer }) {
   };
 
   const DrawerList = (
-    <>
-      <Box sx={{ width: 1184 }} role="presentation">
-        <Card sx={{ maxWidth: 1184 }}>
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="div">
-              Step 1
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Click on 'Add Client' button for Dynamic Client Registration on authentication server.
-            </Typography>
-          </CardContent>
-          <CardMedia
-            sx={{ height: 266 }}
-            image={'tarpDocs1.png'}
-          />
-        </Card>
-      </Box>
-      <Box sx={{ width: 586 }} role="presentation">
-        <Card sx={{ maxWidth: 586 }}>
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="div">
-              Step 2
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              On registration form enter details and register.
-            </Typography>
-          </CardContent>
-          <CardMedia
-            sx={{ height: 445 }}
-            image={'tarpDocs2.png'}
-          />
-        </Card>
-      </Box>
-      <Box sx={{ width: 1184 }} role="presentation">
-        <Card sx={{ maxWidth: 1184 }}>
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="div">
-              Step 3
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Trigger authentication flow.
-            </Typography>
-          </CardContent>
-          <CardMedia
-            sx={{ height: 266 }}
-            image={'tarpDocs3.png'}
-          />
-        </Card>
-      </Box>
-      <Box sx={{ width: 575 }} role="presentation">
-        <Card sx={{ maxWidth: 575 }}>
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="div">
-              Step 4
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              The Registered client can be used to trigger authentication flow until it is expired.
-            </Typography>
-          </CardContent>
-          <CardMedia
-            sx={{ height: 459 }}
-            image={'tarpDocs4.png'}
-          />
-        </Card>
-      </Box>
-      <Box sx={{ width: 575 }} role="presentation">
-        <Card sx={{ maxWidth: 575 }}>
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="div">
-              Optional
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              For <b>'Acr Values'</b> input, you can also add a new ACR option.
-            </Typography>
-          </CardContent>
-          <CardMedia
-            sx={{ height: 459 }}
-            image={'tarpDocs5.png'}
-          />
-        </Card>
-      </Box>
-    </>
+
+    <Box sx={{ width: width }} role="presentation">
+      <div style={{ padding: "20px" }}>
+        <Typography gutterBottom variant="h5" component="div">
+          Step 1
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Click on 'Add Client' button for Dynamic Client Registration on authentication server.
+        </Typography>
+      </div>
+      <div className="image-container">
+        <img id="dynamic-image" src={'tarpDocs1.png'} />
+      </div>
+
+      <div style={{ padding: "20px" }}>
+        <Typography gutterBottom variant="h5" component="div">
+          Step 2
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          On registration form enter details and register.
+        </Typography>
+      </div>
+      <div className="image-container">
+        <img id="dynamic-image" src={'tarpDocs2.png'} />
+      </div>
+
+      <div style={{ padding: "20px" }}>
+        <Typography gutterBottom variant="h5" component="div">
+          Step 3 (Optional: For Cedarlig authorization testing)
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Add Cedarling bootstrap configuration on <b>Cedarling</b> tab.
+        </Typography>
+      </div>
+      <div className="image-container">
+        <img id="dynamic-image" src={'tarpDocs3.png'} />
+      </div>
+
+      <div style={{ padding: "20px" }}>
+        <Typography gutterBottom variant="h5" component="div">
+          Step 4
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Start Authentication code flow.
+        </Typography>
+      </div>
+      <div className="image-container">
+        <img id="dynamic-image" src={'tarpDocs4.png'} />
+      </div>
+
+      <div style={{ padding: "20px" }}>
+        <Typography gutterBottom variant="h5" component="div">
+          Step 5
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Enter required details before starting Authentication Code flow.
+        </Typography>
+      </div>
+      <div className="image-container">
+        <img id="dynamic-image" src={'tarpDocs5.png'} />
+      </div>
+
+      <div style={{ padding: "20px" }}>
+        <Typography gutterBottom variant="h5" component="div">
+          Step 6 (Optional: For Cedarlig authorization testing)
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          After authentication, test Cedarling Authorization decision using following request form.
+        </Typography>
+      </div>
+      <div className="image-container">
+        <img id="dynamic-image" src={'tarpDocs6.png'} />
+      </div>
+    </Box>
+
   );
 
   return (

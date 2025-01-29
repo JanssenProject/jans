@@ -25,7 +25,6 @@ public class AuditLoggerResource {
 
     @Inject
     Logger log;
-
     @POST
     @Path(AUDIT)
     @ProtectedApi(scopes = {AUDIT_LOGGING_WRITE_SCOPE})

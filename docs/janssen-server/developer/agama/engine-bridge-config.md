@@ -40,8 +40,6 @@ The properties of Agama engine configuration are described in the following:
 
 - `finishedFlowPage`:  A path relative to `/opt/jans/jetty/jans-auth/agama` containing the location of the page shown when a flow has finished (whether successfully or not) in the phase handled exclusively by the engine. This page features an auto-submitting form that users won't notice in practice. This page will rarely need modifications. Default value is `finished.ftlh`
 
-- `bridgeScriptPage`: This is a facelets (JSF) page the bridge needs for proper operation. This page resides in the authentication server WAR file and will rarely need modifications. Default value is `agama.xhtml`
-
 - `serializeRules`: A JSON object specifying the serialization rules, see below. It is not recommended to remove items from the out-of-the-box rules. Adding items is fine
 
 ### Serialization rules

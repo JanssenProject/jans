@@ -15,25 +15,24 @@ limitations under the License.
 """
 
 from datetime import datetime
+import logging
+import orjson
 
-from structlog import configure, stdlib, processors, get_logger 
+from structlog import configure, get_logger, stdlib, processors, BytesLoggerFactory, make_filtering_bound_logger, \
+    contextvars
 from pythonjsonlogger import jsonlogger
 
 configure(
-    processors=[
-        stdlib.filter_by_level,
-        stdlib.add_logger_name,
-        stdlib.add_log_level,
-        stdlib.PositionalArgumentsFormatter(),
-        processors.TimeStamper(fmt='iso'),
-        processors.StackInfoRenderer(),
-        processors.format_exc_info,
-        processors.JSONRenderer()
-    ],
-    context_class=dict,
-    logger_factory=stdlib.LoggerFactory(),
-    wrapper_class=stdlib.BoundLogger,
     cache_logger_on_first_use=True,
+    wrapper_class=make_filtering_bound_logger(logging.INFO),
+    processors=[
+        contextvars.merge_contextvars,
+        processors.add_log_level,
+        processors.format_exc_info,
+        processors.TimeStamper(fmt="iso", utc=True),
+        processors.JSONRenderer(serializer=orjson.dumps),
+    ],
+    logger_factory=BytesLoggerFactory(),
 )
 
 logger:stdlib.BoundLogger = get_logger()
