@@ -183,7 +183,8 @@ from this project listing page.
 
 4. Create `result object` Assignment block
 
-    Next, we need to create an empty variable that the flow will use in the future to store authentication results. 
+    Next, we need to create an empty variable to store authentication results
+    when we validate the credentials in subsequent steps. 
 
     Create a `Assignment` block after the `Get instance reference` call block and configure it as shown below.
 
@@ -470,7 +471,7 @@ GitHub release repository. Click `Publish`
 
 ![](../../../assets/agamalab-flow-passwd-publish-project-gh.png)
 
-Upon successful publishing, the Agama Lab `Releases` dashboard is shown. 
+Upon successful publishing, the Agama Lab's `Releases` dashboard is shown. 
 It lists the project that we released.
 
 Click on the project name to go to the GitHub repository release page where 
