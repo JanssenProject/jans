@@ -113,6 +113,41 @@ impl Cedarling {
         }
         result
     }
+
+    /// Get logs by tag, like `log_kind` or `log level`.
+    /// Tag can be `log_kind`, `log_level`.
+    pub fn get_logs_by_tag(&self, tag: &str) -> Result<Vec<JsValue>, Error> {
+        self.instance
+            .get_logs_by_tag(tag)
+            .iter()
+            .map(|log| convert_json_to_object(log))
+            .collect()
+    }
+
+    /// Get logs by request_id.
+    /// Return log entries that match the given request_id.
+    pub fn get_logs_by_request_id(&self, request_id: &str) -> Result<Vec<JsValue>, Error> {
+        self.instance
+            .get_logs_by_request_id(request_id)
+            .iter()
+            .map(|log| convert_json_to_object(log))
+            .collect()
+    }
+
+    /// Get log by request_id and tag, like composite key `request_id` + `log_kind`.
+    /// Tag can be `log_kind`, `log_level`.
+    /// Return log entries that match the given request_id and tag.
+    pub fn get_logs_by_request_id_and_tag(
+        &self,
+        request_id: &str,
+        tag: &str,
+    ) -> Result<Vec<JsValue>, Error> {
+        self.instance
+            .get_logs_by_request_id_and_tag(request_id, tag)
+            .iter()
+            .map(|log| convert_json_to_object(log))
+            .collect()
+    }
 }
 
 /// convert json to js object
@@ -176,6 +211,10 @@ pub struct AuthorizeResult {
     ///
     /// this field is [`bool`] type to be compatible with [authzen Access Evaluation Decision](https://openid.github.io/authzen/#section-6.2.1).
     pub decision: bool,
+
+    /// Request ID of the authorization request
+    #[wasm_bindgen(getter_with_clone)]
+    pub request_id: String,
 }
 
 #[wasm_bindgen]
@@ -196,6 +235,7 @@ impl From<cedarling::AuthorizeResult> for AuthorizeResult {
                 .person
                 .map(|v| AuthorizeResultResponse { inner: Rc::new(v) }),
             decision: value.decision,
+            request_id: value.request_id,
         }
     }
 }
