@@ -100,13 +100,6 @@ class EndUserNotification(EndUserNotificationType):
 ## Sample Scripts
 - [EndUserNotification](../../../script-catalog/ciba/end-user-notification/end_user_notification.py)
 
-## This content is in progress
-
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
-
-## Have questions in the meantime?
-
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
 
 ## Want to contribute?
 
