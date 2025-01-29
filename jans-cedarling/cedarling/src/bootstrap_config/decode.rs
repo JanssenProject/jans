@@ -13,17 +13,16 @@ use std::fs;
 use std::path::Path;
 use std::str::FromStr;
 
+use super::BootstrapConfigRaw;
 use super::authorization_config::{AuthorizationConfig, IdTokenTrustMode};
 use super::raw_config::LoggerType;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, JwtConfig, LogConfig, LogTypeConfig,
-    MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, TokenValidationConfig,
+    MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
-
-use super::BootstrapConfigRaw;
 
 impl BootstrapConfig {
     /// Construct `BootstrapConfig` from environment variables and `BootstrapConfigRaw` config.
@@ -115,28 +114,7 @@ impl BootstrapConfig {
             jwt_sig_validation: raw.jwt_sig_validation.into(),
             jwt_status_validation: raw.jwt_status_validation.into(),
             signature_algorithms_supported: raw.jwt_signature_algorithms_supported.clone(),
-            access_token_config: TokenValidationConfig {
-                iss_validation: raw.at_iss_validation.into(),
-                jti_validation: raw.at_jti_validation.into(),
-                nbf_validation: raw.at_nbf_validation.into(),
-                exp_validation: raw.at_exp_validation.into(),
-                ..Default::default()
-            },
-            id_token_config: TokenValidationConfig {
-                iss_validation: raw.idt_iss_validation.into(),
-                aud_validation: raw.idt_aud_validation.into(),
-                sub_validation: raw.idt_sub_validation.into(),
-                exp_validation: raw.idt_exp_validation.into(),
-                iat_validation: raw.idt_iat_validation.into(),
-                ..Default::default()
-            },
-            userinfo_token_config: TokenValidationConfig {
-                iss_validation: raw.userinfo_iss_validation.into(),
-                aud_validation: raw.userinfo_aud_validation.into(),
-                sub_validation: raw.userinfo_sub_validation.into(),
-                exp_validation: raw.userinfo_exp_validation.into(),
-                ..Default::default()
-            },
+            token_validation_settings: raw.token_configs.clone().into(),
         };
 
         let authorization_config = AuthorizationConfig {
@@ -148,9 +126,8 @@ impl BootstrapConfig {
             decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
             mapping_user: raw.mapping_user.clone(),
             mapping_workload: raw.mapping_workload.clone(),
-            mapping_id_token: raw.mapping_id_token.clone(),
-            mapping_access_token: raw.mapping_access_token.clone(),
-            mapping_userinfo_token: raw.mapping_userinfo_token.clone(),
+            mapping_role: raw.mapping_role.clone(),
+            mapping_tokens: raw.token_configs.clone().into(),
             id_token_trust_mode: raw.id_token_trust_mode,
         };
 

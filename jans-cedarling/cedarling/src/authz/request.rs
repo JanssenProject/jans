@@ -9,7 +9,8 @@ use std::collections::HashMap;
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Request {
     /// Contains the JWTs that will be used for the AuthZ request
-    pub tokens: Tokens,
+    #[serde(default)]
+    pub tokens: HashMap<String, String>,
     /// cedar_policy action
     pub action: String,
     /// cedar_policy resource data

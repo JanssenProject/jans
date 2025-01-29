@@ -9,6 +9,7 @@ use super::super::authorization_config::IdTokenTrustMode;
 use super::default_values::*;
 use super::feature_types::*;
 use super::json_util::*;
+use super::token_settings::TokenConfigs;
 use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Serialize};
@@ -101,20 +102,9 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub mapping_workload: Option<String>,
 
-    /// Mapping name of cedar schema id_token entity.
-    #[serde(rename = "CEDARLING_MAPPING_ID_TOKEN", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub mapping_id_token: Option<String>,
-
-    /// Mapping name of cedar schema access_token entity.
-    #[serde(rename = "CEDARLING_MAPPING_ACCESS_TOKEN", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub mapping_access_token: Option<String>,
-
-    /// Mapping name of cedar schema userinfo_token entity.
-    #[serde(rename = "CEDARLING_MAPPING_USERINFO_TOKEN", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub mapping_userinfo_token: Option<String>,
+    /// Mapping name of cedar schema Workload entity.
+    #[serde(rename = "CEDARLING_MAPPING_ROLE", default)]
+    pub mapping_role: Option<String>,
 
     /// Path to a local file pointing containing a JWKS.
     #[serde(
@@ -160,64 +150,11 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_signature_algorithms_supported: HashSet<Algorithm>,
 
-    /// When enabled, the `iss` (Issuer) claim must be present in the Access Token and
-    /// the scheme must be https.
-    #[serde(rename = "CEDARLING_AT_ISS_VALIDATION", default)]
-    pub at_iss_validation: FeatureToggle,
-
-    /// When enabled, the `jti` (JWT ID) claim must be present in the Access Token.
-    #[serde(rename = "CEDARLING_AT_JTI_VALIDATION", default)]
-    pub at_jti_validation: FeatureToggle,
-
-    /// When enabled, the `nbf` (Not Before) claim must be present in the Access Token
-    /// and Cedarling will verify that the current date is after the `nbf`.
-    #[serde(rename = "CEDARLING_AT_NBF_VALIDATION", default)]
-    pub at_nbf_validation: FeatureToggle,
-
-    /// When enabled, the `exp` (Expiration) claim must be present in the Access Token
-    /// and not past the date specified.
-    #[serde(rename = "CEDARLING_AT_EXP_VALIDATION", default)]
-    pub at_exp_validation: FeatureToggle,
-
-    /// When enabled, the `iss` (Issuer) claim must be present in the ID Token and
-    /// the scheme must be https.
-    #[serde(rename = "CEDARLING_IDT_ISS_VALIDATION", default)]
-    pub idt_iss_validation: FeatureToggle,
-
-    /// When enabled, the `sub` (Subject) claim must be present in the ID Token.
-    #[serde(rename = "CEDARLING_IDT_SUB_VALIDATION", default)]
-    pub idt_sub_validation: FeatureToggle,
-
-    /// When enabled, the `exp` (Expiration) claim must be present in the ID Token
-    /// and not past the date specified.
-    #[serde(rename = "CEDARLING_IDT_EXP_VALIDATION", default)]
-    pub idt_exp_validation: FeatureToggle,
-
-    /// When enabled, the `iat` (Issued at) claim must be present in the ID Token.
-    #[serde(rename = "CEDARLING_IDT_IAT_VALIDATION", default)]
-    pub idt_iat_validation: FeatureToggle,
-
-    /// When enabled, the `aud` ( Audience) claim must be present in the ID Token.
-    #[serde(rename = "CEDARLING_IDT_AUD_VALIDATION", default)]
-    pub idt_aud_validation: FeatureToggle,
-
-    /// When enabled, the `iss` (Issuer) claim must be present in the Userinfo Token and
-    /// the scheme must be https.
-    #[serde(rename = "CEDARLING_USERINFO_ISS_VALIDATION", default)]
-    pub userinfo_iss_validation: FeatureToggle,
-
-    /// When enabled, the `sub` (Subject) claim must be present in the Userinfo Token.
-    #[serde(rename = "CEDARLING_USERINFO_SUB_VALIDATION", default)]
-    pub userinfo_sub_validation: FeatureToggle,
-
-    /// When enabled, the `aud` (Audience) claim must be present in the Userinfo Token.
-    #[serde(rename = "CEDARLING_USERINFO_AUD_VALIDATION", default)]
-    pub userinfo_aud_validation: FeatureToggle,
-
-    /// When enabled, the `exp` (Expiration) claim must be present in the Userinfo Token
-    /// and not past the date specified.
-    #[serde(rename = "CEDARLING_USERINFO_EXP_VALIDATION", default)]
-    pub userinfo_exp_validation: FeatureToggle,
+    /// Configuration for token-based entities, mapping token names to their
+    /// respective settings.
+    #[serde(rename = "CEDARLING_TOKEN_CONFIGS", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub token_configs: TokenConfigs,
 
     /// Varying levels of validations based on the preference of the developer.
     ///

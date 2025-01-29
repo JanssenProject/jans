@@ -21,7 +21,8 @@ policy_stores:
                 action in [Jans::Action::"Update"],
                 resource is Jans::Issue
             )when{
-                principal.org_id == resource.org_id
+                principal.org_id == resource.org_id &&
+                principal.access_token.aud == "5b4487c4-8db1-409d-a653-f907b8094039" 
             };
       444da5d85403f35ea76519ed1a18a33989f855bf1cf8:
         cedar_version: v4.0.0
@@ -36,7 +37,8 @@ policy_stores:
                 action in [Jans::Action::"Update"],
                 resource is Jans::Issue
             )when{
-                principal.country == resource.country
+                principal.country == resource.country &&
+                principal.access_token.aud == "5b4487c4-8db1-409d-a653-f907b8094039" 
             };
     schema:
       encoding: none
@@ -48,8 +50,8 @@ policy_stores:
           entity Issue = {"country": String, "org_id": String};
           entity Role;
           entity TrustedIssuer = {"issuer_entity_id": Url};
-          entity User in [Role] = {"country": String, "email": String, "sub": String, "username": String};
-          entity Workload = {"client_id": String, "iss": TrustedIssuer, "name": String, "org_id": String};
+          entity User in [Role] = {"country": String, "email": String, "sub": String, "username": String, "access_token": Access_token};
+          entity Workload = {"client_id": String, "iss": TrustedIssuer, "name": String, "org_id": String, access_token: Access_token};
           entity id_token = {"acr": String, "amr": String, "aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String, "sub": String};
           entity Userinfo_token  = {"iss": String, "jti": String, "client_id": String};
           type Context = {

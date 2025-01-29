@@ -3,14 +3,13 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::HashMap;
-
 use super::{AuthorizeEntitiesData, AuthzConfig};
-use crate::common::cedar_schema::cedar_json::attribute::Attribute;
-use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::CEDAR_NAMESPACE_SEPARATOR;
-use cedar_policy::ContextJsonError;
-use serde_json::{json, map::Entry, Value};
+use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
+use crate::common::cedar_schema::cedar_json::attribute::Attribute;
+use cedar_policy::{ContextJsonError, ParseErrors};
+use serde_json::{Value, json, map::Entry};
+use std::collections::HashMap;
 
 /// Constructs the authorization context by adding the built entities from the tokens
 pub fn build_context(
@@ -62,7 +61,7 @@ pub fn build_context(
                             return Err(BuildContextError::InvalidKind(
                                 attr.kind_str().to_string(),
                                 "record".to_string(),
-                            ))
+                            ));
                         },
                     }
                 }
@@ -71,7 +70,7 @@ pub fn build_context(
                 return Err(BuildContextError::InvalidKind(
                     attr.kind_str().to_string(),
                     "record or common".to_string(),
-                ))
+                ));
             },
         }
     }
@@ -95,8 +94,11 @@ fn build_entity_refs_from_attr(
     match attr {
         Attribute::Entity { name, .. } => map_entity_id(namespace, name, type_ids),
         Attribute::EntityOrCommon { name, .. } => {
-            if let Some((entity_namespace, _)) = schema.get_entity_from_base_name(name) {
-                if namespace == entity_namespace {
+            if let Some((type_name, _type_schema)) = schema
+                .get_entity_schema(name)
+                .map_err(|e| BuildContextError::ParseEntityName(name.to_string(), e))?
+            {
+                if namespace == type_name.namespace() {
                     return map_entity_id(namespace, name, type_ids);
                 }
             }
@@ -145,6 +147,8 @@ pub enum BuildContextError {
     MissingEntityId(String),
     #[error("invalid action context type: {0}. expected: {1}")]
     InvalidKind(String, String),
+    #[error("failed to parse the entity name `{0}`: {1}")]
+    ParseEntityName(String, ParseErrors),
 }
 
 pub fn merge_json_values(mut base: Value, other: Value) -> Result<Value, BuildContextError> {

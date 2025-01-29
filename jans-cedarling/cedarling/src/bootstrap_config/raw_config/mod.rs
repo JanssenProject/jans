@@ -8,5 +8,7 @@ mod default_values;
 mod feature_types;
 mod json_util;
 
+pub mod token_settings;
+
 pub use config::*;
 pub use feature_types::*;

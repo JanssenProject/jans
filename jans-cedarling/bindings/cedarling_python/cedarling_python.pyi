@@ -44,22 +44,13 @@ class BootstrapConfig:
                     - "CEDARLING_LOCAL_JWKS" (str, optional): Local JWKS (JSON Web Key Set). Defaults to None.
                     - "CEDARLING_LOCAL_POLICY_STORE" (str, optional): Local policy store configuration. Defaults to None.
                     - "CEDARLING_POLICY_STORE_LOCAL_FN" (str, optional): Local policy store function. Defaults to None.
+                    - "CEDARLING_WORKLOAD_MAPPING" (str, optional): The workload's entity type name. Defaults to "Jans::Workload".
+                    - "CEDARLING_USER_MAPPING" (str, optional): The workload's entity type name. Defaults to "Jans::User".
+                    - "CEDARLING_ROLE_MAPPING" (str, optional): The workload's entity type name. Defaults to "Jans::Role".
                     - "CEDARLING_JWT_SIG_VALIDATION" (str, optional): JWT signature validation status. Defaults to "enabled".
                     - "CEDARLING_JWT_STATUS_VALIDATION" (str, optional): JWT status validation status. Defaults to "enabled".
                     - "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED" (list, optional): Supported JWT signature algorithms. Defaults to an empty list.
-                    - "CEDARLING_AT_ISS_VALIDATION" (str, optional): Access token issuer validation status. Defaults to "enabled".
-                    - "CEDARLING_AT_JTI_VALIDATION" (str, optional): Access token JWT ID validation status. Defaults to "enabled".
-                    - "CEDARLING_AT_NBF_VALIDATION" (str, optional): Access token "not before" validation status. Defaults to "enabled".
-                    - "CEDARLING_AT_EXP_VALIDATION" (str, optional): Access token expiration validation status. Defaults to "enabled".
-                    - "CEDARLING_IDT_ISS_VALIDATION" (str, optional): ID token issuer validation status. Defaults to "enabled".
-                    - "CEDARLING_IDT_SUB_VALIDATION" (str, optional): ID token subject validation status. Defaults to "enabled".
-                    - "CEDARLING_IDT_EXP_VALIDATION" (str, optional): ID token expiration validation status. Defaults to "enabled".
-                    - "CEDARLING_IDT_IAT_VALIDATION" (str, optional): ID token issued-at validation status. Defaults to "enabled".
-                    - "CEDARLING_IDT_AUD_VALIDATION" (str, optional): ID token audience validation status. Defaults to "enabled".
-                    - "CEDARLING_USERINFO_ISS_VALIDATION" (str, optional): User info issuer validation status. Defaults to "enabled".
-                    - "CEDARLING_USERINFO_SUB_VALIDATION" (str, optional): User info subject validation status. Defaults to "enabled".
-                    - "CEDARLING_USERINFO_AUD_VALIDATION" (str, optional): User info audience validation status. Defaults to "enabled".
-                    - "CEDARLING_USERINFO_EXP_VALIDATION" (str, optional): User info expiration validation status. Defaults to "enabled".
+                    - "CEDARLING_TOKEN_CONFIGS" (dict, optional): Token Validation Settings. See docs for what this defaults to.
                     - "CEDARLING_ID_TOKEN_TRUST_MODE" (str, optional): Trust mode for ID tokens. Defaults to "strict".
                     - "CEDARLING_LOCK" (str, optional): Lock mechanism status. Defaults to "disabled".
                     - "CEDARLING_LOCK_MASTER_CONFIGURATION_URI" (str, optional): Master configuration URI for locks. Defaults to None.
@@ -147,28 +138,16 @@ class Cedarling:
 
 @final
 class Request:
-    tokens: Tokens
+    tokens: Dict[str, str]
     action: str
     resource: ResourceData
     context: Dict[str, Any]
 
     def __init__(self,
-                 tokens: Tokens,
+                 tokens: Dict[str, Any],
                  action: str,
                  resource: ResourceData,
                  context: Dict[str, Any]) -> None: ...
-
-
-@final
-class Tokens:
-    access_token: str | None
-    id_token: str | None
-    userinfo_token: str | None
-
-    def __init__(self,
-                 access_token: str | None,
-                 id_token: str | None,
-                 userinfo_token: str | None) -> None: ...
 
 
 @final
