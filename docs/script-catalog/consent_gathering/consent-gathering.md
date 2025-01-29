@@ -9,6 +9,31 @@ tags:
 ## Overview
 OAuth 2.0 allows providers to prompt users for consent before releasing their personal information to a client (application). The standard consent process is binary: approve or deny. Using the consent gathering interception script, the consent flow can be customized to meet unique business requirements, for instance to support payment authorization, where you need to present transactional information, or where you need to step-up authentication to add security.
 
+## Script identification during execution
+
+Consent script is executed during authorization step.
+AS identifies consent gathering script to invoke in following order:
+- if `consentGatheringScriptBackwardCompatibility` is `true` (`false` by default) - invoke first consent gathering script found in database.
+- if `acrToConsentScriptNameMapping` has mapping, try to find consent script by that mapping and invoke it.
+- if client has `consentGatheringScripts` that points to valid consent script, invoke it.
+- if nothing from above worked try to invoke first script found in database 
+
+`acrToConsentScriptNameMapping` is simple acr to consent script mapping
+```text
+acr1 - consentScript1
+acr2 - consentScript2
+..
+acrN - consentScriptN
+```
+
+**Agama**
+
+If Agama Consent is used then typically `acrToAgamaConsentFlowMapping` AS configuration property has to be used as well 
+to determine consent flow.
+`acrToAgamaConsentFlowMapping` - The acr mapping to agama consent flow name. When AS meets acr it tries to match agama consent name and set it into session attributes under `consent_flow` name.
+This makes it available for main Agama Consent script, so it knows which flow to invoke.
+ 
+
 ## Interface
 The consent gathering script implements the [ConsentGathering](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/authz/ConsentGatheringType.java) interface. This extends methods from the base script type in addition to adding new methods:
 
