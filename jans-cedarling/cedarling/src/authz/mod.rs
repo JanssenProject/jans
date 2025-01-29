@@ -72,11 +72,12 @@ impl Authz {
             build_user,
         );
 
-        config.log_service.log(
+        config.log_service.log_any(
             LogEntry::new_with_data(
                 config.pdp_id,
                 Some(config.application_name.clone()),
                 LogType::System,
+                None,
             )
             .set_cedar_version()
             .set_level(LogLevel::INFO)
@@ -344,11 +345,12 @@ impl Authz {
         // DEBUG LOG
         // Log all result information about both authorize checks.
         // Where principal is `"Jans::Workload"` and where principal is `"Jans::User"`.
-        self.config.log_service.as_ref().log(
+        self.config.log_service.as_ref().log_any(
             LogEntry::new_with_data(
                 self.config.pdp_id,
                 Some(self.config.application_name.clone()),
                 LogType::System,
+                Some(request_id),
             )
             .set_level(LogLevel::DEBUG)
             .set_auth_info(AuthorizationLogInfo {

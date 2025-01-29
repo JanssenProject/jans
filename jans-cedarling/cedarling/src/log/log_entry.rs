@@ -54,9 +54,10 @@ impl LogEntry {
         pdp_id: app_types::PdpID,
         application_id: Option<app_types::ApplicationName>,
         log_type: LogType,
+        request_id: Option<Uuid>,
     ) -> LogEntry {
         Self {
-            base: BaseLogEntry::new(pdp_id, log_type, gen_uuid7()),
+            base: BaseLogEntry::new_opt_request_id(pdp_id, log_type, request_id),
             // We use uuid v7 because it is generated based on the time and sortable.
             // and we need sortable ids to use it in the sparkv database.
             // Sparkv store data in BTree. So we need have correct order of ids.
@@ -405,7 +406,8 @@ pub struct BaseLogEntry {
     /// It should be uuid7
     pub id: Uuid,
     /// identifier for bunch of events (whole request)
-    pub request_id: Uuid,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub request_id: Option<Uuid>,
     /// Time of decision, in ISO-8601 time format
     /// This field is optional. Can be none if we can't have access to clock (WASM)
     /// or it is not specified in context
@@ -431,6 +433,29 @@ impl BaseLogEntry {
 
         Self {
             id: uuid7(),
+            request_id: Some(request_id),
+            timestamp: Some(local_time_string),
+            log_kind: log_type,
+            pdp_id: pdp_id.0,
+            level: default_log_level,
+        }
+    }
+
+    pub(crate) fn new_opt_request_id(
+        pdp_id: app_types::PdpID,
+        log_type: LogType,
+        request_id: Option<Uuid>,
+    ) -> Self {
+        let local_time_string = chrono::Local::now().format(ISO8601).to_string();
+
+        let default_log_level = if log_type == LogType::System {
+            Some(LogLevel::TRACE)
+        } else {
+            None
+        };
+
+        Self {
+            id: uuid7(),
             request_id,
             timestamp: Some(local_time_string),
             log_kind: log_type,
@@ -446,7 +471,8 @@ impl Indexed for BaseLogEntry {
     }
 
     fn get_additional_ids(&self) -> Vec<Uuid> {
-        vec![self.request_id]
+        // return empty vec if value is None
+        self.request_id.into_iter().collect()
     }
 
     fn get_tags(&self) -> Vec<&'static str> {

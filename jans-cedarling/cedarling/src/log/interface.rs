@@ -8,18 +8,13 @@
 
 use uuid7::Uuid;
 
-use super::{LogEntry, LogLevel};
+use super::LogLevel;
 
 /// Log Writer
 /// interface for logging events
 pub(crate) trait LogWriter {
     /// log any serializable entry that not suitable for [`LogEntry`]
     fn log_any<T: Loggable>(&self, entry: T);
-
-    /// log logging entry
-    fn log(&self, entry: LogEntry) {
-        self.log_any(entry);
-    }
 }
 
 const SEPARATOR: &str = "__";
@@ -110,7 +105,7 @@ pub trait LogStorage {
 
     /// Get logs by request_id.
     /// Return log entries that match the given request_id.
-    fn get_log_by_request_id(&self, request_id: &str) -> Vec<serde_json::Value>;
+    fn get_logs_by_request_id(&self, request_id: &str) -> Vec<serde_json::Value>;
 
     /// Get log by request_id and tag, like composite key `request_id` + `log_kind`.
     /// Tag can be `log_kind`, `log_level`.

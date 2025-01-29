@@ -154,7 +154,7 @@ impl LogStorage for MemoryLogger {
             .collect()
     }
 
-    fn get_log_by_request_id(&self, request_id: &str) -> Vec<serde_json::Value> {
+    fn get_logs_by_request_id(&self, request_id: &str) -> Vec<serde_json::Value> {
         self.storage
             .lock()
             .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
@@ -202,6 +202,7 @@ mod tests {
             app_types::PdpID::new(),
             Some(app_types::ApplicationName("app1".to_string())),
             LogType::Decision,
+            None,
         )
         .set_message("some message".to_string())
         .set_auth_info(AuthorizationLogInfo {
@@ -217,6 +218,7 @@ mod tests {
             app_types::PdpID::new(),
             Some(app_types::ApplicationName("app2".to_string())),
             LogType::System,
+            None,
         );
 
         assert!(
@@ -225,8 +227,8 @@ mod tests {
         );
 
         // log entries
-        logger.log(entry1.clone());
-        logger.log(entry2.clone());
+        logger.log_any(entry1.clone());
+        logger.log_any(entry2.clone());
 
         let entry1_json = serde_json::json!(entry1);
         let entry2_json = serde_json::json!(entry2);
@@ -266,16 +268,18 @@ mod tests {
             app_types::PdpID::new(),
             Some(app_types::ApplicationName("app1".to_string())),
             LogType::Decision,
+            None,
         );
         let entry2 = LogEntry::new_with_data(
             app_types::PdpID::new(),
             Some(app_types::ApplicationName("app2".to_string())),
             LogType::Metric,
+            None,
         );
 
         // log entries
-        logger.log(entry1.clone());
-        logger.log(entry2.clone());
+        logger.log_any(entry1.clone());
+        logger.log_any(entry2.clone());
 
         let entry1_json = serde_json::json!(entry1);
         let entry2_json = serde_json::json!(entry2);

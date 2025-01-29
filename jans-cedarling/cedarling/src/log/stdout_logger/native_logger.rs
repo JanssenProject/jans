@@ -130,7 +130,7 @@ mod tests {
         let logger = StdOutLogger::new_with(buffer, LogLevel::TRACE);
 
         // Log the entry
-        logger.log(log_entry);
+        logger.log_any(log_entry);
 
         // call flush just to get great coverage
         _ = test_writer.flush();

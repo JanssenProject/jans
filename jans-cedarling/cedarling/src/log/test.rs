@@ -83,7 +83,7 @@ fn test_log_memory_logger() {
     };
 
     // Act
-    strategy.log(entry);
+    strategy.log_any(entry);
 
     // Assert
     match &strategy {
@@ -103,6 +103,7 @@ fn test_log_memory_logger() {
         app_types::PdpID::new(),
         Some(app_types::ApplicationName("app1".to_string())),
         LogType::Decision,
+        None,
     )
     .set_message("some message".to_string());
 
@@ -110,11 +111,12 @@ fn test_log_memory_logger() {
         app_types::PdpID::new(),
         Some(app_types::ApplicationName("app2".to_string())),
         LogType::System,
+        None,
     );
 
     // log entries
-    strategy.log(entry1.clone());
-    strategy.log(entry2.clone());
+    strategy.log_any(entry1.clone());
+    strategy.log_any(entry2.clone());
 
     let entry1_json = serde_json::json!(entry1);
     let entry2_json = serde_json::json!(entry2);
@@ -170,7 +172,7 @@ fn test_log_stdout_logger() {
     let strategy = LogStrategy::StdOut(logger);
 
     // Act
-    strategy.log(log_entry);
+    strategy.log_any(log_entry);
 
     let logged_content = test_writer.into_inner_buf();
 
@@ -187,6 +189,7 @@ fn test_log_storage_for_only_writer() {
         app_types::PdpID::new(),
         Some(app_types::ApplicationName("app1".to_string())),
         LogType::Decision,
+        None,
     )
     .set_message("some message".to_string());
 
@@ -194,11 +197,12 @@ fn test_log_storage_for_only_writer() {
         app_types::PdpID::new(),
         Some(app_types::ApplicationName("app2".to_string())),
         LogType::System,
+        None,
     );
 
     // log entries
-    strategy.log(entry1.clone());
-    strategy.log(entry2.clone());
+    strategy.log_any(entry1.clone());
+    strategy.log_any(entry2.clone());
 
     // check that we have two entries in the log database
     // we should not have any entries in the memory logger
