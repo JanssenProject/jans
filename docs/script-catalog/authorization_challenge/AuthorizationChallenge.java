@@ -130,6 +130,8 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
         boolean newSave = authorizationChallengeSessionObject == null;
         if (newSave) {
             authorizationChallengeSessionObject = authorizationChallengeSessionService.newAuthorizationChallengeSession();
+            context.getAuthzRequest().setAuthorizationChallengeSessionObject(authorizationChallengeSessionObject);
+            context.getAuthzRequest().setAuthorizationChallengeSession(authorizationChallengeSessionObject.getId());
         }
 
         final String dpop = context.getHttpRequest().getHeader(DpopService.DPOP);

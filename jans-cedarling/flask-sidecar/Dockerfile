@@ -31,7 +31,7 @@ RUN pip3 install "poetry==$POETRY_VERSION" gunicorn \
 # ===============
 # Project setup
 # ===============
-ENV JANS_SOURCE_VERSION=040ff17942019bc10433ce17d819b8d8474f13c8
+ENV JANS_SOURCE_VERSION=81b061d8a2777afafe3ea9b36859561715da5839
 
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
@@ -70,7 +70,7 @@ RUN poetry add /api/cedarling_python-$(cat /api/cedarling_version)-cp310-cp310-m
 
 ENV FLASK_APP=main.core:app \
     GUNICORN_LOG_LEVEL=${GUNICORN_LOG_LEVEL:-debug} \
-    CEDARLING_BOOTSTRAP_CONFIG_FILE=${CEDARLING_BOOTSTRAP_CONFIG_FILE:-/api/bootstrap.json} \
+    CEDARLING_BOOTSTRAP_CONFIG_FILE=${CEDARLING_BOOTSTRAP_CONFIG_FILE:-None} \
     SIDECAR_DEBUG_RESPOSE=${SIDECAR_DEBUG_RESPONSE:-False}
 
 EXPOSE 5000

@@ -178,6 +178,9 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
             deviceSessionObjectAttrs.put("scope", servletRequest.getParameter("scope"));
             
             deviceSessionService.persist(deviceSessionObject);
+
+            authRequest.setAuthorizationChallengeSessionObject(deviceSessionObject);
+            authRequest.setAuthorizationChallengeSession(deviceSessionObject.getId());
             
         } else {
             sessionId = deviceSessionObject.getId();
