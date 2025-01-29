@@ -114,6 +114,7 @@ public class AuthorizationChallengeService {
     public void prepareAuthzRequest(AuthzRequest authzRequest) {
         authzRequest.setScope(ServerUtil.urlDecode(authzRequest.getScope()));
 
+        log.trace("prepareAuthzRequest - authorization challenge session {}", authzRequest.getAuthorizationChallengeSession());
         if (StringUtils.isNotBlank(authzRequest.getAuthorizationChallengeSession())) {
             final AuthorizationChallengeSession session = authorizationChallengeSessionService.getAuthorizationChallengeSession(authzRequest.getAuthorizationChallengeSession());
 
@@ -121,11 +122,13 @@ public class AuthorizationChallengeService {
 
             authzRequest.setAuthorizationChallengeSessionObject(session);
             if (session != null) {
+                log.trace("prepareAuthzRequest - sessionAttributes {}, id {}", session.getAttributes().getAttributes(), session.getId());
                 final Map<String, String> attributes = session.getAttributes().getAttributes();
 
                 final String clientId = attributes.get("client_id");
                 if (StringUtils.isNotBlank(clientId) && StringUtils.isBlank(authzRequest.getClientId())) {
                     authzRequest.setClientId(clientId);
+                    log.trace("prepareAuthzRequest - Set client_id {} from session", clientId);
                 }
 
                 String acrValues = session.getAttributes().getAcrValues();
@@ -134,9 +137,20 @@ public class AuthorizationChallengeService {
                 }
                 if (StringUtils.isNotBlank(acrValues) && StringUtils.isBlank(authzRequest.getAcrValues())) {
                     authzRequest.setAcrValues(acrValues);
+                    log.trace("prepareAuthzRequest - Set acr_values {} from session", acrValues);
                 }
+
+                final String scope = attributes.get("scope");
+                if (StringUtils.isNotBlank(scope) && StringUtils.isBlank(authzRequest.getScope())) {
+                    authzRequest.setScope(scope);
+                    log.trace("prepareAuthzRequest - Set scope {} from session", scope);
+                }
+            } else {
+                log.debug("Unable to find authorization challenge session by id {}", authzRequest.getAuthorizationChallengeSession());
             }
         }
+
+        externalAuthorizationChallengeService.externalPrepareAuthzRequest(authzRequest);
     }
 
     public Response authorize(AuthzRequest authzRequest) throws IOException, TokenBindingParseException {
@@ -158,14 +172,14 @@ public class AuthorizationChallengeService {
         executionContext.setSessionId(sessionUser);
 
         if (user == null) {
-            log.trace("Executing external authentication challenge");
+            log.trace("Executing external authentication challenge ... (requestedScopes: {})", scopes);
 
             final boolean ok = externalAuthorizationChallengeService.externalAuthorize(executionContext);
             if (!ok) {
                 log.debug("Not allowed by authorization challenge script, client_id {}.", client.getClientId());
                 throw new WebApplicationException(errorResponseFactory
-                        .newErrorResponse(Response.Status.BAD_REQUEST)
-                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, state, "No allowed by authorization challenge script."))
+                        .newErrorResponse(Response.Status.UNAUTHORIZED)
+                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, state, "Not allowed by authorization challenge script."))
                         .build());
             }
 
@@ -178,6 +192,8 @@ public class AuthorizationChallengeService {
         }
 
         String grantAcr = executionContext.getScript() != null ? executionContext.getScript().getName() : authzRequest.getAcrValues();
+
+        log.trace("Creating authorization code grant with: scope {}, acr {}", scopes, grantAcr);
 
         AuthorizationCodeGrant authorizationGrant = authorizationGrantList.createAuthorizationCodeGrant(user, client, new Date());
         authorizationGrant.setNonce(authzRequest.getNonce());

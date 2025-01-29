@@ -10,15 +10,17 @@
 //! CEDARLING_MAPPING_ACCESS_TOKEN
 //! CEDARLING_MAPPING_USERINFO_TOKEN
 
+use super::utils::*;
+use crate::authz::entity_builder::{
+    BuildCedarlingEntityError, BuildEntityError, BuildTokenEntityError,
+};
+use crate::common::policy_store::TokenKind;
+use crate::{AuthorizeError, Cedarling, cmp_decision, cmp_policy};
+use cedarling_util::get_raw_config;
 use std::collections::HashSet;
 use std::sync::LazyLock;
-
-use cedarling_util::get_raw_config;
 use test_utils::assert_eq;
-
-use super::utils::*;
-use crate::common::policy_store::TokenKind;
-use crate::{cmp_decision, cmp_policy, AuthorizeError, Cedarling, CreateCedarEntityError};
+use tokio::test;
 
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../../test_files/policy-store_entity_mapping.yaml");
@@ -66,16 +68,19 @@ static REQUEST: LazyLock<Request> = LazyLock::new(|| {
 
 /// we not specify any mapping to check if it works correctly with default mapping
 #[test]
-fn test_default_mapping() {
+async fn test_default_mapping() {
     let raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
-    let cedarling = Cedarling::new(&config).expect("could be created without error");
+    let cedarling = Cedarling::new(&config)
+        .await
+        .expect("could be created without error");
 
     let request = REQUEST.clone();
 
     let result = cedarling
         .authorize(request)
+        .await
         .expect("request should be parsed without errors");
 
     cmp_decision!(
@@ -101,18 +106,16 @@ fn test_default_mapping() {
         "reason of permit person should be '2','3'"
     );
 
-    assert!(result.is_allowed(), "request result should be allowed");
+    assert!(result.decision, "request result should be allowed");
 }
 
 /// Validate mapping entities.
 /// This function validates the mapping of users and workloads using the defined `cedar` schema.
 /// For other entities, currently, it is not possible to automatically validate the mapping.
 ///
-/// TODO: Add validation for `IdToken`, `Access_token`, and `Userinfo_token` once they are added to the context.
-///
 /// Note: Verified that the mapped entity types are present in the logs.
 #[test]
-fn test_custom_mapping() {
+async fn test_custom_mapping() {
     let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
 
     raw_config.mapping_user = Some("MappedUser".to_string());
@@ -123,13 +126,16 @@ fn test_custom_mapping() {
 
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
-    let cedarling = Cedarling::new(&config).expect("could be created without error");
+    let cedarling = Cedarling::new(&config)
+        .await
+        .expect("could be created without error");
 
     let mut request = REQUEST.clone();
     request.action = "Jans::Action::\"UpdateMappedWorkloadAndUser\"".to_string();
 
     let result = cedarling
         .authorize(request)
+        .await
         .expect("request should be parsed without errors");
 
     cmp_policy!(
@@ -156,12 +162,12 @@ fn test_custom_mapping() {
         "request result should be allowed for person"
     );
 
-    assert!(result.is_allowed(), "request result should be allowed");
+    assert!(result.decision, "request result should be allowed");
 }
 
 /// Check if we get error on mapping user to undefined entity
 #[test]
-fn test_failed_user_mapping() {
+async fn test_failed_user_mapping() {
     let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
 
     let entity_type = "MappedUserNotExist".to_string();
@@ -170,23 +176,26 @@ fn test_failed_user_mapping() {
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
 
-    let cedarling = Cedarling::new(&config).expect("could be created without error");
+    let cedarling = Cedarling::new(&config)
+        .await
+        .expect("could be created without error");
 
     let request = REQUEST.clone();
 
     let err = cedarling
         .authorize(request)
+        .await
         .expect_err("request should be parsed with mapping error");
 
     match err {
-        AuthorizeError::CreateUserEntity(error) => {
+        AuthorizeError::BuildEntity(BuildCedarlingEntityError::User(error)) => {
             assert_eq!(error.errors.len(), 2, "there should be 2 errors");
 
             let (token_kind, err) = &error.errors[0];
             assert_eq!(token_kind, &TokenKind::Userinfo);
             assert!(
-                matches!(err, CreateCedarEntityError::CouldNotFindEntity(ref err) if err == &entity_type),
-                "expected CouldNotFindEntity({}), got: {:?}",
+                matches!(err, BuildEntityError::EntityNotInSchema(ref err) if err == &entity_type),
+                "expected EntityNotInSchema({}), got: {:?}",
                 &entity_type,
                 err,
             );
@@ -194,43 +203,47 @@ fn test_failed_user_mapping() {
             let (token_kind, err) = &error.errors[1];
             assert_eq!(token_kind, &TokenKind::Id);
             assert!(
-                matches!(err, CreateCedarEntityError::CouldNotFindEntity(ref err) if err == &entity_type),
-                "expected CouldNotFindEntity({}), got: {:?}",
+                matches!(err, BuildEntityError::EntityNotInSchema(ref err) if err == &entity_type),
+                "expected EntityNotInSchema({}), got: {:?}",
                 &entity_type,
                 err,
             );
         },
-        _ => panic!("expected error CreateWorkloadEntity"),
+        _ => panic!("expected error BuildCedarlingEntityError::User"),
     }
 }
 
 /// Check if we get error on mapping workload to undefined entity
 #[test]
-fn test_failed_workload_mapping() {
+async fn test_failed_workload_mapping() {
     let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
+
     let entity_type = "MappedWorkloadNotExist".to_string();
     raw_config.mapping_workload = Some(entity_type.clone());
 
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
 
-    let cedarling = Cedarling::new(&config).expect("could be created without error");
+    let cedarling = Cedarling::new(&config)
+        .await
+        .expect("could be created without error");
 
     let request = REQUEST.clone();
 
     let err = cedarling
         .authorize(request)
+        .await
         .expect_err("request should be parsed with mapping error");
 
     match err {
-        AuthorizeError::CreateWorkloadEntity(error) => {
+        AuthorizeError::BuildEntity(BuildCedarlingEntityError::Workload(error)) => {
             assert_eq!(error.errors.len(), 2, "there should be 2 errors");
 
             // check for access token error
             let (token_kind, err) = &error.errors[0];
             assert_eq!(token_kind, &TokenKind::Access);
             assert!(
-                matches!(err, CreateCedarEntityError::CouldNotFindEntity(ref err) if err == &entity_type),
+                matches!(err, BuildEntityError::EntityNotInSchema(ref err) if err == &entity_type),
                 "expected CouldNotFindEntity(\"{}\"), got: {:?}",
                 &entity_type,
                 err,
@@ -240,19 +253,22 @@ fn test_failed_workload_mapping() {
             let (token_kind, err) = &error.errors[1];
             assert_eq!(token_kind, &TokenKind::Id);
             assert!(
-                matches!(err, CreateCedarEntityError::CouldNotFindEntity(ref err) if err == &entity_type),
+                matches!(err, BuildEntityError::EntityNotInSchema(ref err) if err == &entity_type),
                 "expected CouldNotFindEntity(\"{}\"), got: {:?}",
                 &entity_type,
                 err,
             );
         },
-        _ => panic!("expected error CreateWorkloadEntity"),
+        _ => panic!(
+            "expected BuildEntity(BuildCedarlingEntityError::Workload(_))) error, got: {:?}",
+            err
+        ),
     }
 }
 
 /// Check if we get error on mapping id_token to undefined entity
 #[test]
-fn test_failed_id_token_mapping() {
+async fn test_failed_id_token_mapping() {
     let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
 
     raw_config.mapping_id_token = Some("MappedIdTokenNotExist".to_string());
@@ -260,26 +276,38 @@ fn test_failed_id_token_mapping() {
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
 
-    let cedarling = Cedarling::new(&config).expect("could be created without error");
+    let cedarling = Cedarling::new(&config)
+        .await
+        .expect("could be created without error");
 
     let request = REQUEST.clone();
 
     let err = cedarling
         .authorize(request)
+        .await
         .expect_err("request should be parsed with mapping error");
 
-    assert!(
-        matches!(
-            err,
-            AuthorizeError::CreateIdTokenEntity(CreateCedarEntityError::CouldNotFindEntity(_))
+    match err {
+        AuthorizeError::BuildEntity(BuildCedarlingEntityError::IdToken(
+            BuildTokenEntityError { token_kind, err },
+        )) => {
+            assert_eq!(token_kind, TokenKind::Id);
+            assert!(
+                matches!(err, BuildEntityError::EntityNotInSchema(ref name) if name == "MappedIdTokenNotExist"),
+                "expected EntityNotInSchema(\"MappedIdTokenNotExist\") got: {:?}",
+                err
+            );
+        },
+        _ => panic!(
+            "expected BuildEntity(BuildCedarlingEntityError::IdToken(_)) error, got: {:?}",
+            err
         ),
-        "should be error CouldNotFindEntity, got: {err:?}"
-    );
+    }
 }
 
 /// Check if we get error on mapping access_token to undefined entity
 #[test]
-fn test_failed_access_token_mapping() {
+async fn test_failed_access_token_mapping() {
     let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
 
     raw_config.mapping_access_token = Some("MappedAccess_tokenNotExist".to_string());
@@ -287,26 +315,35 @@ fn test_failed_access_token_mapping() {
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
 
-    let cedarling = Cedarling::new(&config).expect("could be created without error");
+    let cedarling = Cedarling::new(&config)
+        .await
+        .expect("could be created without error");
 
     let request = REQUEST.clone();
 
     let err = cedarling
         .authorize(request)
+        .await
         .expect_err("request should be parsed with mapping error");
 
-    assert!(
-        matches!(
-            err,
-            AuthorizeError::CreateAccessTokenEntity(CreateCedarEntityError::CouldNotFindEntity(_))
-        ),
-        "should be error CouldNotFindEntity"
-    );
+    match err {
+        AuthorizeError::BuildEntity(BuildCedarlingEntityError::AccessToken(
+            BuildTokenEntityError { token_kind, err },
+        )) => {
+            assert_eq!(token_kind, TokenKind::Access);
+            assert!(
+                matches!(err, BuildEntityError::EntityNotInSchema(ref name) if name == "MappedAccess_tokenNotExist"),
+                "expected EntityNotInSchema(\"MappedAccess_tokenNotExist\") got: {:?}",
+                err
+            );
+        },
+        _ => panic!("expected BuildEntity error, got: {:?}", err),
+    }
 }
 
 /// Check if we get error on mapping userinfo_token to undefined entity
 #[test]
-fn test_failed_userinfo_token_mapping() {
+async fn test_failed_userinfo_token_mapping() {
     let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
 
     raw_config.mapping_userinfo_token = Some("MappedUserinfo_tokenNotExist".to_string());
@@ -314,36 +351,45 @@ fn test_failed_userinfo_token_mapping() {
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
 
-    let cedarling = Cedarling::new(&config).expect("could be created without error");
+    let cedarling = Cedarling::new(&config)
+        .await
+        .expect("could be created without error");
 
     let request = REQUEST.clone();
 
     let err = cedarling
         .authorize(request)
+        .await
         .expect_err("request should be parsed with mapping error");
 
-    assert!(
-        matches!(
-            err,
-            AuthorizeError::CreateUserinfoTokenEntity(CreateCedarEntityError::CouldNotFindEntity(
-                _
-            ))
-        ),
-        "should be error CouldNotFindEntity"
-    );
+    match err {
+        AuthorizeError::BuildEntity(BuildCedarlingEntityError::UserinfoToken(
+            BuildTokenEntityError { token_kind, err },
+        )) => {
+            assert_eq!(token_kind, TokenKind::Userinfo);
+            assert!(
+                matches!(err, BuildEntityError::EntityNotInSchema(ref name) if name == "MappedUserinfo_tokenNotExist"),
+                "expected EntityNotInSchema(\"MappedUserinfo_tokenNotExist\") got: {:?}",
+                err
+            );
+        },
+        _ => panic!("expected BuildEntity error, got: {:?}", err),
+    }
 }
 
 /// Check if we get roles mapping from all tokens.
 /// Because we specify mapping from each token in policy store
 /// We use iss in JWT tokens to enable mapping for trusted issuer in policy store
 #[test]
-fn test_role_many_tokens_mapping() {
+async fn test_role_many_tokens_mapping() {
     let raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
 
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
 
-    let cedarling = Cedarling::new(&config).expect("could be created without error");
+    let cedarling = Cedarling::new(&config)
+        .await
+        .expect("could be created without error");
 
     let request = // deserialize `Request` from json
     Request::deserialize(serde_json::json!(
@@ -391,7 +437,8 @@ fn test_role_many_tokens_mapping() {
 
     // iterate over roles that created and filter expected roles
     let roles_left = cedarling
-        .authorize_entities_data(&request)
+        .build_entities(&request)
+        .await
         .expect("should get authorize_entities_data without errors")
         .roles
         .into_iter()

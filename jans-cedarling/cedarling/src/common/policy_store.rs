@@ -202,7 +202,7 @@ pub struct TokensMetadata<'a> {
     pub tx_tokens: &'a TokenEntityMetadata,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub enum TokenKind {
     /// Access token used for granting access to resources.
     Access,
@@ -241,10 +241,11 @@ impl<'de> Deserialize<'de> for TokenKind {
             "id_token" => Ok(TokenKind::Id),
             "userinfo_token" => Ok(TokenKind::Userinfo),
             "access_token" => Ok(TokenKind::Access),
-            _ => Err(serde::de::Error::unknown_variant(
-                &token_kind,
-                &["access_token", "id_token", "userinfo_token"],
-            )),
+            _ => Err(serde::de::Error::unknown_variant(&token_kind, &[
+                "access_token",
+                "id_token",
+                "userinfo_token",
+            ])),
         }
     }
 }

@@ -1,3 +1,19 @@
+"""
+Copyright (c) 2025, Gluu, Inc. 
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
 import os
 from pathlib import Path
 from main.logger import logger
@@ -19,12 +35,18 @@ class BaseConfig:
     API_SPEC_OPTIONS = {
         "x-internal-id": "1",
     }
-    CEDARLING_BOOTSTRAP_CONFIG_FILE = os.getenv("CEDARLING_BOOTSTRAP_CONFIG_FILE", None)
-    if CEDARLING_BOOTSTRAP_CONFIG_FILE is None:
-        logger.warning("Cedarling bootstrap file not found")
-        exit()
-    with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
-        CEDARLING_BOOTSTRAP_CONFIG = f.read()
+    CEDARLING_BOOTSTRAP_CONFIG = None
+    CEDARLING_BOOTSTRAP_CONFIG_FILE = os.getenv("CEDARLING_BOOTSTRAP_CONFIG_FILE", "None")
+    if CEDARLING_BOOTSTRAP_CONFIG_FILE == "None":
+        logger.info("Cedarling bootstrap file not found, falling back to environment variables")
+    else:
+        with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
+            CEDARLING_BOOTSTRAP_CONFIG = f.read()
+    SIDECAR_DEBUG_RESPONSE = os.getenv("SIDECAR_DEBUG_RESPONSE", "False")
+    if SIDECAR_DEBUG_RESPONSE == "True":
+        SIDECAR_DEBUG_RESPONSE = True
+    else:
+        SIDECAR_DEBUG_RESPONSE = False
 
 class TestingConfig(BaseConfig):
     TESTING = True

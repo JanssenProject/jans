@@ -24,11 +24,11 @@ use std::sync::Arc;
 
 pub use jsonwebtoken::Algorithm;
 use key_service::{KeyService, KeyServiceError};
-pub use token::{Token, TokenClaim, TokenClaimTypeError, TokenClaims, TokenStr};
+pub use token::{Token, TokenClaimTypeError, TokenClaims, TokenStr};
 use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
 
 use crate::common::policy_store::TrustedIssuer;
-use crate::{IdTokenTrustMode, JwtConfig};
+use crate::JwtConfig;
 
 /// Type alias for Trusted Issuers' ID.
 type TrustedIssuerId = Arc<str>;
@@ -92,14 +92,10 @@ pub struct JwtService {
     access_tkn_validator: JwtValidator,
     id_tkn_validator: JwtValidator,
     userinfo_tkn_validator: JwtValidator,
-    // TODO: implement the usage of this bootstrap property in
-    // the authz module.
-    #[allow(dead_code)]
-    id_token_trust_mode: IdTokenTrustMode,
 }
 
 impl JwtService {
-    pub fn new(
+    pub async fn new(
         config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
     ) -> Result<Self, JwtServiceInitError> {
@@ -110,6 +106,7 @@ impl JwtService {
                 // Case: Trusted issuers provided
                 (true, None, Some(issuers)) => Some(
                     KeyService::new_from_trusted_issuers(issuers)
+                        .await
                         .map_err(JwtServiceInitError::KeyService)?,
                 ),
                 // Case: Local JWKS provided
@@ -173,11 +170,10 @@ impl JwtService {
             access_tkn_validator,
             id_tkn_validator,
             userinfo_tkn_validator,
-            id_token_trust_mode: config.id_token_trust_mode,
         })
     }
 
-    pub fn process_token<'a>(
+    pub async fn process_token<'a>(
         &'a self,
         token: TokenStr<'a>,
     ) -> Result<Token<'a>, JwtProcessingError> {
@@ -217,13 +213,14 @@ mod test {
     use jsonwebtoken::Algorithm;
     use serde_json::json;
     use test_utils::assert_eq;
+    use tokio::test;
 
     use super::test_utils::*;
     use super::{JwtService, Token, TokenClaims, TokenStr};
-    use crate::{IdTokenTrustMode, JwtConfig, TokenValidationConfig};
+    use crate::{JwtConfig, TokenValidationConfig};
 
     #[test]
-    pub fn can_validate_token() {
+    pub async fn can_validate_token() {
         // Generate token
         let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
         let access_tkn_claims = json!({
@@ -262,7 +259,6 @@ mod test {
                 jwks: Some(local_jwks),
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
-                id_token_trust_mode: IdTokenTrustMode::Strict,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
                 access_token_config: TokenValidationConfig::access_token(),
                 id_token_config: TokenValidationConfig::id_token(),
@@ -270,11 +266,13 @@ mod test {
             },
             None,
         )
+        .await
         .expect("Should create JwtService");
 
         // Test access_token
         let access_tkn = jwt_service
             .process_token(TokenStr::Access(&access_tkn))
+            .await
             .expect("Should process access_token");
         let expected_claims = serde_json::from_value::<TokenClaims>(access_tkn_claims)
             .expect("Should create expected access_token claims");
@@ -283,6 +281,7 @@ mod test {
         // Test id_token
         let id_tkn = jwt_service
             .process_token(TokenStr::Id(&id_tkn))
+            .await
             .expect("Should process id_token");
         let expected_claims = serde_json::from_value::<TokenClaims>(id_tkn_claims)
             .expect("Should create expected id_token claims");
@@ -291,6 +290,7 @@ mod test {
         // Test userinfo_token
         let userinfo_tkn = jwt_service
             .process_token(TokenStr::Userinfo(&userinfo_tkn))
+            .await
             .expect("Should process userinfo_token");
         let expected_claims = serde_json::from_value::<TokenClaims>(userinfo_tkn_claims)
             .expect("Should create expected userinfo_token claims");

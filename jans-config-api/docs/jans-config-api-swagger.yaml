@@ -9335,11 +9335,11 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        selected:
-          type: boolean
-        whitePagesCanView:
+        adminCanEdit:
           type: boolean
         userCanView:
+          type: boolean
+        adminCanView:
           type: boolean
         userCanEdit:
           type: boolean
@@ -9347,9 +9347,9 @@ components:
           type: boolean
         adminCanAccess:
           type: boolean
-        adminCanEdit:
+        selected:
           type: boolean
-        adminCanView:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -10351,8 +10351,10 @@ components:
           type: string
         finishedFlowPage:
           type: string
-        bridgeScriptPage:
-          type: string
+        startEndUrlMapping:
+          type: object
+          additionalProperties:
+            type: string
         serializeRules:
           type: object
           additionalProperties:
@@ -11331,14 +11333,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
@@ -11767,10 +11769,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

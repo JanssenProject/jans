@@ -68,7 +68,7 @@ Check the hash if it is matching. You may need to change your working directory
 to where both the rpm and sha256sum file are located.
 
 ```shell
-sha256sum -c jans-replace-janssen-version.suse15.x86_64.rpm.sha256sum
+sha256sum -c jans-replace-janssen-version-stable.suse15.x86_64.rpm.sha256sum
 ```
 
 Output similar to below should confirm the integrity of the downloaded package.
@@ -80,7 +80,7 @@ Output similar to below should confirm the integrity of the downloaded package.
 - Install the package
 
 ```
-sudo zypper install ~/jans-replace-janssen-version.suse15.x86_64.rpm
+sudo zypper install ~/jans-replace-janssen-version-stable.suse15.x86_64.rpm
 ```
 
 ## Run the setup script

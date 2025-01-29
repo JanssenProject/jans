@@ -3,7 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::{AuthorizationConfig, JwtConfig, WorkloadBoolOp};
+use crate::{
+    authorization_config::IdTokenTrustMode, AuthorizationConfig, JwtConfig, WorkloadBoolOp,
+};
 pub use crate::{
     BootstrapConfig, BootstrapConfigRaw, Cedarling, FeatureToggle, LogConfig, LogTypeConfig,
     PolicyStoreConfig, PolicyStoreSource,
@@ -23,7 +25,7 @@ pub fn get_raw_config(local_policy_store: &str) -> BootstrapConfigRaw {
         log_type: crate::LoggerType::StdOut,
         local_policy_store: Some(local_policy_store_json.to_string()),
         jwt_status_validation: FeatureToggle::Disabled,
-        id_token_trust_mode: crate::IdTokenTrustMode::None,
+        id_token_trust_mode: IdTokenTrustMode::None,
         ..Default::default()
     }
 }
@@ -44,19 +46,21 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::And,
+            id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
     }
 }
 
 /// create [`Cedarling`] from [`PolicyStoreSource`]
-pub fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
+pub async fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
     Cedarling::new(&get_config(policy_source))
+        .await
         .expect("bootstrap config should initialize correctly")
 }
 
 /// create [`Cedarling`] from [`PolicyStoreSource`]
-pub fn get_cedarling_with_authorization_conf(
+pub async fn get_cedarling_with_authorization_conf(
     policy_source: PolicyStoreSource,
     auth_conf: AuthorizationConfig,
 ) -> Cedarling {
@@ -72,6 +76,7 @@ pub fn get_cedarling_with_authorization_conf(
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: auth_conf,
     })
+    .await
     .expect("bootstrap config should initialize correctly")
 }
 

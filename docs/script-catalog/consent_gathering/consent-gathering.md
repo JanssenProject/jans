@@ -237,7 +237,7 @@ public class ConsentGathering implements ConsentGatheringType {
         if(step == 1) {
             return "/authz/authorize.xhtml";
         } else if (step == 2) {
-            return "return \"/authz/transaction.xhtml\"";
+            return "/authz/transaction.xhtml";
         }
         return "";
     }
