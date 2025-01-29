@@ -152,8 +152,6 @@ configmap:
   kcDbUrlDatabase: keycloak
   # -- Keycloak database connection properties. If using postgresql, the value can be set to empty string.
   kcDbUrlProperties: "?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"
-  # -- URL of OPA server
-  cnOpaUrl: http://opa.opa.svc.cluster.cluster.local:8181/v1
   # -- Message type (one of POSTGRES, REDIS, or DISABLED)
   cnMessageType: DISABLED
 nameOverride: ""
