@@ -175,6 +175,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private ExternalResourceOwnerPasswordCredentialsService externalResourceOwnerPasswordCredentialsService;
 
     @Inject
+    private ExternalConsentGatheringService externalConsentGatheringService;
+
+    @Inject
     private DpopService dpopService;
 
     @Context
@@ -603,8 +606,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             authzRequest.removePrompt(Prompt.CONSENT);
             return;
         }
+        
+        if (isTrue(sessionUser.isPermissionGrantedForClient(authzRequest.getClientId()))) {
+        	return;
+        }
 
-        if (authzRequest.getPromptList().contains(Prompt.CONSENT) || !isTrue(sessionUser.isPermissionGrantedForClient(authzRequest.getClientId()))) {
+        if (authzRequest.getPromptList().contains(Prompt.CONSENT) || externalConsentGatheringService.isEnabled()) {
             if (!clientAuthorizationFetched) {
                 clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), authzRequest.getClient().getClientId());
             }
