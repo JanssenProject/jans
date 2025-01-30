@@ -214,6 +214,7 @@ mod tests {
             authorized: true,
             entities: serde_json::json!({}),
         });
+
         let entry2 = LogEntry::new_with_data(
             app_types::PdpID::new(),
             Some(app_types::ApplicationName("app2".to_string())),
@@ -222,8 +223,8 @@ mod tests {
         );
 
         assert!(
-            entry1.base.request_id < entry2.base.request_id,
-            "entry1.base.request_id should be lower than in entry2"
+            entry1.base.id < entry2.base.id,
+            "entry1.base.id should be lower than in entry2"
         );
 
         // log entries
