@@ -150,6 +150,7 @@ nav:
     - SMTP Configuration: janssen-server/config-guide/smtp-configuration.md
     - Link Configuration: janssen-server/config-guide/link-configuration.md
     - Custom Assets Configuration: janssen-server/config-guide/custom-assets-configuration.md
+    - Session: janssen-server/config-guide/session.md
   - Database Guide:
     - janssen-server/reference/database/README.md
     - RDBMS Erwin Table: janssen-server/reference/database/rdbms-erwin.md
