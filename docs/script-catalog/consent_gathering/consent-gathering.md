@@ -26,14 +26,6 @@ acr2 - consentScript2
 acrN - consentScriptN
 ```
 
-**Agama**
-
-If Agama Consent is used then typically `acrToAgamaConsentFlowMapping` AS configuration property has to be used as well 
-to determine consent flow.
-`acrToAgamaConsentFlowMapping` - The acr mapping to agama consent flow name. When AS meets acr it tries to match agama consent name and set it into session attributes under `consent_flow` name.
-This makes it available for main Agama Consent script, so it knows which flow to invoke.
- 
-
 ## Interface
 The consent gathering script implements the [ConsentGathering](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/authz/ConsentGatheringType.java) interface. This extends methods from the base script type in addition to adding new methods:
 
@@ -243,3 +235,30 @@ public class ConsentGathering implements ConsentGatheringType {
     }
 }
 ```
+
+## Writing consent flows using Agama
+
+Besides scripts, developers can also use [Agama](../../agama/introduction.md) for writing consent flows. For this, enable the custom script named `agama_consent` and update the authentication server configuration accordingly using  `acrToConsentScriptNameMapping` and `acrToAgamaConsentFlowMapping` properties. Suppose the below configuration:
+
+```
+"consentGatheringScriptBackwardCompatibility": false,
+"acrToConsentScriptNameMapping": {
+   "basic": "consent_gathering",
+   "otp": "agama_consent",
+   "agama_co.acme.myflow": "my_consent_gathering",
+   "agama_co.acme.mysuperflow": "agama_consent"
+},
+"acrToAgamaConsentFlowMapping": {
+   "otp": "io.jans.consent.A",
+   "agama_co.acme.mysuperflow": "io.jans.consent.B",
+}
+```
+
+This is how consent will work depending on the authentication request issued:
+
+- With `acr_values=basic`, the consent script named `consent_gathering` will be executed - as long as it is already enabled, of course. This is the default Consent script bundled with the server
+- With `acr_values=otp`, the Agama flow `io.jans.consent.A` will be launched for consent
+- With `acr_values=agama_co.acme.myflow`, the consent script named `my_consent_gathering` will be executed - assuming it exists and is enabled
+- With `agama_co.acme.mysuperflow`, the Agama flow `io.jans.consent.B` will be launched for consent
+
+Agama flows used for consent can be built using the same approach and tooling used for regular authentication flows. Note however there is no need to pass a user identity in the `Finish` instruction. If passed, it will be ignored, thus, it suffices to end a consent flow with `Finish false/true`.
