@@ -120,7 +120,7 @@ impl Cedarling {
         self.instance
             .get_logs_by_tag(tag)
             .iter()
-            .map(|log| convert_json_to_object(log))
+            .map(convert_json_to_object)
             .collect()
     }
 
@@ -130,7 +130,7 @@ impl Cedarling {
         self.instance
             .get_logs_by_request_id(request_id)
             .iter()
-            .map(|log| convert_json_to_object(log))
+            .map(convert_json_to_object)
             .collect()
     }
 
@@ -145,7 +145,7 @@ impl Cedarling {
         self.instance
             .get_logs_by_request_id_and_tag(request_id, tag)
             .iter()
-            .map(|log| convert_json_to_object(log))
+            .map(convert_json_to_object)
             .collect()
     }
 }
