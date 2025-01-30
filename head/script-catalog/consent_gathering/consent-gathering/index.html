@@ -5459,6 +5459,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#writing-consent-flows-using-agama" class="md-nav__link">
+    Writing consent flows using Agama
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -8726,6 +8733,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#writing-consent-flows-using-agama" class="md-nav__link">
+    Writing consent flows using Agama
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -8790,11 +8804,6 @@ acr2 - consentScript2
 ..
 acrN - consentScriptN
 </code></pre></div></p>
-<p><strong>Agama</strong></p>
-<p>If Agama Consent is used then typically <code>acrToAgamaConsentFlowMapping</code> AS configuration property has to be used as well 
-to determine consent flow.
-<code>acrToAgamaConsentFlowMapping</code> - The acr mapping to agama consent flow name. When AS meets acr it tries to match agama consent name and set it into session attributes under <code>consent_flow</code> name.
-This makes it available for main Agama Consent script, so it knows which flow to invoke.</p>
 <h2 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">#</a></h2>
 <p>The consent gathering script implements the <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/authz/ConsentGatheringType.java">ConsentGathering</a> interface. This extends methods from the base script type in addition to adding new methods:</p>
 <h3 id="inherited-methods">Inherited Methods<a class="headerlink" href="#inherited-methods" title="Permanent link">#</a></h3>
@@ -9054,13 +9063,35 @@ This makes it available for main Agama Consent script, so it knows which flow to
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
+<h2 id="writing-consent-flows-using-agama">Writing consent flows using Agama<a class="headerlink" href="#writing-consent-flows-using-agama" title="Permanent link">#</a></h2>
+<p>Besides scripts, developers can also use <a href="../../../agama/introduction/">Agama</a> for writing consent flows. For this, enable the custom script named <code>agama_consent</code> and update the authentication server configuration accordingly using  <code>acrToConsentScriptNameMapping</code> and <code>acrToAgamaConsentFlowMapping</code> properties. Suppose the below configuration:</p>
+<div class="highlight"><pre><span></span><code>&quot;consentGatheringScriptBackwardCompatibility&quot;: false,
+&quot;acrToConsentScriptNameMapping&quot;: {
+   &quot;basic&quot;: &quot;consent_gathering&quot;,
+   &quot;otp&quot;: &quot;agama_consent&quot;,
+   &quot;agama_co.acme.myflow&quot;: &quot;my_consent_gathering&quot;,
+   &quot;agama_co.acme.mysuperflow&quot;: &quot;agama_consent&quot;
+},
+&quot;acrToAgamaConsentFlowMapping&quot;: {
+   &quot;otp&quot;: &quot;io.jans.consent.A&quot;,
+   &quot;agama_co.acme.mysuperflow&quot;: &quot;io.jans.consent.B&quot;,
+}
+</code></pre></div>
+<p>This is how consent will work depending on the authentication request issued:</p>
+<ul>
+<li>With <code>acr_values=basic</code>, the consent script named <code>consent_gathering</code> will be executed - as long as it is already enabled, of course. This is the default Consent script bundled with the server</li>
+<li>With <code>acr_values=otp</code>, the Agama flow <code>io.jans.consent.A</code> will be launched for consent</li>
+<li>With <code>acr_values=agama_co.acme.myflow</code>, the consent script named <code>my_consent_gathering</code> will be executed - assuming it exists and is enabled</li>
+<li>With <code>agama_co.acme.mysuperflow</code>, the Agama flow <code>io.jans.consent.B</code> will be launched for consent</li>
+</ul>
+<p>Agama flows used for consent can be built using the same approach and tooling used for regular authentication flows. Note however there is no need to pass a user identity in the <code>Finish</code> instruction. If passed, it will be ignored, thus, it suffices to end a consent flow with <code>Finish false/true</code>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-29T11:46:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-29</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-30T12:28:59+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-30</span>
       
         <br>
         Created:

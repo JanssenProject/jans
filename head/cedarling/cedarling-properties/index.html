@@ -7388,6 +7388,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#token-configs" class="md-nav__link">
+    Token Configs
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#id-token-trust-mode" class="md-nav__link">
     ID Token Trust Mode
   </a>
@@ -8693,6 +8700,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#token-configs" class="md-nav__link">
+    Token Configs
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#id-token-trust-mode" class="md-nav__link">
     ID Token Trust Mode
   </a>
@@ -8834,9 +8848,7 @@
 <li><strong><code>CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION</code></strong> :  <code>AND</code>, <code>OR</code></li>
 <li><strong><code>CEDARLING_MAPPING_USER</code></strong> : Name of Cedar User schema entity if we don't want to use default. When specified cedarling try build defined entity (from schema) as user instead of default <code>User</code> entity defined in <code>cedar</code> schema. Works in namespace defined in the policy store.</li>
 <li><strong><code>CEDARLING_MAPPING_WORKLOAD</code></strong> : Name of Cedar Workload schema entity</li>
-<li><strong><code>CEDARLING_MAPPING_ID_TOKEN</code></strong> : Name of Cedar id_token schema entity</li>
-<li><strong><code>CEDARLING_MAPPING_ACCESS_TOKEN</code></strong> : Name of Cedar access_token schema entity</li>
-<li><strong><code>CEDARLING_MAPPING_USERINFO_TOKEN</code></strong> : Name of Cedar userinfo schema entity</li>
+<li><strong><code>CEDARLING_MAPPING_ROLE</code></strong> : Name of Cedar Role schema entity</li>
 </ul>
 <p><strong>The following bootstrap properties are needed to configure log behavior:</strong></p>
 <ul>
@@ -8863,19 +8875,7 @@
 <li><strong><code>CEDARLING_JWT_SIG_VALIDATION</code></strong> : <code>Enabled</code> | <code>Disabled</code> -- Whether to check the signature  of all JWT tokens. This requires an <code>iss</code> is present.</li>
 <li><strong><code>CEDARLING_JWT_STATUS_VALIDATION</code></strong> : <code>Enabled</code> | <code>Disabled</code> -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retreive the latest Status List JWT from the <code>.well-known/openid-configuration</code> via the <code>status_list_endpoint</code> claim and cache it. See the <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">IETF Draft</a> for more info.</li>
 <li><strong><code>CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED</code></strong> : Only tokens signed with these algorithms are acceptable to the Cedarling.</li>
-<li><strong><code>CEDARLING_AT_ISS_VALIDATION</code></strong> : When enabled, the <code>iss</code> claim must be present in access token and the scheme must be <code>https</code>.</li>
-<li><strong><code>CEDARLING_AT_JTI_VALIDATION</code></strong> : When enabled, the <code>jti</code> claim must be present in access token.</li>
-<li><strong><code>CEDARLING_AT_NBF_VALIDATION</code></strong> : When enabled, the <code>nbf</code> claim must be present in access token and the Cedarling should verify that the current date is after the <code>nbf</code>.</li>
-<li><strong><code>CEDARLING_AT_EXP_VALIDATION</code></strong> : When enabled, the <code>exp</code> claim must be present and not past the date specified.</li>
-<li><strong><code>CEDARLING_IDT_ISS_VALIDATION</code></strong> : When enabled, the <code>iss</code> claim must be present in id_token and the scheme must be <code>https</code>.</li>
-<li><strong><code>CEDARLING_IDT_SUB_VALIDATION</code></strong> : When enabled, the <code>sub</code> claim must be present in id_token.</li>
-<li><strong><code>CEDARLING_IDT_EXP_VALIDATION</code></strong> : When enabled, the <code>exp</code> claim must be present and not past the date specified.</li>
-<li><strong><code>CEDARLING_IDT_IAT_VALIDATION</code></strong> : When enabled, the <code>iat</code> claim must be present in id_token.</li>
-<li><strong><code>CEDARLING_IDT_AUD_VALIDATION</code></strong> : When enabled, the <code>aud</code> claim must be present in id_token.</li>
-<li><strong><code>CEDARLING_USERINFO_ISS_VALIDATION</code></strong> : When enabled, the <code>iss</code> claim must be present and the scheme must be <code>https</code>.</li>
-<li><strong><code>CEDARLING_USERINFO_SUB_VALIDATION</code></strong> : When enabled, the <code>sub</code> claim must be present in Userinfo JWT.</li>
-<li><strong><code>CEDARLING_USERINFO_AUD_VALIDATION</code></strong> : When enabled, the <code>aud</code> claim must be present in Userinfo JWT.</li>
-<li><strong><code>CEDARLING_USERINFO_EXP_VALIDATION</code></strong> : When enabled, the <code>exp</code> claim must be present and not past the date specified.</li>
+<li><strong><code>CEDARLING_TOKEN_CONFIGS</code></strong> : JSON object containing token specific configs. See: <a href="#token-configs">Token Configs</a>.</li>
 <li><strong><code>CEDARLING_ID_TOKEN_TRUST_MODE</code></strong> :  <code>Strict</code> | <code>None</code>. Varying levels of validations based on the preference of the developer.
 <code>Strict</code> mode requires (1) id_token <code>aud</code> matches the access_token <code>client_id</code>; (2) if a Userinfo token is present, the <code>sub</code> matches the id_token, and that the <code>aud</code> matches the access token client_id.</li>
 </ul>
@@ -8897,6 +8897,38 @@
 <li><strong>AND</strong>: authz will be successful if <code>USER</code> <strong>AND</strong> <code>WORKLOAD</code> is valid.</li>
 <li><strong>OR</strong>: authz will be successful if <code>USER</code> <strong>OR</strong> <code>WORKLOAD</code> is valid.</li>
 </ul>
+<h2 id="token-configs">Token Configs<a class="headerlink" href="#token-configs" title="Permanent link">#</a></h2>
+<p>The token configs property sets the entity type name of a token and it's validation settings. Below is an example of the <code>CEDARLING_TOKEN_CONFIGS</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nx">CEDARLING_TOKEN_CONFIGS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="s2">&quot;access_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;entity_type_name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Access_token&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;iss&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;aud&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;sub&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;jti&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;nbf&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;iat&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;exp&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="s2">&quot;id_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;entity_type_name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;id_token&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;exp&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="s2">&quot;userinfo_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;entity_type_name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Userinfo_token&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;exp&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="s2">&quot;custom_token1&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;entity_type_name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;SomeCustom_token&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;exp&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="s2">&quot;custom_token2&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;entity_type_name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;AnotherCustom_token&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;exp&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="c1">// more custom tokens can be added here</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="id-token-trust-mode">ID Token Trust Mode<a class="headerlink" href="#id-token-trust-mode" title="Permanent link">#</a></h2>
 <p>The level of validation for the ID Token JWT can be set to either <code>None</code> or <code>Strict</code>.</p>
 <h3 id="none-mode"><code>None</code> Mode<a class="headerlink" href="#none-mode" title="Permanent link">#</a></h3>
@@ -8954,9 +8986,7 @@
 <span class="w">    </span><span class="nt">&quot;CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AND&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_MAPPING_USER&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CustomUser&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_MAPPING_WORKLOAD&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CustomWorkload&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_MAPPING_ID_TOKEN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CustomIdToken&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_MAPPING_ACCESS_TOKEN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CustomAccessToken&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_MAPPING_USERINFO_TOKEN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CustomUserinfoToken&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_MAPPING_ROLE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CustomRole&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_LOCAL_JWKS&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;../test_files/local_jwks.json&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_LOCAL_POLICY_STORE&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_POLICY_STORE_LOCAL_FN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;../test_files/policy-store_blobby.json&quot;</span><span class="p">,</span><span class="w"></span>
@@ -8966,19 +8996,27 @@
 <span class="w">        </span><span class="s2">&quot;HS256&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="s2">&quot;RS256&quot;</span><span class="w"></span>
 <span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_AT_ISS_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_AT_JTI_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_AT_NBF_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_AT_EXP_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_IDT_ISS_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_IDT_SUB_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_IDT_EXP_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_IDT_IAT_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_IDT_AUD_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_USERINFO_ISS_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_USERINFO_SUB_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_USERINFO_AUD_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_USERINFO_EXP_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_TOKEN_CONFIGS&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Access_token&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;id_token&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;id_token&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_ID_TOKEN_TRUST_MODE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Strict&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_LOCK&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_LOCK_MASTER_CONFIGURATION_URI&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
@@ -9024,9 +9062,7 @@
 <span class="nt">CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;AND&#39;</span><span class="w"></span>
 <span class="nt">CEDARLING_MAPPING_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;CustomUser&#39;</span><span class="w"></span>
 <span class="nt">CEDARLING_MAPPING_WORKLOAD</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;CustomWorkload&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_MAPPING_ID_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;CustomIdToken&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_MAPPING_ACCESS_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;CustomAccessToken&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_MAPPING_USERINFO_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;CustomUserinfoToken&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_MAPPING_ROLE</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;CustomRole&#39;</span><span class="w"></span>
 <span class="nt">CEDARLING_LOCAL_JWKS</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../test_files/local_jwks.json&#39;</span><span class="w"></span>
 <span class="nt">CEDARLING_LOCAL_POLICY_STORE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w"></span>
 <span class="nt">CEDARLING_POLICY_STORE_LOCAL_FN</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../test_files/policy-store_blobby.json&#39;</span><span class="w"></span>
@@ -9035,19 +9071,10 @@
 <span class="nt">CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;HS256&#39;</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;RS256&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_AT_ISS_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;disabled&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_AT_JTI_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;disabled&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_AT_NBF_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;disabled&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_AT_EXP_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_IDT_ISS_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_IDT_SUB_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_IDT_EXP_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_IDT_IAT_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_IDT_AUD_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_USERINFO_ISS_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_USERINFO_SUB_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_USERINFO_AUD_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_USERINFO_EXP_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_TOKENS_CONFIG</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">access_token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CustomAccessToken</span><span class="w"></span>
+<span class="w">    </span><span class="nt">id_token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CustomIdToken</span><span class="w"></span>
+<span class="w">    </span><span class="nt">userinfo_token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CustomUserinfoToken</span><span class="w"></span>
 <span class="nt">CEDARLING_ID_TOKEN_TRUST_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;Strict&#39;</span><span class="w"></span>
 <span class="nt">CEDARLING_LOCK</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;disabled&#39;</span><span class="w"></span>
 <span class="nt">CEDARLING_LOCK_MASTER_CONFIGURATION_URI</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w"></span>
@@ -9066,7 +9093,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-22T20:46:19+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-22</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-29T15:54:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-29</span>
       
         <br>
         Created:

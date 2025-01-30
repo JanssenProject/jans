@@ -8994,11 +8994,12 @@
 </code></pre></div>
 <h2 id="trusted-issuers-schema">Trusted Issuers Schema<a class="headerlink" href="#trusted-issuers-schema" title="Permanent link">#</a></h2>
 <p>This record contains the information needed to validate tokens from this issuer:</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;identity_source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;some_unique_id&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_trusted_issuer&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;description for the trusted issuer&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://&lt;trusted-issuer-hostname&gt;/.well-known/openid-configuration&quot;</span><span class="p">,</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;identity_source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;some_unique_id&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_trusted_issuer&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;description for the trusted issuer&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://&lt;trusted-issuer-hostname&gt;/.well-known/openid-configuration&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;tokens_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">      </span><span class="nt">&quot;access_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span><span class="w"></span>
@@ -9007,20 +9008,18 @@
 <span class="w">      </span><span class="nt">&quot;id_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
 <span class="w">      </span><span class="nt">&quot;userinfo_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
 <span class="w">      </span><span class="nt">&quot;tx_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="err">...</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="err">...</span><span class="w"></span>
 <span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="err">...</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <ul>
 <li><strong>name</strong> : (<em>String</em>) The name of the trusted issuer.</li>
 <li><strong>description</strong> : (<em>String</em>) A brief description of the trusted issuer, providing context for administrators.</li>
 <li><strong>openid_configuration_endpoint</strong> : (<em>String</em>) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at <code>/.well-known/openid-configuration</code>).</li>
 <li><strong>identity_source</strong> : (<em>Object</em>, <em>optional</em>) Metadata related to the tokens issued by this issuer.</li>
-</ul>
-<p><strong>Notes</strong>:</p>
-<ul>
-<li>The <code>access_tokens</code>, <code>id_tokens</code>, <code>userinfo_tokens</code>, and <code>tx_tokens</code> fields will follow the <a href="#token-metadata-schema">Token Metadata Schema</a>.</li>
-<li>The <code>access_tokens</code> will contain a <code>trusted</code> and <code>principal_identifier</code> field in addition to the fields from the <code>Token Metadata Schema</code>.</li>
+<li><strong>tokens_metadata</strong> : (<em>Object</em>, <em>optional</em>) Tokens metadata in a map of <em>token name</em> -&gt; <em>token metadata</em>. See  <a href="#token-metadata-schema">Token Metadata Schema</a>.</li>
 </ul>
 <h3 id="token-metadata-schema">Token Metadata Schema<a class="headerlink" href="#token-metadata-schema" title="Permanent link">#</a></h3>
 <p>The Token Entity Metadata Schema defines how tokens are mapped, parsed, and transformed within Cedarling. It allows you to specify how to extract user IDs, roles, and other claims from a token using customizable parsers.</p>
@@ -9212,7 +9211,7 @@ action &quot;Update&quot; appliesTo {
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-16T11:45:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-16</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-29T15:54:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-29</span>
       
         <br>
         Created:
