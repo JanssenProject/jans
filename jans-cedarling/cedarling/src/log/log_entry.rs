@@ -10,7 +10,7 @@ use std::collections::{HashMap, HashSet};
 use std::fmt::Display;
 use std::hash::Hash;
 
-use uuid7::{Uuid, uuid7};
+use uuid7::Uuid;
 
 use super::LogLevel;
 use super::interface::{Indexed, Loggable};
@@ -433,7 +433,7 @@ impl BaseLogEntry {
         };
 
         Self {
-            id: uuid7(),
+            id: gen_uuid7(),
             request_id: Some(request_id),
             timestamp: Some(local_time_string),
             log_kind: log_type,
@@ -456,7 +456,7 @@ impl BaseLogEntry {
         };
 
         Self {
-            id: uuid7(),
+            id: gen_uuid7(),
             request_id,
             timestamp: Some(local_time_string),
             log_kind: log_type,
