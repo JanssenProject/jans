@@ -120,7 +120,14 @@ impl Loggable for LogEntry {
 
 /// Type of log entry
 #[derive(
-    Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize, strum::IntoStaticStr,
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    serde::Serialize,
+    serde::Deserialize,
+    strum::IntoStaticStr,
+    derive_more::Display,
 )]
 pub enum LogType {
     Decision,

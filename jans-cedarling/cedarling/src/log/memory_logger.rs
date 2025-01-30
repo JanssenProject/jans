@@ -187,6 +187,7 @@ mod tests {
     use super::super::{AuthorizationLogInfo, LogEntry, LogType};
     use super::*;
     use crate::common::app_types;
+    use crate::log::gen_uuid7;
 
     fn create_memory_logger() -> MemoryLogger {
         let config = MemoryLogConfig { log_ttl: 60 };
@@ -343,5 +344,79 @@ mod tests {
         // and look in the output for
         // "could not serialize LogEntry to serde_json::Value: Error(\"this always fails\", line: 0, column: 0)"
         assert!(logger.pop_logs().is_empty(), "logger should be empty");
+    }
+
+    #[test]
+    fn test_log_index() {
+        let request_id = gen_uuid7();
+
+        let logger = MemoryLogger::new(MemoryLogConfig { log_ttl: 10 }, LogLevel::DEBUG);
+
+        let entry_decision =
+            LogEntry::new_with_data(app_types::PdpID::new(), None, LogType::Decision, None);
+        logger.log_any(entry_decision);
+
+        let entry_system_info = LogEntry::new_with_data(
+            app_types::PdpID::new(),
+            None,
+            LogType::System,
+            Some(request_id),
+        )
+        .set_level(LogLevel::INFO);
+        logger.log_any(entry_system_info);
+
+        let entry_system_debug = LogEntry::new_with_data(
+            app_types::PdpID::new(),
+            None,
+            LogType::System,
+            Some(request_id),
+        )
+        .set_level(LogLevel::DEBUG);
+        logger.log_any(entry_system_debug);
+
+        let entry_metric =
+            LogEntry::new_with_data(app_types::PdpID::new(), None, LogType::Metric, None);
+        logger.log_any(entry_metric);
+
+        // without request id
+        let entry_system_warn =
+            LogEntry::new_with_data(app_types::PdpID::new(), None, LogType::System, None)
+                .set_level(LogLevel::WARN);
+        logger.log_any(entry_system_warn);
+
+        assert!(
+            logger
+                .get_logs_by_request_id(request_id.to_string().as_str())
+                .len()
+                == 2,
+            "2 log entries should be present for request id: {request_id}"
+        );
+
+        assert!(
+            logger
+                .get_logs_by_request_id_and_tag(
+                    request_id.to_string().as_str(),
+                    LogLevel::DEBUG.to_string().as_str()
+                )
+                .len()
+                == 1,
+            "1 log entries should be present for request id: {request_id} and debug level"
+        );
+
+        assert!(
+            logger
+                .get_logs_by_tag(LogType::System.to_string().as_str())
+                .len()
+                == 3,
+            "3 system log entries should be present"
+        );
+
+        assert!(
+            logger
+                .get_logs_by_tag(LogLevel::WARN.to_string().as_str())
+                .len()
+                == 1,
+            "1 system log entry should be present with WARN level"
+        );
     }
 }
