@@ -499,7 +499,7 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
 					<configuration>
-						<failOnError>false</failOnError>
+						<!-- <failOnError>false</failOnError> -->
 					</configuration>
 				</plugin>
 				<plugin>
