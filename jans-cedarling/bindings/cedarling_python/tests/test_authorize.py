@@ -107,8 +107,14 @@ RESOURCE = ResourceData.from_dict({
     "country": "US"
 })
 
+TOKENS = {
+    "access_token": ACCESS_TOKEN,
+    "id_token": ID_TOKEN,
+    "userinfo_token": USERINFO_TOKEN,
+}
+
 REQUEST = Request(
-    tokens=Tokens(ACCESS_TOKEN, ID_TOKEN, USERINFO_TOKEN),
+    tokens=TOKENS,
     action='Jans::Action::"Update"',
     context={},
     resource=RESOURCE,
@@ -122,26 +128,7 @@ def test_authorize_ok():
     '''
     instance = Cedarling(load_bootstrap_config())
 
-    # Create resouce with type "Jans::Issue" from cedar-policy schema.
-    resource = ResourceData.from_dict({
-        "type": "Jans::Issue",
-        "id": "random_id",
-        "org_id": "some_long_id",
-        "country": "US"
-    })
-
-    request = Request(
-        tokens= {
-            "access_token": ACCESS_TOKEN,
-            "id_token": ID_TOKEN,
-            "userinfo_token": USERINFO_TOKEN,
-        },
-        action='Jans::Action::"Update"',
-        context={}, 
-        resource=resource,
-    )
-
-    authorize_result = instance.authorize(request)
+    authorize_result = instance.authorize(REQUEST)
     assert authorize_result.is_allowed(), "request should be allowed"
 
     workload_result = authorize_result.workload()
