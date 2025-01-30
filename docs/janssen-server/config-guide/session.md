@@ -378,8 +378,10 @@ and `expires before` dates.
 ![image](../../assets/tui-session-screen.png)
 
 
-To get the detail of any session, bring the control on that session (using the tab key), and press v.
-also can export the detail.
+To get the detail of any session, bring the control on that session (using the tab key), and press `v` key.
+You can also `export` the details.
+
+To delete a session, bring the control on that session (using the tab key), and press `Delete` key.
 
 ![image](../../assets/tui-session-detail.png)
 
