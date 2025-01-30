@@ -83,6 +83,17 @@ pub struct Cedarling {
 
 impl Cedarling {
     /// Create a new instance of the Cedarling application.
+    /// Initialize instance from enviroment variables and from config.
+    /// Configuration structure has lower priority.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub async fn new_with_env(
+        raw_config: Option<BootstrapConfigRaw>,
+    ) -> Result<Cedarling, InitCedarlingError> {
+        let config = BootstrapConfig::from_raw_config_and_env(raw_config)?;
+        Self::new(&config).await
+    }
+
+    /// Create a new instance of the Cedarling application.
     pub async fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
         let log = log::init_logger(&config.log_config);
         let pdp_id = app_types::PdpID::new();

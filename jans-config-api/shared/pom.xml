@@ -7,12 +7,16 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-config-api-parent</artifactId>
-		<version>1.3.0</version>
+		<version>0.0.0-nightly</version>
 	</parent>
 
 	<dependencies>
 
 		<!-- jans -->
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-auth-client</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-auth-common</artifactId>
@@ -53,6 +57,12 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
+		</dependency>
+		
+		<!-- Testing -->
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
 		</dependency>
 
 	</dependencies>

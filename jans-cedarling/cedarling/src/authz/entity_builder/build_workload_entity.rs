@@ -11,29 +11,30 @@ use std::collections::HashSet;
 const DEFAULT_ACCESS_TKN_WORKLOAD_CLAIM: &str = "client_id";
 const DEFAULT_ID_TKN_WORKLOAD_CLAIM: &str = "aud";
 
+// TODO: make a bootstrap property to control which tokens to use
+// to create this entity
+const DEFAULT_WORKLOAD_ENTITY_TKN_SRCS: [&str; 2] = ["access_token", "id_token"];
+
 impl EntityBuilder {
     pub fn build_workload_entity(
         &self,
-        tokens: &DecodedTokens,
+        tokens: &HashMap<String, Token>,
+        built_entities: &BuiltEntities,
     ) -> Result<Entity, BuildWorkloadEntityError> {
         let entity_name = self.entity_names.workload.as_ref();
         let mut errors = vec![];
 
-        for (workload_id_claim, token_option, claim_aliases) in [
-            (
-                DEFAULT_ACCESS_TKN_WORKLOAD_CLAIM,
-                tokens.access.as_ref(),
-                vec![],
-            ),
-            (
-                DEFAULT_ID_TKN_WORKLOAD_CLAIM,
-                tokens.id.as_ref(),
-                vec![ClaimAliasMap::new("aud", "client_id")],
-            ),
+        for ((workload_id_claim, claim_aliases), token_name) in [
+            (DEFAULT_ACCESS_TKN_WORKLOAD_CLAIM, Vec::new()),
+            (DEFAULT_ID_TKN_WORKLOAD_CLAIM, vec![ClaimAliasMap::new(
+                "aud",
+                "client_id",
+            )]),
         ]
         .into_iter()
+        .zip(DEFAULT_WORKLOAD_ENTITY_TKN_SRCS)
         {
-            if let Some(token) = token_option {
+            if let Some(token) = tokens.get(token_name) {
                 match build_entity(
                     &self.schema,
                     entity_name,
@@ -41,9 +42,12 @@ impl EntityBuilder {
                     workload_id_claim,
                     claim_aliases,
                     HashSet::new(),
+                    built_entities,
                 ) {
-                    Ok(entity) => return Ok(entity),
-                    Err(err) => errors.push((token.kind, err)),
+                    Ok(entity) => {
+                        return Ok(entity);
+                    },
+                    Err(err) => errors.push((token.name.clone(), err)),
                 }
             }
         }
@@ -54,7 +58,7 @@ impl EntityBuilder {
 
 #[derive(Debug, thiserror::Error)]
 pub struct BuildWorkloadEntityError {
-    pub errors: Vec<(TokenKind, BuildEntityError)>,
+    pub errors: Vec<(String, BuildEntityError)>,
 }
 
 impl fmt::Display for BuildWorkloadEntityError {
@@ -82,10 +86,7 @@ mod test {
     use super::super::*;
     use crate::authz::entity_builder::BuildEntityError;
     use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
-    use crate::common::policy_store::{
-        ClaimMappings, TokenEntityMetadata, TokenKind, TrustedIssuer,
-    };
-    use crate::jwt::{Token, TokenClaims};
+    use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer};
     use cedar_policy::EvalResult;
     use serde_json::json;
     use std::collections::HashMap;
@@ -106,20 +107,18 @@ mod test {
         .unwrap();
         let iss = TrustedIssuer::default();
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
-        let access_token = Token::new_access(
-            TokenClaims::new(HashMap::from([
+        let access_token = Token::new(
+            "access_token",
+            HashMap::from([
                 ("client_id".to_string(), json!("workload-123")),
                 ("name".to_string(), json!("somename")),
-            ])),
+            ])
+            .into(),
             Some(&iss),
         );
-        let tokens = DecodedTokens {
-            access: Some(access_token),
-            id: None,
-            userinfo: None,
-        };
+        let tokens = HashMap::from([("access_token".to_string(), access_token)]);
         let entity = builder
-            .build_workload_entity(&tokens)
+            .build_workload_entity(&tokens, &BuiltEntities::default())
             .expect("expeted to successfully build workload entity");
         assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
         assert_eq!(
@@ -154,20 +153,18 @@ mod test {
         .unwrap();
         let iss = TrustedIssuer::default();
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
-        let id_token = Token::new_id(
-            TokenClaims::new(HashMap::from([
+        let id_token = Token::new(
+            "id_token",
+            HashMap::from([
                 ("aud".to_string(), json!("workload-123")),
                 ("name".to_string(), json!("somename")),
-            ])),
+            ])
+            .into(),
             Some(&iss),
         );
-        let tokens = DecodedTokens {
-            access: None,
-            id: Some(id_token),
-            userinfo: None,
-        };
+        let tokens = HashMap::from([("id_token".to_string(), id_token)]);
         let entity = builder
-            .build_workload_entity(&tokens)
+            .build_workload_entity(&tokens, &BuiltEntities::default())
             .expect("expected to successfully build workload entity");
         assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
         assert_eq!(
@@ -222,7 +219,7 @@ mod test {
         }))
         .unwrap();
         let iss = TrustedIssuer {
-            access_tokens: TokenEntityMetadata {
+            tokens_metadata: HashMap::from([("access_token".to_string(), TokenEntityMetadata {
                 claim_mapping: serde_json::from_value::<ClaimMappings>(json!({
                     "email": {
                         "parser": "regex",
@@ -242,25 +239,23 @@ mod test {
                 }))
                 .unwrap(),
                 ..Default::default()
-            },
+            })]),
             ..Default::default()
         };
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
-        let access_token = Token::new_access(
-            TokenClaims::new(HashMap::from([
+        let access_token = Token::new(
+            "access_token",
+            HashMap::from([
                 ("client_id".to_string(), json!("workload-123")),
                 ("email".to_string(), json!("test@example.com")),
                 ("url".to_string(), json!("https://test.com/example")),
-            ])),
+            ])
+            .into(),
             Some(&iss),
         );
-        let tokens = DecodedTokens {
-            access: Some(access_token),
-            id: None,
-            userinfo: None,
-        };
+        let tokens = HashMap::from([("access_token".to_string(), access_token)]);
         let entity = builder
-            .build_workload_entity(&tokens)
+            .build_workload_entity(&tokens, &BuiltEntities::default())
             .expect("expected to successfully build workload entity");
 
         assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
@@ -340,23 +335,21 @@ mod test {
         .unwrap();
         let iss = TrustedIssuer::default();
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
-        let access_token = Token::new_access(
-            TokenClaims::new(HashMap::from([
+        let access_token = Token::new(
+            "access_token",
+            HashMap::from([
                 ("client_id".to_string(), json!("workload-123")),
                 (
                     "iss".to_string(),
                     json!("https://test.com/.well-known/openid-configuration"),
                 ),
-            ])),
+            ])
+            .into(),
             Some(&iss),
         );
-        let tokens = DecodedTokens {
-            access: Some(access_token),
-            id: None,
-            userinfo: None,
-        };
+        let tokens = HashMap::from([("access_token".to_string(), access_token)]);
         let entity = builder
-            .build_workload_entity(&tokens)
+            .build_workload_entity(&tokens, &BuiltEntities::default())
             .expect("expected to successfully build workload entity");
 
         assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
@@ -404,23 +397,22 @@ mod test {
         .unwrap();
         let iss = TrustedIssuer::default();
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
-        let access_token = Token::new_access(TokenClaims::new(HashMap::new()), Some(&iss));
-        let id_token = Token::new_id(TokenClaims::new(HashMap::new()), Some(&iss));
-        let tokens = DecodedTokens {
-            access: Some(access_token),
-            id: Some(id_token),
-            userinfo: None,
-        };
+        let access_token = Token::new("access_token", HashMap::new().into(), Some(&iss));
+        let id_token = Token::new("id_token", HashMap::new().into(), Some(&iss));
+        let tokens = HashMap::from([
+            ("access_token".to_string(), access_token),
+            ("id_token".to_string(), id_token),
+        ]);
         let err = builder
-            .build_workload_entity(&tokens)
+            .build_workload_entity(&tokens, &BuiltEntities::default())
             .expect_err("expected to error while building the workload entity");
 
         assert_eq!(err.errors.len(), 2);
         assert!(
             matches!(
                 err.errors[0],
-                (ref tkn_kind, BuildEntityError::MissingClaim(ref claim_name))
-                    if tkn_kind == &TokenKind::Access &&
+                (ref tkn_name, BuildEntityError::MissingClaim(ref claim_name))
+                    if tkn_name == "access_token" &&
                         claim_name == "client_id"
             ),
             "expected an error due to missing the `client_id` claim"
@@ -428,8 +420,8 @@ mod test {
         assert!(
             matches!(
                 err.errors[1],
-                (ref tkn_kind, BuildEntityError::MissingClaim(ref claim_name))
-                    if tkn_kind == &TokenKind::Id &&
+                (ref tkn_name, BuildEntityError::MissingClaim(ref claim_name))
+                    if tkn_name == "id_token" &&
                         claim_name == "aud"
             ),
             "expected an error due to missing the `aud` claim"
@@ -451,12 +443,10 @@ mod test {
         }))
         .unwrap();
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
-        let tokens = DecodedTokens {
-            access: None,
-            id: None,
-            userinfo: None,
-        };
-        let err = builder.build_workload_entity(&tokens).unwrap_err();
+        let tokens = HashMap::new();
+        let err = builder
+            .build_workload_entity(&tokens, &BuiltEntities::default())
+            .unwrap_err();
 
         assert_eq!(err.errors.len(), 0);
     }

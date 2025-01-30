@@ -498,6 +498,12 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "The acr mappings. When AS meets key-value in map, it tries to replace 'key' with 'value' as very first thing and use that 'value' in further processing.")
     private Map<String, String> acrMappings;
 
+    @DocProperty(description = "The acr mapping to consent script name. When AS meets acr it tries to match consent script name and invoke it during authorization. This takes higher precedence then client consent script configuration.")
+    private Map<String, String> acrToConsentScriptNameMapping;
+
+    @DocProperty(description = "The acr mapping to agama consent flow name. When AS meets acr it tries to match agama consent name and set it into session attributes under 'consent_flow' name. This makes it available for main Agama Consent script, so it knows which flow to invoke.")
+    private Map<String, String> acrToAgamaConsentFlowMapping;
+
     @DocProperty(description = "Boolean value specifying whether to enable user authentication filters")
     private Boolean authenticationFiltersEnabled;
 
@@ -3615,6 +3621,26 @@ public class AppConfiguration implements Configuration {
 
     public void setAcrMappings(Map<String, String> acrMappings) {
         this.acrMappings = acrMappings;
+    }
+
+    public Map<String, String> getAcrToConsentScriptNameMapping() {
+        if (acrToConsentScriptNameMapping == null) acrToConsentScriptNameMapping = new HashMap<>();
+        return acrToConsentScriptNameMapping;
+    }
+
+    public AppConfiguration setAcrToConsentScriptNameMapping(Map<String, String> acrToConsentScriptNameMapping) {
+        this.acrToConsentScriptNameMapping = acrToConsentScriptNameMapping;
+        return this;
+    }
+
+    public Map<String, String> getAcrToAgamaConsentFlowMapping() {
+        if (acrToAgamaConsentFlowMapping == null) acrToAgamaConsentFlowMapping = new HashMap<>();
+        return acrToAgamaConsentFlowMapping;
+    }
+
+    public AppConfiguration setAcrToAgamaConsentFlowMapping(Map<String, String> acrToAgamaConsentFlowMapping) {
+        this.acrToAgamaConsentFlowMapping = acrToAgamaConsentFlowMapping;
+        return this;
     }
 
     public EngineConfig getAgamaConfiguration() {

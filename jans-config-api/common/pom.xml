@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-config-api-parent</artifactId>
-		<version>1.3.0</version>
+		<version>0.0.0-nightly</version>
 	</parent>
 
 	<prerequisites>
@@ -39,12 +39,6 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<skipTests>true</skipTests>
-					<systemProperties>
-						<karate.options>--tags ~@ignore</karate.options>
-					</systemProperties>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

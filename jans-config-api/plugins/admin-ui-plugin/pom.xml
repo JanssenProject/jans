@@ -3,7 +3,7 @@
     <parent>
         <artifactId>plugins</artifactId>
         <groupId>io.jans.jans-config-api.plugins</groupId>
-        <version>1.3.0</version>
+        <version>0.0.0-nightly</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -31,42 +31,18 @@
             <artifactId>commons-collections</artifactId>
             <version>3.2.2</version>
         </dependency>
+		
         <!-- Testing -->
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.intuit.karate</groupId>
-            <artifactId>karate-junit5</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.intuit.karate</groupId>
-            <artifactId>karate-apache</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.masterthought</groupId>
-            <artifactId>cucumber-reporting</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-        <!-- API, java.xml.bind module -->
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+		    <scope>test</scope>
+		</dependency>
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
@@ -90,15 +66,19 @@
 
     <build>
         <finalName>admin-ui-plugin</finalName>
+        
+       <filters>
+			<filter>../../profiles/${cfg}/config-build.properties</filter>
+			<filter>../../profiles/${cfg}/config-api-test.properties</filter>
+		</filters>
+
         <testResources>
             <testResource>
                 <directory>src/test/resources</directory>
                 <filtering>true</filtering>
-                <includes>
-                    <include>*.*</include>
-                </includes>
             </testResource>
         </testResources>
+		
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -118,29 +98,13 @@
                 </executions>
             </plugin>
             <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <systemPropertyVariables>
-                    </systemPropertyVariables>
-                    <excludedGroups>integration</excludedGroups>
-                    <systemProperties>
-                        <karate.options>--tags ~@ignore</karate.options>
-                    </systemProperties>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>integration-tests</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <configuration>
-                            <failIfNoTests>false</failIfNoTests>
-                            <excludedGroups>!integration</excludedGroups>
-                            <groups>integration</groups>
-                        </configuration>
-                    </execution>
-                </executions>
+				<configuration>
+					<suiteXmlFiles>
+                        <suiteXmlFile>target/test-classes/testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+				</configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

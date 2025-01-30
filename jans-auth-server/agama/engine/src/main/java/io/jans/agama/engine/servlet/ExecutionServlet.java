@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.HttpMethod;
 import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import io.jans.agama.engine.exception.FlowCrashException;
@@ -26,6 +27,8 @@ public class ExecutionServlet extends BaseServlet {
     public static final String URL_PREFIX = "/fl/";
     public static final String CALLBACK_PATH = URL_PREFIX + "callback";
     public static final String ABORT_PARAM = "_abort";
+    
+    private static final String POST_FINISH_URL_KEY = "post_finish_url";
 
     private static final String NO_ACTIVE_FLOW = "This flow may have already finished/timed out. " +
             "Login again to the website you were trying to access originally.";
@@ -55,7 +58,7 @@ public class ExecutionServlet extends BaseServlet {
                 if (result == null) {
                     sendRedirect(response, request.getContextPath(), fstatus, true);
                 } else {
-                    sendFinishPage(response, result);
+                    sendFinishPage(response, result, fstatus.getStartUrl());
                 }
             } catch (FlowCrashException e) {
                 logger.error(e.getMessage(), e);
@@ -156,7 +159,7 @@ public class ExecutionServlet extends BaseServlet {
                 sendRedirect(response, request.getContextPath(), fstatus,
                         request.getMethod().equals(HttpMethod.GET));
             } else {                    
-                sendFinishPage(response, result);
+                sendFinishPage(response, result, fstatus.getStartUrl());
             }
             
         } catch (FlowTimeoutException te) {
@@ -204,13 +207,26 @@ public class ExecutionServlet extends BaseServlet {
             response.setHeader(HttpHeaders.LOCATION, newLocation);
             response.setStatus(HttpServletResponse.SC_SEE_OTHER);
         }
-        
+
     }
 
-    private void sendFinishPage(HttpServletResponse response, FlowResult result) throws IOException {
+    private void sendFinishPage(HttpServletResponse response, FlowResult result,
+                String startUrl) throws IOException {
 
         String fpage = isJsonRequest() ? engineConf.getJsonFinishedFlowPage() : 
                 engineConf.getFinishedFlowPage();
+
+        if (startUrl != null) {            
+            Map<String, Object> map = Collections.singletonMap(POST_FINISH_URL_KEY,
+                    engineConf.getStartEndUrlMapping().get(startUrl));
+
+            if (result.getData() == null) {
+                result.setData(map);
+            } else {
+                result.getData().putAll(map);
+            }
+        }
+
         page.setTemplatePath(fpage);
         page.setDataModel(result);
         sendPageContents(response);

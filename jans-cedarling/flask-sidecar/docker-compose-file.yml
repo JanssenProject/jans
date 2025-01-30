@@ -1,0 +1,16 @@
+services:
+  sidecar:
+    image: flask-sidecar
+    build: ./
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - type: bind
+        source: ./secrets/bootstrap.json
+        target: /bootstrap.json
+    environment:
+      - FLASK_APP=main.core:app
+      - APP_MODE=${APP_MODE:-development}
+      - SIDECAR_DEBUG_RESPOSE=${SIDECAR_DEBUG_RESPOSE:-False}
+      - CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json

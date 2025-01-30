@@ -1,6 +1,5 @@
 package io.jans.lock.service;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.util.EntityUtils;
@@ -263,15 +261,12 @@ public class TokenEndpointService {
     }
 
     private String getScopeForToken(String endpoint, boolean allGroupScopes) {
-        log.info("Request for token  for endpoint:{}, allGroupScopes:{}, appConfiguration.isGroupScopeEnabled():{}",
-                endpoint, allGroupScopes, appConfiguration.isGroupScopeEnabled());
+        log.info("Request for token  for endpoint:{}, allGroupScopes:{}", endpoint, allGroupScopes);
         StringBuilder sb = new StringBuilder();
         sb.append(ScopeType.OPENID.getValue());
         List<String> scopeList = null;
 
-        boolean groupScopeEnabled = this.appConfiguration.isGroupScopeEnabled();
-
-        if (allGroupScopes && groupScopeEnabled) {
+        if (allGroupScopes) {
             scopeList = this.getAllGroupScope(endpoint);
         } else {
             scopeList = this.getScopes(endpoint);
@@ -387,21 +382,6 @@ public class TokenEndpointService {
         log.debug(" response:{}", response);
 
         return response;
-    }
-
-    public boolean isTokenValid(Date expiryDate) {
-        if (expiryDate == null) {
-            return false;
-        }
-        return expiryDate.after(new Date());
-    }
-
-    public Date computeTokenExpiryTime(Integer expiresIn) {
-        log.debug("expiresIn:{}", expiresIn);
-        Date currDate = new Date();
-        Date expiryDate = DateUtils.addSeconds(currDate, expiresIn);
-        log.debug("currDate:{}, expiresIn:{}, expiryDate:{}", currDate, expiresIn, expiryDate);
-        return expiryDate;
     }
 
 }

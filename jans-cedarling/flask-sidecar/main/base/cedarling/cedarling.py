@@ -17,38 +17,40 @@ limitations under the License.
 from cedarling_python import BootstrapConfig
 from cedarling_python import Cedarling
 from cedarling_python import (
-        ResourceData,
-        Request,
-        AuthorizeResultResponse,
-        Tokens
+    ResourceData,
+    Request,
+    AuthorizeResultResponse
 )
 from main.logger import logger
 from flask import Flask
-import json
 import typing as _t
 
 DictType = _t.Dict[str, _t.Any]
 KEYS_LIST = ["access_token", "id_token", "userinfo_token"]
 
+
 class CedarlingInstance:
 
     def __init__(self, app=None):
-        self._bootstrap_config: str
+        self._bootstrap_config: str | None
         self._cedarling: Cedarling
         if app is not None:
             self.init_app(app)
 
     def init_app(self, app: Flask):
-        self._bootstrap_config = app.config.get("CEDARLING_BOOTSTRAP_CONFIG", "{}")
+        self._bootstrap_config = app.config.get("CEDARLING_BOOTSTRAP_CONFIG", None)
         self.debug_response: bool = app.config.get("SIDECAR_DEBUG_RESPONSE", False)
         app.extensions = getattr(app, "extensions", {})
         app.extensions["cedarling_client"] = self
         self.initialize_cedarling()
 
     def initialize_cedarling(self):
-        bootstrap_dict = json.loads(self._bootstrap_config)
-        bootstrap_instance = BootstrapConfig(bootstrap_dict)
-        self._cedarling = Cedarling(bootstrap_instance)
+        if self._bootstrap_config is None:
+            logger.info("Loading bootstrap from environment")
+            bootstrap_config = BootstrapConfig.from_env()
+        else:
+            bootstrap_config = BootstrapConfig.load_from_json(self._bootstrap_config) 
+        self._cedarling = Cedarling(bootstrap_config)
 
     def get_cedarling_instance(self) -> Cedarling:
         return self._cedarling
@@ -87,7 +89,7 @@ class CedarlingInstance:
                 for error in diagnostic.errors:
                     result.append(error.error)
         return result
-    
+
     def get_reason(self, authorize_response: AuthorizeResultResponse | None) -> _t.List[str]:
         result = []
         if authorize_response is not None:
@@ -106,29 +108,35 @@ class CedarlingInstance:
         if not self.validate_subject(subject):
             result_dict["decision"] = False
             result_dict["context"] = {
-               "id": "-1",
-               "reason_user": {
-                   "422": "Missing one or more tokens"
-               }
+                "id": "-1",
+                "reason_user": {
+                    "422": "Missing one or more tokens"
+                }
             }
-            return result_dict 
+            return result_dict
         access_token = subject["properties"].get("access_token", None)
         id_token = subject["properties"].get("id_token", None)
         userinfo_token = subject["properties"].get("userinfo_token", None)
         try:
-            tokens = Tokens(access_token, id_token, userinfo_token)
+            tokens={}
+            if access_token is not None:
+                tokens["access_token"] = access_token
+            if id_token is not None:
+                tokens["id_token"] = id_token
+            if userinfo_token is not None:
+                tokens["userinfo_token"] = userinfo_token
             request = Request(tokens, action_entity, resource_entity, context)
             authorize_result = self._cedarling.authorize(request)
         except Exception as e:
             result_dict["decision"] = False
             result_dict["context"] = {
-               "id": "-1",
-               "reason_admin": {
-                   "Exception": f"{e}" 
-               }
+                "id": "-1",
+                "reason_admin": {
+                    "Exception": f"{e}"
+                }
             }
             logger.info(f"Exception during cedarling authorize: {e}")
-            return result_dict 
+            return result_dict
         authorize_bool = authorize_result.is_allowed()
         if authorize_bool:
             result_dict["decision"] = True
@@ -143,22 +151,23 @@ class CedarlingInstance:
                 person_value = person_result.decision.value
             if workload_result is not None:
                 workload_value = workload_result.decision.value
-                person_diagnostic = self.generate_report(person_result, "reason")
-                person_error = self.generate_report(person_result, "error")
-                person_reason = self.get_reason(person_result)
-                workload_diagnostic = self.generate_report(workload_result, "reason")
-                workload_error = self.generate_report(workload_result, "error")
-                workload_reason = self.get_reason(workload_result)
-                result_dict["context"] = {
-                    "reason_admin": {
-                        "person evaluation": person_value,
-                        "person diagnostics": person_diagnostic,
-                        "person error": person_error,
-                        "person reason": person_reason,
-                        "workload evaluation": workload_value,
-                        "workload diagnostics": workload_diagnostic,
-                        "workload error": workload_error,
-                        "workload reason": workload_reason
-                    }
+            person_diagnostic = self.generate_report(person_result, "reason")
+            person_error = self.generate_report(person_result, "error")
+            person_reason = self.get_reason(person_result)
+            workload_diagnostic = self.generate_report(workload_result, "reason")
+            workload_error = self.generate_report(workload_result, "error")
+            workload_reason = self.get_reason(workload_result)
+            result_dict["context"] = {
+                "reason_admin": {
+                    "person evaluation": person_value,
+                    "person diagnostics": person_diagnostic,
+                    "person error": person_error,
+                    "person reason": person_reason,
+                    "workload evaluation": workload_value,
+                    "workload diagnostics": workload_diagnostic,
+                    "workload error": workload_error,
+                    "workload reason": workload_reason
                 }
+            }
+        logger.info(f"Cedarling evaluation result: {result_dict}")
         return result_dict

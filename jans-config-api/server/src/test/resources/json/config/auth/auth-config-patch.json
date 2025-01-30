@@ -1,0 +1,5 @@
+[{
+    "op": "replace",
+    "path": "/loggingLevel",
+    "value": "DEBUG"
+}]

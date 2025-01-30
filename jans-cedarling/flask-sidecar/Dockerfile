@@ -31,7 +31,7 @@ RUN pip3 install "poetry==$POETRY_VERSION" gunicorn \
 # ===============
 # Project setup
 # ===============
-ENV JANS_SOURCE_VERSION=040ff17942019bc10433ce17d819b8d8474f13c8
+ENV JANS_SOURCE_VERSION=0e628d72acbb674d9ea1fc2a290d010ef603ed24
 
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
@@ -70,14 +70,14 @@ RUN poetry add /api/cedarling_python-$(cat /api/cedarling_version)-cp310-cp310-m
 
 ENV FLASK_APP=main.core:app \
     GUNICORN_LOG_LEVEL=${GUNICORN_LOG_LEVEL:-debug} \
-    CEDARLING_BOOTSTRAP_CONFIG_FILE=${CEDARLING_BOOTSTRAP_CONFIG_FILE:-/api/bootstrap.json} \
+    CEDARLING_BOOTSTRAP_CONFIG_FILE=${CEDARLING_BOOTSTRAP_CONFIG_FILE:-None} \
     SIDECAR_DEBUG_RESPOSE=${SIDECAR_DEBUG_RESPONSE:-False}
 
 EXPOSE 5000
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cedarling-flask-sidecar" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.3.0-1" \
+    org.opencontainers.image.version="0.0.0-nightly" \
     org.opencontainers.image.title="AuthZen Flask API" \
     org.opencontainers.image.description="Flask API that implements the [AuthZen](https://openid.github.io/authzen/) specification with the [cedarling](../) python binding."
 

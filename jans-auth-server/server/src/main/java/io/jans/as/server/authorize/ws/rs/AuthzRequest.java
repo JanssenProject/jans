@@ -109,6 +109,10 @@ public class AuthzRequest {
         return authorizationChallengeSessionObject;
     }
 
+    public Map<String, String> getAuthorizationChallengeSessionAttributesSafely() {
+        return authorizationChallengeSessionObject != null ? authorizationChallengeSessionObject.getAttributes().getAttributes() : new HashMap<>();
+    }
+
     public void setAuthorizationChallengeSessionObject(AuthorizationChallengeSession authorizationChallengeSessionObject) {
         this.authorizationChallengeSessionObject = authorizationChallengeSessionObject;
     }

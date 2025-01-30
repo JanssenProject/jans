@@ -4,7 +4,8 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::WorkloadBoolOp;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 /// Configuration to specify authorization workflow.
 /// - If we use user entity as principal.
@@ -41,20 +42,17 @@ pub struct AuthorizationConfig {
     /// `CEDARLING_DECISION_LOG_DEFAULT_JWT_ID` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     pub decision_log_default_jwt_id: String,
 
-    /// Name of Cedar Context schema entity
+    /// Type Name of the User entity
     pub mapping_user: Option<String>,
 
-    /// Name of Cedar Workload schema entity
+    /// Type Name of the Workload entity
     pub mapping_workload: Option<String>,
 
-    /// Name of Cedar id_token schema entity
-    pub mapping_id_token: Option<String>,
+    /// Type Name of the Role entity
+    pub mapping_role: Option<String>,
 
-    /// Name of Cedar access_token schema entity
-    pub mapping_access_token: Option<String>,
-
-    /// Name of Cedar userinfo schema entity
-    pub mapping_userinfo_token: Option<String>,
+    /// Name of Cedar token schema entities
+    pub mapping_tokens: TokenEntityNames,
 
     /// Sets the validation level for ID tokens.
     ///
@@ -75,8 +73,36 @@ pub struct AuthorizationConfig {
     pub id_token_trust_mode: IdTokenTrustMode,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct TokenEntityNames(pub HashMap<String, String>);
+
+impl Default for TokenEntityNames {
+    fn default() -> Self {
+        Self(HashMap::from([
+            ("access_token".to_string(), "Jans::Access_token".to_string()),
+            ("id_token".to_string(), "Jans::id_token".to_string()),
+            (
+                "userinfo_token".to_string(),
+                "Jans::Userinfo_token".to_string(),
+            ),
+        ]))
+    }
+}
+
+impl From<HashMap<String, String>> for TokenEntityNames {
+    fn from(value: HashMap<String, String>) -> Self {
+        Self(value)
+    }
+}
+
+impl From<TokenEntityNames> for HashMap<String, String> {
+    fn from(value: TokenEntityNames) -> Self {
+        value.0
+    }
+}
+
 /// Defines the level of validation for ID tokens.
-#[derive(Debug, Clone, PartialEq, Default, Deserialize, Copy)]
+#[derive(Debug, Clone, PartialEq, Default, Deserialize, Serialize, Copy)]
 #[serde(rename_all = "lowercase")]
 pub enum IdTokenTrustMode {
     /// No validation is performed on the ID token.
