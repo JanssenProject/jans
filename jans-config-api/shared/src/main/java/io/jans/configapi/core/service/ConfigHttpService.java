@@ -21,6 +21,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -30,10 +31,12 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -194,8 +197,8 @@ public class ConfigHttpService implements Serializable {
         return executePost(httpClient, uri, authCode, null, postData, contentType, null);
     }
 
-    public HttpServiceResponse executePost(String uri, String authCode, String postData,
-            ContentType contentType, String authType) {
+    public HttpServiceResponse executePost(String uri, String authCode, String postData, ContentType contentType,
+            String authType) {
         return executePost(this.getHttpsClient(), uri, authCode, null, postData, contentType, authType);
     }
 
@@ -209,32 +212,35 @@ public class ConfigHttpService implements Serializable {
 
     public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers,
             Map<String, String> parameters) {
-        HttpGet httpGet = new HttpGet(requestUri);
 
+        log.info("\n\n requestUri{}, headers:{}, parameters:{}", requestUri, headers, parameters);
+
+        if (parameters != null && !parameters.isEmpty()) {
+            StringBuilder query = new StringBuilder();
+            int i = 0;
+            for (Iterator<String> iterator = parameters.keySet().iterator(); iterator.hasNext();) {
+                String key = iterator.next();
+                String value = parameters.get(key);
+                if (StringUtils.isNotBlank(value)) {
+                    String delim = (i == 0) ? "?" : "&";
+                    query.append(delim + URLEncoder.encode(key, StandardCharsets.UTF_8) + "=");
+                    query.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
+                    i++;
+                }
+            }
+            requestUri = requestUri + query.toString();
+            log.info("\n\n\n Final requestUri:{}", requestUri);
+        }
+
+        HttpGet httpGet = new HttpGet(requestUri);
         if (headers != null) {
             for (Entry<String, String> headerEntry : headers.entrySet()) {
                 httpGet.setHeader(headerEntry.getKey(), headerEntry.getValue());
             }
         }
-
-        if (parameters != null && !parameters.isEmpty()) {
-            StringBuilder query = new StringBuilder("");
-            for (String key : parameters.keySet()) {
-
-                String value = parameters.get(key);
-                if (value != null && value.length() > 0) {
-
-                    String delim = "&" + URLEncoder.encode(key, StandardCharsets.UTF_8) + "=";
-                    query.append(delim.substring(1));
-                    query.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
-                }
-            }
-            httpGet = new HttpGet(requestUri + query.toString());
-        }
-
         try {
             HttpResponse httpResponse = httpClient.execute(httpGet);
-
+            log.info("httpResponse:{}", httpResponse);
             return new HttpServiceResponse(httpGet, httpResponse);
         } catch (IOException ex) {
             log.error("Failed to execute get request", ex);

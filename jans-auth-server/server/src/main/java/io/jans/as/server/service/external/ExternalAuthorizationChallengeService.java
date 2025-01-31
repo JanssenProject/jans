@@ -1,5 +1,6 @@
 package io.jans.as.server.service.external;
 
+import io.jans.as.common.model.session.AuthorizationChallengeSession;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -9,11 +10,13 @@ import io.jans.as.server.service.external.context.ExternalScriptContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.authzchallenge.AuthorizationChallengeType;
+import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.custom.script.ExternalScriptService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +35,9 @@ public class ExternalAuthorizationChallengeService extends ExternalScriptService
 
     @Inject
     private transient ErrorResponseFactory errorResponseFactory;
+
+    @Inject
+    private transient PersistenceEntryManager persistenceEntryManager;
 
     public ExternalAuthorizationChallengeService() {
         super(CustomScriptType.AUTHORIZATION_CHALLENGE);
@@ -95,6 +101,7 @@ public class ExternalAuthorizationChallengeService extends ExternalScriptService
             AuthorizationChallengeType authorizationChallengeType = (AuthorizationChallengeType) script.getExternalType();
             final ExternalScriptContext scriptContext = new ExternalScriptContext(executionContext);
             result = authorizationChallengeType.authorize(scriptContext);
+            saveRequestParametersInSession(scriptContext);
 
             scriptContext.throwWebApplicationExceptionIfSet();
         } catch (WebApplicationException e) {
@@ -114,6 +121,35 @@ public class ExternalAuthorizationChallengeService extends ExternalScriptService
         log.trace("Finished 'authorize' method, script name: {}, clientId: {}, result: {}", script.getName(), executionContext.getAuthzRequest().getClientId(), result);
 
         return result;
+    }
+
+    private void saveRequestParametersInSession(ExternalScriptContext scriptContext) {
+        final AuthzRequest authzRequest = scriptContext.getAuthzRequest();
+        final AuthorizationChallengeSession session = authzRequest.getAuthorizationChallengeSessionObject();
+        if (session == null) {
+            log.trace("Authorization challenge session is not found.");
+            return;
+        }
+
+        final Map<String, String> attributes = session.getAttributes().getAttributes();
+        final Map<String, String[]> parameterMap = scriptContext.getHttpRequest().getParameterMap();
+        if (parameterMap == null || parameterMap.isEmpty()) {
+            return;
+        }
+
+        for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
+            if (!attributes.containsKey(entry.getKey()) && ArrayUtils.isNotEmpty(entry.getValue())) {
+                final String value = entry.getValue()[0];
+                attributes.put(entry.getKey(), value);
+                log.trace("Put in session request parameter: {}, value: {}", entry.getKey(), value);
+            }
+        }
+
+        try {
+            persistenceEntryManager.merge(session);
+        } catch (Exception e) {
+            log.error("Failed to save authorization challenge session: " + session.getId(), e);
+        }
     }
 
     public CustomScriptConfiguration identifyScript(List<String> acrValues) {
@@ -148,8 +184,8 @@ public class ExternalAuthorizationChallengeService extends ExternalScriptService
                     .build());
         }
 
-        log.trace("Executing python 'prepareAuthzRequest' method, script name: {}, clientId: {}, scope: {}, authorizationChallengeSession: {}",
-                script.getName(), authzRequest.getClientId(), authzRequest.getScope(), authzRequest.getAuthorizationChallengeSession());
+        log.trace("Executing python 'prepareAuthzRequest' method, script name: {}, clientId: {}, scope: {}, authorizationChallengeSession: {}, sessionAttributes: {}",
+                script.getName(), authzRequest.getClientId(), authzRequest.getScope(), authzRequest.getAuthorizationChallengeSessionAttributesSafely());
 
         ExecutionContext executionContext = ExecutionContext.of(authzRequest);
         executionContext.setScript(script);
@@ -174,6 +210,6 @@ public class ExternalAuthorizationChallengeService extends ExternalScriptService
                     .build());
         }
 
-        log.trace("Finished 'prepareAuthzRequest' method, script name: {}, clientId: {}", script.getName(), executionContext.getAuthzRequest().getClientId());
+        log.trace("Finished 'prepareAuthzRequest' method, script name: {}, clientId: {}, sessionAttributes: {}", script.getName(), executionContext.getAuthzRequest().getClientId(), authzRequest.getAuthorizationChallengeSessionAttributesSafely());
     }
 }

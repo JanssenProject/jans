@@ -39,12 +39,6 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<skipTests>true</skipTests>
-					<systemProperties>
-						<karate.options>--tags ~@ignore</karate.options>
-					</systemProperties>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

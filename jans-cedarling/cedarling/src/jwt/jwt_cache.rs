@@ -3,11 +3,12 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::{Token, TokenStr};
-use chrono::{Duration, TimeDelta, Utc};
-use sparkv::SparKV;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::sync::Arc;
+
+use super::Token;
+use chrono::{Duration, TimeDelta, Utc};
+use sparkv::SparKV;
 
 pub struct JwtCache(SparKV<Arc<Token>>);
 
@@ -20,10 +21,10 @@ impl JwtCache {
 
     pub fn insert(
         &mut self,
-        jwt_str: TokenStr,
+        jwt_str: &str,
         decoded_jwt: Token,
     ) -> Result<Arc<Token>, JwtCacheError> {
-        let hash = hash_jwt(&jwt_str);
+        let hash = hash_jwt(&decoded_jwt.name, jwt_str);
         let exp = decoded_jwt
             .get_claim("exp")
             .and_then(|x| x.value().as_i64());
@@ -48,14 +49,15 @@ impl JwtCache {
         Ok(token)
     }
 
-    pub fn get(&self, jwt_str: &TokenStr) -> Option<Arc<Token>> {
-        let hash = hash_jwt(jwt_str);
+    pub fn get(&self, tkn_name: &str, jwt_str: &str) -> Option<Arc<Token>> {
+        let hash = hash_jwt(tkn_name, jwt_str);
         self.0.get(&hash).cloned()
     }
 }
 
-fn hash_jwt(jwt_str: &TokenStr) -> String {
+fn hash_jwt(tkn_name: &str, jwt_str: &str) -> String {
     let mut s = DefaultHasher::new();
+    tkn_name.hash(&mut s);
     jwt_str.hash(&mut s);
     format!("{:x}", s.finish())
 }
@@ -69,7 +71,7 @@ pub enum JwtCacheError {
 #[cfg(test)]
 mod test {
     use super::JwtCache;
-    use crate::jwt::{Token, TokenStr};
+    use crate::jwt::Token;
     use chrono::Utc;
     use serde_json::json;
     use std::collections::HashMap;
@@ -77,15 +79,17 @@ mod test {
     #[test]
     fn test_cache() {
         let mut cache = JwtCache::new();
-        let access_tkn = Token::new_access(
+        let access_tkn = Token::new(
+            "access_token",
             HashMap::from([("aud".to_string(), json!("some_aud"))]).into(),
             None,
         );
         let access_tkn = cache
-            .insert(TokenStr::Access("some.access.tkn"), access_tkn)
+            .insert("some.access.tkn", access_tkn)
             .expect("should insert token into cache");
 
-        let id_tkn = Token::new_id(
+        let id_tkn = Token::new(
+            "id_token",
             HashMap::from([
                 ("aud".to_string(), json!("some_aud")),
                 ("exp".to_string(), json!(Utc::now().timestamp())),
@@ -94,11 +98,12 @@ mod test {
             None,
         );
         cache
-            .insert(TokenStr::Id("some.id.tkn"), id_tkn)
+            .insert("some.id.tkn", id_tkn)
             .expect("should insert token into cache");
 
         let userinfo_exp = json!(Utc::now().timestamp() + 300);
-        let userinfo_tkn = Token::new_userinfo(
+        let userinfo_tkn = Token::new(
+            "userinfo_token",
             HashMap::from([
                 ("aud".to_string(), json!("some_aud")),
                 ("exp".to_string(), userinfo_exp.clone()),
@@ -107,26 +112,26 @@ mod test {
             None,
         );
         let userinfo_tkn = cache
-            .insert(TokenStr::Userinfo("some.userinfo.tkn"), userinfo_tkn)
+            .insert("some.userinfo.tkn", userinfo_tkn)
             .expect("should insert token into cache");
 
         // Check access token
         assert_eq!(
-            cache.get(&TokenStr::Access("some.access.tkn")),
+            cache.get("access_token", "some.access.tkn"),
             Some(access_tkn),
             "should have correct access token in cache"
         );
 
         // Check id token
         assert_eq!(
-            cache.get(&TokenStr::Id("some.id.tkn")),
+            cache.get("id_token", "some.id.tkn"),
             None,
             "should not have id token in the cache"
         );
 
         // Check userinfo token
         assert_eq!(
-            cache.get(&TokenStr::Userinfo("some.userinfo.tkn")),
+            cache.get("userinfo_token", "some.userinfo.tkn"),
             Some(userinfo_tkn),
             "should have correct userinfo token in cache"
         );

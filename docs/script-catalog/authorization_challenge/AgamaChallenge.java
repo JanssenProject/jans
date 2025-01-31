@@ -97,7 +97,7 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
             
             if (qn != null) {
                 NativeJansFlowBridge bridge = CdiUtil.bean(NativeJansFlowBridge.class);            
-                Boolean running = bridge.prepareFlow(sessionId, qn, inputs, true);           
+                Boolean running = bridge.prepareFlow(sessionId, qn, inputs, true, null);
     
                 if (running == null) {
                     msg = "Flow " + qn + " does not exist or cannot be launched from an application";
@@ -178,6 +178,9 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
             deviceSessionObjectAttrs.put("scope", servletRequest.getParameter("scope"));
             
             deviceSessionService.persist(deviceSessionObject);
+
+            authRequest.setAuthorizationChallengeSessionObject(deviceSessionObject);
+            authRequest.setAuthorizationChallengeSession(deviceSessionObject.getId());
             
         } else {
             sessionId = deviceSessionObject.getId();

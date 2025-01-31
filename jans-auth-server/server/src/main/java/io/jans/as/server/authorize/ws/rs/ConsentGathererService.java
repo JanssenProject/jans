@@ -6,6 +6,7 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -13,7 +14,6 @@ import io.jans.as.model.util.StringUtils;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.i18n.LanguageBean;
 import io.jans.as.server.model.authorize.ScopeChecker;
-import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.service.AuthorizeService;
 import io.jans.as.server.service.ClientService;
@@ -23,8 +23,6 @@ import io.jans.as.server.service.external.context.ConsentGatheringContext;
 import io.jans.jsf2.service.FacesService;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
@@ -33,12 +31,11 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.slf4j.Logger;
+
+import java.util.*;
+
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Movchan Date: 10/30/2017
@@ -86,22 +83,22 @@ public class ConsentGathererService {
     @Inject
     private ScopeChecker scopeChecker;
 
-    private final Map<String, String> pageAttributes = new HashMap<String, String>();
+    private final Map<String, String> pageAttributes = new HashMap<>();
     private ConsentGatheringContext context;
 
-    public boolean configure(String userDn, String clientId, String state) {
+    public boolean configure(String userDn, String clientId, String state, List<String> acrValues) {
         final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
         final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
 
         final SessionId session = sessionService.getConsentSession(httpRequest, httpResponse, userDn, true);
 
-        CustomScriptConfiguration script = determineConsentScript(clientId);
+        CustomScriptConfiguration script = determineConsentScript(clientId, acrValues);
         if (script == null) {
             log.error("Failed to determine consent-gathering script");
             return false;
         }
 
-        sessionService.configure(session, script.getName(), clientId, state);
+        sessionService.configure(session, script.getName(), clientId, state, acrValues);
 
         this.context = new ConsentGatheringContext(script.getConfigurationAttributes(), httpRequest, httpResponse, session,
                 pageAttributes, sessionService, userService, facesService, appConfiguration);
@@ -122,22 +119,57 @@ public class ConsentGathererService {
         return true;
     }
 
-    private CustomScriptConfiguration determineConsentScript(String clientId) {
-        if (appConfiguration.getConsentGatheringScriptBackwardCompatibility()) {
+    private CustomScriptConfiguration determineConsentScript(String clientId, List<String> acrValues) {
+        log.trace("Trying to determine consent script, clientId {}, acrValues {} ...", clientId, acrValues);
+
+        if (isTrue(appConfiguration.getConsentGatheringScriptBackwardCompatibility())) {
             // in 4.1 and earlier we returned default consent script
+            log.trace("determineConsentScript - falled back to default script {}", external.getDefaultExternalCustomScript().getName());
             return external.getDefaultExternalCustomScript();
+        }
+
+        final CustomScriptConfiguration consentScriptByAcr = findConsentScriptByAcr(acrValues);
+        if (consentScriptByAcr != null) {
+            return consentScriptByAcr;
         }
 
         final List<String> consentGatheringScripts = clientService.getClient(clientId).getAttributes().getConsentGatheringScripts();
         final List<CustomScriptConfiguration> scripts = external.getCustomScriptConfigurationsByDns(consentGatheringScripts);
         if (!scripts.isEmpty()) {
             final CustomScriptConfiguration script = Collections.max(scripts, Comparator.comparingInt(CustomScriptConfiguration::getLevel)); // flow supports single script, thus taking the one with higher level
-            log.debug("Determined consent gathering script `%s`", script.getName());
+            log.debug("Determined consent gathering script `{}`", script.getName());
             return script;
         }
 
-        log.debug("There no consent gathering script configured for client `%s`. Therefore taking default consent script.", clientId);
+        log.debug("There no consent gathering script configured for client `{}`. Therefore taking default consent script.", clientId);
         return external.getDefaultExternalCustomScript();
+    }
+
+    public CustomScriptConfiguration findConsentScriptByAcr(List<String> acrValues) {
+        final Map<String, String> acrToConsentScriptMap = appConfiguration.getAcrToConsentScriptNameMapping();
+        if (acrToConsentScriptMap.isEmpty()) {
+            log.trace("findConsentScriptByAcr - 'acrToConsentScriptNameMapping' configuration property is empty");
+            return null;
+        }
+
+        for (Map.Entry<String, String> entry : acrToConsentScriptMap.entrySet()) {
+            for (String acr : acrValues) {
+                if (entry.getKey().equalsIgnoreCase(acr)) {
+                    final String scriptName = entry.getValue();
+                    log.trace("Found mapping to consent script {}, acr {}", scriptName, acr);
+                    final CustomScriptConfiguration script = external.getCustomScriptConfigurationByName(scriptName);
+                    if (script != null) {
+                        log.trace("Found consent script by name {}, id {}", scriptName, script.getInum());
+                        return script;
+                    } else {
+                        log.trace("Unable to find consent script by name {}", scriptName);
+                    }
+                }
+            }
+        }
+
+        log.trace("findConsentScriptByAcr - unable to find consent script, acr: {}, acrToConsentScriptNameMapping: {}", acrValues, acrToConsentScriptMap);
+        return null;
     }
 
     public boolean authorize() {

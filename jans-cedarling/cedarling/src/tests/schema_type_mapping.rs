@@ -83,10 +83,10 @@ async fn check_mapping_tokens_data() {
                     "email":"user@example.com",
                 })),
             },
-            "action": "Test::Action::\"Search\"",
+            "action": "Jans::Action::\"Search\"",
             "resource": {
                 "id": "SomeID",
-                "type": "Test::Application",
+                "type": "Jans::Application",
                 "app_id":"1234",
                 "name": "some_app",
                 "url":{
@@ -117,19 +117,19 @@ async fn check_mapping_tokens_data() {
         .expect("request should be parsed without errors");
 
     // check value of resource entity
-    let expected_resource = json!({"uid":{"type":"Test::Application","id":"SomeID"},"attrs":{"url":{"host":"test-casa.gluu.info","path":"/","protocol":"https"},"app_id":"1234","name":"some_app"},"parents":[]}).sorted();
+    let expected_resource = json!({"uid":{"type":"Jans::Application","id":"SomeID"},"attrs":{"url":{"host":"test-casa.gluu.info","path":"/","protocol":"https"},"app_id":"1234","name":"some_app"},"parents":[]}).sorted();
     assert_eq!(
-        expected_resource,
         entities.resource.to_json_value().unwrap().sorted(),
+        expected_resource,
         "derived resource_entity is not equal to the expected"
     );
 
     // check value of user entity
     // managed mapping of email
-    let expected_user = json!({"attrs":{"email":{"domain":"example.com", "uid":"user"},"role":["Manager","Support"],"sub":"J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg"},"parents":[{"id":"Manager","type":"Test::Role"},{"id":"Support","type":"Test::Role"}],"uid":{"id":"J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg","type":"Test::User"}}).sorted();
+    let expected_user = json!({"attrs":{"email":{"domain":"example.com", "uid":"user"},"role":["Manager","Support"],"sub":"J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg"},"parents":[{"id":"Manager","type":"Jans::Role"},{"id":"Support","type":"Jans::Role"}],"uid":{"id":"J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg","type":"Jans::User"}}).sorted();
     assert_eq!(
-        expected_user,
         entities.user.unwrap().to_json_value().unwrap().sorted(),
+        expected_user,
         "derived user_entity is not equal to the expected"
     );
 }

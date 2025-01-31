@@ -3318,6 +3318,33 @@
           ]
         }
       ]
+    },
+    {
+      "path": "/jans-config-api/lock/lockStat",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.03.4",
+              "name": "https://jans.io/oauth/lock/read-all"
+            },
+            {
+              "inum": "",
+              "name": "jans_stat"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

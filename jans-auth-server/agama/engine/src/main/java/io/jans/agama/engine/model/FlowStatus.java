@@ -25,6 +25,7 @@ public class FlowStatus {
     private String externalRedirectUrl;
     private boolean allowCallbackResume;
     private String jsonInput;
+    private String startUrl;
     
     private FlowResult result;
 
@@ -114,6 +115,14 @@ public class FlowStatus {
 
     public void setJsonInput(String jsonInput) {
         this.jsonInput = jsonInput;
+    }
+
+    public String getStartUrl() {
+        return startUrl;
+    }
+
+    public void setStartUrl(String startUrl) {
+        this.startUrl = startUrl;
     }
 
 }

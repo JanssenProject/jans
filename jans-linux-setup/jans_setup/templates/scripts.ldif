@@ -437,6 +437,20 @@ objectClass: jansCustomScr
 jansEnabled: false
 jansProgLng: python
 
+dn: inum=BADA-DAD1,ou=scripts,o=jans
+description: Agama Consent Gathering script
+displayName: agama_consent
+inum: BADA-DAD1
+jansLevel: 10
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
+jansRevision: 1
+jansScr::%(consent_gathering_agamaconsentgathering)s
+jansScrTyp: consent_gathering
+objectClass: top
+objectClass: jansCustomScr
+jansEnabled: false
+jansProgLng: python
+
 dn: inum=8AF7.D82A,ou=scripts,o=jans
 displayName: persistence_extension
 inum: 8AF7.D82A
