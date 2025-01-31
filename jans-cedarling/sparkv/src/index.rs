@@ -10,7 +10,7 @@ use std::hash::Hash;
 #[derive(Hash, Eq, PartialEq, Clone)]
 pub(crate) struct IndexKey(pub String);
 
-#[derive(Hash, Eq, PartialEq, Clone, PartialOrd, Ord)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone, PartialOrd, Ord)]
 pub(crate) struct ValueKey(pub String);
 
 /// HashMapIndex allows to group keys (to origin value) by index key.
@@ -87,5 +87,63 @@ impl HashMapIndex {
     pub fn clear(&mut self) {
         self.buckets.clear();
         self.index_tracker.clear();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_add_key_value() {
+        let mut index = HashMapIndex::new();
+        let index_key = IndexKey("index1".to_string());
+        let value_key = ValueKey("value1".to_string());
+
+        index.add_key_value(index_key.clone(), value_key.clone());
+
+        let values: Vec<&ValueKey> = index.get_by_index_key(&index_key).collect();
+        assert_eq!(values, vec![&value_key]);
+    }
+
+    #[test]
+    fn test_get_by_index_key() {
+        let mut index = HashMapIndex::new();
+        let index_key = IndexKey("index1".to_string());
+        let value_key1 = ValueKey("value1".to_string());
+        let value_key2 = ValueKey("value2".to_string());
+
+        index.add_key_value(index_key.clone(), value_key1.clone());
+        index.add_key_value(index_key.clone(), value_key2.clone());
+
+        let mut values: Vec<&ValueKey> = index.get_by_index_key(&index_key).collect();
+        values.sort();
+        assert_eq!(values, vec![&value_key1, &value_key2]);
+    }
+
+    #[test]
+    fn test_remove_value_key() {
+        let mut index = HashMapIndex::new();
+        let index_key = IndexKey("index1".to_string());
+        let value_key = ValueKey("value1".to_string());
+
+        index.add_key_value(index_key.clone(), value_key.clone());
+        index.remove_value_key(&value_key);
+
+        let values: Vec<&ValueKey> = index.get_by_index_key(&index_key).collect();
+        assert!(values.is_empty());
+    }
+
+    #[test]
+    fn test_clear() {
+        let mut index = HashMapIndex::new();
+        let index_key = IndexKey("index1".to_string());
+        let value_key = ValueKey("value1".to_string());
+
+        index.add_key_value(index_key.clone(), value_key.clone());
+        index.clear();
+
+        assert!(index.buckets.is_empty());
+        assert!(index.index_tracker.is_empty());
     }
 }
