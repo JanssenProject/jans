@@ -121,3 +121,13 @@ cargo doc -p cedarling --no-deps --open
 The python bindings for `Cedarling` is located in the `bindings/cedarling_python` folder.
 
 Or you can find readme by clicking [here](bindings/cedarling_python/README.md).
+
+## Benchmarks
+
+Benchmarks have been written with the help of the [`criterion`](https://crates.io/crates/criterion) crate.
+
+You can run the benchmarks using:
+
+```sh
+cargo bench -p cedarling
+```
