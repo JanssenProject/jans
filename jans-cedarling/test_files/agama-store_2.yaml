@@ -28,61 +28,62 @@ policy_stores:
         name: TestAgama
         description: TestAgama trusted issuer
         openid_configuration_endpoint: https://test-casa.gluu.info/.well-known/openid-configuration
-        access_tokens:
-          trusted: true
-          principal_identifier: jti
-          user_id: ''
-          role_mapping: ''
-          # claim_mapping: {}
-        id_tokens:
-          user_id: ''
-          role_mapping: ''
-        userinfo_tokens:
-          user_id: sub
-          role_mapping: role
-          claim_mapping:
-            email:
-              parser: regex
-              type: Test::email_address
-              regex_expression: "^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"
-              UID:
-                attr: uid
-                type: String
-              DOMAIN:
-                attr: domain
-                type: String
-            profile:
-              parser: regex
-              type: Test::Url
-              regex_expression: |-
-                  (?x) ^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?P<HOST>[^\/:\#?]+)(?::(?<PORT>\d+))?(?P<PATH>\/[^?\#]*)?(?:\?(?P<QUERY>[^\#]*))?(?:(?P<FRAGMENT>.*))?
-              SCHEME:
-                attr: scheme
-                type: String
-              HOST:
-                attr: host
-                type: String
-              PORT:
-                attr: port
-                type: String
-              PATH:
-                attr: path
-                type: String
-              QUERY:
-                attr: query
-                type: String
-              FRAGMENT:
-                attr: fragment
-                type: String
-          tx_tokens:
+        tokens_metadata:
+          access_token:
+            trusted: true
+            principal_identifier: jti
             user_id: ''
             role_mapping: ''
-            claim_mapping: ''
+            # claim_mapping: {}
+          id_token:
+            user_id: ''
+            role_mapping: ''
+          userinfo_token:
+            user_id: sub
+            role_mapping: role
+            claim_mapping:
+              email:
+                parser: regex
+                type: Test::email_address
+                regex_expression: "^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"
+                UID:
+                  attr: uid
+                  type: String
+                DOMAIN:
+                  attr: domain
+                  type: String
+              profile:
+                parser: regex
+                type: Test::Url
+                regex_expression: |-
+                    (?x) ^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?P<HOST>[^\/:\#?]+)(?::(?<PORT>\d+))?(?P<PATH>\/[^?\#]*)?(?:\?(?P<QUERY>[^\#]*))?(?:(?P<FRAGMENT>.*))?
+                SCHEME:
+                  attr: scheme
+                  type: String
+                HOST:
+                  attr: host
+                  type: String
+                PORT:
+                  attr: port
+                  type: String
+                PATH:
+                  attr: path
+                  type: String
+                QUERY:
+                  attr: query
+                  type: String
+                FRAGMENT:
+                  attr: fragment
+                  type: String
+            tx_token:
+              user_id: ''
+              role_mapping: ''
+              claim_mapping: ''
     schema:
       encoding: none
       content_type: cedar
       body: |-
-          namespace Test {
+          namespace Jans {
           type Context = {"current_time": Long, "device_health": Set < String >, "fraud_indicators": Set < String >, "geolocation": Set < String >, "network": String, "network_type": String, "operating_system": String, "user_agent": String};
           type email_address = {"domain": String, "uid": String};
           type Url = {"host": String, "path": String, "protocol": String};

@@ -5,7 +5,7 @@
 
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource, Request, ResourceData, TokenValidationConfig, Tokens,
+    PolicyStoreConfig, PolicyStoreSource, Request, ResourceData, TokenValidationConfig,
     WorkloadBoolOp,
 };
 use jsonwebtoken::Algorithm;
@@ -24,9 +24,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         jwt_sig_validation: true,
         jwt_status_validation: false,
         signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
-        access_token_config: TokenValidationConfig::access_token(),
-        id_token_config: TokenValidationConfig::id_token(),
-        userinfo_token_config: TokenValidationConfig::userinfo_token(),
+        token_validation_settings: HashMap::from([
+            (
+                "access_token".to_string(),
+                TokenValidationConfig::access_token(),
+            ),
+            ("id_token".to_string(), TokenValidationConfig::id_token()),
+            (
+                "userinfo_token".to_string(),
+                TokenValidationConfig::userinfo_token(),
+            ),
+        ]),
     };
 
     // You must change this with your own tokens
@@ -62,11 +70,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // authorization process, alongside resource and action details.
     let result = cedarling
         .authorize(Request {
-        tokens: Tokens {
-                access_token: Some(access_token),
-                id_token: Some(id_token),
-                userinfo_token: Some(userinfo_token),
-        },
+            tokens: HashMap::from([
+                ("access_token".to_string(), access_token.clone()),
+                ("id_token".to_string(), id_token.clone()),
+                ("userinfo_token".to_string(), userinfo_token.clone()),
+            ]),
             action: "Jans::Action::\"Update\"".to_string(),
             context: serde_json::json!({}),
             resource: ResourceData {
