@@ -3,7 +3,7 @@ tags:
   - administration
   - developer
   - script-catalog
-  - ConsentGathering
+  - consent
 ---
 
 ## Overview
