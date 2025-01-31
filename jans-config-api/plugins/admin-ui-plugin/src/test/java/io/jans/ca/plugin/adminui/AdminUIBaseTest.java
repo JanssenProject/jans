@@ -69,9 +69,10 @@ public class AdminUIBaseTest extends BaseTest {
         return code;
     }
 
-    private Response authorize(final String authzurl, final Map<String, String> parameters,
+    private Response authorize(final String authzurl, final String clientId, final String clientSecret,
+            final String authType, final String authCode, final Map<String, String> parameters,
             ContentType contentType) {
-        return executePost(authzurl, clientId, clientSecret, authType, authCode, parameters, contentType);
+        return executeGet(authzurl, clientId, clientSecret, authType, authCode, parameters, contentType);
     }
 
 }

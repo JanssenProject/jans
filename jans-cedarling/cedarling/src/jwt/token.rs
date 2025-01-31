@@ -3,73 +3,49 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::HashMap;
-
+use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer};
 use serde::Deserialize;
 use serde_json::Value;
-
-use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TokenKind, TrustedIssuer};
+use std::collections::HashMap;
 
 const DEFAULT_USER_ID_SRC_CLAIM: &str = "sub";
 const DEFAULT_ROLE_SRC_CLAIM: &str = "role";
 
-pub enum TokenStr<'a> {
-    Access(&'a str),
-    Id(&'a str),
-    Userinfo(&'a str),
-}
-
 #[derive(Debug, PartialEq)]
 pub struct Token<'a> {
-    pub kind: TokenKind,
+    pub name: String,
     pub iss: Option<&'a TrustedIssuer>,
     claims: TokenClaims,
 }
 
 impl<'a> Token<'a> {
-    pub fn new_access(claims: TokenClaims, iss: Option<&'a TrustedIssuer>) -> Token<'a> {
+    pub fn new(name: &str, claims: TokenClaims, iss: Option<&'a TrustedIssuer>) -> Token<'a> {
         Self {
-            kind: TokenKind::Access,
+            name: name.to_string(),
             iss,
             claims,
         }
     }
 
-    pub fn new_id(claims: TokenClaims, iss: Option<&'a TrustedIssuer>) -> Token<'a> {
-        Self {
-            kind: TokenKind::Id,
-            iss,
-            claims,
-        }
-    }
-
-    pub fn new_userinfo(claims: TokenClaims, iss: Option<&'a TrustedIssuer>) -> Token<'a> {
-        Self {
-            kind: TokenKind::Userinfo,
-            iss,
-            claims,
-        }
-    }
-
-    pub fn metadata(&self) -> &TokenEntityMetadata {
-        self.iss.unwrap_or_default().token_metadata(self.kind)
+    pub fn get_metadata(&self) -> Option<&TokenEntityMetadata> {
+        self.iss.unwrap_or_default().get_token_metadata(&self.name)
     }
 
     pub fn user_mapping(&self) -> &str {
         self.iss
             .unwrap_or_default()
-            .user_mapping(self.kind)
+            .get_user_mapping(&self.name)
             .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM)
     }
 
-    pub fn claim_mapping(&self) -> &ClaimMappings {
-        self.iss.unwrap_or_default().claim_mapping(self.kind)
+    pub fn claim_mapping(&self) -> Option<&ClaimMappings> {
+        self.iss.unwrap_or_default().get_claim_mapping(&self.name)
     }
 
     pub fn role_mapping(&self) -> &str {
         self.iss
             .unwrap_or_default()
-            .role_mapping(self.kind)
+            .get_role_mapping(&self.name)
             .unwrap_or(DEFAULT_ROLE_SRC_CLAIM)
     }
 
@@ -86,7 +62,6 @@ impl<'a> Token<'a> {
     }
 }
 
-/// A struct holding information on a decoded JWT.
 #[derive(Debug, PartialEq, Default, Deserialize, Clone)]
 pub struct TokenClaims {
     #[serde(flatten)]
@@ -100,11 +75,6 @@ impl From<HashMap<String, Value>> for TokenClaims {
 }
 
 impl TokenClaims {
-    #[cfg(test)]
-    pub fn new(claims: HashMap<String, serde_json::Value>) -> Self {
-        Self { claims }
-    }
-
     pub fn get_claim(&self, name: &str) -> Option<TokenClaim> {
         self.claims.get(name).map(|value| TokenClaim {
             key: name.to_string(),
@@ -143,7 +113,9 @@ impl TokenClaim<'_> {
 }
 
 #[derive(Debug, thiserror::Error, PartialEq)]
-#[error("type mismatch for token claim '{key}'. expected: '{expected_type}', but found: '{actual_type}'")]
+#[error(
+    "type mismatch for token claim '{key}'. expected: '{expected_type}', but found: '{actual_type}'"
+)]
 pub struct TokenClaimTypeError {
     pub key: String,
     pub expected_type: String,

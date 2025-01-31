@@ -15,12 +15,11 @@ impl EntityBuilder {
         &self,
         resource: &ResourceData,
     ) -> Result<Entity, BuildResourceEntityError> {
-        let entity_type_name = EntityTypeName::from_str(&resource.resource_type)?;
-        let (_namespace_name, entity_type) = self
+        let (entity_type_name, entity_type) = self
             .schema
-            .get_entity_from_base_name(entity_type_name.basename())
+            .get_entity_schema(&resource.resource_type)?
             .ok_or(BuildEntityError::EntityNotInSchema(
-                entity_type_name.to_string(),
+                resource.resource_type.clone(),
             ))?;
 
         let entity_attrs =
@@ -125,7 +124,7 @@ mod test {
         .expect("should successfully create test schema");
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let resource_data = ResourceData {
-            resource_type: "HttpRequest".to_string(),
+            resource_type: "Jans::HttpRequest".to_string(),
             id: "request-123".to_string(),
             payload: HashMap::from([
                 ("header".to_string(), json!({"Accept": "test"})),
@@ -220,7 +219,7 @@ mod test {
         .expect("should successfully create test schema");
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let resource_data = ResourceData {
-            resource_type: "HttpRequest".to_string(),
+            resource_type: "Jans::HttpRequest".to_string(),
             id: "request-123".to_string(),
             payload: HashMap::new(),
         };
@@ -270,7 +269,7 @@ mod test {
         .expect("should successfully create test schema");
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let resource_data = ResourceData {
-            resource_type: "HttpRequest".to_string(),
+            resource_type: "Jans::HttpRequest".to_string(),
             id: "request-123".to_string(),
             payload: HashMap::from([
                 (
