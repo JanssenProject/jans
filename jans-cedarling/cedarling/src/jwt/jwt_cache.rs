@@ -13,6 +13,7 @@ use sparkv::SparKV;
 pub struct JwtCache(SparKV<Arc<Token>>);
 
 const DEFAULT_TTL: TimeDelta = Duration::hours(1);
+const MAX_SPARKV_TTL: i64 = 3600;
 
 impl JwtCache {
     pub fn new() -> Self {
@@ -38,7 +39,7 @@ impl JwtCache {
             }
             // we cap the TTL to 1 hr since that's the default max TLL in SparKV
             // otherwise, we get a TTLTooLong from SparKV
-            let ttl = (exp - now).min(3600);
+            let ttl = (exp - now).min(MAX_SPARKV_TTL);
             Duration::seconds(ttl)
         } else {
             DEFAULT_TTL
