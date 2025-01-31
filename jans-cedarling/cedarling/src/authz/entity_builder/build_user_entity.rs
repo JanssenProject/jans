@@ -17,7 +17,6 @@ impl EntityBuilder {
         parents: HashSet<EntityUid>,
         built_entities: &BuiltEntities,
     ) -> Result<Entity, BuildUserEntityError> {
-        println!("building user entity");
         let entity_name = self.entity_names.user.as_ref();
         let mut errors = vec![];
 
