@@ -81,7 +81,7 @@ Listing of custom asset types that each Janssen Server module accepts:
 
 | Path | Asset Type |
 |----------------|-------------|
-| /opt/jans/jetty/jans-lock/custom-libs	| *.jar
+| /opt/jans/jetty/jans-lock/custom/libs	| *.jar
 
 
 ### KeyCloak-link
@@ -96,7 +96,7 @@ Listing of custom asset types that each Janssen Server module accepts:
 
 | Path | Asset Type |
 |----------------|-------------|
-| /opt/jans/jetty/jans-link/custom-libs	| *.jar
+| /opt/jans/jetty/jans-link/custom/libs	| *.jar
 | /var/jans/link-snapshots/	| *.txt
 
 
