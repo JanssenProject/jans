@@ -19,8 +19,7 @@ from cedarling_python import Cedarling
 from cedarling_python import (
     ResourceData,
     Request,
-    AuthorizeResultResponse,
-    Tokens
+    AuthorizeResultResponse
 )
 from main.logger import logger
 from flask import Flask
@@ -119,7 +118,13 @@ class CedarlingInstance:
         id_token = subject["properties"].get("id_token", None)
         userinfo_token = subject["properties"].get("userinfo_token", None)
         try:
-            tokens = Tokens(access_token, id_token, userinfo_token)
+            tokens={}
+            if access_token is not None:
+                tokens["access_token"] = access_token
+            if id_token is not None:
+                tokens["id_token"] = id_token
+            if userinfo_token is not None:
+                tokens["userinfo_token"] = userinfo_token
             request = Request(tokens, action_entity, resource_entity, context)
             authorize_result = self._cedarling.authorize(request)
         except Exception as e:
