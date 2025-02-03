@@ -175,7 +175,7 @@ pub struct BootstrapConfigRaw {
     /// URI where Cedarling can get JSON file with all required metadata about
     /// Lock Master, i.e. .well-known/lock-master-configuration.
     ///
-    /// ***Required*** if `LOCK == Enabled`.
+    /// ***Required*** if `LOCK == enabled`.
     #[serde(rename = "CEDARLING_LOCK_MASTER_CONFIGURATION_URI", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub lock_master_configuration_uri: Option<String>,
