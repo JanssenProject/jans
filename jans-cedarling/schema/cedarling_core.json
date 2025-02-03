@@ -192,6 +192,11 @@
                             "name": "email_address",
                             "required": false
                         },
+                        "id_token": {
+                            "type": "EntityOrCommon",
+                            "name": "id_token",
+                            "required": false
+                        },
                         "phone_number": {
                             "type": "EntityOrCommon",
                             "name": "String",
@@ -207,6 +212,11 @@
                         "sub": {
                             "type": "EntityOrCommon",
                             "name": "String"
+                        },
+                        "userinfo_token": {
+                            "type": "EntityOrCommon",
+                            "name": "Userinfo_token",
+                            "required": false
                         },
                         "username": {
                             "type": "EntityOrCommon",
@@ -282,6 +292,11 @@
                 "shape": {
                     "type": "Record",
                     "attributes": {
+                        "access_token": {
+                            "type": "EntityOrCommon",
+                            "name": "Access_token",
+                            "required": false
+                        },
                         "client_id": {
                             "type": "EntityOrCommon",
                             "name": "String"
