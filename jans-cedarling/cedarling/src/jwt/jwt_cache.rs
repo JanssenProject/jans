@@ -3,21 +3,29 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::hash::{DefaultHasher, Hash, Hasher};
+use std::hash::{Hash, Hasher};
 use std::sync::Arc;
 
 use super::Token;
 use chrono::{Duration, TimeDelta, Utc};
+use rand::random;
 use sparkv::SparKV;
+use twox_hash::XxHash64;
 
-pub struct JwtCache(SparKV<Arc<Token>>);
+pub struct JwtCache {
+    cache: SparKV<Arc<Token>>,
+    hash_seed: u64,
+}
 
 const DEFAULT_TTL: TimeDelta = Duration::hours(1);
 const MAX_SPARKV_TTL: i64 = 3600;
 
 impl JwtCache {
     pub fn new() -> Self {
-        Self(SparKV::new())
+        Self {
+            cache: SparKV::new(),
+            hash_seed: random::<u64>(),
+        }
     }
 
     pub fn insert(
@@ -25,7 +33,7 @@ impl JwtCache {
         jwt_str: &str,
         decoded_jwt: Token,
     ) -> Result<Arc<Token>, JwtCacheError> {
-        let hash = hash_jwt(&decoded_jwt.name, jwt_str);
+        let hash = hash_jwt(self.hash_seed, &decoded_jwt.name, jwt_str);
         let exp = decoded_jwt
             .get_claim("exp")
             .and_then(|x| x.value().as_i64());
@@ -45,19 +53,19 @@ impl JwtCache {
             DEFAULT_TTL
         };
 
-        self.0.set_with_ttl(&hash, token.clone(), ttl)?;
+        self.cache.set_with_ttl(&hash, token.clone(), ttl)?;
 
         Ok(token)
     }
 
     pub fn get(&self, tkn_name: &str, jwt_str: &str) -> Option<Arc<Token>> {
-        let hash = hash_jwt(tkn_name, jwt_str);
-        self.0.get(&hash).cloned()
+        let hash = hash_jwt(self.hash_seed, tkn_name, jwt_str);
+        self.cache.get(&hash).cloned()
     }
 }
 
-fn hash_jwt(tkn_name: &str, jwt_str: &str) -> String {
-    let mut s = DefaultHasher::new();
+fn hash_jwt(seed: u64, tkn_name: &str, jwt_str: &str) -> String {
+    let mut s = XxHash64::with_seed(seed);
     tkn_name.hash(&mut s);
     jwt_str.hash(&mut s);
     format!("{:x}", s.finish())
