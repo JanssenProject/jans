@@ -33,6 +33,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .iter()
                     .map(|tkn| (tkn.to_string(), TokenValidationConfig::default())),
             ),
+            token_validation_cache: false,
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {

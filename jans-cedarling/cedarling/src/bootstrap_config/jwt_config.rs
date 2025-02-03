@@ -41,6 +41,8 @@ pub struct JwtConfig {
     pub signature_algorithms_supported: HashSet<Algorithm>,
     /// Token validation settings
     pub token_validation_settings: HashMap<String, TokenValidationConfig>,
+    /// Cache token validation results
+    pub token_validation_cache: bool,
 }
 
 /// Validation options related to JSON Web Tokens (JWT).
@@ -174,6 +176,7 @@ impl Default for JwtConfig {
                     TokenValidationConfig::userinfo_token(),
                 ),
             ]),
+            token_validation_cache: false,
         }
     }
 }
@@ -191,6 +194,7 @@ impl JwtConfig {
                     .iter()
                     .map(|tkn| (tkn.to_string(), TokenValidationConfig::default())),
             ),
+            token_validation_cache: false,
         }
         .allow_all_algorithms()
     }

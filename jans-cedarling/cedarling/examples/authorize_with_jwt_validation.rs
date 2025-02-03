@@ -35,6 +35,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 TokenValidationConfig::userinfo_token(),
             ),
         ]),
+        token_validation_cache: false,
     };
 
     // You must change this with your own tokens

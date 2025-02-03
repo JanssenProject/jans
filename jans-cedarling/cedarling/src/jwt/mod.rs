@@ -102,7 +102,7 @@ pub enum JwtServiceInitError {
 
 pub struct JwtService {
     validators: HashMap<String, JwtValidator>,
-    jwt_cache: RwLock<JwtCache>,
+    jwt_cache: RwLock<Option<JwtCache>>,
 }
 
 impl JwtService {
@@ -160,9 +160,15 @@ impl JwtService {
             );
         }
 
+        let jwt_cache = if config.token_validation_cache {
+            RwLock::new(Some(JwtCache::new()))
+        } else {
+            RwLock::new(None)
+        };
+
         Ok(Self {
             validators,
-            jwt_cache: RwLock::new(JwtCache::new()),
+            jwt_cache,
         })
     }
 
@@ -177,7 +183,8 @@ impl JwtService {
                 .jwt_cache
                 .read()
                 .map_err(|e| JwtProcessingError::CacheLockPoisoned(e.to_string()))?
-                .get(tkn_name, jwt)
+                .as_ref()
+                .and_then(|x| x.get(tkn_name, jwt))
             {
                 validated_tokens.insert(tkn_name.to_string(), cached_tkn);
                 continue;
@@ -198,12 +205,18 @@ impl JwtService {
                 .map_err(|e| JwtProcessingError::InvalidToken(tkn_name.to_string(), e))?;
             let claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)?;
 
+            let token = Token::new(tkn_name, claims, validated_jwt.trusted_iss);
+
             // cache the token
-            let token = self
+            let token = match self
                 .jwt_cache
                 .write()
                 .map_err(|e| JwtProcessingError::CacheLockPoisoned(e.to_string()))?
-                .insert(jwt, Token::new(tkn_name, claims, validated_jwt.trusted_iss))?;
+                .as_mut()
+            {
+                Some(cache) => cache.insert(jwt, token)?,
+                None => token.into(),
+            };
 
             validated_tokens.insert(tkn_name.to_string(), token.clone());
         }
@@ -274,6 +287,7 @@ mod test {
                         TokenValidationConfig::userinfo_token(),
                     ),
                 ]),
+                token_validation_cache: false,
             },
             None,
         )
