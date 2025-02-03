@@ -45,7 +45,7 @@
     "postcss": "^8.4.14",
     "qs": "^6.11.2",
     "react-dropzone": "^14.2.3",
-    "react-router-dom": "6.20",
+    "react-router-dom": "7.1",
     "react-select": "^5.7.3",
     "react-spinner-overlay": "^0.1.33",
     "styled-components": "^6.1.0",
