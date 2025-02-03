@@ -10,8 +10,11 @@ use cedarling::{
 };
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use jsonwebtoken::Algorithm;
+use rand::Rng;
+use rand::distributions::Alphanumeric;
 use serde::Deserialize;
 use serde_json::json;
+use std::char;
 use std::collections::{HashMap, HashSet};
 use test_utils::token_claims::generate_token_using_claims;
 use tokio::runtime::Runtime;
@@ -25,7 +28,7 @@ fn without_jwt_validation_benchmark(c: &mut Criterion) {
         .block_on(prepare_cedarling_without_jwt_validation())
         .expect("should initialize Cedarling");
 
-    let request = prepare_cedarling_request().expect("should prepare r:equest");
+    let request = prepare_cedarling_request(0).expect("should prepare r:equest");
 
     c.bench_with_input(
         BenchmarkId::new("authz_without_jwt_validation", "tokio runtime"),
@@ -37,17 +40,76 @@ fn without_jwt_validation_benchmark(c: &mut Criterion) {
     );
 }
 
-fn with_jwt_validation_benchmark(c: &mut Criterion) {
+fn with_jwt_validation_benchmark_cached(c: &mut Criterion) {
     let runtime = Runtime::new().expect("init tokio runtime");
 
     let cedarling = runtime
-        .block_on(prepare_cedarling_with_jwt_validation())
+        .block_on(prepare_cedarling_with_jwt_validation(true))
         .expect("should initialize Cedarling");
 
-    let request = prepare_cedarling_request().expect("should prepare r:equest");
+    let request = prepare_cedarling_request(0).expect("should prepare request");
 
     c.bench_with_input(
-        BenchmarkId::new("authz_with_jwt_validation", "tokio runtime"),
+        BenchmarkId::new("authz_with_jwt_validation_cached", "tokio runtime"),
+        &runtime,
+        |b, rt| {
+            b.to_async(rt)
+                .iter(|| cedarling.authorize(black_box(request.clone())));
+        },
+    );
+}
+
+fn with_jwt_validation_benchmark_no_cache(c: &mut Criterion) {
+    let runtime = Runtime::new().expect("init tokio runtime");
+
+    let cedarling = runtime
+        .block_on(prepare_cedarling_with_jwt_validation(false))
+        .expect("should initialize Cedarling");
+
+    let request = prepare_cedarling_request(0).expect("should prepare request");
+
+    c.bench_with_input(
+        BenchmarkId::new("authz_with_jwt_validation_no_cache", "tokio runtime"),
+        &runtime,
+        |b, rt| {
+            b.to_async(rt)
+                .iter(|| cedarling.authorize(black_box(request.clone())));
+        },
+    );
+}
+
+fn with_jwt_validation_benchmark_bigjwt_cached(c: &mut Criterion) {
+    let runtime = Runtime::new().expect("init tokio runtime");
+
+    let cedarling = runtime
+        .block_on(prepare_cedarling_with_jwt_validation(true))
+        .expect("should initialize Cedarling");
+
+    // this increases the size of the jwt to have 100 additional claims
+    let request = prepare_cedarling_request(100).expect("should prepare request");
+
+    c.bench_with_input(
+        BenchmarkId::new("authz_with_jwt_validation_bigjwt_cached", "tokio runtime"),
+        &runtime,
+        |b, rt| {
+            b.to_async(rt)
+                .iter(|| cedarling.authorize(black_box(request.clone())));
+        },
+    );
+}
+
+fn with_jwt_validation_benchmark_bigjwt_no_cache(c: &mut Criterion) {
+    let runtime = Runtime::new().expect("init tokio runtime");
+
+    let cedarling = runtime
+        .block_on(prepare_cedarling_with_jwt_validation(false))
+        .expect("should initialize Cedarling");
+
+    // this increases the size of the jwt to have 100 additional claims
+    let request = prepare_cedarling_request(100).expect("should prepare request");
+
+    c.bench_with_input(
+        BenchmarkId::new("authz_with_jwt_validation_bigjwt_no_cache", "tokio runtime"),
         &runtime,
         |b, rt| {
             b.to_async(rt)
@@ -59,7 +121,10 @@ fn with_jwt_validation_benchmark(c: &mut Criterion) {
 criterion_group!(
     authz_benchmark,
     without_jwt_validation_benchmark,
-    with_jwt_validation_benchmark,
+    with_jwt_validation_benchmark_cached,
+    with_jwt_validation_benchmark_no_cache,
+    with_jwt_validation_benchmark_bigjwt_cached,
+    with_jwt_validation_benchmark_bigjwt_no_cache,
 );
 criterion_main!(authz_benchmark);
 
@@ -98,7 +163,9 @@ async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCed
     Cedarling::new(&bootstrap_config).await
 }
 
-async fn prepare_cedarling_with_jwt_validation() -> Result<Cedarling, InitCedarlingError> {
+async fn prepare_cedarling_with_jwt_validation(
+    caching: bool,
+) -> Result<Cedarling, InitCedarlingError> {
     let bootstrap_config = BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
@@ -124,6 +191,7 @@ async fn prepare_cedarling_with_jwt_validation() -> Result<Cedarling, InitCedarl
                     TokenValidationConfig::userinfo_token(),
                 ),
             ]),
+            token_validation_cache: caching,
         },
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
@@ -149,36 +217,50 @@ async fn prepare_cedarling_with_jwt_validation() -> Result<Cedarling, InitCedarl
     Cedarling::new(&bootstrap_config).await
 }
 
-pub fn prepare_cedarling_request() -> Result<Request, serde_json::Error> {
+pub fn prepare_cedarling_request(
+    additional_access_tkn_claims: u32,
+) -> Result<Request, serde_json::Error> {
+    let mut access_tkn_claims = json!({
+        "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+        "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
+        "iss": "https://admin-ui-test.gluu.org",
+        "token_type": "Bearer",
+        "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "acr": "basic",
+        "x5t#S256": "",
+        "scope": [
+          "openid",
+          "profile"
+        ],
+        "org_id": "some_long_id",
+        "auth_time": 1724830746,
+        "exp": 1724945978,
+        "iat": 1724832259,
+        "jti": "lxTmCVRFTxOjJgvEEpozMQ",
+        "name": "Default Admin User",
+        "status": {
+          "status_list": {
+            "idx": 201,
+            "uri": "https://admin-ui-test.gluu.org/jans-auth/restv1/status_list"
+          }
+        }
+    });
+
+    // we add some additional claims here to make the token bigger
+    for x in 0..additional_access_tkn_claims {
+        let claim_value = rand::thread_rng()
+            .sample_iter(&Alphanumeric)
+            .take(100)
+            .map(char::from)
+            .collect::<String>();
+        access_tkn_claims[format!("xtra{}", x)] = json!(claim_value);
+    }
+
     Request::deserialize(serde_json::json!(
         {
             "tokens": {
-                "access_token": generate_token_using_claims(json!({
-                    "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
-                    "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
-                    "iss": "https://admin-ui-test.gluu.org",
-                    "token_type": "Bearer",
-                    "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
-                    "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
-                    "acr": "basic",
-                    "x5t#S256": "",
-                    "scope": [
-                      "openid",
-                      "profile"
-                    ],
-                    "org_id": "some_long_id",
-                    "auth_time": 1724830746,
-                    "exp": 1724945978,
-                    "iat": 1724832259,
-                    "jti": "lxTmCVRFTxOjJgvEEpozMQ",
-                    "name": "Default Admin User",
-                    "status": {
-                      "status_list": {
-                        "idx": 201,
-                        "uri": "https://admin-ui-test.gluu.org/jans-auth/restv1/status_list"
-                      }
-                    }
-                })),
+                "access_token": generate_token_using_claims(json!(access_tkn_claims)),
                 "id_token": generate_token_using_claims(json!({
                     "acr": "basic",
                     "amr": "10",
