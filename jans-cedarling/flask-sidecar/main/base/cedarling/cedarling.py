@@ -127,6 +127,10 @@ class CedarlingInstance:
                 tokens["userinfo_token"] = userinfo_token
             request = Request(tokens, action_entity, resource_entity, context)
             authorize_result = self._cedarling.authorize(request)
+            request_id = authorize_result.request_id()
+            tag = "Decision"
+            decision_log = self._cedarling.get_logs_by_request_id_and_tag(request_id, tag)
+            logger.info(f"{str(decision_log)}")
         except Exception as e:
             result_dict["decision"] = False
             result_dict["context"] = {
