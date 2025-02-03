@@ -24,7 +24,7 @@ These Bootstrap Properties control default application level behavior.
 
 **The following bootstrap properties are needed to configure log behavior:**
 
-* **`CEDARLING_LOG_STORAGE`** : `off`, `memory`, `std_out`
+* **`CEDARLING_LOG_TYPE`** : `off`, `memory`, `std_out`
 * **`CEDARLING_LOG_LEVEL`** : System Log Level [See here](./cedarling-logs.md). Default to `WARN`
 * **`CEDARLING_LOG_STDOUT_TYPE`** : Either `System`, `Metric`, or `Decision`. Default to System.
 * **`CEDARLING_LOG_LEVEL`** : Log level filter for logging. Log level has only `System` log type entries. `TRACE` is lowest. `FATAL` is highest. Possible variants:
@@ -213,10 +213,10 @@ Below is an example of a bootstrap config in JSON format. Not all fields should 
     "CEDARLING_ID_TOKEN_TRUST_MODE": "Strict",
     "CEDARLING_LOCK": "disabled",
     "CEDARLING_LOCK_MASTER_CONFIGURATION_URI": null,
-    "CEDARLING_DYNAMIC_CONFIGURATION": "disabled",
+    "CEDARLING_LOCK_DYNAMIC_CONFIGURATION": "disabled",
     "CEDARLING_LOCK_SSA_JWT": null,
-    "CEDARLING_AUDIT_HEALTH_INTERVAL": 0,
-    "CEDARLING_AUDIT_TELEMETRY_INTERVAL": 0,
+    "CEDARLING_LOCK_DYNAMIC_CONFIGURATION": 0,
+    "CEDARLING_LOCK_TELEMETRY_INTERVAL": 0,
     "CEDARLING_LISTEN_SSE": "disabled"
 }
 ```
@@ -274,10 +274,10 @@ CEDARLING_TOKENS_CONFIG:
 CEDARLING_ID_TOKEN_TRUST_MODE: 'Strict'
 CEDARLING_LOCK: 'disabled'
 CEDARLING_LOCK_MASTER_CONFIGURATION_URI: null
-CEDARLING_DYNAMIC_CONFIGURATION: 'disabled'
+CEDARLING_LOCK_DYNAMIC_CONFIGURATION: 'disabled'
 CEDARLING_LOCK_SSA_JWT: 0
-CEDARLING_AUDIT_HEALTH_INTERVAL: 0
-CEDARLING_AUDIT_TELEMETRY_INTERVAL: 0
+CEDARLING_LOCK_DYNAMIC_CONFIGURATION: 0
+CEDARLING_LOCK_TELEMETRY_INTERVAL: 0
 CEDARLING_LISTEN_SSE: 'disabled'
 ```
 
