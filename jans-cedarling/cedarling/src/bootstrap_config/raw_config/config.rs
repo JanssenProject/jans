@@ -167,7 +167,7 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_ID_TOKEN_TRUST_MODE", default)]
     pub id_token_trust_mode: IdTokenTrustMode,
 
-    /// Enables caching of validated JWTs to improve performance.
+    /// Enables caching of validated JWTs
     ///
     /// Caching is beneficial when JWTs are large, as it reduces redundant validation
     /// overhead. However, for small JWTs, caching may have little to no effect and
