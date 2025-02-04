@@ -152,7 +152,7 @@ pub struct BootstrapConfigRaw {
 
     /// Configuration for token-based entities, mapping token names to their
     /// respective settings.
-    #[serde(rename = "CEDARLING_TOKEN_CONFIGS", default)]
+    #[serde(rename = "CEDARLING_TOKEN_CONFIGS")]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub token_configs: TokenConfigs,
 
