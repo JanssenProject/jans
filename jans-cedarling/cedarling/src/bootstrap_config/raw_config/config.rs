@@ -115,7 +115,7 @@ pub struct BootstrapConfigRaw {
     pub local_jwks: Option<String>,
 
     /// JSON object with policy store
-    #[serde(rename = "CEDARLING_LOCAL_POLICY_STORE", default)]
+    #[serde(rename = "CEDARLING_POLICY_STORE_LOCAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub local_policy_store: Option<String>,
 

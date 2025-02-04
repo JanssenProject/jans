@@ -35,7 +35,7 @@ These Bootstrap Properties control default application level behavior.
 **The following bootstrap properties are needed to configure JWT and cryptographic behavior:**
 
 * **`CEDARLING_LOCAL_JWKS`** : JWKS file with public keys
-* **`CEDARLING_LOCAL_POLICY_STORE`** : JSON object with policy store
+* **`CEDARLING_POLICY_STORE_LOCAL`** : JSON object with policy store
 * **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Local file with JSON object with policy store
 * **`CEDARLING_JWT_SIG_VALIDATION`** : `enabled` | `disabled` -- Whether to check the signature  of all JWT tokens. This requires an `iss` is present.
 * **`CEDARLING_JWT_STATUS_VALIDATION`** : `enabled` | `disabled` -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retreive the latest Status List JWT from the `.well-known/openid-configuration` via the `status_list_endpoint` claim and cache it. See the [IETF Draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) for more info.
@@ -67,7 +67,7 @@ To enable usage of principals at least one of the following keys must be provide
 
 To load policy store one of the following keys must be provided:
 
-* **`CEDARLING_LOCAL_POLICY_STORE`
+* **`CEDARLING_POLICY_STORE_LOCAL`
 * **`CEDARLING_POLICY_STORE_URI`
 * **`CEDARLING_POLICY_STORE_LOCAL_FN`
 
@@ -229,7 +229,7 @@ Below is an example of a bootstrap config in JSON format. Not all fields should 
   "CEDARLING_USER_AUTHZ": "enabled",
   "CEDARLING_WORKLOAD_AUTHZ": "enabled",
   "CEDARLING_POLICY_STORE_URI": null,
-  "CEDARLING_LOCAL_POLICY_STORE": null,
+  "CEDARLING_POLICY_STORE_LOCAL": null,
   "CEDARLING_POLICY_STORE_LOCAL_FN": "./example_files/policy-store.json",
   "CEDARLING_TOKEN_CONFIGS": {
     "access_token": {
@@ -300,7 +300,7 @@ CEDARLING_APPLICATION_NAME: My App
 CEDARLING_USER_AUTHZ: enabled
 CEDARLING_WORKLOAD_AUTHZ: enabled
 CEDARLING_POLICY_STORE_URI: null
-CEDARLING_LOCAL_POLICY_STORE: null
+CEDARLING_POLICY_STORE_LOCAL: null
 CEDARLING_POLICY_STORE_LOCAL_FN: ./example_files/policy-store.json
 CEDARLING_TOKEN_CONFIGS:
     access_token: { entity_type_name: "Access_token" }

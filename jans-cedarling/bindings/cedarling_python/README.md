@@ -107,7 +107,7 @@ This project uses `maturin` to create a Python library from Rust code. Follow th
 To verify that the library works correctly, you can run the provided `example.py` script. Make sure the virtual environment is activated before running the script:
 
 ```bash
-CEDARLING_LOCAL_POLICY_STORE=example_files/policy-store.json python example.py
+CEDARLING_POLICY_STORE_LOCAL=example_files/policy-store.json python example.py
 ```
 
 ## Building the Python Library
