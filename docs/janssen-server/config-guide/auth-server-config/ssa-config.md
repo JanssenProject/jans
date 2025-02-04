@@ -2,7 +2,7 @@
 tags:
   - administration
   - recipes
-  - open-banking
+  - open banking
   - SSA
 ---
 
@@ -197,6 +197,39 @@ jans cli -auth --operation-id get-ssa
 ]
 ```
 
+
+### Create SSA
+
+
+
+To create a new `SSA`, we can use `post-register-ssa` operation id. As shown in the [output](#using-command-line) for 
+`--info` command, the `post-register-ssa` operation requires data to create new SSA.
+
+we have added below key data to the file `/tmp/ssa.json`.
+
+```json title="Input"
+  {
+        "software_id": "SS652413",
+        "grant_types": [
+          "authorization_code"
+        ],
+        "org_id": "janssen",
+        "description": "admin all access",
+        "software_roles": [
+          "admin"
+        ]
+  }
+```
+
+Now let's post this `SSA` to the Janssen Server to be added to the existing set:
+
+
+```bash title="Command"
+ jans cli -auth --operation-id post-register-ssa --data /tmp/ssa.json
+```
+
+
+
 ### Get JWT of SSA based on `jti`
 
 
@@ -205,12 +238,12 @@ Provide to bearer token in the Authorization header when making requests to prot
 
 ```bash title="Command"
 jans cli -auth --operation-id get-jwt-ssa \
---url-suffix="jti:07754f4c-5368-489f-a7ae-2ce8a06087cd"
+--url-suffix="jti:e94aae83-5a88-410c-a988-277919bdcdaf"
 ```
 
 ```json title="Sample Output"
 {
-  "ssa": "eyJraWQiOiJjb25uZWN0XzEwZTdkZGUxLTNlZWQtNGJkNi1hNmIzLTY0ZjhjNTA3OWJmN19zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzb2Z0d2FyZV9pZCI6IlNXOTg3NjU0IiwiZ3JhbnRfdHlwZXMiOlsiYXV0aG9yaXphdGlvbl9jb2RlIiwicmVmcmVzaF90b2tlbiJdLCJvcmdfaWQiOiJnbHV1IiwiaXNzIjoiaHR0cHM6Ly9vc3NkaGF2YWwtaGFyZHktdG9ydG9pc2UuZ2x1dS5pbmZvIiwic29mdHdhcmVfcm9sZXMiOlsiYWRtaW4iXSwiZXhwIjozMzE1MTIwMzE4LCJpYXQiOjE3MzgzMjAzMTgsImp0aSI6ImU5NGFhZTgzLTVhODgtNDEwYy1hOTg4LTI3NzkxOWJkY2RhZiJ9.CRicNHnh5Ji1mh8UFRWw_-1KK1eGHL4Vm9AoeojwWxOSmdiO0INrlg5F2XXZhn3REHJ-8W2Db00_oCwKqP90_O5C29tyjAeKqxiN9tiHTZL84d56aJ4hnEQ_DKbqF6zHO0FrjBDQ6a7ev7WNL0kC2819DumiDXU4RfE0gvtUYkzh17pH7JrXw49Ggkc78VXDixGgCai5YP6AZmmW3XbTpacSlvWFzC-SgxXoqawTtrj0QRwkT0zddiWSJvCDrPFko8XgdKoj5cHG7QVRsHNU3i_tnMpyjAUBGHra4ZgyPqjrcBZTmvqLdWEJ3Kl5j4WF0NTMxWX0mjBKW-5o98RX2A"
+  "ssa": "eyJraWQiOiJjb25uZWN0X2RkM2MzNDYwLTc3YjUtNDMyOS1iN2M0LTY4YTU5MDc5YTNmZF9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzb2Z0d2FyZV9pZCI6IlNXOTg3NjU0IiwiZ3JhbnRfdHlwZXMiOlsiYXV0aG9yaXphdGlvbl9jb2RlIiwicmVmcmVzaF90b2tlbiJdLCJvcmdfaWQiOiJnbHV1IiwiaXNzIjoiaHR0cHM6Ly9vc3NkaGF2YWwtaGFyZHktdG9ydG9pc2UuZ2x1dS5pbmZvIiwic29mdHdhcmVfcm9sZXMiOlsiYWRtaW4iXSwiZXhwIjozMzE1MTIwMzE4LCJpYXQiOjE3MzgzMjAzMTgsImp0aSI6ImU5NGFhZTgzLTVhODgtNDEwYy1hOTg4LTI3NzkxOWJkY2RhZiJ9.DIDdlnlMHUxlNIMWtauu4Eg5SdyPZG5DthYXCFoRFkXpy8m9lGONPd0IMY18Tp0TKTHy4j2hPCzesEYGXAGPihqCP-ZYz0Jdv0mGd6I3yw_Z4iyNgF9GRVYHWp98wUA1WGqj-Y0oyolhPZmpDtwD2pCFCBWe4taAHmsr5UGBnIUVCSVexpGzX44GDny7TD3_05It8AfcHzQ4NrrCfz0DsYxfkgs7hpcgb4FJuuGczOm2J-vFvb62ReXP7pfWqwZ0oeM-Dik_ScHUEBhKj5jrZyKhUc-ow66zlCmNGkGXDUfTDFgiJ1K1DywqYZzPWc5XD0VnBstKlh230YaURYqq1A"
 }
 ```
 
@@ -218,14 +251,14 @@ jans cli -auth --operation-id get-jwt-ssa \
 ### Delete SSA
 
 We can delete the specific `SSA` through its `jti` using `delete-ssa` operation. 
-For example, We can put `jti:07754f4c-5368-489f-a7ae-2ce8a06087cd` with `--url-suffix` to delete the session. 
+For example, We can put `jti:e94aae83-5a88-410c-a988-277919bdcdaf` with `--url-suffix` to delete the session. 
 The following command as below:
 
 
 
 ```bash 
 jans cli -auth --operation-id delete-ssa \
---url-suffix="jti:07754f4c-5368-489f-a7ae-2ce8a06087cd"
+--url-suffix="jti:e94aae83-5a88-410c-a988-277919bdcdaf"
 ```
 
 
