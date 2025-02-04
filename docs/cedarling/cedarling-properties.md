@@ -46,14 +46,14 @@ These Bootstrap Properties control default application level behavior.
 
 **The following bootstrap properties are only needed for enterprise deployments.**
 
-* **`CEDARLING_LOCK`** : Enabled | Disabled. If Enabled, the Cedarling will connect to the Lock Master for policies, and subscribe for SSE events.
+* **`CEDARLING_LOCK`** : `enabled` | `disabled`. If `enabled`, the Cedarling will connect to the Lock Master for policies, and subscribe for SSE events.
 * **`CEDARLING_LOCK_MASTER_CONFIGURATION_URI`** : Required if `LOCK` == `enabled`. URI where Cedarling can get JSON file with all required metadata about Lock Master, i.e. `.well-known/lock-master-configuration`.
-* **`CEDARLING_LOCK_DYNAMIC_CONFIGURATION`** : Enabled | Disabled, controls whether Cedarling should listen for SSE config updates.
+* **`CEDARLING_LOCK_DYNAMIC_CONFIGURATION`** : `enabled` | `disabled`, controls whether Cedarling should listen for SSE config updates.
 * **`CEDARLING_LOCK_SSA_JWT`** : SSA for DCR in a Lock Master deployment. The Cedarling will validate this SSA JWT prior to DCR.
 * **`CEDARLING_LOCK_LOG_INTERVAL`** : How often to send log messages to Lock Master (0 to turn off trasmission).
 * **`CEDARLING_LOCK_HEALTH_INTERVAL`** : How often to send health messages to Lock Master (0 to turn off transmission).
 * **`CEDARLING_LOCK_TELEMETRY_INTERVAL`** : How often to send telemetry messages to Lock Master (0 to turn off transmission).
-* **`CEDARLING_LOCK_LISTEN_SSE`** :  Enabled | Disabled: controls whether Cedarling should listen for updates from the Lock Server.
+* **`CEDARLING_LOCK_LISTEN_SSE`** :  `enabled` | `disabled`: controls whether Cedarling should listen for updates from the Lock Server.
 
 ## Required keys for startup
 
