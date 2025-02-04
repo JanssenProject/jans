@@ -49,3 +49,13 @@ test_utils = { workspace = true }
 rand = "0.8.5"
 jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
 mockito = "1.5.0"
+criterion = { version = "0.5.1", features = ["async_tokio"] }
+tokio = { version = "1.42.0", features = ["rt-multi-thread"] }
+
+[[bench]]
+name = "authz_benchmark"
+harness = false
+
+[[bench]]
+name = "startup_benchmark"
+harness = false
