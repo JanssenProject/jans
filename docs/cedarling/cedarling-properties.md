@@ -50,7 +50,7 @@ These Bootstrap Properties control default application level behavior.
 * **`CEDARLING_TOKEN_CONFIGS`** : JSON object containing token specific configs. See: [Token Configs](#token-configs).
 * **`CEDARLING_ID_TOKEN_TRUST_MODE`** :  `Strict` | `None`. Varying levels of validations based on the preference of the developer.
 `Strict` mode requires (1) id_token `aud` matches the access_token `client_id`; (2) if a Userinfo token is present, the `sub` matches the id_token, and that the `aud` matches the access token client_id.
-* **`CEDARLING_TOKEN_VALIDATION_CACHE`** : `Enabled` | `Disabled`. Enabled Caching of validated JWTs. Caching is beneficial when JWTs are large, as it reduces redundant validation overhead. However, for small JWTs, caching may have little to no effect and could even introduce unnecessary overhead. Thus, it's recommended to benchmark performance before enabling this.
+* **`CEDARLING_TOKEN_VALIDATION_CACHE`** : `Enabled` | `Disabled`. Enabled Caching of validated JWTs. Caching is beneficial when the JWTs' payload are large, as it reduces redundant validation overhead. However, for small JWTs, caching may have little to no effect and could even introduce unnecessary overhead. Thus, it's recommended to benchmark performance before enabling this.
 
 **The following bootstrap properties are only needed for enterprise deployments.**
 
