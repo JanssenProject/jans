@@ -176,59 +176,50 @@ Below is an example of a bootstrap config in JSON format. Not all fields should 
 
 ```json
 {
-    "CEDARLING_APPLICATION_NAME": "My App",
-    "CEDARLING_POLICY_STORE_URI": "",
-    "CEDARLING_POLICY_STORE_ID": "840da5d85403f35ea76519ed1a18a33989f855bf1cf8",
-    "CEDARLING_LOG_TYPE": "memory",
-    "CEDARLING_LOG_LEVEL": "INFO",
-    "CEDARLING_DECISION_LOG_USER_CLAIMS": ["sub", "email", "username"],
-    "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS": ["client_id", "rp_id"],
-    "CEDARLING_DECISION_LOG_DEFAULT_JWT_ID": "jti",
-    "CEDARLING_LOG_TTL": 60,
-    "CEDARLING_USER_AUTHZ": "enabled",
-    "CEDARLING_WORKLOAD_AUTHZ": "enabled",
-    "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
-    "CEDARLING_MAPPING_USER": "CustomUser",
-    "CEDARLING_MAPPING_WORKLOAD": "CustomWorkload",
-    "CEDARLING_MAPPING_ROLE": "CustomRole",
-    "CEDARLING_LOCAL_JWKS": "../test_files/local_jwks.json",
-    "CEDARLING_LOCAL_POLICY_STORE": null,
-    "CEDARLING_POLICY_STORE_LOCAL_FN": "../test_files/policy-store_blobby.json",
-    "CEDARLING_JWT_SIG_VALIDATION": "enabled",
-    "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-    "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
-        "HS256",
-        "RS256"
-    ],
-    "CEDARLING_TOKEN_CONFIGS": {
-        "access_token": {
-            "entity_type_name": "Access_token",
-            "exp": "enabled",
-        },
-        "id_token": {
-            "entity_type_name": "id_token",
-            "iss": "enabled",
-            "sub": "enabled",
-            "exp": "enabled",
-            "iat": "enabled",
-            "aud": "enabled",
-        },
-        "id_token": {
-            "entity_type_name": "id_token",
-            "iss": "enabled",
-            "aud": "enabled",
-            "sub": "enabled",
-            "exp": "enabled",
-        },
+  "CEDARLING_APPLICATION_NAME": "My App",
+  "CEDARLING_USER_AUTHZ": "enabled",
+  "CEDARLING_WORKLOAD_AUTHZ": "enabled",
+  "CEDARLING_POLICY_STORE_URI": null,
+  "CEDARLING_LOCAL_POLICY_STORE": null,
+  "CEDARLING_POLICY_STORE_LOCAL_FN": "./example_files/policy-store.json",
+  "CEDARLING_TOKEN_CONFIGS": {
+    "access_token": {
+      "entity_type_name": "Access_token"
     },
-    "CEDARLING_ID_TOKEN_TRUST_MODE": "Strict",
-    "CEDARLING_LOCK": "disabled",
-    "CEDARLING_LOCK_MASTER_CONFIGURATION_URI": null,
-    "CEDARLING_LOCK_DYNAMIC_CONFIGURATION": "disabled",
-    "CEDARLING_LOCK_SSA_JWT": null,
-    "CEDARLING_LOCK_DYNAMIC_CONFIGURATION": 0,
-    "CEDARLING_LOCK_TELEMETRY_INTERVAL": 0,
-    "CEDARLING_LISTEN_SSE": "disabled"
+    "id_token": {
+      "entity_type_name": "id_token"
+    },
+    "userinfo_token": {
+      "entity_type_name": "Userinfo_token"
+    }
+  },
+  "CEDARLING_POLICY_STORE_ID": "gICAgcHJpbmNpcGFsIGlz",
+  "CEDARLING_LOG_TYPE": "std_out",
+  "CEDARLING_LOG_LEVEL": "INFO",
+  "CEDARLING_LOG_TTL": null,
+  "CEDARLING_DECISION_LOG_USER_CLAIMS": [
+    "sub",
+    "email"
+  ],
+  "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS": [
+    "client_id",
+    "rp_id"
+  ],
+  "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
+  "CEDARLING_LOCAL_JWKS": null,
+  "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+  "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
+  "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
+    "HS256",
+    "RS256"
+  ],
+  "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
+  "CEDARLING_LOCK": "disabled",
+  "CEDARLING_LOCK_MASTER_CONFIGURATION_URI": null,
+  "CEDARLING_LOCK_DYNAMIC_CONFIGURATION": "disabled",
+  "CEDARLING_LOCK_HEALTH_INTERVAL": 0,
+  "CEDARLING_LOCK_TELEMETRY_INTERVAL": 0,
+  "CEDARLING_LOCK_LISTEN_SSE": "disabled"
 }
 ```
 
@@ -257,39 +248,37 @@ Below is an example of a bootstrap config in YAML format. Not all fields should 
 
 ```yaml
 CEDARLING_APPLICATION_NAME: My App
-CEDARLING_POLICY_STORE_URI: ''
-CEDARLING_POLICY_STORE_ID: '840da5d85403f35ea76519ed1a18a33989f855bf1cf8'
-CEDARLING_LOG_TYPE: 'memory'
-CEDARLING_LOG_LEVEL: 'INFO'
+CEDARLING_USER_AUTHZ: enabled
+CEDARLING_WORKLOAD_AUTHZ: enabled
+CEDARLING_POLICY_STORE_URI: null
+CEDARLING_LOCAL_POLICY_STORE: null
+CEDARLING_POLICY_STORE_LOCAL_FN: ./example_files/policy-store.json
+CEDARLING_TOKEN_CONFIGS:
+    access_token: { entity_type_name: "Access_token" }
+    id_token: { entity_type_name: "id_token" }
+    userinfo_token: { entity_type_name: "Userinfo_token" }
+
+CEDARLING_POLICY_STORE_ID: gICAgcHJpbmNpcGFsIGlz
+CEDARLING_LOG_TYPE: std_out
+CEDARLING_LOG_LEVEL: INFO
+CEDARLING_LOG_TTL: null
 CEDARLING_DECISION_LOG_USER_CLAIMS: ["sub","email"]
 CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS: ["client_id", "rp_id"]
-CEDARLING_LOG_TTL: 60
-CEDARLING_USER_AUTHZ: 'enabled'
-CEDARLING_WORKLOAD_AUTHZ: 'enabled'
-CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION: 'AND'
-CEDARLING_MAPPING_USER: 'CustomUser'
-CEDARLING_MAPPING_WORKLOAD: 'CustomWorkload'
-CEDARLING_MAPPING_ROLE: 'CustomRole'
-CEDARLING_LOCAL_JWKS: '../test_files/local_jwks.json'
-CEDARLING_LOCAL_POLICY_STORE: null
-CEDARLING_POLICY_STORE_LOCAL_FN: '../test_files/policy-store_blobby.json'
-CEDARLING_JWT_SIG_VALIDATION: 'enabled'
-CEDARLING_JWT_STATUS_VALIDATION: 'disabled'
+CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION: AND
+CEDARLING_LOCAL_JWKS: null
+CEDARLING_JWT_SIG_VALIDATION: disabled
+CEDARLING_JWT_STATUS_VALIDATION: disabled
 CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED:
-    - 'HS256'
-    - 'RS256'
-CEDARLING_TOKENS_CONFIG:
-    access_token: CustomAccessToken
-    id_token: CustomIdToken
-    userinfo_token: CustomUserinfoToken
-CEDARLING_ID_TOKEN_TRUST_MODE: 'Strict'
-CEDARLING_LOCK: 'disabled'
+    - HS256
+    - RS256
+
+CEDARLING_ID_TOKEN_TRUST_MODE: strict
+CEDARLING_LOCK: disabled
 CEDARLING_LOCK_MASTER_CONFIGURATION_URI: null
-CEDARLING_LOCK_DYNAMIC_CONFIGURATION: 'disabled'
-CEDARLING_LOCK_SSA_JWT: 0
-CEDARLING_LOCK_DYNAMIC_CONFIGURATION: 0
+CEDARLING_LOCK_DYNAMIC_CONFIGURATION: disabled
+CEDARLING_LOCK_HEALTH_INTERVAL: 0
 CEDARLING_LOCK_TELEMETRY_INTERVAL: 0
-CEDARLING_LISTEN_SSE: 'disabled'
+CEDARLING_LOCK_LISTEN_SSE: disabled
 ```
 
 * Note that properties set to `'disabled'`, an empty string `''`, zero `0`, and `null` can be ommited since they are the defaults.
