@@ -55,6 +55,24 @@ These Bootstrap Properties control default application level behavior.
 * **`CEDARLING_LOCK_TELEMETRY_INTERVAL`** : How often to send telemetry messages to Lock Master (0 to turn off transmission).
 * **`CEDARLING_LOCK_LISTEN_SSE`** :  Enabled | Disabled: controls whether Cedarling should listen for updates from the Lock Server.
 
+## Required keys for startup
+
+* **`CEDARLING_APPLICATION_NAME`
+* **`CEDARLING_TOKEN_CONFIGS`
+
+To enable usage of principals at least one of the following keys must be provided:
+
+* **`CEDARLING_WORKLOAD_AUTHZ`
+* **`CEDARLING_USER_AUTHZ`
+
+To load policy store one of the following keys must be provided:
+
+* **`CEDARLING_LOCAL_POLICY_STORE`
+* **`CEDARLING_POLICY_STORE_URI`
+* **`CEDARLING_POLICY_STORE_LOCAL_FN`
+
+All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.
+
 ## User-Workload Boolean Operation
 
 The `CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION` property specifies what boolean operation to use for the `USER` and `WORKLOAD` when making authz (authorization) decisions.
