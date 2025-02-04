@@ -9,6 +9,7 @@ use cedar_policy::Decision;
 use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
 use std::collections::HashSet;
+use uuid7::Uuid;
 
 use crate::bootstrap_config::WorkloadBoolOp;
 
@@ -29,6 +30,9 @@ pub struct AuthorizeResult {
     ///
     /// this field is [`bool`] type to be compatible with [authzen Access Evaluation Decision](https://openid.github.io/authzen/#section-6.2.1).
     pub decision: bool,
+
+    /// Request ID, generated per each request call, is used to get logs from memory logger
+    pub request_id: String,
 }
 
 /// Custom serializer for an Option<String> which converts `None` to an empty string and vice versa.
@@ -72,11 +76,13 @@ impl AuthorizeResult {
         user_workload_operator: WorkloadBoolOp,
         workload: Option<cedar_policy::Response>,
         person: Option<cedar_policy::Response>,
+        request_id: Uuid,
     ) -> Self {
         Self {
             decision: calc_decision(&user_workload_operator, &workload, &person),
             workload,
             person,
+            request_id: request_id.to_string(),
         }
     }
 

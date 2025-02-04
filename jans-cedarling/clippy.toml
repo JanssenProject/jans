@@ -1,0 +1,3 @@
+[[disallowed-methods]]
+path = "uuid7::uuid7"
+reason = "not allowed method in WASM, use cedarling::log::log_entry::gen_uuid7()"
