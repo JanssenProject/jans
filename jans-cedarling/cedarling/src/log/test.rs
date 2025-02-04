@@ -9,7 +9,7 @@
 
 use std::io::Write;
 
-use interface::{LogWriter, Loggable};
+use interface::{Indexed, LogWriter};
 use nop_logger::NopLogger;
 use stdout_logger::StdOutLogger;
 use test_utils::assert_eq;
@@ -73,7 +73,7 @@ fn test_log_memory_logger() {
     };
     let strategy = LogStrategy::new(&config);
     let entry = LogEntry {
-        base: BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision),
+        base: BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision, gen_uuid7()),
         application_id: Some("test_app".to_string().into()),
         auth_info: None,
         msg: "Test message".to_string(),
@@ -83,7 +83,7 @@ fn test_log_memory_logger() {
     };
 
     // Act
-    strategy.log(entry);
+    strategy.log_any(entry);
 
     // Assert
     match &strategy {
@@ -103,6 +103,7 @@ fn test_log_memory_logger() {
         app_types::PdpID::new(),
         Some(app_types::ApplicationName("app1".to_string())),
         LogType::Decision,
+        None,
     )
     .set_message("some message".to_string());
 
@@ -110,11 +111,12 @@ fn test_log_memory_logger() {
         app_types::PdpID::new(),
         Some(app_types::ApplicationName("app2".to_string())),
         LogType::System,
+        None,
     );
 
     // log entries
-    strategy.log(entry1.clone());
-    strategy.log(entry2.clone());
+    strategy.log_any(entry1.clone());
+    strategy.log_any(entry2.clone());
 
     let entry1_json = serde_json::json!(entry1);
     let entry2_json = serde_json::json!(entry2);
@@ -123,14 +125,14 @@ fn test_log_memory_logger() {
     assert_eq!(strategy.get_log_ids().len(), 2);
     assert_eq!(
         strategy
-            .get_log_by_id(&entry1.get_request_id().to_string())
+            .get_log_by_id(&entry1.get_id().to_string())
             .unwrap(),
         entry1_json,
         "Failed to get log entry by id"
     );
     assert_eq!(
         strategy
-            .get_log_by_id(&entry2.get_request_id().to_string())
+            .get_log_by_id(&entry2.get_id().to_string())
             .unwrap(),
         entry2_json,
         "Failed to get log entry by id"
@@ -153,7 +155,7 @@ fn test_log_memory_logger() {
 fn test_log_stdout_logger() {
     // Arrange
     let log_entry = LogEntry {
-        base: BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision),
+        base: BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision, gen_uuid7()),
         application_id: Some("test_app".to_string().into()),
         auth_info: None,
         msg: "Test message".to_string(),
@@ -170,7 +172,7 @@ fn test_log_stdout_logger() {
     let strategy = LogStrategy::StdOut(logger);
 
     // Act
-    strategy.log(log_entry);
+    strategy.log_any(log_entry);
 
     let logged_content = test_writer.into_inner_buf();
 
@@ -187,6 +189,7 @@ fn test_log_storage_for_only_writer() {
         app_types::PdpID::new(),
         Some(app_types::ApplicationName("app1".to_string())),
         LogType::Decision,
+        None,
     )
     .set_message("some message".to_string());
 
@@ -194,24 +197,25 @@ fn test_log_storage_for_only_writer() {
         app_types::PdpID::new(),
         Some(app_types::ApplicationName("app2".to_string())),
         LogType::System,
+        None,
     );
 
     // log entries
-    strategy.log(entry1.clone());
-    strategy.log(entry2.clone());
+    strategy.log_any(entry1.clone());
+    strategy.log_any(entry2.clone());
 
     // check that we have two entries in the log database
     // we should not have any entries in the memory logger
     assert_eq!(strategy.get_log_ids().len(), 0);
     assert!(
         strategy
-            .get_log_by_id(&entry1.get_request_id().to_string())
+            .get_log_by_id(&entry1.get_id().to_string())
             .is_none(),
         "We should not have entry1 entry in the memory logger"
     );
     assert!(
         strategy
-            .get_log_by_id(&entry2.get_request_id().to_string())
+            .get_log_by_id(&entry2.get_id().to_string())
             .is_none(),
         "We should not have entry2 entry in the memory logger"
     );
