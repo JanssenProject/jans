@@ -3,48 +3,48 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use std::collections::HashMap;
+use std::sync::Arc;
+
 use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer};
 use serde::Deserialize;
 use serde_json::Value;
-use std::collections::HashMap;
 
 const DEFAULT_USER_ID_SRC_CLAIM: &str = "sub";
 const DEFAULT_ROLE_SRC_CLAIM: &str = "role";
 
 #[derive(Debug, PartialEq)]
-pub struct Token<'a> {
+pub struct Token {
     pub name: String,
-    pub iss: Option<&'a TrustedIssuer>,
+    pub iss: Arc<TrustedIssuer>,
     claims: TokenClaims,
 }
 
-impl<'a> Token<'a> {
-    pub fn new(name: &str, claims: TokenClaims, iss: Option<&'a TrustedIssuer>) -> Token<'a> {
+impl Token {
+    pub fn new(name: &str, claims: TokenClaims, iss: Option<Arc<TrustedIssuer>>) -> Token {
         Self {
             name: name.to_string(),
-            iss,
+            iss: iss.unwrap_or_default(),
             claims,
         }
     }
 
     pub fn get_metadata(&self) -> Option<&TokenEntityMetadata> {
-        self.iss.unwrap_or_default().get_token_metadata(&self.name)
+        self.iss.get_token_metadata(&self.name)
     }
 
     pub fn user_mapping(&self) -> &str {
         self.iss
-            .unwrap_or_default()
             .get_user_mapping(&self.name)
             .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM)
     }
 
     pub fn claim_mapping(&self) -> Option<&ClaimMappings> {
-        self.iss.unwrap_or_default().get_claim_mapping(&self.name)
+        self.iss.get_claim_mapping(&self.name)
     }
 
     pub fn role_mapping(&self) -> &str {
         self.iss
-            .unwrap_or_default()
             .get_role_mapping(&self.name)
             .unwrap_or(DEFAULT_ROLE_SRC_CLAIM)
     }
@@ -53,7 +53,7 @@ impl<'a> Token<'a> {
         self.claims.get_claim(name)
     }
 
-    pub fn logging_info(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
+    pub fn logging_info<'a>(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
         self.claims.logging_info(claim)
     }
 

@@ -9,6 +9,7 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt::Display;
 use std::hash::Hash;
+use std::sync::Arc;
 
 use uuid7::Uuid;
 
@@ -482,7 +483,7 @@ impl serde::Serialize for PrincipalLogEntry {
 pub struct LogTokensInfo<'a>(pub HashMap<&'a str, HashMap<&'a str, &'a serde_json::Value>>);
 
 impl<'a> LogTokensInfo<'a> {
-    pub fn new(tokens: &'a HashMap<String, Token>, decision_log_jwt_id: &'a str) -> Self {
+    pub fn new(tokens: &'a HashMap<String, Arc<Token>>, decision_log_jwt_id: &'a str) -> Self {
         let tokens_logging_info = tokens
             .iter()
             .map(|(tkn_name, tkn)| (tkn_name.as_str(), tkn.logging_info(decision_log_jwt_id)))

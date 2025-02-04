@@ -160,6 +160,7 @@ mod test {
     use crate::common::policy_store::TrustedIssuer;
     use serde_json::json;
     use std::collections::HashMap;
+    use std::sync::Arc;
 
     #[test]
     fn can_build_entity_attrs_from_tkn() {
@@ -182,14 +183,14 @@ mod test {
                 attrs: HashMap::from([("client_id".to_string(), Attribute::string())]),
             }),
         };
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let token = Token::new(
             "access_token",
             HashMap::from([(
                 "client_id".to_string(),
                 json!("workload-123"),
             )]).into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
 
         let attrs = build_entity_attrs_from_tkn(
@@ -229,8 +230,8 @@ mod test {
                 attrs: HashMap::from([("client_id".to_string(), Attribute::string())]),
             }),
         };
-        let iss = TrustedIssuer::default();
-        let token = Token::new("access_token", HashMap::new().into(), Some(&iss));
+        let iss = Arc::new(TrustedIssuer::default());
+        let token = Token::new("access_token", HashMap::new().into(), Some(iss.clone()));
 
         let err = build_entity_attrs_from_tkn(
             &schema,

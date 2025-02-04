@@ -211,6 +211,7 @@ mod test {
                         ..Default::default()
                     }),
                 ]),
+                token_validation_cache: false,
             },
             authorization_config: AuthorizationConfig {
                 use_user_principal: true,
@@ -277,6 +278,7 @@ mod test {
                         ..Default::default()
                     }),
                 ]),
+                token_validation_cache: false,
             },
             authorization_config: AuthorizationConfig {
                 use_user_principal: true,

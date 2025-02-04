@@ -41,7 +41,7 @@ pub struct JwkStore {
     /// The timestamp indicating when the store was last updated.
     last_updated: OffsetDateTime,
     /// From which TrustedIssuer this struct was built (if applicable).
-    source_iss: Option<TrustedIssuer>,
+    source_iss: Option<Arc<TrustedIssuer>>,
 }
 
 // We cannot derive from Debug directly because DecodingKey does not implement Debug.
@@ -156,7 +156,7 @@ impl JwkStore {
     /// Creates a JwkStore by fetching the keys from the given [`TrustedIssuer`].
     pub async fn new_from_trusted_issuer(
         store_id: TrustedIssuerId,
-        issuer: &TrustedIssuer,
+        issuer: Arc<TrustedIssuer>,
         http_client: &HttpClient,
     ) -> Result<Self, JwkStoreError> {
         // fetch openid configuration
@@ -172,14 +172,14 @@ impl JwkStore {
 
         let mut store = Self::new_from_jwks_str(store_id, response.text())?;
         store.issuer = Some(openid_config.issuer.into());
-        store.source_iss = Some(issuer.clone());
+        store.source_iss = Some(issuer);
 
         Ok(store)
     }
 
     /// Returns a reference to the source [`TrustedIssuer`] this struct was built on.
-    pub fn source_iss(&self) -> Option<&TrustedIssuer> {
-        self.source_iss.as_ref()
+    pub fn source_iss(&self) -> Option<Arc<TrustedIssuer>> {
+        self.source_iss.as_ref().cloned()
     }
 
     /// Retrieves a Decoding Key from the store
@@ -234,6 +234,7 @@ struct IntermediateJwks {
 #[cfg(test)]
 mod test {
     use std::collections::HashMap;
+    use std::sync::Arc;
     use std::time::Duration;
 
     use jsonwebtoken::DecodingKey;
@@ -364,7 +365,7 @@ mod test {
         let http_client =
             HttpClient::new(3, Duration::from_millis(1)).expect("Should create HttpClient");
 
-        let source_iss = TrustedIssuer {
+        let source_iss = Arc::new(TrustedIssuer {
             name: "Test Trusted Issuer".to_string(),
             description: "This is a test trusted issuer".to_string(),
             openid_configuration_endpoint: format!(
@@ -372,10 +373,10 @@ mod test {
                 mock_server.url()
             ),
             ..Default::default()
-        };
+        });
 
         let mut result =
-            JwkStore::new_from_trusted_issuer("test".into(), &source_iss, &http_client)
+            JwkStore::new_from_trusted_issuer("test".into(), source_iss.clone(), &http_client)
                 .await
                 .expect("Should load JwkStore from Trusted Issuer");
         // We edit the `last_updated` from the result so that the comparison

@@ -13,6 +13,7 @@
 
 mod issuers_store;
 mod jwk_store;
+mod jwt_cache;
 mod key_service;
 #[cfg(test)]
 mod test_utils;
@@ -21,13 +22,17 @@ mod validator;
 
 use crate::JwtConfig;
 use crate::common::policy_store::TrustedIssuer;
+use issuers_store::TrustedIssuersStore;
+use jwt_cache::{JwtCache, JwtCacheError};
 use key_service::{KeyService, KeyServiceError};
 use std::collections::{HashMap, HashSet};
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
+use token::TokenClaims;
+use url::ParseError;
 use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
 
 pub use jsonwebtoken::Algorithm;
-pub use token::{Token, TokenClaimTypeError, TokenClaims};
+pub use token::{Token, TokenClaimTypeError};
 
 /// Type alias for Trusted Issuers' ID.
 type TrustedIssuerId = Arc<str>;
@@ -67,6 +72,10 @@ pub enum JwtProcessingError {
     MissingClaimsInStrictMode(&'static str, &'static str),
     #[error("Failed to deserialize from Value to String: {0}")]
     StringDeserialization(#[from] serde_json::Error),
+    #[error("failed to get lock for the JWT cache: {0}")]
+    CacheLockPoisoned(String),
+    #[error(transparent)]
+    JwtCacheError(#[from] JwtCacheError),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -87,10 +96,13 @@ pub enum JwtServiceInitError {
     UnsupportedAlgorithm(String),
     #[error("Failed to initialize JwtValidator: {0}")]
     InitJwtValidator(#[from] JwtValidatorError),
+    #[error("failed to parse issuer url: {0}")]
+    FailedToParseIssUrl(#[from] ParseError),
 }
 
 pub struct JwtService {
     validators: HashMap<String, JwtValidator>,
+    jwt_cache: RwLock<Option<JwtCache>>,
 }
 
 impl JwtService {
@@ -98,13 +110,17 @@ impl JwtService {
         config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
     ) -> Result<Self, JwtServiceInitError> {
+        let iss_store = Arc::new(TrustedIssuersStore::new(
+            trusted_issuers.clone().unwrap_or_default(),
+        )?);
+
         let key_service: Arc<_> =
             match (&config.jwt_sig_validation, &config.jwks, &trusted_issuers) {
                 // Case: no JWKS provided
                 (true, None, None) => Err(JwtServiceInitError::MissingJwksConfig)?,
                 // Case: Trusted issuers provided
-                (true, None, Some(issuers)) => Some(
-                    KeyService::new_from_trusted_issuers(issuers)
+                (true, None, Some(_)) => Some(
+                    KeyService::new_from_trusted_issuers(iss_store.clone())
                         .await
                         .map_err(JwtServiceInitError::KeyService)?,
                 ),
@@ -122,7 +138,6 @@ impl JwtService {
         // prepare shared configs
         let sig_validation: Arc<_> = config.jwt_sig_validation.into();
         let status_validation: Arc<_> = config.jwt_status_validation.into();
-        let trusted_issuers: Arc<_> = trusted_issuers.clone().into();
         let algs_supported: Arc<HashSet<Algorithm>> =
             config.signature_algorithms_supported.clone().into();
 
@@ -134,26 +149,47 @@ impl JwtService {
                     JwtValidatorConfig {
                         sig_validation: sig_validation.clone(),
                         status_validation: status_validation.clone(),
-                        trusted_issuers: trusted_issuers.clone(),
                         algs_supported: algs_supported.clone(),
                         required_claims: config.required_claims(),
                         validate_exp: config.exp_validation,
                         validate_nbf: config.nbf_validation,
                     },
                     key_service.clone(),
+                    iss_store.clone(),
                 )?,
             );
         }
 
-        Ok(Self { validators })
+        let jwt_cache = if config.token_validation_cache {
+            RwLock::new(Some(JwtCache::new()))
+        } else {
+            RwLock::new(None)
+        };
+
+        Ok(Self {
+            validators,
+            jwt_cache,
+        })
     }
 
     pub async fn validate_tokens<'a>(
         &'a self,
         tokens: &'a HashMap<String, String>,
-    ) -> Result<HashMap<String, Token<'a>>, JwtProcessingError> {
+    ) -> Result<HashMap<String, Arc<Token>>, JwtProcessingError> {
         let mut validated_tokens = HashMap::new();
         for (tkn_name, jwt) in tokens.iter() {
+            // First to get the token from cache
+            if let Some(cached_tkn) = self
+                .jwt_cache
+                .read()
+                .map_err(|e| JwtProcessingError::CacheLockPoisoned(e.to_string()))?
+                .as_ref()
+                .and_then(|x| x.get(tkn_name, jwt))
+            {
+                validated_tokens.insert(tkn_name.to_string(), cached_tkn);
+                continue;
+            }
+
             let validator = if let Some(validator) = self.validators.get(tkn_name) {
                 validator
             } else {
@@ -168,10 +204,21 @@ impl JwtService {
                 .process_jwt(jwt)
                 .map_err(|e| JwtProcessingError::InvalidToken(tkn_name.to_string(), e))?;
             let claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)?;
-            validated_tokens.insert(
-                tkn_name.to_string(),
-                Token::new(tkn_name, claims, validated_jwt.trusted_iss),
-            );
+
+            let token = Token::new(tkn_name, claims, validated_jwt.trusted_iss);
+
+            // cache the token
+            let token = match self
+                .jwt_cache
+                .write()
+                .map_err(|e| JwtProcessingError::CacheLockPoisoned(e.to_string()))?
+                .as_mut()
+            {
+                Some(cache) => cache.insert(jwt, token)?,
+                None => token.into(),
+            };
+
+            validated_tokens.insert(tkn_name.to_string(), token.clone());
         }
 
         Ok(validated_tokens)
@@ -240,6 +287,7 @@ mod test {
                         TokenValidationConfig::userinfo_token(),
                     ),
                 ]),
+                token_validation_cache: false,
             },
             None,
         )
@@ -262,7 +310,7 @@ mod test {
             token.is_some_and(|token| {
                 let expected_claims = serde_json::from_value::<TokenClaims>(access_tkn_claims)
                     .expect("Should create expected access_token claims");
-                *token == Token::new("access_token", expected_claims.into(), None)
+                **token == Token::new("access_token", expected_claims.into(), None)
             }),
             "should validate correct access token: {:?}",
             token
@@ -274,7 +322,7 @@ mod test {
             token.is_some_and(|token| {
                 let expected_claims = serde_json::from_value::<TokenClaims>(id_tkn_claims)
                     .expect("Should create expected id_token claims");
-                *token == Token::new("id_token", expected_claims.into(), None)
+                **token == Token::new("id_token", expected_claims.into(), None)
             }),
             "should validate correct id token"
         );
@@ -285,7 +333,7 @@ mod test {
             token.is_some_and(|token| {
                 let expected_claims = serde_json::from_value::<TokenClaims>(userinfo_tkn_claims)
                     .expect("Should create expected userinfo_token claims");
-                *token == Token::new("userinfo_token", expected_claims.into(), None)
+                **token == Token::new("userinfo_token", expected_claims.into(), None)
             }),
             "should validate correct userinfo token"
         );

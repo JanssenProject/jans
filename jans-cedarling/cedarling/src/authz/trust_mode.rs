@@ -4,6 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::collections::HashMap;
+use std::sync::Arc;
 
 use crate::jwt::{Token, TokenClaimTypeError};
 
@@ -24,7 +25,7 @@ use crate::jwt::{Token, TokenClaimTypeError};
 ///     - `userinfo_token.aud` == `access_token.client_id`
 ///     - `userinfo_token.sub` == `id_token.sub`
 pub fn validate_id_tkn_trust_mode(
-    tokens: &HashMap<String, Token<'_>>,
+    tokens: &HashMap<String, Arc<Token>>,
 ) -> Result<(), IdTokenTrustModeError> {
     let access_tkn = tokens
         .get("access_token")
@@ -112,8 +113,8 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
+            ("access_token".to_string(), access_token.into()),
+            ("id_token".to_string(), id_token.into()),
         ]);
         validate_id_tkn_trust_mode(&tokens).expect("should not error");
     }
@@ -125,7 +126,7 @@ mod test {
             serde_json::from_value(json!({"aud": "some-id-123"})).expect("valid token claims"),
             None,
         );
-        let tokens = HashMap::from([("id_token".to_string(), id_token)]);
+        let tokens = HashMap::from([("id_token".to_string(), id_token.into())]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(err, IdTokenTrustModeError::MissingAccessToken),
@@ -147,8 +148,8 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
+            ("access_token".to_string(), access_token.into()),
+            ("id_token".to_string(), id_token.into()),
         ]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
@@ -171,7 +172,7 @@ mod test {
                 .expect("valid token claims"),
             None,
         );
-        let tokens = HashMap::from([("access_token".to_string(), access_token)]);
+        let tokens = HashMap::from([("access_token".to_string(), access_token.into())]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(err, IdTokenTrustModeError::MissingIdToken),
@@ -195,8 +196,8 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
+            ("access_token".to_string(), access_token.into()),
+            ("id_token".to_string(), id_token.into()),
         ]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
@@ -225,8 +226,8 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
+            ("access_token".to_string(), access_token.into()),
+            ("id_token".to_string(), id_token.into()),
         ]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
@@ -255,9 +256,9 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
-            ("userinfo_token".to_string(), userinfo_token),
+            ("access_token".to_string(), access_token.into()),
+            ("id_token".to_string(), id_token.into()),
+            ("userinfo_token".to_string(), userinfo_token.into()),
         ]);
         validate_id_tkn_trust_mode(&tokens).expect("should not error");
     }
@@ -281,9 +282,9 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
-            ("userinfo_token".to_string(), userinfo_token),
+            ("access_token".to_string(), access_token.into()),
+            ("id_token".to_string(), id_token.into()),
+            ("userinfo_token".to_string(), userinfo_token.into()),
         ]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
@@ -317,9 +318,9 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
-            ("userinfo_token".to_string(), userinfo_token),
+            ("access_token".to_string(), access_token.into()),
+            ("id_token".to_string(), id_token.into()),
+            ("userinfo_token".to_string(), userinfo_token.into()),
         ]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(

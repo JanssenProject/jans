@@ -31,6 +31,7 @@ use std::collections::{HashMap, HashSet};
 use std::convert::Infallible;
 use std::fmt;
 use std::str::FromStr;
+use std::sync::Arc;
 
 // TODO: We could probably set the default to not have a namespace
 // once we support multiple namespaces
@@ -119,7 +120,7 @@ impl EntityBuilder {
 
     pub fn build_entities(
         &self,
-        tokens: &HashMap<String, Token>,
+        tokens: &HashMap<String, Arc<Token>>,
         resource: &ResourceData,
     ) -> Result<AuthorizeEntitiesData, BuildCedarlingEntityError> {
         let mut built_entities = BuiltEntities::default();
@@ -258,6 +259,7 @@ mod test {
     use cedar_policy::EvalResult;
     use serde_json::json;
     use std::collections::HashMap;
+    use std::sync::Arc;
 
     #[test]
     fn can_build_entity_using_jwt() {
@@ -276,7 +278,7 @@ mod test {
             }
         }}))
         .expect("should successfully build schema");
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let token = Token::new(
             "access_token",
             HashMap::from([
@@ -284,7 +286,7 @@ mod test {
                 ("name".to_string(), json!("somename")),
             ])
             .into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let entity = build_entity(
             &schema,
@@ -343,7 +345,7 @@ mod test {
             }
         }))
         .expect("should successfully build schema");
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let entity_builder = EntityBuilder::new(
             schema,
             EntityNames {
@@ -374,11 +376,11 @@ mod test {
                         ("jti".to_string(), json!(format!("{}_123", tkn_name))),
                     ])
                     .into(),
-                    Some(&iss),
+                    Some(iss.clone()),
                 );
-                (tkn_name.to_string(), token)
+                (tkn_name.to_string(), token.into())
             })
-            .collect::<HashMap<String, Token>>();
+            .collect::<HashMap<String, Arc<Token>>>();
 
         let entities = entity_builder
             .build_entities(&tokens, &ResourceData {
@@ -467,7 +469,7 @@ mod test {
             }}}
         }))
         .expect("should successfully build schema");
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let token = Token::new(
             "access_token",
             HashMap::from([
@@ -475,7 +477,7 @@ mod test {
                 ("name".to_string(), json!("somename")),
             ])
             .into(),
-            Some(&iss),
+            Some(iss),
         );
 
         let err = build_entity(
@@ -500,8 +502,8 @@ mod test {
     fn errors_when_token_is_missing_entity_id_claim() {
         let schema = serde_json::from_value::<CedarSchemaJson>(json!({}))
             .expect("should successfully build schema");
-        let iss = TrustedIssuer::default();
-        let token = Token::new("access_token", HashMap::new().into(), Some(&iss));
+        let iss = Arc::new(TrustedIssuer::default());
+        let token = Token::new("access_token", HashMap::new().into(), Some(iss.clone()));
 
         let err = build_entity(
             &schema,
@@ -538,11 +540,11 @@ mod test {
             }}}
         }))
         .expect("should successfully build schema");
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let token = Token::new(
             "access_token",
             HashMap::from([("client_id".to_string(), json!(123))]).into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let err = build_entity(
             &schema,
@@ -570,11 +572,11 @@ mod test {
     fn errors_when_entity_not_in_schema() {
         let schema = serde_json::from_value::<CedarSchemaJson>(json!({}))
             .expect("should successfully build schema");
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let token = Token::new(
             "access_token",
             HashMap::from([("client_id".to_string(), json!("client-123"))]).into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
 
         let err = build_entity(

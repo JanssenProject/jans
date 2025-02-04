@@ -32,7 +32,7 @@ impl EntityBuilder {
     /// if no entities were created.
     pub fn try_build_role_entities(
         &self,
-        tokens: &HashMap<String, Token>,
+        tokens: &HashMap<String, Arc<Token>>,
     ) -> Result<Vec<Entity>, BuildRoleEntityError> {
         // Check if the entity is in the schema
         let entity_name = self.entity_names.role.to_string();
@@ -112,6 +112,7 @@ mod test {
     use crate::common::policy_store::TrustedIssuer;
     use serde_json::json;
     use std::collections::HashMap;
+    use std::sync::Arc;
 
     fn test_schema() -> CedarSchemaJson {
         serde_json::from_value::<CedarSchemaJson>(json!({
@@ -129,7 +130,7 @@ mod test {
         .expect("should successfully create test schema")
     }
 
-    fn test_build_entity_from_str_claim(tokens: &HashMap<String, Token>) {
+    fn test_build_entity_from_str_claim(tokens: &HashMap<String, Arc<Token>>) {
         let schema = test_schema();
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let entity = builder
@@ -142,13 +143,13 @@ mod test {
 
     #[test]
     fn can_build_using_userinfo_tkn_vec_claim() {
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let userinfo_token = Token::new(
             "userinfo_token",
             HashMap::from([("role".to_string(), json!(["admin", "user"]))]).into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
-        let tokens = HashMap::from([("userinfo_token".to_string(), userinfo_token)]);
+        let tokens = HashMap::from([("userinfo_token".to_string(), userinfo_token.into())]);
         let schema = test_schema();
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let entity = builder
@@ -168,89 +169,89 @@ mod test {
 
     #[test]
     fn can_build_using_userinfo_tkn_string_claim() {
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let userinfo_token = Token::new(
             "userinfo_token",
             HashMap::from([("role".to_string(), json!("admin"))]).into(),
-            Some(&iss),
+            Some(iss),
         );
-        let tokens = HashMap::from([("userinfo_token".to_string(), userinfo_token)]);
+        let tokens = HashMap::from([("userinfo_token".to_string(), userinfo_token.into())]);
         test_build_entity_from_str_claim(&tokens);
     }
 
     #[test]
     fn can_build_using_id_tkn() {
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let id_token = Token::new(
             "id_token",
             HashMap::from([("role".to_string(), json!("admin"))]).into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
-        let tokens = HashMap::from([("id_token".to_string(), id_token)]);
+        let tokens = HashMap::from([("id_token".to_string(), id_token.into())]);
         test_build_entity_from_str_claim(&tokens);
     }
 
     #[test]
     fn can_build_using_access_tkn() {
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let access_token = Token::new(
             "access_token",
             HashMap::from([("role".to_string(), json!("admin"))]).into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
-        let tokens = HashMap::from([("access_token".to_string(), access_token)]);
+        let tokens = HashMap::from([("access_token".to_string(), access_token.into())]);
         test_build_entity_from_str_claim(&tokens);
     }
 
     #[test]
     fn ignores_duplicate_roles() {
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let access_token = Token::new(
             "access_token",
             HashMap::from([("role".to_string(), json!("admin"))]).into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let id_token = Token::new(
             "id_token",
             HashMap::from([("role".to_string(), json!("admin"))]).into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let userinfo_token = Token::new(
             "userinfo_token",
             HashMap::from([("role".to_string(), json!("admin"))]).into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
-            ("userinfo_token".to_string(), userinfo_token),
+            ("access_token".to_string(), access_token.into()),
+            ("id_token".to_string(), id_token.into()),
+            ("userinfo_token".to_string(), userinfo_token.into()),
         ]);
         test_build_entity_from_str_claim(&tokens);
     }
 
     #[test]
     fn can_create_multiple_different_roles_from_different_tokens() {
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let schema = test_schema();
         let access_token = Token::new(
             "access_token",
             HashMap::from([("role".to_string(), json!("role1"))]).into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let id_token = Token::new(
             "id_token",
             HashMap::from([("role".to_string(), json!("role2"))]).into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let userinfo_token = Token::new(
             "userinfo_token",
             HashMap::from([("role".to_string(), json!(["role3", "role4"]))]).into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
-            ("userinfo_token".to_string(), userinfo_token),
+            ("access_token".to_string(), access_token.into()),
+            ("id_token".to_string(), id_token.into()),
+            ("userinfo_token".to_string(), userinfo_token.into()),
         ]);
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let entities = builder

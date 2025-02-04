@@ -18,7 +18,7 @@ const DEFAULT_WORKLOAD_ENTITY_TKN_SRCS: [&str; 2] = ["access_token", "id_token"]
 impl EntityBuilder {
     pub fn build_workload_entity(
         &self,
-        tokens: &HashMap<String, Token>,
+        tokens: &HashMap<String, Arc<Token>>,
         built_entities: &BuiltEntities,
     ) -> Result<Entity, BuildWorkloadEntityError> {
         let entity_name = self.entity_names.workload.as_ref();
@@ -90,6 +90,7 @@ mod test {
     use cedar_policy::EvalResult;
     use serde_json::json;
     use std::collections::HashMap;
+    use std::sync::Arc;
 
     #[test]
     fn can_build_using_access_tkn() {
@@ -105,7 +106,7 @@ mod test {
             }}}
         }))
         .unwrap();
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let access_token = Token::new(
             "access_token",
@@ -114,9 +115,9 @@ mod test {
                 ("name".to_string(), json!("somename")),
             ])
             .into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
-        let tokens = HashMap::from([("access_token".to_string(), access_token)]);
+        let tokens = HashMap::from([("access_token".to_string(), access_token.into())]);
         let entity = builder
             .build_workload_entity(&tokens, &BuiltEntities::default())
             .expect("expeted to successfully build workload entity");
@@ -151,7 +152,7 @@ mod test {
             }}}
         }))
         .unwrap();
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let id_token = Token::new(
             "id_token",
@@ -160,9 +161,9 @@ mod test {
                 ("name".to_string(), json!("somename")),
             ])
             .into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
-        let tokens = HashMap::from([("id_token".to_string(), id_token)]);
+        let tokens = HashMap::from([("id_token".to_string(), id_token.into())]);
         let entity = builder
             .build_workload_entity(&tokens, &BuiltEntities::default())
             .expect("expected to successfully build workload entity");
@@ -218,7 +219,7 @@ mod test {
             }}
         }))
         .unwrap();
-        let iss = TrustedIssuer {
+        let iss = Arc::new(TrustedIssuer {
             tokens_metadata: HashMap::from([("access_token".to_string(), TokenEntityMetadata {
                 claim_mapping: serde_json::from_value::<ClaimMappings>(json!({
                     "email": {
@@ -241,7 +242,7 @@ mod test {
                 ..Default::default()
             })]),
             ..Default::default()
-        };
+        });
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let access_token = Token::new(
             "access_token",
@@ -251,9 +252,9 @@ mod test {
                 ("url".to_string(), json!("https://test.com/example")),
             ])
             .into(),
-            Some(&iss),
+            Some(iss),
         );
-        let tokens = HashMap::from([("access_token".to_string(), access_token)]);
+        let tokens = HashMap::from([("access_token".to_string(), access_token.into())]);
         let entity = builder
             .build_workload_entity(&tokens, &BuiltEntities::default())
             .expect("expected to successfully build workload entity");
@@ -333,7 +334,7 @@ mod test {
             }}
         }))
         .unwrap();
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let access_token = Token::new(
             "access_token",
@@ -345,9 +346,9 @@ mod test {
                 ),
             ])
             .into(),
-            Some(&iss),
+            Some(iss.clone()),
         );
-        let tokens = HashMap::from([("access_token".to_string(), access_token)]);
+        let tokens = HashMap::from([("access_token".to_string(), access_token.into())]);
         let entity = builder
             .build_workload_entity(&tokens, &BuiltEntities::default())
             .expect("expected to successfully build workload entity");
@@ -395,13 +396,13 @@ mod test {
             }}}
         }))
         .unwrap();
-        let iss = TrustedIssuer::default();
+        let iss = Arc::new(TrustedIssuer::default());
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
-        let access_token = Token::new("access_token", HashMap::new().into(), Some(&iss));
-        let id_token = Token::new("id_token", HashMap::new().into(), Some(&iss));
+        let access_token = Token::new("access_token", HashMap::new().into(), Some(iss.clone()));
+        let id_token = Token::new("id_token", HashMap::new().into(), Some(iss.clone()));
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
+            ("access_token".to_string(), access_token.into()),
+            ("id_token".to_string(), id_token.into()),
         ]);
         let err = builder
             .build_workload_entity(&tokens, &BuiltEntities::default())

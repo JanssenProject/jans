@@ -13,7 +13,7 @@ const DEFAULT_USER_ENTITY_TKN_SRCS: [&str; 2] = ["userinfo_token", "id_token"];
 impl EntityBuilder {
     pub fn build_user_entity(
         &self,
-        tokens: &HashMap<String, Token>,
+        tokens: &HashMap<String, Arc<Token>>,
         parents: HashSet<EntityUid>,
         built_entities: &BuiltEntities,
     ) -> Result<Entity, BuildUserEntityError> {
@@ -77,9 +77,10 @@ mod test {
     use cedar_policy::EvalResult;
     use serde_json::json;
     use std::collections::HashMap;
+    use std::sync::Arc;
     use test_utils::assert_eq;
 
-    fn test_iss() -> TrustedIssuer {
+    fn test_iss() -> Arc<TrustedIssuer> {
         let token_entity_metadata = TokenEntityMetadata {
             claim_mapping: serde_json::from_value::<ClaimMappings>(json!({
                 "email": {
@@ -100,6 +101,7 @@ mod test {
             ]),
             ..Default::default()
         }
+        .into()
     }
 
     fn test_schema() -> CedarSchemaJson {
@@ -139,7 +141,7 @@ mod test {
         .expect("should successfully create test schema")
     }
 
-    fn test_successfully_building_user_entity(tokens: HashMap<String, Token<'_>>) {
+    fn test_successfully_building_user_entity(tokens: HashMap<String, Arc<Token>>) {
         let schema = test_schema();
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, true);
         let entity = builder
@@ -186,9 +188,9 @@ mod test {
                 ("role".to_string(), json!(["admin", "user"])),
             ])
             .into(),
-            Some(&iss),
+            Some(iss),
         );
-        let tokens = HashMap::from([("userinfo_token".to_string(), userinfo_token)]);
+        let tokens = HashMap::from([("userinfo_token".to_string(), userinfo_token.into())]);
         test_successfully_building_user_entity(tokens);
     }
 
@@ -203,9 +205,9 @@ mod test {
                 ("role".to_string(), json!(["admin", "user"])),
             ])
             .into(),
-            Some(&iss),
+            Some(iss),
         );
-        let tokens = HashMap::from([("id_token".to_string(), id_token)]);
+        let tokens = HashMap::from([("id_token".to_string(), id_token.into())]);
         test_successfully_building_user_entity(tokens);
     }
 
@@ -214,11 +216,11 @@ mod test {
         let iss = test_iss();
         let schema = test_schema();
 
-        let id_token = Token::new("id_token", HashMap::new().into(), Some(&iss));
-        let userinfo_token = Token::new("userinfo_token", HashMap::new().into(), Some(&iss));
+        let id_token = Token::new("id_token", HashMap::new().into(), Some(iss.clone()));
+        let userinfo_token = Token::new("userinfo_token", HashMap::new().into(), Some(iss));
         let tokens = HashMap::from([
-            ("id_token".to_string(), id_token),
-            ("userinfo_token".to_string(), userinfo_token),
+            ("id_token".to_string(), id_token.into()),
+            ("userinfo_token".to_string(), userinfo_token.into()),
         ]);
 
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, true);
@@ -266,9 +268,9 @@ mod test {
                 ("role".to_string(), json!(["role1", "role2", "role3"])),
             ])
             .into(),
-            Some(&iss),
+            Some(iss),
         );
-        let tokens = HashMap::from([("userinfo_token".to_string(), userinfo_token)]);
+        let tokens = HashMap::from([("userinfo_token".to_string(), userinfo_token.into())]);
         let schema = test_schema();
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, true);
         let roles = HashSet::from([

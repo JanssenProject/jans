@@ -94,7 +94,7 @@ impl Authz {
     pub(crate) async fn decode_tokens<'a>(
         &'a self,
         request: &'a Request,
-    ) -> Result<HashMap<String, Token<'a>>, AuthorizeError> {
+    ) -> Result<HashMap<String, Arc<Token>>, AuthorizeError> {
         let tokens = self
             .config
             .jwt_service
@@ -337,7 +337,7 @@ impl Authz {
     pub fn build_entities(
         &self,
         request: &Request,
-        tokens: &HashMap<String, Token>,
+        tokens: &HashMap<String, Arc<Token>>,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         Ok(self
             .entity_builder

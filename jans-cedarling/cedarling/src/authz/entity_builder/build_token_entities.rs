@@ -106,7 +106,7 @@ mod test {
         .expect("should deserialize schema")
     }
 
-    fn test_issusers() -> HashMap<String, TrustedIssuer> {
+    fn test_issusers() -> HashMap<String, Arc<TrustedIssuer>> {
         let token_entity_metadata = TokenEntityMetadata {
                 claim_mapping: serde_json::from_value::<ClaimMappings>(json!({
                     "url": {
@@ -129,7 +129,7 @@ mod test {
             ]),
             ..Default::default()
         };
-        let issuers = HashMap::from([("test_iss".into(), iss.clone())]);
+        let issuers = HashMap::from([("test_iss".into(), iss.into())]);
         issuers
     }
 
@@ -184,7 +184,7 @@ mod test {
                 ),
             ])
             .into(),
-            Some(&issuers.get("test_iss").unwrap()),
+            Some(issuers.get("test_iss").unwrap().clone()),
         );
         test_build_entity("Jans::Access_token", access_token, &builder);
     }
@@ -204,7 +204,7 @@ mod test {
                 ),
             ])
             .into(),
-            Some(&issuers.get("test_iss").unwrap()),
+            Some(issuers.get("test_iss").unwrap().clone()),
         );
         test_build_entity("Jans::id_token", id_token, &builder);
     }
@@ -224,7 +224,7 @@ mod test {
                 ),
             ])
             .into(),
-            Some(&issuers.get("test_iss").unwrap()),
+            Some(issuers.get("test_iss").unwrap().clone()),
         );
         test_build_entity("Jans::Userinfo_token", userinfo_token, &builder);
     }

@@ -20,7 +20,6 @@ use super::issuers_store::TrustedIssuersStore;
 use super::key_service::KeyService;
 use crate::common::policy_store::TrustedIssuer;
 
-type IssuerId = String;
 type TokenClaims = Value;
 
 /// Validates Json Web Tokens.
@@ -28,19 +27,20 @@ pub struct JwtValidator {
     config: JwtValidatorConfig,
     key_service: Arc<Option<KeyService>>,
     validators: HashMap<Algorithm, Validation>,
-    iss_store: TrustedIssuersStore,
+    iss_store: Arc<TrustedIssuersStore>,
 }
 
 #[derive(Debug, PartialEq)]
-pub struct ProcessedJwt<'a> {
+pub struct ProcessedJwt {
     pub claims: TokenClaims,
-    pub trusted_iss: Option<&'a TrustedIssuer>,
+    pub trusted_iss: Option<Arc<TrustedIssuer>>,
 }
 
 impl JwtValidator {
     pub fn new(
         config: JwtValidatorConfig,
         key_service: Arc<Option<KeyService>>,
+        iss_store: Arc<TrustedIssuersStore>,
     ) -> Result<Self, JwtValidatorError> {
         if *config.sig_validation && key_service.is_none() {
             Err(JwtValidatorError::MissingKeyService)?;
@@ -65,8 +65,6 @@ impl JwtValidator {
             })
             .collect::<HashMap<Algorithm, Validation>>();
 
-        let iss_store = TrustedIssuersStore::new(config.trusted_issuers.clone());
-
         Ok(Self {
             config,
             key_service,
@@ -76,7 +74,7 @@ impl JwtValidator {
     }
 
     /// Decodes the JWT and optionally validates it depending on the config.
-    pub fn process_jwt<'a>(&'a self, jwt: &'a str) -> Result<ProcessedJwt<'a>, JwtValidatorError> {
+    pub fn process_jwt<'a>(&'a self, jwt: &'a str) -> Result<ProcessedJwt, JwtValidatorError> {
         let processed_jwt = match *self.config.sig_validation {
             true => self.decode_and_validate_token(jwt)?,
             false => self.decode(jwt)?,

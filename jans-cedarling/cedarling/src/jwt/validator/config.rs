@@ -3,11 +3,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::IssuerId;
-use crate::common::policy_store::TrustedIssuer;
-use jsonwebtoken::Algorithm;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::sync::Arc;
+
+use jsonwebtoken::Algorithm;
 
 /// Validation options related to JSON Web Tokens (JWT).
 ///
@@ -29,8 +28,6 @@ pub struct JwtValidatorConfig {
     // TODO: implement token status validation
     #[allow(dead_code)]
     pub status_validation: Arc<bool>,
-    /// List of trusted issuers used to check the JWT status.
-    pub trusted_issuers: Arc<Option<HashMap<IssuerId, TrustedIssuer>>>,
     /// Algorithms supported as defined in the Bootstrap properties.
     ///
     /// Tokens not signed with an algorithm within this HashSet will immediately be invalid.

@@ -12,6 +12,7 @@ use test_utils::assert_eq;
 
 use super::super::test_utils::*;
 use super::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
+use crate::jwt::issuers_store::TrustedIssuersStore;
 use crate::jwt::key_service::KeyService;
 use crate::jwt::validator::ProcessedJwt;
 
@@ -31,13 +32,13 @@ fn can_decode_jwt() {
         JwtValidatorConfig {
             sig_validation: false.into(),
             status_validation: false.into(),
-            trusted_issuers: None.into(),
             algs_supported: HashSet::from([Algorithm::HS256]).into(),
             required_claims: HashSet::new(),
             validate_exp: true,
             validate_nbf: true,
         },
         None.into(),
+        TrustedIssuersStore::default().into(),
     )
     .expect("Should create validator");
 
@@ -77,13 +78,13 @@ fn can_decode_and_validate_jwt() {
         JwtValidatorConfig {
             sig_validation: true.into(),
             status_validation: false.into(),
-            trusted_issuers: None.into(),
             algs_supported: HashSet::from([Algorithm::HS256]).into(),
             required_claims: HashSet::new(),
             validate_exp: true,
             validate_nbf: true,
         },
         Some(key_service).into(),
+        TrustedIssuersStore::default().into(),
     )
     .expect("Should create validator");
 
@@ -127,13 +128,13 @@ fn errors_on_invalid_iss_scheme() {
         JwtValidatorConfig {
             sig_validation: true.into(),
             status_validation: false.into(),
-            trusted_issuers: None.into(),
             algs_supported: HashSet::from([Algorithm::HS256]).into(),
             required_claims: HashSet::from(["iss".into()]),
             validate_exp: true,
             validate_nbf: true,
         },
         Some(key_service).into(),
+        TrustedIssuersStore::default().into(),
     )
     .expect("Should create validator");
 
@@ -172,13 +173,13 @@ fn errors_on_expired_token() {
         JwtValidatorConfig {
             sig_validation: true.into(),
             status_validation: false.into(),
-            trusted_issuers: None.into(),
             algs_supported: HashSet::from([Algorithm::HS256]).into(),
             required_claims: HashSet::new(),
             validate_exp: true,
             validate_nbf: true,
         },
         Some(key_service).into(),
+        TrustedIssuersStore::default().into(),
     )
     .expect("Should create validator");
 
@@ -217,13 +218,13 @@ fn errors_on_immature_token() {
         JwtValidatorConfig {
             sig_validation: true.into(),
             status_validation: false.into(),
-            trusted_issuers: None.into(),
             algs_supported: HashSet::from([Algorithm::HS256]).into(),
             required_claims: HashSet::new(),
             validate_exp: true,
             validate_nbf: true,
         },
         Some(key_service).into(),
+        TrustedIssuersStore::default().into(),
     )
     .expect("Should create validator");
 
@@ -265,13 +266,13 @@ fn can_check_missing_claims() {
         JwtValidatorConfig {
             sig_validation: true.into(),
             status_validation: false.into(),
-            trusted_issuers: None.into(),
             algs_supported: HashSet::from([Algorithm::HS256]).into(),
             required_claims: HashSet::from(["sub", "name", "iat"].map(|x| x.into())),
             validate_exp: true,
             validate_nbf: true,
         },
         key_service.clone(),
+        TrustedIssuersStore::default().into(),
     )
     .expect("Should create validator");
     let result = validator
@@ -290,13 +291,13 @@ fn can_check_missing_claims() {
         JwtValidatorConfig {
             sig_validation: true.into(),
             status_validation: false.into(),
-            trusted_issuers: None.into(),
             algs_supported: HashSet::from([Algorithm::HS256]).into(),
             required_claims: HashSet::from(["sub", "name", "iat", "nbf"].map(|x| x.into())),
             validate_exp: true,
             validate_nbf: true,
         },
         key_service.clone(),
+        TrustedIssuersStore::default().into(),
     )
     .expect("Should create validator");
     let result = validator.process_jwt(&token);
