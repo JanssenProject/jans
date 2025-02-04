@@ -58,7 +58,7 @@ These Bootstrap Properties control default application level behavior.
 ## Required keys for startup
 
 * **`CEDARLING_APPLICATION_NAME`
-* **`CEDARLING_TOKEN_CONFIGS`
+* **`CEDARLING_TOKEN_CONFIGS` - check if default implementation of Token Config is suitable for you.
 
 To enable usage of principals at least one of the following keys must be provided:
 
@@ -115,6 +115,55 @@ CEDARLING_TOKEN_CONFIGS = {
     "exp": "enabled",
   },
   // more custom tokens can be added here
+}
+```
+
+## Default implementation of Token Config
+
+Here is rust code default implementation of Token Configs (`CEDARLING_TOKEN_CONFIGS`). This is used when no custom token config is provided.
+
+```rust
+impl Default for TokenConfigs {
+    fn default() -> Self {
+        Self(HashMap::from([
+            ("access_token".to_string(), TokenConfig {
+                entity_type_name: "Access_token".to_string(),
+                claims: ClaimsValidationConfig {
+                    iss: FeatureToggle::Enabled,
+                    sub: FeatureToggle::Disabled,
+                    aud: FeatureToggle::Disabled,
+                    exp: FeatureToggle::Enabled,
+                    nbf: FeatureToggle::Disabled,
+                    iat: FeatureToggle::Disabled,
+                    jti: FeatureToggle::Enabled,
+                },
+            }),
+            ("id_token".to_string(), TokenConfig {
+                entity_type_name: "id_token".to_string(),
+                claims: ClaimsValidationConfig {
+                    iss: FeatureToggle::Enabled,
+                    sub: FeatureToggle::Enabled,
+                    aud: FeatureToggle::Enabled,
+                    exp: FeatureToggle::Enabled,
+                    nbf: FeatureToggle::Disabled,
+                    iat: FeatureToggle::Disabled,
+                    jti: FeatureToggle::Disabled,
+                },
+            }),
+            ("userinfo_token".to_string(), TokenConfig {
+                entity_type_name: "Userinfo_token".to_string(),
+                claims: ClaimsValidationConfig {
+                    iss: FeatureToggle::Enabled,
+                    sub: FeatureToggle::Enabled,
+                    aud: FeatureToggle::Enabled,
+                    exp: FeatureToggle::Enabled,
+                    nbf: FeatureToggle::Disabled,
+                    iat: FeatureToggle::Disabled,
+                    jti: FeatureToggle::Disabled,
+                },
+            }),
+        ]))
+    }
 }
 ```
 
