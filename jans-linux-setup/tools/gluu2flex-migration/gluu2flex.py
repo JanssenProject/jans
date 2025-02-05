@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import argparse
+import datetime
 
 from pathlib import Path
 from collections import OrderedDict
@@ -73,9 +74,8 @@ for vendor in ('gluu', 'jans'):
 
         if host_vendor == 'gluu':
             gluu_prop = read_prop(vendor_prop_fn)
-            ldap_prop_fn = f'/etc/{vendor}/conf/{vendor}-ldap.properties'
-            ldap_prop = read_prop(ldap_prop_fn)
-            ldap_prop['bindPassword'] = os.popen(f'/opt/{vendor}/bin/encode.py -D ' + ldap_prop['bindPassword']).read().strip()
+            source_db_prop_file = f'/etc/{vendor}/conf/{vendor}-{gluu_prop["persistence.type"]}.properties'
+            source_db_prop = read_prop(source_db_prop_file)
         break
 
 
@@ -94,13 +94,13 @@ class Gluu2FlexMigrator:
         self.schema_mappging_path = setup_path.joinpath('schema', 'jans_schema_mappings.json')
         self.schema_mappging_dict = json.loads(self.schema_mappging_path.read_text())
         self.org_units = {
-            'people':'gluuPerson',
-            'groups':'gluuGroup',
-            'scopes':'oxAuthCustomScope',
-            'clients':'oxAuthClient',
-            'attributes':'gluuAttribute',
-            'scripts': 'oxCustomScript',
-            'configuration': '*',
+            'people': ['gluuPerson'],
+            'groups': ['gluuGroup'],
+            'scopes': ['oxAuthCustomScope'],
+            'clients': ['oxAuthClient'],
+            'attributes': ['gluuAttribute'],
+            'scripts': ['oxCustomScript'],
+            'configuration': ['gluuConfiguration', 'oxAuthConfiguration', 'oxTrustConfiguration', 'gluuApplicationConfiguration', 'oxApplicationConfiguration'],
             }
         self.source_ldif_paths = {}
         self.target_ldif_paths = {}
@@ -139,17 +139,99 @@ class Gluu2FlexMigrator:
         self.json_data_fn.write_text(json.dumps({'salt': salt}, indent=2))
 
     def dump_data(self):
-        ldap_passwd_fn = cur_path.joinpath('.pw')
-        ldap_passwd_fn.write_text(ldap_prop['bindPassword'])
+        if 'bindPassword' in source_db_prop:
+            source_db_prop['bindPassword'] = os.popen(f'/opt/{vendor}/bin/encode.py -D ' + source_db_prop['bindPassword']).read().strip()
+            ldap_passwd_fn = cur_path.joinpath('.pw')
+            ldap_passwd_fn.write_text(source_db_prop['bindPassword'])
+            for org_unit in self.org_units:
+                print(f"Dumping {org_unit} from LDAP")
+                for obj_cls in self.org_units[org_unit]:
+                    cmd = f'/opt/opendj/bin/ldapsearch -X -Z -D "{source_db_prop["bindDN"]}" -j {ldap_passwd_fn} -h localhost -p 1636 -b "ou={org_unit},o=gluu" "(objectClass={obj_cls})" >> {self.source_ldif_paths[org_unit]}'
+                    print(f"Executing {cmd}")
+                    os.system(cmd)
 
-        for org_unit in self.org_units:
-            print(f"Dumping {org_unit}")
-            cmd = f'/opt/opendj/bin/ldapsearch -X -Z -D "{ldap_prop["bindDN"]}" -j {ldap_passwd_fn} -h localhost -p 1636 -b "ou={org_unit},o=gluu" "(objectClass={self.org_units[org_unit]})" > {self.source_ldif_paths[org_unit]}'
-            print(f"Executing {cmd}")
-            os.system(cmd)
+            ldap_passwd_fn.unlink()
 
-        ldap_passwd_fn.unlink()
+        elif 'auth.userPassword' in source_db_prop:
+            source_db_prop['auth.userPassword'] = os.popen(f'/opt/{vendor}/bin/encode.py -D ' + source_db_prop['auth.userPassword']).read().strip()
+            connection_uri_spl = source_db_prop['connection.uri'].split(':')
+            connection_uri_spl[2] = connection_uri_spl[2].strip('/')
+            db_port, db_name = connection_uri_spl[3].split('?')[0].split('/')
 
+            sys.path.append('/install/community-edition-setup/setup_app/pylib/')
+
+            import sqlalchemy
+            import sqlalchemy.orm
+            import sqlalchemy.ext.automap
+            import sqlalchemy.dialects.mysql
+            import sqlalchemy.dialects.postgresql
+
+            from ldif4.ldif import LDIFWriter
+
+            json_dialects_instance = sqlalchemy.dialects.mysql.json.JSON if connection_uri_spl[1] == 'mysql' else sqlalchemy.dialects.postgresql.json.JSONB
+
+            db_str = 'mysql+pymysql' if connection_uri_spl[1] == 'mysql' else 'postgresql+psycopg2'
+    
+            bind_uri = '{}://{}:{}@{}:{}/{}'.format(
+                        db_str,
+                        source_db_prop['auth.userName'],
+                        source_db_prop['auth.userPassword'],
+                        connection_uri_spl[2].strip('/'),
+                        db_port,
+                        db_name,
+                )
+
+            if connection_uri_spl[1] == 'mysql':
+                bind_uri += '?charset=utf8mb4'
+
+            engine = sqlalchemy.create_engine(bind_uri)
+            Session = sqlalchemy.orm.sessionmaker(bind=engine)
+            session = Session()
+            metadata = sqlalchemy.MetaData()
+            session.connection()
+
+            metadata.reflect(engine)
+            Base = sqlalchemy.ext.automap.automap_base(metadata=metadata)
+            Base.prepare()
+
+            for org_table in self.org_units:
+                print(f"Dumping data from {connection_uri_spl[1]} table {org_table}")
+                with open(self.source_ldif_paths[org_table], 'wb') as w:
+                    ldifw = LDIFWriter(w, cols=100000)
+                    for tbl in self.org_units[org_table]:
+                        orm_query = session.query(Base.classes[tbl])
+                        print("Executing ", orm_query.statement.compile(engine))
+                        for row_obj in orm_query.all():
+                                ldif_entry = {}
+                                for col_obj in row_obj.__table__.columns:
+                                    col_val = getattr(row_obj, col_obj.name)
+                                    if col_val is None:
+                                        continue
+                                    
+                                    if col_obj.name == 'dn':
+                                        dn = col_val = getattr(row_obj, col_obj.name)
+                                        continue
+                                    elif col_obj.name == 'doc_id':
+                                        continue
+
+                                    if isinstance(col_obj.type, json_dialects_instance):
+                                        if col_val:
+                                            if connection_uri_spl[1] == 'mysql':
+                                                ldif_entry[col_obj.name] = col_val.get('v', [])
+                                            else:
+                                                ldif_entry[col_obj.name] = col_val
+                                    elif col_obj.type.python_type == datetime.datetime:
+                                        microsecond = f'{col_val.microsecond:03d}'
+                                        ldif_entry[col_obj.name] = [f'{col_val.year}{col_val.month:02d}{col_val.day:02d}{col_val.hour:02d}{col_val.minute:02d}{col_val.second:02d}.{microsecond[:3]}Z']
+                                    elif isinstance(col_obj.type, sqlalchemy.dialects.mysql.types.SMALLINT) or isinstance(col_obj.type, sqlalchemy.dialects.postgresql.BOOLEAN):
+                                        ldif_entry[col_obj.name] = [str(bool(col_val)).upper()]
+                                    elif not isinstance(col_val, str):
+                                        ldif_entry[col_obj.name] = [str(col_val)]
+                                    else:
+                                        ldif_entry[col_obj.name] = [col_val]
+
+                                ldif_entry['objectClass'].insert(0, 'top')
+                                ldifw.unparse(dn, ldif_entry)
 
 
     def map_object_class(self, object_class_list):
