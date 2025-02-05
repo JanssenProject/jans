@@ -8696,7 +8696,7 @@
 }
 </code></pre></div>
 <p>In this case, we are populating the configuration of an OAuth-based provider called "Goooogle". </p>
-<p>The tables shown in <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/agama-catalog/jans/inboundID/README.md#supply-configurations">this</a> page list all possible properties to configure a provider. Particularly, two properties deserve the most detail:</p>
+<p>The tables shown in <a href="https://github.com/JanssenProject/jans/blob/nightly/docs/agama-catalog/jans/inboundID/README.md#supply-configurations">this</a> page list all possible properties to configure a provider. Particularly, two properties deserve the most detail:</p>
 <ol>
 <li>
 <p><code>flowQname</code>. Agama projects are made up of flows - think of small "web journeys". This property must contain the name of an existing flow capable of interfacing with the identity provider of interest. Often, there is no need to write such "interfacing" flow. The below are ready-to-use and cover most of real-world cases, specifically  OpenId/OAuth providers that support the <strong>authorization code grant</strong> (see section 1.3 of <a href="https://www.ietf.org/rfc/rfc6749">rfc6749</a>):</p>
@@ -8718,7 +8718,7 @@
 <p>Recall <code>enabled</code> is a handy property that can be used to temporarily "deactive" a given identity provider.</p>
 </div>
 <h2 id="configuring-attribute-mappings">Configuring attribute mappings<a class="headerlink" href="#configuring-attribute-mappings" title="Permanent link">#</a></h2>
-<p>An introduction to attribute mapping can be found <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/agama-catalog/jans/inboundID/README.md#attribute-mappings">here</a>. Unless an elaborated processing of attributes is required, a basic knowledge of Java language suffices to write a useful mapping.</p>
+<p>An introduction to attribute mapping can be found <a href="https://github.com/JanssenProject/jans/blob/nightly/docs/agama-catalog/jans/inboundID/README.md#attribute-mappings">here</a>. Unless an elaborated processing of attributes is required, a basic knowledge of Java language suffices to write a useful mapping.</p>
 <p>To write a mapping, you can use the samples provided as a guideline (see folder <code>lib/io/jans/casa/acctlinking</code> in the Agama accounts linking project). You can add your mapping in the same file or create a new Java class for this purpose.  Then save your changes, re-package (zip) the project, re-deploy, and update (re-import) the configuration if necessary.</p>
 <p>Specifically, for Casa accounts linking, the mapping <strong>must</strong> include an attribute named <code>ID</code>. While <code>ID</code> is not part of the Jans database, here it is used to supply what could be understood as the <em>identifier</em> of the user at the external site. For instance, in a social site this may be the username or email. The example below shows how to set <code>ID</code> assuming the username was returned by the external site in an attribute named <code>userId</code>:</p>
 <div class="highlight"><pre><span></span><code>profile -&gt; {
