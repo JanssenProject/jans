@@ -101,15 +101,15 @@ impl Cedarling {
         let service_config = ServiceConfig::new(config)
             .await
             .inspect(|_| {
-                log.log(
-                    LogEntry::new_with_data(pdp_id, None, LogType::System)
+                log.log_any(
+                    LogEntry::new_with_data(pdp_id, None, LogType::System, None)
                         .set_level(LogLevel::DEBUG)
                         .set_message("configuration parsed successfully".to_string()),
                 )
             })
             .inspect_err(|err| {
-                log.log(
-                    LogEntry::new_with_data(pdp_id, None, LogType::System)
+                log.log_any(
+                    LogEntry::new_with_data(pdp_id, None, LogType::System, None)
                         .set_error(err.to_string())
                         .set_level(LogLevel::ERROR)
                         .set_message("configuration parsed with error".to_string()),
@@ -155,5 +155,17 @@ impl LogStorage for Cedarling {
 
     fn get_log_ids(&self) -> Vec<String> {
         self.log.get_log_ids()
+    }
+
+    fn get_logs_by_tag(&self, tag: &str) -> Vec<serde_json::Value> {
+        self.log.get_logs_by_tag(tag)
+    }
+
+    fn get_logs_by_request_id(&self, request_id: &str) -> Vec<serde_json::Value> {
+        self.log.get_logs_by_request_id(request_id)
+    }
+
+    fn get_logs_by_request_id_and_tag(&self, id: &str, tag: &str) -> Vec<serde_json::Value> {
+        self.log.get_logs_by_request_id_and_tag(id, tag)
     }
 }

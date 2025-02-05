@@ -3,7 +3,7 @@ tags:
   - administration
   - developer
   - script-catalog
-  - ConsentGathering
+  - consent
 ---
 
 ## Overview
@@ -25,14 +25,6 @@ acr2 - consentScript2
 ..
 acrN - consentScriptN
 ```
-
-**Agama**
-
-If Agama Consent is used then typically `acrToAgamaConsentFlowMapping` AS configuration property has to be used as well 
-to determine consent flow.
-`acrToAgamaConsentFlowMapping` - The acr mapping to agama consent flow name. When AS meets acr it tries to match agama consent name and set it into session attributes under `consent_flow` name.
-This makes it available for main Agama Consent script, so it knows which flow to invoke.
- 
 
 ## Interface
 The consent gathering script implements the [ConsentGathering](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/authz/ConsentGatheringType.java) interface. This extends methods from the base script type in addition to adding new methods:
@@ -242,4 +234,60 @@ public class ConsentGathering implements ConsentGatheringType {
         return "";
     }
 }
+```
+
+## Writing consent flows using Agama
+
+Besides scripts, developers can also use [Agama](../../agama/introduction.md) for writing consent flows. For this, enable the custom script named `agama_consent` and update the authentication server configuration accordingly using  `acrToConsentScriptNameMapping` and `acrToAgamaConsentFlowMapping` properties. Suppose the below configuration:
+
+```
+"consentGatheringScriptBackwardCompatibility": false,
+"acrToConsentScriptNameMapping": {
+   "basic": "consent_gathering",
+   "otp": "agama_consent",
+   "agama_co.acme.myflow": "my_consent_gathering",
+   "agama_co.acme.mysuperflow": "agama_consent"
+},
+"acrToAgamaConsentFlowMapping": {
+   "otp": "io.jans.consent.A",
+   "agama_co.acme.mysuperflow": "io.jans.consent.B",
+}
+```
+
+This is how consent will work depending on the authentication request issued:
+
+- With `acr_values=basic`, the consent script named `consent_gathering` will be executed - as long as it is already enabled, of course. This is the default Consent script bundled with the server
+- With `acr_values=otp`, the Agama flow `io.jans.consent.A` will be launched for consent
+- With `acr_values=agama_co.acme.myflow`, the consent script named `my_consent_gathering` will be executed - assuming it exists and is enabled
+- With `agama_co.acme.mysuperflow`, the Agama flow `io.jans.consent.B` will be launched for consent
+
+Agama flows used for consent can be built using the same approach and tooling used for regular authentication flows. Note however there is no need to pass a user identity in the `Finish` instruction. If passed, it will be ignored, thus, it suffices to end a consent flow with `Finish false/true`.
+
+### Getting contextual data
+
+To access information in your Agama consent flow related to the user attempting login, scopes requested, etc., get an instance of managed bean `io.jans.as.server.util.AgamaConsentUtil` and use the available methods as summarized below:
+
+|Method|Description|Reference class|
+|-|-|-|
+|`getClient`|Gets a reference to the OAuth client associated to the authentication request|[Client](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/common/src/main/java/io/jans/as/common/model/registration/Client.java)|
+|`getScopes`|A list of OAuth scopes requested|[Scope](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/persistence-model/src/main/java/io/jans/as/persistence/model/Scope.java)|
+|`getUser`|A reference to the user attempting authentication|[User](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java) / [SimpleUser](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-core/model/src/main/java/io/jans/model/user/SimpleUser.java)|
+|`getSessionAttributes`|A map containing the parameters of the OAuth authentication request issued||
+
+Java example code:
+
+```
+import io.jans.as.server.util.AgamaConsentUtil;
+import io.jans.service.cdi.util.CdiUtil;
+...
+AgamaConsentUtil acu = CdiUtil.bean(AgamaConsentUtil.class);
+String name = acu.getClient().getClientName();        //retrieves the client's display name
+```
+
+Agama DSL example:
+
+```
+acuCls = Call io.jans.as.server.util.AgamaConsentUtil#class
+acu = Call io.jans.service.cdi.util.CdiUtil#bean acuCls
+name = acu.client.clientName        //retrieves the client's display name
 ```

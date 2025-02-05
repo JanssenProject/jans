@@ -10,7 +10,7 @@ const BOOTSTRAP_CONFIG = {
     "CEDARLING_WORKLOAD_AUTHZ": "enabled",
     "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
     "CEDARLING_LOCAL_JWKS": null,
-    "CEDARLING_LOCAL_POLICY_STORE": null,
+    "CEDARLING_POLICY_STORE_LOCAL": null,
     "CEDARLING_POLICY_STORE_LOCAL_FN": null,
     "CEDARLING_JWT_SIG_VALIDATION": "disabled",
     "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
@@ -18,27 +18,19 @@ const BOOTSTRAP_CONFIG = {
         "HS256",
         "RS256"
     ],
-    "CEDARLING_AT_ISS_VALIDATION": "disabled",
-    "CEDARLING_AT_JTI_VALIDATION": "disabled",
-    "CEDARLING_AT_NBF_VALIDATION": "disabled",
-    "CEDARLING_AT_EXP_VALIDATION": "disabled",
-    "CEDARLING_IDT_ISS_VALIDATION": "disabled",
-    "CEDARLING_IDT_SUB_VALIDATION": "disabled",
-    "CEDARLING_IDT_EXP_VALIDATION": "disabled",
-    "CEDARLING_IDT_IAT_VALIDATION": "disabled",
-    "CEDARLING_IDT_AUD_VALIDATION": "disabled",
-    "CEDARLING_USERINFO_ISS_VALIDATION": "disabled",
-    "CEDARLING_USERINFO_SUB_VALIDATION": "disabled",
-    "CEDARLING_USERINFO_AUD_VALIDATION": "disabled",
-    "CEDARLING_USERINFO_EXP_VALIDATION": "disabled",
+    "CEDARLING_TOKEN_CONFIGS": {
+        "access_token": { "entity_type_name": "Access_token" },
+        "id_token": { "entity_type_name": "id_token" },
+        "userinfo_token": { "entity_type_name": "Userinfo_token" },
+    },
     "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
     "CEDARLING_LOCK": "disabled",
     "CEDARLING_LOCK_MASTER_CONFIGURATION_URI": null,
-    "CEDARLING_DYNAMIC_CONFIGURATION": "disabled",
+    "CEDARLING_LOCK_DYNAMIC_CONFIGURATION": "disabled",
     "CEDARLING_LOCK_SSA_JWT": "",
-    "CEDARLING_AUDIT_HEALTH_INTERVAL": 0,
-    "CEDARLING_AUDIT_TELEMETRY_INTERVAL": 0,
-    "CEDARLING_LISTEN_SSE": "disabled"
+    "CEDARLING_LOCK_HEALTH_INTERVAL": 0,
+    "CEDARLING_LOCK_TELEMETRY_INTERVAL": 0,
+    "CEDARLING_LOCK_LISTEN_SSE": "disabled"
 };
 
 // Payload of access_token:

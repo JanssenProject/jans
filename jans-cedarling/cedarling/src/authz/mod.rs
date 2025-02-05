@@ -12,12 +12,12 @@ use crate::authorization_config::IdTokenTrustMode;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types;
 use crate::common::policy_store::PolicyStoreWithID;
-use crate::jwt::{self, TokenStr};
+use crate::jwt::{self, Token};
 use crate::log::interface::LogWriter;
 use crate::log::{
     AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, DiagnosticsRefs, LogEntry,
     LogLevel, LogTokensInfo, LogType, Logger, PrincipalLogEntry, UserAuthorizeInfo,
-    WorkloadAuthorizeInfo,
+    WorkloadAuthorizeInfo, gen_uuid7,
 };
 use build_ctx::*;
 use cedar_policy::{Entities, Entity, EntityUid};
@@ -72,11 +72,12 @@ impl Authz {
             build_user,
         );
 
-        config.log_service.log(
+        config.log_service.log_any(
             LogEntry::new_with_data(
                 config.pdp_id,
                 Some(config.application_name.clone()),
                 LogType::System,
+                None,
             )
             .set_cedar_version()
             .set_level(LogLevel::INFO)
@@ -94,43 +95,13 @@ impl Authz {
     pub(crate) async fn decode_tokens<'a>(
         &'a self,
         request: &'a Request,
-    ) -> Result<DecodedTokens<'a>, AuthorizeError> {
-        let access = if let Some(tkn) = request.tokens.access_token.as_ref() {
-            Some(
-                self.config
-                    .jwt_service
-                    .process_token(TokenStr::Access(tkn))
-                    .await?,
-            )
-        } else {
-            None
-        };
-        let id = if let Some(tkn) = request.tokens.id_token.as_ref() {
-            Some(
-                self.config
-                    .jwt_service
-                    .process_token(TokenStr::Id(tkn))
-                    .await?,
-            )
-        } else {
-            None
-        };
-        let userinfo = if let Some(tkn) = request.tokens.userinfo_token.as_ref() {
-            Some(
-                self.config
-                    .jwt_service
-                    .process_token(TokenStr::Userinfo(tkn))
-                    .await?,
-            )
-        } else {
-            None
-        };
-
-        Ok(DecodedTokens {
-            access,
-            id,
-            userinfo,
-        })
+    ) -> Result<HashMap<String, Token<'a>>, AuthorizeError> {
+        let tokens = self
+            .config
+            .jwt_service
+            .validate_tokens(&request.tokens)
+            .await?;
+        Ok(tokens)
     }
 
     /// Evaluate Authorization Request
@@ -138,6 +109,12 @@ impl Authz {
     /// - evaluate if authorization is granted for *workload*
     pub async fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
         let start_time = Utc::now();
+        // We use uuid v7 because it is generated based on the time and sortable.
+        // and we need sortable ids to use it in the sparkv database.
+        // Sparkv store data in BTree. So we need have correct order of ids.
+        //
+        // Request ID should be passed to each log entry for tracing in logs and to get log entities from memory logger
+        let request_id = gen_uuid7();
 
         let schema = &self.config.policy_store.schema;
 
@@ -261,6 +238,7 @@ impl Authz {
             self.config.authorization.user_workload_operator,
             workload_authz_result,
             user_authz_result,
+            request_id,
         );
 
         // measure time how long request executes
@@ -286,37 +264,18 @@ impl Authz {
             .as_ref()
             .map(|auth_info| &auth_info.diagnostics);
 
-        let tokens_logging_info = LogTokensInfo {
-            access: tokens.access.as_ref().map(|tkn| {
-                tkn.logging_info(
-                    self.config
-                        .authorization
-                        .decision_log_default_jwt_id
-                        .as_str(),
-                )
-            }),
-            id_token: tokens.id.as_ref().map(|tkn| {
-                tkn.logging_info(
-                    self.config
-                        .authorization
-                        .decision_log_default_jwt_id
-                        .as_str(),
-                )
-            }),
-            userinfo: tokens.userinfo.as_ref().map(|tkn| {
-                tkn.logging_info(
-                    self.config
-                        .authorization
-                        .decision_log_default_jwt_id
-                        .as_str(),
-                )
-            }),
-        };
+        let tokens_logging_info = LogTokensInfo::new(
+            &tokens,
+            self.config
+                .authorization
+                .decision_log_default_jwt_id
+                .as_str(),
+        );
 
         // Decision log
         // we log decision log before debug log, to avoid cloning diagnostic info
         self.config.log_service.as_ref().log_any(&DecisionLogEntry {
-            base: BaseLogEntry::new(self.config.pdp_id, LogType::Decision),
+            base: BaseLogEntry::new(self.config.pdp_id, LogType::Decision, request_id),
             policystore_id: self.config.policy_store.id.as_str(),
             policystore_version: self.config.policy_store.get_store_version(),
             principal: PrincipalLogEntry::new(&self.config.authorization),
@@ -337,11 +296,12 @@ impl Authz {
         // DEBUG LOG
         // Log all result information about both authorize checks.
         // Where principal is `"Jans::Workload"` and where principal is `"Jans::User"`.
-        self.config.log_service.as_ref().log(
+        self.config.log_service.as_ref().log_any(
             LogEntry::new_with_data(
                 self.config.pdp_id,
                 Some(self.config.application_name.clone()),
                 LogType::System,
+                Some(request_id),
             )
             .set_level(LogLevel::DEBUG)
             .set_auth_info(AuthorizationLogInfo {
@@ -386,7 +346,7 @@ impl Authz {
     pub fn build_entities(
         &self,
         request: &Request,
-        tokens: &DecodedTokens<'_>,
+        tokens: &HashMap<String, Token>,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         Ok(self
             .entity_builder
@@ -408,11 +368,9 @@ struct ExecuteAuthorizeParameters<'a> {
 pub struct AuthorizeEntitiesData {
     pub workload: Option<Entity>,
     pub user: Option<Entity>,
-    pub access_token: Option<Entity>,
-    pub id_token: Option<Entity>,
-    pub userinfo_token: Option<Entity>,
     pub resource: Entity,
     pub roles: Vec<Entity>,
+    pub tokens: HashMap<String, Entity>,
 }
 
 impl AuthorizeEntitiesData {
@@ -429,17 +387,11 @@ impl AuthorizeEntitiesData {
 
     /// Create iterator to get all entities
     fn into_iter(self) -> impl Iterator<Item = Entity> {
-        vec![self.resource].into_iter().chain(self.roles).chain(
-            vec![
-                self.user,
-                self.workload,
-                self.access_token,
-                self.userinfo_token,
-                self.id_token,
-            ]
+        vec![self.resource]
             .into_iter()
-            .flatten(),
-        )
+            .chain(self.roles)
+            .chain(self.tokens.into_values())
+            .chain(vec![self.user, self.workload].into_iter().flatten())
     }
 
     /// Create iterator to get all entities
@@ -447,16 +399,11 @@ impl AuthorizeEntitiesData {
         vec![&self.resource]
             .into_iter()
             .chain(self.roles.iter())
+            .chain(self.tokens.values())
             .chain(
-                vec![
-                    self.user.as_ref(),
-                    self.workload.as_ref(),
-                    self.access_token.as_ref(),
-                    self.userinfo_token.as_ref(),
-                    self.id_token.as_ref(),
-                ]
-                .into_iter()
-                .flatten(),
+                vec![self.user.as_ref(), self.workload.as_ref()]
+                    .into_iter()
+                    .flatten(),
             )
     }
 

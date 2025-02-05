@@ -216,6 +216,11 @@ public class TokenEntity implements Serializable {
         return TokenType.fromValue(tokenType);
     }
 
+    public boolean isAccessToken() {
+        final TokenType tokenTypeEnum = getTokenTypeEnum();
+        return tokenTypeEnum == TokenType.ACCESS_TOKEN || tokenTypeEnum == TokenType.LONG_LIVED_ACCESS_TOKEN;
+    }
+
     public void setTokenTypeEnum(TokenType tokenType) {
         if (tokenType != null) {
             this.tokenType = tokenType.getValue();

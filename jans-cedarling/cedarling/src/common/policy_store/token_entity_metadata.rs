@@ -9,7 +9,7 @@ use serde::Deserialize;
 pub use super::claim_mapping::ClaimMappings;
 use super::parse_option_string;
 
-///  Structure for storing mapping JWT claims to `cedar-policy` custom defined types in the `schema`.
+/// Structure for storing mapping JWT claims to `cedar-policy` custom defined types in the `schema`.
 ///
 /// An optional mapping of claims to their values. Each claim is represented
 /// by a key-value pair where the key is the claim name and the value is
@@ -37,9 +37,8 @@ pub struct TokenEntityMetadata {
 
 #[cfg(test)]
 mod test {
-    use serde_json::json;
-
     use super::TokenEntityMetadata;
+    use serde_json::json;
 
     /// Test deserialization of `TokenEntityMetadata` from JSON.
     #[test]

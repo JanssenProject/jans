@@ -13,10 +13,11 @@ use std::hash::Hash;
 use uuid7::Uuid;
 
 use super::LogLevel;
-use super::interface::Loggable;
+use super::interface::{Indexed, Loggable};
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types::{self, ApplicationName};
 use crate::common::policy_store::PoliciesContainer;
+use crate::jwt::Token;
 
 /// ISO-8601 time format for [`chrono`]
 /// example: 2024-11-27T10:10:50.654Z
@@ -54,9 +55,10 @@ impl LogEntry {
         pdp_id: app_types::PdpID,
         application_id: Option<app_types::ApplicationName>,
         log_type: LogType,
+        request_id: Option<Uuid>,
     ) -> LogEntry {
         Self {
-            base: BaseLogEntry::new(pdp_id, log_type),
+            base: BaseLogEntry::new_opt_request_id(pdp_id, log_type, request_id),
             // We use uuid v7 because it is generated based on the time and sortable.
             // and we need sortable ids to use it in the sparkv database.
             // Sparkv store data in BTree. So we need have correct order of ids.
@@ -96,18 +98,37 @@ impl LogEntry {
     }
 }
 
-impl Loggable for LogEntry {
-    fn get_request_id(&self) -> Uuid {
-        self.base.get_request_id()
+impl Indexed for LogEntry {
+    fn get_id(&self) -> Uuid {
+        self.base.get_id()
     }
 
+    fn get_additional_ids(&self) -> Vec<Uuid> {
+        self.base.get_additional_ids()
+    }
+
+    fn get_tags(&self) -> Vec<&str> {
+        self.base.get_tags()
+    }
+}
+
+impl Loggable for LogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }
 }
 
 /// Type of log entry
-#[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    serde::Serialize,
+    serde::Deserialize,
+    strum::IntoStaticStr,
+    derive_more::Display,
+)]
 pub enum LogType {
     Decision,
     System,
@@ -168,7 +189,9 @@ pub struct WorkloadAuthorizeInfo {
 }
 
 /// Cedar-policy decision of the authorization
-#[derive(Debug, Clone, PartialEq, Eq, Copy, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Debug, Clone, PartialEq, Eq, Copy, serde::Serialize, serde::Deserialize, strum::AsRefStr,
+)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum Decision {
     /// Determined that the request should be allowed
@@ -341,11 +364,21 @@ pub struct DecisionLogEntry<'a> {
     pub decision_time_ms: i64,
 }
 
-impl Loggable for &DecisionLogEntry<'_> {
-    fn get_request_id(&self) -> Uuid {
-        self.base.get_request_id()
+impl Indexed for &DecisionLogEntry<'_> {
+    fn get_id(&self) -> Uuid {
+        self.base.get_id()
     }
 
+    fn get_additional_ids(&self) -> Vec<Uuid> {
+        self.base.get_additional_ids()
+    }
+
+    fn get_tags(&self) -> Vec<&str> {
+        self.base.get_tags()
+    }
+}
+
+impl Loggable for &DecisionLogEntry<'_> {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }
@@ -377,8 +410,12 @@ pub fn gen_uuid7() -> Uuid {
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct BaseLogEntry {
-    /// unique identifier for this event
-    pub request_id: Uuid,
+    /// Unique identifier for this event.
+    /// It should be uuid7
+    pub id: Uuid,
+    /// identifier for bunch of events (whole request)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub request_id: Option<Uuid>,
     /// Time of decision, in ISO-8601 time format
     /// This field is optional. Can be none if we can't have access to clock (WASM)
     /// or it is not specified in context
@@ -393,7 +430,7 @@ pub struct BaseLogEntry {
 }
 
 impl BaseLogEntry {
-    pub(crate) fn new(pdp_id: app_types::PdpID, log_type: LogType) -> Self {
+    pub(crate) fn new(pdp_id: app_types::PdpID, log_type: LogType, request_id: Uuid) -> Self {
         let local_time_string = chrono::Local::now().format(ISO8601).to_string();
 
         let default_log_level = if log_type == LogType::System {
@@ -403,10 +440,31 @@ impl BaseLogEntry {
         };
 
         Self {
-            // We use uuid v7 because it is generated based on the time and sortable.
-            // and we need sortable ids to use it in the sparkv database.
-            // Sparkv store data in BTree. So we need have correct order of ids.
-            request_id: gen_uuid7(),
+            id: gen_uuid7(),
+            request_id: Some(request_id),
+            timestamp: Some(local_time_string),
+            log_kind: log_type,
+            pdp_id: pdp_id.0,
+            level: default_log_level,
+        }
+    }
+
+    pub(crate) fn new_opt_request_id(
+        pdp_id: app_types::PdpID,
+        log_type: LogType,
+        request_id: Option<Uuid>,
+    ) -> Self {
+        let local_time_string = chrono::Local::now().format(ISO8601).to_string();
+
+        let default_log_level = if log_type == LogType::System {
+            Some(LogLevel::TRACE)
+        } else {
+            None
+        };
+
+        Self {
+            id: gen_uuid7(),
+            request_id,
             timestamp: Some(local_time_string),
             log_kind: log_type,
             pdp_id: pdp_id.0,
@@ -415,11 +473,29 @@ impl BaseLogEntry {
     }
 }
 
-impl Loggable for BaseLogEntry {
-    fn get_request_id(&self) -> Uuid {
-        self.request_id
+impl Indexed for BaseLogEntry {
+    fn get_id(&self) -> Uuid {
+        self.id
     }
 
+    fn get_additional_ids(&self) -> Vec<Uuid> {
+        // return empty vec if value is None
+        self.request_id.into_iter().collect()
+    }
+
+    fn get_tags(&self) -> Vec<&'static str> {
+        let mut tags = Vec::with_capacity(2);
+        tags.push(self.log_kind.into());
+
+        if let Some(level) = self.level {
+            tags.push(level.into());
+        }
+
+        tags
+    }
+}
+
+impl Loggable for BaseLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.level
     }
@@ -478,9 +554,15 @@ impl serde::Serialize for PrincipalLogEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
-pub struct LogTokensInfo<'a> {
-    pub id_token: Option<HashMap<&'a str, &'a serde_json::Value>>,
-    #[serde(rename = "Userinfo")]
-    pub userinfo: Option<HashMap<&'a str, &'a serde_json::Value>>,
-    pub access: Option<HashMap<&'a str, &'a serde_json::Value>>,
+pub struct LogTokensInfo<'a>(pub HashMap<&'a str, HashMap<&'a str, &'a serde_json::Value>>);
+
+impl<'a> LogTokensInfo<'a> {
+    pub fn new(tokens: &'a HashMap<String, Token>, decision_log_jwt_id: &'a str) -> Self {
+        let tokens_logging_info = tokens
+            .iter()
+            .map(|(tkn_name, tkn)| (tkn_name.as_str(), tkn.logging_info(decision_log_jwt_id)))
+            .collect::<HashMap<&'a str, HashMap<&'a str, &'a serde_json::Value>>>();
+
+        Self(tokens_logging_info)
+    }
 }

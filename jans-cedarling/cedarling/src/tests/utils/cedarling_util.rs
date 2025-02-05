@@ -3,13 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::{
-    authorization_config::IdTokenTrustMode, AuthorizationConfig, JwtConfig, WorkloadBoolOp,
-};
+use crate::authorization_config::IdTokenTrustMode;
+use crate::raw_config::token_settings::TokenConfigs;
+use crate::{AuthorizationConfig, JwtConfig, WorkloadBoolOp};
 pub use crate::{
     BootstrapConfig, BootstrapConfigRaw, Cedarling, FeatureToggle, LogConfig, LogTypeConfig,
     PolicyStoreConfig, PolicyStoreSource,
 };
+use std::collections::HashMap;
 
 /// fixture for [`BootstrapConfigRaw`]
 pub fn get_raw_config(local_policy_store: &str) -> BootstrapConfigRaw {
@@ -25,6 +26,7 @@ pub fn get_raw_config(local_policy_store: &str) -> BootstrapConfigRaw {
         log_type: crate::LoggerType::StdOut,
         local_policy_store: Some(local_policy_store_json.to_string()),
         jwt_status_validation: FeatureToggle::Disabled,
+        token_configs: TokenConfigs::without_validation(),
         id_token_trust_mode: IdTokenTrustMode::None,
         ..Default::default()
     }
@@ -46,6 +48,18 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::And,
+            mapping_user: Some("Jans::User".to_string()),
+            mapping_workload: Some("Jans::Workload".to_string()),
+            mapping_role: Some("Jans::Role".to_string()),
+            mapping_tokens: HashMap::from([
+                ("access_token".to_string(), "Jans::Access_token".to_string()),
+                ("id_token".to_string(), "Jans::id_token".to_string()),
+                (
+                    "userinfo_token".to_string(),
+                    "Jans::Userinfo_token".to_string(),
+                ),
+            ])
+            .into(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },

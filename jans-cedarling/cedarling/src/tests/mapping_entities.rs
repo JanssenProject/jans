@@ -6,15 +6,12 @@
 //! In this test cases we check mapping entities using Bootstrap properties:
 //! CEDARLING_MAPPING_USER
 //! CEDARLING_MAPPING_WORKLOAD
-//! CEDARLING_MAPPING_ID_TOKEN
-//! CEDARLING_MAPPING_ACCESS_TOKEN
-//! CEDARLING_MAPPING_USERINFO_TOKEN
+//! CEDARLING_TOKEN_CONFIGS
 
 use super::utils::*;
 use crate::authz::entity_builder::{
     BuildCedarlingEntityError, BuildEntityError, BuildTokenEntityError,
 };
-use crate::common::policy_store::TokenKind;
 use crate::{AuthorizeError, Cedarling, cmp_decision, cmp_policy};
 use cedarling_util::get_raw_config;
 use std::collections::HashSet;
@@ -117,12 +114,20 @@ async fn test_default_mapping() {
 #[test]
 async fn test_custom_mapping() {
     let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
-
-    raw_config.mapping_user = Some("MappedUser".to_string());
-    raw_config.mapping_workload = Some("MappedWorkload".to_string());
-    raw_config.mapping_id_token = Some("MappedIdToken".to_string());
-    raw_config.mapping_access_token = Some("MappedAccess_token".to_string());
-    raw_config.mapping_userinfo_token = Some("MappedUserinfo_token".to_string());
+    raw_config.mapping_user = Some("Jans::MappedUser".to_string());
+    raw_config.mapping_workload = Some("Jans::MappedWorkload".to_string());
+    raw_config.token_configs = serde_json::from_value(json!({
+        "access_token": {
+            "entity_type_name": "Jans::MappedAccess_token",
+        },
+        "id_token": {
+            "entity_type_name": "Jans::MappedIdToken",
+        },
+        "userinfo_token": {
+            "entity_type_name": "Jans::MappedUserinfo_token",
+        },
+    }))
+    .expect("valid token configs");
 
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
@@ -191,8 +196,8 @@ async fn test_failed_user_mapping() {
         AuthorizeError::BuildEntity(BuildCedarlingEntityError::User(error)) => {
             assert_eq!(error.errors.len(), 2, "there should be 2 errors");
 
-            let (token_kind, err) = &error.errors[0];
-            assert_eq!(token_kind, &TokenKind::Userinfo);
+            let (token_name, err) = &error.errors[0];
+            assert_eq!(token_name, "userinfo_token");
             assert!(
                 matches!(err, BuildEntityError::EntityNotInSchema(ref err) if err == &entity_type),
                 "expected EntityNotInSchema({}), got: {:?}",
@@ -200,8 +205,8 @@ async fn test_failed_user_mapping() {
                 err,
             );
 
-            let (token_kind, err) = &error.errors[1];
-            assert_eq!(token_kind, &TokenKind::Id);
+            let (token_name, err) = &error.errors[1];
+            assert_eq!(token_name, "id_token");
             assert!(
                 matches!(err, BuildEntityError::EntityNotInSchema(ref err) if err == &entity_type),
                 "expected EntityNotInSchema({}), got: {:?}",
@@ -240,8 +245,8 @@ async fn test_failed_workload_mapping() {
             assert_eq!(error.errors.len(), 2, "there should be 2 errors");
 
             // check for access token error
-            let (token_kind, err) = &error.errors[0];
-            assert_eq!(token_kind, &TokenKind::Access);
+            let (token_name, err) = &error.errors[0];
+            assert_eq!(token_name, "access_token");
             assert!(
                 matches!(err, BuildEntityError::EntityNotInSchema(ref err) if err == &entity_type),
                 "expected CouldNotFindEntity(\"{}\"), got: {:?}",
@@ -250,8 +255,8 @@ async fn test_failed_workload_mapping() {
             );
 
             // check for id token error
-            let (token_kind, err) = &error.errors[1];
-            assert_eq!(token_kind, &TokenKind::Id);
+            let (token_name, err) = &error.errors[1];
+            assert_eq!(token_name, "id_token");
             assert!(
                 matches!(err, BuildEntityError::EntityNotInSchema(ref err) if err == &entity_type),
                 "expected CouldNotFindEntity(\"{}\"), got: {:?}",
@@ -270,8 +275,12 @@ async fn test_failed_workload_mapping() {
 #[test]
 async fn test_failed_id_token_mapping() {
     let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
-
-    raw_config.mapping_id_token = Some("MappedIdTokenNotExist".to_string());
+    raw_config.token_configs = serde_json::from_value(json!({
+        "id_token": {
+            "entity_type_name": "MappedIdTokenNotExist",
+        },
+    }))
+    .expect("valid token configs");
 
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
@@ -288,10 +297,11 @@ async fn test_failed_id_token_mapping() {
         .expect_err("request should be parsed with mapping error");
 
     match err {
-        AuthorizeError::BuildEntity(BuildCedarlingEntityError::IdToken(
-            BuildTokenEntityError { token_kind, err },
-        )) => {
-            assert_eq!(token_kind, TokenKind::Id);
+        AuthorizeError::BuildEntity(BuildCedarlingEntityError::Token(BuildTokenEntityError {
+            token_name,
+            err,
+        })) => {
+            assert_eq!(token_name, "id_token");
             assert!(
                 matches!(err, BuildEntityError::EntityNotInSchema(ref name) if name == "MappedIdTokenNotExist"),
                 "expected EntityNotInSchema(\"MappedIdTokenNotExist\") got: {:?}",
@@ -310,7 +320,12 @@ async fn test_failed_id_token_mapping() {
 async fn test_failed_access_token_mapping() {
     let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
 
-    raw_config.mapping_access_token = Some("MappedAccess_tokenNotExist".to_string());
+    raw_config.token_configs = serde_json::from_value(json!({
+        "access_token": {
+            "entity_type_name": "MappedAccess_tokenNotExist",
+        },
+    }))
+    .expect("valid token configs");
 
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
@@ -327,10 +342,11 @@ async fn test_failed_access_token_mapping() {
         .expect_err("request should be parsed with mapping error");
 
     match err {
-        AuthorizeError::BuildEntity(BuildCedarlingEntityError::AccessToken(
-            BuildTokenEntityError { token_kind, err },
-        )) => {
-            assert_eq!(token_kind, TokenKind::Access);
+        AuthorizeError::BuildEntity(BuildCedarlingEntityError::Token(BuildTokenEntityError {
+            token_name,
+            err,
+        })) => {
+            assert_eq!(token_name, "access_token");
             assert!(
                 matches!(err, BuildEntityError::EntityNotInSchema(ref name) if name == "MappedAccess_tokenNotExist"),
                 "expected EntityNotInSchema(\"MappedAccess_tokenNotExist\") got: {:?}",
@@ -346,7 +362,12 @@ async fn test_failed_access_token_mapping() {
 async fn test_failed_userinfo_token_mapping() {
     let mut raw_config = get_raw_config(POLICY_STORE_RAW_YAML);
 
-    raw_config.mapping_userinfo_token = Some("MappedUserinfo_tokenNotExist".to_string());
+    raw_config.token_configs = serde_json::from_value(json!({
+        "userinfo_token": {
+            "entity_type_name": "MappedUserinfo_tokenNotExist",
+        },
+    }))
+    .expect("valid token configs");
 
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");
@@ -363,10 +384,11 @@ async fn test_failed_userinfo_token_mapping() {
         .expect_err("request should be parsed with mapping error");
 
     match err {
-        AuthorizeError::BuildEntity(BuildCedarlingEntityError::UserinfoToken(
-            BuildTokenEntityError { token_kind, err },
-        )) => {
-            assert_eq!(token_kind, TokenKind::Userinfo);
+        AuthorizeError::BuildEntity(BuildCedarlingEntityError::Token(BuildTokenEntityError {
+            token_name,
+            err,
+        })) => {
+            assert_eq!(token_name, "userinfo_token");
             assert!(
                 matches!(err, BuildEntityError::EntityNotInSchema(ref name) if name == "MappedUserinfo_tokenNotExist"),
                 "expected EntityNotInSchema(\"MappedUserinfo_tokenNotExist\") got: {:?}",
