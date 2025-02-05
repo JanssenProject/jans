@@ -7374,6 +7374,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#memory-log-interface" class="md-nav__link">
+    Memory Log interface
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#jans-lock-server" class="md-nav__link">
     Jans Lock Server
   </a>
@@ -8673,6 +8680,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#memory-log-interface" class="md-nav__link">
+    Memory Log interface
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#jans-lock-server" class="md-nav__link">
     Jans Lock Server
   </a>
@@ -8816,6 +8830,38 @@ bootstrap property:</p>
 <li><code>DEBUG</code>: Designates fine-grained informational events useful for debugging the application.</li>
 <li><code>TRACE</code>: Provides finer-grained informational events than DEBUG. It is often used for detailed tracing of program execution.</li>
 </ul>
+<h2 id="memory-log-interface">Memory Log interface<a class="headerlink" href="#memory-log-interface" title="Permanent link">#</a></h2>
+<p>This interface is used to interact with the memory log storage. It provides methods for getting logs and removing them from the storage.
+Same interface is translated to other languages through bindings.</p>
+<p>Tags are used to filter logs. It can be <code>log_kind</code> and <code>log_level</code> values from log entry data.</p>
+<p>You can obtain the <code>request_id</code> from the result structure of the <code>authorize</code> method call.</p>
+<div class="highlight"><pre><span></span><code><span class="sd">/// Log Storage</span>
+<span class="sd">/// interface for getting log entries from the storage</span>
+<span class="k">pub</span><span class="w"> </span><span class="k">trait</span><span class="w"> </span><span class="n">LogStorage</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="sd">/// Return logs and remove them from the storage</span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">pop_logs</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">serde_json</span>::<span class="n">Value</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// Get specific log entry</span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">get_log_by_id</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">id</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Option</span><span class="o">&lt;</span><span class="n">serde_json</span>::<span class="n">Value</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// Returns a list of all log ids</span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">get_log_ids</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// Get logs by tag, like `log_kind` or `log level`.</span>
+<span class="w">    </span><span class="sd">/// Tag can be `log_kind`, `log_level`.</span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">get_logs_by_tag</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">serde_json</span>::<span class="n">Value</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// Get logs by request_id.</span>
+<span class="w">    </span><span class="sd">/// Return log entries that match the given request_id.</span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">get_logs_by_request_id</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">request_id</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">serde_json</span>::<span class="n">Value</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// Get log by request_id and tag, like composite key `request_id` + `log_kind`.</span>
+<span class="w">    </span><span class="sd">/// Tag can be `log_kind`, `log_level`.</span>
+<span class="w">    </span><span class="sd">/// Return log entries that match the given request_id and tag.</span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">get_logs_by_request_id_and_tag</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">request_id</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span>-&gt; <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">serde_json</span>::<span class="n">Value</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="jans-lock-server">Jans Lock Server<a class="headerlink" href="#jans-lock-server" title="Permanent link">#</a></h2>
 <p>In enterprise deployments, <a href="../janssen-server/lock/">Janssen Lock Server</a> collects Cedarling
 logs and can stream to a database or S3 bucket. The Cedarling decision logs provide compliance
@@ -9020,7 +9066,7 @@ analysis to show everything the attacker attempted, both allowed and denied.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-13T22:35:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-04T16:19:58+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-04</span>
       
         <br>
         Created:

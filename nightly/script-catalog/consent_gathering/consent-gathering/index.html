@@ -5464,6 +5464,19 @@
     Writing consent flows using Agama
   </a>
   
+    <nav class="md-nav" aria-label="Writing consent flows using Agama">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#getting-contextual-data" class="md-nav__link">
+    Getting contextual data
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -8738,6 +8751,19 @@
     Writing consent flows using Agama
   </a>
   
+    <nav class="md-nav" aria-label="Writing consent flows using Agama">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#getting-contextual-data" class="md-nav__link">
+    Getting contextual data
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -8774,7 +8800,7 @@
     
       
       
-        <span class="md-tag">ConsentGathering</span>
+        <span class="md-tag">consent</span>
       
     
   </nav>
@@ -9085,13 +9111,58 @@ acrN - consentScriptN
 <li>With <code>agama_co.acme.mysuperflow</code>, the Agama flow <code>io.jans.consent.B</code> will be launched for consent</li>
 </ul>
 <p>Agama flows used for consent can be built using the same approach and tooling used for regular authentication flows. Note however there is no need to pass a user identity in the <code>Finish</code> instruction. If passed, it will be ignored, thus, it suffices to end a consent flow with <code>Finish false/true</code>.</p>
+<h3 id="getting-contextual-data">Getting contextual data<a class="headerlink" href="#getting-contextual-data" title="Permanent link">#</a></h3>
+<p>To access information in your Agama consent flow related to the user attempting login, scopes requested, etc., get an instance of managed bean <code>io.jans.as.server.util.AgamaConsentUtil</code> and use the available methods as summarized below:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+<th>Reference class</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getClient</code></td>
+<td>Gets a reference to the OAuth client associated to the authentication request</td>
+<td><a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/common/src/main/java/io/jans/as/common/model/registration/Client.java">Client</a></td>
+</tr>
+<tr>
+<td><code>getScopes</code></td>
+<td>A list of OAuth scopes requested</td>
+<td><a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/persistence-model/src/main/java/io/jans/as/persistence/model/Scope.java">Scope</a></td>
+</tr>
+<tr>
+<td><code>getUser</code></td>
+<td>A reference to the user attempting authentication</td>
+<td><a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java">User</a> / <a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-core/model/src/main/java/io/jans/model/user/SimpleUser.java">SimpleUser</a></td>
+</tr>
+<tr>
+<td><code>getSessionAttributes</code></td>
+<td>A map containing the parameters of the OAuth authentication request issued</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Java example code:</p>
+<div class="highlight"><pre><span></span><code>import io.jans.as.server.util.AgamaConsentUtil;
+import io.jans.service.cdi.util.CdiUtil;
+...
+AgamaConsentUtil acu = CdiUtil.bean(AgamaConsentUtil.class);
+String name = acu.getClient().getClientName();        //retrieves the client&#39;s display name
+</code></pre></div>
+<p>Agama DSL example:</p>
+<div class="highlight"><pre><span></span><code>acuCls = Call io.jans.as.server.util.AgamaConsentUtil#class
+acu = Call io.jans.service.cdi.util.CdiUtil#bean acuCls
+name = acu.client.clientName        //retrieves the client&#39;s display name
+</code></pre></div>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-30T12:28:59+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-30</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-03T12:26:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-03</span>
       
         <br>
         Created:

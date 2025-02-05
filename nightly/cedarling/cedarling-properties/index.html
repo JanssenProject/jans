@@ -7368,6 +7368,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#required-keys-for-startup" class="md-nav__link">
+    Required keys for startup
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#user-workload-boolean-operation" class="md-nav__link">
     User-Workload Boolean Operation
   </a>
@@ -7390,6 +7397,13 @@
         <li class="md-nav__item">
   <a href="#token-configs" class="md-nav__link">
     Token Configs
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#default-implementation-of-token-config" class="md-nav__link">
+    Default implementation of Token Config
   </a>
   
 </li>
@@ -8680,6 +8694,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#required-keys-for-startup" class="md-nav__link">
+    Required keys for startup
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#user-workload-boolean-operation" class="md-nav__link">
     User-Workload Boolean Operation
   </a>
@@ -8702,6 +8723,13 @@
         <li class="md-nav__item">
   <a href="#token-configs" class="md-nav__link">
     Token Configs
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#default-implementation-of-token-config" class="md-nav__link">
+    Default implementation of Token Config
   </a>
   
 </li>
@@ -8852,16 +8880,9 @@
 </ul>
 <p><strong>The following bootstrap properties are needed to configure log behavior:</strong></p>
 <ul>
-<li><strong><code>CEDARLING_LOG_STORAGE</code></strong> : <code>off</code>, <code>memory</code>, <code>std_out</code></li>
+<li><strong><code>CEDARLING_LOG_TYPE</code></strong> : <code>off</code>, <code>memory</code>, <code>std_out</code></li>
 <li><strong><code>CEDARLING_LOG_LEVEL</code></strong> : System Log Level <a href="../cedarling-logs/">See here</a>. Default to <code>WARN</code></li>
 <li><strong><code>CEDARLING_LOG_STDOUT_TYPE</code></strong> : Either <code>System</code>, <code>Metric</code>, or <code>Decision</code>. Default to System.</li>
-<li><strong><code>CEDARLING_LOG_LEVEL</code></strong> : Log level filter for logging. Log level has only <code>System</code> log type entries. <code>TRACE</code> is lowest. <code>FATAL</code> is highest. Possible variants:</li>
-<li>FATAL</li>
-<li>ERROR</li>
-<li>WARN</li>
-<li>INFO</li>
-<li>DEBUG</li>
-<li>TRACE</li>
 <li><strong><code>CEDARLING_DECISION_LOG_USER_CLAIMS</code></strong> : List of claims to map from user entity, such as ["sub", "email", "username", ...]</li>
 <li><strong><code>CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS</code></strong> : List of claims to map from user entity, such as ["client_id", "rp_id", ...]</li>
 <li><strong><code>CEDARLING_DECISION_LOG_DEFAULT_JWT_ID</code></strong> : Token claims that will be used for decision logging. Default is "jti", but perhaps some other claim is needed.</li>
@@ -8870,10 +8891,10 @@
 <p><strong>The following bootstrap properties are needed to configure JWT and cryptographic behavior:</strong></p>
 <ul>
 <li><strong><code>CEDARLING_LOCAL_JWKS</code></strong> : JWKS file with public keys</li>
-<li><strong><code>CEDARLING_LOCAL_POLICY_STORE</code></strong> : JSON object with policy store</li>
+<li><strong><code>CEDARLING_POLICY_STORE_LOCAL</code></strong> : JSON object with policy store</li>
 <li><strong><code>CEDARLING_POLICY_STORE_LOCAL_FN</code></strong> : Local file with JSON object with policy store</li>
-<li><strong><code>CEDARLING_JWT_SIG_VALIDATION</code></strong> : <code>Enabled</code> | <code>Disabled</code> -- Whether to check the signature  of all JWT tokens. This requires an <code>iss</code> is present.</li>
-<li><strong><code>CEDARLING_JWT_STATUS_VALIDATION</code></strong> : <code>Enabled</code> | <code>Disabled</code> -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retreive the latest Status List JWT from the <code>.well-known/openid-configuration</code> via the <code>status_list_endpoint</code> claim and cache it. See the <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">IETF Draft</a> for more info.</li>
+<li><strong><code>CEDARLING_JWT_SIG_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the signature  of all JWT tokens. This requires an <code>iss</code> is present.</li>
+<li><strong><code>CEDARLING_JWT_STATUS_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retreive the latest Status List JWT from the <code>.well-known/openid-configuration</code> via the <code>status_list_endpoint</code> claim and cache it. See the <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">IETF Draft</a> for more info.</li>
 <li><strong><code>CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED</code></strong> : Only tokens signed with these algorithms are acceptable to the Cedarling.</li>
 <li><strong><code>CEDARLING_TOKEN_CONFIGS</code></strong> : JSON object containing token specific configs. See: <a href="#token-configs">Token Configs</a>.</li>
 <li><strong><code>CEDARLING_ID_TOKEN_TRUST_MODE</code></strong> :  <code>Strict</code> | <code>None</code>. Varying levels of validations based on the preference of the developer.
@@ -8881,15 +8902,32 @@
 </ul>
 <p><strong>The following bootstrap properties are only needed for enterprise deployments.</strong></p>
 <ul>
-<li><strong><code>CEDARLING_LOCK</code></strong> : Enabled | Disabled. If Enabled, the Cedarling will connect to the Lock Master for policies, and subscribe for SSE events.</li>
-<li><strong><code>CEDARLING_LOCK_MASTER_CONFIGURATION_URI</code></strong> : Required if <code>LOCK</code> == <code>Enabled</code>. URI where Cedarling can get JSON file with all required metadata about Lock Master, i.e. <code>.well-known/lock-master-configuration</code>.</li>
-<li><strong><code>CEDARLING_LOCK_DYNAMIC_CONFIGURATION</code></strong> : Enabled | Disabled, controls whether Cedarling should listen for SSE config updates.</li>
+<li><strong><code>CEDARLING_LOCK</code></strong> : <code>enabled</code> | <code>disabled</code>. If <code>enabled</code>, the Cedarling will connect to the Lock Master for policies, and subscribe for SSE events.</li>
+<li><strong><code>CEDARLING_LOCK_MASTER_CONFIGURATION_URI</code></strong> : Required if <code>LOCK</code> == <code>enabled</code>. URI where Cedarling can get JSON file with all required metadata about Lock Master, i.e. <code>.well-known/lock-master-configuration</code>.</li>
+<li><strong><code>CEDARLING_LOCK_DYNAMIC_CONFIGURATION</code></strong> : <code>enabled</code> | <code>disabled</code>, controls whether Cedarling should listen for SSE config updates.</li>
 <li><strong><code>CEDARLING_LOCK_SSA_JWT</code></strong> : SSA for DCR in a Lock Master deployment. The Cedarling will validate this SSA JWT prior to DCR.</li>
 <li><strong><code>CEDARLING_LOCK_LOG_INTERVAL</code></strong> : How often to send log messages to Lock Master (0 to turn off trasmission).</li>
 <li><strong><code>CEDARLING_LOCK_HEALTH_INTERVAL</code></strong> : How often to send health messages to Lock Master (0 to turn off transmission).</li>
 <li><strong><code>CEDARLING_LOCK_TELEMETRY_INTERVAL</code></strong> : How often to send telemetry messages to Lock Master (0 to turn off transmission).</li>
-<li><strong><code>CEDARLING_LOCK_LISTEN_SSE</code></strong> :  Enabled | Disabled: controls whether Cedarling should listen for updates from the Lock Server.</li>
+<li><strong><code>CEDARLING_LOCK_LISTEN_SSE</code></strong> :  <code>enabled</code> | <code>disabled</code>: controls whether Cedarling should listen for updates from the Lock Server.</li>
 </ul>
+<h2 id="required-keys-for-startup">Required keys for startup<a class="headerlink" href="#required-keys-for-startup" title="Permanent link">#</a></h2>
+<ul>
+<li>**<code>CEDARLING_APPLICATION_NAME</code></li>
+<li>**<code>CEDARLING_TOKEN_CONFIGS</code> - check if default implementation of Token Config is suitable for you.</li>
+</ul>
+<p>To enable usage of principals at least one of the following keys must be provided:</p>
+<ul>
+<li>**<code>CEDARLING_WORKLOAD_AUTHZ</code></li>
+<li>**<code>CEDARLING_USER_AUTHZ</code></li>
+</ul>
+<p>To load policy store one of the following keys must be provided:</p>
+<ul>
+<li>**<code>CEDARLING_POLICY_STORE_LOCAL</code></li>
+<li>**<code>CEDARLING_POLICY_STORE_URI</code></li>
+<li>**<code>CEDARLING_POLICY_STORE_LOCAL_FN</code></li>
+</ul>
+<p>All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.</p>
 <h2 id="user-workload-boolean-operation">User-Workload Boolean Operation<a class="headerlink" href="#user-workload-boolean-operation" title="Permanent link">#</a></h2>
 <p>The <code>CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION</code> property specifies what boolean operation to use for the <code>USER</code> and <code>WORKLOAD</code> when making authz (authorization) decisions.</p>
 <h3 id="available-operations">Available Operations<a class="headerlink" href="#available-operations" title="Permanent link">#</a></h3>
@@ -8927,6 +8965,51 @@
 <span class="w">    </span><span class="s2">&quot;exp&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">  </span><span class="p">},</span><span class="w"></span>
 <span class="w">  </span><span class="c1">// more custom tokens can be added here</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<h2 id="default-implementation-of-token-config">Default implementation of Token Config<a class="headerlink" href="#default-implementation-of-token-config" title="Permanent link">#</a></h2>
+<p>Here is rust code default implementation of Token Configs (<code>CEDARLING_TOKEN_CONFIGS</code>). This is used when no custom token config is provided.</p>
+<div class="highlight"><pre><span></span><code><span class="k">impl</span><span class="w"> </span><span class="nb">Default</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">TokenConfigs</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">default</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nc">Self</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="bp">Self</span><span class="p">(</span><span class="n">HashMap</span>::<span class="n">from</span><span class="p">([</span><span class="w"></span>
+<span class="w">            </span><span class="p">(</span><span class="s">&quot;access_token&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">TokenConfig</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">entity_type_name</span>: <span class="s">&quot;Access_token&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"></span>
+<span class="w">                </span><span class="n">claims</span>: <span class="nc">ClaimsValidationConfig</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="n">iss</span>: <span class="nc">FeatureToggle</span>::<span class="n">Enabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">sub</span>: <span class="nc">FeatureToggle</span>::<span class="n">Disabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">aud</span>: <span class="nc">FeatureToggle</span>::<span class="n">Disabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">exp</span>: <span class="nc">FeatureToggle</span>::<span class="n">Enabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">nbf</span>: <span class="nc">FeatureToggle</span>::<span class="n">Disabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">iat</span>: <span class="nc">FeatureToggle</span>::<span class="n">Disabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">jti</span>: <span class="nc">FeatureToggle</span>::<span class="n">Enabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="p">}),</span><span class="w"></span>
+<span class="w">            </span><span class="p">(</span><span class="s">&quot;id_token&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">TokenConfig</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">entity_type_name</span>: <span class="s">&quot;id_token&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"></span>
+<span class="w">                </span><span class="n">claims</span>: <span class="nc">ClaimsValidationConfig</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="n">iss</span>: <span class="nc">FeatureToggle</span>::<span class="n">Enabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">sub</span>: <span class="nc">FeatureToggle</span>::<span class="n">Enabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">aud</span>: <span class="nc">FeatureToggle</span>::<span class="n">Enabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">exp</span>: <span class="nc">FeatureToggle</span>::<span class="n">Enabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">nbf</span>: <span class="nc">FeatureToggle</span>::<span class="n">Disabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">iat</span>: <span class="nc">FeatureToggle</span>::<span class="n">Disabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">jti</span>: <span class="nc">FeatureToggle</span>::<span class="n">Disabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="p">}),</span><span class="w"></span>
+<span class="w">            </span><span class="p">(</span><span class="s">&quot;userinfo_token&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">TokenConfig</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">entity_type_name</span>: <span class="s">&quot;Userinfo_token&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"></span>
+<span class="w">                </span><span class="n">claims</span>: <span class="nc">ClaimsValidationConfig</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="n">iss</span>: <span class="nc">FeatureToggle</span>::<span class="n">Enabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">sub</span>: <span class="nc">FeatureToggle</span>::<span class="n">Enabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">aud</span>: <span class="nc">FeatureToggle</span>::<span class="n">Enabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">exp</span>: <span class="nc">FeatureToggle</span>::<span class="n">Enabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">nbf</span>: <span class="nc">FeatureToggle</span>::<span class="n">Disabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">iat</span>: <span class="nc">FeatureToggle</span>::<span class="n">Disabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="n">jti</span>: <span class="nc">FeatureToggle</span>::<span class="n">Disabled</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="p">}),</span><span class="w"></span>
+<span class="w">        </span><span class="p">]))</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <h2 id="id-token-trust-mode">ID Token Trust Mode<a class="headerlink" href="#id-token-trust-mode" title="Permanent link">#</a></h2>
@@ -8972,59 +9055,50 @@
 <h3 id="loading-from-json">Loading From JSON<a class="headerlink" href="#loading-from-json" title="Permanent link">#</a></h3>
 <p>Below is an example of a bootstrap config in JSON format. Not all fields should be specified, almost all have default value.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_APPLICATION_NAME&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_POLICY_STORE_URI&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_POLICY_STORE_ID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_LOG_TYPE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;memory&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_LOG_LEVEL&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_DECISION_LOG_USER_CLAIMS&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;email&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;username&quot;</span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;client_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;rp_id&quot;</span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_DECISION_LOG_DEFAULT_JWT_ID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_LOG_TTL&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_USER_AUTHZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_WORKLOAD_AUTHZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AND&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_MAPPING_USER&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CustomUser&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_MAPPING_WORKLOAD&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CustomWorkload&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_MAPPING_ROLE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CustomRole&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_LOCAL_JWKS&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;../test_files/local_jwks.json&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_LOCAL_POLICY_STORE&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_POLICY_STORE_LOCAL_FN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;../test_files/policy-store_blobby.json&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_JWT_SIG_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_JWT_STATUS_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;HS256&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;RS256&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_TOKEN_CONFIGS&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Access_token&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;id_token&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;id_token&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_APPLICATION_NAME&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_USER_AUTHZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_WORKLOAD_AUTHZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_POLICY_STORE_URI&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_POLICY_STORE_LOCAL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_POLICY_STORE_LOCAL_FN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;./example_files/policy-store.json&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_TOKEN_CONFIGS&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Access_token&quot;</span><span class="w"></span>
 <span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_ID_TOKEN_TRUST_MODE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Strict&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_LOCK&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_LOCK_MASTER_CONFIGURATION_URI&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_DYNAMIC_CONFIGURATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_LOCK_SSA_JWT&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_AUDIT_HEALTH_INTERVAL&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_AUDIT_TELEMETRY_INTERVAL&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;CEDARLING_LISTEN_SSE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;id_token&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;userinfo_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Userinfo_token&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_POLICY_STORE_ID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gICAgcHJpbmNpcGFsIGlz&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_LOG_TYPE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;std_out&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_LOG_LEVEL&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_LOG_TTL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_DECISION_LOG_USER_CLAIMS&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;sub&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;email&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;client_id&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;rp_id&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AND&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_LOCAL_JWKS&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_JWT_SIG_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_JWT_STATUS_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;HS256&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;RS256&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_ID_TOKEN_TRUST_MODE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;strict&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_LOCK&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_LOCK_MASTER_CONFIGURATION_URI&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_LOCK_DYNAMIC_CONFIGURATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_LOCK_HEALTH_INTERVAL&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_LOCK_TELEMETRY_INTERVAL&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_LOCK_LISTEN_SSE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <ul>
@@ -9050,39 +9124,37 @@
 <h3 id="loading-from-yaml">Loading From YAML<a class="headerlink" href="#loading-from-yaml" title="Permanent link">#</a></h3>
 <p>Below is an example of a bootstrap config in YAML format. Not all fields should be specified, almost all have default value.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">CEDARLING_APPLICATION_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">My App</span><span class="w"></span>
-<span class="nt">CEDARLING_POLICY_STORE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_POLICY_STORE_ID</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_LOG_TYPE</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;memory&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_LOG_LEVEL</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;INFO&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_USER_AUTHZ</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span><span class="w"></span>
+<span class="nt">CEDARLING_WORKLOAD_AUTHZ</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span><span class="w"></span>
+<span class="nt">CEDARLING_POLICY_STORE_URI</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w"></span>
+<span class="nt">CEDARLING_POLICY_STORE_LOCAL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w"></span>
+<span class="nt">CEDARLING_POLICY_STORE_LOCAL_FN</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./example_files/policy-store.json</span><span class="w"></span>
+<span class="nt">CEDARLING_TOKEN_CONFIGS</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">access_token</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> entity_type_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Access_token&quot;</span><span class="w"> </span><span class="p p-Indicator">}</span><span class="w"></span>
+<span class="w">    </span><span class="nt">id_token</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> entity_type_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;id_token&quot;</span><span class="w"> </span><span class="p p-Indicator">}</span><span class="w"></span>
+<span class="w">    </span><span class="nt">userinfo_token</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> entity_type_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Userinfo_token&quot;</span><span class="w"> </span><span class="p p-Indicator">}</span><span class="w"></span>
+
+<span class="nt">CEDARLING_POLICY_STORE_ID</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gICAgcHJpbmNpcGFsIGlz</span><span class="w"></span>
+<span class="nt">CEDARLING_LOG_TYPE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">std_out</span><span class="w"></span>
+<span class="nt">CEDARLING_LOG_LEVEL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">INFO</span><span class="w"></span>
+<span class="nt">CEDARLING_LOG_TTL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w"></span>
 <span class="nt">CEDARLING_DECISION_LOG_USER_CLAIMS</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;sub&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;email&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
 <span class="nt">CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;client_id&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;rp_id&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="nt">CEDARLING_LOG_TTL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60</span><span class="w"></span>
-<span class="nt">CEDARLING_USER_AUTHZ</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_WORKLOAD_AUTHZ</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;AND&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_MAPPING_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;CustomUser&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_MAPPING_WORKLOAD</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;CustomWorkload&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_MAPPING_ROLE</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;CustomRole&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_LOCAL_JWKS</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../test_files/local_jwks.json&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_LOCAL_POLICY_STORE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w"></span>
-<span class="nt">CEDARLING_POLICY_STORE_LOCAL_FN</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../test_files/policy-store_blobby.json&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_JWT_SIG_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;enabled&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_JWT_STATUS_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;disabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AND</span><span class="w"></span>
+<span class="nt">CEDARLING_LOCAL_JWKS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w"></span>
+<span class="nt">CEDARLING_JWT_SIG_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disabled</span><span class="w"></span>
+<span class="nt">CEDARLING_JWT_STATUS_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disabled</span><span class="w"></span>
 <span class="nt">CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;HS256&#39;</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;RS256&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_TOKENS_CONFIG</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">access_token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CustomAccessToken</span><span class="w"></span>
-<span class="w">    </span><span class="nt">id_token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CustomIdToken</span><span class="w"></span>
-<span class="w">    </span><span class="nt">userinfo_token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CustomUserinfoToken</span><span class="w"></span>
-<span class="nt">CEDARLING_ID_TOKEN_TRUST_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;Strict&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_LOCK</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;disabled&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HS256</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RS256</span><span class="w"></span>
+
+<span class="nt">CEDARLING_ID_TOKEN_TRUST_MODE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">strict</span><span class="w"></span>
+<span class="nt">CEDARLING_LOCK</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disabled</span><span class="w"></span>
 <span class="nt">CEDARLING_LOCK_MASTER_CONFIGURATION_URI</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w"></span>
-<span class="nt">CEDARLING_DYNAMIC_CONFIGURATION</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;disabled&#39;</span><span class="w"></span>
-<span class="nt">CEDARLING_LOCK_SSA_JWT</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
-<span class="nt">CEDARLING_AUDIT_HEALTH_INTERVAL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
-<span class="nt">CEDARLING_AUDIT_TELEMETRY_INTERVAL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
-<span class="nt">CEDARLING_LISTEN_SSE</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;disabled&#39;</span><span class="w"></span>
+<span class="nt">CEDARLING_LOCK_DYNAMIC_CONFIGURATION</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disabled</span><span class="w"></span>
+<span class="nt">CEDARLING_LOCK_HEALTH_INTERVAL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="nt">CEDARLING_LOCK_TELEMETRY_INTERVAL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="nt">CEDARLING_LOCK_LISTEN_SSE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disabled</span><span class="w"></span>
 </code></pre></div>
 <ul>
 <li>Note that properties set to <code>'disabled'</code>, an empty string <code>''</code>, zero <code>0</code>, and <code>null</code> can be ommited since they are the defaults.</li>
@@ -9093,7 +9165,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-29T15:54:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-29</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-04T16:39:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-04</span>
       
         <br>
         Created:
