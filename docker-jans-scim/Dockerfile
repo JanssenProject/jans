@@ -60,13 +60,14 @@ RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=aa1b2edaa8d7e3413bd57a7bd7cc86206086768b
+ENV JANS_SOURCE_VERSION=040ff17942019bc10433ce17d819b8d8474f13c8
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
-RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+ARG GIT_CLONE_DEPTH=100
+RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
@@ -99,11 +100,13 @@ RUN cd /tmp/jans \
 # Python
 # ======
 
+# default pip timeout
+ARG PIP_TIMEOUT=15
 COPY requirements.txt /app/requirements.txt
 RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.disabled \
     && python3 -m ensurepip \
-    && pip3 install --no-cache-dir -U pip wheel setuptools \
-    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && pip3 install --no-cache-dir -U pip wheel setuptools --timeout ${PIP_TIMEOUT} \
+    && pip3 install --no-cache-dir -r /app/requirements.txt --timeout ${PIP_TIMEOUT} \
     && pip3 uninstall -y pip wheel
 
 # ==========
@@ -234,7 +237,8 @@ RUN chmod 664 ${JETTY_BASE}/jans-scim/resources/log4j2.xml \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
     && chown 1000:0 ${JETTY_BASE}/jans-scim/webapps/jans-scim.xml \
-    && chown -R 1000:0 ${JETTY_HOME}/temp
+    && chown -R 1000:0 ${JETTY_HOME}/temp \
+    && chown -R 1000:0 /app/templates
 
 USER 1000
 

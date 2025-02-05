@@ -130,6 +130,8 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
         boolean newSave = authorizationChallengeSessionObject == null;
         if (newSave) {
             authorizationChallengeSessionObject = authorizationChallengeSessionService.newAuthorizationChallengeSession();
+            context.getAuthzRequest().setAuthorizationChallengeSessionObject(authorizationChallengeSessionObject);
+            context.getAuthzRequest().setAuthorizationChallengeSession(authorizationChallengeSessionObject.getId());
         }
 
         final String dpop = context.getHttpRequest().getHeader(DpopService.DPOP);
@@ -220,5 +222,20 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
     @Override
     public Map<String, String> getAuthenticationMethodClaims(Object context) {
         return new HashMap<>();
+    }
+
+    @Override
+    public void prepareAuthzRequest(Object scriptContext) {
+        ExternalScriptContext context = (ExternalScriptContext) scriptContext;
+        final AuthorizationChallengeSession sessionObject = context.getAuthzRequest().getAuthorizationChallengeSessionObject();
+        if (sessionObject != null) {
+            final Map<String, String> sessionAttributes = sessionObject.getAttributes().getAttributes();
+
+            // set scope from session into request object
+            final String scopeFromSession = sessionAttributes.get("scope");
+            if (StringUtils.isNotBlank(scopeFromSession) && StringUtils.isBlank(context.getAuthzRequest().getScope())) {
+                context.getAuthzRequest().setScope(scopeFromSession);
+            }
+        }
     }
 }

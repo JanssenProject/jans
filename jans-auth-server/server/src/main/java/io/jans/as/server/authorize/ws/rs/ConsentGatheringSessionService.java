@@ -8,20 +8,23 @@ package io.jans.as.server.authorize.ws.rs;
 
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.model.util.Util;
 import io.jans.as.common.model.session.SessionId;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.util.Util;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.CookieService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.orm.exception.EntryPersistenceException;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yuriy Movchan
@@ -42,6 +45,9 @@ public class ConsentGatheringSessionService {
 
     @Inject
     private ClientService clientService;
+
+    @Inject
+    private AppConfiguration appConfiguration;
 
     public SessionId getConnectSession(HttpServletRequest httpRequest) {
         String cookieId = cookieService.getSessionIdFromCookie(httpRequest);
@@ -141,12 +147,53 @@ public class ConsentGatheringSessionService {
         session.getSessionAttributes().put("step", Integer.toString(step));
     }
 
-    public void configure(SessionId session, String scriptName, String clientId, String state) {
+    public String getAcr(SessionId session) {
+        return session.getSessionAttributes().get("acr");
+    }
+
+    public void setAcr(List<String> acrValues, SessionId session) {
+        session.getSessionAttributes().put("acr", Util.listAsString(acrValues));
+    }
+
+    public String getConsentFlow(SessionId session) {
+        return session.getSessionAttributes().get("consent_flow");
+    }
+
+    public void setConsentFlow(String consentFlow, SessionId session) {
+        session.getSessionAttributes().put("consent_flow", consentFlow);
+    }
+
+    public void configure(SessionId session, String scriptName, String clientId, String state, List<String> acrValues) {
         setStep(1, session);
         setScriptName(session, scriptName);
 
+        setAcr(acrValues, session);
+        setConsentFlow(determineConsentFlow(acrValues), session);
         setClientId(session, clientId);
         persist(session);
+    }
+
+    private String determineConsentFlow(List<String> acrValues) {
+        if (acrValues == null || acrValues.isEmpty()) {
+            log.debug("determineConsentFlow - 'acrValues' is empty, return null for 'consent_flow'");
+            return null;
+        }
+
+        final Map<String, String> acrToConsent = appConfiguration.getAcrToAgamaConsentFlowMapping();
+        if (acrToConsent == null || acrToConsent.isEmpty()) {
+            log.debug("determineConsentFlow - 'acrToAgamaConsentFlowMapping' configuration property is empty, return null for 'consent_flow'");
+            return null;
+        }
+
+        for (String acr : acrValues) {
+            final String consentFlow = acrToConsent.get(acr);
+            if (StringUtils.isNotBlank(consentFlow)) {
+                log.debug("determineConsentFlow - found consent_flow: {} for acr: {}", consentFlow, acr);
+                return consentFlow;
+            }
+        }
+        log.debug("determineConsentFlow - unable to find any match for acr: {}, acrToConsentScriptNameMapping: {}", acrValues, acrToConsent);
+        return null;
     }
 
     public boolean isStepPassed(SessionId session, Integer step) {

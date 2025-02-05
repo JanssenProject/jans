@@ -7,7 +7,6 @@ import io.jans.agama.engine.service.FlowService;
 import io.jans.agama.engine.service.WebContext;
 import io.jans.agama.engine.servlet.ExecutionServlet;
 import io.jans.agama.engine.script.LogUtils;
-import io.jans.agama.model.EngineConfig;
 
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.RequestScoped;
@@ -28,37 +27,31 @@ public class NativeJansFlowBridge {
     private FlowService fs;
     
     @Inject
-    private EngineConfig conf;
-    
-    @Inject
     private WebContext webContext;
-    
-    public String scriptPageUrl() {
-        return conf.getBridgeScriptPage();
-    }
 
     public String getTriggerUrl() {
         return webContext.getContextPath() + ExecutionServlet.URL_PREFIX + 
                 "agama" + ExecutionServlet.URL_SUFFIX;       
     }
     
-    public Boolean prepareFlow(String sessionId, String qname, String jsonInput) throws Exception {
+    public Boolean prepareFlow(String sessionId, String qname, String jsonInput, boolean nativeClient,
+                String startUrl) throws Exception {
         
         logger.info("Preparing flow '{}'", qname);
         Boolean alreadyRunning = null;
         if (aps.flowEnabled(qname)) {
-            
+
             FlowStatus st = aps.getFlowStatus(sessionId);
             alreadyRunning = st != null;
             
-            if (alreadyRunning && !st.getQname().equals(qname)) {
-                logger.warn("Flow {} is already running. Will be terminated", st.getQname());
+            if (alreadyRunning && !qname.equals(st.getQname())) {
+                logger.warn("Flow {} seems to be already running. Will be terminated", st.getQname());
                 fs.terminateFlow();
                 st = null;
             }
             if (st == null) {
 
-                int timeout = aps.getEffectiveFlowTimeout(qname);
+                int timeout = aps.getEffectiveFlowTimeout(qname, nativeClient);
                 if (timeout <= 0) throw new Exception("Flow timeout negative or zero. " +
                         "Check your AS configuration or flow definition");                
                 long expireAt = System.currentTimeMillis() + 1000L * timeout;                
@@ -68,6 +61,9 @@ public class NativeJansFlowBridge {
                 st.setQname(qname);
                 st.setJsonInput(jsonInput);
                 st.setFinishBefore(expireAt);
+                st.setNativeClient(nativeClient);
+                st.setStartUrl(startUrl);
+
                 aps.createFlowRun(sessionId, st, expireAt);
                 LogUtils.log("@w Effective timeout for this flow will be % seconds", timeout);
             }

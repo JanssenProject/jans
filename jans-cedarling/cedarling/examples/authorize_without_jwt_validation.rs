@@ -3,16 +3,17 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::HashMap;
-
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource, Request, ResourceData, WorkloadBoolOp,
+    AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LogConfig,
+    LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
+    TokenValidationConfig, WorkloadBoolOp,
 };
+use std::collections::{HashMap, HashSet};
 
 static POLICY_STORE_RAW: &str = include_str!("../../test_files/policy-store_ok.yaml");
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cedarling = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
@@ -22,7 +23,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
         },
-        jwt_config: JwtConfig::new_without_validation(),
+        jwt_config: JwtConfig {
+            jwks: None,
+            jwt_sig_validation: false,
+            jwt_status_validation: false,
+            signature_algorithms_supported: HashSet::new(),
+            token_validation_settings: HashMap::from_iter(
+                ["access_token", "id_token", "userinfo_token", "custom_token"]
+                    .iter()
+                    .map(|tkn| (tkn.to_string(), TokenValidationConfig::default())),
+            ),
+        }
+        .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
@@ -30,9 +42,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             decision_log_default_jwt_id: "jti".to_string(),
             decision_log_user_claims: vec!["client_id".to_string(), "username".to_string()],
             decision_log_workload_claims: vec!["org_id".to_string()],
+            id_token_trust_mode: IdTokenTrustMode::None,
+            mapping_tokens: HashMap::from([
+                ("access_token".to_string(), "Access_token".to_string()),
+                ("id_token".to_string(), "id_token".to_string()),
+                ("userinfo_token".to_string(), "Userinfo_token".to_string()),
+                ("custom_token".to_string(), "Custom_token".to_string()),
+            ])
+            .into(),
             ..Default::default()
         },
-    })?;
+    })
+    .await?;
 
     // the following tokens are expired
     // access_token claims:
@@ -111,31 +132,36 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // }
     let userinfo_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2FkbWluLXVpLXRlc3QuZ2x1dS5vcmciLCJzdWIiOiJib0c4ZGZjNU1LVG4zN283Z3NkQ2V5cUw4THBXUXRnb080MW0xS1p3ZHEwIiwiY2xpZW50X2lkIjoiNWI0NDg3YzQtOGRiMS00MDlkLWE2NTMtZjkwN2I4MDk0MDM5IiwiYXVkIjoiNWI0NDg3YzQtOGRiMS00MDlkLWE2NTMtZjkwN2I4MDk0MDM5IiwidXNlcm5hbWUiOiJhZG1pbkBnbHV1Lm9yZyIsIm5hbWUiOiJEZWZhdWx0IEFkbWluIFVzZXIiLCJlbWFpbCI6ImFkbWluQGdsdXUub3JnIiwiY291bnRyeSI6IlVTIiwianRpIjoidXNyaW5mb190a25fanRpIn0.NoR53vPZFpfb4vFk85JH9RPx7CHsaJMZwrH3fnB-N60".to_string();
 
-    let result = cedarling.authorize(Request {
-        access_token: Some(access_token),
-        id_token: Some(id_token),
-        userinfo_token: Some(userinfo_token),
-        action: "Jans::Action::\"Update\"".to_string(),
-        context: serde_json::json!({}),
-        resource: ResourceData {
-            id: "random_id".to_string(),
-            resource_type: "Jans::Issue".to_string(),
-            payload: HashMap::from_iter([
-                (
-                    "org_id".to_string(),
-                    serde_json::Value::String("some_long_id".to_string()),
-                ),
-                (
-                    "country".to_string(),
-                    serde_json::Value::String("US".to_string()),
-                ),
+    let result = cedarling
+        .authorize(Request {
+            tokens: HashMap::from([
+                ("access_token".to_string(), access_token.clone()),
+                ("id_token".to_string(), id_token.clone()),
+                ("userinfo_token".to_string(), userinfo_token.clone()),
+                ("custom_token".to_string(), access_token.clone()),
             ]),
-        },
-    });
+            action: "Jans::Action::\"Update\"".to_string(),
+            context: serde_json::json!({}),
+            resource: ResourceData {
+                id: "random_id".to_string(),
+                resource_type: "Jans::Issue".to_string(),
+                payload: HashMap::from_iter([
+                    (
+                        "org_id".to_string(),
+                        serde_json::Value::String("some_long_id".to_string()),
+                    ),
+                    (
+                        "country".to_string(),
+                        serde_json::Value::String("US".to_string()),
+                    ),
+                ]),
+            },
+        })
+        .await;
 
     match result {
         Ok(result) => {
-            println!("\n\nis allowed: {}", result.is_allowed());
+            println!("\n\nis allowed: {}", result.decision);
         },
         Err(e) => eprintln!("Error while authorizing: {}\n {:?}\n\n", e, e),
     }

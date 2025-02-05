@@ -10,13 +10,14 @@ use std::collections::{HashMap, HashSet};
 use std::fmt::Display;
 use std::hash::Hash;
 
-use uuid7::{uuid7, Uuid};
+use uuid7::Uuid;
 
-use super::interface::Loggable;
 use super::LogLevel;
+use super::interface::Loggable;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::app_types::{self, ApplicationName};
 use crate::common::policy_store::PoliciesContainer;
+use crate::jwt::Token;
 
 /// ISO-8601 time format for [`chrono`]
 /// example: 2024-11-27T10:10:50.654Z
@@ -29,6 +30,7 @@ pub struct LogEntry {
     /// it is unwrap to flatten structure
     #[serde(flatten)]
     pub base: BaseLogEntry,
+
     /// message of the event
     pub msg: String,
     /// name of application from [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
@@ -195,6 +197,12 @@ impl From<cedar_policy::Decision> for Decision {
     }
 }
 
+impl From<bool> for Decision {
+    fn from(value: bool) -> Self {
+        if value { Self::Allow } else { Self::Deny }
+    }
+}
+
 /// An error occurred when evaluating a policy
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct PolicyEvaluationError {
@@ -227,6 +235,37 @@ pub struct Diagnostics {
     /// Errors that occurred during authorization. The errors should be
     /// treated as unordered, since policies may be evaluated in any order.
     pub errors: Vec<PolicyEvaluationError>,
+}
+
+/// DiagnosticsRefs structure actually same as Diagnostics but hold reference on data
+/// And allows to not clone data.
+/// Usefull for logging.
+#[derive(Debug, Default, Clone, PartialEq, serde::Serialize)]
+pub struct DiagnosticsRefs<'a> {
+    /// `PolicyId`s of the policies that contributed to the decision.
+    /// If no policies applied to the request, this set will be empty.
+    pub reason: HashSet<&'a PolicyInfo>,
+    /// Errors that occurred during authorization. The errors should be
+    /// treated as unordered, since policies may be evaluated in any order.
+    pub errors: Vec<&'a PolicyEvaluationError>,
+}
+
+impl DiagnosticsRefs<'_> {
+    pub fn new<'a>(diagnostics: &[&'a Option<&Diagnostics>]) -> DiagnosticsRefs<'a> {
+        let policy_info_iter = diagnostics
+            .iter()
+            .filter_map(|diagnostic_opt| diagnostic_opt.map(|diagnostic| &diagnostic.reason))
+            .flatten();
+        let diagnostic_err_iter = diagnostics
+            .iter()
+            .filter_map(|diagnostic_opt| diagnostic_opt.map(|diagnostic| &diagnostic.errors))
+            .flatten();
+
+        DiagnosticsRefs {
+            reason: HashSet::from_iter(policy_info_iter),
+            errors: diagnostic_err_iter.collect(),
+        }
+    }
 }
 
 /// Policy diagnostic info
@@ -289,6 +328,8 @@ pub struct DecisionLogEntry<'a> {
     /// If this Cedarling has registered with a Lock Server, what is the client_id it received
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lock_client_id: Option<String>,
+    /// diagnostic info about policy and errors as result of cedarling
+    pub diagnostics: DiagnosticsRefs<'a>,
     /// action UID for request
     pub action: String,
     /// resource UID for request
@@ -298,7 +339,7 @@ pub struct DecisionLogEntry<'a> {
     /// Dictionary with the token type and claims which should be included in the log
     pub tokens: LogTokensInfo<'a>,
     /// time in milliseconds spent for decision
-    pub decision_time_ms: u128,
+    pub decision_time_ms: i64,
 }
 
 impl Loggable for &DecisionLogEntry<'_> {
@@ -309,6 +350,30 @@ impl Loggable for &DecisionLogEntry<'_> {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }
+}
+
+/// Custom uuid generation function to avoid using std::time because it makes panic in WASM
+//
+// TODO: maybe using wasm we can use `js_sys::Date::now()`
+// Static variable initialize only once at start of program and available during all program live cycle.
+// Import inside function guarantee that it is used only inside function.
+pub fn gen_uuid7() -> Uuid {
+    use std::sync::{LazyLock, Mutex};
+    use uuid7::V7Generator;
+
+    static GLOBAL_V7_GENERATOR: LazyLock<
+        Mutex<V7Generator<uuid7::generator::with_rand08::Adapter<rand::rngs::OsRng>>>,
+    > = LazyLock::new(|| Mutex::new(V7Generator::with_rand08(rand::rngs::OsRng)));
+
+    let mut g = GLOBAL_V7_GENERATOR.lock().expect("mutex should be locked");
+
+    let custom_unix_ts_ms = chrono::Utc::now().timestamp_millis();
+
+    // from docs
+    // The rollback_allowance parameter specifies the amount of unix_ts_ms rollback that is considered significant.
+    // A suggested value is 10_000 (milliseconds).
+    const ROLLBACK_ALLOWANCE: u64 = 10_000;
+    g.generate_or_reset_core(custom_unix_ts_ms as u64, ROLLBACK_ALLOWANCE)
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -342,7 +407,7 @@ impl BaseLogEntry {
             // We use uuid v7 because it is generated based on the time and sortable.
             // and we need sortable ids to use it in the sparkv database.
             // Sparkv store data in BTree. So we need have correct order of ids.
-            request_id: uuid7(),
+            request_id: gen_uuid7(),
             timestamp: Some(local_time_string),
             log_kind: log_type,
             pdp_id: pdp_id.0,
@@ -414,9 +479,15 @@ impl serde::Serialize for PrincipalLogEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
-pub struct LogTokensInfo<'a> {
-    pub id_token: Option<HashMap<&'a str, &'a serde_json::Value>>,
-    #[serde(rename = "Userinfo")]
-    pub userinfo: Option<HashMap<&'a str, &'a serde_json::Value>>,
-    pub access: Option<HashMap<&'a str, &'a serde_json::Value>>,
+pub struct LogTokensInfo<'a>(pub HashMap<&'a str, HashMap<&'a str, &'a serde_json::Value>>);
+
+impl<'a> LogTokensInfo<'a> {
+    pub fn new(tokens: &'a HashMap<String, Token>, decision_log_jwt_id: &'a str) -> Self {
+        let tokens_logging_info = tokens
+            .iter()
+            .map(|(tkn_name, tkn)| (tkn_name.as_str(), tkn.logging_info(decision_log_jwt_id)))
+            .collect::<HashMap<&'a str, HashMap<&'a str, &'a serde_json::Value>>>();
+
+        Self(tokens_logging_info)
+    }
 }

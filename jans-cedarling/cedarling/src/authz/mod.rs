@@ -8,40 +8,36 @@
 //! - evaluate if authorization is granted for *user*
 //! - evaluate if authorization is granted for *client* / *workload *
 
-use std::collections::{HashMap, HashSet};
+use crate::authorization_config::IdTokenTrustMode;
+use crate::bootstrap_config::AuthorizationConfig;
+use crate::common::app_types;
+use crate::common::policy_store::PolicyStoreWithID;
+use crate::jwt::{self, Token};
+use crate::log::interface::LogWriter;
+use crate::log::{
+    AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, DiagnosticsRefs, LogEntry,
+    LogLevel, LogTokensInfo, LogType, Logger, PrincipalLogEntry, UserAuthorizeInfo,
+    WorkloadAuthorizeInfo,
+};
+use build_ctx::*;
+use cedar_policy::{Entities, Entity, EntityUid};
+use chrono::Utc;
+use entity_builder::*;
+use request::Request;
+use std::collections::HashMap;
 use std::io::Cursor;
 use std::str::FromStr;
 use std::sync::Arc;
-
-use crate::bootstrap_config::AuthorizationConfig;
-use crate::common::app_types;
-use crate::common::cedar_schema::cedar_json::{BuildJsonCtxError, FindActionError};
-use crate::common::policy_store::PolicyStoreWithID;
-use crate::jwt::{self, TokenStr};
-use crate::log::interface::LogWriter;
-use crate::log::{
-    AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, LogEntry, LogLevel,
-    LogTokensInfo, LogType, Logger, PrincipalLogEntry, UserAuthorizeInfo, WorkloadAuthorizeInfo,
-};
+use trust_mode::*;
 
 mod authorize_result;
-mod merge_json;
+mod build_ctx;
+mod trust_mode;
 
-pub(crate) mod entities;
+pub(crate) mod entity_builder;
 pub(crate) mod request;
-use std::time::Instant;
 
 pub use authorize_result::AuthorizeResult;
-use cedar_policy::{ContextJsonError, Entities, Entity, EntityUid};
-use entities::{
-    CEDAR_POLICY_SEPARATOR, CreateCedarEntityError, CreateUserEntityError,
-    CreateWorkloadEntityError, DecodedTokens, ResourceEntityError, RoleEntityError,
-    create_resource_entity, create_role_entities, create_token_entities, create_user_entity,
-    create_workload_entity,
-};
-use merge_json::{MergeError, merge_json_values};
-use request::Request;
-use serde_json::Value;
 
 /// Configuration to Authz to initialize service without errors
 pub(crate) struct AuthzConfig {
@@ -59,11 +55,23 @@ pub(crate) struct AuthzConfig {
 pub struct Authz {
     config: AuthzConfig,
     authorizer: cedar_policy::Authorizer,
+    entity_builder: EntityBuilder,
 }
 
 impl Authz {
     /// Create a new Authorization Service
     pub(crate) fn new(config: AuthzConfig) -> Self {
+        let json_schema = config.policy_store.schema.json.clone();
+        let entity_names = EntityNames::from(&config.authorization);
+        let build_workload = config.authorization.use_workload_principal;
+        let build_user = config.authorization.use_user_principal;
+        let entity_builder = entity_builder::EntityBuilder::new(
+            json_schema,
+            entity_names,
+            build_workload,
+            build_user,
+        );
+
         config.log_service.log(
             LogEntry::new_with_data(
                 config.pdp_id,
@@ -78,55 +86,45 @@ impl Authz {
         Self {
             config,
             authorizer: cedar_policy::Authorizer::new(),
+            entity_builder,
         }
     }
 
     // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
-    pub(crate) fn decode_tokens<'a>(
+    pub(crate) async fn decode_tokens<'a>(
         &'a self,
         request: &'a Request,
-    ) -> Result<DecodedTokens<'a>, AuthorizeError> {
-        let access_token = request
-            .access_token
-            .as_ref()
-            .map(|tkn| self.config.jwt_service.process_token(TokenStr::Access(tkn)))
-            .transpose()?;
-        let id_token = request
-            .id_token
-            .as_ref()
-            .map(|tkn| self.config.jwt_service.process_token(TokenStr::Id(tkn)))
-            .transpose()?;
-        let userinfo_token = request
-            .userinfo_token
-            .as_ref()
-            .map(|tkn| {
-                self.config
-                    .jwt_service
-                    .process_token(TokenStr::Userinfo(tkn))
-            })
-            .transpose()?;
-
-        Ok(DecodedTokens {
-            access_token,
-            id_token,
-            userinfo_token,
-        })
+    ) -> Result<HashMap<String, Token<'a>>, AuthorizeError> {
+        let tokens = self
+            .config
+            .jwt_service
+            .validate_tokens(&request.tokens)
+            .await?;
+        Ok(tokens)
     }
 
     /// Evaluate Authorization Request
     /// - evaluate if authorization is granted for *person*
     /// - evaluate if authorization is granted for *workload*
-    pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        let start_time = Instant::now();
+    pub async fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
+        let start_time = Utc::now();
+
         let schema = &self.config.policy_store.schema;
-        let tokens = self.decode_tokens(&request)?;
+
+        let tokens = self.decode_tokens(&request).await?;
+
+        if let IdTokenTrustMode::Strict = self.config.authorization.id_token_trust_mode {
+            validate_id_tkn_trust_mode(&tokens)?;
+        }
 
         // Parse action UID.
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
             .map_err(AuthorizeError::Action)?;
 
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
-        let entities_data: AuthorizeEntitiesData = self.build_entities(&request, &tokens)?;
+        let entities_data = self
+            .entity_builder
+            .build_entities(&tokens, &request.resource)?;
 
         // Get entity UIDs what we will be used on authorize check
         let resource_uid = entities_data.resource.uid();
@@ -236,7 +234,9 @@ impl Authz {
         );
 
         // measure time how long request executes
-        let elapsed_ms = start_time.elapsed().as_millis();
+        let elapsed_ms = Utc::now()
+            .signed_duration_since(start_time)
+            .num_milliseconds();
 
         // FROM THIS POINT WE ONLY MAKE LOGS
 
@@ -247,6 +247,43 @@ impl Authz {
         entities.write_to_json(cursor)?;
         let entities_json: serde_json::Value = serde_json::from_slice(entities_raw_json.as_slice())
             .map_err(AuthorizeError::EntitiesToJson)?;
+
+        let user_authz_diagnostic = user_authz_info
+            .as_ref()
+            .map(|auth_info| &auth_info.diagnostics);
+
+        let workload_authz_diagnostic = user_authz_info
+            .as_ref()
+            .map(|auth_info| &auth_info.diagnostics);
+
+        let tokens_logging_info = LogTokensInfo::new(
+            &tokens,
+            self.config
+                .authorization
+                .decision_log_default_jwt_id
+                .as_str(),
+        );
+
+        // Decision log
+        // we log decision log before debug log, to avoid cloning diagnostic info
+        self.config.log_service.as_ref().log_any(&DecisionLogEntry {
+            base: BaseLogEntry::new(self.config.pdp_id, LogType::Decision),
+            policystore_id: self.config.policy_store.id.as_str(),
+            policystore_version: self.config.policy_store.get_store_version(),
+            principal: PrincipalLogEntry::new(&self.config.authorization),
+            user: user_entity_claims,
+            workload: workload_entity_claims,
+            lock_client_id: None,
+            action: request.action.clone(),
+            resource: resource_uid.to_string(),
+            decision: result.decision.into(),
+            tokens: tokens_logging_info,
+            decision_time_ms: elapsed_ms,
+            diagnostics: DiagnosticsRefs::new(&[
+                &user_authz_diagnostic,
+                &workload_authz_diagnostic,
+            ]),
+        });
 
         // DEBUG LOG
         // Log all result information about both authorize checks.
@@ -265,53 +302,10 @@ impl Authz {
                 entities: entities_json,
                 person_authorize_info: user_authz_info,
                 workload_authorize_info: workload_authz_info,
-                authorized: result.is_allowed(),
+                authorized: result.decision,
             })
             .set_message("Result of authorize.".to_string()),
         );
-
-        let tokens_logging_info = LogTokensInfo {
-            access: tokens.access_token.as_ref().map(|tkn| {
-                tkn.logging_info(
-                    self.config
-                        .authorization
-                        .decision_log_default_jwt_id
-                        .as_str(),
-                )
-            }),
-            id_token: tokens.access_token.as_ref().map(|tkn| {
-                tkn.logging_info(
-                    self.config
-                        .authorization
-                        .decision_log_default_jwt_id
-                        .as_str(),
-                )
-            }),
-            userinfo: tokens.userinfo_token.as_ref().map(|tkn| {
-                tkn.logging_info(
-                    self.config
-                        .authorization
-                        .decision_log_default_jwt_id
-                        .as_str(),
-                )
-            }),
-        };
-
-        // Decision log
-        self.config.log_service.as_ref().log_any(&DecisionLogEntry {
-            base: BaseLogEntry::new(self.config.pdp_id, LogType::Decision),
-            policystore_id: self.config.policy_store.id.as_str(),
-            policystore_version: self.config.policy_store.get_store_version(),
-            principal: PrincipalLogEntry::new(&self.config.authorization),
-            user: user_entity_claims,
-            workload: workload_entity_claims,
-            lock_client_id: None,
-            action: request.action.clone(),
-            resource: resource_uid.to_string(),
-            decision: result.decision().into(),
-            tokens: tokens_logging_info,
-            decision_time_ms: elapsed_ms,
-        });
 
         Ok(result)
     }
@@ -339,102 +333,16 @@ impl Authz {
         Ok(response)
     }
 
-    /// Build all the Cedar [`Entities`] from a [`Request`]
-    ///
-    /// [`Entities`]: Entity
+    #[cfg(test)]
     pub fn build_entities(
         &self,
         request: &Request,
-        tokens: &DecodedTokens,
+        tokens: &HashMap<String, Token>,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
-        let policy_store = &self.config.policy_store;
-        let auth_conf = &self.config.authorization;
-
-        // build workload entity
-        let workload = if self.config.authorization.use_workload_principal {
-            Some(create_workload_entity(
-                auth_conf.mapping_workload.as_deref(),
-                policy_store,
-                tokens,
-            )?)
-        } else {
-            None
-        };
-
-        // build role entity
-        let roles = create_role_entities(policy_store, tokens)?;
-
-        // build user entity
-        let user = if self.config.authorization.use_user_principal {
-            Some(create_user_entity(
-                auth_conf.mapping_user.as_deref(),
-                policy_store,
-                tokens,
-                HashSet::from_iter(roles.iter().map(|e| e.uid())),
-            )?)
-        } else {
-            None
-        };
-
-        let token_entities = create_token_entities(auth_conf, policy_store, tokens)?;
-
-        // build resource entity
-        let resource = create_resource_entity(
-            request.resource.clone(),
-            &self.config.policy_store.schema.json,
-        )?;
-
-        Ok(AuthorizeEntitiesData {
-            workload,
-            access_token: token_entities.access,
-            id_token: token_entities.id,
-            userinfo_token: token_entities.userinfo,
-            user,
-            resource,
-            roles,
-        })
+        Ok(self
+            .entity_builder
+            .build_entities(tokens, &request.resource)?)
     }
-}
-
-/// Constructs the authorization context by adding the built entities from the tokens
-fn build_context(
-    config: &AuthzConfig,
-    request_context: Value,
-    entities_data: &AuthorizeEntitiesData,
-    schema: &cedar_policy::Schema,
-    action: &cedar_policy::EntityUid,
-) -> Result<cedar_policy::Context, BuildContextError> {
-    let namespace = config.policy_store.namespace();
-    let action_name = action.id().escaped().to_string();
-    let action_schema = config
-        .policy_store
-        .schema
-        .json
-        .find_action(&action_name, namespace)
-        .map_err(|e| BuildContextError::FindActionSchema(action_name.clone(), e))?
-        .ok_or(BuildContextError::MissingActionSchema(action_name))?;
-
-    let mut id_mapping = HashMap::new();
-    for entity in entities_data.iter() {
-        // we strip the namespace from the type_name then make it lowercase
-        // example: 'Jans::Id_token' -> 'id_token'
-        let type_name = entity.uid().type_name().to_string();
-        let type_name = type_name
-            .strip_prefix(&format!("{}{}", namespace, CEDAR_POLICY_SEPARATOR))
-            .unwrap_or(&type_name)
-            .to_lowercase();
-        let type_id = entity.uid().id().escaped();
-        id_mapping.insert(type_name, type_id.to_string());
-    }
-
-    let entities_context = action_schema.build_ctx_entity_refs_json(id_mapping)?;
-
-    let context = merge_json_values(entities_context, request_context)?;
-
-    let context: cedar_policy::Context =
-        cedar_policy::Context::from_json_value(context, Some((schema, action)))?;
-
-    Ok(context)
 }
 
 /// Helper struct to hold named parameters for [`Authz::execute_authorize`] method.
@@ -451,27 +359,30 @@ struct ExecuteAuthorizeParameters<'a> {
 pub struct AuthorizeEntitiesData {
     pub workload: Option<Entity>,
     pub user: Option<Entity>,
-    pub access_token: Option<Entity>,
-    pub id_token: Option<Entity>,
-    pub userinfo_token: Option<Entity>,
     pub resource: Entity,
     pub roles: Vec<Entity>,
+    pub tokens: HashMap<String, Entity>,
 }
 
 impl AuthorizeEntitiesData {
+    // NOTE: the type ids created from these does not include the namespace
+    fn type_ids(&self) -> HashMap<String, String> {
+        self.iter()
+            .map(|entity| {
+                let type_name = entity.uid().type_name().basename().to_string();
+                let type_id = entity.uid().id().escaped().to_string();
+                (type_name, type_id)
+            })
+            .collect::<HashMap<String, String>>()
+    }
+
     /// Create iterator to get all entities
     fn into_iter(self) -> impl Iterator<Item = Entity> {
-        vec![self.resource].into_iter().chain(self.roles).chain(
-            vec![
-                self.user,
-                self.workload,
-                self.access_token,
-                self.userinfo_token,
-                self.id_token,
-            ]
+        vec![self.resource]
             .into_iter()
-            .flatten(),
-        )
+            .chain(self.roles)
+            .chain(self.tokens.into_values())
+            .chain(vec![self.user, self.workload].into_iter().flatten())
     }
 
     /// Create iterator to get all entities
@@ -479,16 +390,11 @@ impl AuthorizeEntitiesData {
         vec![&self.resource]
             .into_iter()
             .chain(self.roles.iter())
+            .chain(self.tokens.values())
             .chain(
-                vec![
-                    self.user.as_ref(),
-                    self.workload.as_ref(),
-                    self.access_token.as_ref(),
-                    self.userinfo_token.as_ref(),
-                    self.id_token.as_ref(),
-                ]
-                .into_iter()
-                .flatten(),
+                vec![self.user.as_ref(), self.workload.as_ref()]
+                    .into_iter()
+                    .flatten(),
             )
     }
 
@@ -507,27 +413,6 @@ pub enum AuthorizeError {
     /// Error encountered while processing JWT token data
     #[error(transparent)]
     ProcessTokens(#[from] jwt::JwtProcessingError),
-    /// Error encountered while creating id token entity
-    #[error("could not create id_token entity: {0}")]
-    CreateIdTokenEntity(CreateCedarEntityError),
-    /// Error encountered while creating userinfo entity
-    #[error("could not create userinfo entity: {0}")]
-    CreateUserinfoTokenEntity(CreateCedarEntityError),
-    /// Error encountered while creating access_token entity
-    #[error("could not create access_token entity: {0}")]
-    CreateAccessTokenEntity(CreateCedarEntityError),
-    /// Error encountered while creating user entity
-    #[error("could not create User entity: {0}")]
-    CreateUserEntity(#[from] CreateUserEntityError),
-    /// Error encountered while creating workload
-    #[error(transparent)]
-    CreateWorkloadEntity(#[from] CreateWorkloadEntityError),
-    /// Error encountered while creating resource entity
-    #[error("{0}")]
-    ResourceEntity(#[from] ResourceEntityError),
-    /// Error encountered while creating role entity
-    #[error(transparent)]
-    RoleEntity(#[from] RoleEntityError),
     /// Error encountered while parsing Action to EntityUid
     #[error("could not parse action: {0}")]
     Action(cedar_policy::ParseErrors),
@@ -549,25 +434,12 @@ pub enum AuthorizeError {
     /// Error encountered while building the context for the request
     #[error("Failed to build context: {0}")]
     BuildContext(#[from] BuildContextError),
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum BuildContextError {
-    /// Error encountered while validating context according to the schema
+    /// Error encountered while building the context for the request
+    #[error("error while running on strict id token trust mode: {0}")]
+    IdTokenTrustMode(#[from] IdTokenTrustModeError),
+    /// Error encountered while building Cedar Entities
     #[error(transparent)]
-    Merge(#[from] MergeError),
-    /// Error encountered while deserializing the Context from JSON
-    #[error(transparent)]
-    DeserializeFromJson(#[from] ContextJsonError),
-    /// Error encountered while deserializing the Context from JSON
-    #[error("Failed to find the action `{0}` in the schema: {0}")]
-    FindActionSchema(String, FindActionError),
-    /// Error encountered while deserializing the Context from JSON
-    #[error("The action `{0}` was not found in the schema")]
-    MissingActionSchema(String),
-    /// Error encountered while deserializing the Context from JSON
-    #[error(transparent)]
-    BuildJson(#[from] BuildJsonCtxError),
+    BuildEntity(#[from] BuildCedarlingEntityError),
 }
 
 #[derive(Debug, derive_more::Error, derive_more::Display)]

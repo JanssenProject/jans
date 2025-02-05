@@ -14,6 +14,7 @@ public class Constants {
     public static final String LOCK = "/lock";
     public static final String LOCK_CONFIG = "/lockConfig";
     public static final String AUDIT = "/audit";
+    public static final String LOCK_STAT = "/lockStat";
     public static final String HEALTH = "/health";
     public static final String LOG = "/log";
     public static final String TELEMETRY = "/telemetry";

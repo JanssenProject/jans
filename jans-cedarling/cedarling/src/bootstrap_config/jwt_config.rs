@@ -1,13 +1,12 @@
 // This software is available under the Apache-2.0 license.
+//
 // See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::HashSet;
-use std::str::FromStr;
-
 use jsonwebtoken::Algorithm;
-use serde::Deserialize;
+use std::collections::HashMap;
+use std::collections::HashSet;
 
 /// The set of Bootstrap properties related to JWT validation.
 #[derive(Debug, PartialEq)]
@@ -38,31 +37,10 @@ pub struct JwtConfig {
     ///
     /// [`IETF Draft`]: https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/
     pub jwt_status_validation: bool,
-    /// Sets the validation level for ID tokens.
-    ///
-    /// The available levels are [`None`] and [`Strict`].
-    ///
-    /// # Strict Mode
-    ///
-    /// In `Strict` mode, the following conditions must be met for a token
-    /// to be considered valid:
-    ///
-    /// - The `id_token`'s `aud` (audience) must match the `access_token`'s `client_id`
-    /// - If a Userinfo token is present:
-    ///     - Its `sub` (subject) must match the `id_token`'s `sub`.
-    ///     - Its `aud` (audience) must match the `access_token`'s `client_id`.
-    ///
-    /// [`None`]: IdTokenTrustMode::None
-    /// [`Strict`]: IdTokenTrustMode::Strict
-    pub id_token_trust_mode: IdTokenTrustMode,
     /// Only tokens signed with algorithms in this list can be valid.
     pub signature_algorithms_supported: HashSet<Algorithm>,
-    /// Validation options related to the Access token
-    pub access_token_config: TokenValidationConfig,
-    /// Validation options related to the Id token
-    pub id_token_config: TokenValidationConfig,
-    /// Validation options related to the Userinfo token
-    pub userinfo_token_config: TokenValidationConfig,
+    /// Token validation settings
+    pub token_validation_settings: HashMap<String, TokenValidationConfig>,
 }
 
 /// Validation options related to JSON Web Tokens (JWT).
@@ -177,44 +155,6 @@ impl TokenValidationConfig {
     }
 }
 
-/// Defines the level of validation for ID tokens.
-#[derive(Debug, Clone, PartialEq, Default, Deserialize, Copy)]
-#[serde(rename_all = "lowercase")]
-pub enum IdTokenTrustMode {
-    /// No validation is performed on the ID token.
-    None,
-    /// Strict validation of the ID token.
-    ///
-    /// In this mode, the following conditions must be met:
-    ///
-    /// - The `id_token`'s `aud` (audience) must match the `access_token`'s `client_id`.
-    /// - If a Userinfo token is present:
-    ///   - Its `sub` (subject) must match the `id_token`'s `sub`.
-    ///   - Its `aud` must match the `access_token`'s `client_id`.
-    #[default]
-    Strict,
-}
-
-impl FromStr for IdTokenTrustMode {
-    type Err = IdTknTrustModeParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let s = s.to_lowercase();
-        match s.as_str() {
-            "strict" => Ok(IdTokenTrustMode::Strict),
-            "none" => Ok(IdTokenTrustMode::None),
-            _ => Err(IdTknTrustModeParseError { trust_mode: s }),
-        }
-    }
-}
-
-/// Error when parsing [`IdTokenTrustMode`]
-#[derive(Default, Debug, derive_more::Display, derive_more::Error)]
-#[display("Invalid `IdTokenTrustMode`: {trust_mode}. should be `strict` or `none`")]
-pub struct IdTknTrustModeParseError {
-    trust_mode: String,
-}
-
 impl Default for JwtConfig {
     /// Cedarling will use the strictest validation options by default.
     fn default() -> Self {
@@ -222,11 +162,18 @@ impl Default for JwtConfig {
             jwks: None,
             jwt_sig_validation: true,
             jwt_status_validation: true,
-            id_token_trust_mode: IdTokenTrustMode::Strict,
             signature_algorithms_supported: HashSet::new(),
-            access_token_config: TokenValidationConfig::access_token(),
-            id_token_config: TokenValidationConfig::id_token(),
-            userinfo_token_config: TokenValidationConfig::userinfo_token(),
+            token_validation_settings: HashMap::from([
+                (
+                    "access_token".to_string(),
+                    TokenValidationConfig::access_token(),
+                ),
+                ("id_token".to_string(), TokenValidationConfig::id_token()),
+                (
+                    "userinfo_token".to_string(),
+                    TokenValidationConfig::userinfo_token(),
+                ),
+            ]),
         }
     }
 }
@@ -238,11 +185,12 @@ impl JwtConfig {
             jwks: None,
             jwt_sig_validation: false,
             jwt_status_validation: false,
-            id_token_trust_mode: IdTokenTrustMode::None,
             signature_algorithms_supported: HashSet::new(),
-            access_token_config: TokenValidationConfig::default(),
-            id_token_config: TokenValidationConfig::default(),
-            userinfo_token_config: TokenValidationConfig::default(),
+            token_validation_settings: HashMap::from_iter(
+                ["access_token", "id_token", "userinfo_token"]
+                    .iter()
+                    .map(|tkn| (tkn.to_string(), TokenValidationConfig::default())),
+            ),
         }
         .allow_all_algorithms()
     }

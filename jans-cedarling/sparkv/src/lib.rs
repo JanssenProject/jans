@@ -15,13 +15,62 @@ pub use error::Error;
 pub use expentry::ExpEntry;
 pub use kventry::KvEntry;
 
-pub struct SparKV {
+use chrono::Duration;
+use chrono::prelude::*;
+
+pub struct SparKV<T> {
     pub config: Config,
-    data: std::collections::BTreeMap<String, KvEntry>,
+    data: std::collections::BTreeMap<String, KvEntry<T>>,
     expiries: std::collections::BinaryHeap<ExpEntry>,
+    /// An optional function that calculates the memory size of a value.
+    ///
+    /// Used by `ensure_item_size`.
+    ///
+    /// If this function is not provided, the container will enforce
+    /// `Config.max_item_size` on the basis of `std::mem::size_of_val` which
+    /// probably won't be what you expect.
+    size_calculator: Option<fn(&T) -> usize>,
 }
 
-impl SparKV {
+/// See the SparKV::iter function
+pub struct Iter<'a, T: 'a> {
+    btree_value_iter: std::collections::btree_map::Values<'a, String, KvEntry<T>>,
+}
+
+impl<'a, T> Iterator for Iter<'a, T> {
+    type Item = (&'a String, &'a T);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.btree_value_iter
+            .next()
+            .map(|kventry| (&kventry.key, &kventry.value))
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.btree_value_iter.size_hint()
+    }
+}
+
+/// See the SparKV::drain function
+pub struct DrainIter<T> {
+    value_iter: std::collections::btree_map::IntoValues<String, KvEntry<T>>,
+}
+
+impl<T> Iterator for DrainIter<T> {
+    type Item = (String, T);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.value_iter
+            .next()
+            .map(|kventry| (kventry.key, kventry.value))
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.value_iter.size_hint()
+    }
+}
+
+impl<T> SparKV<T> {
     pub fn new() -> Self {
         let config = Config::new();
         SparKV::with_config(config)
@@ -32,58 +81,76 @@ impl SparKV {
             config,
             data: std::collections::BTreeMap::new(),
             expiries: std::collections::BinaryHeap::new(),
+            // This will underestimate the size of most things.
+            size_calculator: Some(|v| std::mem::size_of_val(v)),
         }
     }
 
-    pub fn set(&mut self, key: &str, value: &str) -> Result<(), Error> {
+    /// Provide optional size function. See SparKV.size_calculator comments.
+    pub fn with_config_and_sizer(config: Config, sizer: Option<fn(&T) -> usize>) -> Self {
+        SparKV {
+            config,
+            data: std::collections::BTreeMap::new(),
+            expiries: std::collections::BinaryHeap::new(),
+            size_calculator: sizer,
+        }
+    }
+
+    pub fn set(&mut self, key: &str, value: T) -> Result<(), Error> {
         self.set_with_ttl(key, value, self.config.default_ttl)
     }
 
-    pub fn set_with_ttl(
-        &mut self,
-        key: &str,
-        value: &str,
-        ttl: std::time::Duration,
-    ) -> Result<(), Error> {
+    pub fn set_with_ttl(&mut self, key: &str, value: T, ttl: Duration) -> Result<(), Error> {
         self.clear_expired_if_auto();
         self.ensure_capacity_ignore_key(key)?;
-        self.ensure_item_size(value)?;
+        self.ensure_item_size(&value)?;
         self.ensure_max_ttl(ttl)?;
 
-        let item: KvEntry = KvEntry::new(key, value, ttl);
+        let item: KvEntry<T> = KvEntry::new(key, value, ttl);
         let exp_item: ExpEntry = ExpEntry::from_kv_entry(&item);
 
         self.expiries.push(exp_item);
-        self.data.insert(item.key.clone(), item);
+        self.data.insert(key.into(), item);
         Ok(())
     }
 
-    pub fn get(&self, key: &str) -> Option<String> {
-        let item = self.get_item(key)?;
-        Some(item.value.clone())
+    pub fn get(&self, key: &str) -> Option<&T> {
+        Some(&self.get_item(key)?.value)
     }
 
     // Only returns if it is not yet expired
-    pub fn get_item(&self, key: &str) -> Option<&KvEntry> {
+    pub fn get_item(&self, key: &str) -> Option<&KvEntry<T>> {
         let item = self.data.get(key)?;
-        if item.expired_at > std::time::Instant::now() {
-            Some(item)
-        } else {
-            None
-        }
+        (item.expired_at > Utc::now()).then_some(item)
     }
 
     pub fn get_keys(&self) -> Vec<String> {
-        self.data
-            .keys()
-            .map(|key| key.to_string())// it clone the string
-            .collect()
+        self.data.keys().cloned().collect()
     }
 
-    pub fn pop(&mut self, key: &str) -> Option<String> {
+    /// Return an iterator of (key,value) : (&String,&T).
+    pub fn iter(&self) -> Iter<T> {
+        Iter {
+            btree_value_iter: self.data.values(),
+        }
+    }
+
+    /// Return an iterator of (key,value) : (String,T) which empties the container.
+    /// All entries will be owned by the iterator, and yielded entries will not be checked against expiry.
+    /// All entries and expiries will be cleared.
+    pub fn drain(&mut self) -> DrainIter<T> {
+        // assume that slightly-expired entries should be returned.
+        self.expiries.clear();
+        let data_only = std::mem::take(&mut self.data);
+        DrainIter {
+            value_iter: data_only.into_values(),
+        }
+    }
+
+    pub fn pop(&mut self, key: &str) -> Option<T> {
         self.clear_expired_if_auto();
         let item = self.data.remove(key)?;
-        // Does not delete from BinaryHeap as it's expensive.
+        // Does not delete expiry entry from BinaryHeap as it's expensive.
         Some(item.value)
     }
 
@@ -92,7 +159,7 @@ impl SparKV {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.data.len() == 0
+        self.data.is_empty()
     }
 
     pub fn contains_key(&self, key: &str) -> bool {
@@ -101,27 +168,25 @@ impl SparKV {
 
     pub fn clear_expired(&mut self) -> usize {
         let mut cleared_count: usize = 0;
-        loop {
-            let peeked = self.expiries.peek().cloned();
-            match peeked {
-                Some(exp_item) => {
-                    if exp_item.is_expired() {
-                        let kv_entry = self.data.get(&exp_item.key).unwrap();
-                        if kv_entry.key == exp_item.key
-                            && kv_entry.expired_at == exp_item.expired_at
-                        {
-                            cleared_count += 1;
-                            self.pop(&exp_item.key);
-                        }
-                        self.expiries.pop();
-                    } else {
-                        break;
-                    }
-                },
-                None => break,
+        while let Some(exp_item) = self.expiries.peek().cloned() {
+            if exp_item.is_expired() {
+                let kv_entry = self.data.get(&exp_item.key).unwrap();
+                if kv_entry.key == exp_item.key && kv_entry.expired_at == exp_item.expired_at {
+                    cleared_count += 1;
+                    self.pop(&exp_item.key);
+                }
+                self.expiries.pop();
+            } else {
+                break;
             }
         }
         cleared_count
+    }
+
+    /// Empty the container. That is, remove all key-values and expiries.
+    pub fn clear(&mut self) {
+        self.data.clear();
+        self.expiries.clear();
     }
 
     fn clear_expired_if_auto(&mut self) {
@@ -144,14 +209,16 @@ impl SparKV {
         self.ensure_capacity()
     }
 
-    fn ensure_item_size(&self, value: &str) -> Result<(), Error> {
-        if value.len() > self.config.max_item_size {
-            return Err(Error::ItemSizeExceeded);
+    fn ensure_item_size(&self, value: &T) -> Result<(), Error> {
+        if let Some(calc) = self.size_calculator {
+            if calc(value) > self.config.max_item_size {
+                return Err(Error::ItemSizeExceeded);
+            }
         }
         Ok(())
     }
 
-    fn ensure_max_ttl(&self, ttl: std::time::Duration) -> Result<(), Error> {
+    fn ensure_max_ttl(&self, ttl: Duration) -> Result<(), Error> {
         if ttl > self.config.max_ttl {
             return Err(Error::TTLTooLong);
         }
@@ -159,214 +226,14 @@ impl SparKV {
     }
 }
 
-impl Default for SparKV {
+impl<T> Default for SparKV<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
+mod tests;
 
-    #[test]
-    fn test_sparkv_config() {
-        let config: Config = Config::new();
-        assert_eq!(config.max_items, 10_000);
-        assert_eq!(config.max_item_size, 500_000);
-        assert_eq!(config.max_ttl, std::time::Duration::from_secs(60 * 60));
-    }
-
-    #[test]
-    fn test_sparkv_new_with_config() {
-        let config: Config = Config::new();
-        let sparkv = SparKV::with_config(config);
-        assert_eq!(sparkv.config, config);
-    }
-
-    #[test]
-    fn test_len_is_empty() {
-        let mut sparkv = SparKV::new();
-        assert_eq!(sparkv.len(), 0);
-        assert!(sparkv.is_empty());
-
-        _ = sparkv.set("keyA", "value");
-        assert_eq!(sparkv.len(), 1);
-        assert!(!sparkv.is_empty());
-    }
-
-    #[test]
-    fn test_set_get() {
-        let mut sparkv = SparKV::new();
-        _ = sparkv.set("keyA", "value");
-        assert_eq!(sparkv.get("keyA"), Some(String::from("value")));
-        assert_eq!(sparkv.expiries.len(), 1);
-
-        // Overwrite the value
-        _ = sparkv.set("keyA", "value2");
-        assert_eq!(sparkv.get("keyA"), Some(String::from("value2")));
-        assert_eq!(sparkv.expiries.len(), 2);
-
-        assert!(sparkv.get("non-existent").is_none());
-    }
-
-    #[test]
-    fn test_get_item() {
-        let mut sparkv = SparKV::new();
-        let item = KvEntry::new("keyARaw", "value99", std::time::Duration::from_secs(1));
-        sparkv.data.insert(item.key.clone(), item);
-        let get_result = sparkv.get_item("keyARaw");
-        let unwrapped = get_result.unwrap();
-
-        assert!(get_result.is_some());
-        assert_eq!(unwrapped.key, "keyARaw");
-        assert_eq!(unwrapped.value, "value99");
-
-        assert!(sparkv.get_item("non-existent").is_none());
-    }
-
-    #[test]
-    fn test_get_item_return_none_if_expired() {
-        let mut sparkv = SparKV::new();
-        _ = sparkv.set_with_ttl("kkk", "value", std::time::Duration::from_millis(50));
-        assert_eq!(sparkv.get("kkk"), Some(String::from("value")));
-
-        std::thread::sleep(std::time::Duration::from_millis(60));
-        assert_eq!(sparkv.get("kkk"), None);
-    }
-
-    #[test]
-    fn test_set_should_fail_if_capacity_exceeded() {
-        let mut config: Config = Config::new();
-        config.max_items = 2;
-
-        let mut sparkv = SparKV::with_config(config);
-        let mut set_result = sparkv.set("keyA", "value");
-        assert!(set_result.is_ok());
-        assert_eq!(sparkv.get("keyA"), Some(String::from("value")));
-
-        set_result = sparkv.set("keyB", "value2");
-        assert!(set_result.is_ok());
-
-        set_result = sparkv.set("keyC", "value3");
-        assert!(set_result.is_err());
-        assert_eq!(set_result.unwrap_err(), Error::CapacityExceeded);
-        assert!(sparkv.get("keyC").is_none());
-
-        // Overwrite existing key should not err
-        set_result = sparkv.set("keyB", "newValue1234");
-        assert!(set_result.is_ok());
-        assert_eq!(sparkv.get("keyB"), Some(String::from("newValue1234")));
-    }
-
-    #[test]
-    fn test_set_with_ttl() {
-        let mut sparkv = SparKV::new();
-        _ = sparkv.set("longest", "value");
-        _ = sparkv.set_with_ttl("longer", "value", std::time::Duration::from_secs(2));
-        _ = sparkv.set_with_ttl("shorter", "value", std::time::Duration::from_secs(1));
-
-        assert_eq!(sparkv.get("longer"), Some(String::from("value")));
-        assert_eq!(sparkv.get("shorter"), Some(String::from("value")));
-        assert!(
-            sparkv.get_item("longer").unwrap().expired_at
-                > sparkv.get_item("shorter").unwrap().expired_at
-        );
-        assert!(
-            sparkv.get_item("longest").unwrap().expired_at
-                > sparkv.get_item("longer").unwrap().expired_at
-        );
-    }
-
-    #[test]
-    fn test_ensure_max_ttl() {
-        let mut config: Config = Config::new();
-        config.max_ttl = std::time::Duration::from_secs(3600);
-        config.default_ttl = std::time::Duration::from_secs(5000);
-        let mut sparkv = SparKV::with_config(config);
-
-        let set_result_long_def = sparkv.set("default is longer than max", "should fail");
-        assert!(set_result_long_def.is_err());
-        assert_eq!(set_result_long_def.unwrap_err(), Error::TTLTooLong);
-
-        let set_result_ok =
-            sparkv.set_with_ttl("shorter", "ok", std::time::Duration::from_secs(3599));
-        assert!(set_result_ok.is_ok());
-
-        let set_result_ok_2 =
-            sparkv.set_with_ttl("exact", "ok", std::time::Duration::from_secs(3600));
-        assert!(set_result_ok_2.is_ok());
-
-        let set_result_not_ok =
-            sparkv.set_with_ttl("not", "not ok", std::time::Duration::from_secs(3601));
-        assert!(set_result_not_ok.is_err());
-        assert_eq!(set_result_not_ok.unwrap_err(), Error::TTLTooLong);
-    }
-
-    #[test]
-    fn test_delete() {
-        let mut sparkv = SparKV::new();
-        _ = sparkv.set("keyA", "value");
-        assert_eq!(sparkv.get("keyA"), Some(String::from("value")));
-        assert_eq!(sparkv.expiries.len(), 1);
-
-        let deleted_value = sparkv.pop("keyA");
-        assert_eq!(deleted_value, Some(String::from("value")));
-        assert!(sparkv.get("keyA").is_none());
-        assert_eq!(sparkv.expiries.len(), 1); // it does not delete
-    }
-
-    #[test]
-    fn test_clear_expired() {
-        let mut config: Config = Config::new();
-        config.auto_clear_expired = false;
-        let mut sparkv = SparKV::with_config(config);
-        _ = sparkv.set_with_ttl("not-yet-expired", "v", std::time::Duration::from_secs(90));
-        _ = sparkv.set_with_ttl("expiring", "value", std::time::Duration::from_millis(1));
-        _ = sparkv.set_with_ttl("not-expired", "value", std::time::Duration::from_secs(60));
-        std::thread::sleep(std::time::Duration::from_millis(2));
-        assert_eq!(sparkv.len(), 3);
-
-        let cleared_count = sparkv.clear_expired();
-        assert_eq!(cleared_count, 1);
-        assert_eq!(sparkv.len(), 2);
-
-        assert_eq!(sparkv.clear_expired(), 0);
-    }
-
-    #[test]
-    fn test_clear_expired_with_overwritten_key() {
-        let mut config: Config = Config::new();
-        config.auto_clear_expired = false;
-        let mut sparkv = SparKV::with_config(config);
-        _ = sparkv.set_with_ttl("no-longer", "value", std::time::Duration::from_millis(1));
-        _ = sparkv.set_with_ttl("no-longer", "v", std::time::Duration::from_secs(90));
-        _ = sparkv.set_with_ttl("not-expired", "value", std::time::Duration::from_secs(60));
-        std::thread::sleep(std::time::Duration::from_millis(2));
-        assert_eq!(sparkv.expiries.len(), 3); // overwriting key does not update expiries
-        assert_eq!(sparkv.len(), 2);
-
-        let cleared_count = sparkv.clear_expired();
-        assert_eq!(cleared_count, 0); // no longer expiring
-        assert_eq!(sparkv.expiries.len(), 2); // should have cleared the expiries
-        assert_eq!(sparkv.len(), 2); // but not actually deleting
-    }
-
-    #[test]
-    fn test_clear_expired_with_auto_clear_expired_enabled() {
-        let mut config: Config = Config::new();
-        config.auto_clear_expired = true; // explicitly setting it to true
-        let mut sparkv = SparKV::with_config(config);
-        _ = sparkv.set_with_ttl("no-longer", "value", std::time::Duration::from_millis(1));
-        _ = sparkv.set_with_ttl("no-longer", "v", std::time::Duration::from_secs(90));
-        std::thread::sleep(std::time::Duration::from_millis(2));
-        _ = sparkv.set_with_ttl("not-expired", "value", std::time::Duration::from_secs(60));
-        assert_eq!(sparkv.expiries.len(), 2); // diff from above, because of auto clear
-        assert_eq!(sparkv.len(), 2);
-
-        // auto clear
-        _ = sparkv.set_with_ttl("new-", "value", std::time::Duration::from_secs(60));
-        assert_eq!(sparkv.expiries.len(), 3); // should have cleared the expiries
-        assert_eq!(sparkv.len(), 3); // but not actually deleting
-    }
-}
+#[cfg(test)]
+mod test_json_value;

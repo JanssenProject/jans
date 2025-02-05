@@ -20,7 +20,8 @@
       "par",
       "ssa",
       "global_token_revocation",
-      "status_list"
+      "status_list",
+      "access_evaluation"
     ],
     "issuer":"${config.oxauth.issuer}",
     "loginPage":"${config.oxauth.contextPath}/login.htm",
@@ -518,7 +519,7 @@
         "interruptionErrorPage": "timeout.ftlh",
         "crashErrorPage": "crash.ftlh",
         "finishedFlowPage": "finished.ftlh",
-        "bridgeScriptPage": "agama.xhtml",
+        "startEndUrlMapping": { "agama/agama.xhtml": "postlogin.htm", "agama/consent.xhtml": "agama/consent_authorize.htm" },
         "defaultResponseHeaders": {
             "Cache-Control": "max-age=0, no-store"
         },

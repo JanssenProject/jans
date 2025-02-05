@@ -24,14 +24,12 @@ public class EngineConfig {
     //transpiled code hash verification. Boolean preferred over boolean because it helps to keep the property "hidden"
     private Boolean disableTCHV;
 
-    private String pageMismatchErrorPage = "mismatch.ftl";
-    private String interruptionErrorPage = "timeout.ftl";
-    private String crashErrorPage = "crash.ftl";
-    private String finishedFlowPage = "finished.ftl";
+    private String pageMismatchErrorPage;
+    private String interruptionErrorPage;
+    private String crashErrorPage;
+    private String finishedFlowPage;
     
-    //relative to https://.../jans-auth
-    private String bridgeScriptPage = "agama.xhtml";
-    
+    private Map<String, String> startEndUrlMapping;
     private Map<String, List<String>> serializeRules;
 
     private Map<String, String> defaultResponseHeaders = Map.of(
@@ -126,14 +124,6 @@ public class EngineConfig {
         this.finishedFlowPage = finishedFlowPage;
     }
 
-    public String getBridgeScriptPage() {
-        return bridgeScriptPage;
-    }
-
-    public void setBridgeScriptPage(String bridgeScriptPage) {
-        this.bridgeScriptPage = bridgeScriptPage;
-    }
-
     public Map<String, String> getDefaultResponseHeaders() {
         return defaultResponseHeaders;
     }
@@ -141,7 +131,15 @@ public class EngineConfig {
     public void setDefaultResponseHeaders(Map<String, String> defaultResponseHeaders) {
         this.defaultResponseHeaders = defaultResponseHeaders;
     }
+    
+    public Map<String, String> getStartEndUrlMapping() {
+        return startEndUrlMapping;
+    }
 
+    public void setStartEndUrlMapping(Map<String, String> startEndUrlMapping) {
+        this.startEndUrlMapping = startEndUrlMapping;
+    }
+   
     public Map<String, List<String>> getSerializeRules() {
         return serializeRules;
     }

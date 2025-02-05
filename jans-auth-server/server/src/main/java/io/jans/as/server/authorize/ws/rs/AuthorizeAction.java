@@ -86,6 +86,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 @Named
 public class AuthorizeAction {
 
+    public static final String UNKNOWN = "Unknown";
     @Inject
     private Logger log;
 
@@ -480,9 +481,10 @@ public class AuthorizeAction {
                 return;
             }
 
-            log.trace("Starting external consent-gathering flow");
+            List<String> acrValuesList = sessionIdService.acrValuesList(this.acrValues);
+            log.trace("Starting external consent-gathering flow, acrValues {} ...", acrValuesList);
 
-            boolean result = consentGatherer.configure(session.getUserDn(), clientId, state);
+            boolean result = consentGatherer.configure(session.getUserDn(), clientId, state, acrValuesList);
             if (!result) {
                 log.error("Failed to initialize external consent-gathering flow.");
                 permissionDenied();
@@ -985,10 +987,28 @@ public class AuthorizeAction {
         log.trace("client {}", clientId);
 
         if (StringUtils.isBlank(clientId)) {
-            return "Unknown";
+            return UNKNOWN;
         }
 
         final Client client = clientService.getClient(clientId);
+        return getCheckedClientDisplayName(client);
+    }
+
+    public String getClientDisplayName(final Client client) {
+        log.trace("client {}", client);
+
+        if (client == null) {
+            return UNKNOWN;
+        }
+
+        return getCheckedClientDisplayName(client);
+    }
+
+	private String getCheckedClientDisplayName(final Client client) {
+        if (client == null) {
+            return UNKNOWN;
+        }
+
         if (StringUtils.isNotBlank(client.getClientName())) {
             return client.getClientName();
         }
@@ -997,8 +1017,8 @@ public class AuthorizeAction {
             return client.getClientId();
         }
 
-        return "Unknown";
-    }
+        return UNKNOWN;
+	}
 
     public String getAuthReqId() {
         return authReqId;

@@ -95,6 +95,15 @@ Example of decision log.
     "Workload": {
         "org_id": "some_long_id"
     },
+    "diagnostics": {
+        "reason": [
+            {
+                "id": "840da5d85403f35ea76519ed1a18a33989f855bf1cf8",
+                "description": "policy for user"
+            }
+        ],
+        "errors": []
+    },
     "lock_client_id": null,
     "action": "Jans::Action::\"Update\"",
     "resource": "Jans::Issue::\"random_id\"",

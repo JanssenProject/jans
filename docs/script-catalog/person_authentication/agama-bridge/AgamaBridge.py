@@ -37,6 +37,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Agama. Property '%s' is missing value" % prop
             return False
 
+        self.startUrl = "agama/agama.xhtml"
         print "Agama. DB attribute '%s' will be used to map the identity of userId passed in Finish directives (if any)" % self.finish_userid_db_attr
         print "Agama. Initialized successfully"
 
@@ -144,7 +145,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 
             try:
                 bridge = CdiUtil.bean(NativeJansFlowBridge)
-                running = bridge.prepareFlow(session.getId(), qn, ins)
+                running = bridge.prepareFlow(session.getId(), qn, ins, False, self.startUrl)
                 
                 if running == None:
                     print "Agama. Flow '%s' does not exist or cannot be launched from a browser!" % qn
@@ -161,7 +162,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
             #except java.lang.Throwable, ex:
             #    ex.printStackTrace() 
-            #    return False                
+            #    return False
             return True
         
     def getExtraParametersForStep(self, configurationAttributes, step):
@@ -171,8 +172,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return 1
 
     def getPageForStep(self, configurationAttributes, step):
-        # page referenced here is only used when a flow is restarted
-        return "/" + CdiUtil.bean(NativeJansFlowBridge).scriptPageUrl()
+        return "/" + self.startUrl
 
     def getNextStep(self, configurationAttributes, requestParameters, step):
         return -1

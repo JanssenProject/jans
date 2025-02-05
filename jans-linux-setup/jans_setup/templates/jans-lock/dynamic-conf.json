@@ -7,7 +7,6 @@
   "clientId": "%(lock_client_id)s",
   "clientPassword": "%(lock_client_encoded_pw)s",
   "tokenUrl": "%(jans_auth_token_endpoint)s",
-  "groupScopeEnabled": true,
   "endpointGroups": {
     "audit": [
       "telemetry",
@@ -51,14 +50,12 @@
   "metricReporterInterval": 300,
   "metricReporterKeepDataDays": 15,
   "metricReporterEnabled": true,
-  "errorReasonEnabled": false,
-  "opaConfiguration": {
-    "baseUrl": "http://%(jans_opa_host)s:%(jans_opa_port)s/v1/",
-    "accessToken": ""
-  },
+  "statEnabled": true,
   "policiesJsonUris": [],
   "policiesJsonUrisAuthorizationToken": "",
   "policiesZipUris": [],
   "policiesZipUrisAuthorizationToken": "",
-  "pdpType": "OPA"
+  "messageConsumerType" : "DISABLED",
+  "policyConsumerType" : "DISABLED",
+  "errorReasonEnabled": false
 }

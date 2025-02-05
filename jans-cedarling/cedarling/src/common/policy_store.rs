@@ -8,16 +8,14 @@ mod claim_mapping;
 mod test;
 mod token_entity_metadata;
 
-use std::collections::HashMap;
-use std::fmt;
-use std::sync::LazyLock;
-
+use super::cedar_schema::CedarSchema;
 use cedar_policy::PolicyId;
 use semver::Version;
 use serde::{Deserialize, Deserializer};
-pub use token_entity_metadata::{ClaimMappings, TokenEntityMetadata};
+use std::collections::HashMap;
+use std::sync::LazyLock;
 
-use super::cedar_schema::CedarSchema;
+pub use token_entity_metadata::{ClaimMappings, TokenEntityMetadata};
 
 /// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
 #[derive(Debug, Clone, serde::Deserialize, PartialEq)]
@@ -101,21 +99,9 @@ pub struct TrustedIssuer {
     /// This endpoint is used to obtain information about the issuer's capabilities.
     pub openid_configuration_endpoint: String,
 
-    /// Metadata for access tokens issued by the trusted issuer.
+    /// Metadata for tokens issued by the trusted issuer.
     #[serde(default)]
-    pub access_tokens: TokenEntityMetadata,
-
-    /// Metadata for ID tokens issued by the trusted issuer.
-    #[serde(default)]
-    pub id_tokens: TokenEntityMetadata,
-
-    /// Metadata for userinfo tokens issued by the trusted issuer.
-    #[serde(default)]
-    pub userinfo_tokens: TokenEntityMetadata,
-
-    /// Metadata for transaction tokens issued by the trusted issuer.
-    #[serde(default)]
-    pub tx_tokens: TokenEntityMetadata,
+    pub tokens_metadata: HashMap<String, TokenEntityMetadata>,
 }
 
 impl Default for TrustedIssuer {
@@ -124,10 +110,7 @@ impl Default for TrustedIssuer {
             name: "Jans".to_string(),
             description: Default::default(),
             openid_configuration_endpoint: Default::default(),
-            access_tokens: Default::default(),
-            id_tokens: Default::default(),
-            userinfo_tokens: Default::default(),
-            tx_tokens: Default::default(),
+            tokens_metadata: Default::default(),
         }
     }
 }
@@ -141,111 +124,27 @@ impl Default for &TrustedIssuer {
 
 impl TrustedIssuer {
     /// Retrieves the claim that defines the `Role` for a given token type.
-    pub fn role_mapping(&self, token_kind: TokenKind) -> Option<&str> {
-        match token_kind {
-            TokenKind::Access => self.access_tokens.role_mapping.as_deref(),
-            TokenKind::Id => self.id_tokens.role_mapping.as_deref(),
-            TokenKind::Userinfo => self.userinfo_tokens.role_mapping.as_deref(),
-            TokenKind::Transaction => self.tx_tokens.role_mapping.as_deref(),
-        }
+    pub fn get_role_mapping(&self, token_name: &str) -> Option<&str> {
+        self.tokens_metadata
+            .get(token_name)
+            .and_then(|x| x.role_mapping.as_deref())
     }
 
     /// Retrieves the claim that defines the `User` for a given token type.
-    pub fn user_mapping(&self, token_kind: TokenKind) -> Option<&str> {
-        match token_kind {
-            TokenKind::Access => self.access_tokens.user_id.as_deref(),
-            TokenKind::Id => self.id_tokens.user_id.as_deref(),
-            TokenKind::Userinfo => self.userinfo_tokens.user_id.as_deref(),
-            TokenKind::Transaction => self.tx_tokens.user_id.as_deref(),
-        }
+    pub fn get_user_mapping(&self, token_name: &str) -> Option<&str> {
+        self.tokens_metadata
+            .get(token_name)
+            .and_then(|x| x.user_id.as_deref())
     }
 
-    pub fn claim_mapping(&self, token_kind: TokenKind) -> &ClaimMappings {
-        match token_kind {
-            TokenKind::Access => &self.access_tokens.claim_mapping,
-            TokenKind::Id => &self.id_tokens.claim_mapping,
-            TokenKind::Userinfo => &self.userinfo_tokens.claim_mapping,
-            TokenKind::Transaction => &self.tx_tokens.claim_mapping,
-        }
+    pub fn get_claim_mapping(&self, token_name: &str) -> Option<&ClaimMappings> {
+        self.tokens_metadata
+            .get(token_name)
+            .map(|x| &x.claim_mapping)
     }
 
-    pub fn token_metadata(&self, token_kind: TokenKind) -> &TokenEntityMetadata {
-        match token_kind {
-            TokenKind::Access => self.tokens_metadata().access_tokens,
-            TokenKind::Id => self.tokens_metadata().id_tokens,
-            TokenKind::Userinfo => self.tokens_metadata().userinfo_tokens,
-            TokenKind::Transaction => self.tokens_metadata().tx_tokens,
-        }
-    }
-
-    pub fn tokens_metadata(&self) -> TokensMetadata<'_> {
-        TokensMetadata {
-            access_tokens: &self.access_tokens,
-            id_tokens: &self.id_tokens,
-            userinfo_tokens: &self.userinfo_tokens,
-            tx_tokens: &self.tx_tokens,
-        }
-    }
-}
-
-// Hold reference to tokens metadata
-pub struct TokensMetadata<'a> {
-    /// Metadata for access tokens issued by the trusted issuer.
-    pub access_tokens: &'a TokenEntityMetadata,
-
-    /// Metadata for ID tokens issued by the trusted issuer.
-    pub id_tokens: &'a TokenEntityMetadata,
-    /// Metadata for userinfo tokens issued by the trusted issuer.
-    pub userinfo_tokens: &'a TokenEntityMetadata,
-
-    /// Metadata for transaction tokens issued by the trusted issuer.
-    pub tx_tokens: &'a TokenEntityMetadata,
-}
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum TokenKind {
-    /// Access token used for granting access to resources.
-    Access,
-
-    /// ID token used for authentication.
-    Id,
-
-    /// Userinfo token containing user-specific information.
-    Userinfo,
-
-    /// Token containing transaction-specific information.
-    Transaction,
-}
-
-/// Enum representing the different kinds of tokens used by Cedarling.
-impl fmt::Display for TokenKind {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let kind_str = match self {
-            TokenKind::Access => "access",
-            TokenKind::Id => "id",
-            TokenKind::Userinfo => "userinfo",
-            TokenKind::Transaction => "transaction",
-        };
-        write!(f, "{}", kind_str)
-    }
-}
-
-impl<'de> Deserialize<'de> for TokenKind {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let token_kind = String::deserialize(deserializer)?;
-
-        match token_kind.to_lowercase().as_str() {
-            "id_token" => Ok(TokenKind::Id),
-            "userinfo_token" => Ok(TokenKind::Userinfo),
-            "access_token" => Ok(TokenKind::Access),
-            _ => Err(serde::de::Error::unknown_variant(
-                &token_kind,
-                &["access_token", "id_token", "userinfo_token"],
-            )),
-        }
+    pub fn get_token_metadata(&self, token_name: &str) -> Option<&TokenEntityMetadata> {
+        self.tokens_metadata.get(token_name)
     }
 }
 
