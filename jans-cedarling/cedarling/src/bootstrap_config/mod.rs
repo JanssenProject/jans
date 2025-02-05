@@ -132,7 +132,7 @@ pub enum BootstrapConfigLoadingError {
     /// Error returned when multiple policy store sources were provided.
     #[error(
         "Multiple store options were provided. Make sure you only one of these properties is set: \
-         `CEDARLING_POLICY_STORE_URI` or `CEDARLING_LOCAL_POLICY_STORE`"
+         `CEDARLING_POLICY_STORE_URI` or `CEDARLING_POLICY_STORE_LOCAL`"
     )]
     ConflictingPolicyStores,
 
