@@ -439,9 +439,10 @@ jobs:
         if [ "${TAG}" == "nightly" ]; then
           VERSION=nightly
           TAG="0.0.0"
-          npm unpublish cedarling_wasm@0.0.0
+          # remove, do not publish on nightly or random nightly build versions to be published
+          #npm unpublish cedarling_wasm@0.0.0
         fi
-        npm publish --access public --tag "${VERSION}"
+        npm publish --access public --tag "${VERSION}" || echo "failed to piblish to NPM"
         cd ..
         rm -rf pkg/.gitignore || echo "Failed to remove gitignore"
         tar -czvf cedarling_wasm_"${TAG}"_pkg.tar.gz -C pkg .
