@@ -394,6 +394,11 @@ public enum RegisterRequestParam {
     POST_AUTHN_SCRIPT_DNS("post_authn_script_dns"),
 
     /**
+     * list of token exchange script dns
+     */
+    TOKEN_EXCHANGE_SCRIPT_DNS("token_exchange_script_dns"),
+
+    /**
      * list of consent gathering script dns
      */
     CONSENT_GATHERING_SCRIPT_DNS("consent_gathering_script_dns"),

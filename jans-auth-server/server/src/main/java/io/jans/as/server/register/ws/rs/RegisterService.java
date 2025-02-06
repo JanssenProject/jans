@@ -256,6 +256,9 @@ public class RegisterService {
         if (requestObject.getPostAuthnScriptDns() != null) {
             client.getAttributes().setPostAuthnScripts(requestObject.getPostAuthnScriptDns());
         }
+        if (requestObject.getTokenExchangeScriptDns() != null) {
+            client.getAttributes().setTokenExchangeScripts(requestObject.getTokenExchangeScriptDns());
+        }
         if (requestObject.getConsentGatheringScriptDns() != null) {
             client.getAttributes().setConsentGatheringScripts(requestObject.getConsentGatheringScriptDns());
         }
