@@ -97,3 +97,5 @@ docs/_build/
 
 # Pyenv
 .python-version
+
+!/bindings/cedarling_native_apps/src/bin
