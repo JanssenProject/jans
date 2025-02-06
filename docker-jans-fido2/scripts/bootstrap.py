@@ -173,7 +173,7 @@ class PersistenceSetup:
             "fido2ConfigFolder": "/etc/jans/conf/fido2",
             "fido_document_certs_dir": "/etc/jans/conf/fido2/mds/cert",
             "fido_document_tocs_dir": "/etc/jans/conf/fido2/mds/toc",
-            "fido_document_auth_dir": "/etc/jans/conf/fido2/authenticator_cert",
+            "fido_document_authenticator_cert_dir": "/etc/jans/conf/fido2/authenticator_cert",
         }
 
         # pre-populate fido2_dynamic_conf_base64
