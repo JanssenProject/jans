@@ -77,7 +77,6 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
     CN_INSTALL_LINK="true" \
     CN_INSTALL_LOCK="true" \
     CN_INSTALL_SAML="false" \
-    CN_INSTALL_OPA="true" \
     RDBMS_DATABASE="jans" \
     RDBMS_USER="jans" \
     RDBMS_PASSWORD="" \

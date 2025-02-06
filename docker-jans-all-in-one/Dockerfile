@@ -58,7 +58,7 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=040ff17942019bc10433ce17d819b8d8474f13c8
+ENV JANS_SOURCE_VERSION=881c1e0818a0aed6b413280ee7d85bd02d92bbb6
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -133,6 +133,7 @@ RUN ln -sf /app/jans_aio/jans_config_api/entrypoint.sh /app/bin/jans-config-api-
 COPY --from=jans-fido2-src /opt/jans/jetty/jans-fido2 /opt/jans/jetty/jans-fido2
 COPY --from=jans-fido2-src /app/templates/jans-fido2 /app/templates/jans-fido2
 COPY --from=jans-fido2-src /etc/jans/conf/fido2 /etc/jans/conf/fido2
+COPY --from=jans-fido2-src /app/static/fido2 /app/static/fido2
 COPY --from=jans-fido2-src /app/scripts /app/jans_aio/jans_fido2
 RUN ln -sf /app/jans_aio/jans_fido2/entrypoint.sh /app/bin/jans-fido2-entrypoint.sh
 
