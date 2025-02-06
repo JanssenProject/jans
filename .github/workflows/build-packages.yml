@@ -429,8 +429,6 @@ jobs:
         cargo install wasm-pack
         wasm-pack build --release --target web --scope janssenproject
         ls pkg
-        cd pkg
-        npm publish --access public
     - name: Archive and sign pkg contents
       id: archive_pkg
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
@@ -440,7 +438,11 @@ jobs:
         if [ "${TAG}" == "nightly" ]; then
           VERSION=nightly
           TAG="0.0.0"
+          npm unpublish @janssenproject/cedarling_wasm@0.0.0 --force
         fi
+        cd pkg
+        npm publish --access public
+        cd ..
         rm -rf pkg/.gitignore || echo "Failed to remove gitignore"
         tar -czvf cedarling_wasm_"${TAG}"_pkg.tar.gz -C pkg .
         sha256sum cedarling_wasm_"${TAG}"_pkg.tar.gz > cedarling_wasm_"${TAG}"_pkg.tar.gz.sha256sum
