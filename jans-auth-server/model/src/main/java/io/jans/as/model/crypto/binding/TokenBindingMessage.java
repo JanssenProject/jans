@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * <pre>
  * struct {
- *     TokenBinding tokenbindings<132..2^16-1>;
+ *     TokenBinding tokenbindings&lt;132..2^16-1&gt;;
  * } TokenBindingMessage;
  * </pre>
  *

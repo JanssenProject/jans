@@ -32,9 +32,9 @@ import static io.jans.as.model.jwk.JWKParameter.*;
 /**
  * Command example:
  * java -cp bcprov-jdk15on-1.54.jar:.jar:bcpkix-jdk15on-1.54.jar:commons-cli-1.2.jar:commons-codec-1.5.jar:commons-lang-2.6.jar:jettison-1.3.jar:log4j-1.2.14.jar:oxauth-model.jar:oxauth.jar KeyGenerator -h
- * <p/>
+ * <p>
  * KeyGenerator -sig_keys RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 EdDSA -enc_keys RSA1_5 RSA-OAEP RSA-OAEP-256 ECDH-ES ECDH-ES+A128KW ECDH-ES+A192KW ECDH-ES+A256KW -keystore /Users/JAVIER/tmp/mykeystore.jks -keypasswd secret -dnname "CN=Jans Auth CA Certificates" -expiration 365
- * <p/>
+ * <p>
  * Note that EdDSA is not allowed in FIPS mode
  *
  * @author Javier Rojas Blum

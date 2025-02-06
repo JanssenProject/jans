@@ -123,11 +123,7 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
      * @param expirationDate
      * @param dnName
      * @return
-     * @throws CertificateEncodingException
-     * @throws InvalidKeyException
      * @throws IllegalStateException
-     * @throws NoSuchProviderException
-     * @throws NoSuchAlgorithmException
      * @throws SignatureException
      */
     public Certificate generateV3Certificate(final Date startDate, final Date expirationDate, final String dnName) throws SignatureException {

@@ -123,7 +123,7 @@ public class SsaRestWebServiceValidator {
      * </p>
      *
      * @param createRequest SSA Metadata
-     * @throws WebApplicationException with status {@code 400 (Bad Request)} with <b>invalid_ssa_metadata<b/> key, when lifetime is invalid
+     * @throws WebApplicationException with status {@code 400 (Bad Request)} with <b>invalid_ssa_metadata</b> key, when lifetime is invalid
      */
     public void validateSsaCreateRequest(SsaCreateRequest createRequest) {
         if (createRequest.getLifetime() != null && createRequest.getLifetime() < 1) {

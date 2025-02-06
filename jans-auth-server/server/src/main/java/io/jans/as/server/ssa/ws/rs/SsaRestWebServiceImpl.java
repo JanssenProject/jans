@@ -42,7 +42,7 @@ public class SsaRestWebServiceImpl implements SsaRestWebService {
      * Creates an SSA from the requested parameters.
      * <p>
      * Method calls the action where the SSA creation logic is implemented.
-     * <p/>
+     * <p>
      *
      * @param requestParams Valid json
      * @param httpRequest   Http request object
@@ -57,7 +57,7 @@ public class SsaRestWebServiceImpl implements SsaRestWebService {
      * Get existing active SSA based on "jti" or "org_id".
      * <p>
      * Method calls the action where the SSA get logic is implemented.
-     * <p/>
+     * <p>
      *
      * @param jti         Unique identifier
      * @param orgId       Organization ID
@@ -73,7 +73,7 @@ public class SsaRestWebServiceImpl implements SsaRestWebService {
      * Validate existing active SSA based on "jti".
      * <p>
      * Method calls the action where the SSA validate logic is implemented.
-     * <p/>
+     * <p>
      *
      * @param jti Unique identifier
      * @return {@link Response} with status {@code 200} (Ok) if SSA has been validated.

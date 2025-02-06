@@ -62,7 +62,6 @@ public class ConfigurationService {
      *
      * @param inum Configuration Inum
      * @return Configuration
-     * @throws Exception
      */
     public GluuConfiguration getConfigurationByInum(String inum) {
         return persistenceEntryManager.find(GluuConfiguration.class, getDnForConfiguration(inum));
@@ -72,7 +71,6 @@ public class ConfigurationService {
      * Get configuration
      *
      * @return Configuration
-     * @throws Exception
      */
     public GluuConfiguration getConfiguration() {
         String configurationDn = staticConfiguration.getBaseDn().getConfiguration();
@@ -88,7 +86,6 @@ public class ConfigurationService {
      *
      * @param inum Inum
      * @return DN string for specified configuration or DN for configurations branch if inum is null
-     * @throws Exception
      */
     public String getDnForConfiguration(String inum) {
         String baseDn = staticConfiguration.getBaseDn().getConfiguration();
