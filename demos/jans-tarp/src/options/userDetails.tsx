@@ -15,7 +15,7 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-import __wbg_init, { init, Cedarling, AuthorizeResult } from 'wasm';
+import __wbg_init, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
 
 const UserDetails = ({ data, notifyOnDataChange }) => {
     const [loading, setLoading] = useState(false);

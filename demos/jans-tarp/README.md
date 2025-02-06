@@ -19,10 +19,9 @@
 ## Build
 
 1. Change directory to the project directory (`/jans-tarp`).
-2. Download and extract Cedarling WASM bindings from https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_wasm_{version}_pkg.tar.gz to `/jans-tarp/src/wasm`.
-3. Run `npm install`.
-4. Run `npm run build`. It will create Chrome and Firefox build in `/jans-tarp/dist/chrome` and `/jans-tarp/dist/firefox` directories respectively.
-5. To pack the build into a zip file run `npm run pack`. This command will pack  Chrome and Firefox builds in zip files at `/jans-tarp/release`.
+2. Run `npm install`.
+3. Run `npm run build`. It will create Chrome and Firefox build in `/jans-tarp/dist/chrome` and `/jans-tarp/dist/firefox` directories respectively.
+4. To pack the build into a zip file run `npm run pack`. This command will pack  Chrome and Firefox builds in zip files at `/jans-tarp/release`.
 
 ## Releases
 
