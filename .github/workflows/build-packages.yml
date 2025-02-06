@@ -439,7 +439,7 @@ jobs:
         if [ "${TAG}" == "nightly" ]; then
           VERSION=nightly
           TAG="0.0.0"
-          npm unpublish --workspace janssenproject cedarling_wasm@0.0.0
+          npm unpublish cedarling_wasm@0.0.0
         fi
         npm publish --access public --tag "${VERSION}"
         cd ..
