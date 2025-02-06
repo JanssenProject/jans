@@ -435,12 +435,12 @@ jobs:
       run: |
         TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
         VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+        cd pkg
         if [ "${TAG}" == "nightly" ]; then
           VERSION=nightly
           TAG="0.0.0"
           npm unpublish --workspace janssenproject cedarling_wasm@0.0.0
         fi
-        cd pkg
         npm publish --access public --tag "${VERSION}"
         cd ..
         rm -rf pkg/.gitignore || echo "Failed to remove gitignore"
