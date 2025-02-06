@@ -42,7 +42,6 @@ setup(
         "sqlalchemy==1.3.23",
         "ldap3",
         "PyMySQL",
-        "pycrypto",
         "PyJWT>=2.3.0",
     ],
     classifiers=[

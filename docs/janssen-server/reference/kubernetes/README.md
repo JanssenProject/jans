@@ -18,7 +18,7 @@ This Reference guide helps you learn about the components and architecture of Ja
 - **config-api**: The API to configure the auth-server and other components is consolidated in this component. This service should not be Internet-facing.
 - **Fido**: Provides the server side endpoints to enroll and validate devices that use FIDO. It provides both FIDO U2F (register, authenticate) and FIDO 2 (attestation, assertion) endpoints. This service must be internet facing.
 - **SCIM**: a JSON/REST API to manage user data. Use it to add, edit and update user information. This service should not be Internet facing.
-- **Casa**: self-service web portal for end-users to manage authentication and authorization preferences for their account in a Gluu Server.
+- **Casa**: self-service web portal for end-users to manage authentication and authorization preferences for their account in a Jannsen Server.
 
 ## Architectural diagram of Janssen
 

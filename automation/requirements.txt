@@ -2,5 +2,5 @@ ruamel.yaml>=0.16.10
 python-dateutil
 dockerfile-parse
 requests-html
-lxml-html-clean
+lxml-html-clean>=0.4.0
 websockets>=10.0 # not directly required, pinned by Snyk to avoid a vulnerability
