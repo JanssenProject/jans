@@ -438,9 +438,10 @@ jobs:
         if [ "${TAG}" == "nightly" ]; then
           VERSION=nightly
           TAG="0.0.0"
+          npm unpublish --workspace janssenproject cedarling_wasm@0.0.0
         fi
         cd pkg
-        npm publish --access public --tag "${VERSION}" --force 
+        npm publish --access public --tag "${VERSION}"
         cd ..
         rm -rf pkg/.gitignore || echo "Failed to remove gitignore"
         tar -czvf cedarling_wasm_"${TAG}"_pkg.tar.gz -C pkg .
