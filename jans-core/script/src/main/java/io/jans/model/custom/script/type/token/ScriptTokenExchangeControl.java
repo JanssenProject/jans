@@ -19,6 +19,10 @@ public class ScriptTokenExchangeControl {
         this.ok = ok;
     }
 
+    public static ScriptTokenExchangeControl ok() {
+        return new ScriptTokenExchangeControl(true);
+    }
+
     public static ScriptTokenExchangeControl fail() {
         return new ScriptTokenExchangeControl(false);
     }
