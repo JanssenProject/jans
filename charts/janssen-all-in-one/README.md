@@ -176,7 +176,6 @@ Kubernetes: `>=v1.22.0-0`
 | configmap.cnJettyRequestHeaderSize | int | `8192` | Jetty header size in bytes in the auth server |
 | configmap.cnMaxRamPercent | string | `"75.0"` | Value passed to Java option -XX:MaxRAMPercentage |
 | configmap.cnMessageType | string | `"DISABLED"` | Message type (one of POSTGRES, REDIS, or DISABLED) |
-| configmap.cnOpaUrl | string | `"http://opa.opa.svc.cluster.cluster.local:8181/v1"` | URL of OPA server |
 | configmap.cnRedisSentinelGroup | string | `""` | Redis Sentinel Group. Often set when `config.configmap.cnRedisType` is set to `SENTINEL`. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`. |
 | configmap.cnRedisSslTruststore | string | `""` | Redis SSL truststore. Optional. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`. |
 | configmap.cnRedisType | string | `"STANDALONE"` | Redis service type. `STANDALONE` or `CLUSTER`. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`. |
