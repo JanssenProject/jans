@@ -66,10 +66,9 @@ tasks.
 
 === "Use REST API"
 
-    Use REST API for programmatic access or invoke via tools like CURL or 
-    Postman. Learn how to use Janssen Server Config API 
-    [here](./config-tools/config-api/README.md) or Jump straight to the
-    [Using Configuration REST API](#using-configuration-rest-api)
+    The Jans link does not have a REST API.
+
+
 
 
 
@@ -191,30 +190,46 @@ Output of above command will be similar to this:
 
 
 
-### Updates Jans Link configuration properties
+#### Updates Jans Link configuration properties
 
 
-Let's update the Jans Link configuration properties using the Janssen CLI command line. To perform the `put-jans-link-properties` operation, we have to use its schema. To get its schema:
+Let's update the Jans Link configuration properties using the Janssen CLI command line. 
+To perform the `put-jans-link-properties` operation, we have to use its schema. To get its schema:
 
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema "Jans Link Plugin:AppConfiguration" > /tmp/update-jans-link.json
+jans cli --schema "Jans Link Plugin:AppConfiguration"
 ```
-The schema can now be found in the `update-jans-link.json` file.
 
 you can also use the following command for `Jans Link Plugin:AppConfiguration` schema example.
 
 ```bash title="Command"
 jans cli --schema-sample "Jans Link Plugin:AppConfiguration"
 ```
+To update the configuration follow the steps below.
 
-We need to modify the `update-jans-link.json` file. We have seen in the jans link `maxConnections:10` and `useSSL:true`. We are going to update it with `maxConnections:15` and `useSSL:false`.
+1. [Get Jans Link App configuration](#gets-jans-link-app-configuration) and store it into 
+a file for editing. The following command will retrieve the existing jans link in the schema file.
+```bash title="Command"
+jans cli -no-color \
+--operation-id get-jans-link-properties > /tmp/update-jans-link.json
+```
+2. Edit and update the desired configuration values in the file while keeping other properties 
+and values unchanged. Updates must adhere to the `Jans Link Plugin:AppConfiguration` 
+schema as mentioned [here](#using-command-line).
+
+3. We have seen in the jans link `maxConnections:10` and `useSSL:true`. We are going to 
+update it with `maxConnections:15` and `useSSL:false`.
+
+
 
 ```bash title="Command"
-jans cli --operation-id put-jans-link-properties --data /tmp/update-jans-link.json
+jans cli --operation-id put-jans-link-properties \
+--data /tmp/update-jans-link.json
 ```
+Upon successful execution of the update, the Janssen Server responds with updated configuration
 
-##  Using Text-based UI
+###  Using Text-based UI
 
 Start TUI using the command below:
 
@@ -228,7 +243,7 @@ in the image below.
 
 Section below covers Jans LDAP link configuration in more details.
 
-### Configuration Using 
+#### Configuration Using 
 
 In order to configre Jans LDAP Link, the administrator needs to know various 
 values of the backend LDAP(or Active Directory). For example, `host` & `port`, 
@@ -266,7 +281,7 @@ TUI
 * `Load Source Data withLimited Search`
 
 
-**Customer Backend Key Attribute**
+#### Customer Backend Key Attribute
 
 ![customerBackend](../../assets/ldap-link-customer-backend.png)
 
@@ -276,10 +291,10 @@ TUI
 
 * `Source Attributes` : This contains the list of attributes which will be pulled and read by the Jans Server.
 
-* `Custom LDAP Filter` :  If there is any custom search required, this filtering mechanism can be used such as "sn=*" whereas the value of this field ensures that every user must contain an attribute named `SN`.
+* `Custom LDAP Filter` : If there is any custom search required, this filtering mechanism can be used such as "sn=*" whereas the value of this field ensures that every user must contain an attribute named `SN`.
 
 
-**Source Backend LDAP Server**
+#### Source Backend LDAP Server 
 
 ![sbls](../../assets/ldap-link-source-backend.png)
 
@@ -305,7 +320,7 @@ Add new Source LDAP Config
 * `Enable` : This check-box is used to save and push the changes. Do not use this unless the server administrator has entered all the required values.
 
 
-**Inum DB Server**
+#### Inum DB Server 
 
 ![inumsbs](../../assets/ldap-link-inum-db.png)
 
