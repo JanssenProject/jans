@@ -42,7 +42,7 @@ public class ScimCustomPerson extends Entry implements Serializable {
     @AttributesList(name = "name", value = "values", multiValued = "multiValued", sortByName = true, attributesConfiguration = {
             @AttributeName(name = "inum", ignoreDuringUpdate = true),
             @AttributeName(name = "uid"),
-            @AttributeName(name = "userPassword", ignoreDuringRead = true) })
+            @AttributeName(name = "userPassword", ignoreDuringRead = true, ignoreDuringUpdate = true) })
     private List<CustomObjectAttribute> typedCustomAttributes = new ArrayList<>();
 
     public Date getCreationDate() {
