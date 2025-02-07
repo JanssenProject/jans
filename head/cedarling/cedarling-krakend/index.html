@@ -8778,19 +8778,20 @@ cd cedarling-krakend
 <h2 id="prerequisites-for-testing">Prerequisites for testing<a class="headerlink" href="#prerequisites-for-testing" title="Permanent link">#</a></h2>
 <p>To test the plugin, you will need:</p>
 <ul>
-<li>A cedarling policy store with a policy for our gateway. To create this, please follow <a href="https://github.com/JanssenProject/jans/wiki/Cedarling-Hello-World-%5BWIP%5D#setup-policy-store">these</a> steps.</li>
-<li>An instance of the cedarling sidecar, using the policy store mentioned above. Please follow <a href="https://github.com/JanssenProject/jans/wiki/Cedarling-Hello-World-%5BWIP%5D#setup-sidecar">these</a> steps. </li>
+<li>A cedarling policy store with a policy for our gateway. To create this, please follow <a href="https://github.com/JanssenProject/jans/wiki/Cedarling-Hello-World-%5BWIP%5D#1-author-policies">these</a> steps.</li>
+<li>An instance of the cedarling sidecar, using the policy store mentioned above. Please follow <a href="https://github.com/JanssenProject/jans/wiki/Cedarling-Hello-World-%5BWIP%5D#2-deploy-cedarling-sidecar">these</a> steps. </li>
 <li>For our demo, we will use this sample policy as outlined in the instructions:
     <div class="highlight"><pre><span></span><code>@id(&quot;allow_one&quot;)
 permit(
-    principal is gatewayDemo::Workload,
-    action == gatewayDemo::Action::&quot;GET&quot;,
-    resource is gatewayDemo::HTTP_Request
+  principal is gatewayDemo::Workload,
+  action == gatewayDemo::Action::&quot;GET&quot;,
+  resource is gatewayDemo::HTTP_Request
 )
 when {
-    (principal[&quot;client_id&quot;]) == &quot;d7f71bea-c38d-4caf-a1ba-e43c74a11a62&quot;
+((principal has &quot;access_token&quot;) &amp;&amp; ((principal[&quot;access_token&quot;]) has &quot;scope&quot;)) &amp;&amp; (((principal[&quot;access_token&quot;])[&quot;scope&quot;]).contains(&quot;profile&quot;))
 };
 </code></pre></div></li>
+<li>This policy will allow access so long as the access token contains the <code>profile</code> scope.</li>
 <li>A <a href="https://www.krakend.io/docs/overview/installing/">KrakenD server installation</a>. For development purposes, the binary install is recommended. For production setups, the Docker method is recommended.</li>
 <li>The plugin <code>.so</code> file for your architecture. For Mac OS hosts, ARM64 is required.</li>
 <li>A configuration file. Sample configuration is provided in <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/cedarling-krakend/krakend.json">krakend.json</a>.</li>
@@ -8848,7 +8849,7 @@ curl http://127.0.0.1:8080/protected -H <span class="s2">&quot;Authorization: Be
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-23T10:24:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-23</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-07T20:34:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-07</span>
       
         <br>
         Created:
