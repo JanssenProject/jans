@@ -4,8 +4,8 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LogConfig,
-    LogLevel, LogTypeConfig, PolicyStoreConfig, WorkloadBoolOp,
+    AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LockConfig,
+    LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, WorkloadBoolOp,
 };
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use lazy_static::lazy_static;
@@ -60,5 +60,6 @@ lazy_static! {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        lock_config: LockConfig::default()
     };
 }

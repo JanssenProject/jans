@@ -5,7 +5,7 @@
 
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, InitCedarlingError,
-    JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, Request,
+    JwtConfig, LockConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, Request,
     TokenValidationConfig, WorkloadBoolOp,
 };
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
@@ -93,6 +93,7 @@ async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCed
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        lock_config: LockConfig::default(),
     };
 
     Cedarling::new(&bootstrap_config).await
@@ -144,6 +145,7 @@ async fn prepare_cedarling_with_jwt_validation() -> Result<Cedarling, InitCedarl
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        lock_config: LockConfig::default(),
     };
 
     Cedarling::new(&bootstrap_config).await

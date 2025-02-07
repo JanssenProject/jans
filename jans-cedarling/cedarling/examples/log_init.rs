@@ -10,8 +10,9 @@
 #![cfg(not(target_family = "wasm"))]
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogLevel, LogStorage,
-    LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, WorkloadBoolOp,
+    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LockConfig, LogConfig, LogLevel,
+    LogStorage, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
+    WorkloadBoolOp,
 };
 use std::env;
 
@@ -61,6 +62,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             user_workload_operator: WorkloadBoolOp::And,
             ..Default::default()
         },
+        lock_config: LockConfig::default(),
     })
     .await?;
 

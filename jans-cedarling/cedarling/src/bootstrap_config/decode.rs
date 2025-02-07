@@ -13,13 +13,13 @@ use std::fs;
 use std::path::Path;
 use std::str::FromStr;
 
-use super::BootstrapConfigRaw;
 use super::authorization_config::{AuthorizationConfig, IdTokenTrustMode};
 use super::raw_config::LoggerType;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, JwtConfig, LogConfig, LogTypeConfig,
-    MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
+    MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, policy_store_config,
 };
+use super::{BootstrapConfigRaw, LockConfig, lock_config};
 use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -60,42 +60,7 @@ impl BootstrapConfig {
             log_level: raw.log_level,
         };
 
-        // Decode policy store
-        let policy_store_config = match (
-            raw.local_policy_store.clone(),
-            raw.policy_store_uri.clone(),
-            raw.policy_store_local_fn.clone(),
-        ) {
-            // Case: no policy store provided
-            (None, None, None) => Err(BootstrapConfigLoadingError::MissingPolicyStore)?,
-            // Case: get the policy store from a JSON string
-            (Some(policy_store), None, None) => PolicyStoreConfig {
-                source: PolicyStoreSource::Json(policy_store),
-            },
-            // Case: get the policy store from the lock master
-            (None, Some(policy_store_uri), None) => PolicyStoreConfig {
-                source: PolicyStoreSource::LockMaster(policy_store_uri),
-            },
-            // Case: get the policy store from a local JSON file
-            (None, None, Some(raw_path)) => {
-                let path = Path::new(&raw_path);
-                let file_ext = Path::new(&path)
-                    .extension()
-                    .and_then(|ext| ext.to_str())
-                    .map(|x| x.to_lowercase());
-
-                let source = match file_ext.as_deref() {
-                    Some("json") => PolicyStoreSource::FileJson(path.into()),
-                    Some("yaml") | Some("yml") => PolicyStoreSource::FileYaml(path.into()),
-                    _ => Err(
-                        BootstrapConfigLoadingError::UnsupportedPolicyStoreFileFormat(raw_path),
-                    )?,
-                };
-                PolicyStoreConfig { source }
-            },
-            // Case: multiple polict stores were set
-            _ => Err(BootstrapConfigLoadingError::ConflictingPolicyStores)?,
-        };
+        let policy_store_config = get_policy_store_config(raw)?;
 
         // Load the jwks from a local file
         let jwks = raw
@@ -131,12 +96,92 @@ impl BootstrapConfig {
             id_token_trust_mode: raw.id_token_trust_mode,
         };
 
+        let lock_config = LockConfig {
+            enabled: raw.lock.into(),
+            lock_master_config_uri: raw.lock_master_configuration_uri.clone(),
+            dynamic_config: raw.dynamic_configuration.into(),
+            ssa_jwt: raw.lock_ssa_jwt.clone(),
+            log_interval: raw.audit_log_interval,
+            health_interval: raw.audit_health_interval,
+            telemetry_interval: raw.audit_health_telemetry_interval,
+            listen_sse: raw.listen_sse.into(),
+        };
+
         Ok(Self {
             application_name: raw.application_name.clone(),
             log_config,
             policy_store_config,
             jwt_config,
             authorization_config,
+            lock_config,
         })
     }
+}
+
+fn get_policy_store_config(
+    raw: &BootstrapConfigRaw,
+) -> Result<PolicyStoreConfig, BootstrapConfigLoadingError> {
+    // If lock server integration is enabled, the policy store will be obtained
+    // from the that server
+    if raw.lock.into() {
+        let config_uri = raw
+            .lock_master_configuration_uri
+            .as_ref()
+            .ok_or(BootstrapConfigLoadingError::LockMissingConfigUri)?
+            .clone();
+        let policy_store_id = raw
+            .policy_store_id
+            .as_ref()
+            .ok_or(BootstrapConfigLoadingError::LockMissingPolicyStoreId)?
+            .clone();
+        let ssa_jwt = raw.lock_ssa_jwt.clone();
+        let jwks = raw.local_jwks.clone();
+
+        return Ok(PolicyStoreConfig {
+            source: PolicyStoreSource::LockMaster {
+                ssa_jwt,
+                config_uri,
+                policy_store_id,
+                jwks,
+            },
+        });
+    }
+
+    // If lock server integration is disabled, the policy store will be obtained
+    // through the following
+    let policy_store_config = match (
+        raw.local_policy_store.clone(),
+        raw.policy_store_uri.clone(),
+        raw.policy_store_local_fn.clone(),
+    ) {
+        // Case: no policy store provided
+        (None, None, None) => Err(BootstrapConfigLoadingError::MissingPolicyStore)?,
+        // Case: get the policy store from a JSON string
+        (Some(policy_store), None, None) => PolicyStoreConfig {
+            source: PolicyStoreSource::Json(policy_store),
+        },
+        // Case: get the policy store from the lock master
+        (None, Some(policy_store_uri), None) => PolicyStoreConfig {
+            source: PolicyStoreSource::Uri(policy_store_uri),
+        },
+        // Case: get the policy store from a local JSON file
+        (None, None, Some(raw_path)) => {
+            let path = Path::new(&raw_path);
+            let file_ext = Path::new(&path)
+                .extension()
+                .and_then(|ext| ext.to_str())
+                .map(|x| x.to_lowercase());
+
+            let source = match file_ext.as_deref() {
+                Some("json") => PolicyStoreSource::FileJson(path.into()),
+                Some("yaml") | Some("yml") => PolicyStoreSource::FileYaml(path.into()),
+                _ => Err(BootstrapConfigLoadingError::UnsupportedPolicyStoreFileFormat(raw_path))?,
+            };
+            PolicyStoreConfig { source }
+        },
+        // Case: multiple polict stores were set
+        _ => Err(BootstrapConfigLoadingError::ConflictingPolicyStores)?,
+    };
+
+    Ok(policy_store_config)
 }
