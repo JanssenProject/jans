@@ -42,7 +42,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2024-12-20 11:02'
+ENV CN_BUILD_DATE='2025-01-29 09:41'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
@@ -61,7 +61,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=040ff17942019bc10433ce17d819b8d8474f13c8
+ENV JANS_SOURCE_VERSION=881c1e0818a0aed6b413280ee7d85bd02d92bbb6
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -80,11 +80,12 @@ RUN mkdir -p /etc/jans/conf \
     /etc/jans/conf/fido2/server_metadata \
     /app/static/rdbm \
     /app/schema \
-    /app/templates/jans-fido2
+    /app/templates/jans-fido2 \
+    /app/static/fido2
 
 # sync static files from linux-setup
 RUN cd /tmp/jans \
-    && cp -R ${JANS_SETUP_DIR}/static/fido2/authenticator_cert /etc/jans/conf/fido2/authenticator_cert \
+    && cp -R ${JANS_SETUP_DIR}/static/fido2/authenticator_cert /app/static/fido2/authenticator_cert \
     && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
@@ -98,7 +99,7 @@ RUN cd /tmp/jans \
 
 # download external files
 ARG MDS_DOWNLOAD_DATE='2022-10-03'
-RUN wget -q https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem -P /etc/jans/conf/fido2/authenticator_cert/ \
+RUN wget -q https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem -P /app/static/fido2/authenticator_cert/ \
     && wget -q https://mds.fidoalliance.org/ -O /etc/jans/conf/fido2/mds/toc/toc.jwt \
     && wget -q http://secure.globalsign.com/cacert/root-r3.crt -P /etc/jans/conf/fido2/mds/cert/
 
