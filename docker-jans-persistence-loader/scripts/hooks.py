@@ -62,7 +62,6 @@ def transform_auth_dynamic_config_hook(conf, manager):
             "interruptionErrorPage": "timeout.ftl",
             "crashErrorPage": "crash.ftl",
             "finishedFlowPage": "finished.ftl",
-            "bridgeScriptPage": "agama.xhtml",
             "defaultResponseHeaders": {
                 "Cache-Control": "max-age=0, no-store",
             },
@@ -234,6 +233,11 @@ def transform_auth_dynamic_config_hook(conf, manager):
         ("serializeRules", {
             "JAVA": ["java", "sun", "com.sun", "jdk"],
             "KRYO": [],
+        }),
+        # add url mapping
+        ("startEndUrlMapping", {
+            "agama/agama.xhtml": "postlogin.htm",
+            "agama/consent.xhtml": "agama/consent_authorize.htm",
         }),
     ]:
         if new_key not in conf["agamaConfiguration"]:

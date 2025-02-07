@@ -1,7 +1,6 @@
 import contextlib
 import json
 import logging.config
-import os
 from collections import namedtuple
 
 from jans.pycloudlib import get_manager
@@ -70,50 +69,10 @@ def _transform_api_dynamic_config(conf):
     # current plugin names to lookup to
     plugins_names = tuple(plugin["name"] for plugin in conf["plugins"])
 
-    supported_plugins = [
-        {
-            "name": "admin",
-            "description": "admin-ui plugin",
-            "className": "io.jans.ca.plugin.adminui.rest.ApiApplication"
-        },
-        {
-            "name": "fido2",
-            "description": "fido2 plugin",
-            "className": "io.jans.configapi.plugin.fido2.rest.ApiApplication"
-        },
-        {
-            "name": "scim",
-            "description": "scim plugin",
-            "className": "io.jans.configapi.plugin.scim.rest.ApiApplication"
-        },
-        {
-            "name": "user-management",
-            "description": "user-management plugin",
-            "className": "io.jans.configapi.plugin.mgt.rest.ApiApplication"
-        },
-        {
-            "name": "jans-link",
-            "description": "jans-link plugin",
-            "className": "io.jans.configapi.plugin.link.rest.ApiApplication"
-        },
-        {
-            "name": "saml",
-            "description": "saml plugin",
-            "className": "io.jans.configapi.plugin.saml.rest.ApiApplication"
-        },
-        {
-            "name": "kc-link",
-            "description": "kc-link plugin",
-            "className": "io.jans.configapi.plugin.kc.link.rest.ApiApplication"
-        },
-        {
-            "name": "lock",
-            "description": "lock plugin",
-            "className": "io.jans.configapi.plugin.lock.rest.ApiApplication"
-        }
-    ]
+    with open("/tmp/config-api.dynamic-conf.json") as f:  # nosec: B108
+        fmt_dynamic_conf = json.loads(f.read())
 
-    for supported_plugin in supported_plugins:
+    for supported_plugin in fmt_dynamic_conf["plugins"]:
         if supported_plugin["name"] not in plugins_names:
             conf["plugins"].append(supported_plugin)
             should_update = True
@@ -131,55 +90,42 @@ def _transform_api_dynamic_config(conf):
         conf.pop("smallryeHealthRootPath", None)
         should_update = True
 
-    # asset management
+    # asset management top-level keys
     asset_attrs = {
         "assetMgtEnabled": conf.pop("assetMgtEnabled", True),
         "assetServerUploadEnabled": True,
-        "assetBaseDirectory": "/opt/jans/jetty/%s/custom",
-        "assetDirMapping": [
-            {
-                "directory": "i18n",
-                "type": ["properties"],
-                "description": "Resource bundle file.",
-            },
-            {
-                "directory": "libs",
-                "type": ["jar"],
-                "description": "java archive library.",
-            },
-            {
-                "directory": "pages",
-                "type": ["xhtml"],
-                "description": "Web pages.",
-            },
-            {
-                "directory": "static",
-                "type": ["js", "css", "png", "gif", "jpg", "jpeg"],
-                "description": "Static resources like Java-script, style-sheet and images.",
-            },
-        ],
         "fileExtensionValidationEnabled": True,
         "moduleNameValidationEnabled": True,
-        "jansServiceModule": conf["assetMgtConfiguration"].pop("jansModules", []),
+        "assetDirMapping": [],
     }
     for k, v in asset_attrs.items():
         if k not in conf["assetMgtConfiguration"]:
             conf["assetMgtConfiguration"][k] = v
             should_update = True
 
-    for module in [
-        "jans-auth",
-        "jans-casa",
-        "jans-config-api",
-        "jans-fido2",
-        "jans-link",
-        "jans-lock",
-        "jans-scim",
-        "jans-keycloak-link",
-    ]:
-        if module not in conf["assetMgtConfiguration"]["jansServiceModule"]:
-            conf["assetMgtConfiguration"]["jansServiceModule"].append(module)
+    # add missing dir mapping
+    dir_mapping_names = tuple(dir_["directory"] for dir_ in conf["assetMgtConfiguration"]["assetDirMapping"])
+
+    for supported_dir_mapping in fmt_dynamic_conf["assetMgtConfiguration"]["assetDirMapping"]:
+        if supported_dir_mapping["directory"] not in dir_mapping_names:
+            conf["assetMgtConfiguration"]["assetDirMapping"].append(supported_dir_mapping)
             should_update = True
+
+    for idx, dir_mapping in enumerate(conf["assetMgtConfiguration"]["assetDirMapping"]):
+        match dir_mapping["directory"]:
+            # add missing service module for `/opt/jans/jetty/%s/custom/libs` dir mapping
+            case "/opt/jans/jetty/%s/custom/libs":
+                for svc_module in ["jans-lock", "jans-link"]:
+                    if svc_module in dir_mapping["jansServiceModule"]:
+                        continue
+
+                    conf["assetMgtConfiguration"]["assetDirMapping"][idx]["jansServiceModule"].append(svc_module)
+                    should_update = True
+
+            # remove `/opt/jans/jetty/%s/custom-libs` dir mapping
+            case "/opt/jans/jetty/%s/custom-libs":
+                conf["assetMgtConfiguration"]["assetDirMapping"].pop(idx)
+                should_update = True
 
     # finalized conf and flag to determine update process
     return conf, should_update
