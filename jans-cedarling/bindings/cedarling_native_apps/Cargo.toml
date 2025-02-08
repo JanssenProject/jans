@@ -1,0 +1,23 @@
+[package]
+name = "cedarling_native_apps"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate_type = ["cdylib", "staticlib"]
+name = "mobile"
+ 
+[dependencies]
+cedarling = { workspace = true, features = ["blocking"]}
+jsonwebtoken = "9.3.0"
+openssl = { version = "0.10.35", features = ["vendored"] }
+once_cell = "1.20.2"
+uniffi = { version = "0.29.0", features = [ "cli" ] }
+uniffi_macros = "0.29.0"  # Procedural macros support
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror.workspace = true
+
+[dev-dependencies]
+# is used in testing
+test_utils = { workspace = true }
