@@ -4,7 +4,11 @@
 # Copyright (c) 2024, Gluu, Inc.
 
 from cedarling_python import Cedarling
+from cedarling_python import ResourceData, Request
 from config import load_bootstrap_config
+
+# reuse already defined tokens
+from test_authorize import ACCESS_TOKEN, ID_TOKEN, USERINFO_TOKEN, RESOURCE, REQUEST
 
 
 # In python unit tests we not cover all possible scenarios, but most common.
@@ -31,8 +35,16 @@ def test_memory_logger():
     assert len(active_log_ids) != 0
     # check if we have access to log entries by id
     for id in active_log_ids:
-        log_entry = cedarling.get_log_by_id(active_log_ids[0])
+        log_entry = cedarling.get_log_by_id(id)
         assert log_entry is not None
+
+    assert len(
+        cedarling.get_logs_by_tag("System")
+    ) != 0, "Logs by tag 'System' were not found"
+
+    assert len(
+        cedarling.get_logs_by_tag("DEBUG")
+    ) != 0, "Logs by tag 'DEBUG' were not found"
 
     # check that we can pop logs from memory
     assert len(cedarling.pop_logs()) != 0
@@ -40,6 +52,21 @@ def test_memory_logger():
     # after popping all logs, we should have no more active logs in memory
     assert len(cedarling.get_log_ids()) == 0
     assert len(cedarling.pop_logs()) == 0
+
+    # execute request and get logs from memory logger
+    authorize_result = cedarling.authorize(REQUEST)
+
+    request_id = authorize_result.request_id()
+
+    # get logs by request id
+    assert len(
+        cedarling.get_logs_by_request_id(request_id)
+    ) != 0, "Logs by request id were not found"
+
+    # get logs by request id + tags
+    assert len(
+        cedarling.get_logs_by_request_id_and_tag(request_id, "DEBUG")
+    ) != 0, "Logs by request id and tag 'DEBUG' were not found"
 
 
 def test_off_logger():

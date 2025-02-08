@@ -36,7 +36,7 @@ The discovery interception script extends the base script type with the methods 
 The `configurationAttributes` parameter is `java.util.Map<String, SimpleCustomProperty>`.
 
     configurationAttributes = new HashMap<String, SimpleCustomProperty>();
-    configurationAttributes.put("Location Type", new SimpleCustomProperty("location_type", "MySQL", "Storage Location for the script"));
+    configurationAttributes.put("Location Type", new SimpleCustomProperty("location_type", "db", "Storage Location for the script"));
 
 ### Snippet
 

@@ -71,7 +71,6 @@ public class SectorIdentifierService {
      *
      * @param jsId Sector Identifier jsId
      * @return DN string for specified sector identifier or DN for sector identifiers branch if jsId is null
-     * @throws Exception
      */
     public String getDnForSectorIdentifier(String jsId) {
         String sectorIdentifierDn = staticConfiguration.getBaseDn().getSectorIdentifiers();
