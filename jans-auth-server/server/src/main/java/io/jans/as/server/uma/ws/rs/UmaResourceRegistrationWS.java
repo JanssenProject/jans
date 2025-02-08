@@ -49,7 +49,7 @@ import static io.jans.as.model.util.Util.escapeLog;
  * The API available at the resource registration endpoint enables the resource server to put resources under
  * the protection of an authorization server on behalf of the resource owner and manage them over time.
  * Protection of a resource at the authorization server begins on successful registration and ends on successful deregistration.
- * <p/>
+ * <p>
  * The resource server uses a RESTful API at the authorization server's resource registration endpoint
  * to create, read, update, and delete resource descriptions, along with retrieving lists of such descriptions.
  * The descriptions consist of JSON documents that are maintained as web resources at the authorization server.
