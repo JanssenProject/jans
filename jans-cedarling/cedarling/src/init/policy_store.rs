@@ -15,6 +15,8 @@ use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStor
 use crate::common::policy_store::{AgamaPolicyStore, PolicyStoreWithID};
 use crate::http::{HttpClient, HttpClientError};
 
+use super::service_config::LockConfig;
+
 /// Errors that can occur when loading a policy store.
 #[derive(Debug, thiserror::Error)]
 pub enum PolicyStoreLoadError {
@@ -37,8 +39,8 @@ pub enum PolicyStoreLoadError {
 pub enum LoadFromLockError {
     #[error("failed to complete http request: {0}")]
     FailedRequest(#[source] reqwest::Error),
-    #[error("bad request: {0}")]
-    BadRequest(#[source] reqwest::Error),
+    #[error("recived an HTTP error response: {0}")]
+    HttpErrResponse(#[source] reqwest::Error),
     #[error("failed to deserialize response: {0}")]
     DeserializeResponse(#[source] reqwest::Error),
     #[error(
@@ -49,6 +51,14 @@ pub enum LoadFromLockError {
         "could not find `config_uri` from the `/.well-known/lock-server-configuration` endpoint"
     )]
     MissingConfigEndpoint,
+    #[error(
+        "could not find `audit_uri` from the `/.well-known/lock-server-configuration` endpoint"
+    )]
+    MissingAuditEndpoint,
+    #[error(
+        "could not find `lock_sse_uri` from the `/.well-known/lock-server-configuration` endpoint"
+    )]
+    MissingSseEndpoint,
     #[error(
         "could not find `registration_endpoint` from the `/.well-known/openid-configuration` endpoint"
     )]
@@ -102,40 +112,42 @@ fn extract_first_policy_store(
 /// This function supports multiple sources for loading policies.
 pub(crate) async fn load_policy_store(
     config: &PolicyStoreConfig,
-) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
-    let policy_store = match &config.source {
+) -> Result<(PolicyStoreWithID, Option<LockConfig>), PolicyStoreLoadError> {
+    match &config.source {
         PolicyStoreSource::Json(policy_json) => {
             let agama_policy_store = serde_json::from_str::<AgamaPolicyStore>(policy_json)
                 .map_err(PolicyStoreLoadError::ParseJson)?;
-            extract_first_policy_store(&agama_policy_store)?
+            let policy_store = extract_first_policy_store(&agama_policy_store)?;
+            Ok((policy_store, None))
         },
         PolicyStoreSource::Yaml(policy_yaml) => {
             let agama_policy_store = serde_yml::from_str::<AgamaPolicyStore>(policy_yaml)
                 .map_err(PolicyStoreLoadError::ParseYaml)?;
-            extract_first_policy_store(&agama_policy_store)?
+            let policy_store = extract_first_policy_store(&agama_policy_store)?;
+            Ok((policy_store, None))
         },
         PolicyStoreSource::LockMaster {
             ssa_jwt,
             config_uri,
             policy_store_id,
             jwks,
-        } => load_policy_store_from_lock_master(ssa_jwt, config_uri, policy_store_id, jwks).await?,
+        } => load_policy_store_from_lock_master(ssa_jwt, config_uri, policy_store_id, jwks).await,
         PolicyStoreSource::FileJson(path) => {
             let policy_json = fs::read_to_string(path)
                 .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone(), e))?;
             let agama_policy_store = serde_json::from_str::<AgamaPolicyStore>(&policy_json)?;
-            extract_first_policy_store(&agama_policy_store)?
+            let policy_store = extract_first_policy_store(&agama_policy_store)?;
+            Ok((policy_store, None))
         },
         PolicyStoreSource::FileYaml(path) => {
             let policy_yaml = fs::read_to_string(path)
                 .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone(), e))?;
             let agama_policy_store = serde_yml::from_str::<AgamaPolicyStore>(&policy_yaml)?;
-            extract_first_policy_store(&agama_policy_store)?
+            let policy_store = extract_first_policy_store(&agama_policy_store)?;
+            Ok((policy_store, None))
         },
-        PolicyStoreSource::Uri(uri) => load_policy_store_from_uri(uri).await?,
-    };
-
-    Ok(policy_store)
+        PolicyStoreSource::Uri(uri) => load_policy_store_from_uri(uri).await,
+    }
 }
 
 /// Loads the policy store from the Lock Master.
@@ -144,7 +156,7 @@ async fn load_policy_store_from_lock_master(
     config_uri: &str,
     policy_store_id: &str,
     jwks: &Option<String>,
-) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+) -> Result<(PolicyStoreWithID, Option<LockConfig>), PolicyStoreLoadError> {
     const SCOPE: &str = "cedarling";
 
     let client = Client::new();
@@ -158,7 +170,7 @@ async fn load_policy_store_from_lock_master(
         .await
         .map_err(LoadFromLockError::FailedRequest)?
         .error_for_status()
-        .map_err(LoadFromLockError::BadRequest)?
+        .map_err(LoadFromLockError::HttpErrResponse)?
         .json::<HashMap<String, String>>()
         .await
         .map_err(LoadFromLockError::DeserializeResponse)?;
@@ -171,6 +183,12 @@ async fn load_policy_store_from_lock_master(
     let policy_store_uri = lock_server_config_resp
         .get("config_uri")
         .ok_or(LoadFromLockError::MissingConfigEndpoint)?;
+    let audit_uri = lock_server_config_resp
+        .get("audit_uri")
+        .ok_or(LoadFromLockError::MissingAuditEndpoint)?;
+    let lock_sse_uri = lock_server_config_resp
+        .get("lock_sse_uri")
+        .ok_or(LoadFromLockError::MissingSseEndpoint)?;
 
     let openid_config_resp = client
         .get(idp_uri)
@@ -178,7 +196,7 @@ async fn load_policy_store_from_lock_master(
         .await
         .map_err(LoadFromLockError::FailedRequest)?
         .error_for_status()
-        .map_err(LoadFromLockError::BadRequest)?
+        .map_err(LoadFromLockError::HttpErrResponse)?
         .json::<HashMap<String, String>>()
         .await
         .map_err(LoadFromLockError::DeserializeResponse)?;
@@ -217,7 +235,7 @@ async fn load_policy_store_from_lock_master(
         .await
         .map_err(LoadFromLockError::FailedRequest)?
         .error_for_status()
-        .map_err(LoadFromLockError::BadRequest)?
+        .map_err(LoadFromLockError::HttpErrResponse)?
         .json::<HashMap<String, Value>>()
         .await
         .map_err(LoadFromLockError::DeserializeResponse)?;
@@ -260,7 +278,7 @@ async fn load_policy_store_from_lock_master(
         .await
         .map_err(LoadFromLockError::FailedRequest)?
         .error_for_status()
-        .map_err(LoadFromLockError::BadRequest)?
+        .map_err(LoadFromLockError::HttpErrResponse)?
         .json::<HashMap<String, Value>>()
         .await
         .map_err(LoadFromLockError::DeserializeResponse)?;
@@ -287,21 +305,34 @@ async fn load_policy_store_from_lock_master(
         .await
         .map_err(LoadFromLockError::FailedRequest)?
         .error_for_status()
-        .map_err(LoadFromLockError::BadRequest)?
+        .map_err(LoadFromLockError::HttpErrResponse)?
         .json::<AgamaPolicyStore>()
         .await
         .map_err(LoadFromLockError::DeserializeResponse)?;
 
-    extract_first_policy_store(&policy_store_resp)
+    let policy_store = extract_first_policy_store(&policy_store_resp)?;
+
+    Ok((
+        policy_store,
+        Some(LockConfig {
+            client_id: client_id.to_string(),
+            access_token: access_token.to_string(),
+            audit_uri: audit_uri.to_string(),
+            sse_uri: lock_sse_uri.to_string(),
+        }),
+    ))
 }
 
 /// Loads the policy store from a URI
 ///
 /// The URI is from the `CEDARLING_POLICY_STORE_URI` bootstrap property.
-async fn load_policy_store_from_uri(uri: &str) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+async fn load_policy_store_from_uri(
+    uri: &str,
+) -> Result<(PolicyStoreWithID, Option<LockConfig>), PolicyStoreLoadError> {
     let client = HttpClient::new(3, Duration::from_secs(3))?;
     let agama_policy_store = client.get(uri).await?.json::<AgamaPolicyStore>()?;
-    extract_first_policy_store(&agama_policy_store)
+    let policy_store = extract_first_policy_store(&agama_policy_store)?;
+    Ok((policy_store, None))
 }
 
 #[cfg(test)]
@@ -367,7 +398,6 @@ mod test {
         mock_endpoint.assert();
     }
 
-    // TODO: finish this test
     #[tokio::test]
     async fn can_load_from_lock_master() {
         let policy_store_id = "gICAgcHJpbmNpcGFsIGlz".to_string();
@@ -375,6 +405,10 @@ mod test {
         let lock_policy_store_endpoint = "/config";
         let lock_policy_store_uri =
             format!("{}{}", mock_lock_server.url(), lock_policy_store_endpoint);
+        let lock_sse_endpoint = "/sse";
+        let lock_sse_uri = format!("{}{}", mock_lock_server.url(), lock_sse_endpoint);
+        let lock_audit_endpoint = "/audit";
+        let lock_audit_uri = format!("{}{}", mock_lock_server.url(), lock_audit_endpoint);
         let lock_config_endpoint = "/.well-known/lock-server-configuration";
         let lock_config_uri = format!("{}{}", mock_lock_server.url(), lock_config_endpoint);
 
@@ -398,6 +432,8 @@ mod test {
                 json!({
                     "config_uri": lock_policy_store_uri,
                     "oauth_as_well_known": idp_conf_uri,
+                    "audit_uri": lock_audit_uri,
+                    "lock_sse_uri": lock_sse_uri,
                 })
                 .to_string(),
             )
@@ -469,7 +505,7 @@ mod test {
             },
         })
         .await
-        .expect("Should load policy store from URI");
+        .expect("Should load policy store from lock master");
 
         lock_config_endpoint.assert();
         policy_store_endpoint.assert();

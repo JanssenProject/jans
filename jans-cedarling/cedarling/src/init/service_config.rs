@@ -14,6 +14,15 @@ use bootstrap_config::BootstrapConfig;
 #[derive(Clone)]
 pub(crate) struct ServiceConfig {
     pub policy_store: PolicyStoreWithID,
+    pub lock_client_config: Option<LockConfig>,
+}
+
+#[derive(Clone)]
+pub(crate) struct LockConfig {
+    pub client_id: String,
+    pub access_token: String,
+    pub audit_uri: String,
+    pub sse_uri: String,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -25,8 +34,12 @@ pub enum ServiceConfigError {
 
 impl ServiceConfig {
     pub async fn new(bootstrap: &BootstrapConfig) -> Result<Self, ServiceConfigError> {
-        let policy_store = load_policy_store(&bootstrap.policy_store_config).await?;
+        let (policy_store, lock_client_creds) =
+            load_policy_store(&bootstrap.policy_store_config).await?;
 
-        Ok(Self { policy_store })
+        Ok(Self {
+            policy_store,
+            lock_client_config: lock_client_creds,
+        })
     }
 }

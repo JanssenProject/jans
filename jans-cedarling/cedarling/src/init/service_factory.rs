@@ -13,6 +13,7 @@ use crate::bootstrap_config::BootstrapConfig;
 use crate::common::app_types;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt::{JwtService, JwtServiceInitError};
+use crate::lock::{AuditIntervals, LockService};
 use crate::log;
 use std::sync::Arc;
 
@@ -32,6 +33,7 @@ pub(crate) struct ServiceFactory<'a> {
 struct SingletonContainer {
     jwt_service: Option<Arc<JwtService>>,
     authz_service: Option<Arc<Authz>>,
+    lock_service: Option<Arc<LockService>>,
 }
 
 impl<'a> ServiceFactory<'a> {
@@ -101,6 +103,35 @@ impl<'a> ServiceFactory<'a> {
             self.container.authz_service = Some(service.clone());
             Ok(service)
         }
+    }
+
+    pub fn lock_service(&mut self) -> Option<Arc<LockService>> {
+        if let Some(lock) = self.container.lock_service.as_ref() {
+            return Some(lock.clone());
+        }
+
+        if !self.bootstrap_config.lock_config.enabled {
+            return None;
+        }
+
+        // we use .take() here so we don't accidentally create multiple instances
+        // for the same client we registered in the OAuth endpoint
+        if let Some(config) = self.service_config.lock_client_config.take() {
+            let audit_intervals = AuditIntervals {
+                log: self.bootstrap_config.lock_config.log_interval,
+                health: self.bootstrap_config.lock_config.health_interval,
+                telemetry: self.bootstrap_config.lock_config.telemetry_interval,
+            };
+            let lock_service = Some(Arc::new(LockService::new(
+                config,
+                audit_intervals,
+                self.log_service(),
+            )));
+            self.container.lock_service = lock_service.clone();
+            return lock_service;
+        }
+
+        None
     }
 }
 

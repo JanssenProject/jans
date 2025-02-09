@@ -41,6 +41,7 @@ use common::app_types;
 use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
+use lock::LockService;
 use log::interface::LogWriter;
 use log::{LogEntry, LogType};
 pub use log::{LogLevel, LogStorage};
@@ -79,6 +80,7 @@ pub enum InitCedarlingError {
 pub struct Cedarling {
     log: log::Logger,
     authz: Arc<Authz>,
+    lock_service: Option<Arc<LockService>>,
 }
 
 impl Cedarling {
@@ -118,9 +120,12 @@ impl Cedarling {
 
         let mut service_factory = ServiceFactory::new(config, service_config, log.clone(), pdp_id);
 
+        let lock_service = service_factory.lock_service();
+
         Ok(Cedarling {
             log,
             authz: service_factory.authz_service().await?,
+            lock_service,
         })
     }
 
@@ -139,6 +144,13 @@ impl Cedarling {
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         let tokens = self.authz.decode_tokens(request).await?;
         self.authz.build_entities(request, &tokens)
+    }
+
+    /// Closes connections to the lock server
+    pub async fn close_lock_connections(&self) {
+        if let Some(lock_service) = self.lock_service.as_ref() {
+            lock_service.close().await;
+        }
     }
 }
 
