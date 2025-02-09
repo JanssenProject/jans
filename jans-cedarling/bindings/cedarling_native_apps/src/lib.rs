@@ -100,15 +100,13 @@ impl Cedarling {
         let config: BootstrapConfig =
             cedarling::BootstrapConfig::load_from_file(&path).map_err(|e| {
                 CedarlingError::InitializationFailed {
-                    error_msg: String::from(
-                        ["Failed to read the file:", e.to_string().as_str()].join(" "),
-                    ),
+                    error_msg: format!("Failed to read the file: {}", e.to_string())
                 }
             })?;
 
         let cedarling = core::blocking::Cedarling::new(&config).map_err(|e| {
             CedarlingError::InitializationFailed {
-                error_msg: String::from(e.to_string()),
+                error_msg: e.to_string(),
             }
         })?;
 
@@ -132,13 +130,13 @@ impl Cedarling {
 
         let core_request: core::Request = request
             .map_err(|e: request_wrapper::RequestError| AuthorizeError::AuthorizationFailed {
-                error_msg: String::from(e.to_string()),
+                error_msg: e.to_string(),
             })?
             .inner;
         let result: cedarling::AuthorizeResult =
             self.inner.authorize(core_request).map_err(|e| {
                 AuthorizeError::AuthorizationFailed {
-                    error_msg: String::from(e.to_string()),
+                    error_msg: e.to_string(),
                 }
             })?;
         let res_val = serde_json::to_value(result.clone()).unwrap();

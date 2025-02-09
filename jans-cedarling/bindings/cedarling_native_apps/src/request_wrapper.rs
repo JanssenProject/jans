@@ -40,12 +40,12 @@ impl RequestWrapper {
         // Parse context
         let parsed_context: Value =
             serde_json::from_str(&context).map_err(|e| RequestError::RequestParsingFailed {
-                error_msg: format!("Invalid JSON for context: {}", e.to_string()),
+                error_msg: format!("Invalid JSON for context: {}", e),
             })?;
         // Parse payload
         let parsed_payload: HashMap<String, Value> =
             serde_json::from_str(&payload).map_err(|e| RequestError::RequestParsingFailed {
-                error_msg: format!("Invalid JSON for payload: {}", e.to_string()),
+                error_msg: format!("Invalid JSON for payload: {}", e),
             })?;
 
         let resource: core::ResourceData = core::ResourceData {
