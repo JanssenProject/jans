@@ -100,7 +100,7 @@ impl Cedarling {
         let config: BootstrapConfig =
             cedarling::BootstrapConfig::load_from_file(&path).map_err(|e| {
                 CedarlingError::InitializationFailed {
-                    error_msg: format!("Failed to read the file: {}", e.to_string())
+                    error_msg: format!("Failed to read the file: {}", e)
                 }
             })?;
 
