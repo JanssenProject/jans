@@ -19,7 +19,7 @@ import jakarta.ws.rs.Produces;
  * The endpoint at which the host registers permissions that it anticipates a
  * requester will shortly be asking for from the AM. This AM's endpoint is part
  * of resource registration API.
- * <p/>
+ * <p>
  * In response to receiving an access request accompanied by an RPT that is
  * invalid or has insufficient authorization data, the host SHOULD register a
  * permission with the AS that would be sufficient for the type of access

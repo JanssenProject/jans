@@ -115,7 +115,7 @@ pub struct BootstrapConfigRaw {
     pub local_jwks: Option<String>,
 
     /// JSON object with policy store
-    #[serde(rename = "CEDARLING_LOCAL_POLICY_STORE", default)]
+    #[serde(rename = "CEDARLING_POLICY_STORE_LOCAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub local_policy_store: Option<String>,
 
@@ -175,13 +175,13 @@ pub struct BootstrapConfigRaw {
     /// URI where Cedarling can get JSON file with all required metadata about
     /// Lock Master, i.e. .well-known/lock-master-configuration.
     ///
-    /// ***Required*** if `LOCK == Enabled`.
+    /// ***Required*** if `LOCK == enabled`.
     #[serde(rename = "CEDARLING_LOCK_MASTER_CONFIGURATION_URI", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub lock_master_configuration_uri: Option<String>,
 
     /// Controls whether Cedarling should listen for SSE config updates.
-    #[serde(rename = "CEDARLING_DYNAMIC_CONFIGURATION", default)]
+    #[serde(rename = "CEDARLING_LOCK_DYNAMIC_CONFIGURATION", default)]
     pub dynamic_configuration: FeatureToggle,
 
     /// SSA for DCR in a Lock Master deployment. The Cedarling will validate this
@@ -194,22 +194,22 @@ pub struct BootstrapConfigRaw {
     pub lock_ssa_jwt: Option<String>,
 
     /// How often to send log messages to Lock Master (0 to turn off trasmission).
-    #[serde(rename = "CEDARLING_AUDIT_LOG_INTERVAL", default)]
+    #[serde(rename = "CEDARLING_LOCK_LOG_INTERVAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub audit_log_interval: u64,
 
     /// How often to send health messages to Lock Master (0 to turn off transmission).
-    #[serde(rename = "CEDARLING_AUDIT_HEALTH_INTERVAL", default)]
+    #[serde(rename = "CEDARLING_LOCK_HEALTH_INTERVAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub audit_health_interval: u64,
 
     /// How often to send telemetry messages to Lock Master (0 to turn off transmission).
-    #[serde(rename = "CEDARLING_AUDIT_TELEMETRY_INTERVAL", default)]
+    #[serde(rename = "CEDARLING_LOCK_TELEMETRY_INTERVAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub audit_health_telemetry_interval: u64,
 
     /// Controls whether Cedarling should listen for updates from the Lock Server.
-    #[serde(rename = "CEDARLING_LISTEN_SSE", default)]
+    #[serde(rename = "CEDARLING_LOCK_LISTEN_SSE", default)]
     pub listen_sse: FeatureToggle,
 }
 

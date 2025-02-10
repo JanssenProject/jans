@@ -194,7 +194,6 @@ data:
   KC_DB_URL_PROPERTIES: {{ .Values.configmap.kcDbUrlProperties | quote }}
   {{- end }}
   CN_LOCK_ENABLED: {{ index .Values "global" "auth-server" "lockEnabled" | quote }}
-  CN_OPA_URL: {{ .Values.configmap.cnOpaUrl | quote }}
   CN_MESSAGE_TYPE: {{ .Values.configmap.cnMessageType | quote }}
   CN_CONFIGURATOR_CONFIGURATION_FILE: {{ .Values.global.cnConfiguratorConfigurationFile | quote }}
   CN_CONFIGURATOR_DUMP_FILE: {{ .Values.global.cnConfiguratorDumpFile | quote }}

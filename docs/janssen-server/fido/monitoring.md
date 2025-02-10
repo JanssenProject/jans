@@ -10,7 +10,7 @@ tags:
 
 A FIDO device represents a user credential stored in the Jans Server database that is compliant with the [FIDO](https://fidoalliance.org/) standard. These devices are used as a second factor in a setting of strong authentication.
 
-FIDO devices were superseded by [FIDO 2](#fido2-devices) devices in Jans Server.
+FIDO devices were superseded by [FIDO 2](#fido-2-devices) devices in Jans Server.
 
 ## FIDO2 devices
 

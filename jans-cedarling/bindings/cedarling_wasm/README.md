@@ -104,6 +104,22 @@ export class Cedarling {
    * Returns `Array` of `String`
    */
   get_log_ids(): Array<any>;
+  /**
+   * Get logs by tag, like `log_kind` or `log level`.
+   * Tag can be `log_kind`, `log_level`.
+   */
+  get_logs_by_tag(tag: string): any[];
+  /**
+   * Get logs by request_id.
+   * Return log entries that match the given request_id.
+   */
+  get_logs_by_request_id(request_id: string): any[];
+  /**
+   * Get log by request_id and tag, like composite key `request_id` + `log_kind`.
+   * Tag can be `log_kind`, `log_level`.
+   * Return log entries that match the given request_id and tag.
+   */
+  get_logs_by_request_id_and_tag(request_id: string, tag: string): any[];
 }
 
 /**
@@ -131,6 +147,10 @@ export class AuthorizeResult {
    * this field is [`bool`] type to be compatible with [authzen Access Evaluation Decision](https://openid.github.io/authzen/#section-6.2.1).
    */
   decision: boolean;
+  /**
+   * Request ID of the authorization request
+   */
+  request_id: string;
 }
 
 /**
