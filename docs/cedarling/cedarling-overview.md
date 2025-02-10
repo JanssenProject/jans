@@ -9,53 +9,83 @@ tags:
 
 # Cedarling Overview
 
-## What is Cedar
+## Cedar Policy Language
 
-[Cedar](https://www.cedarpolicy.com/en) is a policy syntax invented by Amazon and used by their 
-[Verified Permission](https://aws.amazon.com/verified-permissions/) service. Cedar policies
-enable developers to implement fine-grain access control and externalize policies. To learn more
-about why the design of Cedar is **intuitive**, **fast** and **safe**, read this 
-[article](https://aws.amazon.com/blogs/security/how-we-designed-cedar-to-be-intuitive-to-use-fast-and-safe/) 
-or watch this [video](https://www.youtube.com/watch?v=k6pPcnLuOXY&t=1779s)
+[Cedar](https://www.cedarpolicy.com/en) is an open-source policy language developed by Amazon to enable granular, scalable authorization for applications and services. 
+It serves as the foundation for [Amazon Verified Permissions](https://aws.amazon.com/verified-permissions/), providing developers with a robust framework for externalized access control.
 
-Cedar uses the **PARC** syntax: 
+### Key Features
+- **Fine-Grained Authorization**: Enables precise "allow/deny" decisions at the resource level  
+- **Policy Externalization**: Separates authorization logic from application code  
+- **High Performance**: Optimized for low-latency authorization decisions (<1ms in most cases)  
+- **Formal Verification**: Mathematically proven safety properties prevent common security flaws  
 
-* **P**rincipal
-* **A**ction
-* **R**esource
-* **C**ontext 
+### PARC Authorization Model
+Cedar policies follow a structured syntax based on four core elements:
 
-For example, you may have a policy that says *Admins* can *write* to the */config* folder. The *Admin* role 
-is the Principal, *write* is the Action, and the */config* folder is the Resource. The Context is used to 
-specify information about the enivironment, like the time of day or network address.
+| Component | Description | Example |
+|-----------|-------------|---------|
+| **Principal** | Entity requesting access | `User`, `Role`,  `Workload` or `Service` (e.g., "Admin") |
+| **Action**    | Operation being performed | CRUD operations (e.g., "Write", "Create") |
+| **Resource**  | Protected asset being accessed | Application object (e.g., "/config folder") |
+| **Context**   | Environmental factors | Time, IP address, MFA status |
 
-![](../assets/lock-cedarling-diagram-3.jpg)
-
-Fine grain access control makes sense in both the frontend and backend. In the frontend, mastery of 
-authz can help developers build better UX. For example, why display form fields a user is not 
-authorized to see? In the backend, fine grain policies are necessary for a zero trust architecture.
+### Example of Cedar Policy
+```cedar
+permit (
+    principal == Role::"Admin",
+    action == Action::"Write",
+    resource == Folder::"/config"
+);
+```
 
 ## What is the Cedarling
+[Cedarling](https://github.com/cedar-policy/cedarling) is a high-performance local authorization service written in [Rust](https://www.rust-lang.org/) 
+that uses [AWS's Cedar policy language](https://www.cedar.io/) to make access control decisions, where it takes [JWT tokens](https://jwt.io/) 
+and evaluates whether a user or service has permission to perform specific actions on resources based on predefined policies and schemas.
 
+It essentially acts as a security checkpoint that answers the question "should this user/service be allowed to do this action?" while running within your own infrastructure rather than as a cloud service.
+
+This makes it particularly useful for:
+- API gateways
+- Microservices  
+- Applications requiring fine-grained access control
+
+### Architectural Overview
+- **Stateful PDP**: Implements in-memory caching for batched logging and performance optimizations
+- **Cross-Platform Support**: Native Rust core with bindings for:
+  - Web: WebAssembly (WASM)
+  - Mobile: iOS & Android
+  - Cloud: Python
+- **Embeddable Design**: Deploys as lightweight component within application runtime environments
+### Key Features
+
+#### Multi-Environment Support
+| Platform | Implementation | Use Case |
+|----------|----------------|----------|
+| **Frontend** | Browser WASM engine | Browser-based applications |
+| **Mobile** | Native iOS/Android bindings | Mobile app authorization |
+| **Backend** | Linux container/Docker | Cloud service authorization |
+
+#### Authorization Data Flow
+1. **Principal Identification**  
+   Extracted from JWT claims (users, workloads, or hybrid identities)
+2. **Request Context**  
+   Receives `Action`, `Resource`, and `Context` parameters via authorization API calls
+3. **Local Decision Engine**  
+   Eliminates cloud dependencies through embedded policy evaluation
+
+#### Performance Characteristics
+- **Sub-Millisecond Response**: <1ms decision latency for UX-critical operations
+- **Written in Rust**: providing memory safety and thread safety
+- **Frontend Optimization**: Browser-compatible WASM engine avoids main thread blocking
+
+#### Design Advantages
+- **End-to-End Security**: Consistent policy enforcement across application layers, zero trust security models, Audit logging for security compliance
+- **Flexible Configuration**: Environment variable support, file file based configuration
+- **Developer-Friendly**: Simple API for authorization decisions, Comprehensive logging for debugging and auditing,etc.
+### Sample deployment overview
 ![](../assets/lock-cedarling-diagram-1.jpg)
-
-Architecturally, the Cedarling is an embeddable stateful Policy Decision Point, or "PDP". It is 
-stateful because it implements an in-memory cache which makes it possible to batch logs and 
-implement other performance optimizations. The Cedarling is written in Rust with bindings 
-to WASM, iOS, Android, and Python--this makes it possible for web, mobile, and cloud developers
-to incorporate the Cedarling into their applications.
-
-The Cedarling is used for both frontend and backend security. Because the frontend is more 
-constrained with regard to memory and compute, this requirement was critical to the design.
-For example, in the backend, a PDP could run in a Linux container. But in the frontend, the 
-Cedarling must run in a browser, using the browser WASM engine. 
-
-How does the Cedarling get the data to calculate a decision? The Principal data is contained in 
-the JWTs--a person, a workload, or both. The Action, Resource and Context are sent by the 
-application as arguments in the authz request. The Cedarling is fast because it has all the data it 
-needs to make a local decision. No cloud round-trips are needed to return an authz decision--a 
-cloud roundtrip may kill the performance of a frontend application. The Cedarling can execute many 
-requests in less then 1ms--this is critical for UX fine grain authorization.
 
 Below is a conceptual diagram showing how you can archiect the Cedarling for frontend and backend
 security. 
