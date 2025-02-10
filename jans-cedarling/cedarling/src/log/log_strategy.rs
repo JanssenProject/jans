@@ -29,7 +29,6 @@ impl LogStrategy {
             LogTypeConfig::StdOut => {
                 Self::StdOut(StdOutLogger::new(config.log_level, config.lock_enabled))
             },
-            LogTypeConfig::Lock => todo!(),
         }
     }
 }
