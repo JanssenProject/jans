@@ -1,0 +1,18 @@
+[package]
+name = "cedarling_python"
+version = "0.0.0"
+edition = "2021"
+description = "Python binding to Cedarling"
+license = "Apache-2.0"
+
+[lib]
+name = "cedarling_python"
+crate-type = ["cdylib"]
+
+# dependency for NOT wasm target
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+pyo3 = { version = "0.22.5", features = ["extension-module", "gil-refs"] }
+cedarling = { workspace = true, features = ["blocking"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde-pyobject = "0.4.0"
