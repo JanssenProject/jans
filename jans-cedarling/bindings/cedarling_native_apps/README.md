@@ -49,3 +49,7 @@ xcodebuild -create-xcframework \
 6. Open ./jans-cedarling/bindings/cedarling_native_apps/iOSApp in Xcode. Import both the XCFramework Mobile.xcframework and the Swift file bindings bindings/Mobile.swift files into your project (drag and drop should work).
 
 7. Run iOS project on simulator. 
+
+## Android
+
+- WIP...
