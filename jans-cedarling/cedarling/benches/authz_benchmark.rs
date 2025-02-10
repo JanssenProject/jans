@@ -69,6 +69,7 @@ async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCed
         log_config: LogConfig {
             log_type: LogTypeConfig::Off,
             log_level: LogLevel::DEBUG,
+            lock_enabled: false,
         },
         policy_store_config: PolicyStoreConfig {
             source: cedarling::PolicyStoreSource::Yaml(POLICY_STORE.to_string()),
@@ -104,6 +105,7 @@ async fn prepare_cedarling_with_jwt_validation() -> Result<Cedarling, InitCedarl
         log_config: LogConfig {
             log_type: LogTypeConfig::Off,
             log_level: LogLevel::DEBUG,
+            lock_enabled: false,
         },
         policy_store_config: PolicyStoreConfig {
             source: cedarling::PolicyStoreSource::Yaml(POLICY_STORE.to_string()),

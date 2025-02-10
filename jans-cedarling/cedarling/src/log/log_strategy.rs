@@ -26,7 +26,9 @@ impl LogStrategy {
             LogTypeConfig::Memory(memory_config) => {
                 Self::MemoryLogger(MemoryLogger::new(memory_config, config.log_level))
             },
-            LogTypeConfig::StdOut => Self::StdOut(StdOutLogger::new(config.log_level)),
+            LogTypeConfig::StdOut => {
+                Self::StdOut(StdOutLogger::new(config.log_level, config.lock_enabled))
+            },
             LogTypeConfig::Lock => todo!(),
         }
     }

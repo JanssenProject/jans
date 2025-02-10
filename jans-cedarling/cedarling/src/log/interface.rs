@@ -113,3 +113,26 @@ pub trait LogStorage {
     fn get_logs_by_request_id_and_tag(&self, request_id: &str, tag: &str)
     -> Vec<serde_json::Value>;
 }
+
+/// Implementation for buffering logs.
+///
+/// # Usage
+///
+/// 1.  Call [`LogBuffer::batch_logs`] then try to send it to the lock server
+/// 2a. If sending the logs is successful, call [`LogBuffer::flush_batch`]
+/// 2b. If sending the logs failed, and you want to clear the batch but not
+///     lose the logs, call [`LogBuffer::clear_batch`]
+// will be used for lock server integration
+#[allow(dead_code)]
+pub(crate) trait LogBuffer {
+    /// Batches some logs to send to lock master
+    fn batch_logs(&self) -> Vec<serde_json::Value>;
+
+    /// Clear the current batch then remove the logs from log storage if
+    /// they are being stored.
+    fn flush_batch(&mut self);
+
+    /// Clear the current batch but don't get rid of the logs if they are
+    /// being stored.
+    fn clear_batch(&mut self);
+}

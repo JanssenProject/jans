@@ -50,6 +50,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         log_config: LogConfig {
             log_type: LogTypeConfig::StdOut,
             log_level: LogLevel::INFO,
+            lock_enabled: false,
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),

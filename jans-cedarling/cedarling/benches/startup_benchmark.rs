@@ -36,6 +36,7 @@ lazy_static! {
         log_config: LogConfig {
             log_type: LogTypeConfig::Off,
             log_level: LogLevel::DEBUG,
+            lock_enabled: false,
         },
         policy_store_config: PolicyStoreConfig {
             source: cedarling::PolicyStoreSource::Yaml(POLICY_STORE.to_string()),

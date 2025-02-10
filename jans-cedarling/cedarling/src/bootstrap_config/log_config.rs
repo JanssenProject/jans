@@ -14,6 +14,9 @@ pub struct LogConfig {
     /// Log level filter for logging. TRACE is lowest. FATAL is highest.
     /// `CEDARLING_LOG_LEVEL` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     pub log_level: LogLevel,
+
+    /// Toggle for sending logs to the lock server
+    pub lock_enabled: bool,
 }
 
 ///  Log type configuration.

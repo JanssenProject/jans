@@ -3,13 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use chrono::Duration;
+use chrono::{Duration, TimeDelta};
 use std::sync::Mutex;
+use std::vec;
 
 use sparkv::{Config as ConfigSparKV, SparKV};
 
 use super::LogLevel;
-use super::interface::{LogStorage, LogWriter, Loggable, composite_key};
+use super::interface::{LogBuffer, LogStorage, LogWriter, Loggable, composite_key};
 use crate::bootstrap_config::log_config::MemoryLogConfig;
 
 const STORAGE_MUTEX_EXPECT_MESSAGE: &str = "MemoryLogger storage mutex should unlock";
@@ -18,6 +19,9 @@ const STORAGE_MUTEX_EXPECT_MESSAGE: &str = "MemoryLogger storage mutex should un
 pub(crate) struct MemoryLogger {
     storage: Mutex<SparKV<serde_json::Value>>,
     log_level: LogLevel,
+    // will be used for lock server integration
+    #[allow(dead_code)]
+    buffered_log_ids: Mutex<Vec<String>>,
 }
 
 impl MemoryLogger {
@@ -31,9 +35,25 @@ impl MemoryLogger {
             ..Default::default()
         };
 
+        // we add a little bit of delay for the flushed logs so that
+        // we do not accidentally group the flushed logs back in with
+        // the non-flushed logs
+        let mut flushed_logs_config = sparkv_config.clone();
+        flushed_logs_config.default_ttl += TimeDelta::seconds(1);
+
         MemoryLogger {
             storage: Mutex::new(SparKV::with_config(sparkv_config)),
             log_level,
+            buffered_log_ids: vec![].into(),
+        }
+    }
+
+    // will be used for lock server integration
+    #[allow(dead_code)]
+    fn remove_logs(&self, log_ids: Vec<&str>) {
+        let mut storage_lock = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
+        for id in log_ids {
+            storage_lock.pop(id);
         }
     }
 }
@@ -72,11 +92,15 @@ mod fallback {
     /// call. But this is a fallback logger, so it is not intended to be used
     /// often, and in this case correctness and non-fallibility are far more
     /// important than performance.
+    ///
+    /// This also won't support sending the logs to the lock server since this
+    /// creates a new Logger instance every call.
     pub fn log(msg: &str) {
         let log_config = crate::bootstrap_config::LogConfig {
             log_type: crate::bootstrap_config::log_config::LogTypeConfig::StdOut,
             // level is so that all messages passed here are logged.
             log_level: LogLevel::TRACE,
+            lock_enabled: false,
         };
         // This should always be a LogStrategy::StdOut(StdOutLogger)
         let log_strategy = crate::log::LogStrategy::new(&log_config);
@@ -176,6 +200,42 @@ impl LogStorage for MemoryLogger {
             .get_by_index_key(&key)
             .map(|v| v.to_owned())
             .collect()
+    }
+}
+
+impl LogBuffer for MemoryLogger {
+    fn batch_logs(&self) -> Vec<serde_json::Value> {
+        let mut log_ids_buf_lock = self
+            .buffered_log_ids
+            .lock()
+            .expect("should obtain buffered log ids lock");
+        *log_ids_buf_lock = self.get_log_ids();
+        let logs = log_ids_buf_lock
+            .iter()
+            .filter_map(|id| self.get_log_by_id(id))
+            .collect::<Vec<serde_json::Value>>();
+        logs
+    }
+
+    fn flush_batch(&mut self) {
+        let mut log_ids_buf_lock = self
+            .buffered_log_ids
+            .lock()
+            .expect("should obtain lock for buffered lock ids lock");
+        let log_ids = log_ids_buf_lock
+            .iter()
+            .map(|s| s.as_str())
+            .collect::<Vec<&str>>();
+        self.remove_logs(log_ids);
+        log_ids_buf_lock.clear();
+    }
+
+    fn clear_batch(&mut self) {
+        let mut log_ids_buf_lock = self
+            .buffered_log_ids
+            .lock()
+            .expect("should obtain buffered log ids lock");
+        log_ids_buf_lock.clear();
     }
 }
 
@@ -417,6 +477,44 @@ mod tests {
                 .len()
                 == 1,
             "1 system log entry should be present with WARN level"
+        );
+    }
+
+    #[test]
+    fn test_buffering_logs() {
+        let mut logger = MemoryLogger::new(MemoryLogConfig { log_ttl: 3600 }, LogLevel::DEBUG);
+
+        let first_entry =
+            LogEntry::new_with_data(app_types::PdpID::new(), None, LogType::Metric, None);
+        logger.log_any(first_entry.clone());
+        let batch = logger.batch_logs();
+        assert_eq!(batch.len(), 1, "batch should have 1 entry");
+
+        logger.clear_batch();
+        assert_eq!(
+            logger.get_log_ids().len(),
+            1,
+            "clearing the batch should not dispose of the logs"
+        );
+
+        let batch = logger.batch_logs();
+        let second_entry =
+            LogEntry::new_with_data(app_types::PdpID::new(), None, LogType::Metric, None);
+        logger.log_any(second_entry.clone());
+        assert_eq!(logger.get_log_ids().len(), 2, "logger should have 2 logs");
+        assert_eq!(batch.len(), 1, "batch should have 1 entry");
+        assert_eq!(
+            batch[0],
+            serde_json::to_value(first_entry).expect("should serialize first log entry")
+        );
+
+        logger.flush_batch();
+        let batch = logger.batch_logs();
+
+        assert_eq!(batch.len(), 1, "batch should have 1 entry");
+        assert_eq!(
+            batch[0],
+            serde_json::to_value(second_entry).expect("should serialize second log entry")
         );
     }
 }

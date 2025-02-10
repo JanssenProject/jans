@@ -39,6 +39,7 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
         log_config: LogConfig {
             log_type: LogTypeConfig::StdOut,
             log_level: crate::LogLevel::DEBUG,
+            lock_enabled: false,
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_source,
@@ -83,6 +84,7 @@ pub async fn get_cedarling_with_authorization_conf(
         log_config: LogConfig {
             log_type: LogTypeConfig::StdOut,
             log_level: crate::LogLevel::DEBUG,
+            lock_enabled: false,
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_source,

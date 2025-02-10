@@ -58,6 +58,7 @@ impl BootstrapConfig {
         let log_config = LogConfig {
             log_type,
             log_level: raw.log_level,
+            lock_enabled: raw.lock.into(),
         };
 
         // Decode policy store
