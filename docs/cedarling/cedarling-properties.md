@@ -20,22 +20,13 @@ These Bootstrap Properties control default application level behavior.
 * **`CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION`** :  `AND`, `OR`
 * **`CEDARLING_MAPPING_USER`** : Name of Cedar User schema entity if we don't want to use default. When specified cedarling try build defined entity (from schema) as user instead of default `User` entity defined in `cedar` schema. Works in namespace defined in the policy store.
 * **`CEDARLING_MAPPING_WORKLOAD`** : Name of Cedar Workload schema entity
-* **`CEDARLING_MAPPING_ID_TOKEN`** : Name of Cedar id_token schema entity
-* **`CEDARLING_MAPPING_ACCESS_TOKEN`** : Name of Cedar access_token schema entity
-* **`CEDARLING_MAPPING_USERINFO_TOKEN`** : Name of Cedar userinfo schema entity
+* **`CEDARLING_MAPPING_ROLE`** : Name of Cedar Role schema entity
 
 **The following bootstrap properties are needed to configure log behavior:**
 
-* **`CEDARLING_LOG_STORAGE`** : `off`, `memory`, `std_out`
+* **`CEDARLING_LOG_TYPE`** : `off`, `memory`, `std_out`
 * **`CEDARLING_LOG_LEVEL`** : System Log Level [See here](./cedarling-logs.md). Default to `WARN`
 * **`CEDARLING_LOG_STDOUT_TYPE`** : Either `System`, `Metric`, or `Decision`. Default to System.
-* **`CEDARLING_LOG_LEVEL`** : Log level filter for logging. Log level has only `System` log type entries. `TRACE` is lowest. `FATAL` is highest. Possible variants:
-  * FATAL
-  * ERROR
-  * WARN
-  * INFO
-  * DEBUG
-  * TRACE
 * **`CEDARLING_DECISION_LOG_USER_CLAIMS`** : List of claims to map from user entity, such as ["sub", "email", "username", ...]
 * **`CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS`** : List of claims to map from user entity, such as ["client_id", "rp_id", ...]
 * **`CEDARLING_DECISION_LOG_DEFAULT_JWT_ID`** : Token claims that will be used for decision logging. Default is "jti", but perhaps some other claim is needed.
@@ -44,37 +35,43 @@ These Bootstrap Properties control default application level behavior.
 **The following bootstrap properties are needed to configure JWT and cryptographic behavior:**
 
 * **`CEDARLING_LOCAL_JWKS`** : JWKS file with public keys
-* **`CEDARLING_LOCAL_POLICY_STORE`** : JSON object with policy store
+* **`CEDARLING_POLICY_STORE_LOCAL`** : JSON object with policy store
 * **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Local file with JSON object with policy store
-* **`CEDARLING_JWT_SIG_VALIDATION`** : `Enabled` | `Disabled` -- Whether to check the signature  of all JWT tokens. This requires an `iss` is present.
-* **`CEDARLING_JWT_STATUS_VALIDATION`** : `Enabled` | `Disabled` -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retreive the latest Status List JWT from the `.well-known/openid-configuration` via the `status_list_endpoint` claim and cache it. See the [IETF Draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) for more info.
+* **`CEDARLING_JWT_SIG_VALIDATION`** : `enabled` | `disabled` -- Whether to check the signature  of all JWT tokens. This requires an `iss` is present.
+* **`CEDARLING_JWT_STATUS_VALIDATION`** : `enabled` | `disabled` -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retreive the latest Status List JWT from the `.well-known/openid-configuration` via the `status_list_endpoint` claim and cache it. See the [IETF Draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) for more info.
 * **`CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED`** : Only tokens signed with these algorithms are acceptable to the Cedarling.
-* **`CEDARLING_AT_ISS_VALIDATION`** : When enabled, the `iss` claim must be present in access token and the scheme must be `https`.
-* **`CEDARLING_AT_JTI_VALIDATION`** : When enabled, the `jti` claim must be present in access token.
-* **`CEDARLING_AT_NBF_VALIDATION`** : When enabled, the `nbf` claim must be present in access token and the Cedarling should verify that the current date is after the `nbf`.
-* **`CEDARLING_AT_EXP_VALIDATION`** : When enabled, the `exp` claim must be present and not past the date specified.
-* **`CEDARLING_IDT_ISS_VALIDATION`** : When enabled, the `iss` claim must be present in id_token and the scheme must be `https`.
-* **`CEDARLING_IDT_SUB_VALIDATION`** : When enabled, the `sub` claim must be present in id_token.
-* **`CEDARLING_IDT_EXP_VALIDATION`** : When enabled, the `exp` claim must be present and not past the date specified.
-* **`CEDARLING_IDT_IAT_VALIDATION`** : When enabled, the `iat` claim must be present in id_token.
-* **`CEDARLING_IDT_AUD_VALIDATION`** : When enabled, the `aud` claim must be present in id_token.
-* **`CEDARLING_USERINFO_ISS_VALIDATION`** : When enabled, the `iss` claim must be present and the scheme must be `https`.
-* **`CEDARLING_USERINFO_SUB_VALIDATION`** : When enabled, the `sub` claim must be present in Userinfo JWT.
-* **`CEDARLING_USERINFO_AUD_VALIDATION`** : When enabled, the `aud` claim must be present in Userinfo JWT.
-* **`CEDARLING_USERINFO_EXP_VALIDATION`** : When enabled, the `exp` claim must be present and not past the date specified.
+* **`CEDARLING_TOKEN_CONFIGS`** : JSON object containing token specific configs. See: [Token Configs](#token-configs).
 * **`CEDARLING_ID_TOKEN_TRUST_MODE`** :  `Strict` | `None`. Varying levels of validations based on the preference of the developer.
 `Strict` mode requires (1) id_token `aud` matches the access_token `client_id`; (2) if a Userinfo token is present, the `sub` matches the id_token, and that the `aud` matches the access token client_id.
 
 **The following bootstrap properties are only needed for enterprise deployments.**
 
-* **`CEDARLING_LOCK`** : Enabled | Disabled. If Enabled, the Cedarling will connect to the Lock Master for policies, and subscribe for SSE events.
-* **`CEDARLING_LOCK_MASTER_CONFIGURATION_URI`** : Required if `LOCK` == `Enabled`. URI where Cedarling can get JSON file with all required metadata about Lock Master, i.e. `.well-known/lock-master-configuration`.
-* **`CEDARLING_LOCK_DYNAMIC_CONFIGURATION`** : Enabled | Disabled, controls whether Cedarling should listen for SSE config updates.
+* **`CEDARLING_LOCK`** : `enabled` | `disabled`. If `enabled`, the Cedarling will connect to the Lock Master for policies, and subscribe for SSE events.
+* **`CEDARLING_LOCK_MASTER_CONFIGURATION_URI`** : Required if `LOCK` == `enabled`. URI where Cedarling can get JSON file with all required metadata about Lock Master, i.e. `.well-known/lock-master-configuration`.
+* **`CEDARLING_LOCK_DYNAMIC_CONFIGURATION`** : `enabled` | `disabled`, controls whether Cedarling should listen for SSE config updates.
 * **`CEDARLING_LOCK_SSA_JWT`** : SSA for DCR in a Lock Master deployment. The Cedarling will validate this SSA JWT prior to DCR.
 * **`CEDARLING_LOCK_LOG_INTERVAL`** : How often to send log messages to Lock Master (0 to turn off trasmission).
 * **`CEDARLING_LOCK_HEALTH_INTERVAL`** : How often to send health messages to Lock Master (0 to turn off transmission).
 * **`CEDARLING_LOCK_TELEMETRY_INTERVAL`** : How often to send telemetry messages to Lock Master (0 to turn off transmission).
-* **`CEDARLING_LOCK_LISTEN_SSE`** :  Enabled | Disabled: controls whether Cedarling should listen for updates from the Lock Server.
+* **`CEDARLING_LOCK_LISTEN_SSE`** :  `enabled` | `disabled`: controls whether Cedarling should listen for updates from the Lock Server.
+
+## Required keys for startup
+
+* **`CEDARLING_APPLICATION_NAME`
+* **`CEDARLING_TOKEN_CONFIGS` - check if default implementation of Token Config is suitable for you.
+
+To enable usage of principals at least one of the following keys must be provided:
+
+* **`CEDARLING_WORKLOAD_AUTHZ`
+* **`CEDARLING_USER_AUTHZ`
+
+To load policy store one of the following keys must be provided:
+
+* **`CEDARLING_POLICY_STORE_LOCAL`
+* **`CEDARLING_POLICY_STORE_URI`
+* **`CEDARLING_POLICY_STORE_LOCAL_FN`
+
+All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.
 
 ## User-Workload Boolean Operation
 
@@ -84,6 +81,91 @@ The `CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION` property specifies what boolean 
 
 * **AND**: authz will be successful if `USER` **AND** `WORKLOAD` is valid.
 * **OR**: authz will be successful if `USER` **OR** `WORKLOAD` is valid.
+
+## Token Configs
+
+The token configs property sets the entity type name of a token and it's validation settings. Below is an example of the `CEDARLING_TOKEN_CONFIGS`:
+
+```js
+CEDARLING_TOKEN_CONFIGS = {
+  "access_token": {
+    "entity_type_name": "Access_token",
+    "iss": "enabled",
+    "aud": "enabled",
+    "sub": "enabled",
+    "jti": "enabled",
+    "nbf": "enabled",
+    "iat": "enabled",
+    "exp": "enabled",
+  },
+  "id_token": {
+    "entity_type_name": "id_token",
+    "exp": "enabled",
+  },
+  "userinfo_token": {
+    "entity_type_name": "Userinfo_token",
+    "exp": "enabled",
+  },
+  "custom_token1": {
+    "entity_type_name": "SomeCustom_token",
+    "exp": "enabled",
+  },
+  "custom_token2": {
+    "entity_type_name": "AnotherCustom_token",
+    "exp": "enabled",
+  },
+  // more custom tokens can be added here
+}
+```
+
+## Default implementation of Token Config
+
+Here is rust code default implementation of Token Configs (`CEDARLING_TOKEN_CONFIGS`). This is used when no custom token config is provided.
+
+```rust
+impl Default for TokenConfigs {
+    fn default() -> Self {
+        Self(HashMap::from([
+            ("access_token".to_string(), TokenConfig {
+                entity_type_name: "Access_token".to_string(),
+                claims: ClaimsValidationConfig {
+                    iss: FeatureToggle::Enabled,
+                    sub: FeatureToggle::Disabled,
+                    aud: FeatureToggle::Disabled,
+                    exp: FeatureToggle::Enabled,
+                    nbf: FeatureToggle::Disabled,
+                    iat: FeatureToggle::Disabled,
+                    jti: FeatureToggle::Enabled,
+                },
+            }),
+            ("id_token".to_string(), TokenConfig {
+                entity_type_name: "id_token".to_string(),
+                claims: ClaimsValidationConfig {
+                    iss: FeatureToggle::Enabled,
+                    sub: FeatureToggle::Enabled,
+                    aud: FeatureToggle::Enabled,
+                    exp: FeatureToggle::Enabled,
+                    nbf: FeatureToggle::Disabled,
+                    iat: FeatureToggle::Disabled,
+                    jti: FeatureToggle::Disabled,
+                },
+            }),
+            ("userinfo_token".to_string(), TokenConfig {
+                entity_type_name: "Userinfo_token".to_string(),
+                claims: ClaimsValidationConfig {
+                    iss: FeatureToggle::Enabled,
+                    sub: FeatureToggle::Enabled,
+                    aud: FeatureToggle::Enabled,
+                    exp: FeatureToggle::Enabled,
+                    nbf: FeatureToggle::Disabled,
+                    iat: FeatureToggle::Disabled,
+                    jti: FeatureToggle::Disabled,
+                },
+            }),
+        ]))
+    }
+}
+```
 
 ## ID Token Trust Mode
 
@@ -143,53 +225,50 @@ Below is an example of a bootstrap config in JSON format. Not all fields should 
 
 ```json
 {
-    "CEDARLING_APPLICATION_NAME": "My App",
-    "CEDARLING_POLICY_STORE_URI": "",
-    "CEDARLING_POLICY_STORE_ID": "840da5d85403f35ea76519ed1a18a33989f855bf1cf8",
-    "CEDARLING_LOG_TYPE": "memory",
-    "CEDARLING_LOG_LEVEL": "INFO",
-    "CEDARLING_DECISION_LOG_USER_CLAIMS": ["sub", "email", "username"],
-    "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS": ["client_id", "rp_id"],
-    "CEDARLING_DECISION_LOG_DEFAULT_JWT_ID": "jti",
-    "CEDARLING_LOG_TTL": 60,
-    "CEDARLING_USER_AUTHZ": "enabled",
-    "CEDARLING_WORKLOAD_AUTHZ": "enabled",
-    "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
-    "CEDARLING_MAPPING_USER": "CustomUser",
-    "CEDARLING_MAPPING_WORKLOAD": "CustomWorkload",
-    "CEDARLING_MAPPING_ID_TOKEN": "CustomIdToken",
-    "CEDARLING_MAPPING_ACCESS_TOKEN": "CustomAccessToken",
-    "CEDARLING_MAPPING_USERINFO_TOKEN": "CustomUserinfoToken",
-    "CEDARLING_LOCAL_JWKS": "../test_files/local_jwks.json",
-    "CEDARLING_LOCAL_POLICY_STORE": null,
-    "CEDARLING_POLICY_STORE_LOCAL_FN": "../test_files/policy-store_blobby.json",
-    "CEDARLING_JWT_SIG_VALIDATION": "enabled",
-    "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-    "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
-        "HS256",
-        "RS256"
-    ],
-    "CEDARLING_AT_ISS_VALIDATION": "disabled",
-    "CEDARLING_AT_JTI_VALIDATION": "disabled",
-    "CEDARLING_AT_NBF_VALIDATION": "disabled",
-    "CEDARLING_AT_EXP_VALIDATION": "enabled",
-    "CEDARLING_IDT_ISS_VALIDATION": "enabled",
-    "CEDARLING_IDT_SUB_VALIDATION": "enabled",
-    "CEDARLING_IDT_EXP_VALIDATION": "enabled",
-    "CEDARLING_IDT_IAT_VALIDATION": "enabled",
-    "CEDARLING_IDT_AUD_VALIDATION": "enabled",
-    "CEDARLING_USERINFO_ISS_VALIDATION": "enabled",
-    "CEDARLING_USERINFO_SUB_VALIDATION": "enabled",
-    "CEDARLING_USERINFO_AUD_VALIDATION": "enabled",
-    "CEDARLING_USERINFO_EXP_VALIDATION": "enabled",
-    "CEDARLING_ID_TOKEN_TRUST_MODE": "Strict",
-    "CEDARLING_LOCK": "disabled",
-    "CEDARLING_LOCK_MASTER_CONFIGURATION_URI": null,
-    "CEDARLING_DYNAMIC_CONFIGURATION": "disabled",
-    "CEDARLING_LOCK_SSA_JWT": null,
-    "CEDARLING_AUDIT_HEALTH_INTERVAL": 0,
-    "CEDARLING_AUDIT_TELEMETRY_INTERVAL": 0,
-    "CEDARLING_LISTEN_SSE": "disabled"
+  "CEDARLING_APPLICATION_NAME": "My App",
+  "CEDARLING_USER_AUTHZ": "enabled",
+  "CEDARLING_WORKLOAD_AUTHZ": "enabled",
+  "CEDARLING_POLICY_STORE_URI": null,
+  "CEDARLING_POLICY_STORE_LOCAL": null,
+  "CEDARLING_POLICY_STORE_LOCAL_FN": "./example_files/policy-store.json",
+  "CEDARLING_TOKEN_CONFIGS": {
+    "access_token": {
+      "entity_type_name": "Access_token"
+    },
+    "id_token": {
+      "entity_type_name": "id_token"
+    },
+    "userinfo_token": {
+      "entity_type_name": "Userinfo_token"
+    }
+  },
+  "CEDARLING_POLICY_STORE_ID": "gICAgcHJpbmNpcGFsIGlz",
+  "CEDARLING_LOG_TYPE": "std_out",
+  "CEDARLING_LOG_LEVEL": "INFO",
+  "CEDARLING_LOG_TTL": null,
+  "CEDARLING_DECISION_LOG_USER_CLAIMS": [
+    "sub",
+    "email"
+  ],
+  "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS": [
+    "client_id",
+    "rp_id"
+  ],
+  "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
+  "CEDARLING_LOCAL_JWKS": null,
+  "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+  "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
+  "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
+    "HS256",
+    "RS256"
+  ],
+  "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
+  "CEDARLING_LOCK": "disabled",
+  "CEDARLING_LOCK_MASTER_CONFIGURATION_URI": null,
+  "CEDARLING_LOCK_DYNAMIC_CONFIGURATION": "disabled",
+  "CEDARLING_LOCK_HEALTH_INTERVAL": 0,
+  "CEDARLING_LOCK_TELEMETRY_INTERVAL": 0,
+  "CEDARLING_LOCK_LISTEN_SSE": "disabled"
 }
 ```
 
@@ -218,50 +297,37 @@ Below is an example of a bootstrap config in YAML format. Not all fields should 
 
 ```yaml
 CEDARLING_APPLICATION_NAME: My App
-CEDARLING_POLICY_STORE_URI: ''
-CEDARLING_POLICY_STORE_ID: '840da5d85403f35ea76519ed1a18a33989f855bf1cf8'
-CEDARLING_LOG_TYPE: 'memory'
-CEDARLING_LOG_LEVEL: 'INFO'
+CEDARLING_USER_AUTHZ: enabled
+CEDARLING_WORKLOAD_AUTHZ: enabled
+CEDARLING_POLICY_STORE_URI: null
+CEDARLING_POLICY_STORE_LOCAL: null
+CEDARLING_POLICY_STORE_LOCAL_FN: ./example_files/policy-store.json
+CEDARLING_TOKEN_CONFIGS:
+    access_token: { entity_type_name: "Access_token" }
+    id_token: { entity_type_name: "id_token" }
+    userinfo_token: { entity_type_name: "Userinfo_token" }
+
+CEDARLING_POLICY_STORE_ID: gICAgcHJpbmNpcGFsIGlz
+CEDARLING_LOG_TYPE: std_out
+CEDARLING_LOG_LEVEL: INFO
+CEDARLING_LOG_TTL: null
 CEDARLING_DECISION_LOG_USER_CLAIMS: ["sub","email"]
 CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS: ["client_id", "rp_id"]
-CEDARLING_LOG_TTL: 60
-CEDARLING_USER_AUTHZ: 'enabled'
-CEDARLING_WORKLOAD_AUTHZ: 'enabled'
-CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION: 'AND'
-CEDARLING_MAPPING_USER: 'CustomUser'
-CEDARLING_MAPPING_WORKLOAD: 'CustomWorkload'
-CEDARLING_MAPPING_ID_TOKEN: 'CustomIdToken'
-CEDARLING_MAPPING_ACCESS_TOKEN: 'CustomAccessToken'
-CEDARLING_MAPPING_USERINFO_TOKEN: 'CustomUserinfoToken'
-CEDARLING_LOCAL_JWKS: '../test_files/local_jwks.json'
-CEDARLING_LOCAL_POLICY_STORE: null
-CEDARLING_POLICY_STORE_LOCAL_FN: '../test_files/policy-store_blobby.json'
-CEDARLING_JWT_SIG_VALIDATION: 'enabled'
-CEDARLING_JWT_STATUS_VALIDATION: 'disabled'
+CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION: AND
+CEDARLING_LOCAL_JWKS: null
+CEDARLING_JWT_SIG_VALIDATION: disabled
+CEDARLING_JWT_STATUS_VALIDATION: disabled
 CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED:
-    - 'HS256'
-    - 'RS256'
-CEDARLING_AT_ISS_VALIDATION: 'disabled'
-CEDARLING_AT_JTI_VALIDATION: 'disabled'
-CEDARLING_AT_NBF_VALIDATION: 'disabled'
-CEDARLING_AT_EXP_VALIDATION: 'enabled'
-CEDARLING_IDT_ISS_VALIDATION: 'enabled'
-CEDARLING_IDT_SUB_VALIDATION: 'enabled'
-CEDARLING_IDT_EXP_VALIDATION: 'enabled'
-CEDARLING_IDT_IAT_VALIDATION: 'enabled'
-CEDARLING_IDT_AUD_VALIDATION: 'enabled'
-CEDARLING_USERINFO_ISS_VALIDATION: 'enabled'
-CEDARLING_USERINFO_SUB_VALIDATION: 'enabled'
-CEDARLING_USERINFO_AUD_VALIDATION: 'enabled'
-CEDARLING_USERINFO_EXP_VALIDATION: 'enabled'
-CEDARLING_ID_TOKEN_TRUST_MODE: 'Strict'
-CEDARLING_LOCK: 'disabled'
+    - HS256
+    - RS256
+
+CEDARLING_ID_TOKEN_TRUST_MODE: strict
+CEDARLING_LOCK: disabled
 CEDARLING_LOCK_MASTER_CONFIGURATION_URI: null
-CEDARLING_DYNAMIC_CONFIGURATION: 'disabled'
-CEDARLING_LOCK_SSA_JWT: 0
-CEDARLING_AUDIT_HEALTH_INTERVAL: 0
-CEDARLING_AUDIT_TELEMETRY_INTERVAL: 0
-CEDARLING_LISTEN_SSE: 'disabled'
+CEDARLING_LOCK_DYNAMIC_CONFIGURATION: disabled
+CEDARLING_LOCK_HEALTH_INTERVAL: 0
+CEDARLING_LOCK_TELEMETRY_INTERVAL: 0
+CEDARLING_LOCK_LISTEN_SSE: disabled
 ```
 
 * Note that properties set to `'disabled'`, an empty string `''`, zero `0`, and `null` can be ommited since they are the defaults.

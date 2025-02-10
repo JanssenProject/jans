@@ -41,6 +41,44 @@ This is set by `CEDARLING_LOG_LEVEL`
 * `DEBUG`: Designates fine-grained informational events useful for debugging the application.
 * `TRACE`: Provides finer-grained informational events than DEBUG. It is often used for detailed tracing of program execution.
 
+## Memory Log interface
+
+This interface is used to interact with the memory log storage. It provides methods for getting logs and removing them from the storage.
+Same interface is translated to other languages through bindings.
+
+Tags are used to filter logs. It can be `log_kind` and `log_level` values from log entry data.
+
+You can obtain the `request_id` from the result structure of the `authorize` method call.
+
+```rust
+/// Log Storage
+/// interface for getting log entries from the storage
+pub trait LogStorage {
+    /// Return logs and remove them from the storage
+    fn pop_logs(&self) -> Vec<serde_json::Value>;
+
+    /// Get specific log entry
+    fn get_log_by_id(&self, id: &str) -> Option<serde_json::Value>;
+
+    /// Returns a list of all log ids
+    fn get_log_ids(&self) -> Vec<String>;
+
+    /// Get logs by tag, like `log_kind` or `log level`.
+    /// Tag can be `log_kind`, `log_level`.
+    fn get_logs_by_tag(&self, tag: &str) -> Vec<serde_json::Value>;
+
+    /// Get logs by request_id.
+    /// Return log entries that match the given request_id.
+    fn get_logs_by_request_id(&self, request_id: &str) -> Vec<serde_json::Value>;
+
+    /// Get log by request_id and tag, like composite key `request_id` + `log_kind`.
+    /// Tag can be `log_kind`, `log_level`.
+    /// Return log entries that match the given request_id and tag.
+    fn get_logs_by_request_id_and_tag(&self, request_id: &str, tag: &str)
+    -> Vec<serde_json::Value>;
+}
+```
+
 ## Jans Lock Server
 
 In enterprise deployments, [Janssen Lock Server](../janssen-server/lock/) collects Cedarling

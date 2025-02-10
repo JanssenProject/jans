@@ -4266,7 +4266,7 @@ paths:
                                 "moduleProperties": [
                                     {
                                         "value1": "location_type",
-                                        "value2": "ldap"
+                                        "value2": "db"
                                     }
                                 ],
                                 "level": 1,
@@ -4274,7 +4274,7 @@ paths:
                                 "enabled": true,
                                 "modified": false,
                                 "internal": false,
-                                "locationType": "ldap",
+                                "locationType": "db",
                                 "baseDn": "inum=0300-BA90,ou=scripts,o=jans"
                             },
                             {
@@ -4288,7 +4288,7 @@ paths:
                                 "moduleProperties": [
                                     {
                                         "value1": "location_type",
-                                        "value2": "ldap"
+                                        "value2": "db"
                                     }
                                 ],
                                 "level": 100,
@@ -4296,7 +4296,7 @@ paths:
                                 "enabled": false,
                                 "modified": false,
                                 "internal": false,
-                                "locationType": "ldap",
+                                "locationType": "db",
                                 "baseDn": "inum=031C-4A65,ou=scripts,o=jans"
                             }
                         ]
@@ -4333,7 +4333,7 @@ paths:
                               "moduleProperties": [
                                   {
                                       "value1": "location_type",
-                                      "value2": "ldap"
+                                      "value2": "db"
                                   }
                               ],
                               "level": 800,
@@ -4341,7 +4341,7 @@ paths:
                               "enabled": false,
                               "modified": false,
                               "internal": false,
-                              "locationType": "ldap"
+                              "locationType": "db"
                           }
       responses:
         "200":
@@ -4365,7 +4365,7 @@ paths:
                         "moduleProperties": [
                             {
                                 "value1": "location_type",
-                                "value2": "ldap"
+                                "value2": "db"
                             }
                         ],
                         "level": 800,
@@ -4373,7 +4373,7 @@ paths:
                         "enabled": false,
                         "modified": false,
                         "internal": false,
-                        "locationType": "ldap",
+                        "locationType": "db",
                         "baseDn": "inum=4144edf6-af99-451d-be29-f3eb5c0e9143,ou=scripts,o=jans"
                     }
         "401":
@@ -4419,7 +4419,7 @@ paths:
                               "moduleProperties": [
                                   {
                                       "value1": "location_type",
-                                      "value2": "ldap"
+                                      "value2": "db"
                                   }
                               ],
                               "level": 800,
@@ -4427,7 +4427,7 @@ paths:
                               "enabled": false,
                               "modified": false,
                               "internal": false,
-                              "locationType": "ldap"
+                              "locationType": "db"
                           }
       responses:
         "201":
@@ -4459,7 +4459,7 @@ paths:
                         "enabled": false,
                         "modified": false,
                         "internal": false,
-                        "locationType": "ldap",
+                        "locationType": "db",
                         "baseDn": "inum=4144edf6-af99-451d-be29-f3eb5c0e9143,ou=scripts,o=jans"
                     }
         "401":
@@ -4584,7 +4584,7 @@ paths:
                         "enabled": true,
                         "modified": false,
                         "internal": false,
-                        "locationType": "ldap",
+                        "locationType": "db",
                         "baseDn": "inum=0300-BA90,ou=scripts,o=jans"
                     }
         "401":
@@ -9335,21 +9335,21 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        selected:
+        adminCanEdit:
           type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
-          type: boolean
-        whitePagesCanView:
+        userCanView:
           type: boolean
         adminCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanEdit:
+        userCanAccess:
           type: boolean
-        userCanView:
+        adminCanAccess:
+          type: boolean
+        selected:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -10211,8 +10211,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10222,6 +10220,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10351,8 +10351,10 @@ components:
           type: string
         finishedFlowPage:
           type: string
-        bridgeScriptPage:
-          type: string
+        startEndUrlMapping:
+          type: object
+          additionalProperties:
+            type: string
         serializeRules:
           type: object
           additionalProperties:
@@ -11331,14 +11333,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:

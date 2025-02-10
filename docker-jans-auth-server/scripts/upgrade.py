@@ -24,11 +24,6 @@ def _transform_lock_dynamic_config(conf, manager):
     should_update = False
 
     hostname = manager.config.get("hostname")
-    opa_url = os.environ.get("CN_OPA_URL", "http://localhost:8181/v1")
-
-    if opa_url != conf["opaConfiguration"]["baseUrl"]:
-        conf["opaConfiguration"]["baseUrl"] = opa_url
-        should_update = True
 
     # add missing top-level keys
     hostname = manager.config.get("hostname")
@@ -36,7 +31,6 @@ def _transform_lock_dynamic_config(conf, manager):
         ("policiesJsonUrisAuthorizationToken", conf.pop("policiesJsonUrisAccessToken", "")),
         ("policiesZipUris", []),
         ("policiesZipUrisAuthorizationToken", conf.pop("policiesZipUrisAccessToken", "")),
-        ("pdpType", "OPA"),
         ("baseEndpoint", f"https://{hostname}/jans-auth/v1"),
         ("clientId", manager.config.get("lock_client_id")),
         ("clientPassword", manager.secret.get("lock_client_encoded_pw")),
@@ -61,19 +55,12 @@ def _transform_lock_dynamic_config(conf, manager):
                 "log"
             ],
         }),
-        ("groupScopeEnabled", True),
         ("statEnabled", True),
+        ("messageConsumerType", "DISABLED"),
+        ("policyConsumerType", "DISABLED"),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
-            should_update = True
-
-    # add missing opaConfiguration-level keys
-    for missing_key, value in [
-        ("accessToken", ""),
-    ]:
-        if missing_key not in conf["opaConfiguration"]:
-            conf["opaConfiguration"][missing_key] = value
             should_update = True
 
     # channel rename
@@ -84,12 +71,6 @@ def _transform_lock_dynamic_config(conf, manager):
         with contextlib.suppress(ValueError):
             conf["tokenChannels"].remove("id_token")
         should_update = True
-
-    # removed attrs
-    for rm_attr in ["messageConsumerType", "policyConsumerType"]:
-        if rm_attr in conf:
-            conf.pop(rm_attr, None)
-            should_update = True
 
     # base endpoint is changed from jans-lock to jans-auth
     if conf["baseEndpoint"] != f"https://{hostname}/jans-auth/v1":

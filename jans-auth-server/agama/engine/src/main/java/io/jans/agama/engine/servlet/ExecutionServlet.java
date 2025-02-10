@@ -58,7 +58,7 @@ public class ExecutionServlet extends BaseServlet {
                 if (result == null) {
                     sendRedirect(response, request.getContextPath(), fstatus, true);
                 } else {
-                    sendFinishPage(response, result, fstatus.isNativeClient() ? null : fstatus.getStartUrl());
+                    sendFinishPage(response, result, fstatus.getStartUrl());
                 }
             } catch (FlowCrashException e) {
                 logger.error(e.getMessage(), e);
@@ -159,7 +159,7 @@ public class ExecutionServlet extends BaseServlet {
                 sendRedirect(response, request.getContextPath(), fstatus,
                         request.getMethod().equals(HttpMethod.GET));
             } else {                    
-                sendFinishPage(response, result, fstatus.isNativeClient() ? null : fstatus.getStartUrl());
+                sendFinishPage(response, result, fstatus.getStartUrl());
             }
             
         } catch (FlowTimeoutException te) {

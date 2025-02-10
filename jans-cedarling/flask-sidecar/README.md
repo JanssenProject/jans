@@ -9,20 +9,11 @@ To run the API:
 - Install [poetry](https://python-poetry.org/docs/#installation)
 - Clone the [Janssen](https://github.com/JanssenProject/jans) repository:
     ```
-    git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans
-    ```
-    ```
-    cd jans
-    ```
-    ```
-    git sparse-checkout init --cone
-    ```
-    ```
-    git checkout main
-    ```
-
-    ```
-    git sparse-checkout set jans-cedarling
+    git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans \
+    && cd jans \
+    && git sparse-checkout init --cone \
+    && git checkout main \
+    && git sparse-checkout set jans-cedarling
     ```
 - Navigate to `jans-cedarling/flask-sidecar`
 - Run `poetry install` to install dependencies
@@ -47,6 +38,21 @@ CEDARLING_BOOTSTRAP_CONFIG_FILE=/path/to/bootstrap.json
 SIDECAR_DEBUG_RESPONSE=False
 ```
 
+Alternatively, you may add cedarling [bootstrap configuration](https://docs.jans.io/head/cedarling/cedarling-properties/) directly in your `.env` file. 
+
+```
+APP_MODE=development
+SIDECAR_DEBUG_RESPONSE=True
+CEDARLING_APPLICATION_NAME=MyApp
+CEDARLING_POLICY_STORE_ID=abcdef
+CEDARLING_POLICY_STORE_URI=https://gluu.org
+CEDARLING_USER_AUTHZ=disabled
+CEDARLING_WORKLOAD_AUTHZ=enabled
+CEDARLING_ID_TOKEN_TRUST_MODE=none
+```
+
+In this case, please be aware of case sensitivity. Environment variables are directly parsed as strings, hence `none` is not the same as `None`.
+
 ## Tests
 
 Not yet implemented
@@ -54,7 +60,7 @@ Not yet implemented
 # Docker Instructions
 
 - Create a file called `bootstrap.json`. You may use this [sample](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/flask-sidecar/secrets/bootstrap.json) file. 
-- Modify the file to your specifications. Configuration values are described [here](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/cedarling_python.pyi).
+- Modify the file to your specifications. Configuration values are described [here](https://docs.jans.io/head/cedarling/cedarling-properties/).
 - Pull the docker image:
 	```
 	docker pull ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
@@ -70,13 +76,46 @@ Not yet implemented
 		-p 5000:5000\
 		ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
 	```
+- Alternatively, you may provide environment variables directly via the `-e` flag:
+	```bash
+	docker run \
+		-e APP_MODE='development' \
+		-e SIDECAR_DEBUG_RESPONSE=True \
+		-e CEDARLING_APPLICATION_NAME=MyApp \
+		-e CEDARLING_POLICY_STORE_ID=abcdef \
+		-e CEDARLING_POLICY_STORE_URI=https://gluu.org \
+		-e CEDARLING_USER_AUTHZ=enabled \
+		-e CEDARLING_WORKLOAD_AUTHZ=enabled \
+		-e CEDARLING_ID_TOKEN_TRUST_MODE=none \
+		-p 5000:5000 \
+		ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
 - The service is running on `http://0.0.0.0:5000`. OpenAPI documentation is available at `/swagger-ui`
 
 ## Docker Compose Instructions (for development)
 
-- Clone the [Janssen](https://github.com/JanssenProject/jans) repository
+
+- Clone the [Janssen](https://github.com/JanssenProject/jans) repository:
+    ```
+    git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans
+    ```
+    ```
+    cd jans
+    ```
+    ```
+    git sparse-checkout init --cone
+    ```
+    ```
+    git checkout main
+    ```
+
+    ```
+    git sparse-checkout set jans-cedarling
+    ```
 - Navigate to `jans/jans-cedarling/flask-sidecar/`
-- Modify the `secrets/bootstrap.json` file to your specifications. Configuration values are described [here](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/cedarling_python.pyi).
+
+### Static bootstrap method 
+
+- Modify the `secrets/bootstrap.json` file to your specifications. Configuration values are described [here](https://docs.jans.io/head/cedarling/cedarling-properties/).
     - The default configuration expects you to provide a URL to a policy store file via `CEDARLING_POLICY_STORE_URI`. If you want to use a local policy store via `CEDARLING_POLICY_STORE_FN`, you need to mount it inside the docker image. Place your policy store file in the `secrets` folder and edit the Dockerfile at line 46 to add this line:
 
     ```
@@ -84,8 +123,27 @@ Not yet implemented
     COPY --chown=1000:1000 ./secrets/<policy store file>.json /api/
     ...
     ```
-- Run `docker compose up`
+- Run `docker compose -f docker-compose-file.yml up`
 - The service is running on `http://0.0.0.0:5000`. OpenAPI documentation is available at `/swagger-ui`
+
+### Environment variable method
+
+- Set your environment variables. You may create an `.env` file and paste in the content for convenience:
+```
+APP_MODE=development
+SIDECAR_DEBUG_RESPONSE=True
+CEDARLING_APPLICATION_NAME=MyApp
+CEDARLING_POLICY_STORE_ID=abcdef
+CEDARLING_POLICY_STORE_URI=https://gluu.org
+CEDARLING_USER_AUTHZ=disabled
+CEDARLING_WORKLOAD_AUTHZ=enabled
+CEDARLING_ID_TOKEN_TRUST_MODE=none
+...
+```
+
+- Run `docker compose -f docker-compose-env.yml up`
+- The service is running on `http://0.0.0.0:5000`. OpenAPI documentation is available at `/swagger-ui`
+
 
 ## OpenAPI
 

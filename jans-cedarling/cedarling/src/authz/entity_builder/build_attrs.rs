@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::*;
-use crate::{common::cedar_schema::cedar_json::entity_type::EntityType, jwt::Token};
+use crate::common::cedar_schema::cedar_json::entity_type::EntityType;
 use cedar_policy::RestrictedExpression;
 use serde_json::Value;
 use std::collections::HashMap;
@@ -17,6 +17,7 @@ pub fn build_entity_attrs_from_tkn(
     entity_type: &EntityType,
     token: &Token,
     claim_aliases: Vec<ClaimAliasMap>,
+    built_entities: &BuiltEntities,
 ) -> Result<HashMap<String, RestrictedExpression>, BuildAttrError> {
     let mut entity_attrs = HashMap::new();
 
@@ -29,7 +30,8 @@ pub fn build_entity_attrs_from_tkn(
     apply_claim_aliases(&mut claims, claim_aliases);
 
     for (attr_name, attr) in shape.attrs.iter() {
-        let expression = if let Some(mapping) = token.claim_mapping().get(attr_name) {
+        let expression = if let Some(mapping) = token.claim_mapping().and_then(|x| x.get(attr_name))
+        {
             let claim = claims.get(attr_name).ok_or_else(|| {
                 BuildAttrError::new(
                     attr_name,
@@ -37,13 +39,14 @@ pub fn build_entity_attrs_from_tkn(
                 )
             })?;
             let mapped_claim = mapping.apply_mapping(claim);
-            attr.build_expr(&mapped_claim, attr_name, schema)
-                .map_err(|err| BuildAttrError::new(attr_name, err.into()))?
+            attr.build_expr(&mapped_claim, attr_name, schema, built_entities)
+                .map_err(|e| BuildAttrError::new(attr_name, e.into()))?
         } else {
-            match attr.build_expr(&claims, attr_name, schema) {
+            match attr.build_expr(&claims, attr_name, schema, built_entities) {
                 Ok(expr) => expr,
                 Err(err) if attr.is_required() => Err(BuildAttrError::new(attr_name, err.into()))?,
-                // silently fail when attribute isn't required
+                // just skip when attribute isn't required even if it errors
+                // TODO: though we should probably log this
                 Err(_) => continue,
             }
         };
@@ -87,7 +90,7 @@ pub fn build_entity_attrs_from_values(
             src
         };
 
-        let expression = match attr.build_expr(src, attr_name, schema) {
+        let expression = match attr.build_expr(src, attr_name, schema, &BuiltEntities::default()) {
             Ok(expr) => expr,
             Err(err) if attr.is_required() => {
                 return Err(BuildAttrError::new(attr_name, err.into()))?;
@@ -152,16 +155,9 @@ pub enum BuildAttrErrorKind {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::{
-        common::{
-            cedar_schema::cedar_json::{
-                attribute::Attribute,
-                entity_type::{EntityShape, EntityType},
-            },
-            policy_store::TrustedIssuer,
-        },
-        jwt::TokenClaims,
-    };
+    use crate::common::cedar_schema::cedar_json::attribute::Attribute;
+    use crate::common::cedar_schema::cedar_json::entity_type::{EntityShape, EntityType};
+    use crate::common::policy_store::TrustedIssuer;
     use serde_json::json;
     use std::collections::HashMap;
 
@@ -187,16 +183,23 @@ mod test {
             }),
         };
         let iss = TrustedIssuer::default();
-        let token = Token::new_access(
-            TokenClaims::new(HashMap::from([(
+        let token = Token::new(
+            "access_token",
+            HashMap::from([(
                 "client_id".to_string(),
                 json!("workload-123"),
-            )])),
+            )]).into(),
             Some(&iss),
         );
 
-        let attrs = build_entity_attrs_from_tkn(&schema, &entity_type, &token, Vec::new())
-            .expect("should build entity attrs");
+        let attrs = build_entity_attrs_from_tkn(
+            &schema,
+            &entity_type,
+            &token,
+            Vec::new(),
+            &BuiltEntities::default(),
+        )
+        .expect("should build entity attrs");
         // RestrictedExpression does not implement PartialEq so the best we can do is check
         // if the attribute was created
         assert!(
@@ -227,10 +230,16 @@ mod test {
             }),
         };
         let iss = TrustedIssuer::default();
-        let token = Token::new_access(TokenClaims::new(HashMap::new()), Some(&iss));
+        let token = Token::new("access_token", HashMap::new().into(), Some(&iss));
 
-        let err = build_entity_attrs_from_tkn(&schema, &entity_type, &token, Vec::new())
-            .expect_err("should error due to missing source");
+        let err = build_entity_attrs_from_tkn(
+            &schema,
+            &entity_type,
+            &token,
+            Vec::new(),
+            &BuiltEntities::default(),
+        )
+        .expect_err("should error due to missing source");
         assert!(
             matches!(
                 err,
@@ -268,8 +277,9 @@ mod test {
         };
         let src_values = HashMap::from([("client_id".to_string(), json!("workload-123"))]);
 
-        let attrs = build_entity_attrs_from_values(&schema, &entity_type, &src_values)
-            .expect("should build entity attrs");
+        let attrs =
+            build_entity_attrs_from_values(&schema, &entity_type, &src_values)
+                .expect("should build entity attrs");
         // RestrictedExpression does not implement PartialEq so the best we can do is check
         // if the attribute was created
         assert!(
@@ -301,8 +311,9 @@ mod test {
         };
         let src_values = HashMap::new();
 
-        let err = build_entity_attrs_from_values(&schema, &entity_type, &src_values)
-            .expect_err("should error due to missing source");
+        let err =
+            build_entity_attrs_from_values(&schema, &entity_type, &src_values)
+                .expect_err("should error due to missing source");
         assert!(
             matches!(
                 err, 

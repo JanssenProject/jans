@@ -112,7 +112,9 @@
           "jans-auth",
           "jans-config-api",
           "jans-keycloak-link",
-          "jans-scim"
+          "jans-scim",
+          "jans-lock",
+          "jans-link"
         ],
         "description": "java archive library."
       },
@@ -260,17 +262,6 @@
           "jans-fido2"
         ],
         "description": " FIDO Server Metadata."
-      },
-      {
-        "directory": "/opt/jans/jetty/%s/custom-libs",
-        "type": [
-          "jar"
-        ],
-        "jansServiceModule": [
-          "jans-lock",
-          "jans-link"
-        ],
-        "description": "java archive library."
       },
       {
         "directory": "/var/jans/keycloak-link-snapshots",

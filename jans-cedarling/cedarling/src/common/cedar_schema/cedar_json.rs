@@ -5,8 +5,10 @@
 
 //! This module is responsible for deserializing the JSON Cedar schema
 
+use crate::common::cedar_schema::CEDAR_NAMESPACE_SEPARATOR;
 use action::*;
 use attribute::*;
+use cedar_policy::ParseErrors;
 use entity_type::*;
 use serde::Deserialize;
 use std::{collections::HashMap, str::FromStr};
@@ -49,7 +51,33 @@ impl CedarSchemaJson {
         None
     }
 
-    pub fn get_entity_from_base_name(
+    pub fn get_entity_schema(
+        &self,
+        type_name: &str,
+    ) -> Result<Option<(cedar_policy::EntityTypeName, &EntityType)>, ParseErrors> {
+        let entity_type_name = cedar_policy::EntityTypeName::from_str(type_name)?;
+
+        if entity_type_name.namespace().is_empty() {
+            if let Some((namespace, entity_type)) =
+                self.get_entity_schema_from_base_name(entity_type_name.basename())
+            {
+                let entity_type_name = cedar_policy::EntityTypeName::from_str(
+                    &[namespace, type_name].join(CEDAR_NAMESPACE_SEPARATOR),
+                )?;
+                return Ok(Some((entity_type_name, entity_type)));
+            }
+
+            return Ok(None);
+        }
+
+        if let Some(entity_schema) = self.get_entity_schema_from_full_name(&entity_type_name) {
+            return Ok(Some((entity_type_name, entity_schema)));
+        }
+
+        Ok(None)
+    }
+
+    fn get_entity_schema_from_base_name(
         &self,
         base_name: &str,
     ) -> Option<(&NamespaceName, &EntityType)> {
@@ -61,16 +89,15 @@ impl CedarSchemaJson {
         None
     }
 
-    pub fn get_entity_from_full_name(
+    fn get_entity_schema_from_full_name(
         &self,
-        full_name: &str,
-    ) -> Option<(NamespaceName, &EntityType)> {
-        let full_name = cedar_policy::EntityTypeName::from_str(full_name).ok()?;
+        full_name: &cedar_policy::EntityTypeName,
+    ) -> Option<&EntityType> {
         let namespace_name = full_name.namespace();
         if let Some(namespace) = self.namespaces.get(&namespace_name) {
             let base_name = full_name.basename();
             if let Some(entity_type) = namespace.entity_types.get(base_name) {
-                return Some((namespace_name, entity_type));
+                return Some(entity_type);
             }
         }
         None

@@ -481,9 +481,10 @@ public class AuthorizeAction {
                 return;
             }
 
-            log.trace("Starting external consent-gathering flow");
+            List<String> acrValuesList = sessionIdService.acrValuesList(this.acrValues);
+            log.trace("Starting external consent-gathering flow, acrValues {} ...", acrValuesList);
 
-            boolean result = consentGatherer.configure(session.getUserDn(), clientId, state);
+            boolean result = consentGatherer.configure(session.getUserDn(), clientId, state, acrValuesList);
             if (!result) {
                 log.error("Failed to initialize external consent-gathering flow.");
                 permissionDenied();

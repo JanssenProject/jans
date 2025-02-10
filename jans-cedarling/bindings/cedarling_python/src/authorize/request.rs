@@ -5,12 +5,12 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-// use cedarling::ResourceData;
 use super::resource_data::ResourceData;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use serde_pyobject::from_pyobject;
+use std::collections::HashMap;
 
 /// Request
 /// =======
@@ -33,7 +33,7 @@ use serde_pyobject::from_pyobject;
 /// ```
 #[pyclass(get_all, set_all)]
 pub struct Request {
-    pub tokens: Tokens,
+    pub tokens: Py<PyDict>,
     /// cedar_policy action
     pub action: String,
     /// cedar_policy resource data
@@ -42,56 +42,16 @@ pub struct Request {
     pub context: Py<PyDict>,
 }
 
-/// Tokens
-/// =======
-///
-/// A Python wrapper for the Rust `cedarling::Token` struct. Contains the JWTs
-/// that will be used for the AuthZ request.
-///
-/// Attributes
-/// ----------
-/// :param access_token: (Optional) The access token string.
-/// :param id_token: (Optional) The id token string.
-/// :param userinfo_token: (Optional) The userinfo token string.
-///
-/// Example
-/// -------
-/// ```python
-/// tokens = Request("your_access_tkn", "your_id_tkn", "your_userinfo_tkn")
-/// ```
-#[derive(Clone)]
-#[pyclass(get_all, set_all)]
-pub struct Tokens {
-    /// Access token raw value
-    pub access_token: Option<String>,
-    /// Id token raw value
-    pub id_token: Option<String>,
-    /// Userinfo token raw value
-    pub userinfo_token: Option<String>,
-}
-
-#[pymethods]
-impl Tokens {
-    #[new]
-    #[pyo3(signature = (access_token, id_token, userinfo_token))]
-    fn new(
-        access_token: Option<String>,
-        id_token: Option<String>,
-        userinfo_token: Option<String>,
-    ) -> Self {
-        Self {
-            access_token,
-            id_token,
-            userinfo_token,
-        }
-    }
-}
-
 #[pymethods]
 impl Request {
     #[new]
     #[pyo3(signature = (tokens, action, resource, context))]
-    fn new(tokens: Tokens, action: String, resource: ResourceData, context: Py<PyDict>) -> Self {
+    fn new(
+        tokens: Py<PyDict>,
+        action: String,
+        resource: ResourceData,
+        context: Py<PyDict>,
+    ) -> Self {
         Self {
             tokens,
             action,
@@ -101,27 +61,24 @@ impl Request {
     }
 }
 
-impl From<Tokens> for cedarling::Tokens {
-    fn from(tokens: Tokens) -> Self {
-        Self {
-            access_token: tokens.access_token,
-            id_token: tokens.id_token,
-            userinfo_token: tokens.userinfo_token,
-        }
-    }
-}
-
 impl Request {
     pub fn to_cedarling(&self) -> Result<cedarling::Request, PyErr> {
+        let tokens = Python::with_gil(|py| -> Result<HashMap<String, String>, PyErr> {
+            let tokens = self.tokens.clone_ref(py).into_bound(py);
+            from_pyobject(tokens).map_err(|err| {
+                PyRuntimeError::new_err(format!("Failed to convert tokens to json: {}", err))
+            })
+        })?;
+
         let context = Python::with_gil(|py| -> Result<serde_json::Value, PyErr> {
             let context = self.context.clone_ref(py).into_bound(py);
             from_pyobject(context).map_err(|err| {
-                PyRuntimeError::new_err(format!("Failed to convert context: {}", err))
+                PyRuntimeError::new_err(format!("Failed to convert context to json: {}", err))
             })
         })?;
 
         Ok(cedarling::Request {
-            tokens: self.tokens.clone().into(),
+            tokens,
             action: self.action.clone(),
             resource: self.resource.clone().into(),
             context,

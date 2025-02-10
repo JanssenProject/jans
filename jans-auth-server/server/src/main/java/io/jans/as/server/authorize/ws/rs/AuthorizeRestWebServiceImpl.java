@@ -77,6 +77,7 @@ import java.util.function.Function;
 
 import static io.jans.as.server.authorize.ws.rs.AuthzRequestService.canLogWebApplicationException;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.toBoolean;
 
 /**
@@ -173,6 +174,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Inject
     private ExternalResourceOwnerPasswordCredentialsService externalResourceOwnerPasswordCredentialsService;
+
+    @Inject
+    private ExternalConsentGatheringService externalConsentGatheringService;
 
     @Inject
     private DpopService dpopService;
@@ -604,7 +608,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             return;
         }
 
-        if (authzRequest.getPromptList().contains(Prompt.CONSENT) || !isTrue(sessionUser.isPermissionGrantedForClient(authzRequest.getClientId()))) {
+        if (authzRequest.getPromptList().contains(Prompt.CONSENT) || (!isTrue(sessionUser.isPermissionGrantedForClient(authzRequest.getClientId())) || externalConsentGatheringService.isEnabled())) {
+        	if (!authzRequest.getPromptList().contains(Prompt.CONSENT) && isTrue(sessionUser.isPermissionGrantedForClient(authzRequest.getClientId()))) {
+        		return;
+        	}
             if (!clientAuthorizationFetched) {
                 clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), authzRequest.getClient().getClientId());
             }
