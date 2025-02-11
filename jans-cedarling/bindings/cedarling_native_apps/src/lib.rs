@@ -2,6 +2,7 @@
 // See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
 //
 // Copyright (c) 2024, Gluu, Inc.
+#![cfg(not(target_arch = "wasm32"))]
 
 use cedarling::{self as core, BootstrapConfig, BootstrapConfigRaw, LogStorage};
 mod request_wrapper;

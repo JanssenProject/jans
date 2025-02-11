@@ -1,8 +1,15 @@
-# Cedarling Native Apps
+# Cedarling UniFFI binding for Native Apps
 
-This module is designed to build cedarling bindings for iOS and android apps.
+This module is designed to build Cedarling UniFFI bindings for iOS and android apps.
 
 ## iOS
+
+Read [this article](https://medium.com/@arnab.bdutta/janssen-cedarling-uniffi-bindings-for-native-apps-90f36982c894) for details.
+
+### Prerequisites
+
+- Rust: Install it from [the official Rust website](https://www.rust-lang.org/tools/install).
+- Xcode: Available on the Mac App Store.
 
 ### Building 
 

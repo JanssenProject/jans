@@ -6,8 +6,9 @@ edition = "2021"
 [lib]
 crate_type = ["cdylib", "staticlib"]
 name = "mobile"
- 
-[dependencies]
+
+# dependency for NOT wasm target
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 cedarling = { workspace = true, features = ["blocking"]}
 jsonwebtoken = "9.3.0"
 openssl = { version = "0.10.35", features = ["vendored"] }
