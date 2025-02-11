@@ -8859,7 +8859,7 @@ checks if the same authentication is available and active.</p>
 <p>Operations to manage the default authentication method are grouped under the
 <code>DefaultAuthenticationMethod</code> task. To get information about those operations
 use the command below.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --info DefaultAuthenticationMethod
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--info<span class="w"> </span>DefaultAuthenticationMethod
 </code></pre></div>
 <div class="highlight"><span class="filename">Output</span><pre><span></span><code>Operation ID: get-acrs
  Description: Gets default authentication method.
@@ -8871,17 +8871,17 @@ To get sample schema type jans cli --schema &lt;schma&gt;, for example jans cli 
 </code></pre></div></p>
 <h3 id="find-current-authentication-method">Find Current Authentication Method<a class="headerlink" href="#find-current-authentication-method" title="Permanent link">#</a></h3>
 <p>To get the current default authentication method use the command below.
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-acrs
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-acrs
 </code></pre></div>
-<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;defaultAcr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple_password_auth&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;defaultAcr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple_password_auth&quot;</span>
+<span class="p">}</span>
 </code></pre></div></p>
 <h3 id="update-default-authentication-method">Update Default Authentication Method<a class="headerlink" href="#update-default-authentication-method" title="Permanent link">#</a></h3>
 <p>Let's update the <em>Default Authentication Method</em> using the Janssen CLI command line.
 To perform the <em>put-acrs</em> operation, we have to use its schema.
 To get its schema:</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema AuthenticationMethod &gt; /tmp/patch-default-auth.json
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema<span class="w"> </span>AuthenticationMethod<span class="w"> </span>&gt;<span class="w"> </span>/tmp/patch-default-auth.json
 </code></pre></div>
 The schema can now be found in the patch-default-auth.json file.</p>
 <p>For your information, you can obtain the format of the <code>AuthenticationMethod</code>
@@ -8889,32 +8889,32 @@ schema by running the aforementioned command without a file.</p>
 <p><div class="highlight"><span class="filename">Schema Format</span><pre><span></span><code>defaultAcr   string
 </code></pre></div>
 you can also use the following command for <code>AuthenticationMethod</code> schema example.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema-sample AuthenticationMethod
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema-sample<span class="w"> </span>AuthenticationMethod
 </code></pre></div>
-<div class="highlight"><span class="filename">Schema Example</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="nt">&quot;defaultAcr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><span class="filename">Schema Example</span><pre><span></span><code><span class="p">{</span>
+<span class="nt">&quot;defaultAcr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="p">}</span>
 </code></pre></div></p>
 <p>We need to modify the patch-default-auth.json file.
 We have seen that our default authentication method is <code>simple_password_auth</code>.
 We are going to update it with <code>passport_saml</code> authentication method.</p>
-<div class="highlight"><span class="filename">input</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;defaultAcr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;passport_saml&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><span class="filename">input</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;defaultAcr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;passport_saml&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>Now let's trigger the operation using the above file.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id put-acrs --data /tmp/patch-default-auth.json
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>put-acrs<span class="w"> </span>--data<span class="w"> </span>/tmp/patch-default-auth.json
 </code></pre></div>
 <p>It will show the updated result.</p>
-<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;defaultAcr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;passport_saml&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;defaultAcr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;passport_saml&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="using-text-based-ui">Using Text-based UI<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
 <p>In Janssen, You can manage the default authentication method using
 the <a href="../../config-tools/jans-tui/">Text-Based UI</a> also.</p>
 <p>You can start TUI using the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans tui
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>tui
 </code></pre></div>
 <h3 id="find-current-default-authentication-method">Find Current Default Authentication Method<a class="headerlink" href="#find-current-default-authentication-method" title="Permanent link">#</a></h3>
 <p>Navigate to <code>Auth Server</code> -&gt; <code>Authn</code> to open the <code>Authn</code> screen as shown

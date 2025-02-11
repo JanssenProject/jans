@@ -8643,7 +8643,7 @@
 <p>During the Janssen server installation, you can choose any of the supported RDBMS from the list; like mysql, or postgreSQL. In this article, We will connect postgreSQL database locally to explore <code>jansDB</code>. Let's see how we can connect PostgreSQL DB from jans server to your local PC.</p>
 <h3 id="get-postgresql-db-information">Get PostgreSQL DB Information<a class="headerlink" href="#get-postgresql-db-information" title="Permanent link">#</a></h3>
 <p>Let's get the postgreSQL databse information from the Janssen server properties which is located in <code>/opt/jans/jans-setup/setup.properties.last</code>. Run the following command:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>cat /opt/jans/jans-setup/setup.properties.last <span class="p">|</span> grep <span class="s1">&#39;rdbm_&#39;</span>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>cat<span class="w"> </span>/opt/jans/jans-setup/setup.properties.last<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">&#39;rdbm_&#39;</span>
 </code></pre></div>
 <p>It should print details like below:</p>
 <div class="highlight"><span class="filename">Output</span><pre><span></span><code>rdbm_db=jansdb

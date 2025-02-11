@@ -8686,16 +8686,16 @@ Check <a href="../../../script-catalog/person_authentication/passport/passport-s
 <ol>
 <li>Make a token endpoint which expose token with unique id. Jans will use this endpoint to get token and use this token for secur auth request. Passport Project has to validate this token in Jans request. This is just a simple strategy to protect passport endpoint from spam requests and only allow jans to request it. Code sample:</li>
 </ol>
-<div class="highlight"><pre><span></span><code><span class="c1">// Encryption compatible with Jans EncryptionService</span><span class="w"></span>
-<span class="c1">// Salt File path: /etc/jans/conf/salt</span><span class="w"></span>
-<span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/token&#39;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="kd">function</span><span class="w"> </span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">,</span><span class="w"> </span><span class="nx">next</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">jwt</span><span class="p">.</span><span class="nx">sign</span><span class="p">(</span><span class="w"></span>
-<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nx">jwt</span><span class="o">:</span><span class="w"> </span><span class="nx">uuidv4</span><span class="p">()</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="s1">&#39;&lt;saltfilevalue&gt;&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">expiresIn</span><span class="o">:</span><span class="w"> </span><span class="mf">120</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">// 2 min expiration</span><span class="w"></span>
-<span class="w">    </span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="nx">res</span><span class="p">.</span><span class="nx">status</span><span class="p">(</span><span class="mf">200</span><span class="p">).</span><span class="nx">send</span><span class="p">({</span><span class="w"> </span><span class="nx">token_</span><span class="o">:</span><span class="w"> </span><span class="nx">t</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="c1">// key should be token_</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">)</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="c1">// Encryption compatible with Jans EncryptionService</span>
+<span class="c1">// Salt File path: /etc/jans/conf/salt</span>
+<span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/token&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="kd">function</span><span class="w"> </span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">,</span><span class="w"> </span><span class="nx">next</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">jwt</span><span class="p">.</span><span class="nx">sign</span><span class="p">(</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nx">jwt</span><span class="o">:</span><span class="w"> </span><span class="nx">uuidv4</span><span class="p">()</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="s1">&#39;&lt;saltfilevalue&gt;&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">expiresIn</span><span class="o">:</span><span class="w"> </span><span class="mf">120</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">// 2 min expiration</span>
+<span class="w">    </span><span class="p">)</span>
+<span class="w">    </span><span class="nx">res</span><span class="p">.</span><span class="nx">status</span><span class="p">(</span><span class="mf">200</span><span class="p">).</span><span class="nx">send</span><span class="p">({</span><span class="w"> </span><span class="nx">token_</span><span class="o">:</span><span class="w"> </span><span class="nx">t</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="c1">// key should be token_</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">)</span>
 </code></pre></div>
 <p>You need to use Salt File <code>/etc/jans/conf/salt</code> as a secret key. You will get this salt file after Jans intallation. Jans <a href="../../../script-catalog/person_authentication/passport/passport-social-jans-script.py">interception script</a> uses this same file for decryption.</p>
 <ol>
@@ -8706,8 +8706,8 @@ Check <a href="../../../script-catalog/person_authentication/passport/passport-s
 <p>After authentication Passport Project has to send encoded userinfo data to Jans <code>https://&lt;your.jans.server.com&gt;/jans-auth/postlogin.htm</code>. Below is the Node JS code sample to send POST request with data to Jans Post Login Endpoint.</p>
 </li>
 </ol>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">postUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://&lt;your.jans.server.com&gt;/jans-auth/postlogin.htm&quot;</span><span class="w"></span>
-<span class="nx">res</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;content-type&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;text/html;charset=UTF-8&#39;</span><span class="p">)</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">postUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://&lt;your.jans.server.com&gt;/jans-auth/postlogin.htm&quot;</span>
+<span class="nx">res</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;content-type&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;text/html;charset=UTF-8&#39;</span><span class="p">)</span>
 <span class="k">return</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">status</span><span class="p">(</span><span class="mf">200</span><span class="p">).</span><span class="nx">send</span><span class="p">(</span><span class="sb">`</span>
 <span class="sb">  &lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot; xml:lang=&quot;en&quot;&gt;</span>
 <span class="sb">    &lt;body onload=&quot;document.forms[0].submit()&quot;&gt;</span>
@@ -8727,59 +8727,59 @@ Check <a href="../../../script-catalog/person_authentication/passport/passport-s
 <span class="sb">        &lt;/div&gt;</span>
 <span class="sb">      &lt;/form&gt;</span>
 <span class="sb">    &lt;/body&gt;</span>
-<span class="sb">  &lt;/html&gt;`</span><span class="w"></span>
-<span class="p">)</span><span class="w"></span>
+<span class="sb">  &lt;/html&gt;`</span>
+<span class="p">)</span>
 </code></pre></div>
 <p>Check next step to generate <code>jwt</code>.</p>
 <ol>
 <li>To make encoded userinfo data, use jwt private key signing technique. Check below sample code:</li>
 </ol>
-<div class="highlight"><pre><span></span><code><span class="c1">// mapped user info data with MySQL attributes</span><span class="w"></span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nx">uid</span><span class="o">:</span><span class="w"> </span><span class="nx">profile</span><span class="p">.</span><span class="nx">username</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">profile</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nx">mail</span><span class="o">:</span><span class="w"> </span><span class="nx">profile</span><span class="p">.</span><span class="nx">email</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nx">cn</span><span class="o">:</span><span class="w"> </span><span class="nx">profile</span><span class="p">.</span><span class="nx">displayName</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nx">displayName</span><span class="o">:</span><span class="w"> </span><span class="nx">profile</span><span class="p">.</span><span class="nx">displayName</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nx">givenName</span><span class="o">:</span><span class="w"> </span><span class="nx">profile</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">givenName</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nx">sn</span><span class="o">:</span><span class="w"> </span><span class="nx">profile</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">familyName</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nx">provider</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;your-social-provider-name&gt;&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// e.g. google</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="c1">// mapped user info data with MySQL attributes</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">uid</span><span class="o">:</span><span class="w"> </span><span class="nx">profile</span><span class="p">.</span><span class="nx">username</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">profile</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">mail</span><span class="o">:</span><span class="w"> </span><span class="nx">profile</span><span class="p">.</span><span class="nx">email</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">cn</span><span class="o">:</span><span class="w"> </span><span class="nx">profile</span><span class="p">.</span><span class="nx">displayName</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">displayName</span><span class="o">:</span><span class="w"> </span><span class="nx">profile</span><span class="p">.</span><span class="nx">displayName</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">givenName</span><span class="o">:</span><span class="w"> </span><span class="nx">profile</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">givenName</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">sn</span><span class="o">:</span><span class="w"> </span><span class="nx">profile</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">familyName</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">provider</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;your-social-provider-name&gt;&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// e.g. google</span>
+<span class="p">}</span>
 
-<span class="nx">jwt</span><span class="p">.</span><span class="nx">sign</span><span class="p">({</span><span class="w"></span>
-<span class="w">    </span><span class="nx">iss</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;https://&lt;your.jans.server.com&gt;/jans-auth/postlogin.htm&#39;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nx">sub</span><span class="o">:</span><span class="w"> </span><span class="nx">user</span><span class="p">.</span><span class="nx">uid</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nx">aud</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;https://&lt;your.jans.server.com&gt;&#39;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nx">jti</span><span class="o">:</span><span class="w"> </span><span class="nx">uuidv4</span><span class="p">(),</span><span class="w"></span>
-<span class="w">    </span><span class="nx">exp</span><span class="o">:</span><span class="w"> </span><span class="nx">now</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">30</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nx">iat</span><span class="o">:</span><span class="w"> </span><span class="nx">now</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nx">data</span><span class="o">:</span><span class="w"> </span><span class="nx">encrypt</span><span class="p">(</span><span class="nx">user</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"> </span><span class="nx">privateKey</span><span class="p">,</span><span class="w"> </span><span class="nx">defaultRpOptions</span><span class="p">)</span><span class="w"></span>
+<span class="nx">jwt</span><span class="p">.</span><span class="nx">sign</span><span class="p">({</span>
+<span class="w">    </span><span class="nx">iss</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;https://&lt;your.jans.server.com&gt;/jans-auth/postlogin.htm&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">sub</span><span class="o">:</span><span class="w"> </span><span class="nx">user</span><span class="p">.</span><span class="nx">uid</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">aud</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;https://&lt;your.jans.server.com&gt;&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">jti</span><span class="o">:</span><span class="w"> </span><span class="nx">uuidv4</span><span class="p">(),</span>
+<span class="w">    </span><span class="nx">exp</span><span class="o">:</span><span class="w"> </span><span class="nx">now</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">30</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">iat</span><span class="o">:</span><span class="w"> </span><span class="nx">now</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">data</span><span class="o">:</span><span class="w"> </span><span class="nx">encrypt</span><span class="p">(</span><span class="nx">user</span><span class="p">)</span>
+<span class="w">  </span><span class="p">},</span><span class="w"> </span><span class="nx">privateKey</span><span class="p">,</span><span class="w"> </span><span class="nx">defaultRpOptions</span><span class="p">)</span>
 
-<span class="c1">// Check `generate Keystore` section below to generate keys</span><span class="w"></span>
+<span class="c1">// Check `generate Keystore` section below to generate keys</span>
 <span class="kd">const</span><span class="w"> </span><span class="nx">privateKey</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`-----BEGIN PRIVATE KEY-----</span>
 <span class="sb">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span>
 <span class="sb">Your Private Key</span>
 <span class="sb">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span>
-<span class="sb">-----END PRIVATE KEY-----`</span><span class="w"></span>
+<span class="sb">-----END PRIVATE KEY-----`</span>
 
-<span class="nx">cosnt</span><span class="w"> </span><span class="nx">defaultRpOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nx">algorithm</span><span class="o">:</span><span class="w"> </span><span class="nx">config</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;keyAlg&#39;</span><span class="p">),</span><span class="w"></span>
-<span class="w">  </span><span class="nx">header</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nx">typ</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;JWT&#39;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nx">alg</span><span class="o">:</span><span class="w"> </span><span class="nx">config</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;keyAlg&#39;</span><span class="p">),</span><span class="w"></span>
-<span class="w">    </span><span class="nx">kid</span><span class="o">:</span><span class="w"> </span><span class="nx">config</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;keyId&#39;</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="nx">cosnt</span><span class="w"> </span><span class="nx">defaultRpOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">algorithm</span><span class="o">:</span><span class="w"> </span><span class="nx">config</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;keyAlg&#39;</span><span class="p">),</span>
+<span class="w">  </span><span class="nx">header</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">typ</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;JWT&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">alg</span><span class="o">:</span><span class="w"> </span><span class="nx">config</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;keyAlg&#39;</span><span class="p">),</span>
+<span class="w">    </span><span class="nx">kid</span><span class="o">:</span><span class="w"> </span><span class="nx">config</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;keyId&#39;</span><span class="p">)</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
 
-<span class="kd">function</span><span class="w"> </span><span class="nx">encrypt</span><span class="w"> </span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="c1">// Encryption compatible with Jans EncryptionService</span><span class="w"></span>
-<span class="w">  </span><span class="c1">// Salt File path: /etc/jans/conf/salt</span><span class="w"></span>
-<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">pt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">encrypt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">crypto</span><span class="p">.</span><span class="nx">createCipheriv</span><span class="p">(</span><span class="s1">&#39;des-ede3-ecb&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&lt;saltfilevalue&gt;&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="nx">encrypted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">encrypt</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">pt</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;utf8&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;base64&#39;</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="nx">encrypted</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">encrypt</span><span class="p">.</span><span class="kr">final</span><span class="p">(</span><span class="s1">&#39;base64&#39;</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">encrypted</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="kd">function</span><span class="w"> </span><span class="nx">encrypt</span><span class="w"> </span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Encryption compatible with Jans EncryptionService</span>
+<span class="w">  </span><span class="c1">// Salt File path: /etc/jans/conf/salt</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">pt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">encrypt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">crypto</span><span class="p">.</span><span class="nx">createCipheriv</span><span class="p">(</span><span class="s1">&#39;des-ede3-ecb&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&lt;saltfilevalue&gt;&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="nx">encrypted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">encrypt</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">pt</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;utf8&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;base64&#39;</span><span class="p">)</span>
+<span class="w">  </span><span class="nx">encrypted</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">encrypt</span><span class="p">.</span><span class="kr">final</span><span class="p">(</span><span class="s1">&#39;base64&#39;</span><span class="p">)</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">encrypted</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>Follow Steps in <a href="#generate-keystore">Generate Keystore section</a> to generate private key.</p>
 <ol>

@@ -8986,7 +8986,7 @@ Resource bundle names to support other languages should be placed under the same
 </li>
 <li>
 <p>Run helm install or helm upgrade if Jans has been already installed.
-    <div class="highlight"><pre><span></span><code>helm upgrade &lt;helm-release-name&gt; janssen/janssen -n &lt;namespace&gt; -f values.yaml --version<span class="o">=</span><span class="m">1</span>.0.x
+    <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>&lt;helm-release-name&gt;<span class="w"> </span>janssen/janssen<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>-f<span class="w"> </span>values.yaml<span class="w"> </span>--version<span class="o">=</span><span class="m">1</span>.0.x
 </code></pre></div></p>
 </li>
 </ol>
@@ -8997,7 +8997,7 @@ Resource bundle names to support other languages should be placed under the same
 <p><div class="highlight"><pre><span></span><code><span class="ch">#!/bin/sh</span>
 <span class="c1"># This script will pull the custom jar file from a remote location</span>
 <span class="c1"># and place it in the correct location for the Jans Auth server to use it</span>
-wget -O /opt/jans/jetty/jans-auth/custom/libs/mycustom.jar https://mydomain.com/mycustom.jar
+wget<span class="w"> </span>-O<span class="w"> </span>/opt/jans/jetty/jans-auth/custom/libs/mycustom.jar<span class="w"> </span>https://mydomain.com/mycustom.jar
 </code></pre></div>
 <code>kubectl -n &lt;namespace&gt; create cm my-custom-jar --from-file=mycustomjar.sh</code></p>
 </li>
@@ -9019,7 +9019,7 @@ wget -O /opt/jans/jetty/jans-auth/custom/libs/mycustom.jar https://mydomain.com/
 </li>
 <li>
 <p>Run helm install or helm upgrade if Jans has been already installed.
-    <div class="highlight"><pre><span></span><code>helm upgrade &lt;helm-release-name&gt; janssen/janssen -n &lt;namespace&gt; -f values.yaml --version<span class="o">=</span><span class="m">1</span>.0.x
+    <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>&lt;helm-release-name&gt;<span class="w"> </span>janssen/janssen<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>-f<span class="w"> </span>values.yaml<span class="w"> </span>--version<span class="o">=</span><span class="m">1</span>.0.x
 </code></pre></div></p>
 </li>
 </ol>
@@ -9032,7 +9032,7 @@ wget -O /opt/jans/jetty/jans-auth/custom/libs/mycustom.jar https://mydomain.com/
 <ol>
 <li>
 <p>Locate the directory that contains exploded auth-server WAR</p>
-<div class="highlight"><pre><span></span><code>kubectl <span class="nb">exec</span> -n &lt;namespace&gt; &lt;auth-server-pod-name&gt; -- ls /opt/jetty/temp
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>&lt;auth-server-pod-name&gt;<span class="w"> </span>--<span class="w"> </span>ls<span class="w"> </span>/opt/jetty/temp
 </code></pre></div>
 <p>Output example:</p>
 <div class="highlight"><pre><span></span><code>jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753
@@ -9040,7 +9040,7 @@ wget -O /opt/jans/jetty/jans-auth/custom/libs/mycustom.jar https://mydomain.com/
 </li>
 <li>
 <p>Get the <code>login.xhtml</code> from the auth-server pod:</p>
-<div class="highlight"><pre><span></span><code>kubectl -n jans cp &lt;auth-server-pod-name&gt;:opt/jetty/temp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/login.xhtml login.xhtml
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>jans<span class="w"> </span>cp<span class="w"> </span>&lt;auth-server-pod-name&gt;:opt/jetty/temp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/login.xhtml<span class="w"> </span>login.xhtml
 </code></pre></div>
 <p>Modify the file locally:</p>
 <div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">h:form</span>
@@ -9055,7 +9055,7 @@ wget -O /opt/jans/jetty/jans-auth/custom/libs/mycustom.jar https://mydomain.com/
 </li>
 <li>
 <p>Get the <code>login-template.xhtml</code> from the auth-server pod:
-    <div class="highlight"><pre><span></span><code>kubectl -n jans cp &lt;auth-server-pod-name&gt;:opt/jetty/temp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/WEB-INF/incl/layout/login-template.xhtml login-template.xhtml
+    <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>jans<span class="w"> </span>cp<span class="w"> </span>&lt;auth-server-pod-name&gt;:opt/jetty/temp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/WEB-INF/incl/layout/login-template.xhtml<span class="w"> </span>login-template.xhtml
 </code></pre></div>
     Modify the file locally:</p>
 <div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">h:head</span><span class="p">&gt;</span>
@@ -9068,50 +9068,50 @@ wget -O /opt/jans/jetty/jans-auth/custom/libs/mycustom.jar https://mydomain.com/
 </li>
 <li>
 <p>Copy the following text and save it as <code>custom.css</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="p">#</span><span class="nn">creds-title</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="k">font-style</span><span class="p">:</span><span class="w"> </span><span class="kc">italic</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="kc">bolder</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">white</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="kt">em</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="p">#</span><span class="nn">creds-title</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">font-style</span><span class="p">:</span><span class="w"> </span><span class="kc">italic</span><span class="p">;</span>
+<span class="w">    </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="kc">bolder</span><span class="p">;</span>
+<span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">white</span><span class="p">;</span>
+<span class="w">    </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="kt">em</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 </code></pre></div>
 </li>
 <li>
 <p>Create <code>configmaps</code> to store the content of <code>login.xhtml</code>, <code>login-template.xhtml</code> and <code>custom.css</code>.</p>
-<div class="highlight"><pre><span></span><code>kubectl -n &lt;namespace&gt; create cm auth-server-custom-html --from-file<span class="o">=</span>login.xhtml
-kubectl -n &lt;namespace&gt; create cm auth-server-custom-layout-html --from-file<span class="o">=</span>login-template.xhtml
-kubectl -n &lt;namespace&gt; create cm auth-server-custom-css --from-file<span class="o">=</span>custom.css
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>create<span class="w"> </span>cm<span class="w"> </span>auth-server-custom-html<span class="w"> </span>--from-file<span class="o">=</span>login.xhtml
+kubectl<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>create<span class="w"> </span>cm<span class="w"> </span>auth-server-custom-layout-html<span class="w"> </span>--from-file<span class="o">=</span>login-template.xhtml
+kubectl<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>create<span class="w"> </span>cm<span class="w"> </span>auth-server-custom-css<span class="w"> </span>--from-file<span class="o">=</span>custom.css
 </code></pre></div>
 </li>
 <li>
 <p>Mount the <code>configmaps</code> in your <code>values.yaml</code> under <code>auth-server.volumes</code> and <code>auth-server.volumeMounts</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">auth-server</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-server-pages-volume</span><span class="w"></span>
-<span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/opt/jans/jetty/jans-auth/custom/pages</span><span class="w"> </span><span class="c1"># login.xthml will be mounted under this directory</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-server-layout-volume</span><span class="w"></span>
-<span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/opt/jans/jetty/jans-auth/custom/pages/WEB-INF/incl/layout</span><span class="w"> </span><span class="c1"># login-template.xthml will be mounted under this directory</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-server-static-volume</span><span class="w"></span>
-<span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/tmp/static</span><span class="w"> </span><span class="c1">#custom.css will be mounted in the temporary location</span><span class="w"></span>
-<span class="w">  </span><span class="nt">lifecycle</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">postStart</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">exec</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="w"> </span><span class="s">&quot;sh&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;-c&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;mkdir</span><span class="nv"> </span><span class="s">/opt/jans/jetty/jans-auth/custom/static/stylesheet/</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">cp</span><span class="nv"> </span><span class="s">/tmp/static/custom.css</span><span class="nv"> </span><span class="s">/opt/jans/jetty/jans-auth/custom/static/stylesheet/&quot;</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># custom.css will be copied from the temporary to the desired location</span><span class="w"></span>
-<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-server-pages-volume</span><span class="w"></span>
-<span class="w">      </span><span class="nt">configMap</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-server-custom-html</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-server-layout-volume</span><span class="w"></span>
-<span class="w">      </span><span class="nt">configMap</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-server-custom-layout-html</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-server-static-volume</span><span class="w"></span>
-<span class="w">      </span><span class="nt">configMap</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-server-custom-css</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">auth-server</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-server-pages-volume</span>
+<span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/opt/jans/jetty/jans-auth/custom/pages</span><span class="w"> </span><span class="c1"># login.xthml will be mounted under this directory</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-server-layout-volume</span>
+<span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/opt/jans/jetty/jans-auth/custom/pages/WEB-INF/incl/layout</span><span class="w"> </span><span class="c1"># login-template.xthml will be mounted under this directory</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-server-static-volume</span>
+<span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/tmp/static</span><span class="w"> </span><span class="c1">#custom.css will be mounted in the temporary location</span>
+<span class="w">  </span><span class="nt">lifecycle</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">postStart</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">exec</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="w"> </span><span class="s">&quot;sh&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;-c&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;mkdir</span><span class="nv"> </span><span class="s">/opt/jans/jetty/jans-auth/custom/static/stylesheet/</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">cp</span><span class="nv"> </span><span class="s">/tmp/static/custom.css</span><span class="nv"> </span><span class="s">/opt/jans/jetty/jans-auth/custom/static/stylesheet/&quot;</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># custom.css will be copied from the temporary to the desired location</span>
+<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-server-pages-volume</span>
+<span class="w">      </span><span class="nt">configMap</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-server-custom-html</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-server-layout-volume</span>
+<span class="w">      </span><span class="nt">configMap</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-server-custom-layout-html</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-server-static-volume</span>
+<span class="w">      </span><span class="nt">configMap</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-server-custom-css</span>
 </code></pre></div>
 </li>
 <li>
 <p>Run helm install or helm upgrade if Jans has been already installed.</p>
-<div class="highlight"><pre><span></span><code>helm upgrade &lt;helm-release-name&gt; janssen/janssen -n &lt;namespace&gt; -f values.yaml --version<span class="o">=</span><span class="m">1</span>.0.x
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>&lt;helm-release-name&gt;<span class="w"> </span>janssen/janssen<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>-f<span class="w"> </span>values.yaml<span class="w"> </span>--version<span class="o">=</span><span class="m">1</span>.0.x
 </code></pre></div>
 </li>
 </ol>
@@ -9125,7 +9125,7 @@ kubectl -n &lt;namespace&gt; create cm auth-server-custom-css --from-file<span c
 <ol>
 <li>
 <p>Locate the directory that contains exploded auth-server WAR</p>
-<div class="highlight"><pre><span></span><code>kubectl <span class="nb">exec</span> -n &lt;namespace&gt; &lt;auth-server-pod-name&gt; -- ls /opt/jetty/temp
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>&lt;auth-server-pod-name&gt;<span class="w"> </span>--<span class="w"> </span>ls<span class="w"> </span>/opt/jetty/temp
 </code></pre></div>
 <p>Output example:</p>
 <div class="highlight"><pre><span></span><code>jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753
@@ -9133,7 +9133,7 @@ kubectl -n &lt;namespace&gt; create cm auth-server-custom-css --from-file<span c
 </li>
 <li>
 <p>Get the <code>device_authorization.xhtml</code> from the auth-server pod:</p>
-<div class="highlight"><pre><span></span><code>kubectl -n jans cp &lt;auth-server-pod-name&gt;:opt/jetty/temp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/device_authorization.xhtml device_authorization.xhtml
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>jans<span class="w"> </span>cp<span class="w"> </span>&lt;auth-server-pod-name&gt;:opt/jetty/temp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/device_authorization.xhtml<span class="w"> </span>device_authorization.xhtml
 </code></pre></div>
 <p>Modify the file locally:</p>
 <div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;device-authz-button&quot;</span><span class="p">&gt;</span>
@@ -9151,24 +9151,24 @@ kubectl -n &lt;namespace&gt; create cm auth-server-custom-css --from-file<span c
 </li>
 <li>
 <p>Create a configmap to store the content of <code>device_authorization.xhtml</code>.</p>
-<div class="highlight"><pre><span></span><code>kubectl -n &lt;namespace&gt; create cm device-code-custom-html --from-file<span class="o">=</span>device_authorization.xhtml
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>create<span class="w"> </span>cm<span class="w"> </span>device-code-custom-html<span class="w"> </span>--from-file<span class="o">=</span>device_authorization.xhtml
 </code></pre></div>
 </li>
 <li>
 <p>Mount the <code>configmap</code> in your <code>values.yaml</code> under <code>auth-server.volumes</code> and <code>auth-server.volumeMounts</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">auth-server</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device-code-pages-volume</span><span class="w"></span>
-<span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/opt/jans/jetty/jans-auth/custom/pages</span><span class="w"> </span><span class="c1"># device_authorization.xthml will be mounted under this directory</span><span class="w"></span>
-<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device-code-pages-volume</span><span class="w"></span>
-<span class="w">      </span><span class="nt">configMap</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device-code-custom-html</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">auth-server</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device-code-pages-volume</span>
+<span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/opt/jans/jetty/jans-auth/custom/pages</span><span class="w"> </span><span class="c1"># device_authorization.xthml will be mounted under this directory</span>
+<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device-code-pages-volume</span>
+<span class="w">      </span><span class="nt">configMap</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device-code-custom-html</span>
 </code></pre></div>
 </li>
 <li>
 <p>Run helm install or helm upgrade if Jans has been already installed.</p>
-<div class="highlight"><pre><span></span><code>helm upgrade &lt;helm-release-name&gt; janssen/janssen -n &lt;namespace&gt; -f values.yaml --version<span class="o">=</span><span class="m">1</span>.0.x
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>&lt;helm-release-name&gt;<span class="w"> </span>janssen/janssen<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>-f<span class="w"> </span>values.yaml<span class="w"> </span>--version<span class="o">=</span><span class="m">1</span>.0.x
 </code></pre></div>
 </li>
 </ol>
@@ -9182,7 +9182,7 @@ kubectl -n &lt;namespace&gt; create cm auth-server-custom-css --from-file<span c
 <ol>
 <li>
 <p>Locate the directory that contains exploded auth-server WAR</p>
-<div class="highlight"><pre><span></span><code>kubectl <span class="nb">exec</span> -n &lt;namespace&gt; &lt;auth-server-pod-name&gt; -- ls /opt/jetty/temp
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>&lt;auth-server-pod-name&gt;<span class="w"> </span>--<span class="w"> </span>ls<span class="w"> </span>/opt/jetty/temp
 </code></pre></div>
 <p>Output example:</p>
 <div class="highlight"><pre><span></span><code>jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753
@@ -9190,7 +9190,7 @@ kubectl -n &lt;namespace&gt; create cm auth-server-custom-css --from-file<span c
 </li>
 <li>
 <p>Get the <code>error.xhtml</code> from the auth-server pod:</p>
-<div class="highlight"><pre><span></span><code>kubectl -n jans cp &lt;auth-server-pod-name&gt;:opt/jetty/temp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/error.xhtml error.xhtml
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>jans<span class="w"> </span>cp<span class="w"> </span>&lt;auth-server-pod-name&gt;:opt/jetty/temp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/error.xhtml<span class="w"> </span>error.xhtml
 </code></pre></div>
 <p>Modify the file locally:</p>
 <div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;section&quot;</span><span class="p">&gt;</span>
@@ -9204,24 +9204,24 @@ kubectl -n &lt;namespace&gt; create cm auth-server-custom-css --from-file<span c
 </li>
 <li>
 <p>Create a configmap to store the content of <code>error.xhtml</code>.</p>
-<div class="highlight"><pre><span></span><code>kubectl -n &lt;namespace&gt; create cm error-custom-html --from-file<span class="o">=</span>error.xhtml
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>create<span class="w"> </span>cm<span class="w"> </span>error-custom-html<span class="w"> </span>--from-file<span class="o">=</span>error.xhtml
 </code></pre></div>
 </li>
 <li>
 <p>Mount the <code>configmap</code> in your <code>values.yaml</code> under <code>auth-server.volumes</code> and <code>auth-server.volumeMounts</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">auth-server</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">error-pages-volume</span><span class="w"></span>
-<span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/opt/jans/jetty/jans-auth/custom/pages</span><span class="w"> </span><span class="c1"># error.xthml will be mounted under this directory</span><span class="w"></span>
-<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">error-pages-volume</span><span class="w"></span>
-<span class="w">      </span><span class="nt">configMap</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">error-custom-html</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">auth-server</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">error-pages-volume</span>
+<span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/opt/jans/jetty/jans-auth/custom/pages</span><span class="w"> </span><span class="c1"># error.xthml will be mounted under this directory</span>
+<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">error-pages-volume</span>
+<span class="w">      </span><span class="nt">configMap</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">error-custom-html</span>
 </code></pre></div>
 </li>
 <li>
 <p>Run helm install or helm upgrade if Jans has been already installed.</p>
-<div class="highlight"><pre><span></span><code>helm upgrade &lt;helm-release-name&gt; janssen/janssen -n &lt;namespace&gt; -f values.yaml --version<span class="o">=</span><span class="m">1</span>.0.x
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>&lt;helm-release-name&gt;<span class="w"> </span>janssen/janssen<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>-f<span class="w"> </span>values.yaml<span class="w"> </span>--version<span class="o">=</span><span class="m">1</span>.0.x
 </code></pre></div>
 </li>
 </ol>

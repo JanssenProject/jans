@@ -8782,7 +8782,7 @@ Please press &lt;&lt;Enter&gt;&gt; when ready
 <h2 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">#</a></h2>
 <p>CLI <code>--help</code> switch prints all options available from CLI to configure Janssen
 Server. Run command below</p>
-<p><div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --help
+<p><div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--help
 </code></pre></div>
 To see all options as below:
 <div class="highlight"><pre><span></span><code>usage: config-cli.py [-h] [--host HOST] [--client-id CLIENT_ID] [--client-secret CLIENT_SECRET] [--access-token ACCESS_TOKEN] [--plugins PLUGINS] [-debug] [--debug-log-file DEBUG_LOG_FILE]
@@ -8851,7 +8851,7 @@ depicts this structure.</p>
 <p>CLI offer three operation modes, JCA, SCIM and AUTH. JCA is the default mode.
 To use SCIM and AUTH modes, the CLI command specifies <code>-scim</code> or <code>-auth</code> 
 switches. Use <code>-h</code> switch to get help on each mode.</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim -h
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>-scim<span class="w"> </span>-h
 </code></pre></div>
 <p>The modes usually have different task(and hence operations).</p>
 <h3 id="tasks">Tasks<a class="headerlink" href="#tasks" title="Permanent link">#</a></h3>
@@ -8862,50 +8862,50 @@ all the operation-ids related to attribute management are grouped under
 <code>attribute</code> task. As mentioned, tasks are logical groupings, they don't perform
 any operation on the server. Tasks can only be used with <code>--info</code> switch.</p>
 <p>Execute following command to see what all tasks are offered by jans-cli:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --help
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--help
 </code></pre></div>
 <p>Options listed for <code>--info</code> switch are tasks groups available. For example:</p>
-<div class="highlight"><pre><span></span><code>usage: config-cli.py <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--host HOST<span class="o">]</span> <span class="o">[</span>--client-id CLIENT_ID<span class="o">]</span> <span class="o">[</span>--client-secret CLIENT_SECRET<span class="o">]</span> <span class="o">[</span>--access-token ACCESS_TOKEN<span class="o">]</span> <span class="o">[</span>--plugins PLUGINS<span class="o">]</span> <span class="o">[</span>-debug<span class="o">]</span> <span class="o">[</span>--debug-log-file DEBUG_LOG_FILE<span class="o">]</span>
-                     <span class="o">[</span>--operation-id OPERATION_ID<span class="o">]</span> <span class="o">[</span>--url-suffix URL_SUFFIX<span class="o">]</span>
-                     <span class="o">[</span>--info <span class="o">{</span>AdminUiConfiguration,AdminUiLicense,AdminUiPermission,AdminUiRole,AdminUiRolePermissionsMapping,AdminUiWebhooks,Agama,AgamaConfiguration,Attribute,AuthServerHealthCheck,AuthSessionManagement,CacheConfiguration,CacheConfigurationInMemory,CacheConfigurationMemcached,CacheConfigurationNativePersistence,CacheConfigurationRedis,ClientAuthorization,ConfigurationConfigApi,ConfigurationJwkJsonWebKeyJwk,ConfigurationLogging,ConfigurationProperties,ConfigurationSmtp,ConfigurationUserManagement,CustomScripts,DatabaseLdapConfiguration,DefaultAuthenticationMethod,Fido2Configuration,Fido2Registration,HealthCheck,JansAssets,JansLinkConfiguration,KcLinkConfiguration,LockAudit,LockConfiguration,LockLog,MessageConfiguration,MessageConfigurationPostgres,MessageConfigurationRedis,OauthOpenidConnectClients,OauthScopes,OauthUmaResources,OrganizationConfiguration,Plugins,SamlConfiguration,SamlIdentityBroker,SamlTrustRelationship,ScimConfigManagement,StatisticsUser,Token<span class="o">}]</span>
-                     <span class="o">[</span>--op-mode <span class="o">{</span>get,post,put,patch,delete<span class="o">}]</span> <span class="o">[</span>--endpoint-args ENDPOINT_ARGS<span class="o">]</span> <span class="o">[</span>--schema-sample SCHEMA_SAMPLE<span class="o">]</span> <span class="o">[</span>--schema SCHEMA<span class="o">]</span> <span class="o">[</span>-CC CONFIG_API_MTLS_CLIENT_CERT<span class="o">]</span>
-                     <span class="o">[</span>-CK CONFIG_API_MTLS_CLIENT_KEY<span class="o">]</span> <span class="o">[</span>--key-password KEY_PASSWORD<span class="o">]</span> <span class="o">[</span>-noverify<span class="o">]</span> <span class="o">[</span>-use-test-client<span class="o">]</span> <span class="o">[</span>--patch-add PATCH_ADD<span class="o">]</span> <span class="o">[</span>--patch-replace PATCH_REPLACE<span class="o">]</span> <span class="o">[</span>--patch-remove PATCH_REMOVE<span class="o">]</span>
-                     <span class="o">[</span>-no-color<span class="o">]</span> <span class="o">[</span>--log-dir LOG_DIR<span class="o">]</span> <span class="o">[</span>--tmp-dir TMP_DIR<span class="o">]</span> <span class="o">[</span>-revoke-session<span class="o">]</span> <span class="o">[</span>-scim<span class="o">]</span> <span class="o">[</span>-auth<span class="o">]</span> <span class="o">[</span>--data DATA<span class="o">]</span> <span class="o">[</span>--output-access-token<span class="o">]</span>
+<div class="highlight"><pre><span></span><code>usage:<span class="w"> </span>config-cli.py<span class="w"> </span><span class="o">[</span>-h<span class="o">]</span><span class="w"> </span><span class="o">[</span>--host<span class="w"> </span>HOST<span class="o">]</span><span class="w"> </span><span class="o">[</span>--client-id<span class="w"> </span>CLIENT_ID<span class="o">]</span><span class="w"> </span><span class="o">[</span>--client-secret<span class="w"> </span>CLIENT_SECRET<span class="o">]</span><span class="w"> </span><span class="o">[</span>--access-token<span class="w"> </span>ACCESS_TOKEN<span class="o">]</span><span class="w"> </span><span class="o">[</span>--plugins<span class="w"> </span>PLUGINS<span class="o">]</span><span class="w"> </span><span class="o">[</span>-debug<span class="o">]</span><span class="w"> </span><span class="o">[</span>--debug-log-file<span class="w"> </span>DEBUG_LOG_FILE<span class="o">]</span>
+<span class="w">                     </span><span class="o">[</span>--operation-id<span class="w"> </span>OPERATION_ID<span class="o">]</span><span class="w"> </span><span class="o">[</span>--url-suffix<span class="w"> </span>URL_SUFFIX<span class="o">]</span>
+<span class="w">                     </span><span class="o">[</span>--info<span class="w"> </span><span class="o">{</span>AdminUiConfiguration,AdminUiLicense,AdminUiPermission,AdminUiRole,AdminUiRolePermissionsMapping,AdminUiWebhooks,Agama,AgamaConfiguration,Attribute,AuthServerHealthCheck,AuthSessionManagement,CacheConfiguration,CacheConfigurationInMemory,CacheConfigurationMemcached,CacheConfigurationNativePersistence,CacheConfigurationRedis,ClientAuthorization,ConfigurationConfigApi,ConfigurationJwkJsonWebKeyJwk,ConfigurationLogging,ConfigurationProperties,ConfigurationSmtp,ConfigurationUserManagement,CustomScripts,DatabaseLdapConfiguration,DefaultAuthenticationMethod,Fido2Configuration,Fido2Registration,HealthCheck,JansAssets,JansLinkConfiguration,KcLinkConfiguration,LockAudit,LockConfiguration,LockLog,MessageConfiguration,MessageConfigurationPostgres,MessageConfigurationRedis,OauthOpenidConnectClients,OauthScopes,OauthUmaResources,OrganizationConfiguration,Plugins,SamlConfiguration,SamlIdentityBroker,SamlTrustRelationship,ScimConfigManagement,StatisticsUser,Token<span class="o">}]</span>
+<span class="w">                     </span><span class="o">[</span>--op-mode<span class="w"> </span><span class="o">{</span>get,post,put,patch,delete<span class="o">}]</span><span class="w"> </span><span class="o">[</span>--endpoint-args<span class="w"> </span>ENDPOINT_ARGS<span class="o">]</span><span class="w"> </span><span class="o">[</span>--schema-sample<span class="w"> </span>SCHEMA_SAMPLE<span class="o">]</span><span class="w"> </span><span class="o">[</span>--schema<span class="w"> </span>SCHEMA<span class="o">]</span><span class="w"> </span><span class="o">[</span>-CC<span class="w"> </span>CONFIG_API_MTLS_CLIENT_CERT<span class="o">]</span>
+<span class="w">                     </span><span class="o">[</span>-CK<span class="w"> </span>CONFIG_API_MTLS_CLIENT_KEY<span class="o">]</span><span class="w"> </span><span class="o">[</span>--key-password<span class="w"> </span>KEY_PASSWORD<span class="o">]</span><span class="w"> </span><span class="o">[</span>-noverify<span class="o">]</span><span class="w"> </span><span class="o">[</span>-use-test-client<span class="o">]</span><span class="w"> </span><span class="o">[</span>--patch-add<span class="w"> </span>PATCH_ADD<span class="o">]</span><span class="w"> </span><span class="o">[</span>--patch-replace<span class="w"> </span>PATCH_REPLACE<span class="o">]</span><span class="w"> </span><span class="o">[</span>--patch-remove<span class="w"> </span>PATCH_REMOVE<span class="o">]</span>
+<span class="w">                     </span><span class="o">[</span>-no-color<span class="o">]</span><span class="w"> </span><span class="o">[</span>--log-dir<span class="w"> </span>LOG_DIR<span class="o">]</span><span class="w"> </span><span class="o">[</span>--tmp-dir<span class="w"> </span>TMP_DIR<span class="o">]</span><span class="w"> </span><span class="o">[</span>-revoke-session<span class="o">]</span><span class="w"> </span><span class="o">[</span>-scim<span class="o">]</span><span class="w"> </span><span class="o">[</span>-auth<span class="o">]</span><span class="w"> </span><span class="o">[</span>--data<span class="w"> </span>DATA<span class="o">]</span><span class="w"> </span><span class="o">[</span>--output-access-token<span class="o">]</span>
 </code></pre></div>
 <p>To see operation-id available under a task, execute the command below with
 the task name as an argument:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info Attribute
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--info<span class="w"> </span>Attribute
 </code></pre></div>
 <p>Above will list all the operations under <code>Attribute</code> group.</p>
-<div class="highlight"><pre><span></span><code>Operation ID: get-attributes
-  Description: Gets a list of Jans attributes.
-  Parameters:
-  limit: Search size - max size of the results to <span class="k">return</span> <span class="o">[</span>integer<span class="o">]</span>
-  pattern: Search pattern <span class="o">[</span>string<span class="o">]</span>
-  status: Status of the attribute <span class="o">[</span>string<span class="o">]</span>
-  startIndex: The <span class="m">1</span>-based index of the first query result <span class="o">[</span>integer<span class="o">]</span>
-  sortBy: Attribute whose value will be used to order the returned response <span class="o">[</span>string<span class="o">]</span>
-  sortOrder: Order <span class="k">in</span> which the sortBy param is applied. Allowed values are <span class="s2">&quot;ascending&quot;</span> and <span class="s2">&quot;descending&quot;</span> <span class="o">[</span>string<span class="o">]</span>
-  fieldValuePair: Field and value pair <span class="k">for</span> seraching <span class="o">[</span>string<span class="o">]</span>
-Operation ID: put-attributes
-  Description: Updates an existing attribute
-  Schema: JansAttribute
-Operation ID: post-attributes
-  Description: Adds a new attribute
-  Schema: JansAttribute
-Operation ID: get-attributes-by-inum
-  Description: Gets an attribute based on inum
-  Parameters:
-  inum: Attribute Id <span class="o">[</span>string<span class="o">]</span>
-Operation ID: delete-attributes-by-inum
-  Description: Deletes an attribute based on inum
-  Parameters:
-  inum: Attribute Id <span class="o">[</span>string<span class="o">]</span>
-Operation ID: patch-attributes-by-inum
-  Description: Partially modify a JansAttribute
-  Parameters:
-  inum: Attribute Id <span class="o">[</span>string<span class="o">]</span>
-  Schema: Array of PatchRequest
+<div class="highlight"><pre><span></span><code>Operation<span class="w"> </span>ID:<span class="w"> </span>get-attributes
+<span class="w">  </span>Description:<span class="w"> </span>Gets<span class="w"> </span>a<span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>Jans<span class="w"> </span>attributes.
+<span class="w">  </span>Parameters:
+<span class="w">  </span>limit:<span class="w"> </span>Search<span class="w"> </span>size<span class="w"> </span>-<span class="w"> </span>max<span class="w"> </span>size<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">[</span>integer<span class="o">]</span>
+<span class="w">  </span>pattern:<span class="w"> </span>Search<span class="w"> </span>pattern<span class="w"> </span><span class="o">[</span>string<span class="o">]</span>
+<span class="w">  </span>status:<span class="w"> </span>Status<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>attribute<span class="w"> </span><span class="o">[</span>string<span class="o">]</span>
+<span class="w">  </span>startIndex:<span class="w"> </span>The<span class="w"> </span><span class="m">1</span>-based<span class="w"> </span>index<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>first<span class="w"> </span>query<span class="w"> </span>result<span class="w"> </span><span class="o">[</span>integer<span class="o">]</span>
+<span class="w">  </span>sortBy:<span class="w"> </span>Attribute<span class="w"> </span>whose<span class="w"> </span>value<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>used<span class="w"> </span>to<span class="w"> </span>order<span class="w"> </span>the<span class="w"> </span>returned<span class="w"> </span>response<span class="w"> </span><span class="o">[</span>string<span class="o">]</span>
+<span class="w">  </span>sortOrder:<span class="w"> </span>Order<span class="w"> </span><span class="k">in</span><span class="w"> </span>which<span class="w"> </span>the<span class="w"> </span>sortBy<span class="w"> </span>param<span class="w"> </span>is<span class="w"> </span>applied.<span class="w"> </span>Allowed<span class="w"> </span>values<span class="w"> </span>are<span class="w"> </span><span class="s2">&quot;ascending&quot;</span><span class="w"> </span>and<span class="w"> </span><span class="s2">&quot;descending&quot;</span><span class="w"> </span><span class="o">[</span>string<span class="o">]</span>
+<span class="w">  </span>fieldValuePair:<span class="w"> </span>Field<span class="w"> </span>and<span class="w"> </span>value<span class="w"> </span>pair<span class="w"> </span><span class="k">for</span><span class="w"> </span>seraching<span class="w"> </span><span class="o">[</span>string<span class="o">]</span>
+Operation<span class="w"> </span>ID:<span class="w"> </span>put-attributes
+<span class="w">  </span>Description:<span class="w"> </span>Updates<span class="w"> </span>an<span class="w"> </span>existing<span class="w"> </span>attribute
+<span class="w">  </span>Schema:<span class="w"> </span>JansAttribute
+Operation<span class="w"> </span>ID:<span class="w"> </span>post-attributes
+<span class="w">  </span>Description:<span class="w"> </span>Adds<span class="w"> </span>a<span class="w"> </span>new<span class="w"> </span>attribute
+<span class="w">  </span>Schema:<span class="w"> </span>JansAttribute
+Operation<span class="w"> </span>ID:<span class="w"> </span>get-attributes-by-inum
+<span class="w">  </span>Description:<span class="w"> </span>Gets<span class="w"> </span>an<span class="w"> </span>attribute<span class="w"> </span>based<span class="w"> </span>on<span class="w"> </span>inum
+<span class="w">  </span>Parameters:
+<span class="w">  </span>inum:<span class="w"> </span>Attribute<span class="w"> </span>Id<span class="w"> </span><span class="o">[</span>string<span class="o">]</span>
+Operation<span class="w"> </span>ID:<span class="w"> </span>delete-attributes-by-inum
+<span class="w">  </span>Description:<span class="w"> </span>Deletes<span class="w"> </span>an<span class="w"> </span>attribute<span class="w"> </span>based<span class="w"> </span>on<span class="w"> </span>inum
+<span class="w">  </span>Parameters:
+<span class="w">  </span>inum:<span class="w"> </span>Attribute<span class="w"> </span>Id<span class="w"> </span><span class="o">[</span>string<span class="o">]</span>
+Operation<span class="w"> </span>ID:<span class="w"> </span>patch-attributes-by-inum
+<span class="w">  </span>Description:<span class="w"> </span>Partially<span class="w"> </span>modify<span class="w"> </span>a<span class="w"> </span>JansAttribute
+<span class="w">  </span>Parameters:
+<span class="w">  </span>inum:<span class="w"> </span>Attribute<span class="w"> </span>Id<span class="w"> </span><span class="o">[</span>string<span class="o">]</span>
+<span class="w">  </span>Schema:<span class="w"> </span>Array<span class="w"> </span>of<span class="w"> </span>PatchRequest
 </code></pre></div>
 <h3 id="operation-ids">Operation-ids<a class="headerlink" href="#operation-ids" title="Permanent link">#</a></h3>
 <p>jans-cli's unit of work, or a command, is known as <code>operation-id</code>. Each
@@ -8914,7 +8914,7 @@ For example: <code>get-attributes</code> is an operation that <code>Gets a list 
 Server attributes</code>.</p>
 <p>To perform any operation, you have to run command line with the operation id. 
 For example:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-acrs
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--operation-id<span class="w"> </span>get-acrs
 </code></pre></div>
 <p>It returns:</p>
 <div class="highlight"><pre><span></span><code>Getting access token for scope https://jans.io/oauth/config/acrs.readonly

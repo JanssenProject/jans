@@ -8933,13 +8933,13 @@ It can be handled with spontaneous scopes which works via regular expressions.</
 <p><strong>Ticket registration</strong></p>
 <p>RS registers tickets with all scopes mentioned in "data" (we need all scopes in order to evaluate expression, all or nothing principle)</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w">  </span>
-<span class="w">   </span><span class="nt">&quot;resource_id&quot;</span><span class="p">:</span><span class="s2">&quot;112210f47de98100&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;resource_id&quot;</span><span class="p">:</span><span class="s2">&quot;112210f47de98100&quot;</span><span class="p">,</span>
 <span class="w">   </span><span class="nt">&quot;resource_scopes&quot;</span><span class="p">:[</span><span class="w">  </span>
-<span class="w">       </span><span class="s2">&quot;http://photoz.example.com/dev/actions/all&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="s2">&quot;http://photoz.example.com/dev/actions/add&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="s2">&quot;http://photoz.example.com/dev/actions/internalClient&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">       </span><span class="s2">&quot;http://photoz.example.com/dev/actions/all&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="s2">&quot;http://photoz.example.com/dev/actions/add&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="s2">&quot;http://photoz.example.com/dev/actions/internalClient&quot;</span>
+<span class="w">   </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
 <h3 id="uma-scopes">UMA Scopes<a class="headerlink" href="#uma-scopes" title="Permanent link">#</a></h3>
 <p>UMA 2 scopes are used to grant a client permission to do an action on a protected resource. Different scopes can grant access to the same action. For example, a "read" action can be allowed with scope "read" or "all". </p>
@@ -8986,30 +8986,30 @@ combine scopes and thus propose more robust way to grant access.</p>
 </p>
 </div>
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w">  </span>
-<span class="w">   </span><span class="nt">&quot;resource_scopes&quot;</span><span class="p">:[],</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="s2">&quot;Collection of digital photographs&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;icon_uri&quot;</span><span class="p">:</span><span class="s2">&quot;http://www.example.com/icons/flower.png&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Photo Album&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;http://www.example.com/rsrcs/photoalbum&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;scope_expression&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;rule&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">         </span><span class="nt">&quot;and&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">            </span><span class="p">{</span><span class="w"></span>
-<span class="w">               </span><span class="nt">&quot;or&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                   </span><span class="p">{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">},</span><span class="w"></span>
-<span class="w">                   </span><span class="p">{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">}</span><span class="w"></span>
-<span class="w">               </span><span class="p">]</span><span class="w"></span>
-<span class="w">            </span><span class="p">},</span><span class="w"></span>
-<span class="w">            </span><span class="p">{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">}</span><span class="w"></span>
-<span class="w">         </span><span class="p">]</span><span class="w"></span>
-<span class="w">      </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">         </span><span class="s2">&quot;http://photoz.example.com/dev/actions/all&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">         </span><span class="s2">&quot;http://photoz.example.com/dev/actions/add&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">         </span><span class="s2">&quot;http://photoz.example.com/dev/actions/internalClient&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">]</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;resource_scopes&quot;</span><span class="p">:[],</span>
+<span class="w">   </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="s2">&quot;Collection of digital photographs&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;icon_uri&quot;</span><span class="p">:</span><span class="s2">&quot;http://www.example.com/icons/flower.png&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Photo Album&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;http://www.example.com/rsrcs/photoalbum&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;scope_expression&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;rule&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;and&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;or&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                   </span><span class="p">{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">},</span>
+<span class="w">                   </span><span class="p">{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">}</span>
+<span class="w">               </span><span class="p">]</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">}</span>
+<span class="w">         </span><span class="p">]</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">         </span><span class="s2">&quot;http://photoz.example.com/dev/actions/all&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="s2">&quot;http://photoz.example.com/dev/actions/add&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="s2">&quot;http://photoz.example.com/dev/actions/internalClient&quot;</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
 <h3 id="statistic-endpoint">Statistic Endpoint<a class="headerlink" href="#statistic-endpoint" title="Permanent link">#</a></h3>
 <p>Global AS Configuration for statistic endpoint</p>

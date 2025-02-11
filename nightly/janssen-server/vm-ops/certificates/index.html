@@ -8684,17 +8684,17 @@
 <ul>
 <li>Backup the <code>/etc/certs</code> folder on your server</li>
 <li>Install snap
-   <div class="highlight"><pre><span></span><code>sudo snap install core<span class="p">;</span> sudo snap refresh core
+   <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>snap<span class="w"> </span>install<span class="w"> </span>core<span class="p">;</span><span class="w"> </span>sudo<span class="w"> </span>snap<span class="w"> </span>refresh<span class="w"> </span>core
 </code></pre></div></li>
 <li>Remove any certbot OS packages. This varies across distributions. 
    For Ubuntu: 
-   <div class="highlight"><pre><span></span><code>sudo apt remove certbot
+   <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>remove<span class="w"> </span>certbot
 </code></pre></div></li>
 <li>Install certbot: 
-   <div class="highlight"><pre><span></span><code>sudo snap install --classic certbot
+   <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>snap<span class="w"> </span>install<span class="w"> </span>--classic<span class="w"> </span>certbot
 </code></pre></div></li>
 <li>Issue certificate: 
-   <div class="highlight"><pre><span></span><code>certbot --apache -d fqdn_of_Gluu_server
+   <div class="highlight"><pre><span></span><code>certbot<span class="w"> </span>--apache<span class="w"> </span>-d<span class="w"> </span>fqdn_of_Gluu_server
 </code></pre></div></li>
 <li>Full certificate chain and key are available in: <code>/etc/letsencrypt/live/</code> location.</li>
 <li>Reboot your server</li>

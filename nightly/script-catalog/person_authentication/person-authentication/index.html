@@ -9410,12 +9410,12 @@ the Jans-auth server. More on this topic in this <a href="../../recipes/social-l
 <h2 id="testing-an-authentication-flow">Testing an authentication flow<a class="headerlink" href="#testing-an-authentication-flow" title="Permanent link">#</a></h2>
 <p>An example of a complete URL looks like this -
         ```</p>
-<div class="codehilite"><pre><span></span><code>    https://&lt;your.jans.server&gt;/jans-auth/authorize.htm? \
-    response_type=code&amp;redirect_uri=https://&lt;your.jans.server&gt;/admin \
-    &amp;client_id=17b8b82e-b3ec-42a2-bd90-097028a37f3 \
-    &amp;scope=openid+profile+email+user_name \
-    &amp;state=faad2cdjfdddjfkdf&amp;nonce=dajdffdfsdcfff
-```
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nx">https</span><span class="p">:</span><span class="c1">//&lt;your.jans.server&gt;/jans-auth/authorize.htm? \</span>
+<span class="w">    </span><span class="nx">response_type</span><span class="p">=</span><span class="nx">code</span><span class="o">&amp;</span><span class="nx">redirect_uri</span><span class="p">=</span><span class="nx">https</span><span class="p">:</span><span class="c1">//&lt;your.jans.server&gt;/admin \</span>
+<span class="w">    </span><span class="o">&amp;</span><span class="nx">client_id</span><span class="p">=</span><span class="mi">17</span><span class="nx">b8b82e</span><span class="o">-</span><span class="nx">b3ec</span><span class="o">-</span><span class="mi">42</span><span class="nx">a2</span><span class="o">-</span><span class="nx">bd90</span><span class="o">-</span><span class="mi">097028</span><span class="nx">a37f3</span><span class="w"> </span>\
+<span class="w">    </span><span class="o">&amp;</span><span class="nx">scope</span><span class="p">=</span><span class="nx">openid</span><span class="o">+</span><span class="nx">profile</span><span class="o">+</span><span class="nx">email</span><span class="o">+</span><span class="nx">user_name</span><span class="w"> </span>\
+<span class="w">    </span><span class="o">&amp;</span><span class="nx">state</span><span class="p">=</span><span class="nx">faad2cdjfdddjfkdf</span><span class="o">&amp;</span><span class="nx">nonce</span><span class="p">=</span><span class="nx">dajdffdfsdcfff</span>
+<span class="err">```</span>
 </code></pre></div>
 
 <p>To test , enter the complete URL for authorization in a browser or create a 

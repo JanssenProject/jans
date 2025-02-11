@@ -8908,87 +8908,87 @@
         <span class="k">return</span> <span class="s2">&quot;sampleClaimsGathering&quot;</span>
 </code></pre></div>
 <h3 id="script-type-java">Script Type: Java<a class="headerlink" href="#script-type-java" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.List</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.List</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.model.CustomScript</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.uma.UmaRptPolicyType</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.uma.ClaimDefinition</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.custom.script.CustomScriptManager</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.server.uma.authorization.UmaAuthorizationContext</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.uma.ClaimDefinitionBuilder</span><span class="p">;</span><span class="w"></span>
-
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.model.CustomScript</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.uma.UmaRptPolicyType</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.uma.ClaimDefinition</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.custom.script.CustomScriptManager</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.server.uma.authorization.UmaAuthorizationContext</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.uma.ClaimDefinitionBuilder</span><span class="p">;</span>
 
 
-<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">UmaRptPolicy</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">UmaRptPolicyType</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span>
 
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">log</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">CustomScriptManager</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w"></span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;UMA RPT Policy Authorization. Initializing...&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;UMA RPT Policy Authorization. Initialized&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">UmaRptPolicy</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">UmaRptPolicyType</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">CustomScript</span><span class="w"> </span><span class="n">customScript</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;UMA RPT Policy Authorization. Initializing...&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;UMA RPT Policy Authorization. Initialized&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">log</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">CustomScriptManager</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;UMA RPT Policy Authorization. Destroying...&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;UMA RPT Policy Authorization. Destroyed.&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;UMA RPT Policy Authorization. Initializing...&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;UMA RPT Policy Authorization. Initialized&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">11</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">CustomScript</span><span class="w"> </span><span class="n">customScript</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;UMA RPT Policy Authorization. Initializing...&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;UMA RPT Policy Authorization. Initialized&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ClaimDefinition</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">getRequiredClaims</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">authorizationContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;UMA RPT Policy Authorization. Destroying...&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;UMA RPT Policy Authorization. Destroyed.&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">11</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ClaimDefinition</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">getRequiredClaims</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">authorizationContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="cm">/*  needs to be a valid JSON string</span>
 <span class="cm">         *  Sample: [ { &quot;issuer&quot; : [ &quot;https://example.com&quot; ], &quot;name&quot; :</span>
 <span class="cm">         * &quot;country&quot;, &quot;claim_token_format&quot; : [</span>
 <span class="cm">         * &quot;http://openid.net/specs/openid-connect-core-1_0.html#IDToken&quot; ],</span>
 <span class="cm">         * &quot;claim_type&quot; : &quot;string&quot;, &quot;friendly_name&quot; : &quot;country&quot; } ]</span>
 <span class="cm">         *</span>
-<span class="cm">         */</span><span class="w"></span>
-<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">json</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="n">UmaAuthorizationContext</span><span class="w"> </span><span class="n">authContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">UmaAuthorizationContext</span><span class="p">)</span><span class="w"> </span><span class="n">authorizationContext</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="n">authContext</span><span class="p">.</span><span class="na">addRedirectUserParam</span><span class="p">(</span><span class="s">&quot;customUserParam1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;value1&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">ClaimDefinitionBuilder</span><span class="p">.</span><span class="na">build</span><span class="p">(</span><span class="n">String</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">json</span><span class="p">,</span><span class="w"> </span><span class="n">authContext</span><span class="p">.</span><span class="na">getIssuer</span><span class="p">()));</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="cm">         */</span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">json</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">;</span>
+<span class="w">        </span><span class="n">UmaAuthorizationContext</span><span class="w"> </span><span class="n">authContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">UmaAuthorizationContext</span><span class="p">)</span><span class="w"> </span><span class="n">authorizationContext</span><span class="p">;</span>
+<span class="w">        </span><span class="n">authContext</span><span class="p">.</span><span class="na">addRedirectUserParam</span><span class="p">(</span><span class="s">&quot;customUserParam1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;value1&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">ClaimDefinitionBuilder</span><span class="p">.</span><span class="na">build</span><span class="p">(</span><span class="n">String</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">json</span><span class="p">,</span><span class="w"> </span><span class="n">authContext</span><span class="p">.</span><span class="na">getIssuer</span><span class="p">()));</span>
+<span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">authorize</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">authorizationContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;UMA RPT Policy Authorization. Authorizing...&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">UmaAuthorizationContext</span><span class="w"> </span><span class="n">authContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">UmaAuthorizationContext</span><span class="p">)</span><span class="w"> </span><span class="n">authorizationContext</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">authContext</span><span class="p">.</span><span class="na">getClaim</span><span class="p">(</span><span class="s">&quot;country&quot;</span><span class="p">).</span><span class="na">equals</span><span class="p">(</span><span class="s">&quot;US&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">authContext</span><span class="p">.</span><span class="na">getClaim</span><span class="p">(</span><span class="s">&quot;city&quot;</span><span class="p">).</span><span class="na">equals</span><span class="p">(</span><span class="s">&quot;NY&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Authorized successfully!&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">authorize</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">authorizationContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;UMA RPT Policy Authorization. Authorizing...&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">UmaAuthorizationContext</span><span class="w"> </span><span class="n">authContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">UmaAuthorizationContext</span><span class="p">)</span><span class="w"> </span><span class="n">authorizationContext</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">authContext</span><span class="p">.</span><span class="na">getClaim</span><span class="p">(</span><span class="s">&quot;country&quot;</span><span class="p">).</span><span class="na">equals</span><span class="p">(</span><span class="s">&quot;US&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">authContext</span><span class="p">.</span><span class="na">getClaim</span><span class="p">(</span><span class="s">&quot;city&quot;</span><span class="p">).</span><span class="na">equals</span><span class="p">(</span><span class="s">&quot;NY&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Authorized successfully!&quot;</span><span class="p">);</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getClaimsGatheringScriptName</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">authorizationContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">UmaAuthorizationContext</span><span class="w"> </span><span class="n">authContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">UmaAuthorizationContext</span><span class="p">)</span><span class="w"> </span><span class="n">authorizationContext</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="c1">// pass some custom parameters to need_info uri. It can be removed if you don&#39;t need custom parameters.</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getClaimsGatheringScriptName</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">authorizationContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">UmaAuthorizationContext</span><span class="w"> </span><span class="n">authContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">UmaAuthorizationContext</span><span class="p">)</span><span class="w"> </span><span class="n">authorizationContext</span><span class="p">;</span>
+<span class="w">        </span><span class="c1">// pass some custom parameters to need_info uri. It can be removed if you don&#39;t need custom parameters.</span>
 <span class="w">        </span><span class="n">authContext</span><span class="p">.</span><span class="na">addRedirectUserParam</span><span class="p">(</span><span class="s">&quot;customUserParam2&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;value2&quot;</span><span class="p">);</span><span class="w"> </span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;sampleClaimsGathering&quot;</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;sampleClaimsGathering&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-<span class="p">}</span><span class="w"></span>
+<span class="p">}</span>
 </code></pre></div>
 
   <hr>

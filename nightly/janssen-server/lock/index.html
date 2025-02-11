@@ -8764,11 +8764,11 @@ schema to align with the application model, especially for Resources. </li>
 <li><a href=".">Trusted Issuers</a>: A list of domains are authorized to issue tokens.</li>
 </ol>
 <p>In JSON it looks like this: </p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;trusted_idps&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;trusted_idps&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="p">}</span>
 </code></pre></div>
 <h3 id="trusted-issuer-schema">Trusted Issuer Schema<a class="headerlink" href="#trusted-issuer-schema" title="Permanent link">#</a></h3>
 <p>At initialization, the Cedarling iterates the list of Trusted IDPs and fetches 
@@ -8777,17 +8777,17 @@ keys. The trusted issuer schema provides guidance on how to uniquely identify a
 person, and how
 to build the roles based on a user claim.</p>
 <p>Here is a non-normative example: </p>
-<div class="highlight"><pre><span></span><code><span class="p">[</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">[</span>
 <span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Google&quot;</span><span class="p">,</span><span class="w"> </span>
 <span class="w"> </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Consumer IDP&quot;</span><span class="p">,</span><span class="w"> </span>
-<span class="w"> </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://accounts.google.com/.well-known/openid-configuration&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w"> </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://accounts.google.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
 <span class="w"> </span><span class="nt">&quot;access_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">True</span><span class="p">},</span><span class="w"> </span>
-<span class="w"> </span><span class="nt">&quot;id_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="err">True</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;email&quot;</span><span class="p">},</span><span class="w"></span>
+<span class="w"> </span><span class="nt">&quot;id_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="err">True</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;email&quot;</span><span class="p">},</span>
 <span class="w"> </span><span class="nt">&quot;userinfo_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">True</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role&quot;</span><span class="p">},</span><span class="w">  </span>
-<span class="w"> </span><span class="nt">&quot;tx_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">True</span><span class="p">}</span><span class="w"></span>
-<span class="p">},</span><span class="w"></span>
-<span class="err">...</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<span class="w"> </span><span class="nt">&quot;tx_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">True</span><span class="p">}</span>
+<span class="p">},</span>
+<span class="err">...</span>
+<span class="p">]</span>
 </code></pre></div>
 <h3 id="entity-mapping">Entity Mapping<a class="headerlink" href="#entity-mapping" title="Permanent link">#</a></h3>
 <p>A Cedar Entity is an instance of the object defined in the Cedar Schema.<br />

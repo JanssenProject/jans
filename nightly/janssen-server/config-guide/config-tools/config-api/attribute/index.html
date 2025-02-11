@@ -8730,81 +8730,81 @@
 
 ### Example cURL
 
-> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Authorization:Bearer 697479e0-e6f4-453d-bf7a-ddf31b53efba&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">GET</span><span class="w"> </span><span class="nx">http</span><span class="o">:</span><span class="c1">//my.jans.server/jans-config-api/api/v1/attributes?limit=5&amp;pattern=edu,locale,carLicense&amp;startIndex=1</span><span class="w"></span>
+> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Authorization:Bearer 697479e0-e6f4-453d-bf7a-ddf31b53efba&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">GET</span><span class="w"> </span><span class="nx">http</span><span class="o">:</span><span class="c1">//my.jans.server/jans-config-api/api/v1/attributes?limit=5&amp;pattern=edu,locale,carLicense&amp;startIndex=1</span>
 </code></pre></div>
 
 ### Sample Response
-> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;start&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;totalEntriesCount&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">78</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;entriesCount&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">2</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;entries&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">       </span><span class="p">{</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;dn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inum=08E2,ou=attributes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;selected&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;inum&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;08E2&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;departmentNumber&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;displayName&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Department&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;description&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Organizational Department&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;origin&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;jansCustomPerson&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;dataType&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;editType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">               </span><span class="s2">&quot;admin&quot;</span><span class="w"></span>
-<span class="w">           </span><span class="p">],</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;viewType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">               </span><span class="s2">&quot;user&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">               </span><span class="s2">&quot;admin&quot;</span><span class="w"></span>
-<span class="w">           </span><span class="p">],</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;claimName&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;department_number&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;status&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inactive&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;saml1Uri&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:mace:dir:attribute-def:departmentNumber&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;saml2Uri&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.16.840.1.113730.3.1.2&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;urn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:mace:dir:attribute-def:departmentNumber&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;oxMultiValuedAttribute&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;custom&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;whitePagesCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;adminCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;userCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;userCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;adminCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;adminCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;userCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;baseDn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inum=08E2,ou=attributes,o=jans&quot;</span><span class="w"></span>
-<span class="w">       </span><span class="p">},</span><span class="w"></span>
-<span class="w">       </span><span class="p">{</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;dn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inum=0C18,ou=attributes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;selected&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;inum&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;0C18&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;telephoneNumber&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;displayName&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Home Telephone Number&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;description&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Home Telephone Number&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;origin&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;jansCustomPerson&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;dataType&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;editType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">               </span><span class="s2">&quot;user&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">               </span><span class="s2">&quot;admin&quot;</span><span class="w"></span>
-<span class="w">           </span><span class="p">],</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;viewType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">               </span><span class="s2">&quot;user&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">               </span><span class="s2">&quot;admin&quot;</span><span class="w"></span>
-<span class="w">           </span><span class="p">],</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;claimName&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;phone_number&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;status&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inactive&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;saml1Uri&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:mace:dir:attribute-def:telephoneNumber&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;saml2Uri&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.5.4.20&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;urn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:mace:dir:attribute-def:phone_number&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;oxMultiValuedAttribute&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;custom&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;whitePagesCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;adminCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;userCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;userCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;adminCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;adminCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;userCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;baseDn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inum=0C18,ou=attributes,o=jans&quot;</span><span class="w"></span>
-<span class="w">       </span><span class="p">}</span><span class="w"></span>
-<span class="w"> </span><span class="p">}</span><span class="w"></span>
+> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="p">{</span>
+<span class="w">   </span><span class="s2">&quot;start&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">0</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;totalEntriesCount&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">78</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;entriesCount&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">2</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;entries&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">       </span><span class="p">{</span>
+<span class="w">           </span><span class="s2">&quot;dn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inum=08E2,ou=attributes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;selected&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;inum&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;08E2&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;departmentNumber&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;displayName&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Department&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;description&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Organizational Department&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;origin&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;jansCustomPerson&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;dataType&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;editType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">               </span><span class="s2">&quot;admin&quot;</span>
+<span class="w">           </span><span class="p">],</span>
+<span class="w">           </span><span class="s2">&quot;viewType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">               </span><span class="s2">&quot;user&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="s2">&quot;admin&quot;</span>
+<span class="w">           </span><span class="p">],</span>
+<span class="w">           </span><span class="s2">&quot;claimName&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;department_number&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;status&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inactive&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;saml1Uri&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:mace:dir:attribute-def:departmentNumber&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;saml2Uri&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.16.840.1.113730.3.1.2&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;urn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:mace:dir:attribute-def:departmentNumber&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;oxMultiValuedAttribute&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;custom&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;whitePagesCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;adminCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;userCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;userCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;adminCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;adminCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;userCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;baseDn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inum=08E2,ou=attributes,o=jans&quot;</span>
+<span class="w">       </span><span class="p">},</span>
+<span class="w">       </span><span class="p">{</span>
+<span class="w">           </span><span class="s2">&quot;dn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inum=0C18,ou=attributes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;selected&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;inum&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;0C18&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;telephoneNumber&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;displayName&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Home Telephone Number&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;description&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Home Telephone Number&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;origin&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;jansCustomPerson&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;dataType&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;editType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">               </span><span class="s2">&quot;user&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="s2">&quot;admin&quot;</span>
+<span class="w">           </span><span class="p">],</span>
+<span class="w">           </span><span class="s2">&quot;viewType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">               </span><span class="s2">&quot;user&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="s2">&quot;admin&quot;</span>
+<span class="w">           </span><span class="p">],</span>
+<span class="w">           </span><span class="s2">&quot;claimName&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;phone_number&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;status&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inactive&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;saml1Uri&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:mace:dir:attribute-def:telephoneNumber&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;saml2Uri&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.5.4.20&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;urn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:mace:dir:attribute-def:phone_number&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;oxMultiValuedAttribute&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;custom&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;whitePagesCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;adminCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;userCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;userCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;adminCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;adminCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;userCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">           </span><span class="s2">&quot;baseDn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inum=0C18,ou=attributes,o=jans&quot;</span>
+<span class="w">       </span><span class="p">}</span>
+<span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 
 </details>
@@ -8828,43 +8828,43 @@
 
 ### Example cURL
 
-> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Authorization:Bearer 697479e0-e6f4-453d-bf7a-ddf31b53efba&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">GET</span><span class="w"> </span><span class="nx">http</span><span class="o">:</span><span class="c1">//my.jans.server/jans-config-api/api/v1/attributes/08E2</span><span class="w"></span>
+> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Authorization:Bearer 697479e0-e6f4-453d-bf7a-ddf31b53efba&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">GET</span><span class="w"> </span><span class="nx">http</span><span class="o">:</span><span class="c1">//my.jans.server/jans-config-api/api/v1/attributes/08E2</span>
 </code></pre></div>
 
 ### Sample Response
 
-> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;dn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inum=08E2,ou=attributes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;selected&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;inum&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;08E2&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;departmentNumber&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;displayName&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Department&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;description&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Organizational Department&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;origin&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;jansCustomPerson&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;dataType&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;editType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">       </span><span class="s2">&quot;admin&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">],</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;viewType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">       </span><span class="s2">&quot;user&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="s2">&quot;admin&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">],</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;claimName&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;department_number&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;status&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inactive&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;saml1Uri&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:mace:dir:attribute-def:departmentNumber&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;saml2Uri&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.16.840.1.113730.3.1.2&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;urn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:mace:dir:attribute-def:departmentNumber&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;oxMultiValuedAttribute&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;custom&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;whitePagesCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;adminCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;userCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;userCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;adminCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;adminCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;userCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;baseDn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inum=08E2,ou=attributes,o=jans&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">}</span><span class="w"></span>
+> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="p">{</span>
+<span class="w">   </span><span class="s2">&quot;dn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inum=08E2,ou=attributes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;selected&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;inum&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;08E2&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;departmentNumber&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;displayName&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Department&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;description&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Organizational Department&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;origin&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;jansCustomPerson&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;dataType&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;editType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">       </span><span class="s2">&quot;admin&quot;</span>
+<span class="w">   </span><span class="p">],</span>
+<span class="w">   </span><span class="s2">&quot;viewType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">       </span><span class="s2">&quot;user&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="s2">&quot;admin&quot;</span>
+<span class="w">   </span><span class="p">],</span>
+<span class="w">   </span><span class="s2">&quot;claimName&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;department_number&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;status&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inactive&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;saml1Uri&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:mace:dir:attribute-def:departmentNumber&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;saml2Uri&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.16.840.1.113730.3.1.2&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;urn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:mace:dir:attribute-def:departmentNumber&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;oxMultiValuedAttribute&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;custom&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;whitePagesCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;adminCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;userCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;userCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;adminCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;adminCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;userCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;baseDn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inum=08E2,ou=attributes,o=jans&quot;</span>
+<span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 
 </details>
@@ -8890,37 +8890,37 @@
 
 ### Example cURL
 
-> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">POST</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/attributes&#39;</span><span class="w"> </span><span class="o">--</span><span class="nx">data</span><span class="w"> </span><span class="err">@</span><span class="nx">post</span><span class="p">.</span><span class="nx">json</span><span class="w"></span>
+> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">POST</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/attributes&#39;</span><span class="w"> </span><span class="o">--</span><span class="nx">data</span><span class="w"> </span><span class="err">@</span><span class="nx">post</span><span class="p">.</span><span class="nx">json</span>
 </code></pre></div>
 
 ### Sample Request
 
-> <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;adminCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;adminCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;adminCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;custom&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;dataType&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;description&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;QAAdded Attribute&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;displayName&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;QAAdded Attribute&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;editType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">       </span><span class="s2">&quot;admin&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="s2">&quot;user&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">],</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;qaattribute&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;origin&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;jansPerson&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;jansMultivaluedAttr&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;status&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;active&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;urn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:mace:dir:attribute-def:qaattribute&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;userCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;userCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;userCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;viewType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">       </span><span class="s2">&quot;admin&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="s2">&quot;user&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">],</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;whitePagesCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+> <div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">   </span><span class="s2">&quot;adminCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;adminCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;adminCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;custom&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;dataType&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;description&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;QAAdded Attribute&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;displayName&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;QAAdded Attribute&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;editType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">       </span><span class="s2">&quot;admin&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="s2">&quot;user&quot;</span>
+<span class="w">   </span><span class="p">],</span>
+<span class="w">   </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;qaattribute&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;origin&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;jansPerson&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;jansMultivaluedAttr&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;status&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;active&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;urn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:mace:dir:attribute-def:qaattribute&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;userCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;userCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;userCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;viewType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">       </span><span class="s2">&quot;admin&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="s2">&quot;user&quot;</span>
+<span class="w">   </span><span class="p">],</span>
+<span class="w">   </span><span class="s2">&quot;whitePagesCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="p">}</span>
 </code></pre></div>
 
 
@@ -8948,43 +8948,43 @@
 
 ### Example cURL
 
-> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">PUT</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/attributes&#39;</span><span class="w"> </span><span class="o">--</span><span class="nx">data</span><span class="w"> </span><span class="err">@</span><span class="nx">put</span><span class="p">.</span><span class="nx">json</span><span class="w"></span>
+> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">PUT</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/attributes&#39;</span><span class="w"> </span><span class="o">--</span><span class="nx">data</span><span class="w"> </span><span class="err">@</span><span class="nx">put</span><span class="p">.</span><span class="nx">json</span>
 </code></pre></div>
 
 ### Sample Request
 
-> <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;dn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inum=08E2,ou=attributes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;selected&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;inum&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;08E2&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;departmentNumber&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;displayName&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Department&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;description&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Organizational Department&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;origin&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;jansCustomPerson&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;dataType&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;editType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">       </span><span class="s2">&quot;admin&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">],</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;viewType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">       </span><span class="s2">&quot;user&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="s2">&quot;admin&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">],</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;claimName&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;department_number&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;status&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inactive&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;saml1Uri&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:mace:dir:attribute-def:departmentNumber&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;saml2Uri&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.16.840.1.113730.3.1.2&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;urn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:mace:dir:attribute-def:departmentNumber&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;oxMultiValuedAttribute&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;custom&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;whitePagesCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;adminCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;userCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;userCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;adminCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;adminCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;userCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;baseDn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inum=08E2,ou=attributes,o=jans&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+> <div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">   </span><span class="s2">&quot;dn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inum=08E2,ou=attributes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;selected&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;inum&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;08E2&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;departmentNumber&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;displayName&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Department&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;description&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Organizational Department&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;origin&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;jansCustomPerson&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;dataType&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;editType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">       </span><span class="s2">&quot;admin&quot;</span>
+<span class="w">   </span><span class="p">],</span>
+<span class="w">   </span><span class="s2">&quot;viewType&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">       </span><span class="s2">&quot;user&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="s2">&quot;admin&quot;</span>
+<span class="w">   </span><span class="p">],</span>
+<span class="w">   </span><span class="s2">&quot;claimName&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;department_number&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;status&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inactive&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;saml1Uri&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:mace:dir:attribute-def:departmentNumber&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;saml2Uri&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.16.840.1.113730.3.1.2&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;urn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;urn:mace:dir:attribute-def:departmentNumber&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;oxMultiValuedAttribute&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;custom&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;whitePagesCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;adminCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;userCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;userCanEdit&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;adminCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;adminCanView&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;userCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;baseDn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inum=08E2,ou=attributes,o=jans&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
 
 </details>
@@ -9013,12 +9013,12 @@
 
 ### Example cURL
 
-> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">PATCH</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json-patch+json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/attributes/08E2&#39;</span><span class="w"> </span><span class="o">--</span><span class="nx">data</span><span class="w"> </span><span class="err">@</span><span class="nx">patch</span><span class="p">.</span><span class="nx">json</span><span class="w"></span>
+> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">PATCH</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json-patch+json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/attributes/08E2&#39;</span><span class="w"> </span><span class="o">--</span><span class="nx">data</span><span class="w"> </span><span class="err">@</span><span class="nx">patch</span><span class="p">.</span><span class="nx">json</span>
 </code></pre></div>
 
 ### Sample Request
 
-> <div class="highlight"><pre><span></span><code><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="s2">&quot;op&quot;</span><span class="o">:</span><span class="s2">&quot;replace&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;path&quot;</span><span class="o">:</span><span class="s2">&quot;/displayName&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;value&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;PatchCustomAttribute123&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+> <div class="highlight"><pre><span></span><code><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="s2">&quot;op&quot;</span><span class="o">:</span><span class="s2">&quot;replace&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;path&quot;</span><span class="o">:</span><span class="s2">&quot;/displayName&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;value&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;PatchCustomAttribute123&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">]</span>
 </code></pre></div>
 
 </details>
@@ -9046,7 +9046,7 @@
 
 ### Example cURL
 
-> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">DELETE</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/attributes/08E2&#39;</span><span class="w"></span>
+> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">DELETE</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/attributes/08E2&#39;</span>
 </code></pre></div>
 
 ### Sample Request

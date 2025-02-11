@@ -8673,12 +8673,12 @@ By default, the password attribute validation is not enabled.</p>
 <ol>
 <li>
 <p>Obtain the unique ID, that is inum for <code>userPassword</code> attribute.
-<div class="highlight"><pre><span></span><code>jans cli --operation-id get-attributes --endpoint-args pattern:userPassword
+<div class="highlight"><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-attributes<span class="w"> </span>--endpoint-args<span class="w"> </span>pattern:userPassword
 </code></pre></div></p>
 </li>
 <li>
 <p>Obatin the PatchRequest schema
-<div class="highlight"><pre><span></span><code>jans cli --schema PatchRequest &gt; /tmp/patch.json
+<div class="highlight"><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema<span class="w"> </span>PatchRequest<span class="w"> </span>&gt;<span class="w"> </span>/tmp/patch.json
 </code></pre></div></p>
 </li>
 <li>
@@ -8692,21 +8692,21 @@ By default, the password attribute validation is not enabled.</p>
 Following is the example of having <code>userPassword</code> with minimum 8 characters,
 maximum 20 characters and should be alphanumeric with special characters.
 <div class="highlight"><pre><span></span><code><span class="o">[{</span>
-    <span class="s2">&quot;op&quot;</span>: <span class="s2">&quot;add&quot;</span>,
-    <span class="s2">&quot;path&quot;</span>: <span class="s2">&quot;/attributeValidation&quot;</span>,
-    <span class="s2">&quot;value&quot;</span>: <span class="o">{</span>
-        <span class="s2">&quot;minLength&quot;</span>: <span class="m">5</span>,
-        <span class="s2">&quot;maxLength&quot;</span>:15,
-        <span class="s2">&quot;regexp&quot;</span>: <span class="s2">&quot;^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&amp;()–[{}]:;&#39;,?/*~</span>$<span class="s2">^+=&lt;&gt;]).{8,20}</span>$<span class="s2">&quot;</span>
-    <span class="o">}</span>
+<span class="w">    </span><span class="s2">&quot;op&quot;</span>:<span class="w"> </span><span class="s2">&quot;add&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;path&quot;</span>:<span class="w"> </span><span class="s2">&quot;/attributeValidation&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;value&quot;</span>:<span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;minLength&quot;</span>:<span class="w"> </span><span class="m">5</span>,
+<span class="w">        </span><span class="s2">&quot;maxLength&quot;</span>:15,
+<span class="w">        </span><span class="s2">&quot;regexp&quot;</span>:<span class="w"> </span><span class="s2">&quot;^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&amp;()–[{}]:;&#39;,?/*~</span>$<span class="s2">^+=&lt;&gt;]).{8,20}</span>$<span class="s2">&quot;</span>
+<span class="w">    </span><span class="o">}</span>
 <span class="o">}]</span>
 </code></pre></div></li>
 </ul>
 </li>
 <li>
 <p>Execute patch operation for <code>userPassword</code> attribute.
-<div class="highlight"><pre><span></span><code>jans cli --operation-id patch-attributes-by-inum <span class="se">\</span>
---url-suffix<span class="o">=</span><span class="s2">&quot;inum:AAEE&quot;</span> --data /tmp/patch.json
+<div class="highlight"><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>patch-attributes-by-inum<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="o">=</span><span class="s2">&quot;inum:AAEE&quot;</span><span class="w"> </span>--data<span class="w"> </span>/tmp/patch.json
 </code></pre></div>
 <img alt="update default authentication method" src="../../../assets/image-pwd-enable-custom-validation-jans-cli.png" /></p>
 </li>
@@ -8736,15 +8736,15 @@ maximum 20 characters and should be alphanumeric with special characters.
 <ol>
 <li>
 <p>Obtain the access token
-<div class="highlight"><pre><span></span><code>curl -k -u <span class="s2">&quot;&lt;put_client_id_here&gt;:&lt;put_config_api_client_secret_here&gt;&quot;</span> https://&lt;your.jans.server&gt;/jans-auth/restv1/token <span class="se">\</span>
-     -d  <span class="s2">&quot;grant_type=client_credentials&amp;scope=https://jans.io/oauth/config/attributes.write&quot;</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-k<span class="w"> </span>-u<span class="w"> </span><span class="s2">&quot;&lt;put_client_id_here&gt;:&lt;put_config_api_client_secret_here&gt;&quot;</span><span class="w"> </span>https://&lt;your.jans.server&gt;/jans-auth/restv1/token<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-d<span class="w">  </span><span class="s2">&quot;grant_type=client_credentials&amp;scope=https://jans.io/oauth/config/attributes.write&quot;</span>
 </code></pre></div></p>
 </li>
 <li>
 <p>Obtain the unique ID, that is inum for <code>userPassword</code> attribute.
-<div class="highlight"><pre><span></span><code>curl -k -i -H <span class="s2">&quot;Accept: application/json&quot;</span> -H <span class="s2">&quot;Content-Type: application/json&quot;</span> <span class="se">\</span>
-  -H <span class="s2">&quot;Authorization:Bearer &lt;put_access_token_here&gt;&quot;</span> 
-  -X GET https://&lt;your.jans.server&gt;/jans-config-api/api/v1/attributes?pattern<span class="o">=</span>userPassword
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-k<span class="w"> </span>-i<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization:Bearer &lt;put_access_token_here&gt;&quot;</span><span class="w"> </span>
+<span class="w">  </span>-X<span class="w"> </span>GET<span class="w"> </span>https://&lt;your.jans.server&gt;/jans-config-api/api/v1/attributes?pattern<span class="o">=</span>userPassword
 </code></pre></div></p>
 </li>
 <li>
@@ -8755,9 +8755,9 @@ maximum 20 characters and should be alphanumeric with special characters.
 <li>
 <p>Enter <strong>Maximum length</strong>, the maximum length of a value associated with this attribute.
   Following is the example of having <code>userPassword</code> with minimum 8 characters, maximum 20 characters, and should be alphanumeric with special characters.
-<div class="highlight"><pre><span></span><code>curl -k --location --request PATCH <span class="s1">&#39;https://&lt;your.jans.server&gt;/jans-config-api/api/v1/attributes/&lt;put_userPassword_inum_here&gt;&#39;</span> <span class="se">\</span>
- --header <span class="s1">&#39;Content-Type: application/json-patch+json&#39;</span> --header <span class="s1">&#39;Authorization: Bearer &lt;put_access_token_here&gt;&#39;</span> <span class="se">\</span>
-  --data-raw <span class="s1">&#39;[{</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-k<span class="w"> </span>--location<span class="w"> </span>--request<span class="w"> </span>PATCH<span class="w"> </span><span class="s1">&#39;https://&lt;your.jans.server&gt;/jans-config-api/api/v1/attributes/&lt;put_userPassword_inum_here&gt;&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w"> </span>--header<span class="w"> </span><span class="s1">&#39;Content-Type: application/json-patch+json&#39;</span><span class="w"> </span>--header<span class="w"> </span><span class="s1">&#39;Authorization: Bearer &lt;put_access_token_here&gt;&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-raw<span class="w"> </span><span class="s1">&#39;[{</span>
 <span class="s1">    &quot;op&quot;: &quot;add&quot;,</span>
 <span class="s1">    &quot;path&quot;: &quot;/attributeValidation&quot;,</span>
 <span class="s1">    &quot;value&quot;: {</span>

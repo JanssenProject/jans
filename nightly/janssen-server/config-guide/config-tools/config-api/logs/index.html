@@ -8869,14 +8869,14 @@
 <h3 id="audit-log">Audit log<a class="headerlink" href="#audit-log" title="Permanent link">#</a></h3>
 <h4 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h4>
 <blockquote>
-<div class="highlight"><pre><span></span><code><span class="p">...</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">...</span>
 <span class="nx">auditLogConf</span><span class="s2">&quot;: {</span>
 <span class="s2">    &quot;</span><span class="nx">enabled</span><span class="s2">&quot;: true,</span>
 <span class="s2">    &quot;</span><span class="nx">ignoreHttpMethod</span><span class="s2">&quot;: [],</span>
 <span class="s2">    &quot;</span><span class="nx">headerAttributes</span><span class="s2">&quot;: [</span>
-<span class="s2">      &quot;</span><span class="nx">User</span><span class="o">-</span><span class="nx">inum</span><span class="err">&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">]</span><span class="w"></span>
-<span class="p">...</span><span class="w"></span>
+<span class="s2">      &quot;</span><span class="nx">User</span><span class="o">-</span><span class="nx">inum</span><span class="err">&quot;</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">...</span>
 </code></pre></div>
 </blockquote>
 <table>
@@ -8933,14 +8933,14 @@
 <li>
 <p>Fetch configuration </p>
 <blockquote>
-<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Authorization:Bearer 3114e010-fd4d-4e62-b5e2-a51b7d6dd231&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">GET</span><span class="w"> </span><span class="nx">https</span><span class="o">:</span><span class="c1">//jans.server/jans-config-api/api/v1/api-config</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Authorization:Bearer 3114e010-fd4d-4e62-b5e2-a51b7d6dd231&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">GET</span><span class="w"> </span><span class="nx">https</span><span class="o">:</span><span class="c1">//jans.server/jans-config-api/api/v1/api-config</span>
 </code></pre></div>
 </blockquote>
 </li>
 <li>
 <p>Patch configuration</p>
 <blockquote>
-<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">PATCH</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json-patch+json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization:Bearer 3114e010-fd4d-4e62-b5e2-a51b7d6dd231&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://jans.server/jans-config-api/api/v1/api-config&#39;</span><span class="w"> </span><span class="o">--</span><span class="nx">data</span><span class="w"> </span><span class="s1">&#39;[{&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/loggingLevel&quot;, &quot;value&quot;:&quot;ERROR&quot;}, {&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/loggingLayout&quot;, &quot;value&quot;:&quot;json&quot;}, {&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/auditLogConf/enabled&quot;, &quot;value&quot;:false} , {&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/auditLogConf/headerAttributes&quot;, &quot;value&quot;:[&quot;User-inum&quot;,&quot;city&quot;]}]&#39;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">PATCH</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json-patch+json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization:Bearer 3114e010-fd4d-4e62-b5e2-a51b7d6dd231&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://jans.server/jans-config-api/api/v1/api-config&#39;</span><span class="w"> </span><span class="o">--</span><span class="nx">data</span><span class="w"> </span><span class="s1">&#39;[{&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/loggingLevel&quot;, &quot;value&quot;:&quot;ERROR&quot;}, {&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/loggingLayout&quot;, &quot;value&quot;:&quot;json&quot;}, {&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/auditLogConf/enabled&quot;, &quot;value&quot;:false} , {&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/auditLogConf/headerAttributes&quot;, &quot;value&quot;:[&quot;User-inum&quot;,&quot;city&quot;]}]&#39;</span>
 </code></pre></div>
 </blockquote>
 </li>

@@ -8742,16 +8742,16 @@ specifying environment variables.</p>
 </code></pre></div>
 For a Helm installation you can globally override hte URI in the <code>values.yaml</code></li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">usrEnvs</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">normal</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">CN_JAVA_OPTIONS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-Dconnection.uri=jdbc:postgresql://postgresql.sql.svc.cluster.local:5432/jansdb</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">usrEnvs</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">normal</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">CN_JAVA_OPTIONS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-Dconnection.uri=jdbc:postgresql://postgresql.sql.svc.cluster.local:5432/jansdb</span>
 </code></pre></div>
 <p>Or for a specific component like the auth server:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">auth-server</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">usrEnvs</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">normal</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">CN_JAVA_OPTIONS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-Dconnection.uri=jdbc:postgresql://postgresql.sql.svc.cluster.local:5432/jansdb</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">auth-server</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">usrEnvs</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">normal</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">CN_JAVA_OPTIONS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-Dconnection.uri=jdbc:postgresql://postgresql.sql.svc.cluster.local:5432/jansdb</span>
 </code></pre></div>
 <h4 id="vm-installations">VM Installations<a class="headerlink" href="#vm-installations" title="Permanent link">#</a></h4>
 <p>For the Janssen Server installed on a VM, a new parameter or parameters with override
@@ -8760,7 +8760,7 @@ certain modules only. The steps
 below show how to override the DB connection URI:</p>
 <h5 id="globally-for-all-modules">Globally For All Modules<a class="headerlink" href="#globally-for-all-modules" title="Permanent link">#</a></h5>
 <p>Define environment variable at the VM level, such as shown in the example below:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span> <span class="nv">CONNECTION_URI</span><span class="o">=</span>jdbc:postgresql://localhost:5432/jansdb
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">CONNECTION_URI</span><span class="o">=</span>jdbc:postgresql://localhost:5432/jansdb
 </code></pre></div>
 <p>This will affect all Janssen Server modules, where properties like
 <code>connection.uri</code> or <code>connection-uri</code> will be overridden with the new value.</p>
@@ -8779,7 +8779,7 @@ directory which contains config files for Janssen modules. For example
 </code></pre></div></li>
 <li>Using the environment variable, export a new variable, as shown in the example
   below:
-  <div class="highlight"><pre><span></span><code><span class="nb">export</span> <span class="nv">CONNECTION_URI</span><span class="o">=</span>jdbc:postgresql://localhost:5432/jansdb
+  <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">CONNECTION_URI</span><span class="o">=</span>jdbc:postgresql://localhost:5432/jansdb
 </code></pre></div>
   The exported variable above, <code>CONNECTION_URI</code>, will override the value
   provided by <code>connection.uri</code> or <code>connection-uri</code> parameters.</li>

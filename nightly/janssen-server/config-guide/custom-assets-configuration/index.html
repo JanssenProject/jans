@@ -8843,7 +8843,7 @@ Postman. Learn how to use Janssen Server Config API
 command line. To get the details of Janssen command line operations relevant to
 the custom assets, check the operations under the <code>JansAssets</code> task using the
 command below.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --info JansAssets
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--info<span class="w"> </span>JansAssets
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -8916,7 +8916,7 @@ To get sample schema type jans cli --schema-sample &lt;schema&gt;, for example j
 <h3 id="get-all-current-custom-assets">Get All Current Custom Assets<a class="headerlink" href="#get-all-current-custom-assets" title="Permanent link">#</a></h3>
 <p>Use the operation ID <code>get-all-assets</code> to get all the currently configured 
 custom assets on the Janssen Server.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-all-assets
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-all-assets
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -8964,59 +8964,59 @@ custom assets on the Janssen Server.</p>
 <span class="normal">44</span>
 <span class="normal">45</span>
 <span class="normal">46</span>
-<span class="normal">47</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;totalEntriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;entriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;entries&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=61edc29d-45f8-4ab9-8c9a-7b39e4cbe440,ou=document,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;61edc29d-45f8-4ab9-8c9a-7b39e4cbe440&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p2.properties&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Valid text description&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cHJvcGVydGllcyBoZXJlLiAK\r\n&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-07-31T07:36:08&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;jansService&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;jans-auth&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;jansLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">142</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;jansEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=61edc29d-45f8-4ab9-8c9a-7b39e4cbe440,ou=document,o=jans&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=835c7a68-57b1-4e39-8d2a-2a3963f2a92f,ou=document,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;835c7a68-57b1-4e39-8d2a-2a3963f2a92f&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p1.properties&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;updated thrice Valid text description&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cHJvcGVydGllcwo=\r\n&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;jansService&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;jans-auth&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;jansEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=835c7a68-57b1-4e39-8d2a-2a3963f2a92f,ou=document,o=jans&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fd67d07b-c874-4bc1-a9f0-860fc4f7a091&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p.properties&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Valid text description&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cHJvcGVydGllcyBoZXJlLiAK\r\n&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-07-31T07:40:03&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;jansService&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;jans-auth&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;jansLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">142</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;jansEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">47</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;totalEntriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;entriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;entries&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=61edc29d-45f8-4ab9-8c9a-7b39e4cbe440,ou=document,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;61edc29d-45f8-4ab9-8c9a-7b39e4cbe440&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p2.properties&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Valid text description&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cHJvcGVydGllcyBoZXJlLiAK\r\n&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-07-31T07:36:08&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;jansService&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;jans-auth&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;jansLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">142</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;jansEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=61edc29d-45f8-4ab9-8c9a-7b39e4cbe440,ou=document,o=jans&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=835c7a68-57b1-4e39-8d2a-2a3963f2a92f,ou=document,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;835c7a68-57b1-4e39-8d2a-2a3963f2a92f&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p1.properties&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;updated thrice Valid text description&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cHJvcGVydGllcwo=\r\n&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;jansService&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;jans-auth&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;jansEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=835c7a68-57b1-4e39-8d2a-2a3963f2a92f,ou=document,o=jans&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fd67d07b-c874-4bc1-a9f0-860fc4f7a091&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p.properties&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Valid text description&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cHJvcGVydGllcyBoZXJlLiAK\r\n&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-07-31T07:40:03&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;jansService&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;jans-auth&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;jansLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">142</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;jansEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div></p>
 <h3 id="get-custom-asset-by-inum">Get Custom Asset By inum<a class="headerlink" href="#get-custom-asset-by-inum" title="Permanent link">#</a></h3>
 <p>With <code>get-asset-by-inum</code> operation-id, we can get any specific asset matched 
 with <code>inum</code>. If we know the <code>inum</code>, we can simply use the below command:</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-asset-by-inum <span class="se">\</span>
---url-suffix inum:61edc29d-45f8-4ab9-8c9a-7b39e4cbe440
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-asset-by-inum<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="w"> </span>inum:61edc29d-45f8-4ab9-8c9a-7b39e4cbe440
 </code></pre></div>
 It returns the details as below:</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -9032,26 +9032,26 @@ It returns the details as below:</p>
 <span class="normal">11</span>
 <span class="normal">12</span>
 <span class="normal">13</span>
-<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=61edc29d-45f8-4ab9-8c9a-7b39e4cbe440,ou=document,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;61edc29d-45f8-4ab9-8c9a-7b39e4cbe440&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p2.properties&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Valid text description&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cHJvcGVydGllcyBoZXJlLiAK\r\n&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-07-31T07:36:08&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;jansService&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;jans-auth&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;jansLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">142</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;jansEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=61edc29d-45f8-4ab9-8c9a-7b39e4cbe440,ou=document,o=jans&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=61edc29d-45f8-4ab9-8c9a-7b39e4cbe440,ou=document,o=jans&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;61edc29d-45f8-4ab9-8c9a-7b39e4cbe440&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p2.properties&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Valid text description&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cHJvcGVydGllcyBoZXJlLiAK\r\n&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-07-31T07:36:08&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jansService&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;jans-auth&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;jansLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">142</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jansEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=61edc29d-45f8-4ab9-8c9a-7b39e4cbe440,ou=document,o=jans&quot;</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="get-custom-asset-by-name">Get Custom Asset By Name<a class="headerlink" href="#get-custom-asset-by-name" title="Permanent link">#</a></h3>
 <p>With <code>get-asset-by-name</code> operation-id, we can get any specific asset matched with <code>name</code>.
  If we know the <code>name</code>, we can simply use the below command:</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-asset-by-name <span class="se">\</span>
---url-suffix name:p1.properties
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-asset-by-name<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="w"> </span>name:p1.properties
 </code></pre></div>
 It returns the details as below:</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -9072,30 +9072,30 @@ It returns the details as below:</p>
 <span class="normal">16</span>
 <span class="normal">17</span>
 <span class="normal">18</span>
-<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;totalEntriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;entriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;entries&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=835c7a68-57b1-4e39-8d2a-2a3963f2a92f,ou=document,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;835c7a68-57b1-4e39-8d2a-2a3963f2a92f&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p1.properties&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;updated thrice Valid text description&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cHJvcGVydGllcwo=\r\n&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;jansService&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;jans-auth&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;jansEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=835c7a68-57b1-4e39-8d2a-2a3963f2a92f,ou=document,o=jans&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;totalEntriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;entriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;entries&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=835c7a68-57b1-4e39-8d2a-2a3963f2a92f,ou=document,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;835c7a68-57b1-4e39-8d2a-2a3963f2a92f&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p1.properties&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;updated thrice Valid text description&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cHJvcGVydGllcwo=\r\n&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;jansService&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;jans-auth&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;jansEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=835c7a68-57b1-4e39-8d2a-2a3963f2a92f,ou=document,o=jans&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="get-services">Get Services<a class="headerlink" href="#get-services" title="Permanent link">#</a></h3>
 <p>Get the list of Janssen Server services that support custom assets 
 by performing <code>get-asset-services</code> operation.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-asset-services
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-asset-services
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -9120,7 +9120,7 @@ by performing <code>get-asset-services</code> operation.</p>
 <h3 id="get-valid-asset-types">Get Valid Asset Types<a class="headerlink" href="#get-valid-asset-types" title="Permanent link">#</a></h3>
 <p>Get the asset types of your Janssen Server by performing <code>get-asset-types</code> 
 operation.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-asset-types
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-asset-types
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -9149,12 +9149,12 @@ operation.</p>
 the <a href="#using-the-command-line">output</a> for <code>--info</code> command, the <code>post-new-asset</code> 
 operation requires data to be sent according to <code>AssetForm</code> schema.</p>
 <p>To see the schema, use the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema AssetForm
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema<span class="w"> </span>AssetForm
 </code></pre></div>
 <p>For better understanding, the Janssen Server also provides a sample of data to 
 be sent to the server. This sample conforms to the schema above. Use the command 
 below to get the sample.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema-sample AssetForm
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema-sample<span class="w"> </span>AssetForm
 </code></pre></div>
 <p>Using the schema and the example above, we have added below data to the 
 file <code>/tmp/add-asset.json</code>. Example below will load <code>p3.properties</code> file as
@@ -9170,22 +9170,22 @@ a custom asset to the <code>jans-auth</code> service.</p>
 <span class="normal"> 9</span>
 <span class="normal">10</span>
 <span class="normal">11</span>
-<span class="normal">12</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p3.properties&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text description&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;jansService&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;jans-auth&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;jansLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">144</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;jansEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;assetFile&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/tmp/p3.properties&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">12</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p3.properties&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text description&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;jansService&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;jans-auth&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;jansLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">144</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;jansEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;assetFile&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/tmp/p3.properties&quot;</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 Now let's post this Assert to the Janssen Server to be added to the existing set:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code> jans cli --operation-id post-new-asset <span class="se">\</span>
- --data /tmp/add-asset.json
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="w"> </span>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>post-new-asset<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span>--data<span class="w"> </span>/tmp/add-asset.json
 </code></pre></div>
 <h3 id="update-existing-custom-assets">Update Existing Custom Assets<a class="headerlink" href="#update-existing-custom-assets" title="Permanent link">#</a></h3>
 <p>Use the <code>put-asset</code> operation to update an existing asset. This operation uses
@@ -9204,20 +9204,20 @@ assuming that there is an existing asset as show below:</p>
 <span class="normal">11</span>
 <span class="normal">12</span>
 <span class="normal">13</span>
-<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fd67d07b-c874-4bc1-a9f0-860fc4f7a091&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p.properties&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Valid text description&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cHJvcGVydGllcyBoZXJlLiAK\r\n&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-07-31T07:40:03&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;jansService&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;jans-auth&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;jansLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">142</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;jansEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fd67d07b-c874-4bc1-a9f0-860fc4f7a091&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p.properties&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Valid text description&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cHJvcGVydGllcyBoZXJlLiAK\r\n&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-07-31T07:40:03&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jansService&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;jans-auth&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;jansLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">142</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jansEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans&quot;</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -9240,26 +9240,26 @@ content in it. Let's name this text file as <code>/tmp/update-asset.json</code><
 <span class="normal">13</span>
 <span class="normal">14</span>
 <span class="normal">15</span>
-<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fd67d07b-c874-4bc1-a9f0-860fc4f7a091&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p.properties&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Valid text description&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cHJvcGVydGllcyBoZXJlLiAK\r\n&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-07-31T07:40:03&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;jansService&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;jans-auth&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;jansLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;jansEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;assetFile&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/tmp/p.properties&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fd67d07b-c874-4bc1-a9f0-860fc4f7a091&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p.properties&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Valid text description&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cHJvcGVydGllcyBoZXJlLiAK\r\n&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-07-31T07:40:03&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;jansService&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;jans-auth&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;jansLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;jansEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;assetFile&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/tmp/p.properties&quot;</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <p>Now use the command below to update the asset with new value for level.</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id put-asset <span class="se">\</span>
---data /tmp/update-asset.json
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>put-asset<span class="w"> </span><span class="se">\</span>
+--data<span class="w"> </span>/tmp/update-asset.json
 </code></pre></div>
 <p>Upon successful execution, this command will return with updated asset values.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Return values</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -9275,31 +9275,31 @@ content in it. Let's name this text file as <code>/tmp/update-asset.json</code><
 <span class="normal">11</span>
 <span class="normal">12</span>
 <span class="normal">13</span>
-<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fd67d07b-c874-4bc1-a9f0-860fc4f7a091&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p.properties&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Valid text description&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cHJvcGVydGllcyBoZXJlLiAK\r\n&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-07-31T07:40:03&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;jansService&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;jans-auth&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;jansLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;jansEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fd67d07b-c874-4bc1-a9f0-860fc4f7a091&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p.properties&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Valid text description&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;document&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cHJvcGVydGllcyBoZXJlLiAK\r\n&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-07-31T07:40:03&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jansService&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;jans-auth&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;jansLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jansEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans&quot;</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="delete-custom-asset">Delete Custom Asset<a class="headerlink" href="#delete-custom-asset" title="Permanent link">#</a></h3>
 <p>You can delete any custom asset by its <code>inum</code> value.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id delete-asset <span class="se">\</span>
---url-suffix inum:61edc29d-45f8-4ab9-8c9a-7b39e4cbe440
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>delete-asset<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="w"> </span>inum:61edc29d-45f8-4ab9-8c9a-7b39e4cbe440
 </code></pre></div>
 <h2 id="using-text-based-ui">Using Text-based UI<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
 <p>In Janssen, You can deploy custom asset using
 the <a href="../config-tools/jans-tui/">Text-Based UI</a> also.</p>
 <p>You can start TUI using the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans tui
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>tui
 </code></pre></div>
 <h3 id="asset-screen">Asset Screen<a class="headerlink" href="#asset-screen" title="Permanent link">#</a></h3>
 <p>Navigate to <code>Assets</code> tab to open the Assets screen as shown in the image below.</p>

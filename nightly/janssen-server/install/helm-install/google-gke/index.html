@@ -8863,27 +8863,27 @@ helm install nginx ingress-nginx/ingress-nginx
 <div class="highlight"><pre><span></span><code>kubectl get svc nginx-ingress-nginx-controller --output jsonpath=&#39;{.status.loadBalancer.ingress[0].ip}&#39;
 </code></pre></div></p>
 <p>Add the following yaml snippet to your <code>override.yaml</code> file:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">lbIp</span><span class="p">:</span><span class="w"> </span><span class="c1">#Add the Loadbalance IP from the previous command</span><span class="w"></span>
-<span class="w">    </span><span class="nt">isFqdnRegistered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">lbIp</span><span class="p">:</span><span class="w"> </span><span class="c1">#Add the Loadbalance IP from the previous command</span>
+<span class="w">    </span><span class="nt">isFqdnRegistered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </code></pre></div>
 </li>
 <li>
 <p>FQDN/domain is registered:</p>
 <p>Add the following yaml snippet to your <code>override.yaml</code> file:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">lbIp</span><span class="p">:</span><span class="w"> </span><span class="c1">#Add the LoadBalancer IP from the previous command</span><span class="w"></span>
-<span class="w">    </span><span class="nt">isFqdnRegistered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">    </span><span class="nt">fqdn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoexample.jans.io</span><span class="w"> </span><span class="c1">#CHANGE-THIS to the FQDN used for Jans</span><span class="w"></span>
-<span class="nt">nginx-ingress</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span><span class="w"></span>
-<span class="w">      </span><span class="nt">hosts</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoexample.jans.io</span><span class="w"> </span><span class="c1">#CHANGE-THIS to the FQDN used for Jans</span><span class="w"></span>
-<span class="w">      </span><span class="nt">tls</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">secretName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tls-certificate</span><span class="w"></span>
-<span class="w">        </span><span class="nt">hosts</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoexample.jans.io</span><span class="w"> </span><span class="c1">#CHANGE-THIS to the FQDN used for Jans</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">lbIp</span><span class="p">:</span><span class="w"> </span><span class="c1">#Add the LoadBalancer IP from the previous command</span>
+<span class="w">    </span><span class="nt">isFqdnRegistered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">fqdn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoexample.jans.io</span><span class="w"> </span><span class="c1">#CHANGE-THIS to the FQDN used for Jans</span>
+<span class="nt">nginx-ingress</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">      </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoexample.jans.io</span><span class="w"> </span><span class="c1">#CHANGE-THIS to the FQDN used for Jans</span>
+<span class="w">      </span><span class="nt">tls</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">secretName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tls-certificate</span>
+<span class="w">        </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoexample.jans.io</span><span class="w"> </span><span class="c1">#CHANGE-THIS to the FQDN used for Jans</span>
 </code></pre></div>
 </li>
 <li>
@@ -8893,17 +8893,17 @@ helm install nginx ingress-nginx/ingress-nginx
 <div class="highlight"><pre><span></span><code>helm install my-release --set auth.postgresPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/postgresql
 </code></pre></div>
 <p>Add the following yaml snippet to your <code>override.yaml</code> file:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">cnPersistenceType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sql</span><span class="w"></span>
-<span class="nt">config</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">configmap</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqlDbName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jans</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqlDbPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5432</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqlDbDialect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pgsql</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqlDbHost</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-release-postgresql.jans.svc</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqlDbUser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">postgres</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqlDbTimezone</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UTC</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqldbUserPassword</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test1234#</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cnPersistenceType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sql</span>
+<span class="nt">config</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">configmap</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">cnSqlDbName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jans</span>
+<span class="w">    </span><span class="nt">cnSqlDbPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5432</span>
+<span class="w">    </span><span class="nt">cnSqlDbDialect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pgsql</span>
+<span class="w">    </span><span class="nt">cnSqlDbHost</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-release-postgresql.jans.svc</span>
+<span class="w">    </span><span class="nt">cnSqlDbUser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">postgres</span>
+<span class="w">    </span><span class="nt">cnSqlDbTimezone</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UTC</span>
+<span class="w">    </span><span class="nt">cnSqldbUserPassword</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test1234#</span>
 </code></pre></div>
 </li>
 <li>
@@ -8913,42 +8913,42 @@ helm install nginx ingress-nginx/ingress-nginx
 <div class="highlight"><pre><span></span><code>helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/mysql
 </code></pre></div>
 <p>Add the following yaml snippet to your <code>override.yaml</code> file:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">cnPersistenceType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sql</span><span class="w"></span>
-<span class="nt">config</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">configmap</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqlDbName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jans</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqlDbPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3306</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqlDbDialect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqlDbHost</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-release-mysql.jans.svc</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqlDbUser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">root</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqlDbTimezone</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UTC</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqldbUserPassword</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test1234#</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cnPersistenceType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sql</span>
+<span class="nt">config</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">configmap</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">cnSqlDbName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jans</span>
+<span class="w">    </span><span class="nt">cnSqlDbPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3306</span>
+<span class="w">    </span><span class="nt">cnSqlDbDialect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql</span>
+<span class="w">    </span><span class="nt">cnSqlDbHost</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-release-mysql.jans.svc</span>
+<span class="w">    </span><span class="nt">cnSqlDbUser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">root</span>
+<span class="w">    </span><span class="nt">cnSqlDbTimezone</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UTC</span>
+<span class="w">    </span><span class="nt">cnSqldbUserPassword</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test1234#</span>
 </code></pre></div>
 <p>So if your desired configuration has FQDN and MySQL, the final <code>override.yaml</code> file will look something like that:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">cnPersistenceType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sql</span><span class="w"></span>
-<span class="w">  </span><span class="nt">lbIp</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="c1">#Add the LoadBalancer IP from previous command</span><span class="w"></span>
-<span class="w">  </span><span class="nt">isFqdnRegistered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">  </span><span class="nt">fqdn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoexample.jans.io</span><span class="w"> </span><span class="c1">#CHANGE-THIS to the FQDN used for Jans</span><span class="w"></span>
-<span class="nt">nginx-ingress</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span><span class="w"></span>
-<span class="w">      </span><span class="nt">hosts</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoexample.jans.io</span><span class="w"> </span><span class="c1">#CHANGE-THIS to the FQDN used for Jans</span><span class="w"></span>
-<span class="w">      </span><span class="nt">tls</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">secretName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tls-certificate</span><span class="w"></span>
-<span class="w">        </span><span class="nt">hosts</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoexample.jans.io</span><span class="w"> </span><span class="c1">#CHANGE-THIS to the FQDN used for Jans  </span><span class="w"></span>
-<span class="nt">config</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">configmap</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqlDbName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jans</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqlDbPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3306</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqlDbDialect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqlDbHost</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-release-mysql.jans.svc</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqlDbUser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">root</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqlDbTimezone</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UTC</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSqldbUserPassword</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test1234#</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cnPersistenceType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sql</span>
+<span class="w">  </span><span class="nt">lbIp</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="c1">#Add the LoadBalancer IP from previous command</span>
+<span class="w">  </span><span class="nt">isFqdnRegistered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">fqdn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoexample.jans.io</span><span class="w"> </span><span class="c1">#CHANGE-THIS to the FQDN used for Jans</span>
+<span class="nt">nginx-ingress</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">      </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoexample.jans.io</span><span class="w"> </span><span class="c1">#CHANGE-THIS to the FQDN used for Jans</span>
+<span class="w">      </span><span class="nt">tls</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">secretName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tls-certificate</span>
+<span class="w">        </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoexample.jans.io</span><span class="w"> </span><span class="c1">#CHANGE-THIS to the FQDN used for Jans  </span>
+<span class="nt">config</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">configmap</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">cnSqlDbName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jans</span>
+<span class="w">    </span><span class="nt">cnSqlDbPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3306</span>
+<span class="w">    </span><span class="nt">cnSqlDbDialect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql</span>
+<span class="w">    </span><span class="nt">cnSqlDbHost</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-release-mysql.jans.svc</span>
+<span class="w">    </span><span class="nt">cnSqlDbUser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">root</span>
+<span class="w">    </span><span class="nt">cnSqlDbTimezone</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UTC</span>
+<span class="w">    </span><span class="nt">cnSqldbUserPassword</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test1234#</span>
 </code></pre></div>
 </li>
 </ul>

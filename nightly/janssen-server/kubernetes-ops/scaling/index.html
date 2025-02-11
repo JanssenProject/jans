@@ -8743,7 +8743,7 @@
 <ol>
 <li>
 <p>Install metrics server</p>
-<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml</span>
 </code></pre></div>
 </li>
 <li>
@@ -8752,16 +8752,16 @@
 </ol>
 <p>It is configured and enabled by default in the deployed <code>jans</code> components. </p>
 <p>The default configuration scales in and out based on the CPU utilization of the pods.</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&lt;component-name&gt;</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">hpa</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">      </span><span class="nt">minReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<span class="w">      </span><span class="nt">maxReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
-<span class="w">      </span><span class="nt">targetCPUUtilizationPercentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># -- metrics if targetCPUUtilizationPercentage is not set</span><span class="w"></span>
-<span class="w">      </span><span class="nt">metrics</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># -- Scaling Policies</span><span class="w"></span>
-<span class="w">      </span><span class="nt">behavior</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;component-name&gt;</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">hpa</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">minReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">maxReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">      </span><span class="nt">targetCPUUtilizationPercentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+<span class="w">      </span><span class="c1"># -- metrics if targetCPUUtilizationPercentage is not set</span>
+<span class="w">      </span><span class="nt">metrics</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="w">      </span><span class="c1"># -- Scaling Policies</span>
+<span class="w">      </span><span class="nt">behavior</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
 </code></pre></div>
 <h4 id="cluster-autoscaler">Cluster Autoscaler<a class="headerlink" href="#cluster-autoscaler" title="Permanent link">#</a></h4>
 <p>Cluster Autoscaler automatically resizes the number of <code>nodes</code> in a given node pool, based on the demands of your workloads. </p>
@@ -8769,7 +8769,7 @@
 <h3 id="manual-scaling">Manual Scaling<a class="headerlink" href="#manual-scaling" title="Permanent link">#</a></h3>
 <p>Kubernetes also offers the option to manually scale your resources.</p>
 <p>For example, you can increase <code>manually</code> the pod replicas of auth-server deployment using the following command: </p>
-<div class="highlight"><pre><span></span><code>kubectl scale --replicas<span class="o">=</span><span class="m">3</span> deployment/auth-server -n &lt;namespace&gt;
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>scale<span class="w"> </span>--replicas<span class="o">=</span><span class="m">3</span><span class="w"> </span>deployment/auth-server<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
 </code></pre></div>
 
   <hr>

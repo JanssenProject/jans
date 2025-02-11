@@ -8928,7 +8928,7 @@ Postman. Learn how to use Janssen Server Config API
 command line. To get the details of Janssen command line operations relevant to
 Agama projects, you can check the operations under <code>Agama</code> task using the
 command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --info Agama
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--info<span class="w"> </span>Agama
 </code></pre></div>
 <p>It will show the details of the available operation-ids for Agama.</p>
 <div class="highlight"><pre><span></span><code>Operation ID: get-agama-prj-by-name
@@ -8965,7 +8965,7 @@ projects via the command line using the above operations.</p>
 <h3 id="list-deployed-projects">List Deployed Projects<a class="headerlink" href="#list-deployed-projects" title="Permanent link">#</a></h3>
 <p>Use the <code>get-agama-prj</code> operation to retrieve the list of deployed Agama
 projects:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-agama-prj
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-agama-prj
 </code></pre></div>
 <p>The output will list Agama projects that are added to this Janssen Server
 deployment.</p>
@@ -8999,37 +8999,37 @@ deployment.</p>
 <span class="normal">28</span>
 <span class="normal">29</span>
 <span class="normal">30</span>
-<span class="normal">31</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;totalEntriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;entriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;entries&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=46546e9a-fed6-34d0-ba63-b615233b2115,ou=deployments,ou=agama,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;46546e9a-fed6-34d0-ba63-b615233b2115&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;createdAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-08-13T14:45:27&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;taskActive&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;finishedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-08-13T14:45:43&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;details&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;There were problems processing one or more flows&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;flowsError&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;mmrraju.np.test.me&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;mmrraju.test2.agama&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;mmrraju.u2f.me&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Syntax error: mismatched input &#39;&lt;EOF&gt;&#39; expecting {&#39;|&#39;, &#39;Log&#39;, &#39;Trigger&#39;, &#39;Call&#39;, &#39;RRF&#39;, &#39;When&#39;, &#39;Repeat&#39;, &#39;Iterate over&#39;, &#39;Match&#39;, &#39;Finish&#39;, &#39;RFAC&#39;, ALPHANUM, QNAME, DOTEXPR, DOTIDXEXPR, WS}\nSymbol: [@9,43:42=&#39;&lt;EOF&gt;&#39;,&lt;-1&gt;,2:23]\nLine: 2\nColumn: 24&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;projectMetadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;projectName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user_pass_auth&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mmrraju&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;community&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;This is password based authentication&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0.34&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">      </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=46546e9a-fed6-34d0-ba63-b615233b2115,ou=deployments,ou=agama,o=jans&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">31</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;totalEntriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;entriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;entries&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=46546e9a-fed6-34d0-ba63-b615233b2115,ou=deployments,ou=agama,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;46546e9a-fed6-34d0-ba63-b615233b2115&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;createdAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-08-13T14:45:27&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;taskActive&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;finishedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-08-13T14:45:43&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;details&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;There were problems processing one or more flows&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;flowsError&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;mmrraju.np.test.me&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;mmrraju.test2.agama&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;mmrraju.u2f.me&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Syntax error: mismatched input &#39;&lt;EOF&gt;&#39; expecting {&#39;|&#39;, &#39;Log&#39;, &#39;Trigger&#39;, &#39;Call&#39;, &#39;RRF&#39;, &#39;When&#39;, &#39;Repeat&#39;, &#39;Iterate over&#39;, &#39;Match&#39;, &#39;Finish&#39;, &#39;RFAC&#39;, ALPHANUM, QNAME, DOTEXPR, DOTIDXEXPR, WS}\nSymbol: [@9,43:42=&#39;&lt;EOF&gt;&#39;,&lt;-1&gt;,2:23]\nLine: 2\nColumn: 24&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;projectMetadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;projectName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user_pass_auth&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mmrraju&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;community&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;This is password based authentication&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0.34&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=46546e9a-fed6-34d0-ba63-b615233b2115,ou=deployments,ou=agama,o=jans&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h4 id="endpoint-arguments">Endpoint Arguments<a class="headerlink" href="#endpoint-arguments" title="Permanent link">#</a></h4>
 <p>Endpoint arguments are parameters passed to an API or function to specify
@@ -9046,7 +9046,7 @@ how and what data to retrieve or process.</p>
 </ul>
 <p>For example, to fetch details of the project at index 1 only, use the command
 below.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-agama-prj --endpoint-args start:1,count:1
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-agama-prj<span class="w"> </span>--endpoint-args<span class="w"> </span>start:1,count:1
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -9070,37 +9070,37 @@ below.</p>
 <span class="normal">20</span>
 <span class="normal">21</span>
 <span class="normal">22</span>
-<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;totalEntriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;entriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;entries&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=3a0e91a4-b79b-37c2-9df7-122247e8ed9c,ou=deployments,ou=agama,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3a0e91a4-b79b-37c2-9df7-122247e8ed9c&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;createdAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-08-15T05:56:19&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;taskActive&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;finishedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-08-15T05:56:42&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;details&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Archive missing web and/or code subdirectories&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;flowsError&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;projectMetadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;projectName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testAuth&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">      </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=3a0e91a4-b79b-37c2-9df7-122247e8ed9c,ou=deployments,ou=agama,o=jans&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;totalEntriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;entriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;entries&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=3a0e91a4-b79b-37c2-9df7-122247e8ed9c,ou=deployments,ou=agama,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3a0e91a4-b79b-37c2-9df7-122247e8ed9c&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;createdAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-08-15T05:56:19&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;taskActive&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;finishedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-08-15T05:56:42&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;details&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Archive missing web and/or code subdirectories&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;flowsError&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;projectMetadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;projectName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testAuth&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=3a0e91a4-b79b-37c2-9df7-122247e8ed9c,ou=deployments,ou=agama,o=jans&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="view-agama-project-by-name">View Agama Project By Name<a class="headerlink" href="#view-agama-project-by-name" title="Permanent link">#</a></h3>
 <p>You can get the details of an Agama project deployed in the Janssen Server
 by the project name. The command line for this operation is as below:</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id get-agama-prj-by-name --url-suffix<span class="o">=</span><span class="s2">&quot;agama-project-name&quot;</span>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-agama-prj-by-name<span class="w"> </span>--url-suffix<span class="o">=</span><span class="s2">&quot;agama-project-name&quot;</span>
 </code></pre></div>
 <p><strong>Example:</strong>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id get-agama-prj-by-name --url-suffix<span class="o">=</span><span class="s2">&quot;testAuth&quot;</span>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-agama-prj-by-name<span class="w"> </span>--url-suffix<span class="o">=</span><span class="s2">&quot;testAuth&quot;</span>
 </code></pre></div></p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -9126,39 +9126,39 @@ by the project name. The command line for this operation is as below:</p>
 <span class="normal">22</span>
 <span class="normal">23</span>
 <span class="normal">24</span>
-<span class="normal">25</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=3a0e91a4-b79b-37c2-9df7-122247e8ed9c,ou=deployments,ou=agama,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3a0e91a4-b79b-37c2-9df7-122247e8ed9c&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;createdAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1687247278717</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;taskActive&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;finishedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1687247288646</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;assets&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;details&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;folders&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;libs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;flowsError&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;imShakil.co.basicAuth&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;projectMetadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;projectName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testAuth&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;imShakil&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;community&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testing authentication with janssen server&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=3a0e91a4-b79b-37c2-9df7-122247e8ed9c,ou=deployments,ou=agama,o=jans&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">25</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=3a0e91a4-b79b-37c2-9df7-122247e8ed9c,ou=deployments,ou=agama,o=jans&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3a0e91a4-b79b-37c2-9df7-122247e8ed9c&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;createdAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1687247278717</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;taskActive&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;finishedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1687247288646</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;assets&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;details&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;folders&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;libs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">&quot;flowsError&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;imShakil.co.basicAuth&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;projectMetadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;projectName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testAuth&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;imShakil&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;community&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testing authentication with janssen server&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=3a0e91a4-b79b-37c2-9df7-122247e8ed9c,ou=deployments,ou=agama,o=jans&quot;</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="post-agama-project-in-janssen">Post Agama Project in Janssen<a class="headerlink" href="#post-agama-project-in-janssen" title="Permanent link">#</a></h3>
 <p>You can deploy the Agama project in the Janssen Server through the command line
 using the <code>post-agama-prj</code> operation. Here the <code>agama-project-file</code> is an
 archive file that holds the bundled Agama project and follows the
 <a href="../../../../agama/gama-format/">.gama</a> specification.</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id post-agama-prj <span class="se">\</span>
---url-suffix<span class="o">=</span><span class="s2">&quot;name:project-name&quot;</span> --data agama-project-file
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>post-agama-prj<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="o">=</span><span class="s2">&quot;name:project-name&quot;</span><span class="w"> </span>--data<span class="w"> </span>agama-project-file
 </code></pre></div>
 <p><strong>Example:</strong></p>
 <p>Let's upload <a href="../../../../assets/agama/journey.zip">a test project</a> Zip file.
@@ -9167,19 +9167,19 @@ specification.
 Assuming that the zip file has been downloaded in the folder at
 path <code>/tmp/journey.zip</code>, the command below will upload a new Agama project with
 specified name in the Janssen Server.</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id<span class="o">=</span>post-agama-prj <span class="se">\</span>
---url-suffix<span class="o">=</span><span class="s2">&quot;name:Agama Lab Journey&quot;</span> --data /tmp/journey.zip
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="o">=</span>post-agama-prj<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="o">=</span><span class="s2">&quot;name:Agama Lab Journey&quot;</span><span class="w"> </span>--data<span class="w"> </span>/tmp/journey.zip
 </code></pre></div>
-<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A deployment task for project Agama Lab Journey has been queued. Use the GET endpoint to poll status&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A deployment task for project Agama Lab Journey has been queued. Use the GET endpoint to poll status&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>Now the project should be available in the
 <a href="#list-deployed-projects">list of deployed projects</a>.</p>
 <h3 id="retrieve-agama-project-configuration">Retrieve Agama Project Configuration<a class="headerlink" href="#retrieve-agama-project-configuration" title="Permanent link">#</a></h3>
 <p>To retrieve the Agama project configuration, use the <code>get-agama-prj-configs</code>
 operation.</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id get-agama-prj-configs <span class="se">\</span>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-agama-prj-configs<span class="w"> </span><span class="se">\</span>
 --url-suffix<span class="o">=</span><span class="s2">&quot;name:agama-project-name&quot;</span>
 </code></pre></div>
 <h3 id="update-agama-project">Update Agama Project<a class="headerlink" href="#update-agama-project" title="Permanent link">#</a></h3>
@@ -9190,8 +9190,8 @@ operation.</p>
 keep it under <code>/tmp/journey-configs.json</code>.</p>
 <p>Make a few test changes to the configuration and run the command below to
 update the configuration:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id<span class="o">=</span>put-agama-prj <span class="se">\</span>
---url-suffix <span class="s2">&quot;name:Agama Lab Journey&quot;</span> --data /tmp/journey-configs.json 
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="o">=</span>put-agama-prj<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="w"> </span><span class="s2">&quot;name:Agama Lab Journey&quot;</span><span class="w"> </span>--data<span class="w"> </span>/tmp/journey-configs.json<span class="w"> </span>
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
@@ -9200,23 +9200,23 @@ update the configuration:</p>
 <span class="normal">5</span>
 <span class="normal">6</span>
 <span class="normal">7</span>
-<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;io.jans.agamaLab.registration&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;io.jans.agamaLab.main&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;io.jans.agamaLab.credsEnrollment.otp&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;io.jans.agamaLab.authenticator.super_gluu&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;io.jans.agamaLab.credsEnrollment.super_gluu&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;io.jans.agamaLab.githubAuthn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;io.jans.agamaLab.registration&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;io.jans.agamaLab.main&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;io.jans.agamaLab.credsEnrollment.otp&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;io.jans.agamaLab.authenticator.super_gluu&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;io.jans.agamaLab.credsEnrollment.super_gluu&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;io.jans.agamaLab.githubAuthn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="delete-agama-project">Delete Agama Project<a class="headerlink" href="#delete-agama-project" title="Permanent link">#</a></h3>
 <p>To delete an Agama project by its name, use the <code>delete-agama-prj</code> operation.</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id delete-agama-prj --url-suffix<span class="o">=</span><span class="s2">&quot;agama-project-name&quot;</span>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>delete-agama-prj<span class="w"> </span>--url-suffix<span class="o">=</span><span class="s2">&quot;agama-project-name&quot;</span>
 </code></pre></div>
 <h3 id="agama-flow-configuration">Agama Flow Configuration<a class="headerlink" href="#agama-flow-configuration" title="Permanent link">#</a></h3>
 <p><code>AgamaConfiguration</code> task groups operations that help understand the correctness
 of the deployed Agama project configuration.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --info AgamaConfiguration
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--info<span class="w"> </span>AgamaConfiguration
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
@@ -9229,11 +9229,11 @@ of the deployed Agama project configuration.</p>
 <h4 id="agama-flow-dsl-syntax">Agama Flow DSL Syntax<a class="headerlink" href="#agama-flow-dsl-syntax" title="Permanent link">#</a></h4>
 <p>To check if a deployed Agama project is running into Agama
 DSL related errors, use the <code>agama-syntax-check</code> operation as below:</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id agama-syntax-check <span class="se">\</span>
---url-suffix qname:<span class="s2">&quot;fully-qualified-flow-name&quot;</span>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>agama-syntax-check<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="w"> </span>qname:<span class="s2">&quot;fully-qualified-flow-name&quot;</span>
 </code></pre></div>
 <p><strong><em>Example</em></strong>:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id agama-syntax-check --url-suffix qname:<span class="s2">&quot;imShakil.co.test&quot;</span>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>agama-syntax-check<span class="w"> </span>--url-suffix<span class="w"> </span>qname:<span class="s2">&quot;imShakil.co.test&quot;</span>
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
@@ -9241,19 +9241,19 @@ DSL related errors, use the <code>agama-syntax-check</code> operation as below:<
 <span class="normal">4</span>
 <span class="normal">5</span>
 <span class="normal">6</span>
-<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mismatched input &#39;newline&#39; expecting &#39;Flow&#39;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;symbol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;[@0,0:-1=&#39;newline&#39;,&lt;9&gt;,1:0]&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;line&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;column&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Syntax error: mismatched input &#39;newline&#39; expecting &#39;Flow&#39;\nSymbol: [@0,0:-1=&#39;newline&#39;,&lt;9&gt;,1:0]\nLine: 1\nColumn: 1&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mismatched input &#39;newline&#39; expecting &#39;Flow&#39;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;symbol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;[@0,0:-1=&#39;newline&#39;,&lt;9&gt;,1:0]&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;line&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;column&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Syntax error: mismatched input &#39;newline&#39; expecting &#39;Flow&#39;\nSymbol: [@0,0:-1=&#39;newline&#39;,&lt;9&gt;,1:0]\nLine: 1\nColumn: 1&quot;</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h2 id="using-text-based-ui">Using Text-based UI<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
 <p>In Janssen, You can deploy and customize an Agama project using
 the <a href="../../config-tools/jans-tui/">Text-Based UI</a> also.</p>
 <p>You can start TUI using the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans tui
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>tui
 </code></pre></div>
 <h3 id="agama-project-screen">Agama Project Screen<a class="headerlink" href="#agama-project-screen" title="Permanent link">#</a></h3>
 <p>Navigate to <code>Auth Server</code> -&gt; <code>Agama</code> to open the Agama projects screen as shown 

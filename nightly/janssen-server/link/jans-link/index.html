@@ -8753,114 +8753,114 @@ Upon <a href="https://docs.jans.
 io/head/admin/install/vm-install/ubuntu/">installation</a> you can select if you want 
 to install this Service along with other Janssen Server components. Post 
 installation, to add Jans-Link component, use the following:</p>
-<div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-setup/setup.py --install-jans-link<span class="sb">`</span>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>/opt/jans/jans-setup/setup.py<span class="w"> </span>--install-jans-link<span class="sb">`</span>
 </code></pre></div>
 <p>Jans LDAP link gets installed as a service that can be managed using below 
 commands.</p>
 <p>To Satrt Jans-Link </p>
-<div class="highlight"><pre><span></span><code>systemctl start jans-link
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>start<span class="w"> </span>jans-link
 </code></pre></div>
 <p>To check status </p>
-<div class="highlight"><pre><span></span><code>systemctl status jans-link
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>jans-link
 </code></pre></div>
 <p>To Stop Jans-Link </p>
-<div class="highlight"><pre><span></span><code>systemctl stop jans-link
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>stop<span class="w"> </span>jans-link
 </code></pre></div>
 <h2 id="jans-ldap-link-configuration">Jans LDAP Link Configuration<a class="headerlink" href="#jans-ldap-link-configuration" title="Permanent link">#</a></h2>
 <h3 id="using-jans-cli">Using Jans CLI<a class="headerlink" href="#using-jans-cli" title="Permanent link">#</a></h3>
 <p>Janssen Server <a href="../../config-guide/config-tools/jans-cli/">CLI</a> provides
 number of operations and metadata information about Jans LDAP link.</p>
 <p>To see Jans-Link info using Jans CLI
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info JansLinkConfiguration
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--info<span class="w"> </span>JansLinkConfiguration
 </code></pre></div></p>
 <p>To see Jans Link properties using below command.
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-jans-link-properties
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--operation-id<span class="w"> </span>get-jans-link-properties
 </code></pre></div></p>
 <p>To see basic schema of Jans-Link use below command
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema <span class="s2">&quot;Jans Link Plugin:AppConfiguration&quot;</span>
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--schema<span class="w"> </span><span class="s2">&quot;Jans Link Plugin:AppConfiguration&quot;</span>
 </code></pre></div></p>
 <p>Output of above command will be similar to this:
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;inumConfig&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;configId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;local_inum&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;bindDN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cn=directory manager&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;bindPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;+iChsQofo6Y=&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;localhost:1636&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;maxConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;baseDNs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;ou=link,o=site&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;useAnonymousBind&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;targetConfig&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;maxConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;useAnonymousBind&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;ldapSearchSizeLimit&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;keyAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;uid&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;keyObjectClasses&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;gluuPerson&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;sourceAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;mail&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;cn&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;sn&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;updateMethod&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;copy&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;defaultInumServer&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;keepExternalPerson&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;useSearchLimit&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;attributeMapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uid&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;destination&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uid&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cn&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;destination&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cn&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sn&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;destination&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sn&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;snapshotFolder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/var/jans/link-snapshots&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;snapshotMaxCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;baseDN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;personObjectClassTypes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;jansCustomPerson&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;jansPerson&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;eduPerson&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;personCustomObjectClass&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansCustomPerson&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;allowPersonModification&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;supportedUserStatus&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;active&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;inactive&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;metricReporterInterval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;metricReporterKeepDataDays&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;disableJdkLogger&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;cleanServiceInterval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;linkEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;serverIpAddress&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;255.255.255.255&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;lastUpdate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-07-05T18:27:28&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;lastUpdateCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;problemCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;useLocalCache&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;inumConfig&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;configId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;local_inum&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;bindDN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cn=directory manager&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;bindPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;+iChsQofo6Y=&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;localhost:1636&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;maxConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;baseDNs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;ou=link,o=site&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;useAnonymousBind&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;targetConfig&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;maxConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;useAnonymousBind&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;ldapSearchSizeLimit&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;keyAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;uid&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;keyObjectClasses&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;gluuPerson&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;sourceAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;mail&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;cn&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;sn&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;updateMethod&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;copy&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;defaultInumServer&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;keepExternalPerson&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;useSearchLimit&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;attributeMapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uid&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;destination&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uid&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cn&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;destination&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cn&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sn&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;destination&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sn&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;snapshotFolder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/var/jans/link-snapshots&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;snapshotMaxCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;baseDN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;o=jans&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;personObjectClassTypes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;jansCustomPerson&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;jansPerson&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;eduPerson&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;personCustomObjectClass&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansCustomPerson&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;allowPersonModification&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;supportedUserStatus&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;active&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;inactive&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;metricReporterInterval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;metricReporterKeepDataDays&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;disableJdkLogger&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;cleanServiceInterval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;linkEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;serverIpAddress&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;255.255.255.255&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;lastUpdate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-07-05T18:27:28&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;lastUpdateCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;problemCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;useLocalCache&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="p">}</span>
 </code></pre></div></p>
 <h2 id="using-jans-tui">Using Jans TUI<a class="headerlink" href="#using-jans-tui" title="Permanent link">#</a></h2>
 <p>Janssen Server <a href="../../config-guide/config-tools/jans-tui/">TUI</a> provides
@@ -8983,7 +8983,7 @@ anyway).</p>
 <p>Use the command ldapsearch to check to see if results are starting to come in. The following command will search for the total number of users in the Jans LDAP:</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>/opt/opendj/bin/ldapsearch -h localhost -p <span class="m">1636</span> -Z -X -D <span class="s2">&quot;cn=directory manager&quot;</span> -w &lt;pass&gt; -b <span class="s2">&quot;ou=people,o=DA....,o=jans&quot;</span> dn <span class="p">|</span> grep <span class="s2">&quot;dn\:&quot;</span> <span class="p">|</span> wc -l
+<div class="highlight"><pre><span></span><code>/opt/opendj/bin/ldapsearch<span class="w"> </span>-h<span class="w"> </span>localhost<span class="w"> </span>-p<span class="w"> </span><span class="m">1636</span><span class="w"> </span>-Z<span class="w"> </span>-X<span class="w"> </span>-D<span class="w"> </span><span class="s2">&quot;cn=directory manager&quot;</span><span class="w"> </span>-w<span class="w"> </span>&lt;pass&gt;<span class="w"> </span>-b<span class="w"> </span><span class="s2">&quot;ou=people,o=DA....,o=jans&quot;</span><span class="w"> </span>dn<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;dn\:&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l
 </code></pre></div>
 <p>Try to log in with one of these users. We assume that you have also set up your 
 Jans Server to use the correct LDAP server for authentication.</p>

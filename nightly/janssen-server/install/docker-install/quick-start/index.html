@@ -8721,7 +8721,7 @@
 <p>Installation depends on a <a href="https://github.com/JanssenProject/jans/tree/main/docker-jans-monolith#environment-variables">set of environment variables</a>.
 These environment variables can be set to customize installation as per the need. If not set, the installer uses default values.</p>
 <p>Run this command to start the installation:</p>
-<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/startjanssenmonolithdemo.sh <span class="o">&amp;&amp;</span> chmod u+x startjanssenmonolithdemo.sh <span class="o">&amp;&amp;</span> sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL <span class="s2">&quot;&quot;</span> main
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssenmonolithdemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>chmod<span class="w"> </span>u+x<span class="w"> </span>startjanssenmonolithdemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>startjanssenmonolithdemo.sh<span class="w"> </span>demoexample.jans.io<span class="w"> </span>MYSQL<span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"> </span>main
 </code></pre></div>
 <p>Console messages like below confirms the successful installation:</p>
 <div class="highlight"><pre><span></span><code>[+] Running 3/3
@@ -8736,7 +8736,7 @@ Testing openid-configuration endpoint..
 <h2 id="verify-installation-by-accessing-standard-endpoints">Verify Installation By Accessing Standard Endpoints<a class="headerlink" href="#verify-installation-by-accessing-standard-endpoints" title="Permanent link">#</a></h2>
 <p>To access Janssen Server standard endpoints from outside of the Docker container, systems <code>/etc/hosts</code> file needs to be updated. Open the file and add the IP domain record which should be the IP of the instance docker is installed. And the domain used in the env above <code>CN_HOSTNAME</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># For-example</span>
-<span class="m">172</span>.22.0.3      demoexample.jans.io
+<span class="m">172</span>.22.0.3<span class="w">      </span>demoexample.jans.io
 </code></pre></div>
 <p>After adding the record, hit the standard endpoints such as </p>
 <div class="highlight"><pre><span></span><code>https://demoexample.jans.io/.well-known/openid-configuration
@@ -8745,7 +8745,7 @@ Testing openid-configuration endpoint..
 <ol>
 <li>
 <p>Access the Docker container shell using:</p>
-<div class="highlight"><pre><span></span><code>docker <span class="nb">exec</span> -ti docker-jans-monolith-jans-1 bash
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-ti<span class="w"> </span>docker-jans-monolith-jans-1<span class="w"> </span>bash
 </code></pre></div>
 </li>
 <li>
@@ -8753,7 +8753,7 @@ Testing openid-configuration endpoint..
 </li>
 <li>
 <p>Use the CLI tools located under <code>/opt/jans/jans-cli/</code> to configure Janssen Server as needed. For example you can run the <a href="../../../config-guide/config-tools/jans-tui/">TUI</a>:
-    <div class="highlight"><pre><span></span><code>jans tui
+    <div class="highlight"><pre><span></span><code>jans<span class="w"> </span>tui
 </code></pre></div></p>
 </li>
 </ol>

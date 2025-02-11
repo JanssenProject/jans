@@ -8701,60 +8701,60 @@ Custom script allows inject/modify response from Health Check Endpoint.</p>
 </tbody>
 </table>
 <h3 id="saample-scrip-in-java">Saample Scrip in Java<a class="headerlink" href="#saample-scrip-in-java" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">io.jans.as.server._scripts</span><span class="p">;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">io.jans.as.server._scripts</span><span class="p">;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.server.service.external.context.ExternalScriptContext</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.model.CustomScript</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.health.HealthCheckType</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.custom.script.CustomScriptManager</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">jakarta.servlet.http.HttpServletRequest</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.server.service.external.context.ExternalScriptContext</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.model.CustomScript</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.health.HealthCheckType</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.custom.script.CustomScriptManager</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jakarta.servlet.http.HttpServletRequest</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * @author Yuriy Z</span>
-<span class="cm"> */</span><span class="w"></span>
-<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">HealthCheck</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">HealthCheckType</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="cm"> */</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">HealthCheck</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">HealthCheckType</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">log</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">HealthCheck</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">scriptLogger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">CustomScriptManager</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">log</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">HealthCheck</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">scriptLogger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">CustomScriptManager</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">healthCheck</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">ExternalScriptContext</span><span class="w"> </span><span class="n">scriptContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ExternalScriptContext</span><span class="p">)</span><span class="w"> </span><span class="n">context</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="n">HttpServletRequest</span><span class="w"> </span><span class="n">httpRequest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scriptContext</span><span class="p">.</span><span class="na">getExecutionContext</span><span class="p">().</span><span class="na">getHttpRequest</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">healthCheck</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ExternalScriptContext</span><span class="w"> </span><span class="n">scriptContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ExternalScriptContext</span><span class="p">)</span><span class="w"> </span><span class="n">context</span><span class="p">;</span>
+<span class="w">        </span><span class="n">HttpServletRequest</span><span class="w"> </span><span class="n">httpRequest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scriptContext</span><span class="p">.</span><span class="na">getExecutionContext</span><span class="p">().</span><span class="na">getHttpRequest</span><span class="p">();</span>
 
-<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">appStatus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;running&quot;</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">dbStatus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;online&quot;</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">String</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;{\&quot;status\&quot;: \&quot;%s\&quot;, \&quot;db_status\&quot;:\&quot;%s\&quot;}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">appStatus</span><span class="p">,</span><span class="w"> </span><span class="n">dbStatus</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">appStatus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;running&quot;</span><span class="p">;</span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">dbStatus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;online&quot;</span><span class="p">;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">String</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;{\&quot;status\&quot;: \&quot;%s\&quot;, \&quot;db_status\&quot;:\&quot;%s\&quot;}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">appStatus</span><span class="p">,</span><span class="w"> </span><span class="n">dbStatus</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Initialized HealthCheck Java custom script.&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Initialized HealthCheck Java custom script.&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">CustomScript</span><span class="w"> </span><span class="n">customScript</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Initialized HealthCheck Java custom script.&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">CustomScript</span><span class="w"> </span><span class="n">customScript</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Initialized HealthCheck Java custom script.&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Destroyed HealthCheck Java custom script.&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Destroyed HealthCheck Java custom script.&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">11</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">11</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="sample-scripts">Sample Scripts<a class="headerlink" href="#sample-scripts" title="Permanent link">#</a></h2>
 <ul>

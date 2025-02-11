@@ -8679,7 +8679,7 @@
 </tr>
 </tbody>
 </table>
-<p>To update this setting in Jans persistence, follow this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script">link</a></p>
+<p>To update this setting in Jans persistence, follow this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script">link</a></p>
 <h3 id="enable-sign-in-with-apple-authentication-script">Enable Sign-in with Apple Authentication script<a class="headerlink" href="#enable-sign-in-with-apple-authentication-script" title="Permanent link">#</a></h3>
 <p>By default, users will get the default authentication mechanism as specified above. However, using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism.</p>
 <p>Obtain the json contents of <code>apple</code> custom script by using a jans-cli command like get-config-scripts-by-type, get-config-scripts-by-inum etc.
@@ -8689,7 +8689,7 @@ Update the custom script and change the enabled attribute to <code>true</code>
 Now Sign-in with Apple is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect acr_values, applications can now request Apple authentication for users.</p>
 <p>!!! Note To make sure <code>apple</code> has been enabled successfully, you can check your Janssen's Auth Server OpenID Connect configuration by navigating to the following URL: https://<hostname>/.well-known/openid-configuration. Find "acr_values_supported": and you should see "apple".</p>
 <h3 id="make-sign-in-with-apple-script-as-default-authentication-script">Make Sign-in with Apple Script as default authentication script:<a class="headerlink" href="#make-sign-in-with-apple-script-as-default-authentication-script" title="Permanent link">#</a></h3>
-<p>Use this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md">link</a> as a reference.</p>
+<p>Use this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md">link</a> as a reference.</p>
 <p>Steps:
 1. Create a file say <code>apple-auth-default.json</code> with the following contents
 <div class="highlight"><pre><span></span><code>{
@@ -8699,7 +8699,7 @@ Now Sign-in with Apple is an available authentication mechanism for your Janssen
 2.Update the default authentication method to Apple Sign-in
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-acrs --data /tmp/apple-auth-default.json
 </code></pre></div></p>
-<p><img alt="📝" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/1f4dd.svg" title=":memo:" /> <strong>NOTE</strong></p>
+<p><img alt="📝" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@14.1.2/assets/svg/1f4dd.svg" title=":memo:" /> <strong>NOTE</strong></p>
 <p>To make sure <code>apple</code> has been enabled successfully as a default authentication method, you can check your Janssen Server's OpenID Connect configuration by navigating to the following URL: <code>https://&lt;hostname&gt;/.well-known/openid-configuration</code>. Find <code>"acr_values_supported":</code> and you should see <code>"apple"</code>.</p>
 <h2 id="test-the-feature-sign-in-with-apple">Test the feature - Sign-in with Apple<a class="headerlink" href="#test-the-feature-sign-in-with-apple" title="Permanent link">#</a></h2>
 <p>To test , enter the complete URL for authorization in a browser or create a simple webpage with a link that simulates the user sign-in attempt. If the server is configured properly, the first page for the selected authentication method will be displayed to the user.</p>

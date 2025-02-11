@@ -8801,7 +8801,7 @@ Postman. Learn how to use Janssen Server Config API
 command line. To get the details of Janssen command line operations relevant to
 SMTP Configuration, you can check the operations under <code>ConfigurationSmtp</code> 
 task using the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --info ConfigurationSmtp
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--info<span class="w"> </span>ConfigurationSmtp
 </code></pre></div>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Operation ID: get-config-smtp
  Description: Returns SMTP server configuration
@@ -8819,7 +8819,7 @@ Operation ID: test-config-smtp
 </code></pre></div>
 <h3 id="find-smtp-server-configuration">Find SMTP Server Configuration<a class="headerlink" href="#find-smtp-server-configuration" title="Permanent link">#</a></h3>
 <p>To view the current SMTP server configuration, run the following command line:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-config-smtp
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-config-smtp
 </code></pre></div>
 <p>It will show the SMTP server configuration as below:</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -8831,16 +8831,16 @@ Operation ID: test-config-smtp
 <span class="normal"> 7</span>
 <span class="normal"> 8</span>
 <span class="normal"> 9</span>
-<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;valid&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;trust_host&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;requires_authentication&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;key_store&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/etc/certs/smtp-keys.pkcs12&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;key_store_password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kb5JITTrmCyX1LNEp8uorA==&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;key_store_alias&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;smtp_sig_ec256&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;signing_algorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SHA256withECDSA&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;valid&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;trust_host&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;requires_authentication&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;key_store&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/etc/certs/smtp-keys.pkcs12&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;key_store_password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kb5JITTrmCyX1LNEp8uorA==&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;key_store_alias&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;smtp_sig_ec256&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;signing_algorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SHA256withECDSA&quot;</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="setup-new-smtp-server-configuration">Setup New SMTP Server Configuration<a class="headerlink" href="#setup-new-smtp-server-configuration" title="Permanent link">#</a></h3>
 <p>To add a new SMTP Server, we can use <code>post-config-smtp</code> operation id.
@@ -8848,11 +8848,11 @@ As shown in the <a href="#using-command-line">output</a> for<code>--info</code>
 command, the <code>post-config-smtp</code> operation requires data to be sent 
 according to the <code>SmtpConfiguration</code> schema.</p>
 <p>To see the schema, use the command below:
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema SmtpConfiguration 
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema<span class="w"> </span>SmtpConfiguration<span class="w"> </span>
 </code></pre></div></p>
 <p>The Janssen Server also provides an example of data that adheres to the above schema.
 To fetch the example, use the command below.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema-sample SmtpConfiguration 
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema-sample<span class="w"> </span>SmtpConfiguration<span class="w"> </span>
 </code></pre></div>
 <p>Using the schema and the example above, we have added below  data to the file 
 <code>/tmp/smtp.json</code>.</p>
@@ -8871,26 +8871,26 @@ To fetch the example, use the command below.</p>
 <span class="normal">13</span>
 <span class="normal">14</span>
 <span class="normal">15</span>
-<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;valid&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;connect_protection&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;StartTls&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;trust_host&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;from_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;from_email_address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;requires_authentication&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;smtp_authentication_account_username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;smtp_authentication_account_password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;key_store&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;key_store_password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;key_store_alias&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;signing_algorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;valid&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;connect_protection&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;StartTls&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;trust_host&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;from_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;from_email_address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;requires_authentication&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;smtp_authentication_account_username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;smtp_authentication_account_password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;key_store&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;key_store_password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;key_store_alias&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;signing_algorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <p>To setup a new SMTP server configuration, run the following command:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id post-config-smtp <span class="se">\</span>
---data /tmp/smtp.json
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>post-config-smtp<span class="w"> </span><span class="se">\</span>
+--data<span class="w"> </span>/tmp/smtp.json
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -8907,50 +8907,50 @@ To fetch the example, use the command below.</p>
 <span class="normal">13</span>
 <span class="normal">14</span>
 <span class="normal">15</span>
-<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;valid&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;connect_protection&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;StartTls&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;trust_host&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;from_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;from_email_address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;requires_authentication&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;smtp_authentication_account_username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;smtp_authentication_account_password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CGmVqM6v4Hs=&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;key_store&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;key_store_password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CGmVqM6v4Hs=&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;key_store_alias&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;signing_algorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;valid&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;connect_protection&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;StartTls&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;trust_host&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;from_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;from_email_address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;requires_authentication&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;smtp_authentication_account_username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;smtp_authentication_account_password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CGmVqM6v4Hs=&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;key_store&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;key_store_password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CGmVqM6v4Hs=&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;key_store_alias&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;signing_algorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="update-smtp-server-configuration">Update SMTP Server Configuration<a class="headerlink" href="#update-smtp-server-configuration" title="Permanent link">#</a></h3>
 <p>To update the SMTP server, we can use the <code>put-config-smtp</code> operation id. 
 simply change any information on <code>/tmp/smtp.json</code>file and run the following 
 command:</p>
 <p>In that file, update the value <code>false</code> to <code>true</code> of the <code>trust_host</code> field.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id put-config-smtp <span class="se">\</span>
---data /tmp/smtp.json
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>put-config-smtp<span class="w"> </span><span class="se">\</span>
+--data<span class="w"> </span>/tmp/smtp.json
 </code></pre></div>
 It will update the information.</p>
 <h3 id="delete-smtp-sever-configuration">Delete SMTP Sever Configuration<a class="headerlink" href="#delete-smtp-sever-configuration" title="Permanent link">#</a></h3>
 <p>To delete the SMTP Sever, we can use the <code>delete-config-smtp</code> operation id.
 run the following command</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id delete-config-smtp
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>delete-config-smtp
 </code></pre></div>
 <h3 id="test-smtp-server-configuration">Test SMTP Server Configuration<a class="headerlink" href="#test-smtp-server-configuration" title="Permanent link">#</a></h3>
 <p>Testing SMTP Server configuration token with <code>https://jans.io/oauth/config/smtp.write</code> 
 scope is required. To test the SMTP server configuration update, change any information 
 on the <code>/tmp/smtp.json</code> file with test data and run the following command:</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id test-config-smtp <span class="se">\</span>
---data /tmp/smtp.json
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>test-config-smtp<span class="w"> </span><span class="se">\</span>
+--data<span class="w"> </span>/tmp/smtp.json
 </code></pre></div>
 This will return status code 200 with a response as true or false based on the 
 SMTP test result.
 Note:  <code>SMTP Password</code> should be an App password and not a web login password.</p>
 <h2 id="using-text-based-ui">Using Text-based UI<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
 <p>Start TUI using the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans tui
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>tui
 </code></pre></div>
 <h3 id="smpt-screen">SMPT Screen<a class="headerlink" href="#smpt-screen" title="Permanent link">#</a></h3>
 <p>Navigate to <code>Auth Server</code> -&gt; <code>SMPT</code> to open the SMPT screen as shown

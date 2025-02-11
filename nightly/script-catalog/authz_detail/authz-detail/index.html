@@ -8663,28 +8663,28 @@
 This script is used to control/customize single authorization detail from <code>authorization_details</code> array.</p>
 <h2 id="behavior">Behavior<a class="headerlink" href="#behavior" title="Permanent link">#</a></h2>
 <p>In request to Authorization Endpoint and to Token Endpoint RP can specify <code>authorization_details</code> request parameter which specifies JSON array.</p>
-<div class="highlight"><pre><span></span><code><span class="p">[</span><span class="w"></span>
-<span class="w">   </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo_authz_detail&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;actions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">          </span><span class="s2">&quot;list_accounts&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="s2">&quot;read_balances&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;locations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">          </span><span class="s2">&quot;https://example.com/accounts&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;ui_representation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Read balances and list accounts at https://example.com/accounts&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">},</span><span class="w"></span>
-<span class="w">   </span><span class="p">{</span><span class="w"></span>
-<span class="w">       </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;financial-transaction&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="nt">&quot;actions&quot;</span><span class="p">:[</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;withdraw&quot;</span><span class="w"></span>
-<span class="w">       </span><span class="p">],</span><span class="w"></span>
-<span class="w">       </span><span class="nt">&quot;identifier&quot;</span><span class="p">:</span><span class="s2">&quot;account-14-32-32-3&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="nt">&quot;currency&quot;</span><span class="p">:</span><span class="s2">&quot;USD&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="nt">&quot;ui_representation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Withdraw money from account-14-32-32-3&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">[</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo_authz_detail&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;actions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;list_accounts&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;read_balances&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;locations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;https://example.com/accounts&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;ui_representation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Read balances and list accounts at https://example.com/accounts&quot;</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">       </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;financial-transaction&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="nt">&quot;actions&quot;</span><span class="p">:[</span>
+<span class="w">           </span><span class="s2">&quot;withdraw&quot;</span>
+<span class="w">       </span><span class="p">],</span>
+<span class="w">       </span><span class="nt">&quot;identifier&quot;</span><span class="p">:</span><span class="s2">&quot;account-14-32-32-3&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="nt">&quot;currency&quot;</span><span class="p">:</span><span class="s2">&quot;USD&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="nt">&quot;ui_representation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Withdraw money from account-14-32-32-3&quot;</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">]</span>
 </code></pre></div>
 <p><code>type</code> defines type of authorization detail. Each such type is represented by AS <code>AuthzDetailType</code> custom scripts.
 It means that for example above administrator must define two <code>AuthzDetailType</code> custom scripts with names: <code>demo_authz_detail</code> and <code>financial-transaction</code>. </p>
@@ -8747,11 +8747,11 @@ response_type=code&amp;client_id=7a29bf35-96ec-4bbd-a05c-15e1ff9f07cc&amp;scope=
 <p><code>validateDetail</code> method returns true/false which indicates to server whether the validation of single authorization detail (from <code>authorization_details</code> array) is passed or failed.
 If at least one element from <code>authorization_details</code> array fails validation error is returned by AS.</p>
 <p><code>getUiRepresentation</code> method returns string and represents single authorization detail as string on UI. Authorization detail can have "ui_representation" json key which makes implementation as simple as following:</p>
-<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getUiRepresentation</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">scriptContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">ExternalScriptContext</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ExternalScriptContext</span><span class="p">)</span><span class="w"> </span><span class="n">scriptContext</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getAuthzDetail</span><span class="p">().</span><span class="na">getJsonObject</span><span class="p">().</span><span class="na">optString</span><span class="p">(</span><span class="s">&quot;ui_representation&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getUiRepresentation</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">scriptContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ExternalScriptContext</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ExternalScriptContext</span><span class="p">)</span><span class="w"> </span><span class="n">scriptContext</span><span class="p">;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getAuthzDetail</span><span class="p">().</span><span class="na">getJsonObject</span><span class="p">().</span><span class="na">optString</span><span class="p">(</span><span class="s">&quot;ui_representation&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
 </code></pre></div>
 <h3 id="objects">Objects<a class="headerlink" href="#objects" title="Permanent link">#</a></h3>
 <table>
@@ -8783,25 +8783,25 @@ If at least one element from <code>authorization_details</code> array fails vali
 <div class="highlight"><pre><span></span><code><span class="cm">/*</span>
 <span class="cm"> Copyright (c) 2023, Gluu</span>
 <span class="cm"> Author: Yuriy Z</span>
-<span class="cm"> */</span><span class="w"></span>
+<span class="cm"> */</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.server.service.external.context.ExternalScriptContext</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.model.CustomScript</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.authzdetails.AuthzDetailType</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.custom.script.CustomScriptManager</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.server.service.external.context.ExternalScriptContext</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.model.CustomScript</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.authzdetails.AuthzDetailType</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.custom.script.CustomScriptManager</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * @author Yuriy Z</span>
-<span class="cm"> */</span><span class="w"></span>
-<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">AuthzDetail</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">AuthzDetailType</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="cm"> */</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">AuthzDetail</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">AuthzDetailType</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">log</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">AuthzDetail</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">scriptLogger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">CustomScriptManager</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">log</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">AuthzDetail</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">scriptLogger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">CustomScriptManager</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/**</span>
 <span class="cm">     * All validation logic of single authorization detail must take place in this method.</span>
@@ -8809,48 +8809,48 @@ If at least one element from <code>authorization_details</code> array fails vali
 <span class="cm">     *</span>
 <span class="cm">     * @param scriptContext script context. Authz detail can be taken as &quot;context.getAuthzDetail()&quot;.</span>
 <span class="cm">     * @return whether single authorization detail is valid or not</span>
-<span class="cm">     */</span><span class="w"></span>
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">validateDetail</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">scriptContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">ExternalScriptContext</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ExternalScriptContext</span><span class="p">)</span><span class="w"> </span><span class="n">scriptContext</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getAuthzDetail</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">validateDetail</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">scriptContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ExternalScriptContext</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ExternalScriptContext</span><span class="p">)</span><span class="w"> </span><span class="n">scriptContext</span><span class="p">;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getAuthzDetail</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="cm">/**</span>
 <span class="cm">     * Method returns single authorization detail string representation which is shown on authorization page by AS.</span>
 <span class="cm">     *</span>
 <span class="cm">     * @param scriptContext script context. Authz detail can be taken as &quot;context.getAuthzDetail()&quot;.</span>
 <span class="cm">     * @return returns single authorization details string representation which is shown on authorization page by AS.</span>
-<span class="cm">     */</span><span class="w"></span>
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getUiRepresentation</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">scriptContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">ExternalScriptContext</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ExternalScriptContext</span><span class="p">)</span><span class="w"> </span><span class="n">scriptContext</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getAuthzDetail</span><span class="p">().</span><span class="na">getJsonObject</span><span class="p">().</span><span class="na">optString</span><span class="p">(</span><span class="s">&quot;ui_representation&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getUiRepresentation</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">scriptContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ExternalScriptContext</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ExternalScriptContext</span><span class="p">)</span><span class="w"> </span><span class="n">scriptContext</span><span class="p">;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getAuthzDetail</span><span class="p">().</span><span class="na">getJsonObject</span><span class="p">().</span><span class="na">optString</span><span class="p">(</span><span class="s">&quot;ui_representation&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Initialized AuthzDetail Java custom script.&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Initialized AuthzDetail Java custom script.&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">CustomScript</span><span class="w"> </span><span class="n">customScript</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Initialized AuthzDetail Java custom script.&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">CustomScript</span><span class="w"> </span><span class="n">customScript</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Initialized AuthzDetail Java custom script.&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Destroyed AuthzDetail Java custom script.&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Destroyed AuthzDetail Java custom script.&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">11</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">11</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="sample-scripts">Sample Scripts<a class="headerlink" href="#sample-scripts" title="Permanent link">#</a></h2>
 <ul>

@@ -8617,7 +8617,7 @@
 <h2 id="configuration-prerequisites">Configuration Prerequisites<a class="headerlink" href="#configuration-prerequisites" title="Permanent link">#</a></h2>
 <ul>
 <li>A Janssen Authorization Server installation</li>
-<li><a href="https://github.com/JanssenProject/jans/blob/nightly/jans-linux-setup/jans_setup/openbanking/static/extension/client_registration/Registration.py">Client Registration script</a> - included in the default Janssen OpenBanking distribution</li>
+<li><a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-linux-setup/jans_setup/openbanking/static/extension/client_registration/Registration.py">Client Registration script</a> - included in the default Janssen OpenBanking distribution</li>
 <li>Setting configuration parameters</li>
 <li>Setting third party library (Jose4j) in classpath </li>
 </ul>
@@ -8734,24 +8734,24 @@
 </li>
 <li>
 <p>Create a <code>ConfigMap</code> containing the jar.</p>
-<div class="highlight"><pre><span></span><code>kubectl create cm jose4j -n &lt;gluu-namespace&gt; --from-file<span class="o">=</span>jose4j-0.7.7.jar
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>create<span class="w"> </span>cm<span class="w"> </span>jose4j<span class="w"> </span>-n<span class="w"> </span>&lt;gluu-namespace&gt;<span class="w"> </span>--from-file<span class="o">=</span>jose4j-0.7.7.jar
 </code></pre></div>
 </li>
 <li>
 <p>Add the volume and volume mount to <code>auth-server</code> in your <a href="https://gluu.org/docs/openbanking/install-cn/#helm-valuesyaml"><code>override.yaml</code></a> helm configuration.</p>
-<div class="highlight"><pre><span></span><code><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jose4j</span><span class="w"></span>
-<span class="w">      </span><span class="nt">configMap</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jose4j</span><span class="w"></span>
-<span class="nt">volumeMounts</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jose4j</span><span class="w"></span>
-<span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/opt/jans/jetty/jans-auth/custom/libs/jose4j-0.7.7.jar&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="nt">subPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jose4j-0.7.7.jar</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jose4j</span>
+<span class="w">      </span><span class="nt">configMap</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jose4j</span>
+<span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jose4j</span>
+<span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/opt/jans/jetty/jans-auth/custom/libs/jose4j-0.7.7.jar&quot;</span>
+<span class="w">        </span><span class="nt">subPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jose4j-0.7.7.jar</span>
 </code></pre></div>
 </li>
 <li>
 <p>Run helm upgrade.</p>
-<div class="highlight"><pre><span></span><code>helm upgrade gluu gluu/gluu -n &lt;gluu-namespace&gt; --version<span class="o">=</span><span class="m">5</span>.0.0 -f override.yaml
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>gluu<span class="w"> </span>gluu/gluu<span class="w"> </span>-n<span class="w"> </span>&lt;gluu-namespace&gt;<span class="w"> </span>--version<span class="o">=</span><span class="m">5</span>.0.0<span class="w"> </span>-f<span class="w"> </span>override.yaml
 </code></pre></div>
 </li>
 </ol>

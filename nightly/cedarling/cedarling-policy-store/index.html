@@ -8887,18 +8887,18 @@
 <p><strong>Note:</strong> The <code>cedarling_store.json</code> file is only needed if the bootstrap properties: <code>CEDARLING_LOCK</code>; <code>CEDARLING_POLICY_STORE_URI</code>; and <code>CEDARLING_POLICY_STORE_ID</code> are not set to a local location. If you're fetching the policies remotely, you don't need a <code>cedarling_store.json</code> file.</p>
 <h2 id="json-schema">JSON Schema<a class="headerlink" href="#json-schema" title="Permanent link">#</a></h2>
 <p>The JSON Schema accepted by cedarling is defined as follows:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v4.0.0&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;policy_stores&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;some_unique_string_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestPolicy&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Once upon a time there was a Policy, that lived in a Store.&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
-<span class="w">      </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v4.0.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;policy_stores&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;some_unique_string_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestPolicy&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Once upon a time there was a Policy, that lived in a Store.&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
 <ul>
 <li><strong>cedar_version</strong> : (<em>String</em>) The version of <a href="https://docs.cedarpolicy.com/">Cedar policy</a>. The protocols of this version will be followed when processing Cedar schema and policies.</li>
@@ -8909,27 +8909,27 @@
 <h3 id="schema"><code>schema</code><a class="headerlink" href="#schema" title="Permanent link">#</a></h3>
 <p>Either <em>String</em> or <em>Object</em>, where <em>Object</em> is preferred.</p>
 <p>Where <em>Object</em> - An object with <code>encoding</code>, <code>content_type</code> and <code>body</code> keys. For example:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;encoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// can be one of &quot;none&quot; or &quot;base64&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;content_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// can be one of &quot;cedar&quot; or &quot;cedar-json&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;namespace Jans {\ntype Url = {&quot;</span><span class="err">hos</span><span class="kc">t</span><span class="s2">&quot;: String, &quot;</span><span class="err">pa</span><span class="kc">t</span><span class="err">h</span><span class="s2">&quot;: String, &quot;</span><span class="err">pro</span><span class="kc">t</span><span class="err">ocol</span><span class="s2">&quot;: String};...&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;encoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// can be one of &quot;none&quot; or &quot;base64&quot;</span>
+<span class="w">    </span><span class="nt">&quot;content_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// can be one of &quot;cedar&quot; or &quot;cedar-json&quot;</span>
+<span class="w">    </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;namespace Jans {\ntype Url = {&quot;</span><span class="err">hos</span><span class="kc">t</span><span class="s2">&quot;: String, &quot;</span><span class="err">pa</span><span class="kc">t</span><span class="err">h</span><span class="s2">&quot;: String, &quot;</span><span class="err">pro</span><span class="kc">t</span><span class="err">ocol</span><span class="s2">&quot;: String};...&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>Where <em>String</em> - The schema in cedar-json format, encoded as Base64. For example:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cGVybWl0KAogICAgc...&quot;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cGVybWl0KAogICAgc...&quot;</span>
 </code></pre></div>
 <h2 id="cedar-policies-schema">Cedar Policies Schema<a class="headerlink" href="#cedar-policies-schema" title="Permanent link">#</a></h2>
 <p>The <code>policies</code> field describes the Cedar policies that will be used in Cedarling. Multiple policies can be defined, with each policy requiring a <code>unique_policy_id</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;unique_policy_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;cedar_version&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v4.0.0&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Policy for Unique Id&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple policy example&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T17:22:39.996050&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="err">...</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;unique_policy_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;cedar_version&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v4.0.0&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Policy for Unique Id&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple policy example&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T17:22:39.996050&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="err">...</span>
+<span class="w">  </span><span class="p">}</span>
 </code></pre></div>
 <ul>
 <li><strong>unique_policy_id</strong>: (<em>String</em>) A uniqe policy ID used to for tracking and auditing purposes.</li>
@@ -8941,78 +8941,78 @@
 <h3 id="policy_content"><code>policy_content</code><a class="headerlink" href="#policy_content" title="Permanent link">#</a></h3>
 <p>Either <em>String</em> or <em>Object</em>, where <em>Object</em> is preferred.</p>
 <p>Where <em>Object</em> - An object with <code>encoding</code>, <code>content_type</code> and <code>body</code> keys. For example:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;encoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// can be one of &quot;none&quot; or &quot;base64&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;content_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// ONLY &quot;cedar&quot; for now due to limitations in cedar-policy crate</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;permit(\n    principal is Jans::User,\n    action in [Jans::Action::\&quot;Update\&quot;],\n    resource is Jans::Issue\n)when{\n    principal.country == resource.country\n};&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;encoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// can be one of &quot;none&quot; or &quot;base64&quot;</span>
+<span class="w">    </span><span class="nt">&quot;content_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// ONLY &quot;cedar&quot; for now due to limitations in cedar-policy crate</span>
+<span class="w">    </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;permit(\n    principal is Jans::User,\n    action in [Jans::Action::\&quot;Update\&quot;],\n    resource is Jans::Issue\n)when{\n    principal.country == resource.country\n};&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>Where <em>String</em> - The policy in cedar format, encoded as Base64. For example:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cGVybWl0KAogICAgc...&quot;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cGVybWl0KAogICAgc...&quot;</span>
 </code></pre></div>
 <h3 id="example-of-policies">Example of <code>policies</code><a class="headerlink" href="#example-of-policies" title="Permanent link">#</a></h3>
 <p>Here is a non-normative example of the <code>policies</code> field:</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v2.7.4&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Policy-the-first&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple policy example for principal workload&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T17:22:39.996050&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cGVybWl0KAogICAgc...&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;0fo1kl928Afa0sc9123scma0123891asklajsh1233ab&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v2.7.4&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Policy-the-second&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;another policy example&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T18:22:39.192051&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kJW1bWl0KA0g3CAxa...&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;1fo1kl928Afa0sc9123scma0123891asklajsh1233ac&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v2.7.4&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Policy-the-third&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;another policy example&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T18:22:39.192051&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;encoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;content_type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;permit(...) where {...}&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;2fo1kl928Afa0sc9123scma0123891asklajsh1233ad&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v2.7.4&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Policy-the-fourth&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;another policy example&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T18:22:39.192051&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;encoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;base64&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;content_type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kJW1bWl0KA0g3CAxa...&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="err">...</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v2.7.4&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Policy-the-first&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple policy example for principal workload&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T17:22:39.996050&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cGVybWl0KAogICAgc...&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;0fo1kl928Afa0sc9123scma0123891asklajsh1233ab&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v2.7.4&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Policy-the-second&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;another policy example&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T18:22:39.192051&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kJW1bWl0KA0g3CAxa...&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;1fo1kl928Afa0sc9123scma0123891asklajsh1233ac&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v2.7.4&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Policy-the-third&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;another policy example&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T18:22:39.192051&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;encoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;content_type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;permit(...) where {...}&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;2fo1kl928Afa0sc9123scma0123891asklajsh1233ad&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v2.7.4&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Policy-the-fourth&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;another policy example&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T18:22:39.192051&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;encoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;base64&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;content_type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kJW1bWl0KA0g3CAxa...&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="err">...</span>
+<span class="w">  </span><span class="p">}</span>
 </code></pre></div>
 <h2 id="trusted-issuers-schema">Trusted Issuers Schema<a class="headerlink" href="#trusted-issuers-schema" title="Permanent link">#</a></h2>
 <p>This record contains the information needed to validate tokens from this issuer:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;identity_source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;some_unique_id&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_trusted_issuer&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;description for the trusted issuer&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://&lt;trusted-issuer-hostname&gt;/.well-known/openid-configuration&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;tokens_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;access_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="err">...</span><span class="w"></span>
-<span class="w">      </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;userinfo_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;tx_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="err">...</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="err">...</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;identity_source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;some_unique_id&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_trusted_issuer&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;description for the trusted issuer&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://&lt;trusted-issuer-hostname&gt;/.well-known/openid-configuration&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;tokens_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;access_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="err">...</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;id_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;userinfo_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;tx_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="err">...</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="err">...</span>
+<span class="p">}</span>
 </code></pre></div>
 <ul>
 <li><strong>name</strong> : (<em>String</em>) The name of the trusted issuer.</li>
@@ -9023,17 +9023,17 @@
 </ul>
 <h3 id="token-metadata-schema">Token Metadata Schema<a class="headerlink" href="#token-metadata-schema" title="Permanent link">#</a></h3>
 <p>The Token Entity Metadata Schema defines how tokens are mapped, parsed, and transformed within Cedarling. It allows you to specify how to extract user IDs, roles, and other claims from a token using customizable parsers.</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;field name in token (e.g., &#39;email&#39;, &#39;sub&#39;, &#39;uid&#39;, etc.) or &#39;&#39; if not used&gt;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;field for role assignment (e.g., &#39;role&#39;, &#39;memberOf&#39;, etc.) or &#39;&#39; if not used&gt;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;claim_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;mapping_target&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;parser&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;type of parser (&#39;regex&#39; or &#39;json&#39;)&gt;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;type identifier (e.g., &#39;Acme::Email&#39;)&gt;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;...&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Additional configurations specific to the parser&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;field name in token (e.g., &#39;email&#39;, &#39;sub&#39;, &#39;uid&#39;, etc.) or &#39;&#39; if not used&gt;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;field for role assignment (e.g., &#39;role&#39;, &#39;memberOf&#39;, etc.) or &#39;&#39; if not used&gt;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;claim_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;mapping_target&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;parser&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;type of parser (&#39;regex&#39; or &#39;json&#39;)&gt;&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;type identifier (e.g., &#39;Acme::Email&#39;)&gt;&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;...&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Additional configurations specific to the parser&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="p">}</span>
 </code></pre></div>
 <h4 id="role-mapping">Role mapping<a class="headerlink" href="#role-mapping" title="Permanent link">#</a></h4>
 <ul>
@@ -9054,93 +9054,93 @@ If none <code>role_mapping</code> defined the <code>Cedarling</code> will try to
 <p>Note, use of regex <strong>named capture groups</strong> which is more readable by referring to parts of a regex match by descriptive names rather than numbers. For example, <code>(?P&lt;name&gt;...)</code> defines a named capture group where name is the identifier, and ... is the regex pattern for what you want to capture.</p>
 <p>When you use <code>(?x)</code> modifier in regexp, ensure that you escaped character <code>#</code> =&gt; <code>\#</code>.</p>
 <p>example of mapping <code>email_address</code> and <code>Url</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="err">...</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;claim_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;parser&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;regex&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test::email_address&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;regex_expression&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^(?P&lt;UID&gt;[^@]+)@(?P&lt;DOMAIN&gt;.+)$&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;UID&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uid&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;DOMAIN&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;domain&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;profile&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;parser&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;regex&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test::Url&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;regex_expression&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;(?x) ^(?P&lt;SCHEME&gt;[a-zA-Z][a-zA-Z0-9+.-]*):\\/\\/(?P&lt;HOST&gt;[^\\/:\\#?]+)(?::(?&lt;PORT&gt;\\d+))?(?P&lt;PATH&gt;\\/[^?\\#]*)?(?:\\?(?P&lt;QUERY&gt;[^\\#]*))?(?:(?P&lt;FRAGMENT&gt;.*))?&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;SCHEME&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;scheme&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;HOST&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;host&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;PORT&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;port&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;PATH&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;path&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;QUERY&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;query&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;FRAGMENT&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fragment&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="err">...</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="err">...</span>
+<span class="w">  </span><span class="nt">&quot;claim_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;parser&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test::email_address&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;regex_expression&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^(?P&lt;UID&gt;[^@]+)@(?P&lt;DOMAIN&gt;.+)$&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;UID&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uid&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;DOMAIN&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;domain&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;profile&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;parser&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test::Url&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;regex_expression&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;(?x) ^(?P&lt;SCHEME&gt;[a-zA-Z][a-zA-Z0-9+.-]*):\\/\\/(?P&lt;HOST&gt;[^\\/:\\#?]+)(?::(?&lt;PORT&gt;\\d+))?(?P&lt;PATH&gt;\\/[^?\\#]*)?(?:\\?(?P&lt;QUERY&gt;[^\\#]*))?(?:(?P&lt;FRAGMENT&gt;.*))?&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;SCHEME&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;scheme&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;HOST&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;host&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;PORT&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;port&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;PATH&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;path&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;QUERY&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;query&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;FRAGMENT&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fragment&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="err">...</span>
 </code></pre></div>
 <h2 id="example-policy-store">Example Policy store<a class="headerlink" href="#example-policy-store" title="Permanent link">#</a></h2>
 <p>Here is a non-normative example of a <code>cedarling_store.json</code> file:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v4.0.0&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple policy example&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T17:22:39.996050&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar_policy_encoded_in_base64&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema_encoded_in_base64&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;identity_source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;08c6c18a654f492adcf3fe069d729b4d9e6bf82605cb&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Google&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Consumer IDP&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://accounts.google.com/.well-known/openid-configuration&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;access_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">              </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="p">},</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;id_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">              </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sub&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="p">},</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;userinfo_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">              </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="p">},</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;tx_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">              </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v4.0.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple policy example&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T17:22:39.996050&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar_policy_encoded_in_base64&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema_encoded_in_base64&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;identity_source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;08c6c18a654f492adcf3fe069d729b4d9e6bf82605cb&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Google&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Consumer IDP&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://accounts.google.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;access_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;id_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sub&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;userinfo_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;tx_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="p">},</span><span class="w">            </span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="policy-and-schema-authoring">Policy and Schema Authoring<a class="headerlink" href="#policy-and-schema-authoring" title="Permanent link">#</a></h2>
 <p>You can hand create your Cedar policies and schema in

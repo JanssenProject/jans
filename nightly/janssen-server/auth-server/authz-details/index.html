@@ -8696,27 +8696,27 @@
 <p>While <code>scope</code> is used for coarse-grained access, <code>authorization_details</code> is used for fine-grained access.</p>
 <p><code>authorization_details</code> are associated with authorization and thus with client to limit what authorization can be granted within given client.</p>
 <p><code>authorization_details</code> is JSON array, example:</p>
-<div class="highlight"><pre><span></span><code><span class="p">[</span><span class="w"></span>
-<span class="w">   </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo_authz_detail&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;actions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">          </span><span class="s2">&quot;list_accounts&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="s2">&quot;read_balances&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;locations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">          </span><span class="s2">&quot;https://example.com/accounts&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;ui_representation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Read balances and list accounts at https://example.com/accounts&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">},</span><span class="w"></span>
-<span class="w">   </span><span class="p">{</span><span class="w"></span>
-<span class="w">       </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;financial-transaction&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="nt">&quot;actions&quot;</span><span class="p">:[</span><span class="w"></span>
-<span class="w">           </span><span class="s2">&quot;withdraw&quot;</span><span class="w"></span>
-<span class="w">       </span><span class="p">],</span><span class="w"></span>
-<span class="w">       </span><span class="nt">&quot;identifier&quot;</span><span class="p">:</span><span class="s2">&quot;account-14-32-32-3&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="nt">&quot;currency&quot;</span><span class="p">:</span><span class="s2">&quot;USD&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">[</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo_authz_detail&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;actions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;list_accounts&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;read_balances&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;locations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;https://example.com/accounts&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;ui_representation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Read balances and list accounts at https://example.com/accounts&quot;</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">       </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;financial-transaction&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="nt">&quot;actions&quot;</span><span class="p">:[</span>
+<span class="w">           </span><span class="s2">&quot;withdraw&quot;</span>
+<span class="w">       </span><span class="p">],</span>
+<span class="w">       </span><span class="nt">&quot;identifier&quot;</span><span class="p">:</span><span class="s2">&quot;account-14-32-32-3&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="nt">&quot;currency&quot;</span><span class="p">:</span><span class="s2">&quot;USD&quot;</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">]</span>
 </code></pre></div>
 <h3 id="authorization-details-types">Authorization Details Types<a class="headerlink" href="#authorization-details-types" title="Permanent link">#</a></h3>
 <p><code>type</code> - is required element in single authorization detail and specifies the authorization details type as a string.

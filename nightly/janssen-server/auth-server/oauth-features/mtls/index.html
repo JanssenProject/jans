@@ -9148,7 +9148,7 @@ of a building.</p>
 <p>The information below belongs to <code>apache</code> and web client (usually web browser) mutual authentication setup method. This
 also includes basic checks to be performed for the setup.</p>
 <p>Is <code>mod_ssl</code> installed: Run below command to confirm if the ssl module is installed.</p>
-<div class="highlight"><pre><span></span><code>apachectl -M <span class="p">|</span> grep ssl
+<div class="highlight"><pre><span></span><code>apachectl<span class="w"> </span>-M<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>ssl
 </code></pre></div>
 <p>If we get <code>ssl_module</code> related output, then we're good to proceed. The output could look like:</p>
 <div class="highlight"><pre><span></span><code>root@jans:~# apachectl -M | grep ssl
@@ -9161,14 +9161,14 @@ necessary. But if we want to use self-signed certs, then follow on.</p>
 <p>Now, we're covering the case if you want to deploy your own CA Cert.</p>
 <h4 id="1-open-terminal">1. Open Terminal.<a class="headerlink" href="#1-open-terminal" title="Permanent link">#</a></h4>
 <h4 id="2-create-a-new-directory-to-generate-certificates">2. Create a new directory to generate certificates.<a class="headerlink" href="#2-create-a-new-directory-to-generate-certificates" title="Permanent link">#</a></h4>
-<div class="highlight"><pre><span></span><code>mkdir /etc/certs/mtlscert
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>/etc/certs/mtlscert
 </code></pre></div>
 <p>Change to the directory created.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span> /etc/certs/mtlscert
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/etc/certs/mtlscert
 </code></pre></div>
 <h4 id="3-generate-self-signed-ca-cert">3. Generate Self-Signed CA Cert.<a class="headerlink" href="#3-generate-self-signed-ca-cert" title="Permanent link">#</a></h4>
 <p>Run below command:</p>
-<div class="highlight"><pre><span></span><code>openssl req -newkey rsa:2048 -nodes -keyform PEM -keyout example-ca.key -x509 -days <span class="m">3650</span> -outform PEM -out example-ca.crt
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>req<span class="w"> </span>-newkey<span class="w"> </span>rsa:2048<span class="w"> </span>-nodes<span class="w"> </span>-keyform<span class="w"> </span>PEM<span class="w"> </span>-keyout<span class="w"> </span>example-ca.key<span class="w"> </span>-x509<span class="w"> </span>-days<span class="w"> </span><span class="m">3650</span><span class="w"> </span>-outform<span class="w"> </span>PEM<span class="w"> </span>-out<span class="w"> </span>example-ca.crt
 </code></pre></div>
 <p>Below is a sample run of the command.</p>
 <div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# openssl req -newkey rsa:2048 -nodes -keyform PEM -keyout example-ca.key -x509 -days 3650 -outform PEM -out example-ca.crt
@@ -9198,7 +9198,7 @@ example-ca.crt  example-ca.key
 </code></pre></div>
 <h4 id="4-generate-private-key">4. Generate private key.<a class="headerlink" href="#4-generate-private-key" title="Permanent link">#</a></h4>
 <p>Run below command:</p>
-<div class="highlight"><pre><span></span><code>openssl genrsa -out example.key <span class="m">2048</span>
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>genrsa<span class="w"> </span>-out<span class="w"> </span>example.key<span class="w"> </span><span class="m">2048</span>
 </code></pre></div>
 <p>Below is a sample run of the command.</p>
 <div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# openssl genrsa -out example.key 2048
@@ -9213,7 +9213,7 @@ example-ca.crt  example-ca.key  example.key
 </code></pre></div>
 <h4 id="5-generate-a-server-csr-certificate-signing-request">5. Generate a server CSR (Certificate Signing Request):<a class="headerlink" href="#5-generate-a-server-csr-certificate-signing-request" title="Permanent link">#</a></h4>
 <p>Run below command:</p>
-<div class="highlight"><pre><span></span><code>openssl req -new -key example.key -out example.csr
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>req<span class="w"> </span>-new<span class="w"> </span>-key<span class="w"> </span>example.key<span class="w"> </span>-out<span class="w"> </span>example.csr
 </code></pre></div>
 <p>Below is a sample run of the command.</p>
 <div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# openssl req -new -key example.key -out example.csr
@@ -9243,7 +9243,7 @@ example-ca.crt  example-ca.key  example.csr  example.key
 </code></pre></div>
 <h4 id="6-sign-the-csr-examplecsr-we-just-generated">6. Sign the CSR <code>example.csr</code> we just generated.<a class="headerlink" href="#6-sign-the-csr-examplecsr-we-just-generated" title="Permanent link">#</a></h4>
 <p>Run below command:</p>
-<div class="highlight"><pre><span></span><code>openssl x509 -req -in example.csr -CA example-ca.crt -CAkey example-ca.key -set_serial <span class="m">100</span> -days <span class="m">365</span> -outform PEM -out example.crt
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>x509<span class="w"> </span>-req<span class="w"> </span>-in<span class="w"> </span>example.csr<span class="w"> </span>-CA<span class="w"> </span>example-ca.crt<span class="w"> </span>-CAkey<span class="w"> </span>example-ca.key<span class="w"> </span>-set_serial<span class="w"> </span><span class="m">100</span><span class="w"> </span>-days<span class="w"> </span><span class="m">365</span><span class="w"> </span>-outform<span class="w"> </span>PEM<span class="w"> </span>-out<span class="w"> </span>example.crt
 </code></pre></div>
 <p>Below is a sample run of the command.</p>
 <div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# openssl x509 -req -in example.csr -CA example-ca.crt -CAkey example-ca.key -set_serial 100 -days 365 -outform PEM -out example.crt
@@ -9275,15 +9275,15 @@ certificate forward to <code>jans-auth</code> application. <code>jans-auth</code
 &lt;/LocationMatch&gt;
 </code></pre></div>
 <p>Now we must restart the Apache2 server.</p>
-<div class="highlight"><pre><span></span><code>service apache2 restart
+<div class="highlight"><pre><span></span><code>service<span class="w"> </span>apache2<span class="w"> </span>restart
 </code></pre></div>
 <p>To check if SSL cert on apache works:</p>
-<div class="highlight"><pre><span></span><code>openssl s_client -connect yourdomain.com:443
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>yourdomain.com:443
 </code></pre></div>
 <h3 id="client-side-mtls-setup">Client-Side mTLS setup<a class="headerlink" href="#client-side-mtls-setup" title="Permanent link">#</a></h3>
 <h4 id="1-generate-private-key">1. Generate private key.<a class="headerlink" href="#1-generate-private-key" title="Permanent link">#</a></h4>
 <p>Run below command:</p>
-<div class="highlight"><pre><span></span><code>openssl genrsa -out example-cli.key <span class="m">2048</span>
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>genrsa<span class="w"> </span>-out<span class="w"> </span>example-cli.key<span class="w"> </span><span class="m">2048</span>
 </code></pre></div>
 <p>Below is a sample run of the command.</p>
 <div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# openssl genrsa -out example-cli.key 2048
@@ -9298,7 +9298,7 @@ example-ca.crt  example-ca.key  example-cli.key  example.crt  example.csr  examp
 </code></pre></div>
 <h4 id="2-generate-a-client-csr-certificate-signing-request">2. Generate a client CSR (Certificate Signing Request).<a class="headerlink" href="#2-generate-a-client-csr-certificate-signing-request" title="Permanent link">#</a></h4>
 <p>Run below command:</p>
-<div class="highlight"><pre><span></span><code>openssl req -new -key example-cli.key -out example-cli.csr
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>req<span class="w"> </span>-new<span class="w"> </span>-key<span class="w"> </span>example-cli.key<span class="w"> </span>-out<span class="w"> </span>example-cli.csr
 </code></pre></div>
 <p>Below is a sample run of the command.</p>
 <div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# openssl req -new -key example-cli.key -out example-cli.csr
@@ -9328,7 +9328,7 @@ example-ca.crt  example-ca.key  example-cli.csr  example-cli.key  example.crt  e
 </code></pre></div>
 <h4 id="3-sign-the-csr-example-clicsr-we-just-generated">3. Sign the CSR <code>example-cli.csr</code> we just generated.<a class="headerlink" href="#3-sign-the-csr-example-clicsr-we-just-generated" title="Permanent link">#</a></h4>
 <p>Run below command:</p>
-<div class="highlight"><pre><span></span><code>openssl x509 -req -in example-cli.csr -CA example-ca.crt -CAkey example-ca.key -set_serial <span class="m">101</span> -days <span class="m">365</span> -outform PEM -out example-cli.crt
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>x509<span class="w"> </span>-req<span class="w"> </span>-in<span class="w"> </span>example-cli.csr<span class="w"> </span>-CA<span class="w"> </span>example-ca.crt<span class="w"> </span>-CAkey<span class="w"> </span>example-ca.key<span class="w"> </span>-set_serial<span class="w"> </span><span class="m">101</span><span class="w"> </span>-days<span class="w"> </span><span class="m">365</span><span class="w"> </span>-outform<span class="w"> </span>PEM<span class="w"> </span>-out<span class="w"> </span>example-cli.crt
 </code></pre></div>
 <p>Below is a sample run of the command.</p>
 <div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# openssl x509 -req -in example-cli.csr -CA example-ca.crt -CAkey example-ca.key -set_serial 101 -days 365 -outform PEM -out example-cli.crt
@@ -9343,7 +9343,7 @@ example-ca.crt  example-ca.key  example-cli.crt  example-cli.csr  example-cli.ke
 <h4 id="4-generate-pkcs12-cert">4. Generate PKCS12 cert<a class="headerlink" href="#4-generate-pkcs12-cert" title="Permanent link">#</a></h4>
 <p>Some browsers need client certs to be in the format <code>pkcs12</code>.</p>
 <p>Run below command:</p>
-<div class="highlight"><pre><span></span><code>openssl pkcs12 -export -inkey example-cli.key -in example-cli.crt -out example-cli.p12
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>pkcs12<span class="w"> </span>-export<span class="w"> </span>-inkey<span class="w"> </span>example-cli.key<span class="w"> </span>-in<span class="w"> </span>example-cli.crt<span class="w"> </span>-out<span class="w"> </span>example-cli.p12
 </code></pre></div>
 <p>Below is a sample run of the command.</p>
 <div class="highlight"><pre><span></span><code>root@jans:/etc/certs/mtlscert# openssl pkcs12 -export -inkey example-cli.key -in example-cli.crt -out example-cli.p12
@@ -9382,7 +9382,7 @@ example-ca.crt  example-ca.key  example-cli.crt  example-cli.csr  example-cli.ke
 <h3 id="solving-the-curl-problem">Solving the <code>curl</code> problem<a class="headerlink" href="#solving-the-curl-problem" title="Permanent link">#</a></h3>
 <p>If you have <code>openssl</code> version <code>3.x.x</code>, most likely when you are trying to consume
 the <code>/.well-known/openid-configuration</code> endpoint.</p>
-<div class="highlight"><pre><span></span><code>curl --insecure --cert-type P12 --cert example-cli.p12:&lt;YOUR_PASSWORD&gt; --location <span class="s1">&#39;https://&lt;YOUR_DOMAIN&gt;/.well-known/openid-configuration&#39;</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>--insecure<span class="w"> </span>--cert-type<span class="w"> </span>P12<span class="w"> </span>--cert<span class="w"> </span>example-cli.p12:&lt;YOUR_PASSWORD&gt;<span class="w"> </span>--location<span class="w"> </span><span class="s1">&#39;https://&lt;YOUR_DOMAIN&gt;/.well-known/openid-configuration&#39;</span>
 </code></pre></div>
 <p>You will get the following error:</p>
 <div class="highlight"><pre><span></span><code>root@jans~# curl --insecure --cert-type P12 --cert example-cli.p12:&lt;YOUR_PASSWORD&gt; --location &#39;https://&lt;YOUR_DOMAIN&gt;/.well-known/openid-configuration&#39;
@@ -9425,9 +9425,9 @@ problems</p>
 </code></pre></div>
 <h3 id="1-register-new-client">1. Register new client<a class="headerlink" href="#1-register-new-client" title="Permanent link">#</a></h3>
 <p>Run below command:</p>
-<div class="highlight"><pre><span></span><code>curl --insecure --cert-type P12 --cert example-cli.p12:&lt;YOUR_PASSWORD&gt; --location <span class="s1">&#39;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/register&#39;</span> <span class="se">\</span>
---header <span class="s1">&#39;Content-Type: application/json&#39;</span> <span class="se">\</span>
---data <span class="s1">&#39;{</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>--insecure<span class="w"> </span>--cert-type<span class="w"> </span>P12<span class="w"> </span>--cert<span class="w"> </span>example-cli.p12:&lt;YOUR_PASSWORD&gt;<span class="w"> </span>--location<span class="w"> </span><span class="s1">&#39;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/register&#39;</span><span class="w"> </span><span class="se">\</span>
+--header<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
+--data<span class="w"> </span><span class="s1">&#39;{</span>
 <span class="s1">  &quot;client_name&quot;: &quot;Test Client mTLS&quot;,</span>
 <span class="s1">  &quot;application_type&quot;: &quot;web&quot;,</span>
 <span class="s1">  &quot;access_token_as_jwt&quot;: true,</span>
@@ -9463,68 +9463,68 @@ problems</p>
 <span class="s1">}&#39;</span>
 </code></pre></div>
 <p>Response:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;allow_spontaneous_scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;jwks&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;keys&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">      </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;kty&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RSA&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;e&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AQAB&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;use&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sig&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;kid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your-kid&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;n&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5elNNA2wYlUpEK2JxOqIgFe3JmHBs63M7wvKM_cbzXjMpLXn7UqAbIN7drDgLIvsIwSo9DAuWvFV3mLqApFYlL1qQCEveULbh6LorqPUzl2UjHwDDFlM1Hj6JpJ_GbacX5-YnRgXC7k_p4ZIf0GOkQxIo0WVNhulku3z84Ko8Efk5BeV7ImFyXWLoO-ru8h3Yvq2h1LRVYX02LZlG6Mv8dqCJsWHIbnmaB16TSe_HCA3qEA4k9La2fl4R7fPlq1u89LN3kz2M0cm1M8aTTquLHP0tv5EpeqX1pG4VjwurssevguRM9QqrGkPktAw_uzIKfO7s5_j3AD3teYdVQFryQ&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">]</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;application_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;web&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;rpt_as_jwt&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;registration_client_uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/register?client_id=d16994c2-313c-4440-9713-25290fbb89a9&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;tls_client_auth_subject_dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;run_introspection_script_before_jwt_creation&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;registration_access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;93a52334-bf79-4414-bc9a-983b6921597c&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;d16994c2-313c-4440-9713-25290fbb89a9&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;token_endpoint_auth_method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;self_signed_tls_client_auth&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;email openid profile&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;client_secret&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e1c9e9df-e542-4225-adb4-d0590f85d97d&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;client_id_issued_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1698114939</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;backchannel_logout_uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;backchannel_logout_session_required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;client_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test Client mTLS&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;par_lifetime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;spontaneous_scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;id_token_signed_response_alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;access_token_as_jwt&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;grant_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;implicit&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;refresh_token&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;authorization_code&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;subject_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pairwise&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;additional_token_endpoint_auth_methods&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;keep_client_authorization_after_expiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;require_par&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;redirect_uris&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;https://&lt;YOUR_DOMAIN&gt;/jans-auth-rp/home.htm&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;redirect_uris_regex&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;additional_audience&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;frontchannel_logout_session_required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;client_secret_expires_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1698201339</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;access_token_signing_alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;response_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;code&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;id_token&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;token&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;allow_spontaneous_scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jwks&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;keys&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;kty&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RSA&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;e&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AQAB&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;use&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sig&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;kid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your-kid&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;n&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5elNNA2wYlUpEK2JxOqIgFe3JmHBs63M7wvKM_cbzXjMpLXn7UqAbIN7drDgLIvsIwSo9DAuWvFV3mLqApFYlL1qQCEveULbh6LorqPUzl2UjHwDDFlM1Hj6JpJ_GbacX5-YnRgXC7k_p4ZIf0GOkQxIo0WVNhulku3z84Ko8Efk5BeV7ImFyXWLoO-ru8h3Yvq2h1LRVYX02LZlG6Mv8dqCJsWHIbnmaB16TSe_HCA3qEA4k9La2fl4R7fPlq1u89LN3kz2M0cm1M8aTTquLHP0tv5EpeqX1pG4VjwurssevguRM9QqrGkPktAw_uzIKfO7s5_j3AD3teYdVQFryQ&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;application_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;web&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;rpt_as_jwt&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;registration_client_uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/register?client_id=d16994c2-313c-4440-9713-25290fbb89a9&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;tls_client_auth_subject_dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;run_introspection_script_before_jwt_creation&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;registration_access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;93a52334-bf79-4414-bc9a-983b6921597c&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;d16994c2-313c-4440-9713-25290fbb89a9&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;token_endpoint_auth_method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;self_signed_tls_client_auth&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;email openid profile&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;client_secret&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e1c9e9df-e542-4225-adb4-d0590f85d97d&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;client_id_issued_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1698114939</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;backchannel_logout_uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;backchannel_logout_session_required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;client_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test Client mTLS&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;par_lifetime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;spontaneous_scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">&quot;id_token_signed_response_alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;access_token_as_jwt&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;grant_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;implicit&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;refresh_token&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;authorization_code&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;subject_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pairwise&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;additional_token_endpoint_auth_methods&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">&quot;keep_client_authorization_after_expiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;require_par&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;redirect_uris&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;https://&lt;YOUR_DOMAIN&gt;/jans-auth-rp/home.htm&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;redirect_uris_regex&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;additional_audience&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">&quot;frontchannel_logout_session_required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;client_secret_expires_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1698201339</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;access_token_signing_alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;response_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;code&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;id_token&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;token&quot;</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
 <blockquote>
 <p><strong>NOTE:</strong> To obtain the <code>jwks</code> field data, follow the next step.</p>
 </blockquote>
 <h4 id="p12-to-jwks">P12 to JWKS<a class="headerlink" href="#p12-to-jwks" title="Permanent link">#</a></h4>
 <p>To get the fields from <code>jwks</code> you can use the following command:</p>
-<div class="highlight"><pre><span></span><code>openssl x509 -in example-cli.p12 -pubkey -noout <span class="p">|</span> pem-jwk <span class="p">|</span> jq <span class="s1">&#39;{kid: &quot;your-kid&quot;, kty: .kty , alg: &quot;RS256&quot; , use: &quot;sig&quot;, e: .e, n: .n }&#39;</span>
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> </span>example-cli.p12<span class="w"> </span>-pubkey<span class="w"> </span>-noout<span class="w"> </span><span class="p">|</span><span class="w"> </span>pem-jwk<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;{kid: &quot;your-kid&quot;, kty: .kty , alg: &quot;RS256&quot; , use: &quot;sig&quot;, e: .e, n: .n }&#39;</span>
 </code></pre></div>
 <p>Make sure you have <code>pem-jwk</code> installed, use the command: <code>npm install -g pem-jwk</code> or <code>yarn global add pem-jwk</code>.</p>
 <p>Below is a sample run of the command.</p>
@@ -9556,52 +9556,52 @@ Enter pass phrase for PKCS12 import pass phrase:
 <p><img alt="mtls5.png" src="../../../../assets/mtls5.png" /></p>
 <h3 id="3-call-token-endpoint">3. Call <code>token</code> endpoint<a class="headerlink" href="#3-call-token-endpoint" title="Permanent link">#</a></h3>
 <p>Previously we have obtained the <code>code</code> field, we will use this value to call the endpoint <code>token</code>.</p>
-<div class="highlight"><pre><span></span><code>curl --insecure --cert-type P12 --cert example-cli.p12:&lt;YOUR_PASSWORD&gt; --location <span class="s1">&#39;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/token&#39;</span> <span class="se">\</span>
---header <span class="s1">&#39;Content-Type: application/x-www-form-urlencoded&#39;</span> <span class="se">\</span>
---data-urlencode <span class="s1">&#39;grant_type=authorization_code&#39;</span> <span class="se">\</span>
---data-urlencode <span class="s1">&#39;redirect_uri=https://&lt;YOUR_DOMAIN&gt;/jans-auth-rp/home.htm&#39;</span> <span class="se">\</span>
---data-urlencode <span class="s1">&#39;client_id=d16994c2-313c-4440-9713-25290fbb89a9&#39;</span> <span class="se">\</span>
---data-urlencode <span class="s1">&#39;client_secret=&lt;YOUR_CLIENT_SECRET&gt;&#39;</span> <span class="se">\</span>
---data-urlencode <span class="s1">&#39;code=&lt;YOUR_CODE&gt;&#39;</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>--insecure<span class="w"> </span>--cert-type<span class="w"> </span>P12<span class="w"> </span>--cert<span class="w"> </span>example-cli.p12:&lt;YOUR_PASSWORD&gt;<span class="w"> </span>--location<span class="w"> </span><span class="s1">&#39;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/token&#39;</span><span class="w"> </span><span class="se">\</span>
+--header<span class="w"> </span><span class="s1">&#39;Content-Type: application/x-www-form-urlencoded&#39;</span><span class="w"> </span><span class="se">\</span>
+--data-urlencode<span class="w"> </span><span class="s1">&#39;grant_type=authorization_code&#39;</span><span class="w"> </span><span class="se">\</span>
+--data-urlencode<span class="w"> </span><span class="s1">&#39;redirect_uri=https://&lt;YOUR_DOMAIN&gt;/jans-auth-rp/home.htm&#39;</span><span class="w"> </span><span class="se">\</span>
+--data-urlencode<span class="w"> </span><span class="s1">&#39;client_id=d16994c2-313c-4440-9713-25290fbb89a9&#39;</span><span class="w"> </span><span class="se">\</span>
+--data-urlencode<span class="w"> </span><span class="s1">&#39;client_secret=&lt;YOUR_CLIENT_SECRET&gt;&#39;</span><span class="w"> </span><span class="se">\</span>
+--data-urlencode<span class="w"> </span><span class="s1">&#39;code=&lt;YOUR_CODE&gt;&#39;</span>
 </code></pre></div>
 <p>Response:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJraWQiOiJjb25uZWN0X2NmNjBiZWZmLTU1MzUtNDllNS04MWQ5LTM5ZDM4ZmNlMWNhMF9zaWdfcnMyNTYiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJNSGdqa2hnTktmZWF4ZUVEY0wycEt5c1EwVUQ4RDk1QUd5NFBGXzI2cmlnIiwiY29kZSI6ImE0NWE5ODI5LTFkMDQtNGQxNS05NjllLWRiMjk3Mzk4ZTdjMyIsImlzcyI6Imh0dHBzOi8vbWlsdG9uLWNoLWhhcmR5LW1pdGUuZ2x1dS5pbmZvIiwidG9rZW5fdHlwZSI6IkJlYXJlciIsImNsaWVudF9pZCI6IjVkODM1NDA3LTFlZjMtNDQxZC04YWU2LTZiYmRkNTcyNzZjYyIsImF1ZCI6IjVkODM1NDA3LTFlZjMtNDQxZC04YWU2LTZiYmRkNTcyNzZjYyIsImFjciI6ImJhc2ljIiwieDV0I1MyNTYiOiJPeHRJQXRBMEMwTkwteTR2UmZLeDd6TExFZXhfWG1DelduUWJ4ejZUem5ZIiwic2NvcGUiOlsib3BlbmlkIiwicHJvZmlsZSIsImVtYWlsIl0sImF1dGhfdGltZSI6MTY5ODE5NDczNiwiZXhwIjoxNjk4Mjc4MDQzLCJpYXQiOjE2OTgxOTY4MzIsInVzZXJuYW1lIjoiRGVmYXVsdCBBZG1pbiBVc2VyIn0.JpK7JYy6Avui3LNbxTKBYJW9fqjEIqijCXPw9fvqEO1kqO7AUozOEof00hPKzJo1Dh7VgGpY89MiAduDUoU3QCemtFsNSd1DCyExl2s3w5OF2mUm6nMzjaS377ZQQ39DAq91OGFFq_ISt4JIhWRf7_xUEvlLRAttTqxE5qp1ZYvgAYu07jbVJX8WqJvxYz3rZ3J-4kq2FLREunRf5KxYaHO-oKzrmhRVPTc_cj1vqwSfu8vRjLmx4P-eN7SgVNa0XmZ8WClLnmchucGBH6rYq3bXZWsOKixwLhno_2vPe1MmbK3XnNNBu_fm_bL2N5kgAwr9b-upoBJc08IyCje1vA&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1e58e2c9-4175-4b3f-8170-65544b1a7c48&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJraWQiOiJjb25uZWN0X2NmNjBiZWZmLTU1MzUtNDllNS04MWQ5LTM5ZDM4ZmNlMWNhMF9zaWdfcnMyNTYiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoib1NoVDE4YUdRVHdtNXBjT255dkNMUSIsInN1YiI6Ik1IZ2praGdOS2ZlYXhlRURjTDJwS3lzUTBVRDhEOTVBR3k0UEZfMjZyaWciLCJhbXIiOlsiMTAiXSwiaXNzIjoiaHR0cHM6Ly9taWx0b24tY2gtaGFyZHktbWl0ZS5nbHV1LmluZm8iLCJub25jZSI6ImMxNGQ2Y2RlLWQ5NTYtNDM4Zi04Mzk5LTQ3MzdkNWZlOTkyOSIsInNpZCI6IjI2ZTM4YTJmLTEzZTktNGY4Yi05MzdjLTQ3M2ViMjdlNzFkNiIsImphbnNPcGVuSURDb25uZWN0VmVyc2lvbiI6Im9wZW5pZGNvbm5lY3QtMS4wIiwiYXVkIjoiNWQ4MzU0MDctMWVmMy00NDFkLThhZTYtNmJiZGQ1NzI3NmNjIiwicmFuZG9tIjoiMjVhZDViMmUtMGNkMi00Mjg3LTg1M2ItZWY3NWRhZjMzNWMwIiwiYWNyIjoiYmFzaWMiLCJjX2hhc2giOiJwM2ZJVHlGT09fd0tRZW9QT1VkWWF3IiwiYXV0aF90aW1lIjoxNjk4MTk0NzM2LCJleHAiOjE2OTgyMDA0MzIsImdyYW50IjoiYXV0aG9yaXphdGlvbl9jb2RlIiwiaWF0IjoxNjk4MTk2ODMyfQ.GMXkiFGcCy6dXI8gPPuCLd977Gs_rkG1w3FrNx_HlSnmcDUSsEQHvPxpA99Y3L8Z82uLHYCbP5Vga6iCEOmBBHnu9jEsmYgp-TSrB31HV-5g7-o4ZWJG05SdL9KgSP3PyDXRqcE0VFxBJ-uJSyvI-htQ4GUXMIhqVhbJJynPNosXtZvvDVIw1NBThupmqx58cozf5tIdnwaeiuN_Ce2XQrjZBiachI6KWFa-Mstrsdw1E6Ny_4bP-1UmeNgScd6pmIUemGsfclxIAgO0lACqgbGh7wo0PljbhEkGU_i9kP--0KJHkBkUxflULW3aAqdYtG9hEr_JEIddHVxXbi1c_w&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;token_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bearer&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;expires_in&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">81210</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJraWQiOiJjb25uZWN0X2NmNjBiZWZmLTU1MzUtNDllNS04MWQ5LTM5ZDM4ZmNlMWNhMF9zaWdfcnMyNTYiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJNSGdqa2hnTktmZWF4ZUVEY0wycEt5c1EwVUQ4RDk1QUd5NFBGXzI2cmlnIiwiY29kZSI6ImE0NWE5ODI5LTFkMDQtNGQxNS05NjllLWRiMjk3Mzk4ZTdjMyIsImlzcyI6Imh0dHBzOi8vbWlsdG9uLWNoLWhhcmR5LW1pdGUuZ2x1dS5pbmZvIiwidG9rZW5fdHlwZSI6IkJlYXJlciIsImNsaWVudF9pZCI6IjVkODM1NDA3LTFlZjMtNDQxZC04YWU2LTZiYmRkNTcyNzZjYyIsImF1ZCI6IjVkODM1NDA3LTFlZjMtNDQxZC04YWU2LTZiYmRkNTcyNzZjYyIsImFjciI6ImJhc2ljIiwieDV0I1MyNTYiOiJPeHRJQXRBMEMwTkwteTR2UmZLeDd6TExFZXhfWG1DelduUWJ4ejZUem5ZIiwic2NvcGUiOlsib3BlbmlkIiwicHJvZmlsZSIsImVtYWlsIl0sImF1dGhfdGltZSI6MTY5ODE5NDczNiwiZXhwIjoxNjk4Mjc4MDQzLCJpYXQiOjE2OTgxOTY4MzIsInVzZXJuYW1lIjoiRGVmYXVsdCBBZG1pbiBVc2VyIn0.JpK7JYy6Avui3LNbxTKBYJW9fqjEIqijCXPw9fvqEO1kqO7AUozOEof00hPKzJo1Dh7VgGpY89MiAduDUoU3QCemtFsNSd1DCyExl2s3w5OF2mUm6nMzjaS377ZQQ39DAq91OGFFq_ISt4JIhWRf7_xUEvlLRAttTqxE5qp1ZYvgAYu07jbVJX8WqJvxYz3rZ3J-4kq2FLREunRf5KxYaHO-oKzrmhRVPTc_cj1vqwSfu8vRjLmx4P-eN7SgVNa0XmZ8WClLnmchucGBH6rYq3bXZWsOKixwLhno_2vPe1MmbK3XnNNBu_fm_bL2N5kgAwr9b-upoBJc08IyCje1vA&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1e58e2c9-4175-4b3f-8170-65544b1a7c48&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJraWQiOiJjb25uZWN0X2NmNjBiZWZmLTU1MzUtNDllNS04MWQ5LTM5ZDM4ZmNlMWNhMF9zaWdfcnMyNTYiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoib1NoVDE4YUdRVHdtNXBjT255dkNMUSIsInN1YiI6Ik1IZ2praGdOS2ZlYXhlRURjTDJwS3lzUTBVRDhEOTVBR3k0UEZfMjZyaWciLCJhbXIiOlsiMTAiXSwiaXNzIjoiaHR0cHM6Ly9taWx0b24tY2gtaGFyZHktbWl0ZS5nbHV1LmluZm8iLCJub25jZSI6ImMxNGQ2Y2RlLWQ5NTYtNDM4Zi04Mzk5LTQ3MzdkNWZlOTkyOSIsInNpZCI6IjI2ZTM4YTJmLTEzZTktNGY4Yi05MzdjLTQ3M2ViMjdlNzFkNiIsImphbnNPcGVuSURDb25uZWN0VmVyc2lvbiI6Im9wZW5pZGNvbm5lY3QtMS4wIiwiYXVkIjoiNWQ4MzU0MDctMWVmMy00NDFkLThhZTYtNmJiZGQ1NzI3NmNjIiwicmFuZG9tIjoiMjVhZDViMmUtMGNkMi00Mjg3LTg1M2ItZWY3NWRhZjMzNWMwIiwiYWNyIjoiYmFzaWMiLCJjX2hhc2giOiJwM2ZJVHlGT09fd0tRZW9QT1VkWWF3IiwiYXV0aF90aW1lIjoxNjk4MTk0NzM2LCJleHAiOjE2OTgyMDA0MzIsImdyYW50IjoiYXV0aG9yaXphdGlvbl9jb2RlIiwiaWF0IjoxNjk4MTk2ODMyfQ.GMXkiFGcCy6dXI8gPPuCLd977Gs_rkG1w3FrNx_HlSnmcDUSsEQHvPxpA99Y3L8Z82uLHYCbP5Vga6iCEOmBBHnu9jEsmYgp-TSrB31HV-5g7-o4ZWJG05SdL9KgSP3PyDXRqcE0VFxBJ-uJSyvI-htQ4GUXMIhqVhbJJynPNosXtZvvDVIw1NBThupmqx58cozf5tIdnwaeiuN_Ce2XQrjZBiachI6KWFa-Mstrsdw1E6Ny_4bP-1UmeNgScd6pmIUemGsfclxIAgO0lACqgbGh7wo0PljbhEkGU_i9kP--0KJHkBkUxflULW3aAqdYtG9hEr_JEIddHVxXbi1c_w&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;token_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bearer&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;expires_in&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">81210</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>Once we have obtained the <code>access_token</code> in <code>jwt(json web token)</code> format, we will do the last step.</p>
 <h3 id="4-call-introspection-endpoint">4. Call <code>introspection</code> endpoint<a class="headerlink" href="#4-call-introspection-endpoint" title="Permanent link">#</a></h3>
 <p>Run below command:</p>
-<div class="highlight"><pre><span></span><code>curl --insecure --cert-type P12 --cert example-cli.p12:&lt;YOUR_PASSWORD&gt; --location <span class="s1">&#39;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/introspection&#39;</span> <span class="se">\</span>
---header <span class="s1">&#39;Content-Type: application/x-www-form-urlencoded&#39;</span> <span class="se">\</span>
---header <span class="s1">&#39;Authorization: Bearer &lt;ACCESS_TOKEN&gt;&#39;</span> <span class="se">\</span>
---data-urlencode <span class="s1">&#39;token=&lt;ACCESS_TOKEN&gt;&#39;</span> <span class="se">\</span>
---data-urlencode <span class="s1">&#39;response_as_jwt=false&#39;</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>--insecure<span class="w"> </span>--cert-type<span class="w"> </span>P12<span class="w"> </span>--cert<span class="w"> </span>example-cli.p12:&lt;YOUR_PASSWORD&gt;<span class="w"> </span>--location<span class="w"> </span><span class="s1">&#39;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/introspection&#39;</span><span class="w"> </span><span class="se">\</span>
+--header<span class="w"> </span><span class="s1">&#39;Content-Type: application/x-www-form-urlencoded&#39;</span><span class="w"> </span><span class="se">\</span>
+--header<span class="w"> </span><span class="s1">&#39;Authorization: Bearer &lt;ACCESS_TOKEN&gt;&#39;</span><span class="w"> </span><span class="se">\</span>
+--data-urlencode<span class="w"> </span><span class="s1">&#39;token=&lt;ACCESS_TOKEN&gt;&#39;</span><span class="w"> </span><span class="se">\</span>
+--data-urlencode<span class="w"> </span><span class="s1">&#39;response_as_jwt=false&#39;</span>
 </code></pre></div>
 <p>Response:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MHgjkhgNKfeaxeEDcL2pKysQ0UD8D95AGy4PF_26rig&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://&lt;YOUR_DOMAIN&gt;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;active&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;token_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bearer&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;d16994c2-313c-4440-9713-25290fbb89a9&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5d835407-1ef3-441d-8ae6-6bbdd57276cc&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;acr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;basic&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;nbf&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openid profile email&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;auth_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1698194736</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;cnf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;x5t#S256&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OxtIAtA0C0NL-y4vRfKx7zLLEex_XmCzWnQbxz6TznY&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1698278043</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1698201265</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MHgjkhgNKfeaxeEDcL2pKysQ0UD8D95AGy4PF_26rig&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://&lt;YOUR_DOMAIN&gt;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;active&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;token_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bearer&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;d16994c2-313c-4440-9713-25290fbb89a9&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5d835407-1ef3-441d-8ae6-6bbdd57276cc&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;acr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;basic&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;nbf&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openid profile email&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;auth_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1698194736</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;cnf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;x5t#S256&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OxtIAtA0C0NL-y4vRfKx7zLLEex_XmCzWnQbxz6TznY&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1698278043</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1698201265</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="specification-document">Specification document<a class="headerlink" href="#specification-document" title="Permanent link">#</a></h2>
 <p>For more details of the specification, you can have a look at the following

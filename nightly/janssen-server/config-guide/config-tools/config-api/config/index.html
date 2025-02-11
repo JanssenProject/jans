@@ -9000,7 +9000,7 @@ Postman. Learn how to use Janssen Server Config API
 using the command line. To get the details of Janssen command line operations 
 relevant to Config-API Configuration, you can check the operations under 
 <code>ConfigurationConfigApi</code> task using the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans tui --info ConfigurationConfigApi
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>tui<span class="w"> </span>--info<span class="w"> </span>ConfigurationConfigApi
 </code></pre></div>
 <p>It will show the details of the available operation-ids for Config-API.</p>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Operation ID: get-config-api-properties
@@ -9013,7 +9013,7 @@ To get sample schema type jans tui --schema-sample &lt;schema&gt;, for example j
 </code></pre></div>
 <h3 id="get-the-current-config-api-configuration">Get The Current Config-API Configuration<a class="headerlink" href="#get-the-current-config-api-configuration" title="Permanent link">#</a></h3>
 <p>Configuration for Config-API is a set of key-value pairs, called properties. When we retrieve the configuration, these properties and their current values are returned as a JSON document. To get the properties of Janssen Config-API Configuration, run the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans tui --operation-id<span class="o">=</span>get-config-api-properties
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>tui<span class="w"> </span>--operation-id<span class="o">=</span>get-config-api-properties
 </code></pre></div>
 <p>It will return the result as below:</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  1</span>
@@ -9182,173 +9182,173 @@ To get sample schema type jans tui --schema-sample &lt;schema&gt;, for example j
 <span class="normal">164</span>
 <span class="normal">165</span>
 <span class="normal">166</span>
-<span class="normal">167</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;serviceName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans-config-api&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;configOauthEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;disableLoggerTimer&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;disableAuditLogger&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;customAttributeValidationEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;acrValidationEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;apiApprovedIssuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;https://example.jans.io&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;apiProtectionType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oauth2&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;apiClientId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1800.b62cb614-a09d-4163-a6bc-32e38a51c4d2&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;apiClientPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CN8ggRUhMkw9K0ocQ+LXbA==&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;endpointInjectionEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;authIssuerUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.jans.io&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;authOpenidConfigurationUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.jans.io/.well-known/openid-configuration&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;authOpenidIntrospectionUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.jans.io/jans-auth/restv1/introspection&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;authOpenidTokenUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.jans.io/jans-auth/restv1/token&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;authOpenidRevokeUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.jans.io/jans-auth/restv1/revoke&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;exclusiveAuthScopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;jans_stat&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;https://jans.io/scim/users.read&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;https://jans.io/scim/users.write&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;corsConfigurationFilters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;filterName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CorsFilter&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;corsEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;corsAllowedOrigins&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;corsAllowedMethods&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GET,PUT,POST,DELETE,PATCH,HEAD,OPTIONS&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;corsSupportCredentials&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;corsLoggingEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;corsPreflightMaxAge&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1800</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;corsRequestDecorate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
-<span class="w"> </span><span class="p">}</span><span class="w"></span>
-<span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;loggingLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;loggingLayout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;disableJdkLogger&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;maxCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;acrExclusionList&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;simple_password_auth&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;userExclusionAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;userPassword&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;userMandatoryAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;mail&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;displayName&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;status&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;userPassword&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;givenName&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;agamaConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;mandatoryAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;qname&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;source&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;optionalAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;serialVersionUID&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;enabled&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">]</span><span class="w"></span>
-<span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;auditLogConf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;headerAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;User-inum&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">]</span><span class="w"></span>
-<span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dataFormatConversionConf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;ignoreHttpMethod&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;@jakarta.ws.rs.GET()&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">]</span><span class="w"></span>
-<span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;plugins&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin-ui plugin&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;className&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;io.jans.ca.plugin.adminui.rest.ApiApplication&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fido2&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fido2 plugin&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;className&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;io.jans.configapi.plugin.fido2.rest.ApiApplication&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;scim&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;scim plugin&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;className&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;io.jans.configapi.plugin.scim.rest.ApiApplication&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user-management&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user-management plugin&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;className&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;io.jans.configapi.plugin.mgt.rest.ApiApplication&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans-link&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans-link plugin&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;className&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;io.jans.configapi.plugin.link.rest.ApiApplication&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;saml&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;saml plugin&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;className&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;io.jans.configapi.plugin.saml.rest.ApiApplication&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kc-link&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kc-link plugin&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;className&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;io.jans.configapi.plugin.kc.link.rest.ApiApplication&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lock&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lock plugin&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;className&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;io.jans.configapi.plugin.lock.rest.ApiApplication&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">}</span><span class="w"></span>
-<span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;assetMgtConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;assetMgtEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;assetServerUploadEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;fileExtensionValidationEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;moduleNameValidationEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;assetBaseDirectory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/opt/jans/jetty/%s/custom&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;jansServiceModule&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;jans-auth&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;jans-config-api&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;jans-fido2&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;jans-scim&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;assetDirMapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i18n&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">          </span><span class="s2">&quot;properties&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Resource bundle file.&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;libs&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">          </span><span class="s2">&quot;jar&quot;</span><span class="err">/op</span><span class="kc">t</span><span class="err">/ja</span><span class="kc">ns</span><span class="err">/ja</span><span class="kc">ns</span><span class="mi">-</span><span class="err">cli/co</span><span class="kc">nf</span><span class="err">ig</span><span class="mi">-</span><span class="err">cli.py</span><span class="w"> </span><span class="mi">--</span><span class="err">i</span><span class="kc">nf</span><span class="err">o</span><span class="w"> </span><span class="err">Co</span><span class="kc">nf</span><span class="err">igura</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">Co</span><span class="kc">nf</span><span class="err">igApi</span><span class="w"></span>
+<span class="normal">167</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;serviceName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans-config-api&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;configOauthEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;disableLoggerTimer&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;disableAuditLogger&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;customAttributeValidationEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;acrValidationEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;apiApprovedIssuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;https://example.jans.io&quot;</span>
+<span class="w"> </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;apiProtectionType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oauth2&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;apiClientId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1800.b62cb614-a09d-4163-a6bc-32e38a51c4d2&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;apiClientPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CN8ggRUhMkw9K0ocQ+LXbA==&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;endpointInjectionEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;authIssuerUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.jans.io&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;authOpenidConfigurationUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.jans.io/.well-known/openid-configuration&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;authOpenidIntrospectionUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.jans.io/jans-auth/restv1/introspection&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;authOpenidTokenUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.jans.io/jans-auth/restv1/token&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;authOpenidRevokeUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.jans.io/jans-auth/restv1/revoke&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;exclusiveAuthScopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;jans_stat&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;https://jans.io/scim/users.read&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;https://jans.io/scim/users.write&quot;</span>
+<span class="w"> </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;corsConfigurationFilters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;filterName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CorsFilter&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;corsEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;corsAllowedOrigins&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;corsAllowedMethods&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GET,PUT,POST,DELETE,PATCH,HEAD,OPTIONS&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;corsSupportCredentials&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;corsLoggingEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;corsPreflightMaxAge&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1800</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;corsRequestDecorate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w"> </span><span class="p">}</span>
+<span class="w"> </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;loggingLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;loggingLayout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;disableJdkLogger&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;maxCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;acrExclusionList&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;simple_password_auth&quot;</span>
+<span class="w"> </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;userExclusionAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;userPassword&quot;</span>
+<span class="w"> </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;userMandatoryAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;mail&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;displayName&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;status&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;userPassword&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;givenName&quot;</span>
+<span class="w"> </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;agamaConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;mandatoryAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;qname&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;source&quot;</span>
+<span class="w"> </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;optionalAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;serialVersionUID&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;enabled&quot;</span>
+<span class="w"> </span><span class="p">]</span>
+<span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;auditLogConf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;headerAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;User-inum&quot;</span>
+<span class="w"> </span><span class="p">]</span>
+<span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;dataFormatConversionConf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;ignoreHttpMethod&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;@jakarta.ws.rs.GET()&quot;</span>
+<span class="w"> </span><span class="p">]</span>
+<span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;plugins&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin-ui plugin&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;className&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;io.jans.ca.plugin.adminui.rest.ApiApplication&quot;</span>
+<span class="w"> </span><span class="p">},</span>
+<span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fido2&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fido2 plugin&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;className&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;io.jans.configapi.plugin.fido2.rest.ApiApplication&quot;</span>
+<span class="w"> </span><span class="p">},</span>
+<span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;scim&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;scim plugin&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;className&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;io.jans.configapi.plugin.scim.rest.ApiApplication&quot;</span>
+<span class="w"> </span><span class="p">},</span>
+<span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user-management&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user-management plugin&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;className&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;io.jans.configapi.plugin.mgt.rest.ApiApplication&quot;</span>
+<span class="w"> </span><span class="p">},</span>
+<span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans-link&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans-link plugin&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;className&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;io.jans.configapi.plugin.link.rest.ApiApplication&quot;</span>
+<span class="w"> </span><span class="p">},</span>
+<span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;saml&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;saml plugin&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;className&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;io.jans.configapi.plugin.saml.rest.ApiApplication&quot;</span>
+<span class="w"> </span><span class="p">},</span>
+<span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kc-link&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kc-link plugin&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;className&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;io.jans.configapi.plugin.kc.link.rest.ApiApplication&quot;</span>
+<span class="w"> </span><span class="p">},</span>
+<span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lock&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lock plugin&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;className&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;io.jans.configapi.plugin.lock.rest.ApiApplication&quot;</span>
+<span class="w"> </span><span class="p">}</span>
+<span class="w"> </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;assetMgtConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;assetMgtEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;assetServerUploadEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;fileExtensionValidationEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;moduleNameValidationEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;assetBaseDirectory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/opt/jans/jetty/%s/custom&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;jansServiceModule&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;jans-auth&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;jans-config-api&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;jans-fido2&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;jans-scim&quot;</span>
+<span class="w"> </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;assetDirMapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i18n&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;properties&quot;</span>
+<span class="w"> </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Resource bundle file.&quot;</span>
+<span class="w"> </span><span class="p">},</span>
+<span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;libs&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;jar&quot;</span><span class="err">/op</span><span class="kc">t</span><span class="err">/ja</span><span class="kc">ns</span><span class="err">/ja</span><span class="kc">ns</span><span class="mi">-</span><span class="err">cli/co</span><span class="kc">nf</span><span class="err">ig</span><span class="mi">-</span><span class="err">cli.py</span><span class="w"> </span><span class="mi">--</span><span class="err">i</span><span class="kc">nf</span><span class="err">o</span><span class="w"> </span><span class="err">Co</span><span class="kc">nf</span><span class="err">igura</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">Co</span><span class="kc">nf</span><span class="err">igApi</span>
 
-<span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;java archive library.&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pages&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">          </span><span class="s2">&quot;xhtml&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Web pages.&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;static&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">          </span><span class="s2">&quot;js&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="s2">&quot;css&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="s2">&quot;png&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="s2">&quot;gif&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="s2">&quot;jpg&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="s2">&quot;jpeg&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Static resources like Java-script, style-sheet and images.&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">}</span><span class="w"></span>
-<span class="w"> </span><span class="p">]</span><span class="w"></span>
-<span class="w"> </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w"> </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;java archive library.&quot;</span>
+<span class="w"> </span><span class="p">},</span>
+<span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pages&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;xhtml&quot;</span>
+<span class="w"> </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Web pages.&quot;</span>
+<span class="w"> </span><span class="p">},</span>
+<span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;static&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;js&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;css&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;png&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;gif&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;jpg&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;jpeg&quot;</span>
+<span class="w"> </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Static resources like Java-script, style-sheet and images.&quot;</span>
+<span class="w"> </span><span class="p">}</span>
+<span class="w"> </span><span class="p">]</span>
+<span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="update-config-api-configuration-properties">Update Config-API Configuration Properties<a class="headerlink" href="#update-config-api-configuration-properties" title="Permanent link">#</a></h3>
 <p>To update the configuration, we will use <a href="https://datatracker.ietf.org/doc/html/rfc6902">JSON patch</a> schema as shown below. </p>
@@ -9362,17 +9362,17 @@ setting the <code>fileExtensionValidationEnabled</code> property to
 <span class="normal">4</span>
 <span class="normal">5</span>
 <span class="normal">6</span>
-<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">[</span><span class="w"></span>
-<span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/assetMgtConfiguration/fileExtensionValidationEnabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"></span>
-<span class="w"> </span><span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">[</span>
+<span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/assetMgtConfiguration/fileExtensionValidationEnabled&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w"> </span><span class="p">}</span>
+<span class="p">]</span>
 </code></pre></div></td></tr></table></div>
 <p>Now, execute the following command to apply this patch:
- <div class="highlight"><span class="filename">Command</span><pre><span></span><code> jans tui <span class="se">\</span>
---operation-id<span class="o">=</span>patch-config-api-properties --data ./config-api-assetmgt-patch.json
+ <div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="w"> </span>jans<span class="w"> </span>tui<span class="w"> </span><span class="se">\</span>
+--operation-id<span class="o">=</span>patch-config-api-properties<span class="w"> </span>--data<span class="w"> </span>./config-api-assetmgt-patch.json
 </code></pre></div>
  Upon successful execution of the update, the Janssen Server responds with 
  updated configuration.</p>
@@ -9398,24 +9398,24 @@ to the Janssen Server. Let's do this step-by-step:</p>
 <span class="normal">11</span>
 <span class="normal">12</span>
 <span class="normal">13</span>
-<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">[</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/userMandatoryAttributes&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">     </span><span class="s2">&quot;mail&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">     </span><span class="s2">&quot;displayName&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">     </span><span class="s2">&quot;status&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">     </span><span class="s2">&quot;userPassword&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">     </span><span class="s2">&quot;givenName&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">     </span><span class="s2">&quot;gender&quot;</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">[</span>
+<span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/userMandatoryAttributes&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">     </span><span class="s2">&quot;mail&quot;</span><span class="p">,</span>
+<span class="w">     </span><span class="s2">&quot;displayName&quot;</span><span class="p">,</span>
+<span class="w">     </span><span class="s2">&quot;status&quot;</span><span class="p">,</span>
+<span class="w">     </span><span class="s2">&quot;userPassword&quot;</span><span class="p">,</span>
+<span class="w">     </span><span class="s2">&quot;givenName&quot;</span><span class="p">,</span>
+<span class="w">     </span><span class="s2">&quot;gender&quot;</span>
+<span class="p">]</span>
+<span class="p">}</span>
+<span class="p">]</span>
 </code></pre></div></td></tr></table></div>
 <p>Now, execute the following command to apply this patch:
- <div class="highlight"><span class="filename">Command</span><pre><span></span><code> jans tui <span class="se">\</span>
---operation-id<span class="o">=</span>patch-config-api-properties --data ./config-api-patch.json
+ <div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="w"> </span>jans<span class="w"> </span>tui<span class="w"> </span><span class="se">\</span>
+--operation-id<span class="o">=</span>patch-config-api-properties<span class="w"> </span>--data<span class="w"> </span>./config-api-patch.json
 </code></pre></div></p>
 <h3 id="config-api-configuration-parameters">Config API Configuration Parameters:<a class="headerlink" href="#config-api-configuration-parameters" title="Permanent link">#</a></h3>
 <p>The table below outlines the key 
@@ -9583,18 +9583,18 @@ at the persistence layer, it may be useful information for a developer.</p>
 <h4 id="oauth-authorization">OAuth authorization<a class="headerlink" href="#oauth-authorization" title="Permanent link">#</a></h4>
 <p><code>configOauthEnabled</code> property can be used to enable or disable the oAuth2 
 authorization. By default, it is set to true.</p>
-<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="s2">&quot;configOauthEnabled&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="s2">&quot;configOauthEnabled&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span>
 </code></pre></div>
 <h4 id="api-protection">Api protection<a class="headerlink" href="#api-protection" title="Permanent link">#</a></h4>
 <p><code>apiProtectionType</code> property states the protocol used for API authorization. 
 The currently supported value is <code>oauth2</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="s2">&quot;apiProtectionType&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;oauth2&quot;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="s2">&quot;apiProtectionType&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;oauth2&quot;</span>
 </code></pre></div>
 <h3 id="api-protection-auth-server">Api protection auth server<a class="headerlink" href="#api-protection-auth-server" title="Permanent link">#</a></h3>
 <p><code>apiApprovedIssuer</code> property enables to set more than one authorization servers. 
 By default, the current auth-server is set. You can add more servers separated 
 by commas.</p>
-<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">apiApprovedIssuer</span><span class="s2">&quot;: [&quot;</span><span class="nx">https</span><span class="o">:</span><span class="c1">//&lt;jans.auth.server&gt;,https://&lt;gluu.server&gt;,https://&lt;anyAuth.server&gt;&quot;]</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">apiApprovedIssuer</span><span class="s2">&quot;: [&quot;</span><span class="nx">https</span><span class="o">:</span><span class="c1">//&lt;jans.auth.server&gt;,https://&lt;gluu.server&gt;,https://&lt;anyAuth.server&gt;&quot;]</span>
 </code></pre></div>
 <h3 id="logging-level">Logging level<a class="headerlink" href="#logging-level" title="Permanent link">#</a></h3>
 <p><code>loggingLevel</code> property can be used to change the logging level to the 
@@ -9611,31 +9611,31 @@ by other modules like auth-server. </p>
 the creation of these scopes during Config API start-up. <code>exclusiveAuthScopes</code> 
 property can be used to change the logging level to the desired value 
 <code>(TRACE, DEBUG, INFO, WARN, ERROR)</code>. By default, the level is set to <code>INFO</code></p>
-<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="s2">&quot;exclusiveAuthScopes&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;jans_stat&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;https://jans.io/scim/users.read&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;https://jans.io/scim/users.write&quot;</span><span class="w"></span>
-<span class="p">],</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="s2">&quot;exclusiveAuthScopes&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">   </span><span class="s2">&quot;jans_stat&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;https://jans.io/scim/users.read&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;https://jans.io/scim/users.write&quot;</span>
+<span class="p">],</span>
 </code></pre></div>
 <h3 id="user-mandatory-and-exclusion-attributes">User - Mandatory and exclusion attributes<a class="headerlink" href="#user-mandatory-and-exclusion-attributes" title="Permanent link">#</a></h3>
 <h4 id="mandatoryattributes">MandatoryAttributes<a class="headerlink" href="#mandatoryattributes" title="Permanent link">#</a></h4>
 <p><code>userMandatoryAttributes</code> can be used to define mandatory attributes 
 for User while creating and updating.</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="s2">&quot;userMandatoryAttributes&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w"> </span><span class="s2">&quot;mail&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w"> </span><span class="s2">&quot;displayName&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w"> </span><span class="s2">&quot;jansStatus&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w"> </span><span class="s2">&quot;userPassword&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w"> </span><span class="s2">&quot;givenName&quot;</span><span class="w"></span>
-<span class="p">],</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="s2">&quot;userMandatoryAttributes&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w"> </span><span class="s2">&quot;mail&quot;</span><span class="p">,</span>
+<span class="w"> </span><span class="s2">&quot;displayName&quot;</span><span class="p">,</span>
+<span class="w"> </span><span class="s2">&quot;jansStatus&quot;</span><span class="p">,</span>
+<span class="w"> </span><span class="s2">&quot;userPassword&quot;</span><span class="p">,</span>
+<span class="w"> </span><span class="s2">&quot;givenName&quot;</span>
+<span class="p">],</span>
 </code></pre></div>
 <h4 id="exclusion-attributes">Exclusion attributes<a class="headerlink" href="#exclusion-attributes" title="Permanent link">#</a></h4>
 <p><code>userExclusionAttributes</code> can be used to define User attributes that are not 
 to be returned in the API response. More attributes that are to be skipped in 
 response can be added to the list.</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="s2">&quot;userExclusionAttributes&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;userPassword&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">],</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="s2">&quot;userExclusionAttributes&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;userPassword&quot;</span>
+<span class="w"> </span><span class="p">],</span>
 </code></pre></div>
 <h3 id="agama-flow-configuration">Agama flow configuration<a class="headerlink" href="#agama-flow-configuration" title="Permanent link">#</a></h3>
 <p><code>agamaConfiguration</code> stores Agama-related configuration used in Agama related 
@@ -9643,20 +9643,20 @@ endpoints.</p>
 <p><code>mandatoryAttributes</code> list defines the required attributes for Agama flow creation 
 and update.
 <code>optionalAttributes</code> list specifies the optional attributes.</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="s2">&quot;agamaConfiguration&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">     </span><span class="s2">&quot;mandatoryAttributes&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;qname&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;source&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;optionalAttributes&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;serialVersionUID&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="s2">&quot;enabled&quot;</span><span class="w"></span>
-<span class="w"> </span><span class="p">]</span><span class="w"></span>
-<span class="w"> </span><span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="s2">&quot;agamaConfiguration&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="s2">&quot;mandatoryAttributes&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">   </span><span class="s2">&quot;qname&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;source&quot;</span>
+<span class="w"> </span><span class="p">],</span>
+<span class="w">   </span><span class="s2">&quot;optionalAttributes&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">   </span><span class="s2">&quot;serialVersionUID&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="s2">&quot;enabled&quot;</span>
+<span class="w"> </span><span class="p">]</span>
+<span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <h2 id="using-text-based-ui">Using Text-based UI<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
 <p>You can start TUI using the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans tui
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>tui
 </code></pre></div>
 <p>Navigate to <code>Config API</code> section where administrators can update 
 Config-API configurations in six sub-tabs, namely 

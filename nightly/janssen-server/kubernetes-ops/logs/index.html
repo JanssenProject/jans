@@ -8793,28 +8793,28 @@
 </table>
 <h2 id="configuring-log-levels">Configuring Log Levels<a class="headerlink" href="#configuring-log-levels" title="Permanent link">#</a></h2>
 <p>To get the current log level of any component, run the following command:</p>
-<div class="highlight"><pre><span></span><code>kubectl get configmap -n &lt;namespace&gt; &lt;helm-release-name&gt;-config-cm -o yaml <span class="p">|</span> grep CN_&lt;service-name&gt;_APP_LOGGERS
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>configmap<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>&lt;helm-release-name&gt;-config-cm<span class="w"> </span>-o<span class="w"> </span>yaml<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>CN_&lt;service-name&gt;_APP_LOGGERS
 </code></pre></div>
 <h3 id="auth-server">auth-server<a class="headerlink" href="#auth-server" title="Permanent link">#</a></h3>
 <p>To get the current log level of auth-server:</p>
-<div class="highlight"><pre><span></span><code>kubectl get configmap -n &lt;namespace&gt; &lt;helm-release-name&gt;-config-cm -o yaml <span class="p">|</span> grep CN_AUTH_APP_LOGGERS 
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>configmap<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>&lt;helm-release-name&gt;-config-cm<span class="w"> </span>-o<span class="w"> </span>yaml<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>CN_AUTH_APP_LOGGERS<span class="w"> </span>
 </code></pre></div>
 <p>Example output:
 <div class="highlight"><pre><span></span><code><span class="nt">CN_AUTH_APP_LOGGERS</span><span class="p">:</span><span class="w"> </span>
-<span class="s">&#39;{</span><span class="w"></span>
-<span class="s">&quot;audit_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;audit_log_target&quot;:&quot;FILE&quot;,</span><span class="w"></span>
-<span class="s">&quot;auth_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;auth_log_target&quot;:&quot;STDOUT&quot;,</span><span class="w"></span>
-<span class="s">&quot;http_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;http_log_target&quot;:&quot;FILE&quot;,</span><span class="w"></span>
-<span class="s">&quot;persistence_duration_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;persistence_duration_log_target&quot;:&quot;FILE&quot;,</span><span class="w"></span>
-<span class="s">&quot;persistence_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;persistence_log_target&quot;:&quot;FILE&quot;,</span><span class="w"></span>
-<span class="s">&quot;script_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;script_log_target&quot;:&quot;FILE&quot;</span><span class="w"></span>
-<span class="s">}&#39;</span><span class="w"></span>
+<span class="s">&#39;{</span>
+<span class="s">&quot;audit_log_level&quot;:&quot;INFO&quot;,</span>
+<span class="s">&quot;audit_log_target&quot;:&quot;FILE&quot;,</span>
+<span class="s">&quot;auth_log_level&quot;:&quot;INFO&quot;,</span>
+<span class="s">&quot;auth_log_target&quot;:&quot;STDOUT&quot;,</span>
+<span class="s">&quot;http_log_level&quot;:&quot;INFO&quot;,</span>
+<span class="s">&quot;http_log_target&quot;:&quot;FILE&quot;,</span>
+<span class="s">&quot;persistence_duration_log_level&quot;:&quot;INFO&quot;,</span>
+<span class="s">&quot;persistence_duration_log_target&quot;:&quot;FILE&quot;,</span>
+<span class="s">&quot;persistence_log_level&quot;:&quot;INFO&quot;,</span>
+<span class="s">&quot;persistence_log_target&quot;:&quot;FILE&quot;,</span>
+<span class="s">&quot;script_log_level&quot;:&quot;INFO&quot;,</span>
+<span class="s">&quot;script_log_target&quot;:&quot;FILE&quot;</span>
+<span class="s">}&#39;</span>
 </code></pre></div></p>
 <p>To override the current logging level in auth-server, you can either add the desired changes to a yaml file and apply it using <code>helm</code>, or
 change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
@@ -8822,42 +8822,42 @@ change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
 <li>Add changes to yaml:</li>
 </ul>
 <p>add these changes to your <code>override.yaml</code> file:</p>
-<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">............</span><span class="w"></span>
-<span class="l l-Scalar l-Scalar-Plain">............</span><span class="w"></span>
-<span class="l l-Scalar l-Scalar-Plain">global</span><span class="p p-Indicator">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">auth-server</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">appLoggers</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">authLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">httpLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">persistenceLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">persistenceDurationLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">scriptLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">auditStatsLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="l l-Scalar l-Scalar-Plain">............</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">............</span>
+<span class="l l-Scalar l-Scalar-Plain">............</span>
+<span class="l l-Scalar l-Scalar-Plain">global</span><span class="p p-Indicator">:</span>
+<span class="w">  </span><span class="nt">auth-server</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">appLoggers</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">authLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span>
+<span class="w">      </span><span class="nt">httpLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span>
+<span class="w">      </span><span class="nt">persistenceLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span>
+<span class="w">      </span><span class="nt">persistenceDurationLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span>
+<span class="w">      </span><span class="nt">scriptLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span>
+<span class="w">      </span><span class="nt">auditStatsLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span>
+<span class="l l-Scalar l-Scalar-Plain">............</span>
 <span class="l l-Scalar l-Scalar-Plain">............</span><span class="w">      </span>
 </code></pre></div>
 <p>Apply the changes: </p>
-<div class="highlight"><pre><span></span><code>helm upgrade &lt;helm-release-name&gt; janssen/janssen -f override.yaml -n &lt;namespace&gt;
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>&lt;helm-release-name&gt;<span class="w"> </span>janssen/janssen<span class="w"> </span>-f<span class="w"> </span>override.yaml<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
 </code></pre></div>
 <p>View the logs of auth-server:
-<div class="highlight"><pre><span></span><code>kubectl logs -f deployment/&lt;helm-release-name&gt;-auth-server -n &lt;namespace&gt;
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>deployment/&lt;helm-release-name&gt;-auth-server<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
 </code></pre></div></p>
 <h3 id="config-api">config-api<a class="headerlink" href="#config-api" title="Permanent link">#</a></h3>
 <p>To get the current log level of config-api:</p>
-<div class="highlight"><pre><span></span><code>kubectl get configmap -n &lt;namspace&gt; &lt;helm-release-name&gt;-config-cm -o yaml <span class="p">|</span> grep CN_CONFIG_API_APP_LOGGERS 
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>configmap<span class="w"> </span>-n<span class="w"> </span>&lt;namspace&gt;<span class="w"> </span>&lt;helm-release-name&gt;-config-cm<span class="w"> </span>-o<span class="w"> </span>yaml<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>CN_CONFIG_API_APP_LOGGERS<span class="w"> </span>
 </code></pre></div>
 <p>Example output:
 <div class="highlight"><pre><span></span><code><span class="nt">CN_CONFIG_API_APP_LOGGERS</span><span class="p">:</span><span class="w"> </span>
-<span class="s">&#39;{</span><span class="w"></span>
-<span class="s">&quot;config_api_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;config_api_log_target&quot;:&quot;STDOUT&quot;,</span><span class="w"></span>
-<span class="s">&quot;persistence_duration_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;persistence_duration_log_target&quot;:&quot;FILE&quot;,</span><span class="w"></span>
-<span class="s">&quot;persistence_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;persistence_log_target&quot;:&quot;FILE&quot;,</span><span class="w"></span>
-<span class="s">&quot;script_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;script_log_target&quot;:&quot;FILE&quot;</span><span class="w"></span>
-<span class="s">}&#39;</span><span class="w"></span>
+<span class="s">&#39;{</span>
+<span class="s">&quot;config_api_log_level&quot;:&quot;INFO&quot;,</span>
+<span class="s">&quot;config_api_log_target&quot;:&quot;STDOUT&quot;,</span>
+<span class="s">&quot;persistence_duration_log_level&quot;:&quot;INFO&quot;,</span>
+<span class="s">&quot;persistence_duration_log_target&quot;:&quot;FILE&quot;,</span>
+<span class="s">&quot;persistence_log_level&quot;:&quot;INFO&quot;,</span>
+<span class="s">&quot;persistence_log_target&quot;:&quot;FILE&quot;,</span>
+<span class="s">&quot;script_log_level&quot;:&quot;INFO&quot;,</span>
+<span class="s">&quot;script_log_target&quot;:&quot;FILE&quot;</span>
+<span class="s">}&#39;</span>
 </code></pre></div></p>
 <p>To override the current logging level in config-api, you can either add the desired changes to a yaml file and apply it using <code>helm</code>, or
 change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
@@ -8865,36 +8865,36 @@ change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
 <li>Add changes to yaml:</li>
 </ul>
 <p>add these changes to your <code>override.yaml</code> file:</p>
-<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">............</span><span class="w"></span>
-<span class="l l-Scalar l-Scalar-Plain">............</span><span class="w"></span>
-<span class="l l-Scalar l-Scalar-Plain">global</span><span class="p p-Indicator">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">config-api</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">appLoggers</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">configApiLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">persistenceLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">persistenceDurationLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">scriptLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="l l-Scalar l-Scalar-Plain">............</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">............</span>
+<span class="l l-Scalar l-Scalar-Plain">............</span>
+<span class="l l-Scalar l-Scalar-Plain">global</span><span class="p p-Indicator">:</span>
+<span class="w">  </span><span class="nt">config-api</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">appLoggers</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">configApiLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span>
+<span class="w">      </span><span class="nt">persistenceLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span>
+<span class="w">      </span><span class="nt">persistenceDurationLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span>
+<span class="w">      </span><span class="nt">scriptLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span>
+<span class="l l-Scalar l-Scalar-Plain">............</span>
 <span class="l l-Scalar l-Scalar-Plain">............</span><span class="w">      </span>
 </code></pre></div>
 <p>Apply the changes: </p>
-<div class="highlight"><pre><span></span><code>helm upgrade &lt;helm-release-name&gt; janssen/janssen -f override.yaml -n &lt;namespace&gt;
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>&lt;helm-release-name&gt;<span class="w"> </span>janssen/janssen<span class="w"> </span>-f<span class="w"> </span>override.yaml<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
 </code></pre></div>
 <p>View the logs of config-api:
-<div class="highlight"><pre><span></span><code>kubectl logs -f deployment/&lt;helm-release-name&gt;-config-api -n &lt;namespace&gt;
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>deployment/&lt;helm-release-name&gt;-config-api<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
 </code></pre></div></p>
 <h3 id="fido2">fido2<a class="headerlink" href="#fido2" title="Permanent link">#</a></h3>
 <p>To get the current log level of fido2:</p>
-<div class="highlight"><pre><span></span><code>kubectl get configmap -n &lt;namespace&gt; &lt;helm-release-name&gt;-config-cm -o yaml <span class="p">|</span> grep CN_FIDO2_APP_LOGGERS 
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>configmap<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>&lt;helm-release-name&gt;-config-cm<span class="w"> </span>-o<span class="w"> </span>yaml<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>CN_FIDO2_APP_LOGGERS<span class="w"> </span>
 </code></pre></div>
 <p>Example output:
 <div class="highlight"><pre><span></span><code><span class="nt">CN_FIDO2_APP_LOGGERS</span><span class="p">:</span><span class="w"> </span>
-<span class="s">&#39;{</span><span class="w"></span>
-<span class="s">&quot;fido2_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;fido2_log_target&quot;:&quot;STDOUT&quot;,</span><span class="w"></span>
-<span class="s">&quot;persistence_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;persistence_log_target&quot;:&quot;FILE&quot;</span><span class="w"></span>
-<span class="s">}&#39;</span><span class="w"></span>
+<span class="s">&#39;{</span>
+<span class="s">&quot;fido2_log_level&quot;:&quot;INFO&quot;,</span>
+<span class="s">&quot;fido2_log_target&quot;:&quot;STDOUT&quot;,</span>
+<span class="s">&quot;persistence_log_level&quot;:&quot;INFO&quot;,</span>
+<span class="s">&quot;persistence_log_target&quot;:&quot;FILE&quot;</span>
+<span class="s">}&#39;</span>
 </code></pre></div></p>
 <p>To override the current logging level in fido2, you can either add the desired changes to a yaml file and apply it using <code>helm</code>, or
 change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
@@ -8902,38 +8902,38 @@ change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
 <li>Add changes to yaml:</li>
 </ul>
 <p>add these changes to your <code>override.yaml</code> file:</p>
-<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">............</span><span class="w"></span>
-<span class="l l-Scalar l-Scalar-Plain">............</span><span class="w"></span>
-<span class="l l-Scalar l-Scalar-Plain">global</span><span class="p p-Indicator">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">fido2</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">appLoggers</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">fido2LogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">persistenceLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="l l-Scalar l-Scalar-Plain">............</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">............</span>
+<span class="l l-Scalar l-Scalar-Plain">............</span>
+<span class="l l-Scalar l-Scalar-Plain">global</span><span class="p p-Indicator">:</span>
+<span class="w">  </span><span class="nt">fido2</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">appLoggers</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">fido2LogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span>
+<span class="w">      </span><span class="nt">persistenceLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span>
+<span class="l l-Scalar l-Scalar-Plain">............</span>
 <span class="l l-Scalar l-Scalar-Plain">............</span><span class="w">      </span>
 </code></pre></div>
 <p>Apply the changes: </p>
-<div class="highlight"><pre><span></span><code>helm upgrade &lt;helm-release-name&gt; janssen/janssen -f override.yaml -n &lt;namespace&gt;
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>&lt;helm-release-name&gt;<span class="w"> </span>janssen/janssen<span class="w"> </span>-f<span class="w"> </span>override.yaml<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
 </code></pre></div>
 <p>View the logs of fido2:
-<div class="highlight"><pre><span></span><code>kubectl logs -f deployment/&lt;helm-release-name&gt;-fido2 -n &lt;namespace&gt;
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>deployment/&lt;helm-release-name&gt;-fido2<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
 </code></pre></div></p>
 <h3 id="scim">scim<a class="headerlink" href="#scim" title="Permanent link">#</a></h3>
 <p>To get the current log level of scim:</p>
-<div class="highlight"><pre><span></span><code>kubectl get configmap -n &lt;namespace&gt; &lt;helm-release-name&gt;-config-cm -o yaml <span class="p">|</span> grep CN_SCIM_APP_LOGGERS 
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>configmap<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>&lt;helm-release-name&gt;-config-cm<span class="w"> </span>-o<span class="w"> </span>yaml<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>CN_SCIM_APP_LOGGERS<span class="w"> </span>
 </code></pre></div>
 <p>Example output:
 <div class="highlight"><pre><span></span><code><span class="nt">CN_SCIM_APP_LOGGERS</span><span class="p">:</span><span class="w"> </span>
-<span class="s">&#39;{</span><span class="w"></span>
-<span class="s">&quot;persistence_duration_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;persistence_duration_log_target&quot;:&quot;FILE&quot;,</span><span class="w"></span>
-<span class="s">&quot;persistence_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;persistence_log_target&quot;:&quot;FILE&quot;,</span><span class="w"></span>
-<span class="s">&quot;scim_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;scim_log_target&quot;:&quot;STDOUT&quot;,</span><span class="w"></span>
-<span class="s">&quot;script_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;script_log_target&quot;:&quot;FILE&quot;</span><span class="w"></span>
-<span class="s">}&#39;</span><span class="w"></span>
+<span class="s">&#39;{</span>
+<span class="s">&quot;persistence_duration_log_level&quot;:&quot;INFO&quot;,</span>
+<span class="s">&quot;persistence_duration_log_target&quot;:&quot;FILE&quot;,</span>
+<span class="s">&quot;persistence_log_level&quot;:&quot;INFO&quot;,</span>
+<span class="s">&quot;persistence_log_target&quot;:&quot;FILE&quot;,</span>
+<span class="s">&quot;scim_log_level&quot;:&quot;INFO&quot;,</span>
+<span class="s">&quot;scim_log_target&quot;:&quot;STDOUT&quot;,</span>
+<span class="s">&quot;script_log_level&quot;:&quot;INFO&quot;,</span>
+<span class="s">&quot;script_log_target&quot;:&quot;FILE&quot;</span>
+<span class="s">}&#39;</span>
 </code></pre></div></p>
 <p>To override the current logging level in scim, you can either add the desired changes to a yaml file and apply it using <code>helm</code>, or
 change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
@@ -8941,23 +8941,23 @@ change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
 <li>Add changes to yaml:</li>
 </ul>
 <p>add these changes to your <code>override.yaml</code> file:</p>
-<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">............</span><span class="w"></span>
-<span class="l l-Scalar l-Scalar-Plain">............</span><span class="w"></span>
-<span class="l l-Scalar l-Scalar-Plain">global</span><span class="p p-Indicator">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">scim</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">appLoggers</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">scimLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">persistenceLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">persistenceDurationLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">scriptLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="l l-Scalar l-Scalar-Plain">............</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">............</span>
+<span class="l l-Scalar l-Scalar-Plain">............</span>
+<span class="l l-Scalar l-Scalar-Plain">global</span><span class="p p-Indicator">:</span>
+<span class="w">  </span><span class="nt">scim</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">appLoggers</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">scimLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span>
+<span class="w">      </span><span class="nt">persistenceLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span>
+<span class="w">      </span><span class="nt">persistenceDurationLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span>
+<span class="w">      </span><span class="nt">scriptLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span>
+<span class="l l-Scalar l-Scalar-Plain">............</span>
 <span class="l l-Scalar l-Scalar-Plain">............</span><span class="w">      </span>
 </code></pre></div>
 <p>Apply the changes: </p>
-<div class="highlight"><pre><span></span><code>helm upgrade &lt;helm-release-name&gt; janssen/janssen -f override.yaml -n &lt;namespace&gt;
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>&lt;helm-release-name&gt;<span class="w"> </span>janssen/janssen<span class="w"> </span>-f<span class="w"> </span>override.yaml<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
 </code></pre></div>
 <p>View the logs of scim:
-<div class="highlight"><pre><span></span><code>kubectl logs -f deployment/&lt;helm-release-name&gt;-scim -n &lt;namespace&gt;
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>deployment/&lt;helm-release-name&gt;-scim<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
 </code></pre></div></p>
 <h3 id="hack-it">Hack it<a class="headerlink" href="#hack-it" title="Permanent link">#</a></h3>
 <blockquote>
@@ -8965,10 +8965,10 @@ change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
 This can cause deployments to break, but if you wish you may edit it directly and restart the wanted deployment</p>
 </blockquote>
 <p>Edit using the following command: 
-<div class="highlight"><pre><span></span><code>kubectl edit configmap &lt;helm-release-name&gt;-config-cm -n &lt;namespace&gt;
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>edit<span class="w"> </span>configmap<span class="w"> </span>&lt;helm-release-name&gt;-config-cm<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
 </code></pre></div></p>
 <p>Restart the wanted deployment:
-<div class="highlight"><pre><span></span><code>kubectl rollout restart deployment &lt;deployment-name&gt; -n &lt;namespace&gt;
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>rollout<span class="w"> </span>restart<span class="w"> </span>deployment<span class="w"> </span>&lt;deployment-name&gt;<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
 </code></pre></div></p>
 
   <hr>

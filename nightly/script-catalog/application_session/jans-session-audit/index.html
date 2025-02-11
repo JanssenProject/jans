@@ -8719,61 +8719,61 @@ Script type:  <strong>Application Sessions</strong>.  </p>
 <p>Generated value <strong>jansData</strong> in JSON format will contain type of event (one of <strong>AUTHENTICATED</strong>, <strong>UNAUTHENTICATED</strong>, <strong>UPDATED</strong>, <strong>GONE</strong>) and all properties/attributes defined by <strong>audit_data</strong> and <strong>audit_cust_data</strong>.</p>
 <p>Examples of <strong>/etc/jans/conf/jans-session-audit.json</strong> file: </p>
 <h2 id="_1"><a class="headerlink" href="#_1" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;event_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;UNAUTHENTICATED&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;UPDATED&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;GONE&quot;</span><span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;audit_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;userDn&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;id&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;outsideSid&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;lastUsedAt&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;authenticationTime&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;state&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;expirationDate&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;sessionState&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;permissionGranted&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;permissionGrantedMap&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;deviceSecrets&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;audit_cust_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;auth_external_attributes&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;opbs&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;response_type&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;client_id&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;auth_step&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;acr&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;casa_logoUrl&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;remote_ip&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;scope&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;acr_values&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;casa_faviconUrl&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;redirect_uri&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;state&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;casa_prefix&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;casa_contextPath&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;casa_extraCss&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;event_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;UNAUTHENTICATED&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;UPDATED&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;GONE&quot;</span><span class="w"> </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;audit_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;userDn&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;id&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;outsideSid&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;lastUsedAt&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;authenticationTime&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;state&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;expirationDate&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;sessionState&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;permissionGranted&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;permissionGrantedMap&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;deviceSecrets&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;audit_cust_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;auth_external_attributes&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;opbs&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;response_type&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;client_id&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;auth_step&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;acr&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;casa_logoUrl&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;remote_ip&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;scope&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;acr_values&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;casa_faviconUrl&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;redirect_uri&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;state&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;casa_prefix&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;casa_contextPath&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;casa_extraCss&quot;</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="_2"><a class="headerlink" href="#_2" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;event_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="s2">&quot;GONE&quot;</span><span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;audit_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;userDn&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;id&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;outsideSid&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;lastUsedAt&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;authenticationTime&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;state&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;expirationDate&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;sessionState&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;permissionGranted&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;permissionGrantedMap&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;deviceSecrets&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;audit_cust_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;sessionAttributes&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;event_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="s2">&quot;GONE&quot;</span><span class="w"> </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;audit_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;userDn&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;id&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;outsideSid&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;lastUsedAt&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;authenticationTime&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;state&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;expirationDate&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;sessionState&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;permissionGranted&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;permissionGrantedMap&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;deviceSecrets&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;audit_cust_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;sessionAttributes&quot;</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="_3"><a class="headerlink" href="#_3" title="Permanent link">#</a></h2>
 <ul>
@@ -8789,178 +8789,178 @@ Script type:  <strong>Application Sessions</strong>.  </p>
 <p>Examples of generated <strong>jansData</strong> (JSON format):</p>
 <h2 id="_4"><a class="headerlink" href="#_4" title="Permanent link">#</a></h2>
 <p><strong>/etc/jans/conf/jans-session-audit.json</strong>:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;event_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="s2">&quot;GONE&quot;</span><span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;audit_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;userDn&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;id&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;outsideSid&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;lastUsedAt&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;authenticationTime&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;state&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;expirationDate&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;sessionState&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;permissionGranted&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;permissionGrantedMap&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;deviceSecrets&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;audit_cust_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;auth_external_attributes&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;opbs&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;response_type&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;client_id&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;auth_step&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;acr&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;casa_logoUrl&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;remote_ip&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;scope&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;acr_values&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;casa_faviconUrl&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;redirect_uri&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;state&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;casa_prefix&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;casa_contextPath&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;casa_extraCss&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;event_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="s2">&quot;GONE&quot;</span><span class="w"> </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;audit_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;userDn&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;id&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;outsideSid&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;lastUsedAt&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;authenticationTime&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;state&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;expirationDate&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;sessionState&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;permissionGranted&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;permissionGrantedMap&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;deviceSecrets&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;audit_cust_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;auth_external_attributes&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;opbs&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;response_type&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;client_id&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;auth_step&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;acr&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;casa_logoUrl&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;remote_ip&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;scope&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;acr_values&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;casa_faviconUrl&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;redirect_uri&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;state&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;casa_prefix&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;casa_contextPath&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;casa_extraCss&quot;</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
 <p><strong>jansData</strong>:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;authenticationTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sun Jul 16 10:17:48 CDT 2023&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;deviceSecrets&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;[]&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;permissionGranted&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;None&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;sessionState&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bc85eaccff71f7145057405363f60bbc7d7d9733faed52a84ca79eaca56248c3.b8eafaa1-b08d-414c-b15d-883ca0eb363c&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;lastUsedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sun Jul 16 10:17:48 CDT 2023&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;outsideSid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3f2e08a6-06c2-4444-a2dd-1368da4e22da&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cb9a92d2-e1e7-4754-943e-354b976938bc&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;authState&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;authenticated&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;userDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=32c32267-6f8a-4cac-88e4-643e3abcfe6c,ou=people,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;expirationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mon Jul 17 10:17:31 CDT 2023&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;permissionGrantedMap&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;3000.79c97b57-0bf8-4d5b-8f9c-918eff96e8b8&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;opbs&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a8e3a9fb-f9f6-42b1-a42b-795f195407b7&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;responseType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;code&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;clientId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3000.79c97b57-0bf8-4d5b-8f9c-918eff96e8b8&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;authStep&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;acr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;casa&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;casaLogoUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/casa/images/logo.png&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;remoteIp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;192.168.64.2&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openid profile user_name clientinfo&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;acrValues&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;casa&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;casaFaviconUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/casa/images/favicon.ico&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;redirectUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://gluu-1.smansoft.net/casa&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hr9ZeBdWVBQTyAMKna-GROKaLeqnpFkIngYImTmSIdk&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;casaPrefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;casaContextPath&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/casa&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;casaExtraCss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;None&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;authExternalAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;casa_logoUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;java.lang.String&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;casa_faviconUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;java.lang.String&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;casa_prefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;java.lang.String&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;casa_contextPath&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;java.lang.String&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;authenticationTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sun Jul 16 10:17:48 CDT 2023&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;deviceSecrets&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;[]&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;permissionGranted&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;sessionState&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bc85eaccff71f7145057405363f60bbc7d7d9733faed52a84ca79eaca56248c3.b8eafaa1-b08d-414c-b15d-883ca0eb363c&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;lastUsedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sun Jul 16 10:17:48 CDT 2023&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;outsideSid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3f2e08a6-06c2-4444-a2dd-1368da4e22da&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cb9a92d2-e1e7-4754-943e-354b976938bc&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;authState&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;authenticated&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;userDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=32c32267-6f8a-4cac-88e4-643e3abcfe6c,ou=people,o=jans&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;expirationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mon Jul 17 10:17:31 CDT 2023&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;permissionGrantedMap&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;3000.79c97b57-0bf8-4d5b-8f9c-918eff96e8b8&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;opbs&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a8e3a9fb-f9f6-42b1-a42b-795f195407b7&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;responseType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;code&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;clientId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3000.79c97b57-0bf8-4d5b-8f9c-918eff96e8b8&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;authStep&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;acr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;casa&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;casaLogoUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/casa/images/logo.png&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;remoteIp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;192.168.64.2&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openid profile user_name clientinfo&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;acrValues&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;casa&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;casaFaviconUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/casa/images/favicon.ico&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;redirectUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://gluu-1.smansoft.net/casa&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hr9ZeBdWVBQTyAMKna-GROKaLeqnpFkIngYImTmSIdk&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;casaPrefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;casaContextPath&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/casa&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;casaExtraCss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;authExternalAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;casa_logoUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;java.lang.String&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;casa_faviconUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;java.lang.String&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;casa_prefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;java.lang.String&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;casa_contextPath&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;java.lang.String&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="_5"><a class="headerlink" href="#_5" title="Permanent link">#</a></h2>
 <p><strong>/etc/jans/conf/jans-session-audit.json</strong>: </p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;event_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="s2">&quot;GONE&quot;</span><span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;audit_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;audit_cust_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;event_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="s2">&quot;GONE&quot;</span><span class="w"> </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;audit_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;audit_cust_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
 <p><strong>jansData</strong>:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GONE&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GONE&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="_6"><a class="headerlink" href="#_6" title="Permanent link">#</a></h2>
 <p><strong>/etc/jans/conf/jans-session-audit.json</strong>: </p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;event_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="s2">&quot;GONE&quot;</span><span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;audit_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;userDn&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;id&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;state&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;permissionGrantedMap&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;deviceSecrets&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;audit_cust_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;event_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="s2">&quot;GONE&quot;</span><span class="w"> </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;audit_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;userDn&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;id&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;state&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;permissionGrantedMap&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;deviceSecrets&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;audit_cust_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
 <p><strong>jansData</strong>:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;deviceSecrets&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;[]&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;8103b097-964c-4e66-8dea-c0edcfdb0438&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;authState&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;authenticated&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;userDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=32c32267-6f8a-4cac-88e4-643e3abcfe6c,ou=people,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;permissionGrantedMap&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;3000.79c97b57-0bf8-4d5b-8f9c-918eff96e8b8&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;deviceSecrets&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;[]&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;8103b097-964c-4e66-8dea-c0edcfdb0438&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;authState&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;authenticated&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;userDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=32c32267-6f8a-4cac-88e4-643e3abcfe6c,ou=people,o=jans&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;permissionGrantedMap&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;3000.79c97b57-0bf8-4d5b-8f9c-918eff96e8b8&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="_7"><a class="headerlink" href="#_7" title="Permanent link">#</a></h2>
 <p><strong>/etc/jans/conf/jans-session-audit.json</strong>: </p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;event_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="s2">&quot;GONE&quot;</span><span class="w"> </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;audit_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;userDn&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;id&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;audit_cust_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;sessionAttributes&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;event_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="s2">&quot;GONE&quot;</span><span class="w"> </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;audit_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;userDn&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;id&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;audit_cust_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;sessionAttributes&quot;</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
 <p><strong>jansData</strong>:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;426d82e8-3182-4f5e-9b1a-54fa1d9fc295&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;userDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=32c32267-6f8a-4cac-88e4-643e3abcfe6c,ou=people,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;opbs&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c8727cf7-f136-4555-be86-5313039f874b&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;responseType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;code&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;clientId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3000.79c97b57-0bf8-4d5b-8f9c-918eff96e8b8&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;authStep&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;acr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;casa&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;casaLogoUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/casa/images/logo.png&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;remoteIp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;192.168.64.2&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openid profile user_name clientinfo&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;acrValues&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;casa&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;casaFaviconUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/casa/images/favicon.ico&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;redirectUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://gluu-1.smansoft.net/casa&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PEIbloYE4OUy4hkaT75uzDUuiRtQO0v5P_uy0q8iBss&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;casaPrefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;casaContextPath&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/casa&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;casaExtraCss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;None&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;authExternalAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;casa_logoUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;java.lang.String&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;casa_faviconUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;java.lang.String&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;casa_prefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;java.lang.String&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;casa_contextPath&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;java.lang.String&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;426d82e8-3182-4f5e-9b1a-54fa1d9fc295&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;userDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=32c32267-6f8a-4cac-88e4-643e3abcfe6c,ou=people,o=jans&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;opbs&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c8727cf7-f136-4555-be86-5313039f874b&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;responseType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;code&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;clientId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3000.79c97b57-0bf8-4d5b-8f9c-918eff96e8b8&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;authStep&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;acr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;casa&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;casaLogoUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/casa/images/logo.png&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;remoteIp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;192.168.64.2&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openid profile user_name clientinfo&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;acrValues&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;casa&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;casaFaviconUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/casa/images/favicon.ico&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;redirectUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://gluu-1.smansoft.net/casa&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PEIbloYE4OUy4hkaT75uzDUuiRtQO0v5P_uy0q8iBss&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;casaPrefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;casaContextPath&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/casa&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;casaExtraCss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;authExternalAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;casa_logoUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;java.lang.String&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;casa_faviconUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;java.lang.String&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;casa_prefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;java.lang.String&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;casa_contextPath&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;java.lang.String&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="_8"><a class="headerlink" href="#_8" title="Permanent link">#</a></h2>
 

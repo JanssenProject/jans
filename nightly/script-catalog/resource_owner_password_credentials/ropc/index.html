@@ -8779,7 +8779,7 @@
 <p>Resource Owner Password Credentials script allows modifying the behavior of Resource Owner Password Credentials Grant (<a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.3">RFC 6749</a>).</p>
 <p>The script is invoked after normal authentication and can either leave current result or change it - authenticate if not authenticated - it should return True and optionally set user (via <code>context.setUser(user)</code>).</p>
 <h2 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">#</a></h2>
-<p>The ROPC script implements the <a href="https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java">ResourceOwnerPasswordCredentialsType</a> interface. This extends methods from the base script type in addition to adding new method:</p>
+<p>The ROPC script implements the <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java">ResourceOwnerPasswordCredentialsType</a> interface. This extends methods from the base script type in addition to adding new method:</p>
 <h3 id="inherited-methods">Inherited Methods<a class="headerlink" href="#inherited-methods" title="Permanent link">#</a></h3>
 <table>
 <thead>
@@ -8829,7 +8829,7 @@
 <tbody>
 <tr>
 <td align="left"><code>customScript</code></td>
-<td align="left">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
+<td align="left">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
 </tr>
 <tr>
 <td align="left"><code>configurationAttributes</code></td>
@@ -8837,11 +8837,11 @@
 </tr>
 <tr>
 <td align="left"><code>SimpleCustomProperty</code></td>
-<td align="left">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/nightly/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
+<td align="left">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
 </tr>
 <tr>
 <td align="left"><code>context</code></td>
-<td align="left"><a href="https://github.com/JanssenProject/jans/blob/nightly/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java">Reference</a></td>
+<td align="left"><a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java">Reference</a></td>
 </tr>
 </tbody>
 </table>
@@ -8908,81 +8908,81 @@ By default it is not enabled but it can be enabled if set <code>forceRopcInAutho
         <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div>
 <h3 id="script-type-java">Script Type: Java<a class="headerlink" href="#script-type-java" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.model.CustomScript</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.owner.ResourceOwnerPasswordCredentialsType</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.custom.script.CustomScriptManager</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.server.service.AuthenticationService</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.cdi.util.CdiUtil</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.server.service.external.context.ExternalResourceOwnerPasswordCredentialsContext</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.model.CustomScript</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.owner.ResourceOwnerPasswordCredentialsType</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.custom.script.CustomScriptManager</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.server.service.AuthenticationService</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.cdi.util.CdiUtil</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.server.service.external.context.ExternalResourceOwnerPasswordCredentialsContext</span><span class="p">;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span>
 
-<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ResourceOwnerPasswordCredentials</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">ResourceOwnerPasswordCredentialsType</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ResourceOwnerPasswordCredentials</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">ResourceOwnerPasswordCredentialsType</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">log</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">CustomScriptManager</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">log</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">CustomScriptManager</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
 
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">usernameParamName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;username&quot;</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">passwordParamName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;password&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">usernameParamName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;username&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">passwordParamName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;password&quot;</span><span class="p">;</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;ROPC Script. Initializing...&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;ROPC Script. Initialized&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;ROPC Script. Initializing...&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;ROPC Script. Initialized&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">CustomScript</span><span class="w"> </span><span class="n">customScript</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;ROPC Script. Initializing...&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;ROPC Script. Initialized&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">CustomScript</span><span class="w"> </span><span class="n">customScript</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;ROPC Script. Initializing...&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;ROPC Script. Initialized&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;ROPC Script. Destroying...&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;ROPC Script. Destroyed.&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;ROPC Script. Destroying...&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;ROPC Script. Destroyed.&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">11</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">11</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">authenticate</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;ROPC script. Authenticate&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">ExternalResourceOwnerPasswordCredentialsContext</span><span class="w"> </span><span class="n">ropcContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ExternalResourceOwnerPasswordCredentialsContext</span><span class="p">)</span><span class="w"> </span><span class="n">context</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">deviceIdParam</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ropcContext</span><span class="p">.</span><span class="na">getHttpRequest</span><span class="p">().</span><span class="na">getParameterValues</span><span class="p">(</span><span class="s">&quot;device_id&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">deviceIdParam</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">deviceIdParam</span><span class="p">.</span><span class="na">length</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="kt">boolean</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">deviceIdParam</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;device_id_1&quot;</span><span class="p">;</span><span class="w"></span>
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">result</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"></span>
-<span class="w">            </span><span class="p">}</span><span class="w"></span>
-<span class="w">            </span><span class="c1">// Set authenticated user in context</span><span class="w"></span>
-<span class="w">            </span><span class="c1">// context.setUser(user)</span><span class="w"></span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">        </span><span class="c1">// generic authentication in other cases</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">authenticate</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;ROPC script. Authenticate&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">ExternalResourceOwnerPasswordCredentialsContext</span><span class="w"> </span><span class="n">ropcContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ExternalResourceOwnerPasswordCredentialsContext</span><span class="p">)</span><span class="w"> </span><span class="n">context</span><span class="p">;</span>
+<span class="w">        </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">deviceIdParam</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ropcContext</span><span class="p">.</span><span class="na">getHttpRequest</span><span class="p">().</span><span class="na">getParameterValues</span><span class="p">(</span><span class="s">&quot;device_id&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">deviceIdParam</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">deviceIdParam</span><span class="p">.</span><span class="na">length</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="kt">boolean</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">deviceIdParam</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;device_id_1&quot;</span><span class="p">;</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">result</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="c1">// Set authenticated user in context</span>
+<span class="w">            </span><span class="c1">// context.setUser(user)</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="c1">// generic authentication in other cases</span>
 
-<span class="w">        </span><span class="n">AuthenticationService</span><span class="w"> </span><span class="n">authService</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CdiUtil</span><span class="p">.</span><span class="na">bean</span><span class="p">(</span><span class="n">AuthenticationService</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">username</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ropcContext</span><span class="p">.</span><span class="na">getHttpRequest</span><span class="p">().</span><span class="na">getParameter</span><span class="p">(</span><span class="n">usernameParamName</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ropcContext</span><span class="p">.</span><span class="na">getHttpRequest</span><span class="p">().</span><span class="na">getParameter</span><span class="p">(</span><span class="n">passwordParamName</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="kt">boolean</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">authService</span><span class="p">.</span><span class="na">authenticate</span><span class="p">(</span><span class="n">username</span><span class="p">,</span><span class="w"> </span><span class="n">password</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">result</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;ROPC script. Authenticate. Could not authenticate &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">username</span><span class="p">);</span><span class="w"></span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">        </span><span class="n">ropcContext</span><span class="p">.</span><span class="na">setUser</span><span class="p">(</span><span class="n">authService</span><span class="p">.</span><span class="na">getAuthenticatedUser</span><span class="p">());</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="n">AuthenticationService</span><span class="w"> </span><span class="n">authService</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CdiUtil</span><span class="p">.</span><span class="na">bean</span><span class="p">(</span><span class="n">AuthenticationService</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">username</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ropcContext</span><span class="p">.</span><span class="na">getHttpRequest</span><span class="p">().</span><span class="na">getParameter</span><span class="p">(</span><span class="n">usernameParamName</span><span class="p">);</span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ropcContext</span><span class="p">.</span><span class="na">getHttpRequest</span><span class="p">().</span><span class="na">getParameter</span><span class="p">(</span><span class="n">passwordParamName</span><span class="p">);</span>
+<span class="w">        </span><span class="kt">boolean</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">authService</span><span class="p">.</span><span class="na">authenticate</span><span class="p">(</span><span class="n">username</span><span class="p">,</span><span class="w"> </span><span class="n">password</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">result</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;ROPC script. Authenticate. Could not authenticate &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">username</span><span class="p">);</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">ropcContext</span><span class="p">.</span><span class="na">setUser</span><span class="p">(</span><span class="n">authService</span><span class="p">.</span><span class="na">getAuthenticatedUser</span><span class="p">());</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 
-<span class="p">}</span><span class="w"></span>
+<span class="p">}</span>
 </code></pre></div>
 <h3 id="sample-scripts">Sample Scripts<a class="headerlink" href="#sample-scripts" title="Permanent link">#</a></h3>
 <ul>

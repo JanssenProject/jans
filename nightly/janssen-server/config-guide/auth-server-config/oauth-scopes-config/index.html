@@ -8831,7 +8831,7 @@ Postman. Learn how to use Janssen Server Config API
 command line. To get the details of Janssen command line operations relevant to
 OAuth Scope, you can check the operations under the <code>OauthScopes</code> task using the
 command below.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --info OauthScopes
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--info<span class="w"> </span>OauthScopes
 </code></pre></div>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Operation ID: get-oauth-scopes
   Description: Gets list of Scopes
@@ -8878,8 +8878,8 @@ To get sample schema type jans cli --schema-sample &lt;schema&gt;, for example j
 <h3 id="findview-oauth-scopes">Find/View OAuth Scopes<a class="headerlink" href="#findview-oauth-scopes" title="Permanent link">#</a></h3>
 <p>Use the operation ID <code>get-oauth-scopes</code> to find and view the current scopes. Let's retrieve 3 scopes that
 contain <code>view</code> in the description and <code>openid</code> as the Type.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code> jans cli --operation-id get-oauth-scopes <span class="se">\</span>
- --endpoint-args limit:3,pattern:view,type:openid
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="w"> </span>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-oauth-scopes<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span>--endpoint-args<span class="w"> </span>limit:3,pattern:view,type:openid
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -9041,11 +9041,11 @@ contain <code>view</code> in the description and <code>openid</code> as the Type
 <p>To create a new scope, we can use <code>post-oauth-scopes</code> operation id. As shown in the <a href="#using-command-line">output</a>
 for <code>--info</code> command, the <code>post-oauth-scopes</code> operation requires data to be sent according to <code>Scope</code> schema.</p>
 <p>To see the schema, use the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema Scope
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema<span class="w"> </span>Scope
 </code></pre></div>
 <p>For better understanding, the Janssen Server also provides an sample of data to be sent to the server. 
 This sample conforms to the schema above. Use the command below to get the sample.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema-sample Scope
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema-sample<span class="w"> </span>Scope
 </code></pre></div>
 <p>Using the schema and the example above, we have added below key data to the file <code>/tmp/scope.json</code></p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Input</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -9066,29 +9066,29 @@ This sample conforms to the schema above. Use the command below to get the sampl
 <span class="normal">16</span>
 <span class="normal">17</span>
 <span class="normal">18</span>
-<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestScopeID&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestScope&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test Scope created by jans-cli&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;iconUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;authorizationPolicies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;defaultScope&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;scopeType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openid&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;umaType&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;umaAuthorizationPolicies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;spontaneousClientId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;spontaneousClientScopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;showInConfigurationEndpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestScopeID&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestScope&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test Scope created by jans-cli&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iconUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;authorizationPolicies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">&quot;defaultScope&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scopeType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openid&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">&quot;umaType&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;umaAuthorizationPolicies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;spontaneousClientId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;spontaneousClientScopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">&quot;showInConfigurationEndpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <p>Now let's post this scope to the Janssen Server to be added to the existing set:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code> jans cli --operation-id post-oauth-scopes <span class="se">\</span>
- --data /tmp/scope.json 
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="w"> </span>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>post-oauth-scopes<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span>--data<span class="w"> </span>/tmp/scope.json<span class="w"> </span>
 </code></pre></div>
 <h3 id="update-existing-oauth-scopes">Update Existing OAuth Scopes<a class="headerlink" href="#update-existing-oauth-scopes" title="Permanent link">#</a></h3>
 <p>To update the configuration follow the steps below.</p>
@@ -9096,8 +9096,8 @@ This sample conforms to the schema above. Use the command below to get the sampl
 <li>
 <p><a href="#find-oauth-scopes-by-inum">Get the existing OAuth Scope</a> and store it into a file for editing.
   The following command will retrieve the existing OAuth Scope in the schema file.
-  <div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli -no-color --operation-id get-oauth-scopes-by-inum <span class="se">\</span>
---url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2 &gt; /tmp/scopdata.json
+  <div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>-no-color<span class="w"> </span>--operation-id<span class="w"> </span>get-oauth-scopes-by-inum<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="w"> </span>inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2<span class="w"> </span>&gt;<span class="w"> </span>/tmp/scopdata.json
 </code></pre></div></p>
 </li>
 <li>
@@ -9108,7 +9108,7 @@ This sample conforms to the schema above. Use the command below to get the sampl
 <li>
 <p>We have changed only the <code>scopeType</code> to <code>dynamic</code> in existing OAuth Scope.
    Use the updated file to send the update to the Janssen Server using the command below
-   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id put-oauth-scopes --data /tmp/scope.json
+   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>put-oauth-scopes<span class="w"> </span>--data<span class="w"> </span>/tmp/scope.json
 </code></pre></div>
 This will updated the existing oauth scopes matched with inum value.</p>
 </li>
@@ -9125,23 +9125,23 @@ Remember when we queried info for the task <strong>OAuthScopes</strong> it print
 The <code>patch-oauth-scopes-by-id</code> operation uses the <a href="https://jsonpatch.com/#the-patch">JSON Patch</a> schema to describe 
 the configuration change. Refer <a href="../../config-tools/jans-cli/#patch-request-schema">here</a> 
 to know more about schema.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema JsonPatch &gt; /tmp/patch.json
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema<span class="w"> </span>JsonPatch<span class="w"> </span>&gt;<span class="w"> </span>/tmp/patch.json
 </code></pre></div>
 <p>For instance, to perform a <code>replace</code> operation at <code>iconUrl</code> 
 and change it from <code>null</code> to <code>https://www.jans.io/icon.png</code>, 
 the JSON Patch data would look like below:</p>
-<p><div class="highlight"><span class="filename">Input</span><pre><span></span><code><span class="p">[</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;iconUrl&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.jans.io/icon.png&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<p><div class="highlight"><span class="filename">Input</span><pre><span></span><code><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;iconUrl&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.jans.io/icon.png&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
 </code></pre></div>
 Store the above JSON Patch data in a file, for instance, <code>/tmp/patch.json</code></p>
 <p>Let's do the operation:
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id patch-oauth-scopes-by-id <span class="se">\</span>
---url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2 --data /tmp/patch.json 
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>patch-oauth-scopes-by-id<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="w"> </span>inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2<span class="w"> </span>--data<span class="w"> </span>/tmp/patch.json<span class="w"> </span>
 </code></pre></div></p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -9158,22 +9158,22 @@ Store the above JSON Patch data in a file, for instance, <code>/tmp/patch.json</
 <span class="normal">13</span>
 <span class="normal">14</span>
 <span class="normal">15</span>
-<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;8eb2b0c0-d1d9-453d-8364-e2809ce857f2&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestScope&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestScopeID&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;iconUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.jans.io/icon.png&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test Scope created by jans-cli&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;scopeType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dynamic&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;defaultScope&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;showInConfigurationEndpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-25T08:44:08&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;umaType&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;8eb2b0c0-d1d9-453d-8364-e2809ce857f2&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestScope&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestScopeID&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iconUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.jans.io/icon.png&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test Scope created by jans-cli&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scopeType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dynamic&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;defaultScope&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;showInConfigurationEndpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-25T08:44:08&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;umaType&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans&quot;</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="find-oauth-scopes-by-inum">Find OAuth Scopes by <code>inum</code><a class="headerlink" href="#find-oauth-scopes-by-inum" title="Permanent link">#</a></h3>
 <p>In case We know the <code>inum</code> value of an OAuth Scope, We can get the details of that scope.</p>
@@ -9184,11 +9184,11 @@ Store the above JSON Patch data in a file, for instance, <code>/tmp/patch.json</
   withAssociatedClients: No description is provided for this parameter [boolean]
 </code></pre></div>
 <p>We can use the <code>url-suffix</code> for the <code>inum</code> value.
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id get-oauth-scopes-by-inum --url-suffix inum:value
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-oauth-scopes-by-inum<span class="w"> </span>--url-suffix<span class="w"> </span>inum:value
 </code></pre></div></p>
 <p>For example:</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-oauth-scopes-by-inum <span class="se">\</span>
---url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-oauth-scopes-by-inum<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="w"> </span>inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2
 </code></pre></div>
 It returns the details of the scope matched with the <code>inum</code> value.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -9206,32 +9206,32 @@ It returns the details of the scope matched with the <code>inum</code> value.</p
 <span class="normal">13</span>
 <span class="normal">14</span>
 <span class="normal">15</span>
-<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;8eb2b0c0-d1d9-453d-8364-e2809ce857f2&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestScope&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestScopeID&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;iconUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.jans.io/icon.png&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test Scope created by jans-cli&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;scopeType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dynamic&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;defaultScope&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;showInConfigurationEndpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-25T08:44:08&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;umaType&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;8eb2b0c0-d1d9-453d-8364-e2809ce857f2&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestScope&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestScopeID&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iconUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.jans.io/icon.png&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test Scope created by jans-cli&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scopeType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dynamic&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;defaultScope&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;showInConfigurationEndpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-25T08:44:08&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;umaType&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans&quot;</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="delete-oauth-scopes-by-inum">Delete OAuth Scopes by <code>inum</code><a class="headerlink" href="#delete-oauth-scopes-by-inum" title="Permanent link">#</a></h3>
 <p>You can delete any OAuth Scopes by its <code>inum</code> value.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id delete-oauth-scopes-by-inum <span class="se">\</span>
---url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>delete-oauth-scopes-by-inum<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="w"> </span>inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2
 </code></pre></div>
 <p>Just change the <code>inum</code> value to your own according to which one you want to delete.</p>
 <h2 id="using-text-based-ui">Using Text-based UI<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
 <p>You can start TUI using the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans tui
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>tui
 </code></pre></div>
 <h3 id="scope-screen">Scope Screen<a class="headerlink" href="#scope-screen" title="Permanent link">#</a></h3>
 <p>Navigate to <code>Auth Server</code> -&gt; <code>Scopes</code> to open the scope screen as shown in the image below.</p>

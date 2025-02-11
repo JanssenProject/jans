@@ -8947,11 +8947,11 @@ must re-authenticate to continue. If the user succeeds, a new session with a new
 AS will map <code>loginWithOtpCheck</code> to <code>otp</code> and will use <code>acr_values=otp</code> for actual processing on server side. 
 It means that custom script must be called <code>otp</code> in this case on AS side and not <code>loginWithOtpCheck</code> (because <code>loginWithOtpCheck</code> is alias to <code>otp</code>). </p>
 <p>ACR mappings are published on discovery page <code>GET /.well-known/openid-configuration HTTP/1.1</code></p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="err">...</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;acr_mappings&quot;</span><span class="p">:{</span><span class="nt">&quot;alias1&quot;</span><span class="p">:</span><span class="s2">&quot;acr1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;loginWithOtpCheck&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;otp&quot;</span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="err">...</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="err">...</span>
+<span class="w">  </span><span class="nt">&quot;acr_mappings&quot;</span><span class="p">:{</span><span class="nt">&quot;alias1&quot;</span><span class="p">:</span><span class="s2">&quot;acr1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;loginWithOtpCheck&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;otp&quot;</span><span class="p">}</span>
+<span class="w">  </span><span class="err">...</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="flowchart-how-the-jans-as-derives-an-acr-value-for-a-user-session">Flowchart : How the Jans AS derives an ACR value for a user session<a class="headerlink" href="#flowchart-how-the-jans-as-derives-an-acr-value-for-a-user-session" title="Permanent link">#</a></h2>
 <pre class="mermaid"><code>flowchart TD

@@ -8734,10 +8734,10 @@ UNION - size: 20483bytes, cardinality: 10010897
 <h2 id="health-check">Health Check<a class="headerlink" href="#health-check" title="Permanent link">#</a></h2>
 <p>AS provides <code>/sys/health-check</code> endpoint which can be used to perform health check.</p>
 <p>Sample reply
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;running&quot;</span><span class="p">,</span><span class="w"> </span>
-<span class="w">  </span><span class="nt">&quot;db_status&quot;</span><span class="p">:</span><span class="s2">&quot;online&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;db_status&quot;</span><span class="p">:</span><span class="s2">&quot;online&quot;</span>
+<span class="p">}</span>
 </code></pre></div></p>
 <p>Sample curl
 <div class="highlight"><pre><span></span><code>curl -k https://janssen-host-name/jans-auth/sys/health-check
@@ -8745,116 +8745,116 @@ UNION - size: 20483bytes, cardinality: 10010897
 <h2 id="token-issued">Token Issued<a class="headerlink" href="#token-issued" title="Permanent link">#</a></h2>
 <p>Token Issued report shows how many tokens were issued per grant type.</p>
 <p>Sample response from <code>/jans-auth/restv1/internal/stat</code> protected endpoint.</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;response&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;202101&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;monthly_active_users&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1939497078</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;token_count_per_granttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;implicit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8843443</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">361678620</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">257653798</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1196937417</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">198484847</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">527458534</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1552211159</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2077968838</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">21293868</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2003904704</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">44144850</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1713870170</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;client_credentials&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1656091541</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">875245682</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1920358732</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2029924857</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;urn:ietf:params:oauth:grant-type:device_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">871050693</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">735390384</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">902227655</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">572398177</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;authorization_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1468057290</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1576996227</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1755565333</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">944346498</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;urn:openid:params:grant-type:ciba&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1187334485</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1043290537</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">206572517</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1850166398</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;urn:ietf:params:oauth:grant-type:uma-ticket&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">933970698</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1089756841</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">352343374</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">645686974</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">      </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;202012&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;monthly_active_users&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1620607010</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;token_count_per_granttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;implicit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20676511</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">960308503</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">703633153</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">573544490</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">526463917</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">483679318</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">545888615</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">951286042</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1883167951</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1636169697</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1753544837</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1675535757</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;client_credentials&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">290209545</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1635984977</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1066472511</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">463520941</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;urn:ietf:params:oauth:grant-type:device_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">84124820</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1705729386</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2070635541</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">970034925</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;authorization_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">387026047</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">907425179</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">370523863</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1807260512</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;urn:openid:params:grant-type:ciba&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1408098991</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">819153423</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">936295536</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">378210748</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;urn:ietf:params:oauth:grant-type:uma-ticket&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">381038617</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">828068056</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">448746427</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">650520169</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">      </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;response&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;202101&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;monthly_active_users&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1939497078</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;token_count_per_granttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;implicit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8843443</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">361678620</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">257653798</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1196937417</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">198484847</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">527458534</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1552211159</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2077968838</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">21293868</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2003904704</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">44144850</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1713870170</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;client_credentials&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1656091541</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">875245682</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1920358732</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2029924857</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;urn:ietf:params:oauth:grant-type:device_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">871050693</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">735390384</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">902227655</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">572398177</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;authorization_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1468057290</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1576996227</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1755565333</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">944346498</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;urn:openid:params:grant-type:ciba&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1187334485</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1043290537</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">206572517</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1850166398</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;urn:ietf:params:oauth:grant-type:uma-ticket&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">933970698</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1089756841</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">352343374</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">645686974</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;202012&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;monthly_active_users&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1620607010</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;token_count_per_granttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;implicit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20676511</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">960308503</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">703633153</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">573544490</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">526463917</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">483679318</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">545888615</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">951286042</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1883167951</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1636169697</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1753544837</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1675535757</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;client_credentials&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">290209545</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1635984977</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1066472511</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">463520941</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;urn:ietf:params:oauth:grant-type:device_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">84124820</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1705729386</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2070635541</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">970034925</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;authorization_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">387026047</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">907425179</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">370523863</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1807260512</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;urn:openid:params:grant-type:ciba&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1408098991</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">819153423</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">936295536</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">378210748</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;urn:ietf:params:oauth:grant-type:uma-ticket&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">381038617</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">828068056</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;uma_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">448746427</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">650520169</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="audit-logs">Audit logs<a class="headerlink" href="#audit-logs" title="Permanent link">#</a></h2>
 <p>AS supports audit logs. Please check <a href="../logging/audit-logs/">audit logs page</a></p>
