@@ -11,7 +11,7 @@ Read [this article](https://medium.com/@arnab.bdutta/janssen-cedarling-uniffi-bi
 - Rust: Install it from [the official Rust website](https://www.rust-lang.org/tools/install).
 - Xcode: Available on the Mac App Store.
 
-### Building 
+### Building
 
 1. Build the library:
 
@@ -53,10 +53,10 @@ xcodebuild -create-xcframework \
         -output "ios/Mobile.xcframework"
 ```
 
-6. Open ./jans-cedarling/bindings/cedarling_native_apps/iOSApp in Xcode. Import both the XCFramework Mobile.xcframework and the Swift file bindings bindings/Mobile.swift files into your project (drag and drop should work).
+6. Open ./jans-cedarling/bindings/cedarling_native_apps/iOSApp in Xcode. Import both the XCFramework Mobile.xcframework and the Swift file bindings bindings/output/mobile.swift files into your project (drag and drop should work).
 
-7. Run iOS project on simulator. 
+7. Run iOS project on simulator.
 
 ## Android
 
-- WIP...
+- WIP
