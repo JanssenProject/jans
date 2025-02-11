@@ -10,8 +10,8 @@ mod log_entry;
 
 use super::LockError;
 use super::LockService;
+use super::log_wrapper::Logger;
 use crate::init::service_config::LockConfig;
-use crate::log::Logger;
 use crate::log::interface::LogWriter;
 use log_entry::AuditLogEntry;
 use reqwest::Client;
@@ -68,7 +68,6 @@ impl LockService {
 
         // Task for handling logs
         tracker.spawn(Self::handle_log(
-            client_creds.client_id.clone(),
             client_tx.clone(),
             Duration::from_secs(audit_intervals.log),
             logger.clone(),
@@ -77,14 +76,12 @@ impl LockService {
 
         // Task for handling health checks
         tracker.spawn(Self::handle_health(
-            client_creds.client_id.clone(),
             client_tx.clone(),
             Duration::from_secs(audit_intervals.health),
         ));
 
         // Task for handling telemetry
         tracker.spawn(Self::handle_telemetry(
-            client_creds.client_id.clone(),
             client_tx.clone(),
             Duration::from_secs(audit_intervals.telemetry),
         ));

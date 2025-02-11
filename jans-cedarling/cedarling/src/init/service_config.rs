@@ -17,6 +17,8 @@ pub(crate) struct ServiceConfig {
     pub lock_client_config: Option<LockConfig>,
 }
 
+/// Config from `/.well-known/lock-configuration` and info from the
+/// IDP's DCR.
 #[derive(Clone)]
 pub(crate) struct LockConfig {
     pub client_id: String,

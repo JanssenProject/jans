@@ -9,14 +9,15 @@
 //! [link to the documentation](https://docs.jans.io/head/admin/lock/)
 
 mod audit;
+mod log_wrapper;
 mod telemetry;
 
 pub(crate) use audit::AuditIntervals;
-use tokio_util::sync::CancellationToken;
-use tokio_util::task::TaskTracker;
 
 use crate::init::service_config::LockConfig;
-use crate::log::Logger;
+use log_wrapper::Logger;
+use tokio_util::sync::CancellationToken;
+use tokio_util::task::TaskTracker;
 
 pub(crate) struct LockService {
     audit_tasks_tracker: TaskTracker,
@@ -24,7 +25,13 @@ pub(crate) struct LockService {
 }
 
 impl LockService {
-    pub fn new(config: LockConfig, audit_intervals: AuditIntervals, logger: Logger) -> Self {
+    pub fn new(
+        config: LockConfig,
+        audit_intervals: AuditIntervals,
+        logger: crate::log::Logger,
+    ) -> Self {
+        let logger = Logger::new(logger);
+
         let cancellation_tkn = CancellationToken::new();
 
         let _telemetry_tracker = Self::init_sse_handler(config.sse_uri.clone());

@@ -31,7 +31,7 @@
 //!  
 //!  #### Log type `lock`
 //!  
-//!  This log type will send logs to the server (corporate feature). Will be discussed later.
+//!  This log type will send logs to a lock server.
 //!
 //!  ## Log Strategy
 //!
@@ -49,7 +49,9 @@
 //!
 //!  Currently only [MemoryLogger](`memory_logger::MemoryLogger`) implement this.
 
+mod fallback;
 pub mod interface;
+pub(crate) mod lock_logger;
 mod log_entry;
 mod log_level;
 pub(crate) mod log_strategy;

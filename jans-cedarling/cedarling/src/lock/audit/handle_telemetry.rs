@@ -11,7 +11,6 @@ use tokio::sync::mpsc;
 
 impl LockService {
     pub async fn handle_telemetry(
-        _client_id: String,
         _client_tx: mpsc::Sender<AuditMsg>,
         _interval: Duration,
     ) -> Result<(), LockError> {

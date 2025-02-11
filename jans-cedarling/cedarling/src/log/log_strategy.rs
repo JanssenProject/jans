@@ -4,6 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::interface::{LogStorage, LogWriter, Loggable};
+use super::lock_logger::LockLogger;
 use super::memory_logger::MemoryLogger;
 use super::nop_logger::NopLogger;
 use super::stdout_logger::StdOutLogger;
@@ -15,6 +16,7 @@ pub(crate) enum LogStrategy {
     Off(NopLogger),
     MemoryLogger(MemoryLogger),
     StdOut(StdOutLogger),
+    Lock(LockLogger),
 }
 
 impl LogStrategy {
@@ -27,7 +29,7 @@ impl LogStrategy {
                 Self::MemoryLogger(MemoryLogger::new(memory_config, config.log_level))
             },
             LogTypeConfig::StdOut => Self::StdOut(StdOutLogger::new(config.log_level)),
-            LogTypeConfig::Lock => todo!(),
+            LogTypeConfig::Lock => Self::Lock(LockLogger::new(config)),
         }
     }
 }
@@ -39,6 +41,7 @@ impl LogWriter for LogStrategy {
             LogStrategy::Off(log) => log.log_any(entry),
             LogStrategy::MemoryLogger(memory_logger) => memory_logger.log_any(entry),
             LogStrategy::StdOut(std_out_logger) => std_out_logger.log_any(entry),
+            LogStrategy::Lock(lock_logger) => lock_logger.log_any(entry),
         }
     }
 }
