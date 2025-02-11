@@ -11,7 +11,7 @@ includes all configurations, users, groups, OIDC clients, and more.
 
 ## Provider Configuration
 
-To use the provider, you need to provide the URL of the Jansen instance, as 
+To use the provider, you need to provide the URL of the Janssen instance, as 
 well as valid credentials that have access to the Janssen instance.
 
 ```terraform
@@ -20,7 +20,7 @@ terraform {
   required_providers {
     janssen = {
       source = "JanssenProject/jans"
-      version = "0.6.0"
+      version = "1.2.0"
     }
   }
 }
