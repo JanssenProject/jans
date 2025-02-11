@@ -3,9 +3,9 @@ resource "jans_script" "test" {
 	inum 											= "4A4E-4F3D"
 	name 											= "test_script"
 	description 							= "Test description"
-	script 										= ""
-	script_type 							= "INTROSPECTION"
-	programming_language 			= "PYTHON"
+	script 										= "<path-of-script>" 
+	script_type 							= "introspection"
+	programming_language 			= "python"
 	level 										= 1
 	revision 									= 1
 	enabled 									= true
