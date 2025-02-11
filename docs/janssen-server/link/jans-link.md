@@ -67,23 +67,14 @@ tasks.
 === "Use REST API"
 
     The Jans link does not have a REST API.
-
-
-
-
-
-
-
 ### Using Command Line
 
-Janssen Server [CLI](../config-guide/config-tools/jans-cli/README.md) provides
-number of operations and metadata information about Jans LDAP link.
-
+Janssen Server [CLI](../config-guide/config-tools/jans-cli/README.md) provides the number of operations and metadata information about the Jans LDAP link.
 
 To see Jans-Link info using Jans CLI
 
 ```bash title="Command"
-jans cli --info JansLinkConfiguration
+ jans cli --info JansLinkConfiguration
 ```
 
 ```text
@@ -95,14 +86,14 @@ Operation ID: put-jans-link-properties
 ```
  
 #### Gets Jans Link App configuration
- 
-To see Jans Link properties using below command.
-Use the operation ID `get-jans-link-properties` to get all the jans link on the Janssen Server.
 
-```bash
-/opt/jans/jans-cli/config-cli.py --operation-id get-jans-link-properties
+To see Jans Link properties, use the below command. Use the operation ID 
+`get-jans-link-properties` to get all the Jans link on the Janssen Server.
+
+```bash title="Command"
+ jans cli --operation-id get-jans-link-properties
 ```
-Output of above command will be similar to this:
+The output of the above command will be similar to this:
 
 ```json title="Sample Output"
 {
@@ -192,42 +183,40 @@ Output of above command will be similar to this:
 
 #### Updates Jans Link configuration properties
 
-
 Let's update the Jans Link configuration properties using the Janssen CLI command line. 
-To perform the `put-jans-link-properties` operation, we have to use its schema. To get its schema:
+To perform the `put-jans-link-properties` operation, we have to use its schema. 
+To get its schema:
 
 
 ```bash title="Command"
 jans cli --schema "Jans Link Plugin:AppConfiguration"
 ```
 
-you can also use the following command for `Jans Link Plugin:AppConfiguration` schema example.
+You can also use the following command for `Jans Link Plugin:AppConfiguration` a schema example.
 
 ```bash title="Command"
 jans cli --schema-sample "Jans Link Plugin:AppConfiguration"
 ```
-To update the configuration follow the steps below.
+To update the configuration, follow the steps below.
+
 
 1. [Get Jans Link App configuration](#gets-jans-link-app-configuration) and store it into 
-a file for editing. The following command will retrieve the existing jans link in the schema file.
+a file for editing. The following command will retrieve the existing Jans link in the schema file.
 ```bash title="Command"
 jans cli -no-color \
 --operation-id get-jans-link-properties > /tmp/update-jans-link.json
 ```
 2. Edit and update the desired configuration values in the file while keeping other properties 
-and values unchanged. Updates must adhere to the `Jans Link Plugin:AppConfiguration` 
-schema as mentioned [here](#using-command-line).
-
+and values unchanged. Updates must adhere to the `Jans Link Plugin:AppConfiguration` schema as mentioned 
+[here](#using-command-line).
 3. We have seen in the jans link `maxConnections:10` and `useSSL:true`. We are going to 
 update it with `maxConnections:15` and `useSSL:false`.
-
-
-
 ```bash title="Command"
 jans cli --operation-id put-jans-link-properties \
 --data /tmp/update-jans-link.json
 ```
 Upon successful execution of the update, the Janssen Server responds with updated configuration
+
 
 ###  Using Text-based UI
 
@@ -236,12 +225,13 @@ Start TUI using the command below:
 ```bash title="Command"
 jans tui
 ```
+
 Navigate to `Jans Link` -> `Configuration` to open the screen as shown
 in the image below.
 
 ![link-config](../../assets/ldap-link-main-tab.png)
 
-Section below covers Jans LDAP link configuration in more details.
+The section below covers Jans LDAP link configuration in more detail.
 
 #### Configuration Using 
 
