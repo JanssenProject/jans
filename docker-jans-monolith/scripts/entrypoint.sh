@@ -40,7 +40,6 @@ install_jans() {
   echo "install_jans_link=""$([[ ${CN_INSTALL_LINK} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "install_jans_lock=""$([[ ${CN_INSTALL_LOCK} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "install_jans_saml=""$([[ ${CN_INSTALL_SAML} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
-  echo "install_opa=""$([[ ${CN_INSTALL_OPA} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "test_client_id=${TEST_CLIENT_ID}"| tee -a setup.properties > /dev/null
   echo "test_client_pw=${TEST_CLIENT_SECRET}" | tee -a setup.properties > /dev/null1
   echo "test_client_trusted=""$([[ ${TEST_CLIENT_TRUSTED} == true ]] && echo True || echo True)" | tee -a setup.properties > /dev/null

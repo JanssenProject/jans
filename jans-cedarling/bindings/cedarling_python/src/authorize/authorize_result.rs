@@ -42,6 +42,10 @@ impl AuthorizeResult {
     fn person(&self) -> Option<AuthorizeResultResponse> {
         self.inner.person.clone().map(|v| v.into())
     }
+
+    fn request_id(&self) -> String {
+        self.inner.request_id.clone()
+    }
 }
 
 impl From<cedarling::AuthorizeResult> for AuthorizeResult {

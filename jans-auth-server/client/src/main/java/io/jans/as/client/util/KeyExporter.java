@@ -30,11 +30,11 @@ import java.security.PrivateKey;
 /**
  * Export private key from JKS Command example: java -cp
  * KeyExporter -h
- * <p/>
+ * <p>
  * KeyExporter -keystore /Users/yuriy/tmp/mykeystore.jks -keypasswd secret
  * -alias "2d4817e7-5fe8-4b6b-8f64-fe3723625122"
  * -exportfile=/Users/yuriy/tmp/mykey.pem
- * <p/>
+ * <p>
  *
  * @author Yuriy Movchan
  * @version February 12, 2019

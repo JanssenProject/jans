@@ -24,7 +24,7 @@ static POLICY_STORE_RAW_YAML: &str =
 static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
     json!({
         "CEDARLING_APPLICATION_NAME": "My App",
-        "CEDARLING_LOCAL_POLICY_STORE": POLICY_STORE_RAW_YAML,
+        "CEDARLING_POLICY_STORE_LOCAL": POLICY_STORE_RAW_YAML,
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_LEVEL": "INFO",
         "CEDARLING_USER_AUTHZ": "enabled",
@@ -262,7 +262,7 @@ async fn test_run_cedarling() {
 async fn test_memory_log_interface() {
     let bootstrap_config_json = json!({
         "CEDARLING_APPLICATION_NAME": "My App",
-        "CEDARLING_LOCAL_POLICY_STORE": POLICY_STORE_RAW_YAML,
+        "CEDARLING_POLICY_STORE_LOCAL": POLICY_STORE_RAW_YAML,
         "CEDARLING_LOG_TYPE": "memory",
         "CEDARLING_LOG_TTL": 120,
         "CEDARLING_LOG_LEVEL": "INFO",
