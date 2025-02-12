@@ -8821,7 +8821,7 @@
 <p>Install <a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html">aws cli</a></p>
 </li>
 <li>
-<p>Configure your AWS user account using <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html">aws configure</a> command. This makes you able to authenticate before creating the cluster.
+<p>Configure your AWS user account using the <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html">aws configure</a> command. This makes you able to authenticate before creating the cluster.
     Note that this user account must have permissions to work with Amazon EKS IAM roles and service linked roles, AWS CloudFormation, and a VPC and related resources</p>
 </li>
 <li>
@@ -8897,7 +8897,7 @@ helm install nginx ingress-nginx/ingress-nginx
 </li>
 <li>
 <p>PostgreSQL for persistence storage</p>
-<p>In a production environment, a production grade PostgreSQL server should be used such as <code>Amazon RDS</code></p>
+<p>In a production environment, a production-grade PostgreSQL server should be used such as <code>Amazon RDS</code></p>
 <p>For testing purposes, you can deploy it on the EKS cluster using the following command:</p>
 <div class="highlight"><pre><span></span><code>helm install my-release --set auth.postgresPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/postgresql
 </code></pre></div>
@@ -8917,8 +8917,8 @@ helm install nginx ingress-nginx/ingress-nginx
 </li>
 <li>
 <p>MySQL for persistence storage</p>
-<p>In a production environment, a production grade MySQL server should be used such as <code>Amazon RDS</code></p>
-<p>For testing purposes, you can deploy it on the EKS cluster using the following commands:</p>
+<p>In a production environment, a production-grade MySQL server should be used such as <code>Amazon RDS</code></p>
+<p>For testing purposes, you can deploy it on the EKS cluster using the following command:</p>
 <div class="highlight"><pre><span></span><code>helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/mysql        
 </code></pre></div>
 <p>Add the following yaml snippet to your <code>override.yaml</code> file:</p>
@@ -8979,7 +8979,7 @@ helm install janssen janssen/janssen -n jans -f override.yaml
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-18T05:38:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-18</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-12T12:09:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-12</span>
       
         <br>
         Created:

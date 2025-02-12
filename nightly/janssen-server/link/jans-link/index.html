@@ -6857,8 +6857,23 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#using-jans-cli" class="md-nav__link">
-    Using Jans CLI
+  <a href="#using-command-line" class="md-nav__link">
+    Using Command Line
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Command Line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gets-jans-link-app-configuration" class="md-nav__link">
+    Gets Jans Link App configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updates-jans-link-configuration-properties" class="md-nav__link">
+    Updates Jans Link configuration properties
   </a>
   
 </li>
@@ -6867,19 +6882,45 @@
     </nav>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#using-jans-tui" class="md-nav__link">
-    Using Jans TUI
+        
+          <li class="md-nav__item">
+  <a href="#using-text-based-ui" class="md-nav__link">
+    Using Text-based UI
   </a>
   
-    <nav class="md-nav" aria-label="Using Jans TUI">
+    <nav class="md-nav" aria-label="Using Text-based UI">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#configuration-using-tui" class="md-nav__link">
-    Configuration Using TUI
+  <a href="#configuration-using" class="md-nav__link">
+    Configuration Using
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#customer-backend-key-attribute" class="md-nav__link">
+    Customer Backend Key Attribute
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#source-backend-ldap-server" class="md-nav__link">
+    Source Backend LDAP Server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inum-db-server" class="md-nav__link">
+    Inum DB Server
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -8657,8 +8698,23 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#using-jans-cli" class="md-nav__link">
-    Using Jans CLI
+  <a href="#using-command-line" class="md-nav__link">
+    Using Command Line
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Command Line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gets-jans-link-app-configuration" class="md-nav__link">
+    Gets Jans Link App configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updates-jans-link-configuration-properties" class="md-nav__link">
+    Updates Jans Link configuration properties
   </a>
   
 </li>
@@ -8667,19 +8723,45 @@
     </nav>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#using-jans-tui" class="md-nav__link">
-    Using Jans TUI
+        
+          <li class="md-nav__item">
+  <a href="#using-text-based-ui" class="md-nav__link">
+    Using Text-based UI
   </a>
   
-    <nav class="md-nav" aria-label="Using Jans TUI">
+    <nav class="md-nav" aria-label="Using Text-based UI">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#configuration-using-tui" class="md-nav__link">
-    Configuration Using TUI
+  <a href="#configuration-using" class="md-nav__link">
+    Configuration Using
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#customer-backend-key-attribute" class="md-nav__link">
+    Customer Backend Key Attribute
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#source-backend-ldap-server" class="md-nav__link">
+    Source Backend LDAP Server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inum-db-server" class="md-nav__link">
+    Inum DB Server
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -8767,26 +8849,50 @@ commands.</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>stop<span class="w"> </span>jans-link
 </code></pre></div>
 <h2 id="jans-ldap-link-configuration">Jans LDAP Link Configuration<a class="headerlink" href="#jans-ldap-link-configuration" title="Permanent link">#</a></h2>
-<h3 id="using-jans-cli">Using Jans CLI<a class="headerlink" href="#using-jans-cli" title="Permanent link">#</a></h3>
-<p>Janssen Server <a href="../../config-guide/config-tools/jans-cli/">CLI</a> provides
-number of operations and metadata information about Jans LDAP link.</p>
-<p>To see Jans-Link info using Jans CLI
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--info<span class="w"> </span>JansLinkConfiguration
-</code></pre></div></p>
-<p>To see Jans Link properties using below command.
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--operation-id<span class="w"> </span>get-jans-link-properties
-</code></pre></div></p>
-<p>To see basic schema of Jans-Link use below command
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--schema<span class="w"> </span><span class="s2">&quot;Jans Link Plugin:AppConfiguration&quot;</span>
-</code></pre></div></p>
-<p>Output of above command will be similar to this:
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<p>The Janssen Server provides multiple configuration tools to perform these
+tasks.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Use Command-line</label><label for="__tabbed_1_2">Use Text-based UI</label><label for="__tabbed_1_3">Use REST API</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Use the command line to perform actions from the terminal. Learn how to 
+use Jans CLI <a href="./config-tools/jans-cli/README.md">here</a> or jump straight to 
+the <a href="#using-command-line">Using Command Line</a></p>
+</div>
+<div class="tabbed-block">
+<p>Use a fully functional text-based user interface from the terminal. 
+Learn how to use Jans Text-based UI (TUI) 
+<a href="./config-tools/jans-tui/README.md">here</a> or jump straight to the
+<a href="#using-text-based-ui">Using Text-based UI</a></p>
+</div>
+<div class="tabbed-block">
+<p>The Jans link does not have a REST API.</p>
+</div>
+</div>
+</div>
+<h3 id="using-command-line">Using Command Line<a class="headerlink" href="#using-command-line" title="Permanent link">#</a></h3>
+<p>Janssen Server <a href="../../config-guide/config-tools/jans-cli/">CLI</a> provides the number of operations and metadata information about the Jans LDAP link.</p>
+<p>To see Jans-Link info using Jans CLI</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="w"> </span>jans<span class="w"> </span>cli<span class="w"> </span>--info<span class="w"> </span>JansLinkConfiguration
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>Operation ID: get-jans-link-properties
+  Description: Gets Jans Link App configuration.
+Operation ID: put-jans-link-properties
+  Description: Updates Jans Link configuration properties.
+  Schema: Jans Link Plugin:AppConfiguration
+</code></pre></div>
+<h4 id="gets-jans-link-app-configuration">Gets Jans Link App configuration<a class="headerlink" href="#gets-jans-link-app-configuration" title="Permanent link">#</a></h4>
+<p>To see Jans Link properties, use the below command. Use the operation ID 
+<code>get-jans-link-properties</code> to get all the Jans link on the Janssen Server.</p>
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="w"> </span>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-jans-link-properties
+</code></pre></div>
+The output of the above command will be similar to this:</p>
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;inumConfig&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;configId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;local_inum&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;bindDN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cn=directory manager&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;bindPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;+iChsQofo6Y=&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;bindDN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;@ldap_binddn@&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;bindPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;@ldap_bind_encoded_pw@&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;localhost:1636&quot;</span>
+<span class="w">      </span><span class="s2">&quot;@ldap_hostname@:@ldaps_port@&quot;</span>
 <span class="w">    </span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;maxConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
@@ -8861,13 +8967,42 @@ number of operations and metadata information about Jans LDAP link.</p>
 <span class="w">  </span><span class="nt">&quot;problemCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;useLocalCache&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
 <span class="p">}</span>
-</code></pre></div></p>
-<h2 id="using-jans-tui">Using Jans TUI<a class="headerlink" href="#using-jans-tui" title="Permanent link">#</a></h2>
-<p>Janssen Server <a href="../../config-guide/config-tools/jans-tui/">TUI</a> provides
-ability configure Jans LDAP link component with a menu option as shown below:</p>
+</code></pre></div>
+<h4 id="updates-jans-link-configuration-properties">Updates Jans Link configuration properties<a class="headerlink" href="#updates-jans-link-configuration-properties" title="Permanent link">#</a></h4>
+<p>Let's update the Jans Link configuration properties using the Janssen CLI command line. 
+To perform the <code>put-jans-link-properties</code> operation, we have to use its schema. 
+To get its schema:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema<span class="w"> </span><span class="s2">&quot;Jans Link Plugin:AppConfiguration&quot;</span>
+</code></pre></div>
+<p>You can also use the following command for <code>Jans Link Plugin:AppConfiguration</code> a schema example.</p>
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema-sample<span class="w"> </span><span class="s2">&quot;Jans Link Plugin:AppConfiguration&quot;</span>
+</code></pre></div>
+To update the configuration, follow the steps below.</p>
+<ol>
+<li><a href="#gets-jans-link-app-configuration">Get Jans Link App configuration</a> and store it into 
+a file for editing. The following command will retrieve the existing Jans link in the schema file.
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>-no-color<span class="w"> </span><span class="se">\</span>
+--operation-id<span class="w"> </span>get-jans-link-properties<span class="w"> </span>&gt;<span class="w"> </span>/tmp/update-jans-link.json
+</code></pre></div></li>
+<li>Edit and update the desired configuration values in the file while keeping other properties 
+and values unchanged. Updates must adhere to the <code>Jans Link Plugin:AppConfiguration</code> schema as mentioned 
+<a href="#using-command-line">here</a>.</li>
+<li>We have seen in the jans link <code>maxConnections:10</code> and <code>useSSL:true</code>. We are going to 
+update it with <code>maxConnections:15</code> and <code>useSSL:false</code>.
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>put-jans-link-properties<span class="w"> </span><span class="se">\</span>
+--data<span class="w"> </span>/tmp/update-jans-link.json
+</code></pre></div>
+Upon successful execution of the update, the Janssen Server responds with updated configuration</li>
+</ol>
+<h3 id="using-text-based-ui">Using Text-based UI<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h3>
+<p>Start TUI using the command below:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>tui
+</code></pre></div>
+<p>Navigate to <code>Jans Link</code> -&gt; <code>Configuration</code> to open the screen as shown
+in the image below.</p>
 <p><img alt="link-config" src="../../../assets/ldap-link-main-tab.png" /></p>
-<p>Section below covers Jans LDAP link configuration in more details.</p>
-<h3 id="configuration-using-tui">Configuration Using TUI<a class="headerlink" href="#configuration-using-tui" title="Permanent link">#</a></h3>
+<p>The section below covers Jans LDAP link configuration in more detail.</p>
+<h4 id="configuration-using">Configuration Using<a class="headerlink" href="#configuration-using" title="Permanent link">#</a></h4>
 <p>In order to configre Jans LDAP Link, the administrator needs to know various 
 values of the backend LDAP(or Active Directory). For example, <code>host</code> &amp; <code>port</code>, 
 <code>bindDN</code>, user information, <code>password</code>, <code>Objectclasses</code>, <code>attributes</code> which 
@@ -8880,9 +9015,8 @@ Jans Server's LDAP. By default, the deployer can use <code>localhost:1636</code>
 <p>Let's move forward with the Jans-Link setup.</p>
 <p><img alt="link-config" src="../../../assets/ldap-link-main-tab.png" /></p>
 <ul>
-<li>
-<p><code>Enabled</code> : Enable your Jans-link configuration.</p>
-</li>
+<li><code>Enabled</code> : Enable your Jans-link configuration.
+TUI</li>
 <li>
 <p><code>Refresh Method</code>: There have two refresh mode <code>copy</code> and <code>VDS</code>. If the organization has any kind of Active Directory/LDAP server, they are strongly recommended to use the Copy Method from the drop-down menu. Any organization with a database like mysql can use the VDS method. This option can be enabled via the drop-down menu in Refresh Method option.</p>
 </li>
@@ -8908,7 +9042,7 @@ Jans Server's LDAP. By default, the deployer can use <code>localhost:1636</code>
 <p><code>Load Source Data withLimited Search</code></p>
 </li>
 </ul>
-<p><strong>Customer Backend Key Attribute</strong></p>
+<h4 id="customer-backend-key-attribute">Customer Backend Key Attribute<a class="headerlink" href="#customer-backend-key-attribute" title="Permanent link">#</a></h4>
 <p><img alt="customerBackend" src="../../../assets/ldap-link-customer-backend.png" /></p>
 <ul>
 <li>
@@ -8921,10 +9055,10 @@ Jans Server's LDAP. By default, the deployer can use <code>localhost:1636</code>
 <p><code>Source Attributes</code> : This contains the list of attributes which will be pulled and read by the Jans Server.</p>
 </li>
 <li>
-<p><code>Custom LDAP Filter</code> :  If there is any custom search required, this filtering mechanism can be used such as "sn=*" whereas the value of this field ensures that every user must contain an attribute named <code>SN</code>.</p>
+<p><code>Custom LDAP Filter</code> : If there is any custom search required, this filtering mechanism can be used such as "sn=*" whereas the value of this field ensures that every user must contain an attribute named <code>SN</code>.</p>
 </li>
 </ul>
-<p><strong>Source Backend LDAP Server</strong></p>
+<h4 id="source-backend-ldap-server">Source Backend LDAP Server<a class="headerlink" href="#source-backend-ldap-server" title="Permanent link">#</a></h4>
 <p><img alt="sbls" src="../../../assets/ldap-link-source-backend.png" /></p>
 <p>This section allows the Jans Server to connect to the backend Active Directory/LDAP server of the organization.</p>
 <p>Add new Source LDAP Config</p>
@@ -8954,7 +9088,7 @@ Jans Server's LDAP. By default, the deployer can use <code>localhost:1636</code>
 <p><code>Enable</code> : This check-box is used to save and push the changes. Do not use this unless the server administrator has entered all the required values.</p>
 </li>
 </ul>
-<p><strong>Inum DB Server</strong></p>
+<h4 id="inum-db-server">Inum DB Server<a class="headerlink" href="#inum-db-server" title="Permanent link">#</a></h4>
 <p><img alt="inumsbs" src="../../../assets/ldap-link-inum-db.png" /></p>
 <p>This section of the application allows the server administrator to connect to 
 the internal LDAP of the Jans Server. As Jans Server administrator, you do not 
@@ -8995,7 +9129,7 @@ Jans Server to use the correct LDAP server for authentication.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-12T07:55:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-12</span>
       
         <br>
         Created:
