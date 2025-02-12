@@ -1,0 +1,275 @@
+#######################################################
+TEST: OpenID Connect Discovery
+#######################################################
+-------------------------------------------------------
+REQUEST:
+-------------------------------------------------------
+GET /.well-known/webfinger HTTP/1.1?resource=acct%3Aadmin%40yuriyz-adjusted-coyote.gluu.info&rel=http%3A%2F%2Fopenid.net%2Fspecs%2Fconnect%2F1.0%2Fissuer HTTP/1.1
+Host: yuriyz-adjusted-coyote.gluu.info
+
+-------------------------------------------------------
+RESPONSE:
+-------------------------------------------------------
+HTTP/1.1 200
+Connection: Keep-Alive
+Content-Length: 209
+Content-Type: application/jrd+json;charset=iso-8859-1
+Date: Fri, 12 Jan 2024 10:12:37 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Keep-Alive: timeout=5, max=100
+Server: Apache/2.4.52 (Ubuntu)
+Set-Cookie: X-Correlation-Id=99614274-a991-41d2-b17a-d2831bea17c2; Secure; HttpOnly
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Xss-Protection: 1; mode=block
+
+{
+    "subject": "acct:admin@yuriyz-adjusted-coyote.gluu.info",
+    "links": [{
+        "rel": "http://openid.net/specs/connect/1.0/issuer",
+        "href": "https://yuriyz-adjusted-coyote.gluu.info"
+    }]
+}
+
+
+OpenID Connect Configuration
+-------------------------------------------------------
+REQUEST:
+-------------------------------------------------------
+GET /.well-known/openid-configuration HTTP/1.1 HTTP/1.1
+Host: yuriyz-adjusted-coyote.gluu.info
+
+-------------------------------------------------------
+RESPONSE:
+-------------------------------------------------------
+HTTP/1.1 200
+Connection: Keep-Alive
+Content-Length: 6737
+Content-Type: application/json
+Date: Fri, 12 Jan 2024 10:12:37 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Keep-Alive: timeout=5, max=100
+Server: Apache/2.4.52 (Ubuntu)
+Set-Cookie: X-Correlation-Id=0ecd0ae7-f6cc-4c24-95b9-1812dcbe3943; Secure; HttpOnly
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Xss-Protection: 1; mode=block
+
+{
+  "request_parameter_supported" : true,
+  "pushed_authorization_request_endpoint" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/restv1/par",
+  "introspection_endpoint" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/restv1/introspection",
+  "claims_parameter_supported" : false,
+  "issuer" : "https://yuriyz-adjusted-coyote.gluu.info",
+  "userinfo_encryption_enc_values_supported" : [ "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM" ],
+  "id_token_encryption_enc_values_supported" : [ "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM" ],
+  "access_token_signing_alg_values_supported" : [ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
+  "authorization_endpoint" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/restv1/authorize",
+  "service_documentation" : "http://jans.org/docs",
+  "authorization_encryption_alg_values_supported" : [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ],
+  "claims_supported" : [ "street_address", "country", "zoneinfo", "birthdate", "role", "gender", "formatted", "user_name", "phone_mobile_number", "preferred_username", "locale", "inum", "updated_at", "post_office_box", "nickname", "preferred_language", "email", "website", "email_verified", "profile", "locality", "phone_number_verified", "room_number", "given_name", "middle_name", "picture", "name", "phone_number", "postal_code", "region", "family_name", "jansAdminUIRole" ],
+  "ssa_endpoint" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/restv1/ssa",
+  "token_endpoint_auth_methods_supported" : [ "client_secret_basic", "client_secret_post", "client_secret_jwt", "private_key_jwt", "tls_client_auth", "self_signed_tls_client_auth" ],
+  "tls_client_certificate_bound_access_tokens" : true,
+  "response_modes_supported" : [ "fragment", "jwt", "query.jwt", "form_post", "fragment.jwt", "query", "form_post.jwt" ],
+  "backchannel_logout_session_supported" : true,
+  "token_endpoint" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/restv1/token",
+  "response_types_supported" : [ "code id_token", "token", "token id_token", "token code id_token", "token code", "code", "id_token" ],
+  "tx_token_encryption_alg_values_supported" : [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ],
+  "authorization_encryption_enc_values_supported" : [ "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM" ],
+  "backchannel_token_delivery_modes_supported" : [ "poll", "ping", "push" ],
+  "dpop_signing_alg_values_supported" : [ "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
+  "request_uri_parameter_supported" : true,
+  "backchannel_user_code_parameter_supported" : false,
+  "grant_types_supported" : [ "authorization_code", "tx_token", "implicit", "urn:ietf:params:oauth:grant-type:uma-ticket", "refresh_token", "urn:ietf:params:oauth:grant-type:device_code", "client_credentials", "password", "urn:ietf:params:oauth:grant-type:token-exchange" ],
+  "ui_locales_supported" : [ "en", "bg", "de", "es", "fr", "it", "ru", "tr" ],
+  "userinfo_endpoint" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/restv1/userinfo",
+  "authorization_challenge_endpoint" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/restv1/authorize-challenge",
+  "op_tos_uri" : "https://yuriyz-adjusted-coyote.gluu.info/tos",
+  "require_request_uri_registration" : false,
+  "id_token_encryption_alg_values_supported" : [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ],
+  "frontchannel_logout_session_supported" : true,
+  "authorization_signing_alg_values_supported" : [ "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
+  "claims_locales_supported" : [ "en" ],
+  "clientinfo_endpoint" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/restv1/clientinfo",
+  "request_object_signing_alg_values_supported" : [ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
+  "request_object_encryption_alg_values_supported" : [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ],
+  "tx_token_signing_alg_values_supported" : [ "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
+  "session_revocation_endpoint" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/restv1/revoke_session",
+  "check_session_iframe" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/opiframe.htm",
+  "scopes_supported" : [ "address", "introspection", "https://jans.io/auth/ssa.admin", "online_access", "openid", "user_name", "clientinfo", "profile", "uma_protection", "permission", "revoke_any_token", "revoke_session", "device_sso", "phone", "mobile_phone", "offline_access", "authorization_challenge", "email" ],
+  "backchannel_logout_supported" : true,
+  "acr_values_supported" : [ "simple_password_auth" ],
+  "archived_jwks_uri" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/restv1/jwks/archived",
+  "request_object_encryption_enc_values_supported" : [ "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM" ],
+  "device_authorization_endpoint" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/restv1/device_authorization",
+  "display_values_supported" : [ "page", "popup" ],
+  "tx_token_encryption_enc_values_supported" : [ "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM" ],
+  "userinfo_signing_alg_values_supported" : [ "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
+  "require_pushed_authorization_requests" : false,
+  "claim_types_supported" : [ "normal" ],
+  "userinfo_encryption_alg_values_supported" : [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ],
+  "end_session_endpoint" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/restv1/end_session",
+  "revocation_endpoint" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/restv1/revoke",
+  "backchannel_authentication_endpoint" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/restv1/bc-authorize",
+  "token_endpoint_auth_signing_alg_values_supported" : [ "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
+  "frontchannel_logout_supported" : true,
+  "jwks_uri" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/restv1/jwks",
+  "subject_types_supported" : [ "public", "pairwise" ],
+  "id_token_signing_alg_values_supported" : [ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
+  "registration_endpoint" : "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/restv1/register",
+  "id_token_token_binding_cnf_values_supported" : [ "tbh" ]
+}
+
+
+#######################################################
+TEST: txTokenRequest
+#######################################################
+-------------------------------------------------------
+REQUEST:
+-------------------------------------------------------
+POST /jans-auth/restv1/register HTTP/1.1
+Host: yuriyz-adjusted-coyote.gluu.info
+Content-Type: application/json
+Accept: application/json
+
+{
+  "grant_types" : [ "tx_token", "client_credentials" ],
+  "subject_type" : "public",
+  "application_type" : "web",
+  "scope" : "openid profile address email phone user_name",
+  "minimum_acr_priority_list" : [ ],
+  "redirect_uris" : [ "https://yuriyz-adjusted-coyote.gluu.info/jans-auth-rp/home.htm", "https://client.example.com/cb", "https://client.example.com/cb1", "https://client.example.com/cb2" ],
+  "client_name" : "tx token test",
+  "additional_audience" : [ ],
+  "response_types" : [ "code", "token" ]
+}
+
+-------------------------------------------------------
+RESPONSE:
+-------------------------------------------------------
+HTTP/1.1 201
+Cache-Control: no-store
+Connection: Keep-Alive
+Content-Length: 1665
+Content-Type: application/json
+Date: Fri, 12 Jan 2024 10:12:39 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Keep-Alive: timeout=5, max=100
+Pragma: no-cache
+Server: Apache/2.4.52 (Ubuntu)
+Set-Cookie: X-Correlation-Id=e1b11033-0aa9-4944-9b06-aa7b3e99a68e; Secure; HttpOnly;HttpOnly
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Xss-Protection: 1; mode=block
+
+{
+    "allow_spontaneous_scopes": false,
+    "application_type": "web",
+    "rpt_as_jwt": false,
+    "registration_client_uri": "https://yuriyz-adjusted-coyote.gluu.info/jans-auth/restv1/register?client_id=d60f21b7-b6dd-4140-b228-e6be099bc3ce",
+    "tls_client_auth_subject_dn": "",
+    "run_introspection_script_before_jwt_creation": false,
+    "registration_access_token": "1c29d1af-4e04-4665-bd46-c53cdedab18f",
+    "client_id": "d60f21b7-b6dd-4140-b228-e6be099bc3ce",
+    "token_endpoint_auth_method": "client_secret_basic",
+    "scope": "openid",
+    "client_secret": "9a62ce88-e35f-4516-9724-1437b07bccb2",
+    "client_id_issued_at": 1705054359,
+    "backchannel_logout_uri": "",
+    "backchannel_logout_session_required": false,
+    "client_name": "tx token test",
+    "par_lifetime": 600,
+    "spontaneous_scopes": [],
+    "id_token_signed_response_alg": "RS256",
+    "access_token_as_jwt": false,
+    "grant_types": [
+        "tx_token",
+        "client_credentials"
+    ],
+    "subject_type": "public",
+    "authorization_details_types": [],
+    "additional_token_endpoint_auth_methods": [],
+    "keep_client_authorization_after_expiration": false,
+    "require_par": false,
+    "redirect_uris": [
+        "https://client.example.com/cb2",
+        "https://client.example.com/cb1",
+        "https://client.example.com/cb",
+        "https://yuriyz-adjusted-coyote.gluu.info/jans-auth-rp/home.htm"
+    ],
+    "redirect_uris_regex": "",
+    "additional_audience": [],
+    "frontchannel_logout_session_required": false,
+    "client_secret_expires_at": 0,
+    "access_token_signing_alg": "RS256",
+    "response_types": [
+        "token",
+        "code"
+    ]
+}
+
+-------------------------------------------------------
+REQUEST:
+-------------------------------------------------------
+POST /jans-auth/restv1/token HTTP/1.1
+Host: yuriyz-adjusted-coyote.gluu.info
+Content-Type: application/x-www-form-urlencoded
+Authorization: Basic ZDYwZjIxYjctYjZkZC00MTQwLWIyMjgtZTZiZTA5OWJjM2NlOjlhNjJjZTg4LWUzNWYtNDUxNi05NzI0LTE0MzdiMDdiY2NiMg==
+
+grant_type=client_credentials
+
+-------------------------------------------------------
+RESPONSE:
+-------------------------------------------------------
+HTTP/1.1 200
+Cache-Control: no-store
+Connection: Keep-Alive
+Content-Length: 94
+Content-Type: application/json
+Date: Fri, 12 Jan 2024 10:12:39 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Keep-Alive: timeout=5, max=100
+Pragma: no-cache
+Server: Apache/2.4.52 (Ubuntu)
+Set-Cookie: X-Correlation-Id=11fd3d94-aee4-4926-ab77-3ad3a7a2503b; Secure; HttpOnly;HttpOnly
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Xss-Protection: 1; mode=block
+
+{"access_token":"5fb696ac-638a-4dbf-81cd-27daeb61caf9","token_type":"Bearer","expires_in":299}
+
+-------------------------------------------------------
+REQUEST:
+-------------------------------------------------------
+POST /jans-auth/restv1/token HTTP/1.1
+Host: yuriyz-adjusted-coyote.gluu.info
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&audience=http%3A%2F%2Ftrusted.com&subject_token=5fb696ac-638a-4dbf-81cd-27daeb61caf9&subject_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Aaccess_token&requested_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Atxn_token&request_context=eyAiaXBfYWRkcmVzcyI6ICIxMjcuMC4wLjEiLCAiY2xpZW50IjogIm1vYmlsZS1hcHAiLCAiY2xpZW50X3ZlcnNpb24iOiAidjExIiB9
+
+-------------------------------------------------------
+RESPONSE:
+-------------------------------------------------------
+HTTP/1.1 200
+Cache-Control: no-store
+Connection: Keep-Alive
+Content-Length: 980
+Content-Type: application/json
+Date: Fri, 12 Jan 2024 10:12:40 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Keep-Alive: timeout=5, max=100
+Pragma: no-cache
+Server: Apache/2.4.52 (Ubuntu)
+Set-Cookie: X-Correlation-Id=a348acce-d9c1-424a-af83-e4d75f7f3368; Secure; HttpOnly;HttpOnly
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Xss-Protection: 1; mode=block
+
+{"access_token":"eyJraWQiOiJjb25uZWN0XzBlZGMxOTIyLTk1MjAtNDFkNi1iZGMyLTk3ZjdmYWMwMzRkMl9zaWdfcnMyNTYiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOlsiZDYwZjIxYjctYjZkZC00MTQwLWIyMjgtZTZiZTA5OWJjM2NlIiwiaHR0cDovL3RydXN0ZWQuY29tIl0sInJlcV9jdHgiOnsicmVxX2lwIjoiNjkuMTUxLjcyLjEyMyJ9LCJzdWJfaWQiOiIiLCJpc3MiOiJodHRwczovL3l1cml5ei1hZGp1c3RlZC1jb3lvdGUuZ2x1dS5pbmZvIiwiYXpkIjp7ImNsaWVudF9pZCI6ImQ2MGYyMWI3LWI2ZGQtNDE0MC1iMjI4LWU2YmUwOTliYzNjZSJ9LCJ0eG4iOiIwODBjOGYxOS1kOWVlLTRhMjYtODUyZC0zMmU0ZmRjNmZmNmMiLCJleHAiOjE3MDUwNTQ1NDIsImlhdCI6MTcwNTA1NDM2Mn0.fpPFZpzxitbLw71RgO3O8uSOHJARp16H2THO4YAimJKWiczSE8-DvUAqulEW2nCNN3PRdojXWCe4ipxPSr_0ugLSFWhFKdpLmQqec_udhcV-UWiuGPLfq0XeKte60ESSvj5jgpaBNaaGS2vmFeSLdGrAx1CY2EH06OYrttOrgFFGqMhLJJ1Cpacqa0vmXnHi9gbrS-FIf2_4nNkQKMitQ-m-ec-0J02RjgkEL9zrzFwYNAoE1HEIZNFBhh7GqBejH0cXnR2tBOOz66z83SLqMTAZ-WyaMxmITHGLGLmHZOGyHdiIYME1rLXalrK58XHesMFtB-gae10Ey6w1OIgiAg","issued_token_type":"urn:ietf:params:oauth:token-type:txn_token","token_type":"N_A"}
+
+tx_token payload:
+{"aud":["d60f21b7-b6dd-4140-b228-e6be099bc3ce","http://trusted.com"],"rctx":{"req_ip":"69.151.72.123"},"sub":"","iss":"https://yuriyz-adjusted-coyote.gluu.info","azd":{"client_id":"d60f21b7-b6dd-4140-b228-e6be099bc3ce"},"txn":"080c8f19-d9ee-4a26-852d-32e4fdc6ff6c","exp":1705054542,"iat":1705054362}
+
+Introspection response for tx_token: eyJraWQiOiJjb25uZWN0XzBlZGMxOTIyLTk1MjAtNDFkNi1iZGMyLTk3ZjdmYWMwMzRkMl9zaWdfcnMyNTYiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOlsiZDYwZjIxYjctYjZkZC00MTQwLWIyMjgtZTZiZTA5OWJjM2NlIiwiaHR0cDovL3RydXN0ZWQuY29tIl0sInJlcV9jdHgiOnsicmVxX2lwIjoiNjkuMTUxLjcyLjEyMyJ9LCJzdWJfaWQiOiIiLCJpc3MiOiJodHRwczovL3l1cml5ei1hZGp1c3RlZC1jb3lvdGUuZ2x1dS5pbmZvIiwiYXpkIjp7ImNsaWVudF9pZCI6ImQ2MGYyMWI3LWI2ZGQtNDE0MC1iMjI4LWU2YmUwOTliYzNjZSJ9LCJ0eG4iOiIwODBjOGYxOS1kOWVlLTRhMjYtODUyZC0zMmU0ZmRjNmZmNmMiLCJleHAiOjE3MDUwNTQ1NDIsImlhdCI6MTcwNTA1NDM2Mn0.fpPFZpzxitbLw71RgO3O8uSOHJARp16H2THO4YAimJKWiczSE8-DvUAqulEW2nCNN3PRdojXWCe4ipxPSr_0ugLSFWhFKdpLmQqec_udhcV-UWiuGPLfq0XeKte60ESSvj5jgpaBNaaGS2vmFeSLdGrAx1CY2EH06OYrttOrgFFGqMhLJJ1Cpacqa0vmXnHi9gbrS-FIf2_4nNkQKMitQ-m-ec-0J02RjgkEL9zrzFwYNAoE1HEIZNFBhh7GqBejH0cXnR2tBOOz66z83SLqMTAZ-WyaMxmITHGLGLmHZOGyHdiIYME1rLXalrK58XHesMFtB-gae10Ey6w1OIgiAg
+IntrospectionResponse{active=true, scope=[], authorizationDetails=null, clientId='d60f21b7-b6dd-4140-b228-e6be099bc3ce', username='null', tokenType='null', expiresAt=1705054542, issuedAt=1705054362, subject='', audience='d60f21b7-b6dd-4140-b228-e6be099bc3ce', issuer='https://yuriyz-adjusted-coyote.gluu.info', jti='null', acr='null', authTime='1705054362'}
