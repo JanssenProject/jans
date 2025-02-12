@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/JanssenProject/jans/compare/v1.4.0...v1.5.0) (2025-02-12)
+
+
+### Features
+
+* **jans-auth-server:** added Token Exchange interception script [#8157](https://github.com/JanssenProject/jans/issues/8157) ([#10520](https://github.com/JanssenProject/jans/issues/10520)) ([2dc55c2](https://github.com/JanssenProject/jans/commit/2dc55c2ebade77ba2c53f48a823327c8ae7978e6))
+
 ## [1.3.0](https://github.com/JanssenProject/jans/compare/v1.2.0...v1.3.0) (2025-01-20)
 
 
