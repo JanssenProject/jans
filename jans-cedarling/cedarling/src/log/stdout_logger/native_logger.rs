@@ -6,6 +6,7 @@
 use std::io::Write;
 use std::sync::{Arc, Mutex};
 
+use crate::app_types::{ApplicationName, PdpID};
 use crate::log::LogLevel;
 use crate::log::interface::{LogWriter, Loggable};
 
@@ -14,23 +15,38 @@ pub(crate) struct StdOutLogger {
     // we use `dyn Write`` trait to make it testable and mockable.
     writer: Mutex<Box<dyn Write + Send + Sync>>,
     log_level: LogLevel,
+    pdp_id: PdpID,
+    app_name: Option<ApplicationName>,
 }
 
 impl StdOutLogger {
-    pub(crate) fn new(log_level: LogLevel) -> Self {
+    pub(crate) fn new(
+        log_level: LogLevel,
+        pdp_id: PdpID,
+        app_name: Option<ApplicationName>,
+    ) -> Self {
         Self {
             writer: Mutex::new(Box::new(std::io::stdout())),
             log_level,
+            pdp_id,
+            app_name,
         }
     }
 
     // Create a new StdOutLogger with custom writer.
     // is used in tests.
     #[allow(dead_code)]
-    pub(crate) fn new_with(writer: Box<dyn Write + Send + Sync>, log_level: LogLevel) -> Self {
+    pub(crate) fn new_with(
+        writer: Box<dyn Write + Send + Sync>,
+        log_level: LogLevel,
+        pdp_id: PdpID,
+        app_name: Option<ApplicationName>,
+    ) -> Self {
         Self {
             writer: Mutex::new(Box::new(writer)),
             log_level,
+            pdp_id,
+            app_name,
         }
     }
 }
@@ -44,7 +60,10 @@ impl LogWriter for StdOutLogger {
             return;
         }
 
-        let json_str = serde_json::json!(&entry).to_string();
+        let json = entry
+            .to_json_with_client_info(&self.pdp_id, &self.app_name)
+            .to_string();
+
         // we can't handle error here or test it so we just panic if it happens.
         // we should have specific platform to get error
         writeln!(
@@ -52,7 +71,7 @@ impl LogWriter for StdOutLogger {
                 .lock()
                 .expect("In StdOutLogger writer mutex should unlock"),
             "{}",
-            &json_str
+            &json.to_string()
         )
         .unwrap();
     }
@@ -108,10 +127,11 @@ mod tests {
 
     #[test]
     fn write_log_ok() {
+        let pdp_id = PdpID::new();
+        let app_name = None;
         // Create a log entry
         let log_entry = LogEntry {
-            base: crate::log::BaseLogEntry::new(PdpID::new(), LogType::Decision, gen_uuid7()),
-            application_id: Some("test_app".to_string().into()),
+            base: crate::log::BaseLogEntry::new(LogType::Decision, gen_uuid7()),
             auth_info: None,
             msg: "Test message".to_string(),
             error_msg: None,
@@ -120,14 +140,18 @@ mod tests {
         };
 
         // Serialize the log entry to JSON
-        let json_str = serde_json::json!(&log_entry).to_string();
+        let json_str = log_entry
+            .clone()
+            .to_json_with_client_info(&pdp_id, &app_name)
+            .to_string();
 
         // Create a test writer
         let mut test_writer = TestWriter::new();
         let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
 
         // Create logger with test writer
-        let logger = StdOutLogger::new_with(buffer, LogLevel::TRACE);
+        let logger =
+            StdOutLogger::new_with(buffer, LogLevel::TRACE, pdp_id.clone(), app_name.clone());
 
         // Log the entry
         logger.log_any(log_entry);

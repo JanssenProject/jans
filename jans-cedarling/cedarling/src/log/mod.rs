@@ -68,6 +68,7 @@ use std::sync::Arc;
 pub use interface::LogStorage;
 pub(crate) use log_strategy::LogStrategy;
 
+use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::LogConfig;
 
 /// Type alias for logger that is used in application
@@ -75,6 +76,10 @@ pub(crate) type Logger = Arc<LogStrategy>;
 
 /// Initialize logger.
 /// entry point for initialize logger
-pub(crate) fn init_logger(config: &LogConfig) -> Logger {
-    Arc::new(LogStrategy::new(config))
+pub(crate) fn init_logger(
+    config: &LogConfig,
+    pdp_id: PdpID,
+    app_name: Option<ApplicationName>,
+) -> Logger {
+    Arc::new(LogStrategy::new(config, pdp_id, app_name))
 }

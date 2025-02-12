@@ -7,6 +7,7 @@ use super::interface::{LogStorage, LogWriter, Loggable};
 use super::memory_logger::MemoryLogger;
 use super::nop_logger::NopLogger;
 use super::stdout_logger::StdOutLogger;
+use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::{LogConfig, LogTypeConfig};
 
 /// LogStrategy implements strategy pattern for logging.
@@ -20,13 +21,18 @@ pub(crate) enum LogStrategy {
 impl LogStrategy {
     /// Creates a new `LogStrategy` based on the provided configuration.
     /// Initializes the corresponding logger accordingly.
-    pub fn new(config: &LogConfig) -> Self {
+    pub fn new(config: &LogConfig, pdp_id: PdpID, app_name: Option<ApplicationName>) -> Self {
         match config.log_type {
             LogTypeConfig::Off => Self::Off(NopLogger),
-            LogTypeConfig::Memory(memory_config) => {
-                Self::MemoryLogger(MemoryLogger::new(memory_config, config.log_level))
+            LogTypeConfig::Memory(memory_config) => Self::MemoryLogger(MemoryLogger::new(
+                memory_config,
+                config.log_level,
+                pdp_id,
+                app_name,
+            )),
+            LogTypeConfig::StdOut => {
+                Self::StdOut(StdOutLogger::new(config.log_level, pdp_id, app_name))
             },
-            LogTypeConfig::StdOut => Self::StdOut(StdOutLogger::new(config.log_level)),
             LogTypeConfig::Lock => todo!(),
         }
     }

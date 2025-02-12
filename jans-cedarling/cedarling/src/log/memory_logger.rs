@@ -10,6 +10,7 @@ use sparkv::{Config as ConfigSparKV, SparKV};
 
 use super::LogLevel;
 use super::interface::{LogStorage, LogWriter, Loggable, composite_key};
+use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::MemoryLogConfig;
 
 const STORAGE_MUTEX_EXPECT_MESSAGE: &str = "MemoryLogger storage mutex should unlock";
@@ -18,10 +19,17 @@ const STORAGE_MUTEX_EXPECT_MESSAGE: &str = "MemoryLogger storage mutex should un
 pub(crate) struct MemoryLogger {
     storage: Mutex<SparKV<serde_json::Value>>,
     log_level: LogLevel,
+    pdp_id: PdpID,
+    app_name: Option<ApplicationName>,
 }
 
 impl MemoryLogger {
-    pub fn new(config: MemoryLogConfig, log_level: LogLevel) -> Self {
+    pub fn new(
+        config: MemoryLogConfig,
+        log_level: LogLevel,
+        pdp_id: PdpID,
+        app_name: Option<ApplicationName>,
+    ) -> Self {
         let sparkv_config = ConfigSparKV {
             default_ttl: Duration::new(
                 config.log_ttl.try_into().expect("u64 that fits in a i64"),
@@ -34,6 +42,8 @@ impl MemoryLogger {
         MemoryLogger {
             storage: Mutex::new(SparKV::with_config(sparkv_config)),
             log_level,
+            pdp_id,
+            app_name,
         }
     }
 }
@@ -42,6 +52,8 @@ impl MemoryLogger {
 /// On WASM, stderr is not supported, so log to whatever the wasm logger uses.
 mod fallback {
     use crate::LogLevel;
+    use crate::app_types::{ApplicationName, PdpID};
+    use serde_json::{Value, json};
 
     /// conform to Loggable requirement imposed by LogStrategy
     #[derive(serde::Serialize)]
@@ -66,20 +78,31 @@ mod fallback {
             // These must always be logged.
             Some(LogLevel::TRACE)
         }
+
+        fn to_json_with_client_info(
+            self,
+            // Seems like we only use StrWrap for error messages so we'll just
+            // ignore pdp_id and app_name here
+            _pdp_id: &PdpID,
+            _app_name: &Option<ApplicationName>,
+        ) -> Value {
+            json!(self)
+        }
     }
 
     /// Fetch the correct logger. That takes some work, and it's done on every
     /// call. But this is a fallback logger, so it is not intended to be used
     /// often, and in this case correctness and non-fallibility are far more
     /// important than performance.
-    pub fn log(msg: &str) {
+    pub fn log(msg: &str, pdp_id: &PdpID, app_name: &Option<ApplicationName>) {
         let log_config = crate::bootstrap_config::LogConfig {
             log_type: crate::bootstrap_config::log_config::LogTypeConfig::StdOut,
             // level is so that all messages passed here are logged.
             log_level: LogLevel::TRACE,
         };
         // This should always be a LogStrategy::StdOut(StdOutLogger)
-        let log_strategy = crate::log::LogStrategy::new(&log_config);
+        let log_strategy =
+            crate::log::LogStrategy::new(&log_config, pdp_id.clone(), app_name.clone());
         use crate::log::interface::LogWriter;
         // a string is always serializable
         log_strategy.log_any(StrWrap(msg))
@@ -94,25 +117,22 @@ impl LogWriter for MemoryLogger {
             return;
         }
 
-        let json = match serde_json::to_value(&entry) {
-            Ok(json) => json,
-            Err(err) => {
-                fallback::log(&format!(
-                    "could not serialize LogEntry to serde_json::Value: {err:?}"
-                ));
-                return;
-            },
-        };
+        let entry_id = entry.get_id().to_string();
+        let index_keys = entry.get_index_keys();
+        let json = entry.to_json_with_client_info(&self.pdp_id, &self.app_name);
 
         let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
 
-        let entry_id = entry.get_id().to_string();
         let set_result = storage.set(&entry_id, json);
 
         if let Err(err) = set_result {
-            fallback::log(&format!("could not store LogEntry to memory: {err:?}"));
+            fallback::log(
+                &format!("could not store LogEntry to memory: {err:?}"),
+                &self.pdp_id,
+                &self.app_name,
+            );
         } else {
-            for index_key in entry.get_index_keys() {
+            for index_key in index_keys {
                 storage.add_additional_index(entry_id.as_str(), index_key.as_str());
             }
         };
@@ -181,47 +201,37 @@ impl LogStorage for MemoryLogger {
 
 #[cfg(test)]
 mod tests {
-    use test_utils::assert_eq;
-
     use super::super::interface::Indexed;
     use super::super::{AuthorizationLogInfo, LogEntry, LogType};
     use super::*;
-    use crate::common::app_types;
     use crate::log::gen_uuid7;
+    use test_utils::assert_eq;
 
-    fn create_memory_logger() -> MemoryLogger {
+    fn create_memory_logger(pdp_id: PdpID, app_name: Option<ApplicationName>) -> MemoryLogger {
         let config = MemoryLogConfig { log_ttl: 60 };
-        MemoryLogger::new(config, LogLevel::TRACE)
+        MemoryLogger::new(config, LogLevel::TRACE, pdp_id, app_name)
     }
 
     #[test]
     fn test_log_and_get_logs() {
-        let logger = create_memory_logger();
+        let pdp_id = PdpID::new();
+        let app_name = None;
+        let logger = create_memory_logger(pdp_id.clone(), app_name.clone());
 
         // create log entries
-        let entry1 = LogEntry::new_with_data(
-            app_types::PdpID::new(),
-            Some(app_types::ApplicationName("app1".to_string())),
-            LogType::Decision,
-            None,
-        )
-        .set_message("some message".to_string())
-        .set_auth_info(AuthorizationLogInfo {
-            action: "test_action".to_string(),
-            resource: "test_resource".to_string(),
-            context: serde_json::json!({}),
-            person_authorize_info: Default::default(),
-            workload_authorize_info: Default::default(),
-            authorized: true,
-            entities: serde_json::json!({}),
-        });
+        let entry1 = LogEntry::new_with_data(LogType::Decision, None)
+            .set_message("some message".to_string())
+            .set_auth_info(AuthorizationLogInfo {
+                action: "test_action".to_string(),
+                resource: "test_resource".to_string(),
+                context: serde_json::json!({}),
+                person_authorize_info: Default::default(),
+                workload_authorize_info: Default::default(),
+                authorized: true,
+                entities: serde_json::json!({}),
+            });
 
-        let entry2 = LogEntry::new_with_data(
-            app_types::PdpID::new(),
-            Some(app_types::ApplicationName("app2".to_string())),
-            LogType::System,
-            None,
-        );
+        let entry2 = LogEntry::new_with_data(LogType::System, None);
 
         assert!(
             entry1.base.id < entry2.base.id,
@@ -232,8 +242,8 @@ mod tests {
         logger.log_any(entry1.clone());
         logger.log_any(entry2.clone());
 
-        let entry1_json = serde_json::json!(entry1);
-        let entry2_json = serde_json::json!(entry2);
+        let entry1_json = entry1.clone().to_json_with_client_info(&pdp_id, &app_name);
+        let entry2_json = entry2.clone().to_json_with_client_info(&pdp_id, &app_name);
 
         // check that we have two entries in the log database
         assert_eq!(logger.get_log_ids().len(), 2);
@@ -263,28 +273,20 @@ mod tests {
 
     #[test]
     fn test_pop_logs() {
-        let logger = create_memory_logger();
+        let pdp_id = PdpID::new();
+        let app_name = None;
+        let logger = create_memory_logger(pdp_id.clone(), app_name.clone());
 
         // create log entries
-        let entry1 = LogEntry::new_with_data(
-            app_types::PdpID::new(),
-            Some(app_types::ApplicationName("app1".to_string())),
-            LogType::Decision,
-            None,
-        );
-        let entry2 = LogEntry::new_with_data(
-            app_types::PdpID::new(),
-            Some(app_types::ApplicationName("app2".to_string())),
-            LogType::Metric,
-            None,
-        );
+        let entry1 = LogEntry::new_with_data(LogType::Decision, None);
+        let entry2 = LogEntry::new_with_data(LogType::Metric, None);
 
         // log entries
         logger.log_any(entry1.clone());
         logger.log_any(entry2.clone());
 
-        let entry1_json = serde_json::json!(entry1);
-        let entry2_json = serde_json::json!(entry2);
+        let entry1_json = entry1.clone().to_json_with_client_info(&pdp_id, &app_name);
+        let entry2_json = entry2.clone().to_json_with_client_info(&pdp_id, &app_name);
 
         // check that we have two entries in the log database
         let logs = logger.pop_logs();
@@ -300,88 +302,33 @@ mod tests {
     }
 
     #[test]
-    fn fallback_logger() {
-        struct FailSerialize;
-
-        impl serde::Serialize for FailSerialize {
-            fn serialize<S>(&self, _serializer: S) -> Result<S::Ok, S::Error>
-            where
-                S: serde::Serializer,
-            {
-                Err(serde::ser::Error::custom("this always fails"))
-            }
-        }
-
-        impl crate::log::interface::Indexed for FailSerialize {
-            fn get_id(&self) -> uuid7::Uuid {
-                crate::log::log_entry::gen_uuid7()
-            }
-
-            fn get_additional_ids(&self) -> Vec<uuid7::Uuid> {
-                Vec::new()
-            }
-
-            fn get_tags(&self) -> Vec<&str> {
-                Vec::new()
-            }
-        }
-
-        impl crate::log::interface::Loggable for FailSerialize {
-            fn get_log_level(&self) -> Option<LogLevel> {
-                // These must always be logged.
-                Some(LogLevel::TRACE)
-            }
-        }
-
-        let logger = create_memory_logger();
-        logger.log_any(FailSerialize);
-
-        // There isn't a good way, in unit tests, to verify the output was
-        // actually written to stderr/json console.
-        //
-        // To eyeball-verify it:
-        //   cargo test -- --nocapture fall
-        // and look in the output for
-        // "could not serialize LogEntry to serde_json::Value: Error(\"this always fails\", line: 0, column: 0)"
-        assert!(logger.pop_logs().is_empty(), "logger should be empty");
-    }
-
-    #[test]
     fn test_log_index() {
         let request_id = gen_uuid7();
 
-        let logger = MemoryLogger::new(MemoryLogConfig { log_ttl: 10 }, LogLevel::DEBUG);
+        let logger = MemoryLogger::new(
+            MemoryLogConfig { log_ttl: 10 },
+            LogLevel::DEBUG,
+            PdpID::new(),
+            None,
+        );
 
-        let entry_decision =
-            LogEntry::new_with_data(app_types::PdpID::new(), None, LogType::Decision, None);
+        let entry_decision = LogEntry::new_with_data(LogType::Decision, None);
         logger.log_any(entry_decision);
 
-        let entry_system_info = LogEntry::new_with_data(
-            app_types::PdpID::new(),
-            None,
-            LogType::System,
-            Some(request_id),
-        )
-        .set_level(LogLevel::INFO);
+        let entry_system_info =
+            LogEntry::new_with_data(LogType::System, Some(request_id)).set_level(LogLevel::INFO);
         logger.log_any(entry_system_info);
 
-        let entry_system_debug = LogEntry::new_with_data(
-            app_types::PdpID::new(),
-            None,
-            LogType::System,
-            Some(request_id),
-        )
-        .set_level(LogLevel::DEBUG);
+        let entry_system_debug =
+            LogEntry::new_with_data(LogType::System, Some(request_id)).set_level(LogLevel::DEBUG);
         logger.log_any(entry_system_debug);
 
-        let entry_metric =
-            LogEntry::new_with_data(app_types::PdpID::new(), None, LogType::Metric, None);
+        let entry_metric = LogEntry::new_with_data(LogType::Metric, None);
         logger.log_any(entry_metric);
 
         // without request id
         let entry_system_warn =
-            LogEntry::new_with_data(app_types::PdpID::new(), None, LogType::System, None)
-                .set_level(LogLevel::WARN);
+            LogEntry::new_with_data(LogType::System, None).set_level(LogLevel::WARN);
         logger.log_any(entry_system_warn);
 
         assert!(

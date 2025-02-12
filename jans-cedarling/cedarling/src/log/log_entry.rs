@@ -10,12 +10,14 @@ use std::collections::{HashMap, HashSet};
 use std::fmt::Display;
 use std::hash::Hash;
 
+use serde_json::{Value, json};
 use uuid7::Uuid;
 
 use super::LogLevel;
 use super::interface::{Indexed, Loggable};
+use crate::app_types::PdpID;
 use crate::bootstrap_config::AuthorizationConfig;
-use crate::common::app_types::{self, ApplicationName};
+use crate::common::app_types::ApplicationName;
 use crate::common::policy_store::PoliciesContainer;
 use crate::jwt::Token;
 
@@ -33,9 +35,6 @@ pub struct LogEntry {
 
     /// message of the event
     pub msg: String,
-    /// name of application from [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub application_id: Option<ApplicationName>,
     /// authorization information of the event
     #[serde(flatten)]
     pub auth_info: Option<AuthorizationLogInfo>,
@@ -51,18 +50,9 @@ pub struct LogEntry {
 }
 
 impl LogEntry {
-    pub(crate) fn new_with_data(
-        pdp_id: app_types::PdpID,
-        application_id: Option<app_types::ApplicationName>,
-        log_type: LogType,
-        request_id: Option<Uuid>,
-    ) -> LogEntry {
+    pub(crate) fn new_with_data(log_type: LogType, request_id: Option<Uuid>) -> LogEntry {
         Self {
-            base: BaseLogEntry::new_opt_request_id(pdp_id, log_type, request_id),
-            // We use uuid v7 because it is generated based on the time and sortable.
-            // and we need sortable ids to use it in the sparkv database.
-            // Sparkv store data in BTree. So we need have correct order of ids.
-            application_id,
+            base: BaseLogEntry::new_opt_request_id(log_type, request_id),
             auth_info: None,
             msg: String::new(),
             error_msg: None,
@@ -115,6 +105,15 @@ impl Indexed for LogEntry {
 impl Loggable for LogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
+    }
+
+    fn to_json_with_client_info(self, pdp_id: &PdpID, app_name: &Option<ApplicationName>) -> Value {
+        let mut json = json!(self);
+        json["pdp_id"] = json!(pdp_id);
+        if let Some(app_name) = app_name.as_ref() {
+            json["application_id"] = json!(app_name);
+        }
+        json
     }
 }
 
@@ -382,6 +381,15 @@ impl Loggable for &DecisionLogEntry<'_> {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }
+
+    fn to_json_with_client_info(self, pdp_id: &PdpID, app_name: &Option<ApplicationName>) -> Value {
+        let mut json = json!(self);
+        json["pdp_id"] = json!(pdp_id);
+        if let Some(app_name) = app_name.as_ref() {
+            json["application_id"] = json!(app_name);
+        }
+        json
+    }
 }
 
 /// Custom uuid generation function to avoid using std::time because it makes panic in WASM
@@ -422,15 +430,13 @@ pub struct BaseLogEntry {
     pub timestamp: Option<String>,
     /// kind of log entry
     pub log_kind: LogType,
-    /// unique id of cedarling
-    pub pdp_id: Uuid,
     /// log level of entry
     #[serde(skip_serializing_if = "Option::is_none")]
     pub level: Option<LogLevel>,
 }
 
 impl BaseLogEntry {
-    pub(crate) fn new(pdp_id: app_types::PdpID, log_type: LogType, request_id: Uuid) -> Self {
+    pub(crate) fn new(log_type: LogType, request_id: Uuid) -> Self {
         let local_time_string = chrono::Local::now().format(ISO8601).to_string();
 
         let default_log_level = if log_type == LogType::System {
@@ -444,16 +450,11 @@ impl BaseLogEntry {
             request_id: Some(request_id),
             timestamp: Some(local_time_string),
             log_kind: log_type,
-            pdp_id: pdp_id.0,
             level: default_log_level,
         }
     }
 
-    pub(crate) fn new_opt_request_id(
-        pdp_id: app_types::PdpID,
-        log_type: LogType,
-        request_id: Option<Uuid>,
-    ) -> Self {
+    pub(crate) fn new_opt_request_id(log_type: LogType, request_id: Option<Uuid>) -> Self {
         let local_time_string = chrono::Local::now().format(ISO8601).to_string();
 
         let default_log_level = if log_type == LogType::System {
@@ -467,7 +468,6 @@ impl BaseLogEntry {
             request_id,
             timestamp: Some(local_time_string),
             log_kind: log_type,
-            pdp_id: pdp_id.0,
             level: default_log_level,
         }
     }
@@ -498,6 +498,15 @@ impl Indexed for BaseLogEntry {
 impl Loggable for BaseLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.level
+    }
+
+    fn to_json_with_client_info(self, pdp_id: &PdpID, app_name: &Option<ApplicationName>) -> Value {
+        let mut json = json!(self);
+        json["pdp_id"] = json!(pdp_id);
+        if let Some(app_name) = app_name.as_ref() {
+            json["application_id"] = json!(app_name);
+        }
+        json
     }
 }
 
