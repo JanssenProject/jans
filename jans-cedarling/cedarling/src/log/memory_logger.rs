@@ -101,8 +101,7 @@ mod fallback {
             log_level: LogLevel::TRACE,
         };
         // This should always be a LogStrategy::StdOut(StdOutLogger)
-        let log_strategy =
-            crate::log::LogStrategy::new(&log_config, pdp_id.clone(), app_name.clone());
+        let log_strategy = crate::log::LogStrategy::new(&log_config, *pdp_id, app_name.clone());
         use crate::log::interface::LogWriter;
         // a string is always serializable
         log_strategy.log_any(StrWrap(msg))
