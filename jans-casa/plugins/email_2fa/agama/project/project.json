@@ -2,7 +2,7 @@
     "projectName": "email_2fa",
     "author": "jgomer2001",
     "type": "Community",
-    "version": "0.0.0-nightly",
+    "version": "1.4.0",
     "noDirectLaunch": [],
     "configs": {
         "io.jans.casa.authn.emailotp": {

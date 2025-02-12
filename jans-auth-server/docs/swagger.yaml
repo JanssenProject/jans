@@ -1713,37 +1713,42 @@ paths:
                     type: string
                 spontaneous_scope_script_dns:
                   type: array
-                  description: Spontaneous scope script dn
+                  description: Spontaneous scope script dns
                   items:
                     type: string
                 update_token_script_dns:
                   type: array
-                  description: Update token script dn
+                  description: Update token script dns
                   items:
                     type: string
                 post_authn_script_dns:
                   type: array
-                  description: Post Authn script dn
+                  description: Post Authn script dns
+                  items:
+                    type: string
+                token_exchange_script_dns:
+                  type: array
+                  description: Token Exchange script dns
                   items:
                     type: string
                 consent_gathering_script_dns:
                   type: array
-                  description: Consent Gathering script dn
+                  description: Consent Gathering script dns
                   items:
                     type: string
                 introspection_script_dns:
                   type: array
-                  description: Introspection script dn
+                  description: Introspection script dns
                   items:
                     type: string
                 rpt_claims_script_dns:
                   type: array
-                  description: RPT Claims script dn
+                  description: RPT Claims script dns
                   items:
                     type: string
                 ropc_script_dns:
                   type: array
-                  description: ROPC script dn
+                  description: ROPC script dns
                   items:
                     type: string
                 org_id:
@@ -2143,37 +2148,42 @@ paths:
                     type: string
                 spontaneous_scope_script_dns:
                   type: array
-                  description: Spontaneous scope script dn
+                  description: Spontaneous scope script dns
                   items:
                     type: string
                 update_token_script_dns:
                   type: array
-                  description: Update token script dn
+                  description: Update token script dns
                   items:
                     type: string
                 post_authn_script_dns:
                   type: array
-                  description: Post Authn script dn
+                  description: Post Authn script dns
+                  items:
+                    type: string
+                token_exchange_script_dns:
+                  type: array
+                  description: Token Exchange script dns
                   items:
                     type: string
                 consent_gathering_script_dns:
                   type: array
-                  description: Consent Gathering script dn
+                  description: Consent Gathering script dns
                   items:
                     type: string
                 introspection_script_dns:
                   type: array
-                  description: Introspection script dn
+                  description: Introspection script dns
                   items:
                     type: string
                 rpt_claims_script_dns:
                   type: array
-                  description: RPT Claims script dn
+                  description: RPT Claims script dns
                   items:
                     type: string
                 ropc_script_dns:
                   type: array
-                  description: ROPC script dn
+                  description: ROPC script dns
                   items:
                     type: string
       responses:
