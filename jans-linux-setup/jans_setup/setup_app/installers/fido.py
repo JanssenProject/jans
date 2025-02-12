@@ -43,6 +43,7 @@ class FidoInstaller(JettyInstaller):
 
         self.fido_document_certs_dir = os.path.join(self.fido2ConfigFolder, 'mds/cert')
         self.fido_document_tocs_dir = os.path.join(self.fido2ConfigFolder, 'mds/toc')
+        self.fido_document_authenticator_cert_dir = os.path.join(self.fido2ConfigFolder, 'authenticator_cert')
 
     def install(self):
 

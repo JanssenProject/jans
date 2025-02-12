@@ -298,7 +298,7 @@ Output:
     },
     "modified": true,
     "internal": true,
-    "locationType": "file",
+    "locationType": "db",
     "locationPath": "string",
     "baseDn": "string"
 }

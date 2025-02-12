@@ -75,25 +75,20 @@ class ConsentGathering(ConsentGatheringType):
                 print "Agama-Consent. Failed to retrieve session_id"
                 return False
                 
-            cesar = session.getSessionAttributes()
-            param = cesar.get("agama_flow")
+            sessionId = session.getId()
+            # print "Session id is %s" % sessionId
+            param = context.getSessionAttributes().get("consent_flow")
 
             if not param:
-                param = self.extractAgamaFlow(cesar.get("acr_values"))
+                print "Agama-Consent. 'consent_flow' session attribute missing"
+                return False
 
-                if not param:
-                    print "Agama-Consent. Unable to determine the Agama flow to launch. Check the docs"
-                    return False
-            
             (qn, ins) = self.extractParams(param)
             if qn == None:
                 print "Agama-Consent. Unable to determine the Agama flow to launch. Check the docs"
                 return False
                 
             try:
-                sessionId = session.getId()
-                # print "==================================== %s" % sessionId
-
                 bridge = CdiUtil.bean(NativeJansFlowBridge)
                 running = bridge.prepareFlow(sessionId, qn, ins, False, self.enterUrl)
                 
@@ -120,13 +115,7 @@ class ConsentGathering(ConsentGatheringType):
         return "/" + self.enterUrl
 
 # Misc routines
-        
-    def extractAgamaFlow(self, acr):
-        prefix = "agama_"
-        if acr and acr.startswith(prefix):
-            return acr[len(prefix):]
-        return None        
-        
+
     def extractParams(self, param):
 
         # param must be of the form QN-INPUT where QN is the qualified name of the flow to launch
