@@ -19,7 +19,7 @@ Custom claims provide the flexibility to include application-specific or user-sp
 #### Step 1: Create a custom attribute
 
 Create a new custom attribute using 
-[Test User Interface](../../../config-guide/config-tools/jans-tui) or 
+[Text User Interface](../../../config-guide/config-tools/jans-tui/README.md) or 
 [CURL commands](../../../config-guide/config-tools/jans-cli/README.md), 
 superb tools provided in Janssen. The attribute-name should be the claim-name.
 

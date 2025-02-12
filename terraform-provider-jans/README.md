@@ -45,7 +45,7 @@ Optionally, users can also set the following variables:
 
 ## Tests
 
-Before you run the tests, the custom_attribute test requires that a custom column is present in the user table, to be added as the custom attribute. Add `tbutlonger` VARCHAR field by following the [guide](https://docs.jans.io/stable/admin/reference/database/mysql-ops/#add-custom-attribute) provided in the Janssen documentation.
+Before you run the tests, the custom_attribute test requires that a custom column is present in the user table, to be added as the custom attribute. Add `tbutlonger` VARCHAR field by following the [guide](https://docs.jans.io/vreplace-janssen-version/janssen-server/reference/database/mysql-ops/#add-custom-attribute) provided in the Janssen documentation.
 
 You can run the tests by running `make test`.
 

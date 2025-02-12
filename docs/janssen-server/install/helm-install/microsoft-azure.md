@@ -95,7 +95,7 @@ tags:
 
     - PostgreSQL for persistence storage
 
-        In a production environment, a production grade PostgreSQL server should be used such as `Azure Database for PostgreSQL`
+        In a production environment, a production-grade PostgreSQL server should be used such as `Azure Database for PostgreSQL`
 
         For testing purposes, you can deploy it on the AKS cluster using the following command:
 
@@ -122,7 +122,7 @@ tags:
 
     - MySQL for persistence storage
 
-        In a production environment, a production grade MySQL server should be used such as `Azure Database for MySQL`
+        In a production environment, a production-grade MySQL server should be used such as `Azure Database for MySQL`
 
         For testing purposes, you can deploy it on the AKS cluster using the following command:
 
