@@ -19,7 +19,7 @@ Janssen software.
 
 If your enteprise needs Janssen for a production deployment, Gluu offers a 
 commercial distribution of Janssen Project Components called 
-[Gluu Flex](https://gluu.org/flex) and [hosting](https://gluu.org/solo).
+[Gluu Flex](https://gluu.org/flex) and [Gluu Solo](https://gluu.org/solo).
 
 ----
 

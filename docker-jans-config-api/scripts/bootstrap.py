@@ -364,8 +364,16 @@ class PersistenceSetup:
 
         # pre-populate config_api_dynamic_conf_base64
         with open("/app/templates/jans-config-api/dynamic-conf.json") as f:
-            tmpl = Template(f.read())
-            ctx["config_api_dynamic_conf_base64"] = generate_base64_contents(tmpl.substitute(**ctx))
+            tmpl = Template(f.read()).substitute(**ctx)
+            ctx["config_api_dynamic_conf_base64"] = generate_base64_contents(tmpl)
+
+        # extract necessary keys for upgrade process
+        with open("/tmp/config-api.dynamic-conf.json", "w") as f:  # nosec: B108
+            partial_dyn_conf = {
+                k: v for k, v in json.loads(tmpl).items()
+                if k in ("plugins", "assetMgtConfiguration")
+            }
+            f.write(json.dumps(partial_dyn_conf))
 
         # finalize ctx
         return ctx

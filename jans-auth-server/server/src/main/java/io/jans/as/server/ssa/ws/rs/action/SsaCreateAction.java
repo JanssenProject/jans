@@ -87,7 +87,7 @@ public class SsaCreateAction {
      * request has to have at least scope "ssa.admin",
      * it will also return a {@link WebApplicationException} with status {@code 500} in case an uncontrolled
      * error occurs when processing the method.
-     * <p/>
+     * <p>
      * <p>
      * Response of this method can be modified using the following custom script
      * <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/ssa_modify_response/ssa_modify_response.py">SSA Custom Script</a>,
@@ -95,7 +95,7 @@ public class SsaCreateAction {
      * </p>
      * <p>
      * SSA returned by this method is stored in the corresponding database, so it can be later retrieved, validated or revoked.
-     * <p/>
+     * <p>
      *
      * @param requestParams Valid json request
      * @param httpRequest   Http request

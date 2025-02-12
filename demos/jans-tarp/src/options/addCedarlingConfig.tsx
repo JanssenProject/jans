@@ -9,7 +9,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
-import __wbg_init, { init, Cedarling } from "wasm";
+import __wbg_init, { init, Cedarling } from "@janssenproject/cedarling_wasm";
 import { v4 as uuidv4 } from 'uuid';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
