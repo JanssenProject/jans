@@ -169,7 +169,7 @@ public class ScimCustomPerson extends Entry implements Serializable {
     }
 
     public void setUserPassword(String value) {
-        setCustomAttribute("userPassword", value);
+        if (value != null) setCustomAttribute("userPassword", value);
     }
 
     public CustomObjectAttribute setAttribute(String attributeName, String[] attributeValue) {

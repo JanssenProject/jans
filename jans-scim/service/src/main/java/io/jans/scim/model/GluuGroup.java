@@ -209,4 +209,5 @@ public class GluuGroup extends Entry implements Serializable {
 		customAttributes.remove(attribute);
 		customAttributes.add(attribute);
 	}
+
 }
