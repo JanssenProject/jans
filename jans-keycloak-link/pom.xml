@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.jans</groupId>
   <artifactId>jans-keycloak-link-parent</artifactId>
-  <version>0.0.0-nightly</version>
+  <version>1.4.0</version>
   <modules>
     <module>model</module>
     <module>service</module>

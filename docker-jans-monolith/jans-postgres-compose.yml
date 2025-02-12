@@ -14,7 +14,7 @@ services:
       POSTGRES_PASSWORD: 1t5Fin3#security
       POSTGRES_DB: jans
   jans:
-    image: ${JANSSEN_IMAGE:-ghcr.io/janssenproject/jans/monolith:0.0.0-nightly}
+    image: ${JANSSEN_IMAGE:-ghcr.io/janssenproject/jans/monolith:1.4.0-1}
     restart: always
     ports:
       - "443:443"

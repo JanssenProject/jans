@@ -1,6 +1,6 @@
 {
     "projectName": "casa",
-    "version": "0.0.0-nightly",
+    "version": "1.4.0",
     "author": "jgomer2001",
     "description": "2FA flow featuring pluggable authentication methods",
     "noDirectLaunch": [ "io.jans.casa.authn.fido2", "io.jans.casa.authn.otp", "io.jans.casa.authn.super_gluu", "io.jans.casa.authn.twilio_sms" ],
