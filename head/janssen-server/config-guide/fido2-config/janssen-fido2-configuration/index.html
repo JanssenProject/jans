@@ -8733,7 +8733,7 @@ Postman. Learn how to use Janssen Server Config API
 command line. To get the details of Janssen command line operations relevant to
 FIDO2 Configuration, you can check the operations under <code>Fido2Configuration</code> task using the
 command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --info Fido2Configuration
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--info<span class="w"> </span>Fido2Configuration
 </code></pre></div>
 <p>It will show the details of the available operation-ids for Fido2.</p>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Operation ID: get-properties-fido2
@@ -8746,7 +8746,7 @@ To get sample schema type jans cli --schema &lt;schema&gt;, for example jans cli
 </code></pre></div>
 <h3 id="get-the-current-fido2-configuration">Get The Current Fido2 Configuration<a class="headerlink" href="#get-the-current-fido2-configuration" title="Permanent link">#</a></h3>
 <p>To get the properties of Janssen Fido2 Configuration, run the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-properties-fido2
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-properties-fido2
 </code></pre></div>
 <p>It will return the result as below:</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -8792,50 +8792,50 @@ To get sample schema type jans cli --schema &lt;schema&gt;, for example jans cli
 <span class="normal">41</span>
 <span class="normal">42</span>
 <span class="normal">43</span>
-<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans-project.lxd&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;baseEndpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans-project.lxd/jans-fido2/restv1&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;cleanServiceInterval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;cleanServiceBatchChunkSize&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;useLocalCache&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;disableJdkLogger&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;loggingLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;loggingLayout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;metricReporterInterval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;metricReporterKeepDataDays&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;metricReporterEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;personCustomObjectClassList&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;jansCustomPerson&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;jansPerson&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;sessionIdPersistInCache&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;errorReasonEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;fido2Configuration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;authenticatorCertsFolder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/etc/jans/conf/fido2/authenticator_cert&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;mdsCertsFolder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/etc/jans/conf/fido2/mds/cert&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;mdsTocsFolder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/etc/jans/conf/fido2/mds/toc&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;checkU2fAttestations&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;debugUserAutoEnrollment&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;unfinishedRequestExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">180</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;authenticationHistoryExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1296000</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;serverMetadataFolder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/etc/jans/conf/fido2/server_metadata&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;enabledFidoAlgorithms&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;ES256&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;rp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">      </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans-project.lxd&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;origins&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">          </span><span class="s2">&quot;jans-project.lxd&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">]</span><span class="w"></span>
-<span class="w">      </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;disableMetadataService&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;attestationMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;monitor&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;assertionOptionsGenerateEndpointEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans-project.lxd&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;baseEndpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans-project.lxd/jans-fido2/restv1&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;cleanServiceInterval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;cleanServiceBatchChunkSize&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;useLocalCache&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;disableJdkLogger&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;loggingLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;loggingLayout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;metricReporterInterval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;metricReporterKeepDataDays&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;metricReporterEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;personCustomObjectClassList&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;jansCustomPerson&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;jansPerson&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;sessionIdPersistInCache&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;errorReasonEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;fido2Configuration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;authenticatorCertsFolder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/etc/jans/conf/fido2/authenticator_cert&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;mdsCertsFolder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/etc/jans/conf/fido2/mds/cert&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;mdsTocsFolder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/etc/jans/conf/fido2/mds/toc&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;checkU2fAttestations&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;debugUserAutoEnrollment&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;unfinishedRequestExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">180</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;authenticationHistoryExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1296000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;serverMetadataFolder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/etc/jans/conf/fido2/server_metadata&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;enabledFidoAlgorithms&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;ES256&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;rp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans-project.lxd&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;origins&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;jans-project.lxd&quot;</span>
+<span class="w">        </span><span class="p">]</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;disableMetadataService&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;attestationMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;monitor&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;assertionOptionsGenerateEndpointEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="update-fido2-configuration-properties">Update FIDO2 Configuration Properties<a class="headerlink" href="#update-fido2-configuration-properties" title="Permanent link">#</a></h3>
 <p>To update the configuration follow the steps below.</p>
@@ -8845,7 +8845,7 @@ To get sample schema type jans cli --schema &lt;schema&gt;, for example jans cli
  <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema Fido2:AppConfiguration
 </code></pre></div></li>
 <li>Use the updated file to send the update to the Janssen Server using the command below
- <div class="highlight"><span class="filename">Command</span><pre><span></span><code> jans cli --operation-id put-properties-fido2 --data /tmp/conf-data.json
+ <div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="w"> </span>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>put-properties-fido2<span class="w"> </span>--data<span class="w"> </span>/tmp/conf-data.json
 </code></pre></div>
  Upon successful execution of the update, the Janssen Server responds with updated configuration.</li>
 </ol>
@@ -8853,7 +8853,7 @@ To get sample schema type jans cli --schema &lt;schema&gt;, for example jans cli
 <p>In the Janssen Server, You can manage FIDO2 Configuration using 
 the <a href="../../config-tools/jans-tui/">Text-Based UI</a> also.</p>
 <p>You can start TUI using the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans tui
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>tui
 </code></pre></div>
 <p>Navigate to <code>FIDO</code> section where administrators can update dynamic and static
 configurations.</p>

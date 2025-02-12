@@ -8716,18 +8716,18 @@ of your certificate and key files.</p>
 </code></pre></div>
 <p>Scroll down the file until you find the last <code>&lt;Location&gt;...&lt;/Location&gt;</code> tag and
 insert the following snippet below it:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&lt;Location</span><span class="w"> </span><span class="s">/wwpass</span><span class="nt">&gt;</span><span class="w"></span>
-<span class="w">  </span><span class="nb">require</span><span class="w"> </span><span class="k">all</span><span class="w"> </span>granted<span class="w"></span>
-<span class="nt">&lt;/Location&gt;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;Location</span><span class="w"> </span><span class="s">/wwpass</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="nb">require</span><span class="w"> </span><span class="k">all</span><span class="w"> </span>granted
+<span class="nt">&lt;/Location&gt;</span>
 
-<span class="nb">ScriptAlias</span><span class="w"> </span><span class="s2">&quot;/wwpass/&quot;</span><span class="w"> </span><span class="s2">&quot;/opt/wwpass_gluu/cgi/&quot;</span><span class="w"></span>
+<span class="nb">ScriptAlias</span><span class="w"> </span><span class="s2">&quot;/wwpass/&quot;</span><span class="w"> </span><span class="s2">&quot;/opt/wwpass_gluu/cgi/&quot;</span>
 
-<span class="nt">&lt;Directory</span><span class="w"> </span><span class="s">/opt/wwpass_gluu/cgi/</span><span class="nt">&gt;</span><span class="w"></span>
-<span class="w">  </span><span class="nb">SetHandler</span><span class="w"> </span>cgi-script<span class="w"></span>
-<span class="w">  </span><span class="nb">Options</span><span class="w"> </span>+ExecCGI<span class="w"></span>
-<span class="w">  </span><span class="nb">Order</span><span class="w"> </span>deny,allow<span class="w"></span>
-<span class="w">  </span><span class="nb">Allow</span><span class="w"> </span>from<span class="w"> </span><span class="k">all</span><span class="w"></span>
-<span class="nt">&lt;/Directory&gt;</span><span class="w"></span>
+<span class="nt">&lt;Directory</span><span class="w"> </span><span class="s">/opt/wwpass_gluu/cgi/</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="nb">SetHandler</span><span class="w"> </span>cgi-script
+<span class="w">  </span><span class="nb">Options</span><span class="w"> </span>+ExecCGI
+<span class="w">  </span><span class="nb">Order</span><span class="w"> </span>deny,allow
+<span class="w">  </span><span class="nb">Allow</span><span class="w"> </span>from<span class="w"> </span><span class="k">all</span>
+<span class="nt">&lt;/Directory&gt;</span>
 </code></pre></div>
 <p>Save the file and exit the editor.</p>
 <p>Enable mod_cgi and restart apache:</p>
@@ -8737,7 +8737,7 @@ insert the following snippet below it:</p>
 <p>Check that <code>ticket.json</code> is working.
 Go to <code>https://&lt;your_gluu_host&gt;/wwpass/ticket.json</code>.
 If your setup is correct, you will see output like this:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">&quot;result&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SPNAME:07629a1963c5e4f4f339ecb852b7a0bf10a90c62@p-sp-05-50:16033&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;ttl&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;encoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;plain&quot;</span><span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">&quot;result&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SPNAME:07629a1963c5e4f4f339ecb852b7a0bf10a90c62@p-sp-05-50:16033&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;ttl&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;encoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;plain&quot;</span><span class="p">}</span>
 </code></pre></div>
 <h2 id="configure-gluu-server">Configure Gluu Server<a class="headerlink" href="#configure-gluu-server" title="Permanent link">#</a></h2>
 <p>Log in as administrator and go to "Configuration -&gt; Manage Custom scripts".</p>

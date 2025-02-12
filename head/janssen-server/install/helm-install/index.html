@@ -8605,14 +8605,14 @@
 <h2 id="looking-for-older-helm-charts">Looking for older helm charts?<a class="headerlink" href="#looking-for-older-helm-charts" title="Permanent link">#</a></h2>
 <p>If you are looking for older helm charts, you need to build them from the <a href="https://github.com/JanssenProject/jans/tree/main/charts">janssen</a> repository. We only keep the last 5 versions of the chart up. We support auto-upgrade using helm upgrade and hence want everyone to stay up to date with our charts. </p>
 <p>To build older charts manually from the janssen repository, you can use the following example which assumes we are building for janssen version <code>v1.0.0</code>:</p>
-<div class="highlight"><pre><span></span><code>git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans.git /tmp/jans <span class="se">\</span>
-    <span class="o">&amp;&amp;</span> <span class="nb">cd</span> /tmp/jans <span class="se">\</span>
-    <span class="o">&amp;&amp;</span> git sparse-checkout init --cone <span class="se">\</span>
-    <span class="o">&amp;&amp;</span> git checkout v1.0.0 <span class="se">\</span>
-    <span class="o">&amp;&amp;</span> git sparse-checkout add charts/janssen <span class="se">\</span>
-    <span class="o">&amp;&amp;</span> <span class="nb">cd</span> charts/janssen <span class="se">\</span>
-    <span class="o">&amp;&amp;</span> helm dependency update <span class="se">\</span>
-    <span class="o">&amp;&amp;</span> helm package .
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>--filter<span class="w"> </span>blob:none<span class="w"> </span>--no-checkout<span class="w"> </span>https://github.com/JanssenProject/jans.git<span class="w"> </span>/tmp/jans<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/tmp/jans<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>sparse-checkout<span class="w"> </span>init<span class="w"> </span>--cone<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>v1.0.0<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>sparse-checkout<span class="w"> </span>add<span class="w"> </span>charts/janssen<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>charts/janssen<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>helm<span class="w"> </span>dependency<span class="w"> </span>update<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>helm<span class="w"> </span>package<span class="w"> </span>.
 </code></pre></div>
 
   <hr>

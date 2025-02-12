@@ -8644,7 +8644,7 @@ urn: urn:mace:dir:attribute-def:maidenName
 <ol>
 <li>Create a configmap or secret depending on the if the ldif holds and secret data such as a client secret. Here, we will be creating a configmap. </li>
 </ol>
-<div class="highlight"><pre><span></span><code>kubectl create cm custom-attributes -n &lt;namespace-of-jans&gt; -f custom_attributes.ldif
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>create<span class="w"> </span>cm<span class="w"> </span>custom-attributes<span class="w"> </span>-n<span class="w"> </span>&lt;namespace-of-jans&gt;<span class="w"> </span>-f<span class="w"> </span>custom_attributes.ldif
 <span class="c1"># kubectl create cm custom-attributes -n jans -f custom_attributes.ldif</span>
 <span class="c1"># using a secret</span>
 <span class="c1"># kubectl create secret generic custom-attributes -n jans -f custom_attributes.ldif</span>
@@ -8652,24 +8652,24 @@ urn: urn:mace:dir:attribute-def:maidenName
 <ol>
 <li>Mount the created configmap or secret inside your <code>values.yaml</code></li>
 </ol>
-<div class="highlight"><pre><span></span><code><span class="nt">persistence</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom-attributes</span><span class="w"></span>
-<span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">configMap</span><span class="p p-Indicator">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">custom-attributes</span><span class="w"></span>
-<span class="w">  </span><span class="c1">#- name: custom-attributes</span><span class="w"></span>
-<span class="w">  </span><span class="c1">#  secret:</span><span class="w"></span>
-<span class="w">  </span><span class="c1">#    secretName: custom-attributes</span><span class="w"></span>
-<span class="w">  </span><span class="c1"># -- Configure any additional volumesMounts that need to be attached to the containers</span><span class="w"></span>
-<span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w"></span>
-<span class="w">     </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/app/custom_ldif/custom_attributes.ldif&quot;</span><span class="w"></span>
-<span class="w">       </span><span class="nt">name</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">custom-attributes</span><span class="w"></span>
-<span class="w">       </span><span class="nt">subPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom_attributes.ldif</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">persistence</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom-attributes</span>
+<span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">configMap</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">custom-attributes</span>
+<span class="w">  </span><span class="c1">#- name: custom-attributes</span>
+<span class="w">  </span><span class="c1">#  secret:</span>
+<span class="w">  </span><span class="c1">#    secretName: custom-attributes</span>
+<span class="w">  </span><span class="c1"># -- Configure any additional volumesMounts that need to be attached to the containers</span>
+<span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">     </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/app/custom_ldif/custom_attributes.ldif&quot;</span>
+<span class="w">       </span><span class="nt">name</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">custom-attributes</span>
+<span class="w">       </span><span class="nt">subPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom_attributes.ldif</span>
 </code></pre></div>
 <ol>
 <li>Run helm upgrade to activate the persistence job.</li>
 </ol>
-<div class="highlight"><pre><span></span><code>helm upgrade &lt;release-name&gt; janssen/janssen -f values.yaml -n &lt;jans-namespace&gt;
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>&lt;release-name&gt;<span class="w"> </span>janssen/janssen<span class="w"> </span>-f<span class="w"> </span>values.yaml<span class="w"> </span>-n<span class="w"> </span>&lt;jans-namespace&gt;
 </code></pre></div>
 <p>Your custom work should be loaded to your persistence. This also persists any changes going forward as you upgrade.</p>
 

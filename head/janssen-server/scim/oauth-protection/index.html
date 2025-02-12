@@ -8732,15 +8732,15 @@
 <p>From the "Basic" section, grab the "client id" and "client secret". This secret is encrypted, to decrypt it, in a terminal run <code>/opt/jans/bin/encode.py -D ENCRYPTED-SECRET-HERE</code>.</p>
 <h2 id="getting-a-token">Getting a token<a class="headerlink" href="#getting-a-token" title="Permanent link">#</a></h2>
 <p>This is a <code>curl</code> example of how to get a token valid for retrieving and modifying users (line breaks added for readability). Note the use of white space to separate scope names.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>curl -k -u <span class="s1">&#39;CLIENT_ID:DECRYPTED_CLIENT_SECRET&#39;</span> -k -d <span class="nv">grant_type</span><span class="o">=</span>client_credentials -d 
-    <span class="nv">scope</span><span class="o">=</span><span class="s1">&#39;https://jans.io/scim/users.read https://jans.io/scim/users.write&#39;</span> 
-    https://your-jans-server/jans-auth/restv1/token
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>curl<span class="w"> </span>-k<span class="w"> </span>-u<span class="w"> </span><span class="s1">&#39;CLIENT_ID:DECRYPTED_CLIENT_SECRET&#39;</span><span class="w"> </span>-k<span class="w"> </span>-d<span class="w"> </span><span class="nv">grant_type</span><span class="o">=</span>client_credentials<span class="w"> </span>-d<span class="w"> </span>
+<span class="w">    </span><span class="nv">scope</span><span class="o">=</span><span class="s1">&#39;https://jans.io/scim/users.read https://jans.io/scim/users.write&#39;</span><span class="w"> </span>
+<span class="w">    </span>https://your-jans-server/jans-auth/restv1/token
 </code></pre></div>
 <p>Grab the "access_token" from the obtained response.</p>
 <h2 id="issue-a-request-to-the-service">Issue a request to the service<a class="headerlink" href="#issue-a-request-to-the-service" title="Permanent link">#</a></h2>
 <p>The below is a curl example of how to call an operation by passing the previously obtained token (line breaks added for readability):</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>curl -k -G -H <span class="s1">&#39;Authorization: Bearer ACCESS_TOKEN&#39;</span> --data-urlencode <span class="s1">&#39;filter=displayName co &quot;Admin&quot;&#39;</span> 
-    https://your-jans-server/jans-scim/restv1/v2/Users
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>curl<span class="w"> </span>-k<span class="w"> </span>-G<span class="w"> </span>-H<span class="w"> </span><span class="s1">&#39;Authorization: Bearer ACCESS_TOKEN&#39;</span><span class="w"> </span>--data-urlencode<span class="w"> </span><span class="s1">&#39;filter=displayName co &quot;Admin&quot;&#39;</span><span class="w"> </span>
+<span class="w">    </span>https://your-jans-server/jans-scim/restv1/v2/Users
 </code></pre></div>
 <p>The output should show valid SCIM (JSON) output. Account the access token is short-lived: once it expires you will get a status response of 401 and need to re-request the token as in the previous step.</p>
 <h2 id="deactivating-oauth-mode">Deactivating OAuth mode<a class="headerlink" href="#deactivating-oauth-mode" title="Permanent link">#</a></h2>

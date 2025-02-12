@@ -8751,26 +8751,26 @@ cd cedarling-krakend
 <ul>
 <li>For ARM64 Docker targets:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>docker run -it -v <span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">:/app&quot;</span> -w /app <span class="se">\</span>
-    -e <span class="s2">&quot;CGO_ENABLED=1&quot;</span> <span class="se">\</span>
-    -e <span class="s2">&quot;CC=aarch64-linux-musl-gcc&quot;</span> <span class="se">\</span>
-    -e <span class="s2">&quot;GOARCH=arm64&quot;</span> <span class="se">\</span>
-    -e <span class="s2">&quot;GOHOSTARCH=amd64&quot;</span> <span class="se">\</span>
-    krakend/builder:&lt;x.y.z&gt; <span class="se">\</span>
-    go build -ldflags<span class="o">=</span><span class="s1">&#39;-extldflags=-fuse-ld=bfd -extld=aarch64-linux-musl-gcc&#39;</span> <span class="se">\</span>
-    -buildmode<span class="o">=</span>plugin -o yourplugin.so .
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">:/app&quot;</span><span class="w"> </span>-w<span class="w"> </span>/app<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;CGO_ENABLED=1&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;CC=aarch64-linux-musl-gcc&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;GOARCH=arm64&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;GOHOSTARCH=amd64&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>krakend/builder:&lt;x.y.z&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>go<span class="w"> </span>build<span class="w"> </span>-ldflags<span class="o">=</span><span class="s1">&#39;-extldflags=-fuse-ld=bfd -extld=aarch64-linux-musl-gcc&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-buildmode<span class="o">=</span>plugin<span class="w"> </span>-o<span class="w"> </span>yourplugin.so<span class="w"> </span>.
 </code></pre></div>
 <ul>
 <li>For ARM64 on-premise installs:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>docker run -it -v <span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">:/app&quot;</span> -w /app <span class="se">\</span>
-    -e <span class="s2">&quot;CGO_ENABLED=1&quot;</span> <span class="se">\</span>
-    -e <span class="s2">&quot;CC=aarch64-linux-gnu-gcc&quot;</span> <span class="se">\</span>
-    -e <span class="s2">&quot;GOARCH=arm64&quot;</span> <span class="se">\</span>
-    -e <span class="s2">&quot;GOHOSTARCH=amd64&quot;</span> <span class="se">\</span>
-    krakend/builder:&lt;x.y.z&gt;-linux-generic <span class="se">\</span>
-    go build -ldflags<span class="o">=</span><span class="s1">&#39;-extldflags=-fuse-ld=bfd -extld=aarch64-linux-gnu-gcc&#39;</span> <span class="se">\</span>
-    -buildmode<span class="o">=</span>plugin -o yourplugin.so .
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">:/app&quot;</span><span class="w"> </span>-w<span class="w"> </span>/app<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;CGO_ENABLED=1&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;CC=aarch64-linux-gnu-gcc&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;GOARCH=arm64&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;GOHOSTARCH=amd64&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>krakend/builder:&lt;x.y.z&gt;-linux-generic<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>go<span class="w"> </span>build<span class="w"> </span>-ldflags<span class="o">=</span><span class="s1">&#39;-extldflags=-fuse-ld=bfd -extld=aarch64-linux-gnu-gcc&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-buildmode<span class="o">=</span>plugin<span class="w"> </span>-o<span class="w"> </span>yourplugin.so<span class="w"> </span>.
 </code></pre></div>
 </li>
 </ul>
@@ -8840,7 +8840,7 @@ when {
 </ol>
 <div class="highlight"><pre><span></span><code><span class="nv">ACCESS_TOKEN</span><span class="o">=</span>eyJraWQiOiJjb25uZWN0X2Y5YTAwN2EyLTZkMGItNDkyYS05MGNkLWYwYzliMWMyYjVkYl9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJxenhuMVNjcmI5bFd0R3hWZWRNQ2t5LVFsX0lMc3BaYVFBNmZ5dVlrdHcwIiwiY29kZSI6IjNlMmEyMDEyLTA5OWMtNDY0Zi04OTBiLTQ0ODE2MGMyYWIyNSIsImlzcyI6Imh0dHBzOi8vYWNjb3VudC5nbHV1Lm9yZyIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJjbGllbnRfaWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhdWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhY3IiOiJzaW1wbGVfcGFzc3dvcmRfYXV0aCIsIng1dCNTMjU2IjoiIiwibmJmIjoxNzMxOTUzMDMwLCJzY29wZSI6WyJyb2xlIiwib3BlbmlkIiwicHJvZmlsZSIsImVtYWlsIl0sImF1dGhfdGltZSI6MTczMTk1MzAyNywiZXhwIjoxNzMyMTIxNDYwLCJpYXQiOjE3MzE5NTMwMzAsImp0aSI6InVaVWgxaERVUW82UEZrQlBud3BHemciLCJ1c2VybmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjMwNiwidXJpIjoiaHR0cHM6Ly9qYW5zLnRlc3QvamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0.Pt-Y7F-hfde_WP7ZYwyvvSS11rKYQWGZXTzjH_aJKC5VPxzOjAXqI3Igr6gJLsP1aOd9WJvOPchflZYArctopXMWClbX_TxpmADqyCMsz78r4P450TaMKj-WKEa9cL5KtgnFa0fmhZ1ZWolkDTQ_M00Xr4EIvv4zf-92Wu5fOrdjmsIGFot0jt-12WxQlJFfs5qVZ9P-cDjxvQSrO1wbyKfHQ_txkl1GDATXsw5SIpC5wct92vjAVm5CJNuv_PE8dHAY-KfPTxOuDYBuWI5uA2Yjd1WUFyicbJgcmYzUSVt03xZ0kQX9dxKExwU2YnpDorfwebaAPO7G114Bkw208g
 
-curl http://127.0.0.1:8080/protected -H <span class="s2">&quot;Authorization: Bearer </span><span class="nv">$ACCESS_TOKEN</span><span class="s2">&quot;</span>
+curl<span class="w"> </span>http://127.0.0.1:8080/protected<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$ACCESS_TOKEN</span><span class="s2">&quot;</span>
 </code></pre></div>
 <p>KrakenD is configured to respond with the health check response if authentication succeeds. </p>
 

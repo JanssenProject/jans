@@ -9002,7 +9002,7 @@ certificate installed. Update cacerts using the steps below:</p>
 <ul>
 <li>
 <p>extract certificate for Janssen server with name <code>janssen.op.io</code>
-  <div class="highlight"><span class="filename">On Developer Workstation</span><pre><span></span><code>openssl s_client -connect test.local.jans.io:443 <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">|</span>sed -ne <span class="s1">&#39;/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p&#39;</span> &gt; /tmp/httpd.crt
+  <div class="highlight"><span class="filename">On Developer Workstation</span><pre><span></span><code>openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>test.local.jans.io:443<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span>sed<span class="w"> </span>-ne<span class="w"> </span><span class="s1">&#39;/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>/tmp/httpd.crt
 </code></pre></div>
   this command takes a few seconds to return.</p>
 </li>
@@ -9043,15 +9043,15 @@ against different Janssen Servers. </li>
 <p>Follow the steps below to configure the profile for the client and server sub-modules.</p>
 <ol>
 <li>Move to the module directory
-   <div class="highlight"><pre><span></span><code> <span class="nb">cd</span> source-base/jans-auth-server
+   <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>source-base/jans-auth-server
 </code></pre></div></li>
 <li>
 <p>As a precautionary measure, let's first remove any old profile artifacts 
 from the <code>jans-auth-server</code> workspace.
-   <div class="highlight"><pre><span></span><code>rm -rf ./jans-auth
-rm -rf ./client/profiles/janssen.op.io
-rm -rf ./server/profiles/janssen.op.io
-rm -rf ./agama/engine/profiles/janssen.op.io
+   <div class="highlight"><pre><span></span><code>rm<span class="w"> </span>-rf<span class="w"> </span>./jans-auth
+rm<span class="w"> </span>-rf<span class="w"> </span>./client/profiles/janssen.op.io
+rm<span class="w"> </span>-rf<span class="w"> </span>./server/profiles/janssen.op.io
+rm<span class="w"> </span>-rf<span class="w"> </span>./agama/engine/profiles/janssen.op.io
 </code></pre></div></p>
 </li>
 <li>
@@ -9063,19 +9063,19 @@ rm -rf ./agama/engine/profiles/janssen.op.io
    to <code>source-base/jans-auth-server</code> on developer workstation.</p>
 </li>
 <li>Create new profile directories.
-   <div class="highlight"><pre><span></span><code>mkdir -p ./client/profiles/janssen.op.io
-mkdir -p ./server/profiles/janssen.op.io
-mkdir -p ./agama/engine/profiles/janssen.op.io
+   <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>./client/profiles/janssen.op.io
+mkdir<span class="w"> </span>-p<span class="w"> </span>./server/profiles/janssen.op.io
+mkdir<span class="w"> </span>-p<span class="w"> </span>./agama/engine/profiles/janssen.op.io
 </code></pre></div></li>
 <li>Copy the contents of <code>jans-auth</code> directory into the respective sub-module's <code>janssen.op.io</code> profile directory
-   <div class="highlight"><pre><span></span><code>cp ./jans-auth/client/* ./client/profiles/janssen.op.io
-cp ./jans-auth/server/* ./server/profiles/janssen.op.io
-cp ./jans-auth/config-agama-test.properties ./agama/engine/profiles/janssen.op.io/config-agama-test.properties
+   <div class="highlight"><pre><span></span><code>cp<span class="w"> </span>./jans-auth/client/*<span class="w"> </span>./client/profiles/janssen.op.io
+cp<span class="w"> </span>./jans-auth/server/*<span class="w"> </span>./server/profiles/janssen.op.io
+cp<span class="w"> </span>./jans-auth/config-agama-test.properties<span class="w"> </span>./agama/engine/profiles/janssen.op.io/config-agama-test.properties
 </code></pre></div></li>
 <li>Copy keystore file <code>profiles/default/client_keystore.p12</code> from <code>default</code> profile directory to
    the <code>janssen.op.io</code> profile directory
-   <div class="highlight"><pre><span></span><code>cp -f ./client/profiles/default/client_keystore.p12 ./client/profiles/janssen.op.io
-cp -f ./server/profiles/default/client_keystore.p12 ./server/profiles/janssen.op.io
+   <div class="highlight"><pre><span></span><code>cp<span class="w"> </span>-f<span class="w"> </span>./client/profiles/default/client_keystore.p12<span class="w"> </span>./client/profiles/janssen.op.io
+cp<span class="w"> </span>-f<span class="w"> </span>./server/profiles/default/client_keystore.p12<span class="w"> </span>./server/profiles/janssen.op.io
 </code></pre></div></li>
 </ol>
 <h5 id="running-the-tests">Running The Tests<a class="headerlink" href="#running-the-tests" title="Permanent link">#</a></h5>
@@ -9087,22 +9087,22 @@ following maven command at the directory level:</p>
 <h4 id="configuring-the-jans-core-module">Configuring the jans-core module<a class="headerlink" href="#configuring-the-jans-core-module" title="Permanent link">#</a></h4>
 <p>This module does not require a profile setup. It can be built with below maven
 command.</p>
-<div class="highlight"><pre><span></span><code>mvn clean compile install
+<div class="highlight"><pre><span></span><code>mvn<span class="w"> </span>clean<span class="w"> </span>compile<span class="w"> </span>install
 </code></pre></div>
 <h4 id="configuring-the-jans-link-module">Configuring the jans-link module<a class="headerlink" href="#configuring-the-jans-link-module" title="Permanent link">#</a></h4>
 <p>This module does not require a profile setup. It can be built with the below 
 maven command.</p>
-<div class="highlight"><pre><span></span><code>mvn clean compile install
+<div class="highlight"><pre><span></span><code>mvn<span class="w"> </span>clean<span class="w"> </span>compile<span class="w"> </span>install
 </code></pre></div>
 <h4 id="configuring-the-jans-orm-module">Configuring the jans-orm module<a class="headerlink" href="#configuring-the-jans-orm-module" title="Permanent link">#</a></h4>
 <p>This module does not require a profile setup. It can be built with the below 
 maven command.</p>
-<div class="highlight"><pre><span></span><code>mvn clean compile install
+<div class="highlight"><pre><span></span><code>mvn<span class="w"> </span>clean<span class="w"> </span>compile<span class="w"> </span>install
 </code></pre></div>
 <h4 id="configuring-the-agama-module">Configuring the agama module<a class="headerlink" href="#configuring-the-agama-module" title="Permanent link">#</a></h4>
 <p>This module does not require a profile setup. It can be built with the below 
 maven command.</p>
-<div class="highlight"><pre><span></span><code>mvn clean compile install
+<div class="highlight"><pre><span></span><code>mvn<span class="w"> </span>clean<span class="w"> </span>compile<span class="w"> </span>install
 </code></pre></div>
 <h4 id="configuring-the-scim-module">Configuring the SCIM module<a class="headerlink" href="#configuring-the-scim-module" title="Permanent link">#</a></h4>
 <p>This module does not require a profile setup. It can be built with the below

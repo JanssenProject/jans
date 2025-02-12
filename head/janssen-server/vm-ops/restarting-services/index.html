@@ -8758,7 +8758,7 @@
 
 <h1 id="janssen-system-services-lifecycle-management">Janssen System Services Lifecycle Management<a class="headerlink" href="#janssen-system-services-lifecycle-management" title="Permanent link">#</a></h1>
 <h2 id="getting-list-of-jans-services">Getting list of Jans services<a class="headerlink" href="#getting-list-of-jans-services" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code>sudo systemctl list-units --all <span class="s2">&quot;jans*&quot;</span>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>list-units<span class="w"> </span>--all<span class="w"> </span><span class="s2">&quot;jans*&quot;</span>
 </code></pre></div>
 <p>Output should be like below: 
 <div class="highlight"><pre><span></span><code>UNIT                    LOAD   ACTIVE SUB     DESCRIPTION               
@@ -8775,7 +8775,7 @@ SUB    = The low-level unit activation state, values depend on unit type.
 </code></pre></div></p>
 <h2 id="other-services">Other Services<a class="headerlink" href="#other-services" title="Permanent link">#</a></h2>
 <p>There are more services other than Jans services like  Apache. To get the status of those services make sure you use command like</p>
-<div class="highlight"><pre><span></span><code>sudo systemctl list-units --all <span class="s2">&quot;apache2*&quot;</span>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>list-units<span class="w"> </span>--all<span class="w"> </span><span class="s2">&quot;apache2*&quot;</span>
 </code></pre></div>
 <h2 id="commands-ubuntu-2004-rhel-8-suse-15">Commands (Ubuntu 20.04, RHEL 8, SUSE 15)<a class="headerlink" href="#commands-ubuntu-2004-rhel-8-suse-15" title="Permanent link">#</a></h2>
 <h3 id="start">Start<a class="headerlink" href="#start" title="Permanent link">#</a></h3>

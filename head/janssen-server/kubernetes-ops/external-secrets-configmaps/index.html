@@ -8902,28 +8902,28 @@
 <h4 id="fresh-installation">Fresh Installation<a class="headerlink" href="#fresh-installation" title="Permanent link">#</a></h4>
 <p>You will need the <code>ACCESS_KEY_ID</code> and <code>SECRET_ACCESS_KEY</code> of an IAM user with a <code>SecretsManagerReadWrite</code> policy attached.</p>
 <p>Add the following configuration to your <code>override.yaml</code>:
-<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">configAdapterName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aws</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">configAdapterName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aws</span>
 <span class="w">    </span><span class="nt">configSecretAdapter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aws</span><span class="w"> </span>
-<span class="nt">config</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">configmap</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnAwsAccessKeyId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">L30E10OME18S1220S221</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnAwsSecretAccessKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Z1A1M9A1L1EKALIeHHN~o</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnAwsDefaultRegion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">us-east-1</span><span class="w"> </span><span class="c1">#Choose based on the desired region</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnAwsSecretsEndpointUrl</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://secretsmanager.us-east-1.amazonaws.com</span><span class="w"> </span><span class="c1">#Choose based on the desired region</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnAwsSecretsNamePrefix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnAwsProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen</span><span class="w"> </span><span class="c1">#Choose based on your aws named profile </span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnAwsSecretsReplicaRegions</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span><span class="w"> </span><span class="c1">#Optional if you want secrets to be replicated. [{&quot;Region&quot;: &quot;us-west-1&quot;}, {&quot;Region&quot;: &quot;us-west-2&quot;}]</span><span class="w"></span>
+<span class="nt">config</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">configmap</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">cnAwsAccessKeyId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">L30E10OME18S1220S221</span>
+<span class="w">    </span><span class="nt">cnAwsSecretAccessKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Z1A1M9A1L1EKALIeHHN~o</span>
+<span class="w">    </span><span class="nt">cnAwsDefaultRegion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">us-east-1</span><span class="w"> </span><span class="c1">#Choose based on the desired region</span>
+<span class="w">    </span><span class="nt">cnAwsSecretsEndpointUrl</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://secretsmanager.us-east-1.amazonaws.com</span><span class="w"> </span><span class="c1">#Choose based on the desired region</span>
+<span class="w">    </span><span class="nt">cnAwsSecretsNamePrefix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen</span>
+<span class="w">    </span><span class="nt">cnAwsProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen</span><span class="w"> </span><span class="c1">#Choose based on your aws named profile </span>
+<span class="w">    </span><span class="nt">cnAwsSecretsReplicaRegions</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span><span class="w"> </span><span class="c1">#Optional if you want secrets to be replicated. [{&quot;Region&quot;: &quot;us-west-1&quot;}, {&quot;Region&quot;: &quot;us-west-2&quot;}]</span>
 </code></pre></div></p>
 <p>Run <code>helm install</code> or <code>helm upgrade</code> if <code>Janssen</code> is already installed:</p>
-<div class="highlight"><pre><span></span><code>helm upgrade &lt;helm-release-name&gt; janssen/janssen -f override.yaml -n &lt;namespace&gt;
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>&lt;helm-release-name&gt;<span class="w"> </span>janssen/janssen<span class="w"> </span>-f<span class="w"> </span>override.yaml<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
 </code></pre></div>
 <h4 id="exportmigration">Export/Migration<a class="headerlink" href="#exportmigration" title="Permanent link">#</a></h4>
 <h5 id="configmaps">Configmaps<a class="headerlink" href="#configmaps" title="Permanent link">#</a></h5>
 <ul>
 <li>
 <p>Get the json of the configmap
-  <div class="highlight"><pre><span></span><code>kubectl get configmap -n &lt;namespace&gt; cn -o json 
+  <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>configmap<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>cn<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span>
 </code></pre></div></p>
 </li>
 <li>
@@ -8935,7 +8935,7 @@
 <ul>
 <li>
 <p>Get the json of the secret
-  <div class="highlight"><pre><span></span><code>kubectl get secret -n &lt;namespace&gt; cn -o json 
+  <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>cn<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span>
 </code></pre></div></p>
 </li>
 <li>
@@ -8943,7 +8943,7 @@
 </li>
 <li>
 <p>Assuming the json is stored in a file named <code>binary-secrets.json</code>:
-  <div class="highlight"><pre><span></span><code>aws secretsmanager create-secret --name &lt;secret-name&gt; --secret-binary fileb://binary-secrets.json --region &lt;secret-region&gt;
+  <div class="highlight"><pre><span></span><code>aws<span class="w"> </span>secretsmanager<span class="w"> </span>create-secret<span class="w"> </span>--name<span class="w"> </span>&lt;secret-name&gt;<span class="w"> </span>--secret-binary<span class="w"> </span>fileb://binary-secrets.json<span class="w"> </span>--region<span class="w"> </span>&lt;secret-region&gt;
 </code></pre></div></p>
 </li>
 </ul>
@@ -8952,34 +8952,34 @@
 <p>Make sure you enabled <code>Secret Manager API</code>.</p>
 <p>You will need a <code>Service account</code> with the <code>roles/secretmanager.admin</code> role. This service account json should then be <code>base64</code> encoded.</p>
 <p>Add the following configuration to your <code>override.yaml</code>:
-<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">configAdapterName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">google</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">configAdapterName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">google</span>
 <span class="w">  </span><span class="nt">configSecretAdapter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">google</span><span class="w"> </span>
-<span class="nt">config</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">configmap</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnGoogleSecretManagerServiceAccount</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=</span><span class="w"> </span><span class="c1">#base64 encoded service account json</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnGoogleProjectId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">google-project-to-save-config-and-secrets-to</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSecretGoogleSecretVersionId</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;latest&quot;</span><span class="w"> </span><span class="c1"># Secret version to be used for secret configuration. Defaults to latest and should normally always stay that way. </span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnSecretGoogleSecretNamePrefix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnGoogleSecretManagerPassPhrase</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test1234#</span><span class="w"> </span><span class="c1">#Passphrase for Janssen secret in Google Secret Manager. Used for encrypting and decrypting data from Google&#39;s Secret Manager. </span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnConfigGoogleSecretVersionId</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;latest&quot;</span><span class="w"> </span><span class="c1">#Secret version to be used for configuration. Defaults to latest and should normally always stay that way.</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnConfigGoogleSecretNamePrefix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen</span><span class="w"></span>
+<span class="nt">config</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">configmap</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">cnGoogleSecretManagerServiceAccount</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=</span><span class="w"> </span><span class="c1">#base64 encoded service account json</span>
+<span class="w">    </span><span class="nt">cnGoogleProjectId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">google-project-to-save-config-and-secrets-to</span>
+<span class="w">    </span><span class="nt">cnSecretGoogleSecretVersionId</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;latest&quot;</span><span class="w"> </span><span class="c1"># Secret version to be used for secret configuration. Defaults to latest and should normally always stay that way. </span>
+<span class="w">    </span><span class="nt">cnSecretGoogleSecretNamePrefix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen</span>
+<span class="w">    </span><span class="nt">cnGoogleSecretManagerPassPhrase</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test1234#</span><span class="w"> </span><span class="c1">#Passphrase for Janssen secret in Google Secret Manager. Used for encrypting and decrypting data from Google&#39;s Secret Manager. </span>
+<span class="w">    </span><span class="nt">cnConfigGoogleSecretVersionId</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;latest&quot;</span><span class="w"> </span><span class="c1">#Secret version to be used for configuration. Defaults to latest and should normally always stay that way.</span>
+<span class="w">    </span><span class="nt">cnConfigGoogleSecretNamePrefix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen</span>
 </code></pre></div></p>
 <p>Run <code>helm install</code> or <code>helm upgrade</code> if <code>Janssen</code> is already installed:</p>
-<div class="highlight"><pre><span></span><code>helm upgrade &lt;helm-release-name&gt; janssen/janssen -f override.yaml -n &lt;namespace&gt;
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>&lt;helm-release-name&gt;<span class="w"> </span>janssen/janssen<span class="w"> </span>-f<span class="w"> </span>override.yaml<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
 </code></pre></div>
 <h4 id="exportmigration_1">Export/Migration<a class="headerlink" href="#exportmigration_1" title="Permanent link">#</a></h4>
 <p>Get the json of the secret/configmap
-<div class="highlight"><pre><span></span><code>kubectl get configmap -n &lt;namespace&gt; cn -o json 
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>configmap<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>cn<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span>
 </code></pre></div></p>
 <p>From the console, Go to <code>Secret Manager</code>&gt; Click on <code>Create Secret</code> &gt; Add a <code>name</code> &gt; Upload a <code>json</code> file or add the json to the <code>Secret value</code> field &gt; Create</p>
 <h4 id="managing-versions">Managing Versions<a class="headerlink" href="#managing-versions" title="Permanent link">#</a></h4>
 <p>While there's no limitation on how many versions a secret can have, the recommendation is to keep the number as low as possible, e.g. 5 active versions.
 If there are too many secret versions, it's best to destroy older versions manually, for example:</p>
-<div class="highlight"><pre><span></span><code>gcloud secrets versions list jans-secret --filter<span class="o">=</span><span class="s2">&quot;state = enabled&quot;</span> --filter<span class="o">=</span><span class="s2">&quot;createTime &lt; &#39;2024-03-02&#39;&quot;</span> <span class="p">|</span> grep <span class="s2">&quot;NAME:&quot;</span> <span class="p">|</span> tr -d <span class="s2">&quot;NAME: &quot;</span> &gt; versions_to_destroy.txt
-<span class="k">while</span> <span class="nb">read</span> -r line<span class="p">;</span> <span class="k">do</span>
-  gcloud secrets versions destroy <span class="s2">&quot;</span><span class="nv">$line</span><span class="s2">&quot;</span> --secret<span class="o">=</span>jans-secret
-<span class="k">done</span> &lt; <span class="s2">&quot;versions_to_destroy.txt&quot;</span>
+<div class="highlight"><pre><span></span><code>gcloud<span class="w"> </span>secrets<span class="w"> </span>versions<span class="w"> </span>list<span class="w"> </span>jans-secret<span class="w"> </span>--filter<span class="o">=</span><span class="s2">&quot;state = enabled&quot;</span><span class="w"> </span>--filter<span class="o">=</span><span class="s2">&quot;createTime &lt; &#39;2024-03-02&#39;&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;NAME:&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>-d<span class="w"> </span><span class="s2">&quot;NAME: &quot;</span><span class="w"> </span>&gt;<span class="w"> </span>versions_to_destroy.txt
+<span class="k">while</span><span class="w"> </span><span class="nb">read</span><span class="w"> </span>-r<span class="w"> </span>line<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span>gcloud<span class="w"> </span>secrets<span class="w"> </span>versions<span class="w"> </span>destroy<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$line</span><span class="s2">&quot;</span><span class="w"> </span>--secret<span class="o">=</span>jans-secret
+<span class="k">done</span><span class="w"> </span>&lt;<span class="w"> </span><span class="s2">&quot;versions_to_destroy.txt&quot;</span>
 </code></pre></div>
 <h3 id="vault">Vault<a class="headerlink" href="#vault" title="Permanent link">#</a></h3>
 <div class="admonition note">
@@ -9012,30 +9012,30 @@ vault write auth/approle/role/&lt;role-name&gt; token_policies=&quot;&lt;policy-
 </li>
 <li>
 <p>Add the following configuration to your <code>override.yaml</code>:</p>
-<p><div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">configSecretAdapter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault</span><span class="w"></span>
-<span class="nt">config</span><span class="p">:</span><span class="w"></span>
+<p><div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">configSecretAdapter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vault</span>
+<span class="nt">config</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">configmap</span><span class="p">:</span><span class="w">  </span>
-<span class="w">    </span><span class="c1"># -- Vault AppRole RoleID.</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnVaultRoleId</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- Vault AppRole SecretID.</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnVaultSecretId</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- Base URL of Vault.</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnVaultAddr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://localhost:8200</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- Verify connection to Vault.</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnVaultVerify</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- Path to file contains Vault AppRole role ID.</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnVaultRoleIdFile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/certs/vault_role_id</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- Path to file contains Vault AppRole secret ID.</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnVaultSecretIdFile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/certs/vault_secret_id</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- Vault namespace used to access the secrets.</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnVaultNamespace</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- Path to Vault KV secrets engine.</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnVaultKvPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secret</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- Base prefix name used to access secrets.</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnVaultPrefix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jans</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- Path to Vault AppRole.</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnVaultAppRolePath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">approle</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># -- Vault AppRole RoleID.</span>
+<span class="w">    </span><span class="nt">cnVaultRoleId</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<span class="w">    </span><span class="c1"># -- Vault AppRole SecretID.</span>
+<span class="w">    </span><span class="nt">cnVaultSecretId</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<span class="w">    </span><span class="c1"># -- Base URL of Vault.</span>
+<span class="w">    </span><span class="nt">cnVaultAddr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://localhost:8200</span>
+<span class="w">    </span><span class="c1"># -- Verify connection to Vault.</span>
+<span class="w">    </span><span class="nt">cnVaultVerify</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="c1"># -- Path to file contains Vault AppRole role ID.</span>
+<span class="w">    </span><span class="nt">cnVaultRoleIdFile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/certs/vault_role_id</span>
+<span class="w">    </span><span class="c1"># -- Path to file contains Vault AppRole secret ID.</span>
+<span class="w">    </span><span class="nt">cnVaultSecretIdFile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/certs/vault_secret_id</span>
+<span class="w">    </span><span class="c1"># -- Vault namespace used to access the secrets.</span>
+<span class="w">    </span><span class="nt">cnVaultNamespace</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<span class="w">    </span><span class="c1"># -- Path to Vault KV secrets engine.</span>
+<span class="w">    </span><span class="nt">cnVaultKvPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secret</span>
+<span class="w">    </span><span class="c1"># -- Base prefix name used to access secrets.</span>
+<span class="w">    </span><span class="nt">cnVaultPrefix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jans</span>
+<span class="w">    </span><span class="c1"># -- Path to Vault AppRole.</span>
+<span class="w">    </span><span class="nt">cnVaultAppRolePath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">approle</span>
 </code></pre></div>
 5.  Run <code>helm install</code> or <code>helm upgrade</code></p>
 </li>
@@ -9044,10 +9044,10 @@ vault write auth/approle/role/&lt;role-name&gt; token_policies=&quot;&lt;policy-
 <h3 id="aws_1">AWS<a class="headerlink" href="#aws_1" title="Permanent link">#</a></h3>
 <p><strong>String Secret</strong>: To retrieve the secret value from the Console, click on the secret name and then click on <code>Retrieve Secret Value</code></p>
 <p><strong>Binary Secret</strong>: To retrieve the secret value using the cli
-<div class="highlight"><pre><span></span><code>aws secretsmanager get-secret-value --secret-id &lt;secret-name&gt; --query <span class="s1">&#39;SecretBinary&#39;</span> --output text --region &lt;secret-region&gt;
+<div class="highlight"><pre><span></span><code>aws<span class="w"> </span>secretsmanager<span class="w"> </span>get-secret-value<span class="w"> </span>--secret-id<span class="w"> </span>&lt;secret-name&gt;<span class="w"> </span>--query<span class="w"> </span><span class="s1">&#39;SecretBinary&#39;</span><span class="w"> </span>--output<span class="w"> </span>text<span class="w"> </span>--region<span class="w"> </span>&lt;secret-region&gt;
 </code></pre></div></p>
 <p>Note that the secret is binary encoded, so in order to have a decoded value, you can run the following
-<div class="highlight"><pre><span></span><code>aws secretsmanager get-secret-value --secret-id &lt;secret-name&gt; --query <span class="s1">&#39;SecretBinary&#39;</span> --output text --region &lt;secret-region&gt; <span class="p">|</span> base64 --decode
+<div class="highlight"><pre><span></span><code>aws<span class="w"> </span>secretsmanager<span class="w"> </span>get-secret-value<span class="w"> </span>--secret-id<span class="w"> </span>&lt;secret-name&gt;<span class="w"> </span>--query<span class="w"> </span><span class="s1">&#39;SecretBinary&#39;</span><span class="w"> </span>--output<span class="w"> </span>text<span class="w"> </span>--region<span class="w"> </span>&lt;secret-region&gt;<span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>--decode
 </code></pre></div></p>
 <p>Repeat these commands across all the secrets, to get the full key-value pairs.</p>
 <h3 id="gcp_1">GCP<a class="headerlink" href="#gcp_1" title="Permanent link">#</a></h3>

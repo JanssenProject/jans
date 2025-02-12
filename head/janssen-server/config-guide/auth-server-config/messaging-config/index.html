@@ -8723,7 +8723,7 @@ Postman. Learn how to use Janssen Server Config API
 <p>To get the details of Janssen command line operations relevant to
 the messaging configuration, you can check the operations under
 <code>MessageConfiguration</code> using the command below:</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info MessageConfiguration
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--info<span class="w"> </span>MessageConfiguration
 </code></pre></div>
 It prints below two operations:</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -8743,7 +8743,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample &lt;s
 <h4 id="get-messaging-configuration">Get Messaging Configuration<a class="headerlink" href="#get-messaging-configuration" title="Permanent link">#</a></h4>
 <p>You can get the Messaging Configuration 
 of the Janssen Server by performing this operation.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-message
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--operation-id<span class="w"> </span>get-config-message
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -8767,29 +8767,29 @@ of the Janssen Server by performing this operation.</p>
 <span class="normal">20</span>
 <span class="normal">21</span>
 <span class="normal">22</span>
-<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;messageProviderType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DISABLED&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;nullConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;redisConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;redisProviderType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STANDALONE&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;localhost:6379&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;defaultPutExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;maxIdleConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;maxTotalConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;connectionTimeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3000</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;soTimeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3000</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;maxRetryAttempts&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;postgresConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;dbSchemaName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;public&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;connectionUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jdbc:postgresql://localhost:5432/jansdb&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;authUserName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;authUserPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;U45+dbPl4eRjH1yXkp5NlQ==&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;messageWaitMillis&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;messageSleepThreadTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;messageProviderType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DISABLED&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;nullConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">  </span><span class="nt">&quot;redisConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;redisProviderType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STANDALONE&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;localhost:6379&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;defaultPutExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;maxIdleConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;maxTotalConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;connectionTimeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;soTimeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;maxRetryAttempts&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;postgresConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;dbSchemaName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;public&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;connectionUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jdbc:postgresql://localhost:5432/jansdb&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;authUserName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;authUserPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;U45+dbPl4eRjH1yXkp5NlQ==&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;messageWaitMillis&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;messageSleepThreadTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h4 id="patch-messaging-configuration">Patch Messaging Configuration<a class="headerlink" href="#patch-messaging-configuration" title="Permanent link">#</a></h4>
 <p>To patch update the messaging configuration, use 
@@ -8808,19 +8808,19 @@ the JSON Patch data would be like below:</p>
 <span class="normal">4</span>
 <span class="normal">5</span>
 <span class="normal">6</span>
-<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">[</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;messageProviderType&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;REDIS&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;messageProviderType&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;REDIS&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
 </code></pre></div></td></tr></table></div>
 <p>Store the above JSON Patch data in a file, for instance,
 <code>/tmp/message-patch.json</code></p>
 <p>Using the above file, perform the operation as below:</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-config-message <span class="se">\</span>
---data /tmp/message-patch.json
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--operation-id<span class="w"> </span>patch-config-message<span class="w"> </span><span class="se">\</span>
+--data<span class="w"> </span>/tmp/message-patch.json
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -8845,34 +8845,34 @@ the JSON Patch data would be like below:</p>
 <span class="normal">21</span>
 <span class="normal">22</span>
 <span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="o">{</span>
-  <span class="s2">&quot;messageProviderType&quot;</span>: <span class="s2">&quot;REDIS&quot;</span>,
-  <span class="s2">&quot;nullConfiguration&quot;</span>: <span class="o">{}</span>,
-  <span class="s2">&quot;redisConfiguration&quot;</span>: <span class="o">{</span>
-    <span class="s2">&quot;redisProviderType&quot;</span>: <span class="s2">&quot;STANDALONE&quot;</span>,
-    <span class="s2">&quot;servers&quot;</span>: <span class="s2">&quot;localhost:6379&quot;</span>,
-    <span class="s2">&quot;defaultPutExpiration&quot;</span>: <span class="m">60</span>,
-    <span class="s2">&quot;useSSL&quot;</span>: false,
-    <span class="s2">&quot;maxIdleConnections&quot;</span>: <span class="m">10</span>,
-    <span class="s2">&quot;maxTotalConnections&quot;</span>: <span class="m">500</span>,
-    <span class="s2">&quot;connectionTimeout&quot;</span>: <span class="m">3000</span>,
-    <span class="s2">&quot;soTimeout&quot;</span>: <span class="m">3000</span>,
-    <span class="s2">&quot;maxRetryAttempts&quot;</span>: <span class="m">5</span>
- <span class="o">}</span>,
-  <span class="s2">&quot;postgresConfiguration&quot;</span>: <span class="o">{</span>
-    <span class="s2">&quot;dbSchemaName&quot;</span>: <span class="s2">&quot;public&quot;</span>,
-    <span class="s2">&quot;connectionUri&quot;</span>: <span class="s2">&quot;jdbc:postgresql://localhost:5432/jansdb&quot;</span>,
-    <span class="s2">&quot;authUserName&quot;</span>: <span class="s2">&quot;jans&quot;</span>,
-    <span class="s2">&quot;authUserPassword&quot;</span>: <span class="s2">&quot;U45+dbPl4eRjH1yXkp5NlQ==&quot;</span>,
-    <span class="s2">&quot;messageWaitMillis&quot;</span>: <span class="m">100</span>,
-    <span class="s2">&quot;messageSleepThreadTime&quot;</span>: <span class="m">200</span>
- <span class="o">}</span>
+<span class="w">  </span><span class="s2">&quot;messageProviderType&quot;</span>:<span class="w"> </span><span class="s2">&quot;REDIS&quot;</span>,
+<span class="w">  </span><span class="s2">&quot;nullConfiguration&quot;</span>:<span class="w"> </span><span class="o">{}</span>,
+<span class="w">  </span><span class="s2">&quot;redisConfiguration&quot;</span>:<span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="s2">&quot;redisProviderType&quot;</span>:<span class="w"> </span><span class="s2">&quot;STANDALONE&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;servers&quot;</span>:<span class="w"> </span><span class="s2">&quot;localhost:6379&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;defaultPutExpiration&quot;</span>:<span class="w"> </span><span class="m">60</span>,
+<span class="w">    </span><span class="s2">&quot;useSSL&quot;</span>:<span class="w"> </span>false,
+<span class="w">    </span><span class="s2">&quot;maxIdleConnections&quot;</span>:<span class="w"> </span><span class="m">10</span>,
+<span class="w">    </span><span class="s2">&quot;maxTotalConnections&quot;</span>:<span class="w"> </span><span class="m">500</span>,
+<span class="w">    </span><span class="s2">&quot;connectionTimeout&quot;</span>:<span class="w"> </span><span class="m">3000</span>,
+<span class="w">    </span><span class="s2">&quot;soTimeout&quot;</span>:<span class="w"> </span><span class="m">3000</span>,
+<span class="w">    </span><span class="s2">&quot;maxRetryAttempts&quot;</span>:<span class="w"> </span><span class="m">5</span>
+<span class="w"> </span><span class="o">}</span>,
+<span class="w">  </span><span class="s2">&quot;postgresConfiguration&quot;</span>:<span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="s2">&quot;dbSchemaName&quot;</span>:<span class="w"> </span><span class="s2">&quot;public&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;connectionUri&quot;</span>:<span class="w"> </span><span class="s2">&quot;jdbc:postgresql://localhost:5432/jansdb&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;authUserName&quot;</span>:<span class="w"> </span><span class="s2">&quot;jans&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;authUserPassword&quot;</span>:<span class="w"> </span><span class="s2">&quot;U45+dbPl4eRjH1yXkp5NlQ==&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;messageWaitMillis&quot;</span>:<span class="w"> </span><span class="m">100</span>,
+<span class="w">    </span><span class="s2">&quot;messageSleepThreadTime&quot;</span>:<span class="w"> </span><span class="m">200</span>
+<span class="w"> </span><span class="o">}</span>
 <span class="o">}</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="messaging-configuration-for-postgres">Messaging Configuration For Postgres<a class="headerlink" href="#messaging-configuration-for-postgres" title="Permanent link">#</a></h3>
 <p>When <code>Postgres</code> is being used as a messaging provider,
 use the operations under the task
 <code>MessageConfigurationPostgres</code> to configure and manage the provider.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info MessageConfigurationPostgres
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--info<span class="w"> </span>MessageConfigurationPostgres
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
@@ -8893,7 +8893,7 @@ Operation ID: patch-config-message-postgres
 <h4 id="get-postgres-messaging-configuration">Get Postgres Messaging Configuration<a class="headerlink" href="#get-postgres-messaging-configuration" title="Permanent link">#</a></h4>
 <p>You can get the Postgres messaging configuration
 of the Janssen Server by performing this operation.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-message-postgres
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--operation-id<span class="w"> </span>get-config-message-postgres
 </code></pre></div>
 <p>It will show the configuration details as below.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -8903,22 +8903,22 @@ of the Janssen Server by performing this operation.</p>
 <span class="normal">5</span>
 <span class="normal">6</span>
 <span class="normal">7</span>
-<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dbSchemaName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;public&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;connectionUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jdbc:postgresql://localhost:5432/jansdb&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;authUserName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;authUserPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;U45+dbPl4eRjH1yXkp5NlQ==&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;messageWaitMillis&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;messageSleepThreadTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;dbSchemaName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;public&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;connectionUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jdbc:postgresql://localhost:5432/jansdb&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;authUserName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;authUserPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;U45+dbPl4eRjH1yXkp5NlQ==&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;messageWaitMillis&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;messageSleepThreadTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h4 id="update-postgres-messaging-configuration">Update Postgres Messaging Configuration<a class="headerlink" href="#update-postgres-messaging-configuration" title="Permanent link">#</a></h4>
 <p>To update the configuration follow the steps below.</p>
 <ol>
 <li><a href="#get-postgres-messaging-configuration">Get the current Postgres messaging configuration</a> 
 and store it in a file for editing using the command [below].
-   <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -no-color --operation-id get-config-message-postgres &gt;<span class="se">\</span>
- /tmp/postgres.json
+   <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>-no-color<span class="w"> </span>--operation-id<span class="w"> </span>get-config-message-postgres<span class="w"> </span>&gt;<span class="se">\</span>
+<span class="w"> </span>/tmp/postgres.json
 </code></pre></div></li>
 <li>Edit and update the desired configuration values in the file while
  keeping other properties and values unchanged.Updates must adhere 
@@ -8933,13 +8933,13 @@ and store it in a file for editing using the command [below].
 <p>The Janssen Server also provides an example of data that adheres to the above
  schema.
  To fetch the example, use the command below.
-   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema-sample PostgresMessageConfiguration
+   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--schema-sample<span class="w"> </span>PostgresMessageConfiguration
 </code></pre></div></p>
 </li>
 <li>
 <p>Use the updated file to send the update to the Janssen Server using the command below
- <div class="highlight"><span class="filename">Command</span><pre><span></span><code> /opt/jans/jans-cli/config-cli.py --operation-id put-config-message-postgres <span class="se">\</span>
---data /tmp/postgres.json
+ <div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="w"> </span>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--operation-id<span class="w"> </span>put-config-message-postgres<span class="w"> </span><span class="se">\</span>
+--data<span class="w"> </span>/tmp/postgres.json
 </code></pre></div></p>
 </li>
 </ol>
@@ -8960,19 +8960,19 @@ the JSON Patch data would look like below:</p>
 <span class="normal">4</span>
 <span class="normal">5</span>
 <span class="normal">6</span>
-<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">[</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;messageWaitMillis&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1000&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;messageWaitMillis&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1000&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
 </code></pre></div></td></tr></table></div>
 <p>Store the above JSON Patch data in a file, for instance,
 <code>/tmp/patch-postgres.json</code></p>
 <p>Using the above file, perform the operation as below:</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-config-message-postgres <span class="se">\</span>
---data /tmp/patch-postgres.json
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--operation-id<span class="w"> </span>patch-config-message-postgres<span class="w"> </span><span class="se">\</span>
+--data<span class="w"> </span>/tmp/patch-postgres.json
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
@@ -8981,19 +8981,19 @@ the JSON Patch data would look like below:</p>
 <span class="normal">5</span>
 <span class="normal">6</span>
 <span class="normal">7</span>
-<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dbSchemaName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;public&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;connectionUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jdbc:postgresql://localhost:5432/jansdb&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;authUserName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans-postgres&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;authUserPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;U45+dbPl4eRjH1yXkp5NlQ==&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;messageWaitMillis&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;messageSleepThreadTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;dbSchemaName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;public&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;connectionUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jdbc:postgresql://localhost:5432/jansdb&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;authUserName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans-postgres&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;authUserPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;U45+dbPl4eRjH1yXkp5NlQ==&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;messageWaitMillis&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;messageSleepThreadTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="messaging-configuration-for-redis">Messaging Configuration For Redis<a class="headerlink" href="#messaging-configuration-for-redis" title="Permanent link">#</a></h3>
 <p>To manage the Redis messaging configuratio, check the operations under
 the task <code>MessageConfigurationRedis</code> using the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info MessageConfigurationRedis
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--info<span class="w"> </span>MessageConfigurationRedis
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -9018,7 +9018,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample &lt;s
 <h4 id="get-redis-messaging-configuration">Get Redis Messaging Configuration<a class="headerlink" href="#get-redis-messaging-configuration" title="Permanent link">#</a></h4>
 <p>You can get the Redis message configuration
 of your Janssen Server by performing this operation.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-message-redis
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--operation-id<span class="w"> </span>get-config-message-redis
 </code></pre></div>
 It will show the configuration details.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -9031,25 +9031,25 @@ It will show the configuration details.</p>
 <span class="normal"> 8</span>
 <span class="normal"> 9</span>
 <span class="normal">10</span>
-<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;redisProviderType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STANDALONE&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;localhost:6379&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;defaultPutExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;maxIdleConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;maxTotalConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;connectionTimeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3000</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;soTimeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3000</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;maxRetryAttempts&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;redisProviderType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STANDALONE&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;localhost:6379&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;defaultPutExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;maxIdleConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;maxTotalConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;connectionTimeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3000</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;soTimeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3000</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;maxRetryAttempts&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h4 id="update-redis-message-configuration">Update Redis Message Configuration<a class="headerlink" href="#update-redis-message-configuration" title="Permanent link">#</a></h4>
 <p>To update the configuration follow the steps below.</p>
 <ol>
 <li><a href="#get-redis-messaging-configuration">Get the current Redis Message configuration</a> 
  and store it into a file for editing
-   <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -no-color --operation-id get-config-message-redis &gt;<span class="se">\</span>
- /tmp/redis.json
+   <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>-no-color<span class="w"> </span>--operation-id<span class="w"> </span>get-config-message-redis<span class="w"> </span>&gt;<span class="se">\</span>
+<span class="w"> </span>/tmp/redis.json
 </code></pre></div></li>
 <li>Edit and update the desired configuration values in the file while keeping 
  other properties and values unchanged. Updates must adhere to 
@@ -9061,14 +9061,14 @@ It will show the configuration details.</p>
 <li>
 <p>The Janssen Server also provides an example of data that 
  adheres to the above schema.To fetch the example, use the command below.
-   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema-sample RedisMessageConfiguration
+   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--schema-sample<span class="w"> </span>RedisMessageConfiguration
 </code></pre></div></p>
 </li>
 <li>
 <p>Use the updated file to send the update to the Janssen 
  Server using the command below
- <div class="highlight"><span class="filename">Command</span><pre><span></span><code> /opt/jans/jans-cli/config-cli.py --operation-id put-config-message-redis <span class="se">\</span>
---data /tmp/redis.json
+ <div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="w"> </span>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--operation-id<span class="w"> </span>put-config-message-redis<span class="w"> </span><span class="se">\</span>
+--data<span class="w"> </span>/tmp/redis.json
 </code></pre></div></p>
 </li>
 </ol>
@@ -9089,19 +9089,19 @@ the JSON Patch data would look like below:</p>
 <span class="normal">4</span>
 <span class="normal">5</span>
 <span class="normal">6</span>
-<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">[</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;maxTotalConnections&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;600&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;maxTotalConnections&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;600&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
 </code></pre></div></td></tr></table></div>
 <p>Store the above JSON Patch data in a file, for instance,
 <code>/tmp/patch-redis.json</code></p>
 <p>Using the above file, perform the operation as below:</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-config-message-redis <span class="se">\</span>
---data /tmp/patch-redis.json
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py<span class="w"> </span>--operation-id<span class="w"> </span>patch-config-message-redis<span class="w"> </span><span class="se">\</span>
+--data<span class="w"> </span>/tmp/patch-redis.json
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -9113,23 +9113,23 @@ the JSON Patch data would look like below:</p>
 <span class="normal"> 8</span>
 <span class="normal"> 9</span>
 <span class="normal">10</span>
-<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;redisProviderType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STANDALONE&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;localhost:6379&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;defaultPutExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;maxIdleConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;maxTotalConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;connectionTimeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3000</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;soTimeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3000</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;maxRetryAttempts&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;redisProviderType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STANDALONE&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;localhost:6379&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;defaultPutExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;maxIdleConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;maxTotalConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;connectionTimeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3000</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;soTimeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3000</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;maxRetryAttempts&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h2 id="using-text-based-ui">Using Text-based UI<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
 <p>In the Janssen Server, You can manage Message Configuration using
 the <a href="../../config-tools/jans-tui/">Text-Based UI</a> also.</p>
 <p>You can start TUI using the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo /opt/jans/jans-cli/jans_cli_tui.py
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo<span class="w"> </span>/opt/jans/jans-cli/jans_cli_tui.py
 </code></pre></div>
 <p>Navigate to <code>Auth Server</code> -&gt; <code>Messages</code> to open the Message screen as shown
 in the image below. There are three different message configuration options 

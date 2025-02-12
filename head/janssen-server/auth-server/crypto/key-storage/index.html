@@ -8627,7 +8627,7 @@
 </ul>
 <h3 id="jans-auth-keyspkcs12">jans-auth-keys.pkcs12<a class="headerlink" href="#jans-auth-keyspkcs12" title="Permanent link">#</a></h3>
 <p>Here is the example of the file: <strong>/etc/certs/jans-auth-keys.pkcs12</strong> (list of entries/aliases).</p>
-<div class="highlight"><pre><span></span><code>keytool -list -v -storetype PKCS12 -keystore /etc/certs/jans-auth-keys.pkcs12 -storepass gNzpzYj5h8i1
+<div class="highlight"><pre><span></span><code>keytool<span class="w"> </span>-list<span class="w"> </span>-v<span class="w"> </span>-storetype<span class="w"> </span>PKCS12<span class="w"> </span>-keystore<span class="w"> </span>/etc/certs/jans-auth-keys.pkcs12<span class="w"> </span>-storepass<span class="w"> </span>gNzpzYj5h8i1
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Keystore type: PKCS12
 Keystore provider: SUN
@@ -9606,7 +9606,7 @@ ExtendedKeyUsages [
 <p>This Key Store is used for keys/certificates keeping, which are used by the OpenID provider (<strong>jans-auth-server</strong>).</p>
 <h3 id="smtp-keyspkcs12">smtp-keys.pkcs12<a class="headerlink" href="#smtp-keyspkcs12" title="Permanent link">#</a></h3>
 <p>Here is the example of the file: <strong>/etc/certs/smtp-keys.pkcs12</strong> (list of entries/aliases).</p>
-<div class="highlight"><pre><span></span><code>keytool -list -v -storetype PKCS12 -keystore /etc/certs/smtp-keys.pkcs12 -storepass 6VkIGu0DhnrD
+<div class="highlight"><pre><span></span><code>keytool<span class="w"> </span>-list<span class="w"> </span>-v<span class="w"> </span>-storetype<span class="w"> </span>PKCS12<span class="w"> </span>-keystore<span class="w"> </span>/etc/certs/smtp-keys.pkcs12<span class="w"> </span>-storepass<span class="w"> </span>6VkIGu0DhnrD
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Keystore type: PKCS12
 Keystore provider: SUN
@@ -9654,7 +9654,7 @@ Alias <strong>smtp_sig_ec256</strong> contains self-signed certificate. User/Adm
 .</li>
 </ul>
 <p>Here is example of the BCFKS KeyStore <strong>/etc/certs/jans-auth-keys.bcfks</strong> (list of entries/aliases):</p>
-<div class="highlight"><pre><span></span><code>keytool -list -v -keystore /etc/certs/jans-auth-keys.bcfks -storetype BCFKS -providerpath /var/gluu/dist/app/bc-fips-1.0.2.3.jar:/var/gluu/dist/app/bcpkix-fips-1.0.6.jar -provider org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider -storepass CqE4ApXQxz5y
+<div class="highlight"><pre><span></span><code>keytool<span class="w"> </span>-list<span class="w"> </span>-v<span class="w"> </span>-keystore<span class="w"> </span>/etc/certs/jans-auth-keys.bcfks<span class="w"> </span>-storetype<span class="w"> </span>BCFKS<span class="w"> </span>-providerpath<span class="w"> </span>/var/gluu/dist/app/bc-fips-1.0.2.3.jar:/var/gluu/dist/app/bcpkix-fips-1.0.6.jar<span class="w"> </span>-provider<span class="w"> </span>org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider<span class="w"> </span>-storepass<span class="w"> </span>CqE4ApXQxz5y
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>Keystore type: BCFKS
 Keystore provider: BCFIPS

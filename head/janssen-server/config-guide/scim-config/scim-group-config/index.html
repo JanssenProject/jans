@@ -8767,7 +8767,7 @@ Postman. Learn how to use Janssen Server Config API
 </div>
 </div>
 <h2 id="using-command-line">Using Command Line<a class="headerlink" href="#using-command-line" title="Permanent link">#</a></h2>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -scim --info Group
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>-scim<span class="w"> </span>--info<span class="w"> </span>Group
 </code></pre></div>
 <div class="highlight"><span class="filename">Command Output</span><pre><span></span><code>Operation ID: get-groups
   Description: Query Group resources (see section 3.4.2 of RFC 7644)
@@ -8825,38 +8825,38 @@ To get sample schema type jans cli -scim --schema-sample &lt;schema&gt;, for exa
 </code></pre></div>
 <h3 id="get-groups">Get Groups<a class="headerlink" href="#get-groups" title="Permanent link">#</a></h3>
 <p>This operation can be used to get list of groups. To get the list of groups, run the following command:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -scim --operation-id get-groups
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>-scim<span class="w"> </span>--operation-id<span class="w"> </span>get-groups
 </code></pre></div>
 <p>It will show the list of groups with all the members linked with each of these groups. </p>
-<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;urn:ietf:params:scim:api:messages:2.0:ListResponse&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;totalResults&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;startIndex&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;itemsPerPage&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;Resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;urn:ietf:params:scim:schemas:core:2.0:Group&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;60B7&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;meta&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Group&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Groups/60B7&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Janssen Manager Group&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;members&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;f764391d-56de-4b74-b0a2-f32814706dcc&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;display&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Default Admin User&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;$ref&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Users/f764391d-56de-4b74-b0a2-f32814706dcc&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">      </span><span class="p">]</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;urn:ietf:params:scim:api:messages:2.0:ListResponse&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;totalResults&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;startIndex&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;itemsPerPage&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;urn:ietf:params:scim:schemas:core:2.0:Group&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;60B7&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;meta&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Group&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Groups/60B7&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Janssen Manager Group&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;members&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;f764391d-56de-4b74-b0a2-f32814706dcc&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;display&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Default Admin User&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;$ref&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Users/f764391d-56de-4b74-b0a2-f32814706dcc&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>You can filter for the advanced search with some of its properties:</p>
 <ol>
@@ -8869,98 +8869,98 @@ To get sample schema type jans cli -scim --schema-sample &lt;schema&gt;, for exa
 </ol>
 <h3 id="create-group">Create Group<a class="headerlink" href="#create-group" title="Permanent link">#</a></h3>
 <p>Using <code>create-group</code> operation, we can create groups into Janssen Server. As we have seen in the <a href="#using-command-line">output</a> of <code>--info</code> command, this operation requires <code>GroupResource</code> schema. To know the details of schema, run the following command:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -scim --schema GroupResource
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>-scim<span class="w"> </span>--schema<span class="w"> </span>GroupResource
 </code></pre></div>
 <p>The Janssen server also provides sample schema. To get the sample schema of <code>GroupResource</code>:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -scim --schema-sample GroupResource
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>-scim<span class="w"> </span>--schema-sample<span class="w"> </span>GroupResource
 </code></pre></div>
 <p>According to schema, let's put all the details into a json file <code>/tmp/create-group.json</code> to create a group.</p>
-<div class="highlight"><span class="filename">sample</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;New Group&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><span class="filename">sample</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;New Group&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>Now let's run the following command to add group into the server:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code> jans cli -scim --operation-id create-group --data /tmp/create-group.json
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="w"> </span>jans<span class="w"> </span>cli<span class="w"> </span>-scim<span class="w"> </span>--operation-id<span class="w"> </span>create-group<span class="w"> </span>--data<span class="w"> </span>/tmp/create-group.json
 </code></pre></div>
-<div class="highlight"><span class="filename">Command Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;urn:ietf:params:scim:schemas:core:2.0:Group&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;meta&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Group&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-06T03:46:31.224Z&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;lastModified&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-06T03:46:31.224Z&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Groups/7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;New Group&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><span class="filename">Command Output</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;urn:ietf:params:scim:schemas:core:2.0:Group&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;meta&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Group&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-06T03:46:31.224Z&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;lastModified&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-06T03:46:31.224Z&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Groups/7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;New Group&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
 <h3 id="get-group-by-id">Get Group by ID<a class="headerlink" href="#get-group-by-id" title="Permanent link">#</a></h3>
 <p>We can view the specific group details through its <code>id</code> using <code>get-group-by-id</code> operation. 
 For example, We can put the above created group <code>id:7a20464c-3651-48a0-9c9c-6b59373df60c</code> with <code>--url-suffix</code> to get the groupe details. The following command as below:</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -scim --operation-id get-group-by-id <span class="se">\</span>
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>-scim<span class="w"> </span>--operation-id<span class="w"> </span>get-group-by-id<span class="w"> </span><span class="se">\</span>
 --url-suffix<span class="o">=</span><span class="s2">&quot;id:7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span>
 </code></pre></div>
-<div class="highlight"><span class="filename">Command Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;urn:ietf:params:scim:schemas:core:2.0:Group&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;meta&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Group&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Fri Sep 06 03:46:31 UTC 2024&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;lastModified&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Fri Sep 06 03:46:31 UTC 2024&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Groups/7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;New Group&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;members&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><span class="filename">Command Output</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;urn:ietf:params:scim:schemas:core:2.0:Group&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;meta&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Group&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Fri Sep 06 03:46:31 UTC 2024&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;lastModified&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Fri Sep 06 03:46:31 UTC 2024&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Groups/7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;New Group&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;members&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="p">}</span>
 </code></pre></div></p>
 <p>We see <code>members</code> is empty since we did not associate any user with this group yet. We will add members into this gorup in the next operation. </p>
 <h3 id="update-group-by-id">Update Group by ID<a class="headerlink" href="#update-group-by-id" title="Permanent link">#</a></h3>
 <p>The <code>update-group-by-id</code> operation can be used to update group name and adding members into the group. Let's create a json file <code>/tmp/update-group.json</code> according to the <a href="#create-group"><code>GroupResource</code></a> schema:</p>
-<div class="highlight"><span class="filename">Sample</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;members&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4ed288be-4d1c-4e05-a3af-7a8935fc7f4c&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><span class="filename">Sample</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;members&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4ed288be-4d1c-4e05-a3af-7a8935fc7f4c&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>We can get the <code>value</code> which is actually the <code>id</code> of specific users from <a href="../user-config/#get-users-list">user management</a> section. Let's run the following command to update empty members properties with a member into the group we created <a href="#create-group">above</a>.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -scim --operation-id update-group-by-id <span class="se">\</span>
---url-suffix<span class="o">=</span><span class="s2">&quot;id:7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span> --data /tmp/update-group.json
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>-scim<span class="w"> </span>--operation-id<span class="w"> </span>update-group-by-id<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="o">=</span><span class="s2">&quot;id:7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span><span class="w"> </span>--data<span class="w"> </span>/tmp/update-group.json
 </code></pre></div>
-<div class="highlight"><span class="filename">Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;urn:ietf:params:scim:schemas:core:2.0:Group&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;meta&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Group&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Fri Sep 06 03:46:31 UTC 2024&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;lastModified&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-06T05:15:53.227Z&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Groups/7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;New Group&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;members&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4ed288be-4d1c-4e05-a3af-7a8935fc7f4c&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;display&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test User&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;$ref&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Users/4ed288be-4d1c-4e05-a3af-7a8935fc7f4c&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;urn:ietf:params:scim:schemas:core:2.0:Group&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;meta&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Group&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Fri Sep 06 03:46:31 UTC 2024&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;lastModified&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-06T05:15:53.227Z&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Groups/7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;New Group&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;members&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4ed288be-4d1c-4e05-a3af-7a8935fc7f4c&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;display&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test User&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;$ref&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Users/4ed288be-4d1c-4e05-a3af-7a8935fc7f4c&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
 <blockquote>
 <p><strong>Please remember one thing, this update method just replace the data. If you want to add members instead of replacing then you must try <a href="#patch-group">patch-group-by-id</a>.</strong></p>
 </blockquote>
 <h3 id="delete-group-by-id">Delete Group by ID<a class="headerlink" href="#delete-group-by-id" title="Permanent link">#</a></h3>
 <p>You can delete a group by its ID. The command line looks like:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -scim --operation-id delete-group-by-id <span class="se">\</span>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>-scim<span class="w"> </span>--operation-id<span class="w"> </span>delete-group-by-id<span class="w"> </span><span class="se">\</span>
 --url-suffix<span class="o">=</span><span class="s2">&quot;id:7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span>
 </code></pre></div>
 <p>It will delete the group and all of its associated data if match with the unique group ID.</p>
@@ -8979,8 +8979,8 @@ For example, We can put the above created group <code>id:7a20464c-3651-48a0-9c9c
 ]
 </code></pre></div>
 <p>Let's run the following command:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -scim --operation-id patch-group-by-id <span class="se">\</span>
---url-suffix<span class="o">=</span><span class="s2">&quot;id:7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span> --data /tmp/patch-user.json
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>-scim<span class="w"> </span>--operation-id<span class="w"> </span>patch-group-by-id<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="o">=</span><span class="s2">&quot;id:7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span><span class="w"> </span>--data<span class="w"> </span>/tmp/patch-user.json
 </code></pre></div>
 <h2 id="using-configuration-rest-api">Using Configuration REST API<a class="headerlink" href="#using-configuration-rest-api" title="Permanent link">#</a></h2>
 <p>Janssen Server Configuration REST API exposes relevant endpoints for managing

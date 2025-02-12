@@ -8660,143 +8660,143 @@ AS is configured by <a href="https://github.com/JanssenProject/jans/blob/main/ja
 <p>Sample
 <div class="highlight"><pre><span></span><code><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
 
-<span class="nt">&lt;Configuration</span> <span class="na">packages=</span><span class="s">&quot;io.jans.log&quot;</span><span class="nt">&gt;</span>
-    <span class="nt">&lt;Appenders&gt;</span>
-        <span class="nt">&lt;Console</span> <span class="na">name=</span><span class="s">&quot;STDOUT&quot;</span> <span class="na">target=</span><span class="s">&quot;SYSTEM_OUT&quot;</span><span class="nt">&gt;</span>
-            <span class="nt">&lt;PatternLayout</span> <span class="na">pattern=</span><span class="s">&quot;%d %-5p [%t] [%C{6}] (%F:%L) - %m%n&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/Console&gt;</span>
+<span class="nt">&lt;Configuration</span><span class="w"> </span><span class="na">packages=</span><span class="s">&quot;io.jans.log&quot;</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;Appenders&gt;</span>
+<span class="w">        </span><span class="nt">&lt;Console</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;STDOUT&quot;</span><span class="w"> </span><span class="na">target=</span><span class="s">&quot;SYSTEM_OUT&quot;</span><span class="nt">&gt;</span>
+<span class="w">            </span><span class="nt">&lt;PatternLayout</span><span class="w"> </span><span class="na">pattern=</span><span class="s">&quot;%d %-5p [%t] [%C{6}] (%F:%L) - %m%n&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/Console&gt;</span>
 
-        <span class="nt">&lt;RollingFile</span> <span class="na">name=</span><span class="s">&quot;JANS_AUTH_HTTP_REQUEST_RESPONSE_FILE&quot;</span> <span class="na">fileName=</span><span class="s">&quot;${sys:log.base}/logs/http_request_response.log&quot;</span> <span class="na">filePattern=</span><span class="s">&quot;${sys:log.base}/logs/http_request_response-%d{yyyy-MM-dd}-%i.log&quot;</span><span class="nt">&gt;</span>
+<span class="w">        </span><span class="nt">&lt;RollingFile</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;JANS_AUTH_HTTP_REQUEST_RESPONSE_FILE&quot;</span><span class="w"> </span><span class="na">fileName=</span><span class="s">&quot;${sys:log.base}/logs/http_request_response.log&quot;</span><span class="w"> </span><span class="na">filePattern=</span><span class="s">&quot;${sys:log.base}/logs/http_request_response-%d{yyyy-MM-dd}-%i.log&quot;</span><span class="nt">&gt;</span>
 
-            <span class="nt">&lt;PatternLayout</span> <span class="na">pattern=</span><span class="s">&quot;%d %-5p [%t] [%C{6}] (%F:%L) - %m%n&quot;</span> <span class="nt">/&gt;</span>
+<span class="w">            </span><span class="nt">&lt;PatternLayout</span><span class="w"> </span><span class="na">pattern=</span><span class="s">&quot;%d %-5p [%t] [%C{6}] (%F:%L) - %m%n&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
 
-            <span class="nt">&lt;Policies&gt;</span>
-                <span class="nt">&lt;TimeBasedTriggeringPolicy</span> <span class="na">interval=</span><span class="s">&quot;1&quot;</span> <span class="na">modulate=</span><span class="s">&quot;true&quot;</span> <span class="nt">/&gt;</span>
-                <span class="nt">&lt;SizeBasedTriggeringPolicy</span> <span class="na">size=</span><span class="s">&quot;250 MB&quot;</span> <span class="nt">/&gt;</span>
-            <span class="nt">&lt;/Policies&gt;</span>
-            <span class="nt">&lt;DefaultRolloverStrategy</span> <span class="na">max=</span><span class="s">&quot;30&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/RollingFile&gt;</span>
+<span class="w">            </span><span class="nt">&lt;Policies&gt;</span>
+<span class="w">                </span><span class="nt">&lt;TimeBasedTriggeringPolicy</span><span class="w"> </span><span class="na">interval=</span><span class="s">&quot;1&quot;</span><span class="w"> </span><span class="na">modulate=</span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">                </span><span class="nt">&lt;SizeBasedTriggeringPolicy</span><span class="w"> </span><span class="na">size=</span><span class="s">&quot;250 MB&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">            </span><span class="nt">&lt;/Policies&gt;</span>
+<span class="w">            </span><span class="nt">&lt;DefaultRolloverStrategy</span><span class="w"> </span><span class="na">max=</span><span class="s">&quot;30&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/RollingFile&gt;</span>
 
-        <span class="nt">&lt;RollingFile</span> <span class="na">name=</span><span class="s">&quot;FILE&quot;</span> <span class="na">fileName=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth.log&quot;</span> <span class="na">filePattern=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth-%d{yyyy-MM-dd}-%i.log&quot;</span><span class="nt">&gt;</span>
+<span class="w">        </span><span class="nt">&lt;RollingFile</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;FILE&quot;</span><span class="w"> </span><span class="na">fileName=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth.log&quot;</span><span class="w"> </span><span class="na">filePattern=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth-%d{yyyy-MM-dd}-%i.log&quot;</span><span class="nt">&gt;</span>
 
-            <span class="nt">&lt;PatternLayout</span> <span class="na">pattern=</span><span class="s">&quot;%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n&quot;</span> <span class="nt">/&gt;</span>
+<span class="w">            </span><span class="nt">&lt;PatternLayout</span><span class="w"> </span><span class="na">pattern=</span><span class="s">&quot;%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
 
-            <span class="nt">&lt;Policies&gt;</span>
-                <span class="nt">&lt;TimeBasedTriggeringPolicy</span> <span class="na">interval=</span><span class="s">&quot;1&quot;</span> <span class="na">modulate=</span><span class="s">&quot;true&quot;</span> <span class="nt">/&gt;</span>
-                <span class="nt">&lt;SizeBasedTriggeringPolicy</span> <span class="na">size=</span><span class="s">&quot;250 MB&quot;</span> <span class="nt">/&gt;</span>
-            <span class="nt">&lt;/Policies&gt;</span>
-            <span class="nt">&lt;DefaultRolloverStrategy</span> <span class="na">max=</span><span class="s">&quot;30&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/RollingFile&gt;</span>
+<span class="w">            </span><span class="nt">&lt;Policies&gt;</span>
+<span class="w">                </span><span class="nt">&lt;TimeBasedTriggeringPolicy</span><span class="w"> </span><span class="na">interval=</span><span class="s">&quot;1&quot;</span><span class="w"> </span><span class="na">modulate=</span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">                </span><span class="nt">&lt;SizeBasedTriggeringPolicy</span><span class="w"> </span><span class="na">size=</span><span class="s">&quot;250 MB&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">            </span><span class="nt">&lt;/Policies&gt;</span>
+<span class="w">            </span><span class="nt">&lt;DefaultRolloverStrategy</span><span class="w"> </span><span class="na">max=</span><span class="s">&quot;30&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/RollingFile&gt;</span>
 
-        <span class="nt">&lt;RollingFile</span> <span class="na">name=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_FILE&quot;</span> <span class="na">fileName=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_persistence.log&quot;</span> <span class="na">filePattern=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_persistence-%d{yyyy-MM-dd}-%i.log&quot;</span><span class="nt">&gt;</span>
+<span class="w">        </span><span class="nt">&lt;RollingFile</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_FILE&quot;</span><span class="w"> </span><span class="na">fileName=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_persistence.log&quot;</span><span class="w"> </span><span class="na">filePattern=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_persistence-%d{yyyy-MM-dd}-%i.log&quot;</span><span class="nt">&gt;</span>
 
-            <span class="nt">&lt;PatternLayout</span> <span class="na">pattern=</span><span class="s">&quot;%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n&quot;</span> <span class="nt">/&gt;</span>
+<span class="w">            </span><span class="nt">&lt;PatternLayout</span><span class="w"> </span><span class="na">pattern=</span><span class="s">&quot;%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
 
-            <span class="nt">&lt;Policies&gt;</span>
-                <span class="nt">&lt;TimeBasedTriggeringPolicy</span> <span class="na">interval=</span><span class="s">&quot;1&quot;</span> <span class="na">modulate=</span><span class="s">&quot;true&quot;</span> <span class="nt">/&gt;</span>
-                <span class="nt">&lt;SizeBasedTriggeringPolicy</span> <span class="na">size=</span><span class="s">&quot;250 MB&quot;</span> <span class="nt">/&gt;</span>
-            <span class="nt">&lt;/Policies&gt;</span>
-            <span class="nt">&lt;DefaultRolloverStrategy</span> <span class="na">max=</span><span class="s">&quot;30&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/RollingFile&gt;</span>
+<span class="w">            </span><span class="nt">&lt;Policies&gt;</span>
+<span class="w">                </span><span class="nt">&lt;TimeBasedTriggeringPolicy</span><span class="w"> </span><span class="na">interval=</span><span class="s">&quot;1&quot;</span><span class="w"> </span><span class="na">modulate=</span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">                </span><span class="nt">&lt;SizeBasedTriggeringPolicy</span><span class="w"> </span><span class="na">size=</span><span class="s">&quot;250 MB&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">            </span><span class="nt">&lt;/Policies&gt;</span>
+<span class="w">            </span><span class="nt">&lt;DefaultRolloverStrategy</span><span class="w"> </span><span class="na">max=</span><span class="s">&quot;30&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/RollingFile&gt;</span>
 
-        <span class="nt">&lt;RollingFile</span> <span class="na">name=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_DURATION_FILE&quot;</span> <span class="na">fileName=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_persistence_duration.log&quot;</span> <span class="na">filePattern=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_persistence_duration-%d{yyyy-MM-dd}-%i.log&quot;</span><span class="nt">&gt;</span>
+<span class="w">        </span><span class="nt">&lt;RollingFile</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_DURATION_FILE&quot;</span><span class="w"> </span><span class="na">fileName=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_persistence_duration.log&quot;</span><span class="w"> </span><span class="na">filePattern=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_persistence_duration-%d{yyyy-MM-dd}-%i.log&quot;</span><span class="nt">&gt;</span>
 
-            <span class="nt">&lt;PatternLayout</span> <span class="na">pattern=</span><span class="s">&quot;%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n&quot;</span> <span class="nt">/&gt;</span>
+<span class="w">            </span><span class="nt">&lt;PatternLayout</span><span class="w"> </span><span class="na">pattern=</span><span class="s">&quot;%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
 
-            <span class="nt">&lt;Policies&gt;</span>
-                <span class="nt">&lt;TimeBasedTriggeringPolicy</span> <span class="na">interval=</span><span class="s">&quot;1&quot;</span> <span class="na">modulate=</span><span class="s">&quot;true&quot;</span> <span class="nt">/&gt;</span>
-                <span class="nt">&lt;SizeBasedTriggeringPolicy</span> <span class="na">size=</span><span class="s">&quot;250 MB&quot;</span> <span class="nt">/&gt;</span>
-            <span class="nt">&lt;/Policies&gt;</span>
-            <span class="nt">&lt;DefaultRolloverStrategy</span> <span class="na">max=</span><span class="s">&quot;30&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/RollingFile&gt;</span>
-
-
-
-        <span class="nt">&lt;RollingFile</span> <span class="na">name=</span><span class="s">&quot;JANS_AUTH_SCRIPT_LOG_FILE&quot;</span> <span class="na">fileName=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_script.log&quot;</span> <span class="na">filePattern=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_script-%d{yyyy-MM-dd}-%i.log&quot;</span><span class="nt">&gt;</span>
-
-            <span class="nt">&lt;PatternLayout</span> <span class="na">pattern=</span><span class="s">&quot;%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n&quot;</span> <span class="nt">/&gt;</span>
-
-            <span class="nt">&lt;Policies&gt;</span>
-                <span class="nt">&lt;TimeBasedTriggeringPolicy</span> <span class="na">interval=</span><span class="s">&quot;1&quot;</span> <span class="na">modulate=</span><span class="s">&quot;true&quot;</span> <span class="nt">/&gt;</span>
-                <span class="nt">&lt;SizeBasedTriggeringPolicy</span> <span class="na">size=</span><span class="s">&quot;250 MB&quot;</span> <span class="nt">/&gt;</span>
-            <span class="nt">&lt;/Policies&gt;</span>
-            <span class="nt">&lt;DefaultRolloverStrategy</span> <span class="na">max=</span><span class="s">&quot;30&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/RollingFile&gt;</span>
-
-        <span class="nt">&lt;RollingFile</span> <span class="na">name=</span><span class="s">&quot;JANS_AUTH_AUDIT_LOG_FILE&quot;</span> <span class="na">fileName=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_audit.log&quot;</span> <span class="na">filePattern=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_audit-%d{yyyy-MM-dd}-%i.log&quot;</span><span class="nt">&gt;</span>
-
-            <span class="nt">&lt;PatternLayout</span> <span class="na">pattern=</span><span class="s">&quot;%d %-5p [%macAddr] [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n&quot;</span> <span class="nt">/&gt;</span>
-
-            <span class="nt">&lt;Policies&gt;</span>
-                <span class="nt">&lt;TimeBasedTriggeringPolicy</span> <span class="na">interval=</span><span class="s">&quot;1&quot;</span> <span class="na">modulate=</span><span class="s">&quot;true&quot;</span> <span class="nt">/&gt;</span>
-                <span class="nt">&lt;SizeBasedTriggeringPolicy</span> <span class="na">size=</span><span class="s">&quot;250 MB&quot;</span> <span class="nt">/&gt;</span>
-            <span class="nt">&lt;/Policies&gt;</span>
-            <span class="nt">&lt;DefaultRolloverStrategy</span> <span class="na">max=</span><span class="s">&quot;30&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/RollingFile&gt;</span>
-    <span class="nt">&lt;/Appenders&gt;</span>
-
-    <span class="nt">&lt;Loggers&gt;</span>
-        <span class="cm">&lt;!-- ############### Gluu ################# --&gt;</span>
-        <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;io.jans&quot;</span> <span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span> <span class="nt">/&gt;</span>
-
-        <span class="cm">&lt;!-- EMB-6, JMS activation throws an error due to deployment ordering, but as there is a timeout and retry the tests pass. Hide the error message --&gt;</span>
-        <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;jboss.resource.adapter.jms.inflow.JmsActivation&quot;</span> <span class="na">level=</span><span class="s">&quot;error&quot;</span> <span class="nt">/&gt;</span>
-
-        <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;com.ocpsoft&quot;</span> <span class="na">level=</span><span class="s">&quot;info&quot;</span> <span class="nt">/&gt;</span>
-
-        <span class="cm">&lt;!-- ############### Hibernate logging ################# --&gt;</span>
-        <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;org.hibernate&quot;</span> <span class="na">level=</span><span class="s">&quot;error&quot;</span> <span class="nt">/&gt;</span>
-
-        <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;io.jans.as.server.audit.debug&quot;</span> <span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span> <span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
-            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;JANS_AUTH_HTTP_REQUEST_RESPONSE_FILE&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/Logger&gt;</span>
-
-        <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;io.jans.orm&quot;</span> <span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span> <span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
-            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_FILE&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/Logger&gt;</span>
-
-
-        <span class="nt">&lt;logger</span> <span class="na">name=</span><span class="s">&quot;com.couchbase.client&quot;</span> <span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span> <span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
-            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_FILE&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/logger&gt;</span>
+<span class="w">            </span><span class="nt">&lt;Policies&gt;</span>
+<span class="w">                </span><span class="nt">&lt;TimeBasedTriggeringPolicy</span><span class="w"> </span><span class="na">interval=</span><span class="s">&quot;1&quot;</span><span class="w"> </span><span class="na">modulate=</span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">                </span><span class="nt">&lt;SizeBasedTriggeringPolicy</span><span class="w"> </span><span class="na">size=</span><span class="s">&quot;250 MB&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">            </span><span class="nt">&lt;/Policies&gt;</span>
+<span class="w">            </span><span class="nt">&lt;DefaultRolloverStrategy</span><span class="w"> </span><span class="na">max=</span><span class="s">&quot;30&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/RollingFile&gt;</span>
 
 
 
-        <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;io.jans.orm.couchbase.operation.watch&quot;</span> <span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span> <span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
-            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_DURATION_FILE&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/Logger&gt;</span>
+<span class="w">        </span><span class="nt">&lt;RollingFile</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;JANS_AUTH_SCRIPT_LOG_FILE&quot;</span><span class="w"> </span><span class="na">fileName=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_script.log&quot;</span><span class="w"> </span><span class="na">filePattern=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_script-%d{yyyy-MM-dd}-%i.log&quot;</span><span class="nt">&gt;</span>
 
-        <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;io.jans.orm.watch&quot;</span> <span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span> <span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
-            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_DURATION_FILE&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/Logger&gt;</span>
+<span class="w">            </span><span class="nt">&lt;PatternLayout</span><span class="w"> </span><span class="na">pattern=</span><span class="s">&quot;%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+
+<span class="w">            </span><span class="nt">&lt;Policies&gt;</span>
+<span class="w">                </span><span class="nt">&lt;TimeBasedTriggeringPolicy</span><span class="w"> </span><span class="na">interval=</span><span class="s">&quot;1&quot;</span><span class="w"> </span><span class="na">modulate=</span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">                </span><span class="nt">&lt;SizeBasedTriggeringPolicy</span><span class="w"> </span><span class="na">size=</span><span class="s">&quot;250 MB&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">            </span><span class="nt">&lt;/Policies&gt;</span>
+<span class="w">            </span><span class="nt">&lt;DefaultRolloverStrategy</span><span class="w"> </span><span class="na">max=</span><span class="s">&quot;30&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/RollingFile&gt;</span>
+
+<span class="w">        </span><span class="nt">&lt;RollingFile</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;JANS_AUTH_AUDIT_LOG_FILE&quot;</span><span class="w"> </span><span class="na">fileName=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_audit.log&quot;</span><span class="w"> </span><span class="na">filePattern=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_audit-%d{yyyy-MM-dd}-%i.log&quot;</span><span class="nt">&gt;</span>
+
+<span class="w">            </span><span class="nt">&lt;PatternLayout</span><span class="w"> </span><span class="na">pattern=</span><span class="s">&quot;%d %-5p [%macAddr] [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+
+<span class="w">            </span><span class="nt">&lt;Policies&gt;</span>
+<span class="w">                </span><span class="nt">&lt;TimeBasedTriggeringPolicy</span><span class="w"> </span><span class="na">interval=</span><span class="s">&quot;1&quot;</span><span class="w"> </span><span class="na">modulate=</span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">                </span><span class="nt">&lt;SizeBasedTriggeringPolicy</span><span class="w"> </span><span class="na">size=</span><span class="s">&quot;250 MB&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">            </span><span class="nt">&lt;/Policies&gt;</span>
+<span class="w">            </span><span class="nt">&lt;DefaultRolloverStrategy</span><span class="w"> </span><span class="na">max=</span><span class="s">&quot;30&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/RollingFile&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/Appenders&gt;</span>
+
+<span class="w">    </span><span class="nt">&lt;Loggers&gt;</span>
+<span class="w">        </span><span class="cm">&lt;!-- ############### Gluu ################# --&gt;</span>
+<span class="w">        </span><span class="nt">&lt;Logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;io.jans&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+
+<span class="w">        </span><span class="cm">&lt;!-- EMB-6, JMS activation throws an error due to deployment ordering, but as there is a timeout and retry the tests pass. Hide the error message --&gt;</span>
+<span class="w">        </span><span class="nt">&lt;Logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;jboss.resource.adapter.jms.inflow.JmsActivation&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;error&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+
+<span class="w">        </span><span class="nt">&lt;Logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;com.ocpsoft&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;info&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+
+<span class="w">        </span><span class="cm">&lt;!-- ############### Hibernate logging ################# --&gt;</span>
+<span class="w">        </span><span class="nt">&lt;Logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;org.hibernate&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;error&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+
+<span class="w">        </span><span class="nt">&lt;Logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;io.jans.as.server.audit.debug&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span><span class="w"> </span><span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+<span class="w">            </span><span class="nt">&lt;AppenderRef</span><span class="w"> </span><span class="na">ref=</span><span class="s">&quot;JANS_AUTH_HTTP_REQUEST_RESPONSE_FILE&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/Logger&gt;</span>
+
+<span class="w">        </span><span class="nt">&lt;Logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;io.jans.orm&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span><span class="w"> </span><span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+<span class="w">            </span><span class="nt">&lt;AppenderRef</span><span class="w"> </span><span class="na">ref=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_FILE&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/Logger&gt;</span>
+
+
+<span class="w">        </span><span class="nt">&lt;logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;com.couchbase.client&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span><span class="w"> </span><span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+<span class="w">            </span><span class="nt">&lt;AppenderRef</span><span class="w"> </span><span class="na">ref=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_FILE&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/logger&gt;</span>
 
 
 
-        <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;io.jans.service.PythonService&quot;</span> <span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span> <span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
-            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;JANS_AUTH_SCRIPT_LOG_FILE&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/Logger&gt;</span>
+<span class="w">        </span><span class="nt">&lt;Logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;io.jans.orm.couchbase.operation.watch&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span><span class="w"> </span><span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+<span class="w">            </span><span class="nt">&lt;AppenderRef</span><span class="w"> </span><span class="na">ref=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_DURATION_FILE&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/Logger&gt;</span>
 
-        <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;io.jans.service.custom.script&quot;</span> <span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span> <span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
-            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;JANS_AUTH_SCRIPT_LOG_FILE&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/Logger&gt;</span>
+<span class="w">        </span><span class="nt">&lt;Logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;io.jans.orm.watch&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span><span class="w"> </span><span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+<span class="w">            </span><span class="nt">&lt;AppenderRef</span><span class="w"> </span><span class="na">ref=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_DURATION_FILE&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/Logger&gt;</span>
 
-        <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;io.jans.as.server.service.custom&quot;</span> <span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span> <span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
-            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;JANS_AUTH_SCRIPT_LOG_FILE&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/Logger&gt;</span>
 
-        <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;io.jans.agama.engine.script.LogUtils&quot;</span> <span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span> <span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
-            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;JANS_AUTH_SCRIPT_LOG_FILE&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/Logger&gt;</span>
 
-        <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;io.jans.as.server.audit.ApplicationAuditLogger&quot;</span> <span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span> <span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
-            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;JANS_AUTH_AUDIT_LOG_FILE&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/Logger&gt;</span>
+<span class="w">        </span><span class="nt">&lt;Logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;io.jans.service.PythonService&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span><span class="w"> </span><span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+<span class="w">            </span><span class="nt">&lt;AppenderRef</span><span class="w"> </span><span class="na">ref=</span><span class="s">&quot;JANS_AUTH_SCRIPT_LOG_FILE&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/Logger&gt;</span>
 
-        <span class="nt">&lt;Root</span> <span class="na">level=</span><span class="s">&quot;info&quot;</span><span class="nt">&gt;</span>
-            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;FILE&quot;</span> <span class="nt">/&gt;</span>
-            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;STDOUT&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/Root&gt;</span>
-    <span class="nt">&lt;/Loggers&gt;</span>
+<span class="w">        </span><span class="nt">&lt;Logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;io.jans.service.custom.script&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span><span class="w"> </span><span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+<span class="w">            </span><span class="nt">&lt;AppenderRef</span><span class="w"> </span><span class="na">ref=</span><span class="s">&quot;JANS_AUTH_SCRIPT_LOG_FILE&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/Logger&gt;</span>
+
+<span class="w">        </span><span class="nt">&lt;Logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;io.jans.as.server.service.custom&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span><span class="w"> </span><span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+<span class="w">            </span><span class="nt">&lt;AppenderRef</span><span class="w"> </span><span class="na">ref=</span><span class="s">&quot;JANS_AUTH_SCRIPT_LOG_FILE&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/Logger&gt;</span>
+
+<span class="w">        </span><span class="nt">&lt;Logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;io.jans.agama.engine.script.LogUtils&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span><span class="w"> </span><span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+<span class="w">            </span><span class="nt">&lt;AppenderRef</span><span class="w"> </span><span class="na">ref=</span><span class="s">&quot;JANS_AUTH_SCRIPT_LOG_FILE&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/Logger&gt;</span>
+
+<span class="w">        </span><span class="nt">&lt;Logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;io.jans.as.server.audit.ApplicationAuditLogger&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span><span class="w"> </span><span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+<span class="w">            </span><span class="nt">&lt;AppenderRef</span><span class="w"> </span><span class="na">ref=</span><span class="s">&quot;JANS_AUTH_AUDIT_LOG_FILE&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/Logger&gt;</span>
+
+<span class="w">        </span><span class="nt">&lt;Root</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;info&quot;</span><span class="nt">&gt;</span>
+<span class="w">            </span><span class="nt">&lt;AppenderRef</span><span class="w"> </span><span class="na">ref=</span><span class="s">&quot;FILE&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">            </span><span class="nt">&lt;AppenderRef</span><span class="w"> </span><span class="na">ref=</span><span class="s">&quot;STDOUT&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/Root&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/Loggers&gt;</span>
 <span class="nt">&lt;/Configuration&gt;</span>
 </code></pre></div></p>
 <h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>

@@ -8709,70 +8709,70 @@
 <ul>
 <li>Install <code>wasm-pack</code> by:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>cargo install wasm-pack
+<div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>install<span class="w"> </span>wasm-pack
 </code></pre></div>
 <ul>
 <li>Build cedarling <code>wasm</code> in release:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>wasm-pack build --release --target web
+<div class="highlight"><pre><span></span><code>wasm-pack<span class="w"> </span>build<span class="w"> </span>--release<span class="w"> </span>--target<span class="w"> </span>web
 </code></pre></div>
 <p><code>wasm-pack</code> automatically make optimization of <code>wasm</code> binary file, using <code>wasm-opt</code>.
 - Get result in the <code>pkg</code> folder.</p>
 <h2 id="including-in-projects">Including in projects<a class="headerlink" href="#including-in-projects" title="Permanent link">#</a></h2>
 <p>For using result files in browser project you need make result <code>pkg</code> folder accessible for loading in the browser so that you can later import the corresponding file from the browser.</p>
 <p>Here is example of code snippet:</p>
-<div class="highlight"><pre><span></span><code>   <span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;module&quot;</span><span class="p">&gt;</span><span class="w"></span>
-<span class="w">        </span><span class="k">import</span><span class="w"> </span><span class="nx">initWasm</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">init</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;/pkg/cedarling_wasm.js&quot;</span><span class="p">;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code>   <span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;module&quot;</span><span class="p">&gt;</span>
+<span class="w">        </span><span class="k">import</span><span class="w"> </span><span class="nx">initWasm</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">init</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;/pkg/cedarling_wasm.js&quot;</span><span class="p">;</span>
 
-<span class="w">        </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="k">await</span><span class="w"> </span><span class="nx">initWasm</span><span class="p">();</span><span class="w"> </span><span class="c1">// Initialize the WebAssembly module</span><span class="w"></span>
+<span class="w">        </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">await</span><span class="w"> </span><span class="nx">initWasm</span><span class="p">();</span><span class="w"> </span><span class="c1">// Initialize the WebAssembly module</span>
 
-<span class="w">            </span><span class="c1">// init cedarling with `BOOTSTRAP` config</span><span class="w"></span>
-<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="nx">instance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">({</span><span class="w"></span>
-<span class="w">               </span><span class="s2">&quot;CEDARLING_APPLICATION_NAME&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;CEDARLING_POLICY_STORE_URI&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/policy-store.json&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;CEDARLING_LOG_TYPE&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;memory&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;CEDARLING_LOG_LEVEL&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;CEDARLING_LOG_TTL&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">120</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;CEDARLING_DECISION_LOG_USER_CLAIMS &quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;aud&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;sub&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;email&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;username&quot;</span><span class="p">],</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS &quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;aud&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;client_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;rp_id&quot;</span><span class="p">],</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;CEDARLING_USER_AUTHZ&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;CEDARLING_WORKLOAD_AUTHZ&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;AND&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="p">});</span><span class="w"></span>
-<span class="w">            </span><span class="c1">// make authorize request</span><span class="w"></span>
-<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">instance</span><span class="p">.</span><span class="nx">authorize</span><span class="p">({</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;tokens&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;access_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;id_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;userinfo_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="p">},</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;action&quot;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Jans::Action::&quot;Read&quot;&#39;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;resource&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;app_id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;application_id&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Some Application&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;url&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">                        </span><span class="s2">&quot;host&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;jans.test&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                        </span><span class="s2">&quot;path&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/protected-endpoint&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                        </span><span class="s2">&quot;protocol&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;http&quot;</span><span class="w"></span>
-<span class="w">                    </span><span class="p">}</span><span class="w"></span>
-<span class="w">                </span><span class="p">},</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;context&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;current_time&quot;</span><span class="o">:</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000</span><span class="p">),</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;device_health&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Healthy&quot;</span><span class="p">],</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;fraud_indicators&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Allowed&quot;</span><span class="p">],</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;geolocation&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;America&quot;</span><span class="p">],</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;network&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;network_type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Local&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;operating_system&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;user_agent&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="w"></span>
-<span class="w">                </span><span class="p">},</span><span class="w"></span>
-<span class="w">            </span><span class="p">});</span><span class="w"></span>
-<span class="w">            </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;result:&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">result</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">        </span><span class="nx">main</span><span class="p">().</span><span class="k">catch</span><span class="p">(</span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="c1">// init cedarling with `BOOTSTRAP` config</span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="nx">instance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">({</span>
+<span class="w">               </span><span class="s2">&quot;CEDARLING_APPLICATION_NAME&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">&quot;CEDARLING_POLICY_STORE_URI&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/policy-store.json&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">&quot;CEDARLING_LOG_TYPE&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;memory&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">&quot;CEDARLING_LOG_LEVEL&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">&quot;CEDARLING_LOG_TTL&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">120</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">&quot;CEDARLING_DECISION_LOG_USER_CLAIMS &quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;aud&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;sub&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;email&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;username&quot;</span><span class="p">],</span>
+<span class="w">                </span><span class="s2">&quot;CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS &quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;aud&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;client_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;rp_id&quot;</span><span class="p">],</span>
+<span class="w">                </span><span class="s2">&quot;CEDARLING_USER_AUTHZ&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">&quot;CEDARLING_WORKLOAD_AUTHZ&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">&quot;CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;AND&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="p">});</span>
+<span class="w">            </span><span class="c1">// make authorize request</span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">instance</span><span class="p">.</span><span class="nx">authorize</span><span class="p">({</span>
+<span class="w">                </span><span class="s2">&quot;tokens&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="s2">&quot;access_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="s2">&quot;id_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="s2">&quot;userinfo_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="p">},</span>
+<span class="w">                </span><span class="s2">&quot;action&quot;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Jans::Action::&quot;Read&quot;&#39;</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">&quot;resource&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="s2">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="s2">&quot;app_id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;application_id&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Some Application&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="s2">&quot;url&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="s2">&quot;host&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;jans.test&quot;</span><span class="p">,</span>
+<span class="w">                        </span><span class="s2">&quot;path&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/protected-endpoint&quot;</span><span class="p">,</span>
+<span class="w">                        </span><span class="s2">&quot;protocol&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;http&quot;</span>
+<span class="w">                    </span><span class="p">}</span>
+<span class="w">                </span><span class="p">},</span>
+<span class="w">                </span><span class="s2">&quot;context&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="s2">&quot;current_time&quot;</span><span class="o">:</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000</span><span class="p">),</span>
+<span class="w">                    </span><span class="s2">&quot;device_health&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Healthy&quot;</span><span class="p">],</span>
+<span class="w">                    </span><span class="s2">&quot;fraud_indicators&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Allowed&quot;</span><span class="p">],</span>
+<span class="w">                    </span><span class="s2">&quot;geolocation&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;America&quot;</span><span class="p">],</span>
+<span class="w">                    </span><span class="s2">&quot;network&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="s2">&quot;network_type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Local&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="s2">&quot;operating_system&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="s2">&quot;user_agent&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span>
+<span class="w">                </span><span class="p">},</span>
+<span class="w">            </span><span class="p">});</span>
+<span class="w">            </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;result:&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">result</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">main</span><span class="p">().</span><span class="k">catch</span><span class="p">(</span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">);</span>
 <span class="w">    </span><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
 </code></pre></div>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
@@ -8786,124 +8786,124 @@ You can find usage examples in the following locations:</p>
 <div class="highlight"><pre><span></span><code><span class="cm">/**</span>
 <span class="cm"> * Create a new instance of the Cedarling application.</span>
 <span class="cm"> * This function can take as config parameter the eather `Map` other `Object`</span>
-<span class="cm"> */</span><span class="w"></span>
-<span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">init</span><span class="p">(</span><span class="nx">config</span><span class="o">:</span><span class="w"> </span><span class="kt">any</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Cedarling</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+<span class="cm"> */</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">init</span><span class="p">(</span><span class="nx">config</span><span class="o">:</span><span class="w"> </span><span class="kt">any</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Cedarling</span><span class="o">&gt;</span><span class="p">;</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * The instance of the Cedarling application.</span>
-<span class="cm"> */</span><span class="w"></span>
-<span class="k">export</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">Cedarling</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="cm"> */</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">Cedarling</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * Create a new instance of the Cedarling application.</span>
 <span class="cm">   * Assume that config is `Object`</span>
-<span class="cm">   */</span><span class="w"></span>
-<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="ow">new</span><span class="p">(</span><span class="nx">config</span><span class="o">:</span><span class="w"> </span><span class="kt">object</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Cedarling</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="ow">new</span><span class="p">(</span><span class="nx">config</span><span class="o">:</span><span class="w"> </span><span class="kt">object</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Cedarling</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * Create a new instance of the Cedarling application.</span>
 <span class="cm">   * Assume that config is `Map`</span>
-<span class="cm">   */</span><span class="w"></span>
-<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="nx">new_from_map</span><span class="p">(</span><span class="nx">config</span><span class="o">:</span><span class="w"> </span><span class="kt">Map</span><span class="o">&lt;</span><span class="nx">any</span><span class="p">,</span><span class="w"> </span><span class="nx">any</span><span class="o">&gt;</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Cedarling</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="nx">new_from_map</span><span class="p">(</span><span class="nx">config</span><span class="o">:</span><span class="w"> </span><span class="kt">Map</span><span class="o">&lt;</span><span class="nx">any</span><span class="p">,</span><span class="w"> </span><span class="nx">any</span><span class="o">&gt;</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Cedarling</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * Authorize request</span>
 <span class="cm">   * makes authorization decision based on the [`Request`]</span>
-<span class="cm">   */</span><span class="w"></span>
-<span class="w">  </span><span class="nx">authorize</span><span class="p">(</span><span class="nx">request</span><span class="o">:</span><span class="w"> </span><span class="kt">any</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">AuthorizeResult</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="nx">authorize</span><span class="p">(</span><span class="nx">request</span><span class="o">:</span><span class="w"> </span><span class="kt">any</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">AuthorizeResult</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * Get logs and remove them from the storage.</span>
 <span class="cm">   * Returns `Array` of `Map`</span>
-<span class="cm">   */</span><span class="w"></span>
-<span class="w">  </span><span class="nx">pop_logs</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nb">Array</span><span class="o">&lt;</span><span class="nx">any</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="nx">pop_logs</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nb">Array</span><span class="o">&lt;</span><span class="nx">any</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * Get specific log entry.</span>
 <span class="cm">   * Returns `Map` with values or `null`.</span>
-<span class="cm">   */</span><span class="w"></span>
-<span class="w">  </span><span class="nx">get_log_by_id</span><span class="p">(</span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">any</span><span class="p">;</span><span class="w"></span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="nx">get_log_by_id</span><span class="p">(</span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">any</span><span class="p">;</span>
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * Returns a list of all log ids.</span>
 <span class="cm">   * Returns `Array` of `String`</span>
-<span class="cm">   */</span><span class="w"></span>
-<span class="w">  </span><span class="nx">get_log_ids</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nb">Array</span><span class="o">&lt;</span><span class="nx">any</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="nx">get_log_ids</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nb">Array</span><span class="o">&lt;</span><span class="nx">any</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * A WASM wrapper for the Rust `cedarling::AuthorizeResult` struct.</span>
 <span class="cm"> * Represents the result of an authorization request.</span>
-<span class="cm"> */</span><span class="w"></span>
-<span class="k">export</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">AuthorizeResult</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="cm"> */</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">AuthorizeResult</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * Convert `AuthorizeResult` to json string value</span>
-<span class="cm">   */</span><span class="w"></span>
-<span class="w">  </span><span class="nx">json_string</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"></span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="nx">json_string</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * Result of authorization where principal is `Jans::Workload`</span>
-<span class="cm">   */</span><span class="w"></span>
-<span class="w">  </span><span class="nx">workload?</span><span class="o">:</span><span class="w"> </span><span class="kt">AuthorizeResultResponse</span><span class="p">;</span><span class="w"></span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="nx">workload?</span><span class="o">:</span><span class="w"> </span><span class="kt">AuthorizeResultResponse</span><span class="p">;</span>
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * Result of authorization where principal is `Jans::User`</span>
-<span class="cm">   */</span><span class="w"></span>
-<span class="w">  </span><span class="nx">person?</span><span class="o">:</span><span class="w"> </span><span class="kt">AuthorizeResultResponse</span><span class="p">;</span><span class="w"></span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="nx">person?</span><span class="o">:</span><span class="w"> </span><span class="kt">AuthorizeResultResponse</span><span class="p">;</span>
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * Result of authorization</span>
 <span class="cm">   * true means `ALLOW`</span>
 <span class="cm">   * false means `Deny`</span>
 <span class="cm">   *</span>
 <span class="cm">   * this field is [`bool`] type to be compatible with [authzen Access Evaluation Decision](https://openid.github.io/authzen/#section-6.2.1).</span>
-<span class="cm">   */</span><span class="w"></span>
-<span class="w">  </span><span class="nx">decision</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="nx">decision</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+<span class="p">}</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * A WASM wrapper for the Rust `cedar_policy::Response` struct.</span>
 <span class="cm"> * Represents the result of an authorization request.</span>
-<span class="cm"> */</span><span class="w"></span>
-<span class="k">export</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">AuthorizeResultResponse</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="cm"> */</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">AuthorizeResultResponse</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * Authorization decision</span>
-<span class="cm">   */</span><span class="w"></span>
-<span class="w">  </span><span class="k">readonly</span><span class="w"> </span><span class="nx">decision</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w"></span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">readonly</span><span class="w"> </span><span class="nx">decision</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * Diagnostics providing more information on how this decision was reached</span>
-<span class="cm">   */</span><span class="w"></span>
-<span class="w">  </span><span class="k">readonly</span><span class="w"> </span><span class="nx">diagnostics</span><span class="o">:</span><span class="w"> </span><span class="kt">Diagnostics</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">readonly</span><span class="w"> </span><span class="nx">diagnostics</span><span class="o">:</span><span class="w"> </span><span class="kt">Diagnostics</span><span class="p">;</span>
+<span class="p">}</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Diagnostics</span>
 <span class="cm"> * ===========</span>
 <span class="cm"> *</span>
 <span class="cm"> * Provides detailed information about how a policy decision was made, including policies that contributed to the decision and any errors encountered during evaluation.</span>
-<span class="cm"> */</span><span class="w"></span>
-<span class="k">export</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">Diagnostics</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="cm"> */</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">Diagnostics</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * `PolicyId`s of the policies that contributed to the decision.</span>
 <span class="cm">   * If no policies applied to the request, this set will be empty.</span>
 <span class="cm">   *</span>
 <span class="cm">   * The ids should be treated as unordered,</span>
-<span class="cm">   */</span><span class="w"></span>
-<span class="w">  </span><span class="k">readonly</span><span class="w"> </span><span class="nx">reason</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">)[];</span><span class="w"></span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">readonly</span><span class="w"> </span><span class="nx">reason</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">)[];</span>
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * Errors that occurred during authorization. The errors should be</span>
 <span class="cm">   * treated as unordered, since policies may be evaluated in any order.</span>
-<span class="cm">   */</span><span class="w"></span>
-<span class="w">  </span><span class="k">readonly</span><span class="w"> </span><span class="nx">errors</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">PolicyEvaluationError</span><span class="p">)[];</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">readonly</span><span class="w"> </span><span class="nx">errors</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">PolicyEvaluationError</span><span class="p">)[];</span>
+<span class="p">}</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * PolicyEvaluationError</span>
 <span class="cm"> * =====================</span>
 <span class="cm"> *</span>
 <span class="cm"> * Represents an error that occurred when evaluating a Cedar policy.</span>
-<span class="cm"> */</span><span class="w"></span>
-<span class="k">export</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">PolicyEvaluationError</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="cm"> */</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">PolicyEvaluationError</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * Id of the policy with an error</span>
-<span class="cm">   */</span><span class="w"></span>
-<span class="w">  </span><span class="k">readonly</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"></span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">readonly</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * Underlying evaluation error string representation</span>
-<span class="cm">   */</span><span class="w"></span>
-<span class="w">  </span><span class="k">readonly</span><span class="w"> </span><span class="nx">error</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">readonly</span><span class="w"> </span><span class="nx">error</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="p">}</span>
 </code></pre></div>
 
   <hr>

@@ -8657,13 +8657,13 @@
 <ol>
 <li>
 <p>Configure Terraform to install the required plugins for the <code>Janssen provider</code>. Add this to your <code>versions.tf</code> file:</p>
-<div class="highlight"><pre><span></span><code>terraform <span class="o">{</span>
- required_providers <span class="o">{</span>
-    <span class="nv">jans</span> <span class="o">=</span> <span class="o">{</span>
-    <span class="nb">source</span> <span class="o">=</span> <span class="s2">&quot;JanssenProject/jans&quot;</span>
-    <span class="nv">version</span> <span class="o">=</span> <span class="s2">&quot;1.1.5&quot;</span> <span class="c1">#update based on your targeted version</span>
-    <span class="o">}</span>
- <span class="o">}</span>
+<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span><span class="o">{</span>
+<span class="w"> </span>required_providers<span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="nv">jans</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="nb">source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;JanssenProject/jans&quot;</span>
+<span class="w">    </span><span class="nv">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;1.1.5&quot;</span><span class="w"> </span><span class="c1">#update based on your targeted version</span>
+<span class="w">    </span><span class="o">}</span>
+<span class="w"> </span><span class="o">}</span>
 <span class="o">}</span>
 </code></pre></div>
 </li>

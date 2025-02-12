@@ -8604,20 +8604,20 @@
 <p>Jans-SAML/Keycloak has the flexibility to be deployed using either <a href="#mysql">MySQL</a> or <a href="#postgresql">PostgreSQL</a> as its backend.</p>
 <h1 id="mysql">MySQL<a class="headerlink" href="#mysql" title="Permanent link">#</a></h1>
 <p>Make the following changes in your <code>values.yaml</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">saml</span><span class="p">:</span><span class="w"></span>
-<span class="w">   </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">   </span><span class="nt">ingress</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">samlEnabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="nt">config</span><span class="p">:</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">saml</span><span class="p">:</span>
+<span class="w">   </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">   </span><span class="nt">ingress</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">samlEnabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">config</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">configmap</span><span class="p">:</span><span class="w">    </span>
-<span class="w">    </span><span class="nt">kcDbVendor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql</span><span class="w"></span>
-<span class="w">    </span><span class="nt">kcDbUsername</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keycloak</span><span class="w"></span>
-<span class="w">    </span><span class="nt">kcDbPassword</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test1234#</span><span class="w"></span>
-<span class="w">    </span><span class="nt">kcDbSchema</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keycloak</span><span class="w"></span>
-<span class="w">    </span><span class="nt">kcDbUrlHost</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql.kc.svc.cluster.local</span><span class="w"></span>
-<span class="w">    </span><span class="nt">kcDbUrlPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3306</span><span class="w"></span>
-<span class="w">    </span><span class="nt">kcDbUrlDatabase</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keycloak</span><span class="w"></span>
+<span class="w">    </span><span class="nt">kcDbVendor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql</span>
+<span class="w">    </span><span class="nt">kcDbUsername</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keycloak</span>
+<span class="w">    </span><span class="nt">kcDbPassword</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test1234#</span>
+<span class="w">    </span><span class="nt">kcDbSchema</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keycloak</span>
+<span class="w">    </span><span class="nt">kcDbUrlHost</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql.kc.svc.cluster.local</span>
+<span class="w">    </span><span class="nt">kcDbUrlPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3306</span>
+<span class="w">    </span><span class="nt">kcDbUrlDatabase</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keycloak</span>
 </code></pre></div>
 <p>If you provide a non-root MySQL user to Keycloak, you will encounter the following error and warnings:</p>
 <div class="highlight"><pre><span></span><code>SQLException: XAER_RMERR: Fatal error occurred in the transaction branch - check your data for consistency
@@ -8627,21 +8627,21 @@ WARNING - jans-saml - 2024-02-05 16:54:04,256 - Got insufficient permission, ple
 <p>To resolve this issue, it's necessary to adhere to the guidance provided in the logs.</p>
 <h1 id="postgresql">PostgreSQL<a class="headerlink" href="#postgresql" title="Permanent link">#</a></h1>
 <p>Make the following changes in your <code>values.yaml</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">saml</span><span class="p">:</span><span class="w"></span>
-<span class="w">   </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">   </span><span class="nt">ingress</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">samlEnabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="nt">config</span><span class="p">:</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">saml</span><span class="p">:</span>
+<span class="w">   </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">   </span><span class="nt">ingress</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">samlEnabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">config</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">configmap</span><span class="p">:</span><span class="w">    </span>
-<span class="w">    </span><span class="nt">kcDbVendor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">postgres</span><span class="w"></span>
-<span class="w">    </span><span class="nt">kcDbUsername</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keycloak</span><span class="w"></span>
-<span class="w">    </span><span class="nt">kcDbPassword</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test1234#</span><span class="w"></span>
-<span class="w">    </span><span class="nt">kcDbSchema</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">public</span><span class="w"></span>
-<span class="w">    </span><span class="nt">kcDbUrlHost</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">postgres.kc.svc.cluster.local</span><span class="w"></span>
-<span class="w">    </span><span class="nt">kcDbUrlPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5432</span><span class="w"></span>
-<span class="w">    </span><span class="nt">kcDbUrlDatabase</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keycloak</span><span class="w"></span>
-<span class="w">    </span><span class="nt">kcDbUrlProperties</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">kcDbVendor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">postgres</span>
+<span class="w">    </span><span class="nt">kcDbUsername</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keycloak</span>
+<span class="w">    </span><span class="nt">kcDbPassword</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test1234#</span>
+<span class="w">    </span><span class="nt">kcDbSchema</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">public</span>
+<span class="w">    </span><span class="nt">kcDbUrlHost</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">postgres.kc.svc.cluster.local</span>
+<span class="w">    </span><span class="nt">kcDbUrlPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5432</span>
+<span class="w">    </span><span class="nt">kcDbUrlDatabase</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keycloak</span>
+<span class="w">    </span><span class="nt">kcDbUrlProperties</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
 </code></pre></div>
 
   <hr>

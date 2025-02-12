@@ -8659,11 +8659,11 @@ Here's an <a href="https://ranchermanager.docs.rancher.com/reference-guides/sing
 <li>Provision a Linux 4 CPU, 16 GB RAM, and 50GB SSD VM with ports <code>443</code> and <code>80</code> open. Save the VM IP address. For development environments, the VM can be set up using VMWare Workstation Player or VirtualBox with an Ubuntu 20.04 operating system running on a VM.</li>
 <li>Install <a href="https://docs.docker.com/engine/install/">Docker</a>.</li>
 <li>Execute
-    <div class="highlight"><pre><span></span><code>docker run -d --restart<span class="o">=</span>unless-stopped -p <span class="m">80</span>:80 -p <span class="m">443</span>:443 --privileged rancher/rancher:latest
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--restart<span class="o">=</span>unless-stopped<span class="w"> </span>-p<span class="w"> </span><span class="m">80</span>:80<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:443<span class="w"> </span>--privileged<span class="w"> </span>rancher/rancher:latest
 </code></pre></div>
    The final line of the returned text is the <code>container-id</code>, which you'll need for the next step.</li>
 <li>Execute the following command to get the <a href="https://ranchermanager.docs.rancher.com/getting-started/installation-and-upgrade/resources/bootstrap-password#specifying-the-bootstrap-password-in-docker-installs">bootstrap password</a> for login.
-    <div class="highlight"><pre><span></span><code>docker logs  &lt;container-id&gt;  <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">|</span> grep <span class="s2">&quot;Bootstrap Password:&quot;</span>
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>logs<span class="w">  </span>&lt;container-id&gt;<span class="w">  </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;Bootstrap Password:&quot;</span>
 </code></pre></div></li>
 <li>Head to <code>https://&lt;VM-IP-ADDRESS-FROM-FIRST-STEP&gt;</code> and log in with the username <code>admin</code> and the password from the previous step. If you are logging into Rancher for the first time, you'll need to enter just the password, and on the next step, Rancher will ask you to reset your current password.</li>
 <li>

@@ -8819,7 +8819,7 @@
 <h3 id="access-well-known-endpoints">Access .well-known endpoints<a class="headerlink" href="#access-well-known-endpoints" title="Permanent link">#</a></h3>
 <p>Janssen Server exposes <code>.well-known</code> endpoint for openid configuration as per the <a href="https://openid.net/specs/openid-connect-discovery-1_0.html">OpenIDConnect RFC</a>. Successful response from this endpoint is also an indicator of healthy authentication module. </p>
 <p>From command-line interface, use CURL to access this endpoint. For example:</p>
-<div class="highlight"><pre><span></span><code>curl https://janssen-host-name/jans-auth/.well-known/openid-configuration
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>https://janssen-host-name/jans-auth/.well-known/openid-configuration
 </code></pre></div>
 <p>This should return JSON response from Janssen Server as per OpenId 
 specification. Sample below:</p>

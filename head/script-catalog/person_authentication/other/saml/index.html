@@ -8639,7 +8639,7 @@ tail -f /opt/tomcat/logs/wrapper.log | grep "Saml"</p>
    Example: true</p>
 <p>5) saml_name_identifier_format - Specify in which format IdP should return a name identifier for the user.
    This property isn't required when saml_use_authn_context has value 'false'
-   Example: urn:oasis:names<img alt="🇹🇨" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/1f1f9-1f1e8.svg" title=":tc:" />SAML:2.0:nameid-format:persistent</p>
+   Example: urn:oasis:names<img alt="🇹🇨" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@14.1.2/assets/svg/1f1f9-1f1e8.svg" title=":tc:" />SAML:2.0:nameid-format:persistent</p>
 <p>6) saml_deployment_type - Specify deployment mode. It's optional property. If this property isn't specified Saml script
    tries to find user in local LDAP by 'Persistent Id' specified in Saml response. If this property has 'map' value Saml script map
    should map 'Persistent Id' to local user account. If this property has 'enroll' value Saml script should add new user to local LDAP
@@ -8674,11 +8674,11 @@ tail -f /opt/tomcat/logs/wrapper.log | grep "Saml"</p>
     def init(conf_attr):
     ...
     return True/False</p>
-<div class="codehilite"><pre><span></span><code><span class="nv">def</span><span class="w"> </span><span class="nv">postLogin</span><span class="ss">(</span><span class="nv">conf_attr</span>,<span class="w"> </span><span class="nv">user</span><span class="ss">)</span>:<span class="w"></span>
-...<span class="w"></span>
-<span class="k">return</span><span class="w"> </span><span class="nv">True</span><span class="o">/</span><span class="nv">False</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="nv">def</span><span class="w"> </span><span class="nv">postLogin</span><span class="ss">(</span><span class="nv">conf_attr</span>,<span class="w"> </span><span class="nv">user</span><span class="ss">)</span>:
+...
+<span class="k">return</span><span class="w"> </span><span class="nv">True</span><span class="o">/</span><span class="nv">False</span>
 
-<span class="nv">SAML</span><span class="w"> </span><span class="nv">scripts</span><span class="w"> </span><span class="nv">calls</span><span class="w"> </span><span class="nv">init</span><span class="w"> </span><span class="nv">method</span><span class="w"> </span><span class="nv">at</span><span class="w"> </span><span class="nv">initialization</span>,<span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">calls</span><span class="w"> </span><span class="nv">postLogin</span><span class="w"> </span><span class="nv">after</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">execute</span><span class="w"> </span><span class="nv">additional</span><span class="w"> </span><span class="nv">custom</span><span class="w"> </span><span class="nv">workflow</span>.<span class="w"></span>
+<span class="nv">SAML</span><span class="w"> </span><span class="nv">scripts</span><span class="w"> </span><span class="nv">calls</span><span class="w"> </span><span class="nv">init</span><span class="w"> </span><span class="nv">method</span><span class="w"> </span><span class="nv">at</span><span class="w"> </span><span class="nv">initialization</span>,<span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">calls</span><span class="w"> </span><span class="nv">postLogin</span><span class="w"> </span><span class="nv">after</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">execute</span><span class="w"> </span><span class="nv">additional</span><span class="w"> </span><span class="nv">custom</span><span class="w"> </span><span class="nv">workflow</span>.
 </code></pre></div>
 
 <p>14) saml_allow_basic_login - Specify if authentication module should allow both: basic and saml authentications

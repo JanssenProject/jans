@@ -8926,11 +8926,11 @@ For the client_id and client_secret, contact your administrator.</p>
 <ol>
 <li>
 <p>Creating a client with minimal upfront configuration requires only <code>redirectUris</code> in following format. Add following content in a text file and save it as client.json. 
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;redirectUris&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">  </span><span class="s2">&quot;http://localhost:8080&quot;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;redirectUris&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="s2">&quot;http://localhost:8080&quot;</span>
 <span class="w">  </span><span class="p">]</span><span class="w">  </span>
-<span class="p">}</span><span class="w"></span>
+<span class="p">}</span>
 </code></pre></div>
 In place of <code>http://localhost:8080</code> uri used above, any valid redirect URI can be used.
 To provide full client configuration at the time of creation, Download and use this 
@@ -8947,39 +8947,39 @@ creation, then make sure that the client is created with <code>grantTypes</code>
 </li>
 </ol>
 <p>If client is created successfully, response similar to below will be received:</p>
-<p><div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;allow_spontaneous_scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;application_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;web&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;rpt_as_jwt&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;registration_client_uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://my.jans.server/jans-auth/restv1/register?client_id=994ec0a7-1143-456c-85ca-66ba592d7f9a&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;tls_client_auth_subject_dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;run_introspection_script_before_jwt_creation&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;registration_access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;d34f30ff-ae31-4760-8b67-ef071ba9ee68&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;994ec0a7-1143-456c-85ca-66ba592d7f9a&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;token_endpoint_auth_method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;client_secret_basic&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openid profile permission https://jans.io/auth/ssa.portal uma_protection work_phone phone address test https://jans.io/auth/ssa.admin user_name email clientinfo device_sso org_name https://jans.io/auth/ssa.developer offline_access&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;client_secret&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;da4c17de-b6bc-4f25-b642-4c7b887c7860&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;client_id_issued_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1672221633</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;backchannel_logout_uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;backchannel_logout_session_required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;par_lifetime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;spontaneous_scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;id_token_signed_response_alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;access_token_as_jwt&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;grant_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;authorization_code&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;refresh_token&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;subject_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pairwise&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;keep_client_authorization_after_expiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;require_par&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;redirect_uris_regex&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;additional_audience&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;frontchannel_logout_session_required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;client_secret_expires_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1672308033</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;access_token_signing_alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;response_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<p><div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;allow_spontaneous_scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;application_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;web&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;rpt_as_jwt&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;registration_client_uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://my.jans.server/jans-auth/restv1/register?client_id=994ec0a7-1143-456c-85ca-66ba592d7f9a&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;tls_client_auth_subject_dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;run_introspection_script_before_jwt_creation&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;registration_access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;d34f30ff-ae31-4760-8b67-ef071ba9ee68&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;994ec0a7-1143-456c-85ca-66ba592d7f9a&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;token_endpoint_auth_method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;client_secret_basic&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openid profile permission https://jans.io/auth/ssa.portal uma_protection work_phone phone address test https://jans.io/auth/ssa.admin user_name email clientinfo device_sso org_name https://jans.io/auth/ssa.developer offline_access&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;client_secret&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;da4c17de-b6bc-4f25-b642-4c7b887c7860&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;client_id_issued_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1672221633</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;backchannel_logout_uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;backchannel_logout_session_required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;par_lifetime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;spontaneous_scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">&quot;id_token_signed_response_alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;access_token_as_jwt&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;grant_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;authorization_code&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;refresh_token&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;subject_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pairwise&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;keep_client_authorization_after_expiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;require_par&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;redirect_uris_regex&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;additional_audience&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">&quot;frontchannel_logout_session_required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;client_secret_expires_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1672308033</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;access_token_signing_alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;response_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
 Response contains <code>client_id</code> and <code>client_secret</code> apart from other client configuration details.</p>
 <h3 id="get-client-details">Get Client Details<a class="headerlink" href="#get-client-details" title="Permanent link">#</a></h3>
@@ -8993,92 +8993,92 @@ Response contains <code>client_id</code> and <code>client_secret</code> apart fr
    -H &quot;Authorization: Bearer put_access_token_here&quot;
 </code></pre></div></li>
 <li>This will return JSON response similar to the one below. 
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="s2">&quot;inum=994ec0a7-1143-456c-85ca-66ba592d7f9a,ou=clients,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;expirationDate&quot;</span><span class="p">:</span><span class="s2">&quot;2022-12-29T10:00:33&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;deletable&quot;</span><span class="p">:</span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;clientSecret&quot;</span><span class="p">:</span><span class="s2">&quot;5Mlvuh0JRwl/WcpiUNGGXjtDO4+SprNBjiVFFcWqWB4gu7gYxqcSMw==&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;frontChannelLogoutSessionRequired&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;redirectUris&quot;</span><span class="p">:[</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;http://localhost:8080&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">],</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;responseTypes&quot;</span><span class="p">:[</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;code&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">],</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;grantTypes&quot;</span><span class="p">:[</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;authorization_code&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;refresh_token&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;client_credentials&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">],</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;applicationType&quot;</span><span class="p">:</span><span class="s2">&quot;web&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;clientName&quot;</span><span class="p">:</span><span class="s2">&quot;dd-test-client&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;clientNameLocalized&quot;</span><span class="p">:{</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="s2">&quot;inum=994ec0a7-1143-456c-85ca-66ba592d7f9a,ou=clients,o=jans&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;expirationDate&quot;</span><span class="p">:</span><span class="s2">&quot;2022-12-29T10:00:33&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;deletable&quot;</span><span class="p">:</span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;clientSecret&quot;</span><span class="p">:</span><span class="s2">&quot;5Mlvuh0JRwl/WcpiUNGGXjtDO4+SprNBjiVFFcWqWB4gu7gYxqcSMw==&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;frontChannelLogoutSessionRequired&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;redirectUris&quot;</span><span class="p">:[</span>
+<span class="w">      </span><span class="s2">&quot;http://localhost:8080&quot;</span>
+<span class="w">   </span><span class="p">],</span>
+<span class="w">   </span><span class="nt">&quot;responseTypes&quot;</span><span class="p">:[</span>
+<span class="w">      </span><span class="s2">&quot;code&quot;</span>
+<span class="w">   </span><span class="p">],</span>
+<span class="w">   </span><span class="nt">&quot;grantTypes&quot;</span><span class="p">:[</span>
+<span class="w">      </span><span class="s2">&quot;authorization_code&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;refresh_token&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;client_credentials&quot;</span>
+<span class="w">   </span><span class="p">],</span>
+<span class="w">   </span><span class="nt">&quot;applicationType&quot;</span><span class="p">:</span><span class="s2">&quot;web&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;clientName&quot;</span><span class="p">:</span><span class="s2">&quot;dd-test-client&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;clientNameLocalized&quot;</span><span class="p">:{</span>
 
-<span class="w">   </span><span class="p">},</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;logoUriLocalized&quot;</span><span class="p">:{</span><span class="w"></span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;logoUriLocalized&quot;</span><span class="p">:{</span>
 
-<span class="w">   </span><span class="p">},</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;clientUriLocalized&quot;</span><span class="p">:{</span><span class="w"></span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;clientUriLocalized&quot;</span><span class="p">:{</span>
 
-<span class="w">   </span><span class="p">},</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;policyUriLocalized&quot;</span><span class="p">:{</span><span class="w"></span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;policyUriLocalized&quot;</span><span class="p">:{</span>
 
-<span class="w">   </span><span class="p">},</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;tosUriLocalized&quot;</span><span class="p">:{</span><span class="w"></span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;tosUriLocalized&quot;</span><span class="p">:{</span>
 
-<span class="w">   </span><span class="p">},</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;subjectType&quot;</span><span class="p">:</span><span class="s2">&quot;pairwise&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;idTokenSignedResponseAlg&quot;</span><span class="p">:</span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;tokenEndpointAuthMethod&quot;</span><span class="p">:</span><span class="s2">&quot;client_secret_basic&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;scopes&quot;</span><span class="p">:[</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;inum=F0C4,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;inum=43F1,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;inum=C4F5,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;inum=SSA1-PTL1,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;inum=6D99,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;inum=7D02,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;inum=D491,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;inum=C17A,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;inum=0465-1DEA,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;inum=SSA1-AD01,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;inum=10B2,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;inum=764C,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;inum=341A,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;inum=C4F8,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;inum=7D01,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;inum=SSA1-DEV1,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;inum=C4F6,ou=scopes,o=jans&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">],</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;trustedClient&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;persistClientAuthorizations&quot;</span><span class="p">:</span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;includeClaimsInIdToken&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;customAttributes&quot;</span><span class="p">:[</span><span class="w"></span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;subjectType&quot;</span><span class="p">:</span><span class="s2">&quot;pairwise&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;idTokenSignedResponseAlg&quot;</span><span class="p">:</span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;tokenEndpointAuthMethod&quot;</span><span class="p">:</span><span class="s2">&quot;client_secret_basic&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;scopes&quot;</span><span class="p">:[</span>
+<span class="w">      </span><span class="s2">&quot;inum=F0C4,ou=scopes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;inum=43F1,ou=scopes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;inum=C4F5,ou=scopes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;inum=SSA1-PTL1,ou=scopes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;inum=6D99,ou=scopes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;inum=7D02,ou=scopes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;inum=D491,ou=scopes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;inum=C17A,ou=scopes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;inum=0465-1DEA,ou=scopes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;inum=SSA1-AD01,ou=scopes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;inum=10B2,ou=scopes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;inum=764C,ou=scopes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;inum=341A,ou=scopes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;inum=C4F8,ou=scopes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;inum=7D01,ou=scopes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;inum=SSA1-DEV1,ou=scopes,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;inum=C4F6,ou=scopes,o=jans&quot;</span>
+<span class="w">   </span><span class="p">],</span>
+<span class="w">   </span><span class="nt">&quot;trustedClient&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;persistClientAuthorizations&quot;</span><span class="p">:</span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;includeClaimsInIdToken&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;customAttributes&quot;</span><span class="p">:[</span>
 
-<span class="w">   </span><span class="p">],</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;customObjectClasses&quot;</span><span class="p">:[</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;top&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">],</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;rptAsJwt&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;accessTokenAsJwt&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;accessTokenSigningAlg&quot;</span><span class="p">:</span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;disabled&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;attributes&quot;</span><span class="p">:{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;runIntrospectionScriptBeforeJwtCreation&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;keepClientAuthorizationAfterExpiration&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;allowSpontaneousScopes&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;backchannelLogoutSessionRequired&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;parLifetime&quot;</span><span class="p">:</span><span class="mi">600</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;requirePar&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;jansDefaultPromptLogin&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;minimumAcrLevel&quot;</span><span class="p">:</span><span class="mi">-1</span><span class="w"></span>
-<span class="w">   </span><span class="p">},</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;backchannelTokenDeliveryMode&quot;</span><span class="p">:</span><span class="s2">&quot;poll&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;backchannelUserCodeParameter&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="s2">&quot;dd-test-client&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;authenticationMethod&quot;</span><span class="p">:</span><span class="s2">&quot;client_secret_basic&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="s2">&quot;inum=994ec0a7-1143-456c-85ca-66ba592d7f9a,ou=clients,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="s2">&quot;994ec0a7-1143-456c-85ca-66ba592d7f9a&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="p">],</span>
+<span class="w">   </span><span class="nt">&quot;customObjectClasses&quot;</span><span class="p">:[</span>
+<span class="w">      </span><span class="s2">&quot;top&quot;</span>
+<span class="w">   </span><span class="p">],</span>
+<span class="w">   </span><span class="nt">&quot;rptAsJwt&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;accessTokenAsJwt&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;accessTokenSigningAlg&quot;</span><span class="p">:</span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;disabled&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;attributes&quot;</span><span class="p">:{</span>
+<span class="w">      </span><span class="nt">&quot;runIntrospectionScriptBeforeJwtCreation&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;keepClientAuthorizationAfterExpiration&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;allowSpontaneousScopes&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;backchannelLogoutSessionRequired&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;parLifetime&quot;</span><span class="p">:</span><span class="mi">600</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;requirePar&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;jansDefaultPromptLogin&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;minimumAcrLevel&quot;</span><span class="p">:</span><span class="mi">-1</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;backchannelTokenDeliveryMode&quot;</span><span class="p">:</span><span class="s2">&quot;poll&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;backchannelUserCodeParameter&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="s2">&quot;dd-test-client&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;authenticationMethod&quot;</span><span class="p">:</span><span class="s2">&quot;client_secret_basic&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="s2">&quot;inum=994ec0a7-1143-456c-85ca-66ba592d7f9a,ou=clients,o=jans&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="s2">&quot;994ec0a7-1143-456c-85ca-66ba592d7f9a&quot;</span>
+<span class="p">}</span>
 </code></pre></div></li>
 </ol>
 <h3 id="add-new-scope-to-client">Add New Scope to Client<a class="headerlink" href="#add-new-scope-to-client" title="Permanent link">#</a></h3>

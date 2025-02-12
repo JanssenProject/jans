@@ -8805,64 +8805,64 @@ Janssen Server:</p>
 <h3 id="version-and-build-information">Version and build information<a class="headerlink" href="#version-and-build-information" title="Permanent link">#</a></h3>
 <p>Displays the version and build information of the currently installed 
 Janssen Server.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans version
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>version
 </code></pre></div>
 <img alt="" src="../../../assets/jans_version.png" /></p>
 <h3 id="cli">CLI<a class="headerlink" href="#cli" title="Permanent link">#</a></h3>
 <p>Invokes the Janssen Command-Line Interface.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli
 </code></pre></div>
 <h3 id="tui">TUI<a class="headerlink" href="#tui" title="Permanent link">#</a></h3>
 <p>Launches the text-based user interface for Janssen.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans tui
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>tui
 </code></pre></div>
 <h3 id="logs">Logs<a class="headerlink" href="#logs" title="Permanent link">#</a></h3>
 <p>Shows the log file paths for various Janssen Server modules. </p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans logs
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>logs
 </code></pre></div>
 <img alt="" src="../../../assets/jans_logs.png" /></p>
 <h3 id="status">Status<a class="headerlink" href="#status" title="Permanent link">#</a></h3>
 <p>Displays the status of Janssen Server module services.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans status
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>status
 </code></pre></div>
 <img alt="" src="../../../assets/jans_status.png" /></p>
 <h3 id="start">Start<a class="headerlink" href="#start" title="Permanent link">#</a></h3>
 <p>Starts services for the Janssen Server.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>     jans start
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="w">     </span>jans<span class="w"> </span>start
 </code></pre></div>
 <img alt="image" src="../../../assets/jans_start.png" /></p>
 <p>Start a specific service.</p>
-<div class="highlight"><span class="filename">sample command</span><pre><span></span><code>jans start -service<span class="o">=</span>jans-config-api
+<div class="highlight"><span class="filename">sample command</span><pre><span></span><code>jans<span class="w"> </span>start<span class="w"> </span>-service<span class="o">=</span>jans-config-api
 </code></pre></div>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Executing sudo systemctl start jans-config-api
 </code></pre></div>
 <h3 id="stop">Stop<a class="headerlink" href="#stop" title="Permanent link">#</a></h3>
 <p>Stops services for the Janssen Server.
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans stop
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>stop
 </code></pre></div></p>
 <p><img alt="" src="../../../assets/jans_stop.png" /></p>
 <p>Stop a specific service.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans stop -service<span class="o">=</span>jans-config-api
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>stop<span class="w"> </span>-service<span class="o">=</span>jans-config-api
 </code></pre></div>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Executing sudo systemctl stop jans-config-api
 </code></pre></div></p>
 <h3 id="restart">Restart<a class="headerlink" href="#restart" title="Permanent link">#</a></h3>
 <p>Restart services for the Janssen Server.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans restart
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>restart
 </code></pre></div>
 <img alt="" src="../../../assets/jans_restart.png" /></p>
 <p>Restart a specific service.</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans restart -service<span class="o">=</span>jans-config-api
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans<span class="w"> </span>restart<span class="w"> </span>-service<span class="o">=</span>jans-config-api
 </code></pre></div>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Executing sudo systemctl restart jans-config-api
 </code></pre></div>
 <h3 id="health">Health<a class="headerlink" href="#health" title="Permanent link">#</a></h3>
 <p>Retrieves health status from the Janssen services health-check endpoint.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans health
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>health
 </code></pre></div>
 <img alt="image" src="../../../assets/jans_health.png" /></p>
 <p>Health check for specific service.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans health -service<span class="o">=</span>&lt;service-name&gt;
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>health<span class="w"> </span>-service<span class="o">=</span>&lt;service-name&gt;
 </code></pre></div>
 <div class="highlight"><span class="filename">sample Output</span><pre><span></span><code>Checking health status for jans-config-api
   Executing curl -s http://localhost:8074/jans-config-api/api/v1/health/live
@@ -8870,7 +8870,7 @@ Janssen Server.</p>
 </code></pre></div>
 <h3 id="info">Info<a class="headerlink" href="#info" title="Permanent link">#</a></h3>
 <p>Lists important URLs such as <code>.well-known</code> endpoints.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans info
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>info
 </code></pre></div>
 <img alt="" src="../../../assets/jans_info.png" /></p>
 

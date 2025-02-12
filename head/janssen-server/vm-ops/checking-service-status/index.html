@@ -8677,35 +8677,35 @@
 <h1 id="janssen-system-services">Janssen System Services<a class="headerlink" href="#janssen-system-services" title="Permanent link">#</a></h1>
 <p>In order to debug issues, checking the Jans services may be necessary. The process to do this differs slightly between operating systems. The following examples are shown on Ubuntu 20.04; however, they should work on any operating system using systemd.</p>
 <h2 id="getting-list-of-jans-services">Getting list of Jans services<a class="headerlink" href="#getting-list-of-jans-services" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code>$ sudo systemctl list-units --all <span class="s2">&quot;jans*&quot;</span>
-UNIT                    LOAD   ACTIVE SUB     DESCRIPTION               
-jans-auth.service       loaded active running Janssen OAauth service    
-jans-config-api.service loaded active running Janssen Config API service
-jans-fido2.service      loaded active running Janssen Fido2 Service     
-jans-scim.service       loaded active running Janssen Scim service      
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>sudo<span class="w"> </span>systemctl<span class="w"> </span>list-units<span class="w"> </span>--all<span class="w"> </span><span class="s2">&quot;jans*&quot;</span>
+UNIT<span class="w">                    </span>LOAD<span class="w">   </span>ACTIVE<span class="w"> </span>SUB<span class="w">     </span>DESCRIPTION<span class="w">               </span>
+jans-auth.service<span class="w">       </span>loaded<span class="w"> </span>active<span class="w"> </span>running<span class="w"> </span>Janssen<span class="w"> </span>OAauth<span class="w"> </span>service<span class="w">    </span>
+jans-config-api.service<span class="w"> </span>loaded<span class="w"> </span>active<span class="w"> </span>running<span class="w"> </span>Janssen<span class="w"> </span>Config<span class="w"> </span>API<span class="w"> </span>service
+jans-fido2.service<span class="w">      </span>loaded<span class="w"> </span>active<span class="w"> </span>running<span class="w"> </span>Janssen<span class="w"> </span>Fido2<span class="w"> </span>Service<span class="w">     </span>
+jans-scim.service<span class="w">       </span>loaded<span class="w"> </span>active<span class="w"> </span>running<span class="w"> </span>Janssen<span class="w"> </span>Scim<span class="w"> </span>service<span class="w">      </span>
 
-<span class="nv">LOAD</span>   <span class="o">=</span> Reflects whether the unit definition was properly loaded.
-<span class="nv">ACTIVE</span> <span class="o">=</span> The high-level unit activation state, i.e. generalization of SUB.
-<span class="nv">SUB</span>    <span class="o">=</span> The low-level unit activation state, values depend on unit type.
+<span class="nv">LOAD</span><span class="w">   </span><span class="o">=</span><span class="w"> </span>Reflects<span class="w"> </span>whether<span class="w"> </span>the<span class="w"> </span>unit<span class="w"> </span>definition<span class="w"> </span>was<span class="w"> </span>properly<span class="w"> </span>loaded.
+<span class="nv">ACTIVE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>The<span class="w"> </span>high-level<span class="w"> </span>unit<span class="w"> </span>activation<span class="w"> </span>state,<span class="w"> </span>i.e.<span class="w"> </span>generalization<span class="w"> </span>of<span class="w"> </span>SUB.
+<span class="nv">SUB</span><span class="w">    </span><span class="o">=</span><span class="w"> </span>The<span class="w"> </span>low-level<span class="w"> </span>unit<span class="w"> </span>activation<span class="w"> </span>state,<span class="w"> </span>values<span class="w"> </span>depend<span class="w"> </span>on<span class="w"> </span>unit<span class="w"> </span>type.
 
-<span class="m">5</span> loaded units listed.
+<span class="m">5</span><span class="w"> </span>loaded<span class="w"> </span>units<span class="w"> </span>listed.
 </code></pre></div>
 <h2 id="other-services">Other Services<a class="headerlink" href="#other-services" title="Permanent link">#</a></h2>
 <p>There are more services other than Jans services like Apache. To get the status of those services make sure you use command like</p>
-<div class="highlight"><pre><span></span><code>sudo systemctl list-units --all <span class="s2">&quot;apache2*&quot;</span>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>list-units<span class="w"> </span>--all<span class="w"> </span><span class="s2">&quot;apache2*&quot;</span>
 </code></pre></div>
 <p>Note: depending on your OS and the components of Jans installed, the output may be different.</p>
 <h2 id="checking-status-of-a-service">Checking status of a service<a class="headerlink" href="#checking-status-of-a-service" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code>$ sudo systemctl status jans-auth.service
-● jans-auth.service - Janssen OAauth service
-     Loaded: loaded <span class="o">(</span>/etc/systemd/system/jans-auth.service<span class="p">;</span> enabled<span class="p">;</span> vendor preset: enabled<span class="o">)</span>
-     Active: active <span class="o">(</span>running<span class="o">)</span> since Tue <span class="m">2022</span>-11-01 <span class="m">15</span>:03:23 UTC<span class="p">;</span> 1h 38min ago
-    Process: <span class="m">44700</span> <span class="nv">ExecStart</span><span class="o">=</span>/opt/dist/scripts/jans-auth start <span class="o">(</span><span class="nv">code</span><span class="o">=</span>exited, <span class="nv">status</span><span class="o">=</span><span class="m">0</span>/SUCCESS<span class="o">)</span>
-   Main PID: <span class="m">44727</span> <span class="o">(</span>java<span class="o">)</span>
-      Tasks: <span class="m">60</span> <span class="o">(</span>limit: <span class="m">4677</span><span class="o">)</span>
-     Memory: <span class="m">889</span>.2M
-     CGroup: /system.slice/jans-auth.service
-             └─44727 /opt/jre/bin/java -server -Xms256m -Xmx928m -XX:+DisableExplicitGC -Djans.base<span class="o">=</span>/etc/jans -Dserver.base<span class="o">=</span>/opt/jans/jetty/jan&gt;
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>jans-auth.service
+●<span class="w"> </span>jans-auth.service<span class="w"> </span>-<span class="w"> </span>Janssen<span class="w"> </span>OAauth<span class="w"> </span>service
+<span class="w">     </span>Loaded:<span class="w"> </span>loaded<span class="w"> </span><span class="o">(</span>/etc/systemd/system/jans-auth.service<span class="p">;</span><span class="w"> </span>enabled<span class="p">;</span><span class="w"> </span>vendor<span class="w"> </span>preset:<span class="w"> </span>enabled<span class="o">)</span>
+<span class="w">     </span>Active:<span class="w"> </span>active<span class="w"> </span><span class="o">(</span>running<span class="o">)</span><span class="w"> </span>since<span class="w"> </span>Tue<span class="w"> </span><span class="m">2022</span>-11-01<span class="w"> </span><span class="m">15</span>:03:23<span class="w"> </span>UTC<span class="p">;</span><span class="w"> </span>1h<span class="w"> </span>38min<span class="w"> </span>ago
+<span class="w">    </span>Process:<span class="w"> </span><span class="m">44700</span><span class="w"> </span><span class="nv">ExecStart</span><span class="o">=</span>/opt/dist/scripts/jans-auth<span class="w"> </span>start<span class="w"> </span><span class="o">(</span><span class="nv">code</span><span class="o">=</span>exited,<span class="w"> </span><span class="nv">status</span><span class="o">=</span><span class="m">0</span>/SUCCESS<span class="o">)</span>
+<span class="w">   </span>Main<span class="w"> </span>PID:<span class="w"> </span><span class="m">44727</span><span class="w"> </span><span class="o">(</span>java<span class="o">)</span>
+<span class="w">      </span>Tasks:<span class="w"> </span><span class="m">60</span><span class="w"> </span><span class="o">(</span>limit:<span class="w"> </span><span class="m">4677</span><span class="o">)</span>
+<span class="w">     </span>Memory:<span class="w"> </span><span class="m">889</span>.2M
+<span class="w">     </span>CGroup:<span class="w"> </span>/system.slice/jans-auth.service
+<span class="w">             </span>└─44727<span class="w"> </span>/opt/jre/bin/java<span class="w"> </span>-server<span class="w"> </span>-Xms256m<span class="w"> </span>-Xmx928m<span class="w"> </span>-XX:+DisableExplicitGC<span class="w"> </span>-Djans.base<span class="o">=</span>/etc/jans<span class="w"> </span>-Dserver.base<span class="o">=</span>/opt/jans/jetty/jan&gt;
 </code></pre></div>
 <p>In case of an error or a non-functional component, this is where you would find information about the component.</p>
 

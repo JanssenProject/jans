@@ -8796,17 +8796,17 @@
 </li>
 <li>
 <p>Once Minikube is installed start it with the docker driver.</p>
-<div class="highlight"><pre><span></span><code>minikube start --driver<span class="o">=</span>docker
+<div class="highlight"><pre><span></span><code>minikube<span class="w"> </span>start<span class="w"> </span>--driver<span class="o">=</span>docker
 </code></pre></div>
 </li>
 <li>
 <p>If not automatically set configure <code>kubectl</code> to use the cluster:</p>
-<div class="highlight"><pre><span></span><code>kubectl config use-context minikube
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>config<span class="w"> </span>use-context<span class="w"> </span>minikube
 </code></pre></div>
 </li>
 <li>
 <p>Enable ingress on minikube</p>
-<div class="highlight"><pre><span></span><code>minikube addons <span class="nb">enable</span> ingress
+<div class="highlight"><pre><span></span><code>minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>ingress
 </code></pre></div>
 </li>
 </ol>
@@ -8817,9 +8817,9 @@
 </li>
 <li>
 <p>Install Janssen</p>
-<div class="highlight"><pre><span></span><code>helm repo add jans https://janssenproject.github.io/jans-cloud-native/charts
-kubectl create ns jans
-helm install jans-auth jans/jans -n jans --set global.lbIp<span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>minikube ip<span class="k">)</span><span class="s2">&quot;</span> --set global.provisioner<span class="o">=</span><span class="s2">&quot;k8s.io/minikube-hostpath&quot;</span> --devel
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>jans<span class="w"> </span>https://janssenproject.github.io/jans-cloud-native/charts
+kubectl<span class="w"> </span>create<span class="w"> </span>ns<span class="w"> </span>jans
+helm<span class="w"> </span>install<span class="w"> </span>jans-auth<span class="w"> </span>jans/jans<span class="w"> </span>-n<span class="w"> </span>jans<span class="w"> </span>--set<span class="w"> </span>global.lbIp<span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>minikube<span class="w"> </span>ip<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span>--set<span class="w"> </span>global.provisioner<span class="o">=</span><span class="s2">&quot;k8s.io/minikube-hostpath&quot;</span><span class="w"> </span>--devel
 </code></pre></div>
 </li>
 </ol>
@@ -8829,39 +8829,39 @@ helm install jans-auth jans/jans -n jans --set global.lbIp<span class="o">=</spa
 <li>
 <p>Create a folder that will hold the interception script inside the auth server container. Place the namespace where jans is installed in the env <code>JANS_NAMESPACE</code> and execute:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">JANS_NAMESPACE</span><span class="o">=</span>&lt;jans-namespace&gt;
-<span class="k">for</span> pod <span class="k">in</span> <span class="k">$(</span>kubectl get pods -n <span class="nv">$JANS_NAMESPACE</span> --selector<span class="o">=</span><span class="nv">APP_NAME</span><span class="o">=</span>auth-server --output<span class="o">=</span><span class="nv">jsonpath</span><span class="o">={</span>.items..metadata.name<span class="o">}</span><span class="k">)</span><span class="p">;</span> <span class="k">do</span>
-    kubectl <span class="nb">exec</span> -ti <span class="nv">$pod</span> -n <span class="nv">$JANS_NAMESPACE</span> -- mkdir -p /deploy/interception-scripts-ksync
-<span class="k">done</span>        
+<span class="k">for</span><span class="w"> </span>pod<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span><span class="nv">$JANS_NAMESPACE</span><span class="w"> </span>--selector<span class="o">=</span><span class="nv">APP_NAME</span><span class="o">=</span>auth-server<span class="w"> </span>--output<span class="o">=</span><span class="nv">jsonpath</span><span class="o">={</span>.items..metadata.name<span class="o">}</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-ti<span class="w"> </span><span class="nv">$pod</span><span class="w"> </span>-n<span class="w"> </span><span class="nv">$JANS_NAMESPACE</span><span class="w"> </span>--<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/deploy/interception-scripts-ksync
+<span class="k">done</span><span class="w">        </span>
 </code></pre></div>
 </li>
 <li>
 <p>Install ksync</p>
-<div class="highlight"><pre><span></span><code>curl https://ksync.github.io/gimme-that/gimme.sh <span class="p">|</span> bash
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>https://ksync.github.io/gimme-that/gimme.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash
 </code></pre></div>
 </li>
 <li>
 <p>Initialize ksync</p>
-<div class="highlight"><pre><span></span><code>ksync init -n &lt;jans-namespace&gt;
+<div class="highlight"><pre><span></span><code>ksync<span class="w"> </span>init<span class="w"> </span>-n<span class="w"> </span>&lt;jans-namespace&gt;
 </code></pre></div>
 </li>
 <li>
 <p>Start ksync.</p>
-<div class="highlight"><pre><span></span><code>ksync watch -n &lt;jans-namespace&gt; <span class="p">&amp;</span>
+<div class="highlight"><pre><span></span><code>ksync<span class="w"> </span>watch<span class="w"> </span>-n<span class="w"> </span>&lt;jans-namespace&gt;<span class="w"> </span><span class="p">&amp;</span>
 </code></pre></div>
 </li>
 <li>
 <p>Open a new terminal and create a folder called <code>interception-scripts-ksync</code></p>
-<div class="highlight"><pre><span></span><code>mkdir -p <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/interception-scripts-ksync
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/interception-scripts-ksync
 </code></pre></div>
 </li>
 <li>
 <p>Create a spec to start syncing folders between the local system and auth server container.</p>
-<div class="highlight"><pre><span></span><code>ksync create --selector<span class="o">=</span><span class="nv">APP_NAME</span><span class="o">=</span>auth-server <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/interception-scripts-ksync /deploy/interception-scripts-ksync -n &lt;jans-namespace&gt;
+<div class="highlight"><pre><span></span><code>ksync<span class="w"> </span>create<span class="w"> </span>--selector<span class="o">=</span><span class="nv">APP_NAME</span><span class="o">=</span>auth-server<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/interception-scripts-ksync<span class="w"> </span>/deploy/interception-scripts-ksync<span class="w"> </span>-n<span class="w"> </span>&lt;jans-namespace&gt;
 </code></pre></div>
 </li>
 <li>
 <p>Check the status. Also check the terminal where the <code>watch</code> command is running. </p>
-<p><div class="highlight"><pre><span></span><code>ksync get
+<p><div class="highlight"><pre><span></span><code>ksync<span class="w"> </span>get
 </code></pre></div>
 1. Move the interception script to the local folder <code>$(pwd)/interception-scripts-ksync</code>. In the below example we copied the following script as <code>basic.py</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.</span>
@@ -9029,9 +9029,9 @@ helm install jans-auth jans/jans -n jans --set global.lbIp<span class="o">=</spa
 </code></pre></div>
 <p>The last line will enable remote debug on port 5005. Now restart the <code>jans-auth</code> service.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># To list all jans processes</span>
-systemctl list-units --all <span class="s2">&quot;jans*&quot;</span>
+systemctl<span class="w"> </span>list-units<span class="w"> </span>--all<span class="w"> </span><span class="s2">&quot;jans*&quot;</span>
 <span class="c1"># On Ubuntu, the service name is jans-auth.service</span>
-systemctl restart jans-auth.service
+systemctl<span class="w"> </span>restart<span class="w"> </span>jans-auth.service
 </code></pre></div>
 <p>If you are running Jans on a local VM or anywhere that is not the same as the machine that will be debugging, you will need to set up an SSH tunnel on port 5005. Execute the following command:</p>
 <div class="highlight"><pre><span></span><code>ssh -L 5005:localhost:5005 &lt;username&gt;@&lt;host&gt;
@@ -9159,7 +9159,7 @@ if REMOTE_DEBUG:
 </li>
 <li>
 <p>Port forward the opendj pod. </p>
-<div class="highlight"><pre><span></span><code>kubectl port-forward jans-opendj-0 -n &lt;jans-namespace&gt; <span class="m">1636</span>:1636 --address <span class="m">0</span>.0.0.0
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>port-forward<span class="w"> </span>jans-opendj-0<span class="w"> </span>-n<span class="w"> </span>&lt;jans-namespace&gt;<span class="w"> </span><span class="m">1636</span>:1636<span class="w"> </span>--address<span class="w"> </span><span class="m">0</span>.0.0.0
 </code></pre></div>
 </li>
 <li>
@@ -9223,21 +9223,21 @@ if REMOTE_DEBUG:
 </li>
 <li>
 <p>Open basic.py in a file editor. After the import section, add the following lines to load the PyDev libraries:</p>
-<div class="highlight"><pre><span></span><code><span class="nv">REMOTE_DEBUG</span> <span class="o">=</span> True  
+<div class="highlight"><pre><span></span><code><span class="nv">REMOTE_DEBUG</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>True<span class="w">  </span>
 
-<span class="k">if</span> REMOTE_DEBUG:  
-    try:  
-        import sys  
-        import pydevd  
-    except ImportError as ex:  
-        print <span class="s2">&quot;Failed to import pydevd: %s&quot;</span> % ex  
-        raise  
+<span class="k">if</span><span class="w"> </span>REMOTE_DEBUG:<span class="w">  </span>
+<span class="w">    </span>try:<span class="w">  </span>
+<span class="w">        </span>import<span class="w"> </span>sys<span class="w">  </span>
+<span class="w">        </span>import<span class="w"> </span>pydevd<span class="w">  </span>
+<span class="w">    </span>except<span class="w"> </span>ImportError<span class="w"> </span>as<span class="w"> </span>ex:<span class="w">  </span>
+<span class="w">        </span>print<span class="w"> </span><span class="s2">&quot;Failed to import pydevd: %s&quot;</span><span class="w"> </span>%<span class="w"> </span>ex<span class="w">  </span>
+<span class="w">        </span>raise<span class="w">  </span>
 </code></pre></div>
 </li>
 <li>
 <p>Add this break condition to the first line in the authenticate method. Place the ip of the maching running the ide , here liclipse i.e <code>192.168.140.2</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="k">if</span> REMOTE_DEBUG:   
-    pydevd.settrace<span class="o">(</span><span class="s1">&#39;&lt;ip-of-machine-running-ide&gt;&#39;</span>, <span class="nv">port</span><span class="o">=</span><span class="m">5678</span>, <span class="nv">stdoutToServer</span><span class="o">=</span>True, <span class="nv">stderrToServer</span><span class="o">=</span>True<span class="o">)</span>  
+<div class="highlight"><pre><span></span><code><span class="k">if</span><span class="w"> </span>REMOTE_DEBUG:<span class="w">   </span>
+<span class="w">    </span>pydevd.settrace<span class="o">(</span><span class="s1">&#39;&lt;ip-of-machine-running-ide&gt;&#39;</span>,<span class="w"> </span><span class="nv">port</span><span class="o">=</span><span class="m">5678</span>,<span class="w"> </span><span class="nv">stdoutToServer</span><span class="o">=</span>True,<span class="w"> </span><span class="nv">stderrToServer</span><span class="o">=</span>True<span class="o">)</span><span class="w">  </span>
 </code></pre></div>
 </li>
 <li>

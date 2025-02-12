@@ -8835,7 +8835,7 @@ using the command line. To get the details of Janssen command line operations
 relevant to Logging configuration, you can check the operations under 
 <code>ConfigurationLogging</code> task using the
 command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --info ConfigurationLogging
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--info<span class="w"> </span>ConfigurationLogging
 </code></pre></div>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Operation ID: get-config-logging
   Description: Returns Jans Authorization Server logging settings
@@ -8846,7 +8846,7 @@ Operation ID: put-config-logging
 To get sample schema type jans cli --schema &lt;schema&gt;, for example jans cli --schema Logging
 </code></pre></div>
 <h3 id="find-logging-configuration">Find Logging Configuration<a class="headerlink" href="#find-logging-configuration" title="Permanent link">#</a></h3>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-config-logging
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-config-logging
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -8858,17 +8858,17 @@ To get sample schema type jans cli --schema &lt;schema&gt;, for example jans cli
 <span class="normal"> 8</span>
 <span class="normal"> 9</span>
 <span class="normal">10</span>
-<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;loggingLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;loggingLayout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;httpLoggingEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;disableJdkLogger&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;enabledOAuthAuditLogging&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;externalLoggerConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;httpLoggingExcludePaths&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;loggingLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;loggingLayout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;httpLoggingEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;disableJdkLogger&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;enabledOAuthAuditLogging&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;externalLoggerConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;httpLoggingExcludePaths&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;string&quot;</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="update-logging-configuration">Update Logging Configuration<a class="headerlink" href="#update-logging-configuration" title="Permanent link">#</a></h3>
 <p>To update the configuration follow the steps below.</p>
@@ -8876,7 +8876,7 @@ To get sample schema type jans cli --schema &lt;schema&gt;, for example jans cli
 <li>Get the current logging configuration and store it in a file for editing.
    The following command will retrieve the current logging configuration and 
    store it in a file.
-   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -no-color --operation-id get-config-logging &gt; /tmp/log-config.json
+   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>-no-color<span class="w"> </span>--operation-id<span class="w"> </span>get-config-logging<span class="w"> </span>&gt;<span class="w"> </span>/tmp/log-config.json
 </code></pre></div></li>
 <li>Update the configuration with desired value in the file while 
       keeping other properties and values unchanged. Updates must adhere to the
@@ -8884,18 +8884,18 @@ To get sample schema type jans cli --schema &lt;schema&gt;, for example jans cli
       The schema details can be retrieved using the command below.
       The schema defines what values and datatypes are acceptable for each 
       property value.
-   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema Logging 
+   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema<span class="w"> </span>Logging<span class="w"> </span>
 </code></pre></div></li>
 <li>Use the updated file to send the update to the Janssen Server using the 
     command below
-   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id put-config-logging --data /tmp/log-config.json
+   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>put-config-logging<span class="w"> </span>--data<span class="w"> </span>/tmp/log-config.json
 </code></pre></div>
    Upon successful execution of the update, the Janssen Server responds with 
    updated configuration.</li>
 </ol>
 <h2 id="using-text-based-ui">Using-text-based-ui<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
 <p>Start TUI using the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans tui
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>tui
 </code></pre></div>
 <h3 id="logging-configuration-for-auth-server">Logging Configuration for Auth Server<a class="headerlink" href="#logging-configuration-for-auth-server" title="Permanent link">#</a></h3>
 <ul>

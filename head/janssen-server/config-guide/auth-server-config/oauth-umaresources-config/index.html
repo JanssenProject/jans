@@ -8783,7 +8783,7 @@ the <a href="#using-command-line">Using Command Line</a></p>
 command line. To get the details of Janssen command line operations relevant to
 UMA Resource, you can check the operations under the <code>OauthUmaResources</code> task using the
 command below.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --info OauthUmaResources
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--info<span class="w"> </span>OauthUmaResources
 </code></pre></div>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Operation ID: get-oauth-uma-resources
   Description: Gets list of UMA resources
@@ -8824,103 +8824,103 @@ To get sample schema type jans cli --schema-sample &lt;schema&gt;, for example j
 <p>To find the existing UMA Resources, let's run the following command:</p>
 <p><code>get-oauth-uma-resources</code> operation is used to search UMA Resources.</p>
 <p>To get a list of UMA resources:
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-oauth-uma-resources
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-oauth-uma-resources
 </code></pre></div>
-<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;totalEntriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;entriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;entries&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=361e1db0-19b4-4d83-9cb8-616dda8292b7,ou=resources,ou=uma,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;361e1db0-19b4-4d83-9cb8-616dda8292b7&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans Cofig Api Uma Resource /jans-config-api/api/v1/attributes&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;iconUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://www.jans.io/img/scim_logo.png&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;[\&quot;inum=CACA-0B30,ou=scopes,o=jans\&quot;]&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;clients&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;inum=1801.6e8351d4-5d3f-4773-b632-6c84bf8207cd,ou=clients,o=jans&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;[\&quot;https://testjans.gluu.com/jans-config-api/api/v1/attributes\&quot;]&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;creator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=d206dd87-3a22-465d-bd25-bec9313cd42d,ou=people,o=json&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uma&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;deletable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=c0204b2a-4047-4c2b-86a8-a088e2ee54de,ou=resources,ou=uma,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c0204b2a-4047-4c2b-86a8-a088e2ee54de&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans Cofig Api Uma Resource&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;iconUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://www.jans.io/img/scim_logo.png&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;clients&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;inum=1801.6e8351d4-5d3f-4773-b632-6c84bf8207cd,ou=clients,o=jans&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;[\&quot;https://testjans.gluu.com/jans-config-api/api/v1/config/cache/native-persistence\&quot;]&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;creator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=d206dd87-3a22-465d-bd25-bec9313cd42d,ou=people,o=json&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uma resource&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;deletable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;totalEntriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;entriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;entries&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=361e1db0-19b4-4d83-9cb8-616dda8292b7,ou=resources,ou=uma,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;361e1db0-19b4-4d83-9cb8-616dda8292b7&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans Cofig Api Uma Resource /jans-config-api/api/v1/attributes&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;iconUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://www.jans.io/img/scim_logo.png&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;[\&quot;inum=CACA-0B30,ou=scopes,o=jans\&quot;]&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;clients&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;inum=1801.6e8351d4-5d3f-4773-b632-6c84bf8207cd,ou=clients,o=jans&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;[\&quot;https://testjans.gluu.com/jans-config-api/api/v1/attributes\&quot;]&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;creator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=d206dd87-3a22-465d-bd25-bec9313cd42d,ou=people,o=json&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uma&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;deletable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=c0204b2a-4047-4c2b-86a8-a088e2ee54de,ou=resources,ou=uma,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c0204b2a-4047-4c2b-86a8-a088e2ee54de&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans Cofig Api Uma Resource&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;iconUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://www.jans.io/img/scim_logo.png&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;clients&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;inum=1801.6e8351d4-5d3f-4773-b632-6c84bf8207cd,ou=clients,o=jans&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;[\&quot;https://testjans.gluu.com/jans-config-api/api/v1/config/cache/native-persistence\&quot;]&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;creator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=d206dd87-3a22-465d-bd25-bec9313cd42d,ou=people,o=json&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uma resource&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;deletable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div></p>
 <p>To search using multiple arguments, you can change pattern that you want to find:</p>
-<div class="highlight"><pre><span></span><code>jans cli --operation-id get-oauth-uma-resources <span class="se">\</span>
---endpoint-args limit:1,pattern:<span class="s2">&quot;Jans Cofig Api Uma Resource /jans-config-api/api/v1/attributes&quot;</span>
+<div class="highlight"><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-oauth-uma-resources<span class="w"> </span><span class="se">\</span>
+--endpoint-args<span class="w"> </span>limit:1,pattern:<span class="s2">&quot;Jans Cofig Api Uma Resource /jans-config-api/api/v1/attributes&quot;</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;totalEntriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;entriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;entries&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=361e1db0-19b4-4d83-9cb8-616dda8292b7,ou=resources,ou=uma,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;361e1db0-19b4-4d83-9cb8-616dda8292b7&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans Cofig Api Uma Resource /jans-config-api/api/v1/attributes&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;iconUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://www.jans.io/img/scim_logo.png&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;[\&quot;inum=CACA-0B30,ou=scopes,o=jans\&quot;]&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;clients&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;inum=1801.6e8351d4-5d3f-4773-b632-6c84bf8207cd,ou=clients,o=jans&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;[\&quot;https://testjans.gluu.com/jans-config-api/api/v1/attributes\&quot;]&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;creator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=d206dd87-3a22-465d-bd25-bec9313cd42d,ou=people,o=json&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uma&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;deletable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;totalEntriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;entriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;entries&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=361e1db0-19b4-4d83-9cb8-616dda8292b7,ou=resources,ou=uma,o=jans&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;361e1db0-19b4-4d83-9cb8-616dda8292b7&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans Cofig Api Uma Resource /jans-config-api/api/v1/attributes&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;iconUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://www.jans.io/img/scim_logo.png&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;[\&quot;inum=CACA-0B30,ou=scopes,o=jans\&quot;]&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;clients&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;inum=1801.6e8351d4-5d3f-4773-b632-6c84bf8207cd,ou=clients,o=jans&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;[\&quot;https://testjans.gluu.com/jans-config-api/api/v1/attributes\&quot;]&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;creator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=d206dd87-3a22-465d-bd25-bec9313cd42d,ou=people,o=json&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uma&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;deletable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="get-oauth-uma-resource-by-id">Get Oauth UMA Resource by ID<a class="headerlink" href="#get-oauth-uma-resource-by-id" title="Permanent link">#</a></h2>
 <p>With <code>get-oauth-uma-resources-by-id</code> operation-id, we can get any specific
 uma Resource matched with <code>ID</code>. If we know the <code>ID</code>, we can simply use the below command:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-oauth-uma-resources-by-id <span class="se">\</span>
---url-suffix id:361e1db0-19b4-4d83-9cb8-616dda8292b7
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-oauth-uma-resources-by-id<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="w"> </span>id:361e1db0-19b4-4d83-9cb8-616dda8292b7
 </code></pre></div>
-<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=361e1db0-19b4-4d83-9cb8-616dda8292b7,ou=resources,ou=uma,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;361e1db0-19b4-4d83-9cb8-616dda8292b7&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans Cofig Api Uma Resource /jans-config-api/api/v1/attributes&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;iconUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://www.jans.io/img/scim_logo.png&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;[\&quot;inum=CACA-0B30,ou=scopes,o=jans\&quot;]&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;clients&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;inum=1801.6e8351d4-5d3f-4773-b632-6c84bf8207cd,ou=clients,o=jans&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;[\&quot;https://testjans.gluu.com/jans-config-api/api/v1/attributes\&quot;]&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;creator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=d206dd87-3a22-465d-bd25-bec9313cd42d,ou=people,o=json&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uma&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;deletable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=361e1db0-19b4-4d83-9cb8-616dda8292b7,ou=resources,ou=uma,o=jans&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;361e1db0-19b4-4d83-9cb8-616dda8292b7&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans Cofig Api Uma Resource /jans-config-api/api/v1/attributes&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iconUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://www.jans.io/img/scim_logo.png&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;[\&quot;inum=CACA-0B30,ou=scopes,o=jans\&quot;]&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;clients&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;inum=1801.6e8351d4-5d3f-4773-b632-6c84bf8207cd,ou=clients,o=jans&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;[\&quot;https://testjans.gluu.com/jans-config-api/api/v1/attributes\&quot;]&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;creator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=d206dd87-3a22-465d-bd25-bec9313cd42d,ou=people,o=json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uma&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;deletable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="patch-oauth-uma-resource-by-id">Patch OAuth UMA Resource by ID<a class="headerlink" href="#patch-oauth-uma-resource-by-id" title="Permanent link">#</a></h2>
 <p>Using <code>patch-oauth-uma-resources-by-id</code> operation, 
@@ -8935,33 +8935,33 @@ we can modify <code>UMA Resource</code> partially for its properties.</p>
 and the property and the new value using the <a href="https://jsonpatch.com/#the-patch">JSON Patch </a>.
 Refer <a href="https://docs.jans.io/vreplace-janssen-version/admin/config-guide/config-tools/jans-cli/#patch-request-schema">here</a> to know more about schema.</p>
 <p>In this example; We will change the value of the property <code>name</code> from <code>uma resource</code> to <code>UMA</code>.</p>
-<div class="highlight"><span class="filename">Input</span><pre><span></span><code><span class="p">[</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;UMA&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<div class="highlight"><span class="filename">Input</span><pre><span></span><code><span class="p">[</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;UMA&quot;</span>
+<span class="p">}</span>
+<span class="p">]</span>
 </code></pre></div>
 <p>Now let's do the operation with the command line.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id patch-oauth-uma-resources-by-id <span class="se">\</span>
---url-suffix id:c0204b2a-4047-4c2b-86a8-a088e2ee54de --data /tmp/patch-uma.json
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>patch-oauth-uma-resources-by-id<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="w"> </span>id:c0204b2a-4047-4c2b-86a8-a088e2ee54de<span class="w"> </span>--data<span class="w"> </span>/tmp/patch-uma.json
 </code></pre></div>
-<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=c0204b2a-4047-4c2b-86a8-a088e2ee54de,ou=resources,ou=uma,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c0204b2a-4047-4c2b-86a8-a088e2ee54de&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;UMA&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;iconUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://www.jans.io/img/scim_logo.png&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;clients&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;inum=1801.6e8351d4-5d3f-4773-b632-6c84bf8207cd,ou=clients,o=jans&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;[\&quot;https://testjans.gluu.com/jans-config-api/api/v1/config/cache/native-persistence\&quot;]&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;creator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=d206dd87-3a22-465d-bd25-bec9313cd42d,ou=people,o=json&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uma resource&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;deletable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=c0204b2a-4047-4c2b-86a8-a088e2ee54de,ou=resources,ou=uma,o=jans&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c0204b2a-4047-4c2b-86a8-a088e2ee54de&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;UMA&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iconUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://www.jans.io/img/scim_logo.png&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;clients&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;inum=1801.6e8351d4-5d3f-4773-b632-6c84bf8207cd,ou=clients,o=jans&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;[\&quot;https://testjans.gluu.com/jans-config-api/api/v1/config/cache/native-persistence\&quot;]&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;creator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=d206dd87-3a22-465d-bd25-bec9313cd42d,ou=people,o=json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uma resource&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;deletable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
 </code></pre></div></p>
 <p>We see it has replaced the value of the <code>name</code> property from <code>Jans Cofig Api Uma Resource</code> to <code>UMA</code>.</p>
 <p>Please read about <a href="../../config-tools/jans-cli/#quick-patch-operations">patch method</a>,
@@ -8972,82 +8972,82 @@ As shown in the <a href="#using-command-line">output</a> for <code>--info</code>
 <code>post-oauth-uma-resources</code> operation requires data to be sent
 according to <code>UmaResource</code> schema.</p>
 <p>To see the schema, use the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema UmaResource
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema<span class="w"> </span>UmaResource
 </code></pre></div>
 <p>The Janssen Server also provides an example of data that adheres to
 the above schema. To fetch the example, use the command below.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema-sample UmaResource
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--schema-sample<span class="w"> </span>UmaResource
 </code></pre></div>
 <p>Using the schema and the example above, we have added below data to the file <code>/tmp/uma.json</code>.</p>
-<p><div class="highlight"><span class="filename">Input</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans Cofig Api Uma&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;iconUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://www.jans.io/img/scim_logo.png&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;scopeExpression&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;clients&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;inum=b294adfd-b825-4e7f-9815-55d744002315,ou=clients,o=jans&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;https://testjans.gluu.com/jans-config-api/api/v1/config/cache/native-persistence&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;rev&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;creator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=d206dd87-3a22-465d-bd25-bec9313cd42d,ou=people,o=json&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uma resource&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;expirationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;deletable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<p><div class="highlight"><span class="filename">Input</span><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans Cofig Api Uma&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;iconUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://www.jans.io/img/scim_logo.png&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;scopeExpression&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;clients&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;inum=b294adfd-b825-4e7f-9815-55d744002315,ou=clients,o=jans&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;https://testjans.gluu.com/jans-config-api/api/v1/config/cache/native-persistence&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;rev&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;creator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=d206dd87-3a22-465d-bd25-bec9313cd42d,ou=people,o=json&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uma resource&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;expirationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;deletable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
 </code></pre></div>
 Now let's post this uma to the Janssen Server to be added to the existing set:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id post-oauth-uma-resources --data /tmp/uma.json
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>post-oauth-uma-resources<span class="w"> </span>--data<span class="w"> </span>/tmp/uma.json
 </code></pre></div>
 <h2 id="updates-an-uma-resource">Updates an UMA resource<a class="headerlink" href="#updates-an-uma-resource" title="Permanent link">#</a></h2>
 <p>To update the uma resource follow the steps below.</p>
 <ol>
 <li><a href="#get-oauth-uma-resource-by-id">Get Oauth UMA Resource by ID</a> and store it into a file for editing.
    The following command will retrieve the existing Uma resource in the schema file.
-  <div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli -no-color --operation-id get-oauth-uma-resources-by-id <span class="se">\</span>
---url-suffix id:c70c3b5c-d543-4dec-923c-4035bdce52bb &gt; /tmp/update-uma.json
+  <div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>-no-color<span class="w"> </span>--operation-id<span class="w"> </span>get-oauth-uma-resources-by-id<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="w"> </span>id:c70c3b5c-d543-4dec-923c-4035bdce52bb<span class="w"> </span>&gt;<span class="w"> </span>/tmp/update-uma.json
 </code></pre></div></li>
 <li>Edit and update the desired configuration values in the file while keeping other
    properties and values unchanged. Updates must adhere to the <code>UmaResource</code>
    schema as mentioned <a href="#using-command-line">here</a>.</li>
 <li>We have changed only the <code>true</code> to <code>false</code> for <code>deletable</code> in existing uma resource.
    Use the updated file to send the update to the Janssen Server using the command below
-   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id put-oauth-uma-resources --data /tmp/update-uma.json
+   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>put-oauth-uma-resources<span class="w"> </span>--data<span class="w"> </span>/tmp/update-uma.json
 </code></pre></div>
 This will updated the existing uma resource matched with id.</li>
 </ol>
 <h2 id="get-oauth-uma-resource-by-client-id">Get Oauth UMA Resource by Client id<a class="headerlink" href="#get-oauth-uma-resource-by-client-id" title="Permanent link">#</a></h2>
 <p>With <code>get-oauth-uma-resources-by-clientid</code> operation-id, we can get any specific
 uma Resource matched with <code>clientid</code>. If we know the <code>clientid</code>, we can simply use the below command:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-oauth-uma-resources-by-clientid <span class="se">\</span>
---url-suffix client id:361e1db0-19b4-4d83-9cb8-616dda8292b7
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-oauth-uma-resources-by-clientid<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="w"> </span>client<span class="w"> </span>id:361e1db0-19b4-4d83-9cb8-616dda8292b7
 </code></pre></div>
-<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=361e1db0-19b4-4d83-9cb8-616dda8292b7,ou=resources,ou=uma,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;361e1db0-19b4-4d83-9cb8-616dda8292b7&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans Cofig Api Uma Resource /jans-config-api/api/v1/attributes&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;iconUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://www.jans.io/img/scim_logo.png&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;[\&quot;inum=CACA-0B30,ou=scopes,o=jans\&quot;]&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;clients&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;inum=1801.6e8351d4-5d3f-4773-b632-6c84bf8207cd,ou=clients,o=jans&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;[\&quot;https://testjans.gluu.com/jans-config-api/api/v1/attributes\&quot;]&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;creator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=d206dd87-3a22-465d-bd25-bec9313cd42d,ou=people,o=json&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uma&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;deletable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=361e1db0-19b4-4d83-9cb8-616dda8292b7,ou=resources,ou=uma,o=jans&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;361e1db0-19b4-4d83-9cb8-616dda8292b7&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans Cofig Api Uma Resource /jans-config-api/api/v1/attributes&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iconUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://www.jans.io/img/scim_logo.png&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;[\&quot;inum=CACA-0B30,ou=scopes,o=jans\&quot;]&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;clients&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;inum=1801.6e8351d4-5d3f-4773-b632-6c84bf8207cd,ou=clients,o=jans&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;[\&quot;https://testjans.gluu.com/jans-config-api/api/v1/attributes\&quot;]&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;creator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=d206dd87-3a22-465d-bd25-bec9313cd42d,ou=people,o=json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uma&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;deletable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
 </code></pre></div>
 <h3 id="delete-uma-resource-by-id">Delete Uma Resource by <code>id</code><a class="headerlink" href="#delete-uma-resource-by-id" title="Permanent link">#</a></h3>
 <p>You can delete any Uma Resource by its <code>id</code> value.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id delete-oauth-uma-resources-by-id <span class="se">\</span>
---url-suffix id:c0204b2a-4047-4c2b-86a8-a088e2ee54de
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>delete-oauth-uma-resources-by-id<span class="w"> </span><span class="se">\</span>
+--url-suffix<span class="w"> </span>id:c0204b2a-4047-4c2b-86a8-a088e2ee54de
 </code></pre></div>
 <p>Just change the <code>id</code> to your own according to which one you want to delete.</p>
 

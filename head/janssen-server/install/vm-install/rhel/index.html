@@ -8743,11 +8743,11 @@ sudo yum -y module enable mod_auth_openidc
 <ul>
 <li>Download the GPG key zip file , unzip and import GPG key</li>
 </ul>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/files/11814522/automation-jans-public-gpg.zip
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/files/11814522/automation-jans-public-gpg.zip
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>unzip automation-jans-public-gpg.zip
+<div class="highlight"><pre><span></span><code>unzip<span class="w"> </span>automation-jans-public-gpg.zip
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>sudo rpm -import automation-jans-public-gpg.asc
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>rpm<span class="w"> </span>-import<span class="w"> </span>automation-jans-public-gpg.asc
 </code></pre></div>
 <ul>
 <li>Download the release package from the Github Janssen Project
@@ -8759,10 +8759,10 @@ sudo yum -y module enable mod_auth_openidc
 <li>
 <p>Verify integrity of the downloaded package using published <code>sha256sum</code>.</p>
 <p>Download <code>sha256sum</code> file for the package</p>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el8.x86_64.rpm.sha256sum -P ~/
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el8.x86_64.rpm.sha256sum<span class="w"> </span>-P<span class="w"> </span>~/
 </code></pre></div>
 <p>Check the hash if it is matching.</p>
-<div class="highlight"><pre><span></span><code>sha256sum -c jans-replace-janssen-version-stable-el8.x86_64.rpm.sha256sum
+<div class="highlight"><pre><span></span><code>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans-replace-janssen-version-stable-el8.x86_64.rpm.sha256sum
 </code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
 <div class="highlight"><pre><span></span><code>jans-replace-janssen-version-stable-el8.x86_64.rpm: OK
@@ -8791,7 +8791,7 @@ interactive mode.</p>
 <p>After the successful completion of setup process, <a href="../../install-faq/#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running">verify the system health</a>.</p>
 <h2 id="log-in-to-text-user-interface-tui">Log in to Text User Interface (TUI)<a class="headerlink" href="#log-in-to-text-user-interface-tui" title="Permanent link">#</a></h2>
 <p>Begin configuration by accessing the TUI with the following command:</p>
-<div class="highlight"><pre><span></span><code>jans tui
+<div class="highlight"><pre><span></span><code>jans<span class="w"> </span>tui
 </code></pre></div>
 <p>Full TUI documentation can be found <a href="../../../config-guide/config-tools/jans-tui/">here</a></p>
 <p>If you have selected casa during installation you can access casa using url<code>https://&lt;host&gt;/jans-casa</code></p>
@@ -8806,18 +8806,18 @@ HTTPS cofiguration file <code>https_jans.conf</code> as shown below:</p>
 <ul>
 <li>
 <p>Open <code>https_jans.conf</code> 
-  <div class="highlight"><pre><span></span><code>sudo vi /etc/httpd/conf.d/https_jans.conf
+  <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>vi<span class="w"> </span>/etc/httpd/conf.d/https_jans.conf
 </code></pre></div></p>
 </li>
 <li>
 <p>Update <code>SSLCertificateFile</code> and <code>SSLCertificateKeyFile</code> parameters values
-  <div class="highlight"><pre><span></span><code>SSLCertificateFile location_of_fullchain.pem
-SSLCertificateKeyFile location_of_privkey.pem
+  <div class="highlight"><pre><span></span><code>SSLCertificateFile<span class="w"> </span>location_of_fullchain.pem
+SSLCertificateKeyFile<span class="w"> </span>location_of_privkey.pem
 </code></pre></div></p>
 </li>
 <li>
 <p>Restart <code>httpd</code> service for changes to take effect
-  <div class="highlight"><pre><span></span><code>sudo service httpd restart
+  <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>service<span class="w"> </span>httpd<span class="w"> </span>restart
 </code></pre></div></p>
 </li>
 </ul>

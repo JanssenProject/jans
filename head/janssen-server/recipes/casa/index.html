@@ -8653,16 +8653,16 @@ Casa can be installed using the command below.  </p>
 <ul>
 <li>Download installer</li>
 </ul>
-<div class="highlight"><pre><span></span><code>  wget https://raw.githubusercontent.com/GluuFederation/flex/main/flex-linux-setup/flex_linux_setup/flex_setup.py  -O flex_setup.py
+<div class="highlight"><pre><span></span><code><span class="w">  </span>wget<span class="w"> </span>https://raw.githubusercontent.com/GluuFederation/flex/main/flex-linux-setup/flex_linux_setup/flex_setup.py<span class="w">  </span>-O<span class="w"> </span>flex_setup.py
 </code></pre></div>
 <ul>
 <li>Run the installer</li>
 </ul>
-<div class="highlight"><pre><span></span><code>python3 flex_setup.py
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>flex_setup.py
 </code></pre></div>
 <h3 id="automate-install">Automate install<a class="headerlink" href="#automate-install" title="Permanent link">#</a></h3>
 <p>If you have <code>setup.properties</code> file and want to automate installation, you can pass properties file as</p>
-<div class="highlight"><pre><span></span><code>python3 flex_setup.py -f /path/to/setup.properties -n -c
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>flex_setup.py<span class="w"> </span>-f<span class="w"> </span>/path/to/setup.properties<span class="w"> </span>-n<span class="w"> </span>-c
 </code></pre></div>
 <p>Minimal example setup.properties file:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">ip</span><span class="o">=</span><span class="m">10</span>.146.197.201
@@ -8715,7 +8715,7 @@ Casa can be installed using the command below.  </p>
 <p>At this point, users (<a href="../../config-guide/scim-config/user-config/#creating-a-new-user">How to create users</a> can log in to the Casa portal and <a href="https://gluu.org/docs/casa/4.4/user-guide/">enable/configure one or more authentication methods</a> for their account.</p>
 <h2 id="uninstalling-casa-from-janssen-server">Uninstalling Casa from Janssen Server<a class="headerlink" href="#uninstalling-casa-from-janssen-server" title="Permanent link">#</a></h2>
 <p>Execute following command to uninstall Casa from Janssen Server</p>
-<div class="highlight"><pre><span></span><code>python3 flex_setup.py -remove casa
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>flex_setup.py<span class="w"> </span>-remove<span class="w"> </span>casa
 </code></pre></div>
 
   <hr>
