@@ -32,8 +32,6 @@ type AssetMgtConfiguration struct {
 	AssetServerUploadEnabled       bool              `schema:"asset_server_upload_enabled" json:"assetServerUploadEnabled"`
 	FileExtensionValidationEnabled bool              `schema:"file_extension_validation_enabled" json:"fileExtensionValidationEnabled"`
 	ModuleNameValidationEnabled    bool              `schema:"module_name_validation_enabled" json:"moduleNameValidationEnabled"`
-	AssetBaseDirectory             string            `schema:"asset_base_directory" json:"assetBaseDirectory"`
-	JansServiceModule              []string          `schema:"jans_service_module" json:"jansServiceModule"`
 	AssetDirMappings               []AssetDirMapping `schema:"asset_dir_mappings" json:"assetDirMapping"`
 }
 
