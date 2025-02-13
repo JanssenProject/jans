@@ -8788,7 +8788,8 @@ permit(
   resource is gatewayDemo::HTTP_Request
 )
 when {
-((principal has &quot;access_token&quot;) &amp;&amp; ((principal[&quot;access_token&quot;]) has &quot;scope&quot;)) &amp;&amp; (((principal[&quot;access_token&quot;])[&quot;scope&quot;]).contains(&quot;profile&quot;))
+    principal has access_token.scope &amp;&amp;
+    principal.access_token.scope.contains(&quot;profile&quot;)
 };
 </code></pre></div></li>
 <li>This policy will allow access so long as the access token contains the <code>profile</code> scope.</li>
@@ -8849,7 +8850,7 @@ curl<span class="w"> </span>http://127.0.0.1:8080/protected<span class="w"> </sp
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-07T20:34:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-07</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-13T07:32:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-13</span>
       
         <br>
         Created:
