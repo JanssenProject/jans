@@ -13,8 +13,7 @@ use crate::bootstrap_config::BootstrapConfig;
 use crate::common::app_types;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt::{JwtService, JwtServiceInitError};
-use crate::lock::{AuditIntervals, LockService};
-use crate::log;
+use crate::log::LogStrategy;
 use std::sync::Arc;
 
 #[derive(Clone)]
@@ -23,8 +22,6 @@ pub(crate) struct ServiceFactory<'a> {
     service_config: ServiceConfig,
     // it is initialized before ServiceFactory is created
     pdp_id: app_types::PdpID,
-    log_service: log::Logger,
-
     container: SingletonContainer,
 }
 
@@ -33,7 +30,7 @@ pub(crate) struct ServiceFactory<'a> {
 struct SingletonContainer {
     jwt_service: Option<Arc<JwtService>>,
     authz_service: Option<Arc<Authz>>,
-    lock_service: Option<Arc<LockService>>,
+    log_service: Option<Arc<LogStrategy>>,
 }
 
 impl<'a> ServiceFactory<'a> {
@@ -41,13 +38,11 @@ impl<'a> ServiceFactory<'a> {
     pub fn new(
         bootstrap_config: &'a BootstrapConfig,
         service_config: ServiceConfig,
-        log_service: log::Logger,
         pdp_id: app_types::PdpID,
     ) -> Self {
         Self {
             bootstrap_config,
             service_config,
-            log_service,
             container: Default::default(),
             pdp_id,
         }
@@ -69,8 +64,17 @@ impl<'a> ServiceFactory<'a> {
     }
 
     // get log service
-    pub fn log_service(&mut self) -> log::Logger {
-        self.log_service.clone()
+    pub fn log_service(&mut self) -> Arc<LogStrategy> {
+        if let Some(log_service) = self.container.log_service.as_ref() {
+            log_service.clone()
+        } else {
+            let log_service = Arc::new(LogStrategy::new(
+                &self.bootstrap_config.log_config,
+                self.service_config.lock_client_config.clone(),
+            ));
+            self.container.log_service = Some(log_service.clone());
+            log_service
+        }
     }
 
     // get jwt service
@@ -103,35 +107,6 @@ impl<'a> ServiceFactory<'a> {
             self.container.authz_service = Some(service.clone());
             Ok(service)
         }
-    }
-
-    pub fn lock_service(&mut self) -> Option<Arc<LockService>> {
-        if let Some(lock) = self.container.lock_service.as_ref() {
-            return Some(lock.clone());
-        }
-
-        if !self.bootstrap_config.lock_config.enabled {
-            return None;
-        }
-
-        // we use .take() here so we don't accidentally create multiple instances
-        // for the same client we registered in the OAuth endpoint
-        if let Some(config) = self.service_config.lock_client_config.take() {
-            let audit_intervals = AuditIntervals {
-                log: self.bootstrap_config.lock_config.log_interval,
-                health: self.bootstrap_config.lock_config.health_interval,
-                telemetry: self.bootstrap_config.lock_config.telemetry_interval,
-            };
-            let lock_service = Some(Arc::new(LockService::new(
-                config,
-                audit_intervals,
-                self.log_service(),
-            )));
-            self.container.lock_service = lock_service.clone();
-            return lock_service;
-        }
-
-        None
     }
 }
 

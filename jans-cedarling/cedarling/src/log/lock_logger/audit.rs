@@ -3,17 +3,12 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-mod handle_health;
 mod handle_log;
-mod handle_telemetry;
-mod log_entry;
+mod log_store;
 
-use super::LockError;
-use super::LockService;
-use super::log_wrapper::Logger;
-use crate::init::service_config::LockConfig;
-use crate::log::interface::LogWriter;
-use log_entry::AuditLogEntry;
+use crate::LockLogConfig;
+use crate::init::service_config::LockClientConfig;
+use crate::log::fallback;
 use reqwest::Client;
 use serde::Serialize;
 use serde_json::Value;
@@ -22,17 +17,14 @@ use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 
-pub struct AuditIntervals {
-    pub log: u64,
-    pub health: u64,
-    pub telemetry: u64,
-}
+use super::{LockLogger, LockLoggerError};
 
 #[derive(Serialize)]
+#[allow(dead_code)]
 pub enum AuditMsg {
     Log(Value),
-    Health(AuditMsgContent),
-    Telemetry(AuditMsgContent),
+    Health(Value),
+    Telemetry(Value),
 }
 
 impl AuditMsg {
@@ -49,63 +41,44 @@ impl AuditMsg {
     }
 }
 
-#[derive(Serialize)]
-pub struct AuditMsgContent {
-    client_id: String,
-    message: String,
-    result_code: i32,
-}
-
-impl LockService {
+impl LockLogger {
     pub fn init_audit(
-        client_creds: LockConfig,
-        audit_intervals: AuditIntervals,
-        logger: Logger,
+        lock_config: LockLogConfig,
+        client_config: LockClientConfig,
         cancellation_tkn: CancellationToken,
-    ) -> TaskTracker {
+    ) -> (TaskTracker, mpsc::Sender<Value>) {
         let tracker = TaskTracker::new();
-        let (client_tx, client_rx) = mpsc::channel::<AuditMsg>(100);
+        let (http_client_tx, http_client_rx) = mpsc::channel::<AuditMsg>(100);
+        let (log_tx, log_rx) = mpsc::channel::<Value>(100);
 
-        // Task for handling logs
-        tracker.spawn(Self::handle_log(
-            client_tx.clone(),
-            Duration::from_secs(audit_intervals.log),
-            logger.clone(),
-            cancellation_tkn.clone(),
-        ));
-
-        // Task for handling health checks
-        tracker.spawn(Self::handle_health(
-            client_tx.clone(),
-            Duration::from_secs(audit_intervals.health),
-        ));
-
-        // Task for handling telemetry
-        tracker.spawn(Self::handle_telemetry(
-            client_tx.clone(),
-            Duration::from_secs(audit_intervals.telemetry),
-        ));
+        // Spawn task for handling logs
+        if lock_config.log_interval > 0 {
+            tracker.spawn(Self::handle_log(
+                http_client_tx.clone(),
+                Duration::from_secs(lock_config.log_interval),
+                log_rx,
+                cancellation_tkn.clone(),
+            ));
+        }
 
         // Task for handling sending http requests
         tracker.spawn(Self::handle_http_requests(
-            client_creds,
-            client_rx,
+            client_config,
+            http_client_rx,
             cancellation_tkn,
-            logger,
         ));
 
         tracker.close();
 
-        tracker
+        (tracker, log_tx)
     }
 
     /// `POST`s messages send to the `/audit` endpoints
     async fn handle_http_requests(
-        client_creds: LockConfig,
+        client_creds: LockClientConfig,
         mut audit_rx: mpsc::Receiver<AuditMsg>,
         cancellation_tkn: CancellationToken,
-        logger: Logger,
-    ) -> Result<(), LockError> {
+    ) -> Result<(), LockLoggerError> {
         let client = Client::new();
 
         while let Some(msg) = audit_rx.recv().await {
@@ -113,21 +86,19 @@ impl LockService {
             let uri = client_creds.audit_uri.clone() + audit_endpoint;
             let msg_json = serde_json::ser::to_string(&msg)?;
 
-            logger.log_any(AuditLogEntry::new_http_debug(&msg));
-
             let result = client
-                .post(uri)
+                .post(&uri)
                 .bearer_auth(&client_creds.access_token)
                 .body(msg_json)
                 .send()
                 .await;
 
             if let Err(err) = &result {
-                logger.log_any(AuditLogEntry::new_http_err(&msg, &err.to_string()));
+                fallback::log(&format!("failed to send http request to \"{uri}\": {err}"));
             }
 
             if let Err(err) = result.unwrap().error_for_status() {
-                logger.log_any(AuditLogEntry::new_http_err(&msg, &err.to_string()));
+                fallback::log(&format!("failed to send http request to \"{uri}\": {err}"));
             }
         }
 
@@ -141,9 +112,9 @@ impl LockService {
                         .body(msg_json)
                         .send()
                         .await
-                        .map_err(LockError::HttpRequestFailed)?
+                        .map_err(LockLoggerError::HttpRequestFailed)?
                         .error_for_status()
-                        .map_err(LockError::HttpErrResponse)?;
+                        .map_err(LockLoggerError::HttpErrResponse)?;
                 }
                 _ = cancellation_tkn.cancelled() => break,
                 else => break,

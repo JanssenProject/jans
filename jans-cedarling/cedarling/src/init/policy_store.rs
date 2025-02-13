@@ -15,7 +15,7 @@ use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStor
 use crate::common::policy_store::{AgamaPolicyStore, PolicyStoreWithID};
 use crate::http::{HttpClient, HttpClientError};
 
-use super::service_config::LockConfig;
+use super::service_config::LockClientConfig;
 
 /// Errors that can occur when loading a policy store.
 #[derive(Debug, thiserror::Error)]
@@ -112,7 +112,7 @@ fn extract_first_policy_store(
 /// This function supports multiple sources for loading policies.
 pub(crate) async fn load_policy_store(
     config: &PolicyStoreConfig,
-) -> Result<(PolicyStoreWithID, Option<LockConfig>), PolicyStoreLoadError> {
+) -> Result<(PolicyStoreWithID, Option<LockClientConfig>), PolicyStoreLoadError> {
     match &config.source {
         PolicyStoreSource::Json(policy_json) => {
             let agama_policy_store = serde_json::from_str::<AgamaPolicyStore>(policy_json)
@@ -146,7 +146,7 @@ pub(crate) async fn load_policy_store(
             let policy_store = extract_first_policy_store(&agama_policy_store)?;
             Ok((policy_store, None))
         },
-        PolicyStoreSource::Uri(uri) => load_policy_store_from_uri(uri).await,
+        PolicyStoreSource::Uri(uri) => Ok((load_policy_store_from_uri(uri).await?, None)),
     }
 }
 
@@ -156,7 +156,7 @@ async fn load_policy_store_from_lock_master(
     config_uri: &str,
     policy_store_id: &str,
     jwks: &Option<String>,
-) -> Result<(PolicyStoreWithID, Option<LockConfig>), PolicyStoreLoadError> {
+) -> Result<(PolicyStoreWithID, Option<LockClientConfig>), PolicyStoreLoadError> {
     const SCOPE: &str = "cedarling";
 
     let client = Client::new();
@@ -314,7 +314,7 @@ async fn load_policy_store_from_lock_master(
 
     Ok((
         policy_store,
-        Some(LockConfig {
+        Some(LockClientConfig {
             client_id: client_id.to_string(),
             access_token: access_token.to_string(),
             audit_uri: audit_uri.to_string(),
@@ -326,13 +326,11 @@ async fn load_policy_store_from_lock_master(
 /// Loads the policy store from a URI
 ///
 /// The URI is from the `CEDARLING_POLICY_STORE_URI` bootstrap property.
-async fn load_policy_store_from_uri(
-    uri: &str,
-) -> Result<(PolicyStoreWithID, Option<LockConfig>), PolicyStoreLoadError> {
+async fn load_policy_store_from_uri(uri: &str) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     let client = HttpClient::new(3, Duration::from_secs(3))?;
     let agama_policy_store = client.get(uri).await?.json::<AgamaPolicyStore>()?;
     let policy_store = extract_first_policy_store(&agama_policy_store)?;
-    Ok((policy_store, None))
+    Ok(policy_store)
 }
 
 #[cfg(test)]

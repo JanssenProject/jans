@@ -41,7 +41,6 @@ use common::app_types;
 use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
-use lock::LockService;
 use log::interface::LogWriter;
 use log::{LogEntry, LogType};
 pub use log::{LogLevel, LogStorage};
@@ -80,7 +79,6 @@ pub enum InitCedarlingError {
 pub struct Cedarling {
     log: log::Logger,
     authz: Arc<Authz>,
-    lock_service: Option<Arc<LockService>>,
 }
 
 impl Cedarling {
@@ -97,20 +95,32 @@ impl Cedarling {
 
     /// Create a new instance of the Cedarling application.
     pub async fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
-        let log = log::init_logger(&config.log_config);
+        // The "lock" logger needs to authenticate with the lock server so we
+        // cannot initialize it here. But seeing that we are logging here, we'll
+        // default to the StdOut logger for for the startup.
+        //
+        // a new logger will be instance will be initialized in the service
+        // factory
+        let fallback_logger = log::init_logger(
+            &LogConfig {
+                log_type: LogTypeConfig::StdOut,
+                log_level: config.log_config.log_level,
+            },
+            None,
+        );
         let pdp_id = app_types::PdpID::new();
 
         let service_config = ServiceConfig::new(config)
             .await
             .inspect(|_| {
-                log.log_any(
+                fallback_logger.log_any(
                     LogEntry::new_with_data(pdp_id, None, LogType::System, None)
                         .set_level(LogLevel::DEBUG)
                         .set_message("configuration parsed successfully".to_string()),
                 )
             })
             .inspect_err(|err| {
-                log.log_any(
+                fallback_logger.log_any(
                     LogEntry::new_with_data(pdp_id, None, LogType::System, None)
                         .set_error(err.to_string())
                         .set_level(LogLevel::ERROR)
@@ -118,14 +128,11 @@ impl Cedarling {
                 )
             })?;
 
-        let mut service_factory = ServiceFactory::new(config, service_config, log.clone(), pdp_id);
-
-        let lock_service = service_factory.lock_service();
+        let mut service_factory = ServiceFactory::new(config, service_config, pdp_id);
 
         Ok(Cedarling {
-            log,
+            log: fallback_logger,
             authz: service_factory.authz_service().await?,
-            lock_service,
         })
     }
 
@@ -148,9 +155,7 @@ impl Cedarling {
 
     /// Closes connections to the lock server
     pub async fn close_lock_connections(&self) {
-        if let Some(lock_service) = self.lock_service.as_ref() {
-            lock_service.close().await;
-        }
+        self.log.close_lock_connections().await
     }
 }
 

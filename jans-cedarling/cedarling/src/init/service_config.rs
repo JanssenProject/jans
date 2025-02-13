@@ -14,13 +14,13 @@ use bootstrap_config::BootstrapConfig;
 #[derive(Clone)]
 pub(crate) struct ServiceConfig {
     pub policy_store: PolicyStoreWithID,
-    pub lock_client_config: Option<LockConfig>,
+    pub lock_client_config: Option<LockClientConfig>,
 }
 
 /// Config from `/.well-known/lock-configuration` and info from the
 /// IDP's DCR.
-#[derive(Clone)]
-pub(crate) struct LockConfig {
+#[derive(Debug, Clone, PartialEq)]
+pub(crate) struct LockClientConfig {
     pub client_id: String,
     pub access_token: String,
     pub audit_uri: String,

@@ -44,7 +44,7 @@ pub fn log(msg: &str) {
         log_level: LogLevel::TRACE,
     };
     // This should always be a LogStrategy::StdOut(StdOutLogger)
-    let log_strategy = crate::log::LogStrategy::new(&log_config);
+    let log_strategy = crate::log::LogStrategy::new(&log_config, None);
     use crate::log::interface::LogWriter;
     // a string is always serializable
     log_strategy.log_any(StrWrap(msg))

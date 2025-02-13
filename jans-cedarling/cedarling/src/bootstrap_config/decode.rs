@@ -53,7 +53,11 @@ impl BootstrapConfig {
                     .ok_or(BootstrapConfigLoadingError::MissingLogTTL)?,
             }),
             LoggerType::StdOut => LogTypeConfig::StdOut,
-            LoggerType::Lock => LogTypeConfig::Lock,
+            LoggerType::Lock => LogTypeConfig::Lock(super::LockLogConfig {
+                log_interval: raw.audit_log_interval,
+                health_interval: raw.audit_health_interval,
+                telemetry_interval: raw.audit_health_telemetry_interval,
+            }),
         };
         let log_config = LogConfig {
             log_type,

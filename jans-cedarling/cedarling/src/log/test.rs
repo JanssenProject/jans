@@ -28,7 +28,7 @@ fn test_new_log_strategy_off() {
     };
 
     // Act
-    let strategy = LogStrategy::new(&config);
+    let strategy = LogStrategy::new(&config, None);
 
     // Assert
     assert!(matches!(strategy, LogStrategy::Off(_)));
@@ -43,7 +43,7 @@ fn test_new_log_strategy_memory() {
     };
 
     // Act
-    let strategy = LogStrategy::new(&config);
+    let strategy = LogStrategy::new(&config, None);
 
     // Assert
     assert!(matches!(strategy, LogStrategy::MemoryLogger(_)));
@@ -58,7 +58,7 @@ fn test_new_logstrategy_stdout() {
     };
 
     // Act
-    let strategy = LogStrategy::new(&config);
+    let strategy = LogStrategy::new(&config, None);
 
     // Assert
     assert!(matches!(strategy, LogStrategy::StdOut(_)));
@@ -71,7 +71,7 @@ fn test_log_memory_logger() {
         log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
         log_level: crate::LogLevel::TRACE,
     };
-    let strategy = LogStrategy::new(&config);
+    let strategy = LogStrategy::new(&config, None);
     let entry = LogEntry {
         base: BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision, gen_uuid7()),
         application_id: Some("test_app".to_string().into()),
