@@ -96,9 +96,7 @@ impl Cedarling {
     /// Create a new instance of the Cedarling application.
     pub async fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
         let pdp_id = app_types::PdpID::new();
-        let app_name = config
-            .application_name
-            .is_empty()
+        let app_name = (!config.application_name.is_empty())
             .then(|| ApplicationName(config.application_name.clone()));
         let log = log::init_logger(&config.log_config, pdp_id, app_name);
 
