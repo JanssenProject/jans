@@ -79,13 +79,7 @@ mod fallback {
             Some(LogLevel::TRACE)
         }
 
-        fn to_json_with_client_info(
-            self,
-            // Seems like we only use StrWrap for error messages so we'll just
-            // ignore pdp_id and app_name here
-            _pdp_id: &PdpID,
-            _app_name: &Option<ApplicationName>,
-        ) -> Value {
+        fn to_value(&self) -> Value {
             json!(self)
         }
     }
@@ -118,7 +112,7 @@ impl LogWriter for MemoryLogger {
 
         let entry_id = entry.get_id().to_string();
         let index_keys = entry.get_index_keys();
-        let json = entry.to_json_with_client_info(&self.pdp_id, &self.app_name);
+        let json = entry.to_value();
 
         let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
 
@@ -241,8 +235,8 @@ mod tests {
         logger.log_any(entry1.clone());
         logger.log_any(entry2.clone());
 
-        let entry1_json = entry1.clone().to_json_with_client_info(&pdp_id, &app_name);
-        let entry2_json = entry2.clone().to_json_with_client_info(&pdp_id, &app_name);
+        let entry1_json = entry1.clone().to_value();
+        let entry2_json = entry2.clone().to_value();
 
         // check that we have two entries in the log database
         assert_eq!(logger.get_log_ids().len(), 2);
@@ -284,8 +278,8 @@ mod tests {
         logger.log_any(entry1.clone());
         logger.log_any(entry2.clone());
 
-        let entry1_json = entry1.clone().to_json_with_client_info(&pdp_id, &app_name);
-        let entry2_json = entry2.clone().to_json_with_client_info(&pdp_id, &app_name);
+        let entry1_json = entry1.clone().to_value();
+        let entry2_json = entry2.clone().to_value();
 
         // check that we have two entries in the log database
         let logs = logger.pop_logs();

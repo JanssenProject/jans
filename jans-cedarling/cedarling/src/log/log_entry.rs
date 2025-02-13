@@ -15,9 +15,7 @@ use uuid7::Uuid;
 
 use super::LogLevel;
 use super::interface::{Indexed, Loggable};
-use crate::app_types::PdpID;
 use crate::bootstrap_config::AuthorizationConfig;
-use crate::common::app_types::ApplicationName;
 use crate::common::policy_store::PoliciesContainer;
 use crate::jwt::Token;
 
@@ -107,13 +105,8 @@ impl Loggable for LogEntry {
         self.base.get_log_level()
     }
 
-    fn to_json_with_client_info(self, pdp_id: &PdpID, app_name: &Option<ApplicationName>) -> Value {
-        let mut json = json!(self);
-        json["pdp_id"] = json!(pdp_id);
-        if let Some(app_name) = app_name.as_ref() {
-            json["application_id"] = json!(app_name);
-        }
-        json
+    fn to_value(&self) -> Value {
+        json!(self)
     }
 }
 
@@ -382,13 +375,8 @@ impl Loggable for &DecisionLogEntry<'_> {
         self.base.get_log_level()
     }
 
-    fn to_json_with_client_info(self, pdp_id: &PdpID, app_name: &Option<ApplicationName>) -> Value {
-        let mut json = json!(self);
-        json["pdp_id"] = json!(pdp_id);
-        if let Some(app_name) = app_name.as_ref() {
-            json["application_id"] = json!(app_name);
-        }
-        json
+    fn to_value(&self) -> Value {
+        json!(self)
     }
 }
 
@@ -500,13 +488,8 @@ impl Loggable for BaseLogEntry {
         self.level
     }
 
-    fn to_json_with_client_info(self, pdp_id: &PdpID, app_name: &Option<ApplicationName>) -> Value {
-        let mut json = json!(self);
-        json["pdp_id"] = json!(pdp_id);
-        if let Some(app_name) = app_name.as_ref() {
-            json["application_id"] = json!(app_name);
-        }
-        json
+    fn to_value(&self) -> Value {
+        json!(self)
     }
 }
 

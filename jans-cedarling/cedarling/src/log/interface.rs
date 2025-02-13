@@ -9,8 +9,6 @@
 use serde_json::Value;
 use uuid7::Uuid;
 
-use crate::app_types::{ApplicationName, PdpID};
-
 use super::LogLevel;
 
 /// Log Writer
@@ -89,8 +87,8 @@ pub(crate) trait Loggable: serde::Serialize + Indexed {
         }
     }
 
-    /// Serializes the entry to a JSON [`serde_json::Value`] together with the given client info
-    fn to_json_with_client_info(self, pdp_id: &PdpID, app_name: &Option<ApplicationName>) -> Value;
+    /// Serializes the entry to a [`serde_json::Value`]
+    fn to_value(&self) -> Value;
 }
 
 /// Log Storage
