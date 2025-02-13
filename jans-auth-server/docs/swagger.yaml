@@ -4400,6 +4400,152 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
 
+  /internal/stat:
+    get:
+      tags:
+        - Internal Statistic
+      summary: Get Internal Statistic
+      description: |-
+        # Get Internal Statistic.
+        ----
+
+        **Security: Bearer Auth**
+
+        Provide your bearer token in the Authorization header when making requests to protected resources.
+
+        Example: `Authorization: Bearer {{your-access-token}}`
+
+        **Security: OAuth 2.0**
+
+        Scopes:
+        - `jans_stat` - required scope
+      operationId: get-internal-stat
+      security:
+        - bearer: [ ]
+      parameters:
+        - name: Authorization
+          in: header
+          description: Expects valid access token with appropriate prefix. Example 'Bearer {{your-access-token}}'. Token must have `jans_stat` scope.
+          schema:
+            type: string
+        - name: month
+          in: query
+          required: false
+          description: specify month in YYYYMM format (e.g. `January 2022` is `202201`). It's optional if start-month and end-month parameters are specified. Otherwise it's required.
+          schema:
+            type: string
+        - name: start-month
+          in: query
+          required: false
+          description: start month for range request. Specify month in YYYYMM format (e.g. `January 2022` is `202201`). It's optional if 'month' parameter is specified. Otherwise it's required.
+          schema:
+            type: string
+        - name: end-month
+          in: query
+          required: false
+          description: end month for range request. Specify month in YYYYMM format (e.g. `January 2022` is `202201`). It's optional if 'month' parameter is specified. Otherwise it's required.
+          schema:
+            type: string
+        - name: format
+          in: query
+          required: false
+          description: if no value is specified than json value is returns. Possible explicit values are `openmetrics` (open metrics format) and `jsonmonth` (all data are flattened for given month)
+          schema:
+            type: string
+
+      responses:
+        200:
+          description: Successful response with internal statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        monthly_active_users:
+                          type: integer
+                          description: Number of active users for the month.
+                        token_count_per_granttype:
+                          type: object
+                          additionalProperties:
+                            type: object
+                            properties:
+                              access_token:
+                                type: integer
+                                description: Number of access tokens issued.
+                              refresh_token:
+                                type: integer
+                                description: Number of refresh tokens issued.
+                              uma_token:
+                                type: integer
+                                description: Number of UMA tokens issued.
+                              id_token:
+                                type: integer
+                                description: Number of ID tokens issued.
+        400:
+          description: Invalid parameters provided to endpoint.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - error
+                  - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                      - invalid_request
+                  error_description:
+                    type: string
+                  details:
+                    type: string
+        401:
+          description: Request is rejected due to invalid authorization.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - error
+                  - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                      - invalid_token
+                  error_description:
+                    type: string
+                  details:
+                    type: string
+        403:
+          description: Request is forbiden due to insufficient authorization (typically due to 'jans_stat' scope).
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - error
+                  - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                      - insufficient_scope
+                  error_description:
+                    type: string
+                  details:
+                    type: string
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
   /ssa:
     post:
       tags:
