@@ -18,7 +18,6 @@ mod common;
 mod http;
 mod init;
 mod jwt;
-mod lock;
 mod log;
 
 #[cfg(not(target_arch = "wasm32"))]
