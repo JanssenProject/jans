@@ -5,7 +5,7 @@
 
 use crate::authorization_config::IdTokenTrustMode;
 use crate::raw_config::token_settings::TokenConfigs;
-use crate::{AuthorizationConfig, JwtConfig, WorkloadBoolOp};
+use crate::{AuthorizationConfig, JwtConfig, LockConfig, WorkloadBoolOp};
 pub use crate::{
     BootstrapConfig, BootstrapConfigRaw, Cedarling, FeatureToggle, LogConfig, LogTypeConfig,
     PolicyStoreConfig, PolicyStoreSource,
@@ -63,6 +63,7 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        lock_config: LockConfig::default(),
     }
 }
 
@@ -89,6 +90,7 @@ pub async fn get_cedarling_with_authorization_conf(
         },
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: auth_conf,
+        lock_config: LockConfig::default(),
     })
     .await
     .expect("bootstrap config should initialize correctly")

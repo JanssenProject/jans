@@ -4,9 +4,9 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LogConfig,
-    LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
-    TokenValidationConfig, WorkloadBoolOp,
+    AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LockConfig,
+    LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request,
+    ResourceData, TokenValidationConfig, WorkloadBoolOp,
 };
 use std::collections::{HashMap, HashSet};
 
@@ -52,6 +52,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .into(),
             ..Default::default()
         },
+        lock_config: LockConfig::default(),
     })
     .await?;
 

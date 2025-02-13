@@ -4,10 +4,12 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::interface::{LogStorage, LogWriter, Loggable};
+use super::lock_logger::LockLogger;
 use super::memory_logger::MemoryLogger;
 use super::nop_logger::NopLogger;
 use super::stdout_logger::StdOutLogger;
 use crate::bootstrap_config::log_config::{LogConfig, LogTypeConfig};
+use crate::init::service_config::LockClientConfig;
 
 /// LogStrategy implements strategy pattern for logging.
 /// It is used to provide a single point of access for logging and same api for different loggers.
@@ -15,19 +17,32 @@ pub(crate) enum LogStrategy {
     Off(NopLogger),
     MemoryLogger(MemoryLogger),
     StdOut(StdOutLogger),
+    Lock(LockLogger),
 }
 
 impl LogStrategy {
     /// Creates a new `LogStrategy` based on the provided configuration.
     /// Initializes the corresponding logger accordingly.
-    pub fn new(config: &LogConfig) -> Self {
-        match config.log_type {
+    pub fn new(log_config: &LogConfig, lock_client_config: Option<LockClientConfig>) -> Self {
+        match &log_config.log_type {
             LogTypeConfig::Off => Self::Off(NopLogger),
             LogTypeConfig::Memory(memory_config) => {
-                Self::MemoryLogger(MemoryLogger::new(memory_config, config.log_level))
+                Self::MemoryLogger(MemoryLogger::new(*memory_config, log_config.log_level))
             },
-            LogTypeConfig::StdOut => Self::StdOut(StdOutLogger::new(config.log_level)),
-            LogTypeConfig::Lock => todo!(),
+            LogTypeConfig::StdOut => Self::StdOut(StdOutLogger::new(log_config.log_level)),
+            LogTypeConfig::Lock(lock_config) => Self::Lock(LockLogger::new(
+                log_config.log_level,
+                *lock_config,
+                lock_client_config
+                    .expect("the lock logger requires lock client configs to function"),
+            )),
+        }
+    }
+
+    /// Closes connections to the lock server
+    pub async fn close_lock_connections(&self) {
+        if let LogStrategy::Lock(lock_logger) = self {
+            lock_logger.close().await
         }
     }
 }
@@ -39,6 +54,7 @@ impl LogWriter for LogStrategy {
             LogStrategy::Off(log) => log.log_any(entry),
             LogStrategy::MemoryLogger(memory_logger) => memory_logger.log_any(entry),
             LogStrategy::StdOut(std_out_logger) => std_out_logger.log_any(entry),
+            LogStrategy::Lock(lock_logger) => lock_logger.log_any(entry),
         }
     }
 }

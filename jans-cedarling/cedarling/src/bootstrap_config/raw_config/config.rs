@@ -41,7 +41,7 @@ pub struct BootstrapConfigRaw {
 
     /// An identifier for the policy store.
     #[serde(rename = "CEDARLING_POLICY_STORE_ID", default)]
-    pub policy_store_id: String,
+    pub policy_store_id: Option<String>,
 
     /// How the Logs will be presented.
     #[serde(rename = "CEDARLING_LOG_TYPE", default)]
@@ -307,7 +307,7 @@ mod tests {
                 "Policy store URI should be None by default"
             );
             assert_eq!(
-                config.policy_store_id, "",
+                config.policy_store_id, None,
                 "Policy store ID should be empty by default"
             );
             assert_eq!(

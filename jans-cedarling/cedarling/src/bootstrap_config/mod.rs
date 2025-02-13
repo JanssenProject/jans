@@ -10,6 +10,7 @@ mod decode;
 
 pub(crate) mod authorization_config;
 pub(crate) mod jwt_config;
+pub(crate) mod lock_config;
 pub(crate) mod log_config;
 pub(crate) mod policy_store_config;
 pub(crate) mod raw_config;
@@ -19,6 +20,7 @@ use std::{fs, io, path::Path};
 
 pub use authorization_config::{AuthorizationConfig, IdTokenTrustMode};
 pub use jwt_config::*;
+pub use lock_config::*;
 pub use log_config::*;
 pub use policy_store_config::*;
 pub use raw_config::{BootstrapConfigRaw, FeatureToggle, LoggerType, WorkloadBoolOp};
@@ -38,6 +40,8 @@ pub struct BootstrapConfig {
     pub jwt_config: JwtConfig,
     /// A set of properties used to configure authorization workflow in the `Cedarling` application.
     pub authorization_config: AuthorizationConfig,
+    /// Contains configuration for the Lock Server integration
+    pub lock_config: LockConfig,
 }
 
 impl BootstrapConfig {
@@ -155,6 +159,18 @@ pub enum BootstrapConfigLoadingError {
          simultaneously."
     )]
     BothPrincipalsDisabled,
+
+    /// Error returned when lock integration is enabled but no configuration URI was supplied
+    #[error("`CEDARLING_LOCK` is enabled but `CEDARLING_LOCK_MASTER_CONFIGURATION_URI` is not set")]
+    LockMissingConfigUri,
+
+    /// Error returned when lock integration is enabled but no policy store ID was supplied
+    #[error("`CEDARLING_LOCK` is enabled but `CEDARLING_POLICY_STORE_ID` is not set")]
+    LockMissingPolicyStoreId,
+
+    /// Error returned when lock integration is enabled but no SSA JWT was supplied
+    #[error("`CEDARLING_LOCK` is enabled but `CEDARLING_LOCK_SSA_JWT` is not set")]
+    LockMissingSsaJwt,
 }
 
 #[cfg(test)]
@@ -228,6 +244,7 @@ mod test {
                 decision_log_default_jwt_id: "jti".to_string(),
                 ..Default::default()
             },
+            lock_config: LockConfig::default(),
         };
 
         assert_eq!(deserialized, expected);
@@ -294,6 +311,7 @@ mod test {
                 decision_log_default_jwt_id: "jti".to_string(),
                 ..Default::default()
             },
+            lock_config: LockConfig::default(),
         };
 
         assert_eq!(deserialized, expected);
