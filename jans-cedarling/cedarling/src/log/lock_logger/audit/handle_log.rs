@@ -19,6 +19,7 @@ impl LockLogger {
         mut log_rx: mpsc::Receiver<Value>,
         cancellation_tkn: CancellationToken,
     ) -> Result<(), LockLoggerError> {
+        println!("log handle started");
         let mut log_store = LogStore::new();
         let mut log_interval = tokio::time::interval(period);
 
@@ -28,7 +29,10 @@ impl LockLogger {
                 _ = log_interval.tick() => {
                     let batch = log_store.batch();
                     if batch.is_empty() {
+                        println!("batch is empty");
                         continue;
+                    } else {
+                        println!("sending batch");
                     }
                     let logs_json = batch.json();
                     if http_client_tx.send(AuditMsg::Log(logs_json)).await.is_err() {

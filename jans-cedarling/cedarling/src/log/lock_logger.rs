@@ -12,7 +12,6 @@ use crate::log::fallback;
 use crate::{LockLogConfig, LogWriter};
 use serde_json::Value;
 use tokio::sync::mpsc;
-use tokio::task::spawn_blocking;
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 
@@ -64,13 +63,11 @@ impl LogWriter for LockLogger {
         };
 
         let tx = self.log_tx.clone();
-        spawn_blocking(move || send_log(tx, entry));
-    }
-}
-
-async fn send_log(log_tx: mpsc::Sender<Value>, entry: Value) {
-    if let Err(err) = log_tx.send(entry).await {
-        fallback::log(&format!("failed to send logs to the lock server: {err}"));
+        tokio::spawn(async move {
+            if let Err(err) = tx.send(entry).await {
+                fallback::log(&format!("failed to send logs to the lock server: {err}"));
+            }
+        });
     }
 }
 
@@ -86,27 +83,60 @@ pub enum LockLoggerError {
 
 #[cfg(test)]
 mod test {
+    use std::time::Duration;
+
     use super::LockLogger;
+    use crate::app_types::PdpID;
     use crate::init::service_config::LockClientConfig;
-    use crate::{LockLogConfig, LogLevel};
+    use crate::log::LogEntry;
+    use crate::{LockLogConfig, LogLevel, LogWriter};
+    use mockito::Server;
     use tokio::test;
 
     #[test]
     async fn can_push_logs_to_the_lock_server() {
-        let _logger = LockLogger::new(
+        let mut server = Server::new_async().await;
+        let audit_endpoint = "/audit";
+        let sse_endpoint = "/sse";
+        let audit_uri = format!("{}{}", server.url(), audit_endpoint);
+        let sse_uri = format!("{}{}", server.url(), sse_endpoint);
+
+        let audit_endpoint = server
+            .mock("POST", format!("{audit_endpoint}/log").as_str())
+            .with_status(200)
+            .match_request(|req| {
+                let header = req.header("Authorization");
+                let header_val = header[0].to_str().expect("header value should be a string");
+                header.len() == 1 && header_val == "Bearer some.access.tkn"
+            })
+            .expect(1)
+            .create();
+
+        let logger = LockLogger::new(
             LogLevel::TRACE,
             LockLogConfig {
-                log_interval: 0,
+                log_interval: 1,
                 health_interval: 0,
                 telemetry_interval: 0,
             },
             LockClientConfig {
                 client_id: "someclientid".to_string(),
                 access_token: "some.access.tkn".to_string(),
-                audit_uri: "/audit".to_string(),
-                sse_uri: "/sse".to_string(),
+                audit_uri,
+                sse_uri,
             },
         );
-        todo!()
+
+        logger.log_any(LogEntry::new_with_data(
+            PdpID::new(),
+            None,
+            crate::log::LogType::Decision,
+            None,
+        ));
+
+        // sleep for 1.1 secs so the log can send
+        tokio::time::sleep(Duration::new(1, 1000000000)).await;
+
+        audit_endpoint.assert_async().await;
     }
 }
