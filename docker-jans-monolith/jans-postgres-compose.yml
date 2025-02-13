@@ -14,7 +14,7 @@ services:
       POSTGRES_PASSWORD: 1t5Fin3#security
       POSTGRES_DB: jans
   jans:
-    image: ${JANSSEN_IMAGE:-ghcr.io/janssenproject/jans/monolith:0.0.0-nightly}
+    image: ${JANSSEN_IMAGE:-ghcr.io/janssenproject/jans/monolith:1.4.0-1}
     restart: always
     ports:
       - "443:443"
@@ -39,7 +39,6 @@ services:
       - CN_INSTALL_KC_LINK=true
       - CN_INSTALL_LOCK=true
       - CN_INSTALL_SAML=false
-      - CN_INSTALL_OPA=true
       - TEST_CLIENT_ID=9876baac-de39-4c23-8a78-674b59df8c09
       - TEST_CLIENT_TRUSTED=true
       - TEST_CLIENT_SECRET=1t5Fin3#security

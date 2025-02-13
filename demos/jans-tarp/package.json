@@ -1,6 +1,6 @@
 {
   "name": "jans-tarp",
-  "version": "0.0.0",
+  "version": "1.4.0",
   "description": "Relying Party tool in form of a Chrome Extension.",
   "main": "index.js",
   "license": "Apache",
@@ -31,6 +31,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
+    "@janssenproject/cedarling_wasm": "^0.0.0",
     "@mui/icons-material": "^5.15.10",
     "@mui/material": "^5.15.10",
     "@mui/x-date-pickers": "^6.19.5",
@@ -49,7 +50,6 @@
     "react-select": "^5.7.3",
     "react-spinner-overlay": "^0.1.33",
     "styled-components": "^6.1.0",
-    "uuid": "^9.0.0",
-    "wasm": "file:wasm"
+    "uuid": "^9.0.0"
   }
 }

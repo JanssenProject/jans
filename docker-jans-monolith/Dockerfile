@@ -77,7 +77,6 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
     CN_INSTALL_LINK="true" \
     CN_INSTALL_LOCK="true" \
     CN_INSTALL_SAML="false" \
-    CN_INSTALL_OPA="true" \
     RDBMS_DATABASE="jans" \
     RDBMS_USER="jans" \
     RDBMS_PASSWORD="" \
@@ -92,7 +91,7 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/monolith" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="0.0.0-nightly" \
+    org.opencontainers.image.version="1.4.0-1" \
     org.opencontainers.image.title="Janssen Monolith Image" \
     org.opencontainers.image.description="Janssen Authorization server"
 

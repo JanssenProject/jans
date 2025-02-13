@@ -143,6 +143,9 @@ type AppConfiguration struct {
 	MtlsIntrospectionEndpoint                                 string                                `schema:"mtls_introspection_endpoint" json:"mtlsIntrospectionEndpoint"`
 	MtlsParEndpoint                                           string                                `schema:"mtls_par_endpoint" json:"mtlsParEndpoint"`
 	MtlsDeviceAuthzEndpoint                                   string                                `schema:"mtls_device_authz_endpoint" json:"mtlsDeviceAuthzEndpoint"`
+	AccessEvaluationAllowBasicClientAuthorization             bool                                  `schema:"access_evaluation_allow_basic_client_authorization" json:"accessEvaluationAllowBasicClientAuthorization"`
+	AccessEvaluationScriptName                                string                                `schema:"access_evaluation_script_name" json:"accessEvaluationScriptName"`
+	AccessEvaluationDiscoveryCacheLifetimeInMinutes           int                                   `schema:"access_evaluation_discovery_cache_lifetime_in_minutes" json:"accessEvaluationDiscoveryCacheLifetimeInMinutes"`
 	RequireRequestObjectEncryption                            bool                                  `schema:"require_request_object_encryption" json:"requireRequestObjectEncryption"`
 	RequirePkce                                               bool                                  `schema:"require_pkce" json:"requirePkce"`
 	AllowAllValueForRevokeEndpoint                            bool                                  `schema:"allow_all_value_for_revoke_endpoint" json:"allowAllValueForRevokeEndpoint"`
@@ -286,6 +289,7 @@ type AppConfiguration struct {
 	PairwiseCalculationKey                                    string                                `schema:"pairwise_calculation_key" json:"pairwiseCalculationKey"`
 	PairwiseCalculationSalt                                   string                                `schema:"pairwise_calculation_salt" json:"pairwiseCalculationSalt"`
 	ShareSubjectIdBetweenClientsWithSameSectorId              bool                                  `schema:"share_subject_id_between_clients_with_same_sector_id" json:"shareSubjectIdBetweenClientsWithSameSectorId"`
+	UseOpenidSubAttributeValueForPairwiseLocalAccountId       bool                                  `schema:"use_openid_sub_attribute_value_for_pairwise_local_account_id" json:"useOpenidSubAttributeValueForPairwiseLocalAccountId"`
 	WebKeysStorage                                            string                                `schema:"web_keys_storage" json:"webKeysStorage"`
 	DnName                                                    string                                `schema:"dn_name" json:"dnName"`
 	KeyStoreFile                                              string                                `schema:"key_store_file" json:"keyStoreFile"`
@@ -321,6 +325,7 @@ type AppConfiguration struct {
 	DisableJdkLogger                                          bool                                  `schema:"disable_jdk_logger" json:"disableJdkLogger"`
 	AuthorizationRequestCustomAllowedParameters               []CustomAllowedParameter              `schema:"authorization_request_custom_allowed_parameters" json:"authorizationRequestCustomAllowedParameters"`
 	OpenidScopeBackwardCompatibility                          bool                                  `schema:"openid_scope_backward_compatibility" json:"openidScopeBackwardCompatibility"`
+	AuthorizeChallengeSessionLifetimeInSeconds                int                                   `schema:"authorize_challenge_session_lifetime_in_seconds" json:"authorizeChallengeSessionLifetimeInSeconds"`
 	DisableU2fEndpoint                                        bool                                  `schema:"disable_u2f_endpoint" json:"disableU2fEndpoint"`
 	RotateDeviceSecret                                        bool                                  `schema:"rotate_device_secret" json:"rotateDeviceSecret"`
 	ReturnDeviceSecretFromAuthzEndpoint                       bool                                  `schema:"return_device_secret_from_authz_endpoint" json:"returnDeviceSecretFromAuthzEndpoint"`
@@ -337,7 +342,7 @@ type AppConfiguration struct {
 	TrustedSSAIssuers                                         []TrustedIssuerConfig                 `schema:"trusted_ssa_issuers" json:"trustedSsaIssuers"`
 	UseLocalCache                                             bool                                  `schema:"use_local_cache" json:"useLocalCache"`
 	FapiCompatibility                                         bool                                  `schema:"fapi_compatibility" json:"fapiCompatibility"`
-	ForceIdTokenHintPrecense                                  bool                                  `schema:"force_id_token_hint_precense" json:"forceIdTokenHintPrecense"`
+	ForceIdTokenHintPresence                                  bool                                  `schema:"force_id_token_hint_presence" json:"forceIdTokenHintPresence"`
 	RejectEndSessionIfIdTokenExpired                          bool                                  `schema:"reject_end_session_if_id_token_expired" json:"rejectEndSessionIfIdTokenExpired"`
 	AllowEndSessionWithUnmatchedSid                           bool                                  `schema:"allow_end_session_with_unmatched_sid" json:"allowEndSessionWithUnmatchedSid"`
 	ForceOfflineAccessScopeToEnableRefreshToken               bool                                  `schema:"force_offline_access_scope_to_enable_refresh_token" json:"forceOfflineAccessScopeToEnableRefreshToken"`

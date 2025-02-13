@@ -89,20 +89,22 @@ Check [KrakenD documentation](https://www.krakend.io/docs/extending/injecting-pl
 
 To test the plugin, you will need:
 
-- A cedarling policy store with a policy for our gateway. To create this, please follow [these](https://github.com/JanssenProject/jans/wiki/Cedarling-Hello-World-%5BWIP%5D#setup-policy-store) steps.
-- An instance of the cedarling sidecar, using the policy store mentioned above. Please follow [these](https://github.com/JanssenProject/jans/wiki/Cedarling-Hello-World-%5BWIP%5D#setup-sidecar) steps. 
+- A cedarling policy store with a policy for our gateway. To create this, please follow [these](https://github.com/JanssenProject/jans/wiki/Cedarling-Hello-World-%5BWIP%5D#1-author-policies) steps.
+- An instance of the cedarling sidecar, using the policy store mentioned above. Please follow [these](https://github.com/JanssenProject/jans/wiki/Cedarling-Hello-World-%5BWIP%5D#2-deploy-cedarling-sidecar) steps. 
 - For our demo, we will use this sample policy as outlined in the instructions:
     ```
     @id("allow_one")
     permit(
-        principal is gatewayDemo::Workload,
-        action == gatewayDemo::Action::"GET",
-        resource is gatewayDemo::HTTP_Request
+      principal is gatewayDemo::Workload,
+      action == gatewayDemo::Action::"GET",
+      resource is gatewayDemo::HTTP_Request
     )
     when {
-        (principal["client_id"]) == "d7f71bea-c38d-4caf-a1ba-e43c74a11a62"
+        principal has access_token.scope &&
+        principal.access_token.scope.contains("profile")
     };
     ```
+- This policy will allow access so long as the access token contains the `profile` scope.
 - A [KrakenD server installation](https://www.krakend.io/docs/overview/installing/). For development purposes, the binary install is recommended. For production setups, the Docker method is recommended.
 - The plugin `.so` file for your architecture. For Mac OS hosts, ARM64 is required.
 - A configuration file. Sample configuration is provided in [krakend.json](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/cedarling-krakend/krakend.json).

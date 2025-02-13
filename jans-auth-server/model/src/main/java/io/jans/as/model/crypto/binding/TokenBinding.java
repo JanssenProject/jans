@@ -12,11 +12,11 @@ import java.util.Arrays;
  * struct {
  * TokenBindingType tokenbinding_type;
  * TokenBindingID tokenbindingid;
- * opaque signature<64..2^16-1>;  Signature over the concatenation
+ * opaque signature&lt;64..2^16-1&gt;;  Signature over the concatenation
  * of tokenbinding_type,
  * key_parameters and exported
  * keying material (EKM)
- * TB_Extension extensions<0..2^16-1>;
+ * TB_Extension extensions&lt;0..2^16-1&gt;;
  * } TokenBinding;
  *
  * @author Yuriy Zabrovarnyy

@@ -1,6 +1,6 @@
 apiVersion: v2
 name: casa
-version: 0.0.0-nightly
+version: 1.4.0
 kubeVersion: ">=v1.21.0-0"
 description: Jans Casa ("Casa") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Jans Server.
 type: application
@@ -17,4 +17,4 @@ maintainers:
     email: support@jans.io
     url: https://github.com/moabu
 icon: https://github.com/JanssenProject/jans/raw/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
-appVersion: "0.0.0-nightly"
+appVersion: "1.4.0"

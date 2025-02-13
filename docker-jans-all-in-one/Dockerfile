@@ -3,7 +3,7 @@
 # ==============
 
 # original Janssen base version
-ARG BASE_VERSION=0.0.0-nightly
+ARG BASE_VERSION=1.4.0-1
 
 # the following ARGs set default base images
 # they can be overriden in build process via --build-arg option
@@ -58,7 +58,7 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=040ff17942019bc10433ce17d819b8d8474f13c8
+ENV JANS_SOURCE_VERSION=881c1e0818a0aed6b413280ee7d85bd02d92bbb6
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -133,6 +133,7 @@ RUN ln -sf /app/jans_aio/jans_config_api/entrypoint.sh /app/bin/jans-config-api-
 COPY --from=jans-fido2-src /opt/jans/jetty/jans-fido2 /opt/jans/jetty/jans-fido2
 COPY --from=jans-fido2-src /app/templates/jans-fido2 /app/templates/jans-fido2
 COPY --from=jans-fido2-src /etc/jans/conf/fido2 /etc/jans/conf/fido2
+COPY --from=jans-fido2-src /app/static/fido2 /app/static/fido2
 COPY --from=jans-fido2-src /app/scripts /app/jans_aio/jans_fido2
 RUN ln -sf /app/jans_aio/jans_fido2/entrypoint.sh /app/bin/jans-fido2-entrypoint.sh
 
@@ -178,7 +179,7 @@ RUN mkdir -p /opt/jans/configurator/db \
 COPY app /app
 
 # CN version as env var (with suffix if any, i.e. SNAPSHOT)
-ENV CN_VERSION=0.0.0-nightly
+ENV CN_VERSION=1.4.0
 
 # set directory contains installer code that will be added to Python sys.path
 ENV PYTHONPATH=/app
@@ -235,7 +236,7 @@ ENV JETTY_BASE=/opt/jans/jetty \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/all-in-one" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="0.0.0-nightly" \
+    org.opencontainers.image.version="1.4.0-1" \
     org.opencontainers.image.title="Janssen All-in-One" \
     org.opencontainers.image.description=""
 

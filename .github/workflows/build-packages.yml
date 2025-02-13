@@ -414,13 +414,20 @@ jobs:
         passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
         git_user_signingkey: true
         git_commit_gpgsign: true
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        registry-url: 'https://registry.npmjs.org'
     - name: Build WASM build
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       id: sign-cedarling
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
       run: |
         rustup update stable && rustup default stable
         cargo install wasm-pack
-        wasm-pack build --release --target web
+        wasm-pack build --release --target web --scope janssenproject
         ls pkg
     - name: Archive and sign pkg contents
       id: archive_pkg
@@ -428,10 +435,15 @@ jobs:
       run: |
         TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
         VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+        cd pkg
         if [ "${TAG}" == "nightly" ]; then
           VERSION=nightly
           TAG="0.0.0"
+          # remove, do not publish on nightly or random nightly build versions to be published
+          #npm unpublish cedarling_wasm@0.0.0
         fi
+        npm publish --access public --tag "${VERSION}" || echo "failed to piblish to NPM"
+        cd ..
         rm -rf pkg/.gitignore || echo "Failed to remove gitignore"
         tar -czvf cedarling_wasm_"${TAG}"_pkg.tar.gz -C pkg .
         sha256sum cedarling_wasm_"${TAG}"_pkg.tar.gz > cedarling_wasm_"${TAG}"_pkg.tar.gz.sha256sum

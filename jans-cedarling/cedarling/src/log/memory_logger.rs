@@ -9,7 +9,7 @@ use std::sync::Mutex;
 use sparkv::{Config as ConfigSparKV, SparKV};
 
 use super::LogLevel;
-use super::interface::{LogStorage, LogWriter, Loggable};
+use super::interface::{LogStorage, LogWriter, Loggable, composite_key};
 use crate::bootstrap_config::log_config::MemoryLogConfig;
 
 const STORAGE_MUTEX_EXPECT_MESSAGE: &str = "MemoryLogger storage mutex should unlock";
@@ -47,11 +47,21 @@ mod fallback {
     #[derive(serde::Serialize)]
     struct StrWrap<'a>(&'a str);
 
-    impl crate::log::interface::Loggable for StrWrap<'_> {
-        fn get_request_id(&self) -> uuid7::Uuid {
+    impl crate::log::interface::Indexed for StrWrap<'_> {
+        fn get_id(&self) -> uuid7::Uuid {
             crate::log::log_entry::gen_uuid7()
         }
 
+        fn get_additional_ids(&self) -> Vec<uuid7::Uuid> {
+            Vec::new()
+        }
+
+        fn get_tags(&self) -> Vec<&str> {
+            Vec::new()
+        }
+    }
+
+    impl crate::log::interface::Loggable for StrWrap<'_> {
         fn get_log_level(&self) -> Option<LogLevel> {
             // These must always be logged.
             Some(LogLevel::TRACE)
@@ -94,14 +104,17 @@ impl LogWriter for MemoryLogger {
             },
         };
 
-        let set_result = self
-            .storage
-            .lock()
-            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
-            .set(&entry.get_request_id().to_string(), json);
+        let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
+
+        let entry_id = entry.get_id().to_string();
+        let set_result = storage.set(&entry_id, json);
 
         if let Err(err) = set_result {
             fallback::log(&format!("could not store LogEntry to memory: {err:?}"));
+        } else {
+            for index_key in entry.get_index_keys() {
+                storage.add_additional_index(entry_id.as_str(), index_key.as_str());
+            }
         };
     }
 }
@@ -131,15 +144,50 @@ impl LogStorage for MemoryLogger {
             .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
             .get_keys()
     }
+
+    fn get_logs_by_tag(&self, tag: &str) -> Vec<serde_json::Value> {
+        self.storage
+            .lock()
+            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
+            .get_by_index_key(tag)
+            .map(|v| v.to_owned())
+            .collect()
+    }
+
+    fn get_logs_by_request_id(&self, request_id: &str) -> Vec<serde_json::Value> {
+        self.storage
+            .lock()
+            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
+            .get_by_index_key(request_id)
+            .map(|v| v.to_owned())
+            .collect()
+    }
+
+    fn get_logs_by_request_id_and_tag(
+        &self,
+        request_id: &str,
+        tag: &str,
+    ) -> Vec<serde_json::Value> {
+        let key = composite_key(request_id, tag);
+
+        self.storage
+            .lock()
+            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
+            .get_by_index_key(&key)
+            .map(|v| v.to_owned())
+            .collect()
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use test_utils::assert_eq;
 
+    use super::super::interface::Indexed;
     use super::super::{AuthorizationLogInfo, LogEntry, LogType};
     use super::*;
     use crate::common::app_types;
+    use crate::log::gen_uuid7;
 
     fn create_memory_logger() -> MemoryLogger {
         let config = MemoryLogConfig { log_ttl: 60 };
@@ -155,6 +203,7 @@ mod tests {
             app_types::PdpID::new(),
             Some(app_types::ApplicationName("app1".to_string())),
             LogType::Decision,
+            None,
         )
         .set_message("some message".to_string())
         .set_auth_info(AuthorizationLogInfo {
@@ -166,20 +215,22 @@ mod tests {
             authorized: true,
             entities: serde_json::json!({}),
         });
+
         let entry2 = LogEntry::new_with_data(
             app_types::PdpID::new(),
             Some(app_types::ApplicationName("app2".to_string())),
             LogType::System,
+            None,
         );
 
         assert!(
-            entry1.base.request_id < entry2.base.request_id,
-            "entry1.base.request_id should be lower than in entry2"
+            entry1.base.id < entry2.base.id,
+            "entry1.base.id should be lower than in entry2"
         );
 
         // log entries
-        logger.log(entry1.clone());
-        logger.log(entry2.clone());
+        logger.log_any(entry1.clone());
+        logger.log_any(entry2.clone());
 
         let entry1_json = serde_json::json!(entry1);
         let entry2_json = serde_json::json!(entry2);
@@ -187,16 +238,12 @@ mod tests {
         // check that we have two entries in the log database
         assert_eq!(logger.get_log_ids().len(), 2);
         assert_eq!(
-            logger
-                .get_log_by_id(&entry1.get_request_id().to_string())
-                .unwrap(),
+            logger.get_log_by_id(&entry1.get_id().to_string()).unwrap(),
             entry1_json,
             "Failed to get log entry by id"
         );
         assert_eq!(
-            logger
-                .get_log_by_id(&entry2.get_request_id().to_string())
-                .unwrap(),
+            logger.get_log_by_id(&entry2.get_id().to_string()).unwrap(),
             entry2_json,
             "Failed to get log entry by id"
         );
@@ -223,16 +270,18 @@ mod tests {
             app_types::PdpID::new(),
             Some(app_types::ApplicationName("app1".to_string())),
             LogType::Decision,
+            None,
         );
         let entry2 = LogEntry::new_with_data(
             app_types::PdpID::new(),
             Some(app_types::ApplicationName("app2".to_string())),
             LogType::Metric,
+            None,
         );
 
         // log entries
-        logger.log(entry1.clone());
-        logger.log(entry2.clone());
+        logger.log_any(entry1.clone());
+        logger.log_any(entry2.clone());
 
         let entry1_json = serde_json::json!(entry1);
         let entry2_json = serde_json::json!(entry2);
@@ -263,11 +312,21 @@ mod tests {
             }
         }
 
-        impl crate::log::interface::Loggable for FailSerialize {
-            fn get_request_id(&self) -> uuid7::Uuid {
+        impl crate::log::interface::Indexed for FailSerialize {
+            fn get_id(&self) -> uuid7::Uuid {
                 crate::log::log_entry::gen_uuid7()
             }
 
+            fn get_additional_ids(&self) -> Vec<uuid7::Uuid> {
+                Vec::new()
+            }
+
+            fn get_tags(&self) -> Vec<&str> {
+                Vec::new()
+            }
+        }
+
+        impl crate::log::interface::Loggable for FailSerialize {
             fn get_log_level(&self) -> Option<LogLevel> {
                 // These must always be logged.
                 Some(LogLevel::TRACE)
@@ -285,5 +344,79 @@ mod tests {
         // and look in the output for
         // "could not serialize LogEntry to serde_json::Value: Error(\"this always fails\", line: 0, column: 0)"
         assert!(logger.pop_logs().is_empty(), "logger should be empty");
+    }
+
+    #[test]
+    fn test_log_index() {
+        let request_id = gen_uuid7();
+
+        let logger = MemoryLogger::new(MemoryLogConfig { log_ttl: 10 }, LogLevel::DEBUG);
+
+        let entry_decision =
+            LogEntry::new_with_data(app_types::PdpID::new(), None, LogType::Decision, None);
+        logger.log_any(entry_decision);
+
+        let entry_system_info = LogEntry::new_with_data(
+            app_types::PdpID::new(),
+            None,
+            LogType::System,
+            Some(request_id),
+        )
+        .set_level(LogLevel::INFO);
+        logger.log_any(entry_system_info);
+
+        let entry_system_debug = LogEntry::new_with_data(
+            app_types::PdpID::new(),
+            None,
+            LogType::System,
+            Some(request_id),
+        )
+        .set_level(LogLevel::DEBUG);
+        logger.log_any(entry_system_debug);
+
+        let entry_metric =
+            LogEntry::new_with_data(app_types::PdpID::new(), None, LogType::Metric, None);
+        logger.log_any(entry_metric);
+
+        // without request id
+        let entry_system_warn =
+            LogEntry::new_with_data(app_types::PdpID::new(), None, LogType::System, None)
+                .set_level(LogLevel::WARN);
+        logger.log_any(entry_system_warn);
+
+        assert!(
+            logger
+                .get_logs_by_request_id(request_id.to_string().as_str())
+                .len()
+                == 2,
+            "2 log entries should be present for request id: {request_id}"
+        );
+
+        assert!(
+            logger
+                .get_logs_by_request_id_and_tag(
+                    request_id.to_string().as_str(),
+                    LogLevel::DEBUG.to_string().as_str()
+                )
+                .len()
+                == 1,
+            "1 log entries should be present for request id: {request_id} and debug level"
+        );
+
+        assert!(
+            logger
+                .get_logs_by_tag(LogType::System.to_string().as_str())
+                .len()
+                == 3,
+            "3 system log entries should be present"
+        );
+
+        assert!(
+            logger
+                .get_logs_by_tag(LogLevel::WARN.to_string().as_str())
+                .len()
+                == 1,
+            "1 system log entry should be present with WARN level"
+        );
     }
 }

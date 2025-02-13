@@ -134,8 +134,6 @@ configmap:
   kcDbUrlDatabase: keycloak
   # -- Keycloak database connection properties. If using postgresql, the value can be set to empty string.
   kcDbUrlProperties: "?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"
-  # -- URL of OPA API
-  cnOpaUrl: http://opa.opa.svc.cluster.cluster.local:8181/v1
   # -- Message type (one of POSTGRES, REDIS, or DISABLED)
   cnMessageType: DISABLED
 # -- Country code. Used for certificate creation.
@@ -146,7 +144,7 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/configurator
   # -- Image  tag to use for deploying.
-  tag: 0.0.0-nightly
+  tag: 1.4.0-1
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Organization name. Used for certificate creation.
