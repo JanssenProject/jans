@@ -19,6 +19,8 @@ pub(crate) mod entity_type;
 
 mod deserialize;
 
+const CEDAR_EMPTY_NAMESPACE: &str = "";
+
 pub type ActionName = String;
 pub type ActionGroupName = String;
 pub type AttributeName = String;
@@ -51,32 +53,55 @@ impl CedarSchemaJson {
         None
     }
 
+    /// Get the entity schema for a given type name.
+    /// `default_namespace` is the default namespace for entities to search if no namespace is provided in type_name.
+    ///
+    /// If the type name does not have namespace, it will look for the type in the default namespace.
+    /// If not found in default namespace, it will look with `empty` namespace (value: "").
     pub fn get_entity_schema(
         &self,
         type_name: &str,
+        default_namespace: Option<&str>,
     ) -> Result<Option<(cedar_policy::EntityTypeName, &EntityType)>, ParseErrors> {
         let entity_type_name = cedar_policy::EntityTypeName::from_str(type_name)?;
 
-        if entity_type_name.namespace().is_empty() {
-            if let Some((namespace, entity_type)) =
-                self.get_entity_schema_from_base_name(entity_type_name.basename())
-            {
+        let namespace = entity_type_name.namespace();
+        let basename = entity_type_name.basename();
+
+        if !namespace.is_empty() {
+            if let Some(entity_schema) = self.get_entity_schema_raw_vals(&namespace, basename) {
+                return Ok(Some((entity_type_name, entity_schema)));
+            }
+        }
+
+        // If namespace is empty (in type_name), look for the type in the default namespace.
+        if let Some(namespace) = default_namespace {
+            if let Some(entity_schema) = self.get_entity_schema_raw_vals(namespace, basename) {
                 let entity_type_name = cedar_policy::EntityTypeName::from_str(
                     &[namespace, type_name].join(CEDAR_NAMESPACE_SEPARATOR),
                 )?;
-                return Ok(Some((entity_type_name, entity_type)));
+
+                return Ok(Some((entity_type_name, entity_schema)));
             }
+        } else {
+            // If the type is not found in the default namespace, look for it in the empty namespace.
+            if let Some(entity_schema) =
+                self.get_entity_schema_raw_vals(CEDAR_EMPTY_NAMESPACE, basename)
+            {
+                let entity_type_name = cedar_policy::EntityTypeName::from_str(type_name)?;
 
-            return Ok(None);
-        }
-
-        if let Some(entity_schema) = self.get_entity_schema_from_full_name(&entity_type_name) {
-            return Ok(Some((entity_type_name, entity_schema)));
+                return Ok(Some((entity_type_name, entity_schema)));
+            }
         }
 
         Ok(None)
     }
 
+    /// Iterate through the namespaces and entity types to find the matching schema.
+    /// If found, return the entity type name and schema.
+    /// If not found, return None.
+    //
+    // Looks like wrong implementation
     fn get_entity_schema_from_base_name(
         &self,
         base_name: &str,
@@ -89,14 +114,9 @@ impl CedarSchemaJson {
         None
     }
 
-    fn get_entity_schema_from_full_name(
-        &self,
-        full_name: &cedar_policy::EntityTypeName,
-    ) -> Option<&EntityType> {
-        let namespace_name = full_name.namespace();
-        if let Some(namespace) = self.namespaces.get(&namespace_name) {
-            let base_name = full_name.basename();
-            if let Some(entity_type) = namespace.entity_types.get(base_name) {
+    fn get_entity_schema_raw_vals(&self, namespace: &str, basename: &str) -> Option<&EntityType> {
+        if let Some(namespace) = self.namespaces.get(namespace) {
+            if let Some(entity_type) = namespace.entity_types.get(basename) {
                 return Some(entity_type);
             }
         }
