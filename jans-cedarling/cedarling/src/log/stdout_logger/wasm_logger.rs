@@ -29,7 +29,7 @@ impl LogWriter for StdOutLogger {
             return;
         }
 
-        let json_string = serde_json::json!(entry).to_string();
+        let json_string = entry.to_value().to_string();
         let js_string = JsValue::from(json_string);
 
         let js_array = Array::new();

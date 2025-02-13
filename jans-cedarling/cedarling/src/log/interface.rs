@@ -6,6 +6,7 @@
 //! Log interface
 //! Contains the interface for logging. And getting log information from storage.
 
+use serde_json::Value;
 use uuid7::Uuid;
 
 use super::LogLevel;
@@ -85,6 +86,9 @@ pub(crate) trait Loggable: serde::Serialize + Indexed {
             true
         }
     }
+
+    /// Serializes the entry to a [`serde_json::Value`]
+    fn to_value(&self) -> Value;
 }
 
 /// Log Storage
