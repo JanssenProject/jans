@@ -97,3 +97,6 @@ docs/_build/
 
 # Pyenv
 .python-version
+
+# allow commit of cedarling_native_apps bindings
+!/bindings/cedarling_native_apps/src/bin
