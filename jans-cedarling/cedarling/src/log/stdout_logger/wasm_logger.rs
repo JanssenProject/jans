@@ -29,9 +29,7 @@ impl LogWriter for StdOutLogger {
             return;
         }
 
-        let json_string = entry
-            .to_json_with_client_info(self, &self.pdp_id, &self.app_name)
-            .to_string();
+        let json_string = entry.to_value().to_string();
         let js_string = JsValue::from(json_string);
 
         let js_array = Array::new();
