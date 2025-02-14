@@ -10,18 +10,16 @@ use std::collections::{HashMap, HashSet};
 use std::fmt::Display;
 use std::hash::Hash;
 
-use serde_json::{Value, json};
-use uuid7::Uuid;
-
 use super::LogLevel;
 use super::interface::{Indexed, Loggable};
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::policy_store::PoliciesContainer;
 use crate::jwt::Token;
+use uuid7::Uuid;
 
 /// ISO-8601 time format for [`chrono`]
 /// example: 2024-11-27T10:10:50.654Z
-const ISO8601: &str = "%Y-%m-%dT%H:%M:%S%.3fZ";
+pub(crate) const ISO8601: &str = "%Y-%m-%dT%H:%M:%S%.3fZ";
 
 /// LogEntry is a struct that encapsulates all relevant data for logging events.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -103,10 +101,6 @@ impl Indexed for LogEntry {
 impl Loggable for LogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
-    }
-
-    fn to_value(&self) -> Value {
-        json!(self)
     }
 }
 
@@ -374,10 +368,6 @@ impl Loggable for &DecisionLogEntry<'_> {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }
-
-    fn to_value(&self) -> Value {
-        json!(self)
-    }
 }
 
 /// Custom uuid generation function to avoid using std::time because it makes panic in WASM
@@ -486,10 +476,6 @@ impl Indexed for BaseLogEntry {
 impl Loggable for BaseLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.level
-    }
-
-    fn to_value(&self) -> Value {
-        json!(self)
     }
 }
 

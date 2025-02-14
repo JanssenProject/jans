@@ -7,6 +7,7 @@ use std::io::Write;
 use std::sync::{Arc, Mutex};
 
 use crate::log::LogLevel;
+use crate::log::err_log_entry::ErrorLogEntry;
 use crate::log::interface::{LogWriter, Loggable};
 
 /// A logger that write to std output.
@@ -44,7 +45,15 @@ impl LogWriter for StdOutLogger {
             return;
         }
 
-        let json = entry.to_value().to_string();
+        let json = match serde_json::to_value(&entry) {
+            Ok(json) => json.to_string(),
+            Err(err) => {
+                let err_msg = format!("failed to serialize log entry to JSON: {err}");
+                serde_json::to_value(ErrorLogEntry::from_loggable(&entry, err_msg.clone()))
+                    .expect(&err_msg)
+                    .to_string()
+            },
+        };
 
         // we can't handle error here or test it so we just panic if it happens.
         // we should have specific platform to get error
@@ -103,6 +112,8 @@ impl Write for TestWriter {
 mod tests {
     use std::io::Write;
 
+    use serde_json::json;
+
     use super::*;
     use crate::common::app_types::PdpID;
     use crate::log::log_strategy::LogEntryWithClientInfo;
@@ -128,7 +139,7 @@ mod tests {
         );
 
         // Serialize the log entry to JSON
-        let json_str = log_entry.to_value().to_string();
+        let json_str = json!(log_entry).to_string();
 
         // Create a test writer
         let mut test_writer = TestWriter::new();

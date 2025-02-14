@@ -4,7 +4,6 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use serde::Serialize;
-use serde_json::json;
 
 use super::interface::{Indexed, LogStorage, LogWriter, Loggable};
 use super::memory_logger::MemoryLogger;
@@ -92,15 +91,6 @@ impl<Entry: Loggable + Indexed> Loggable for LogEntryWithClientInfo<Entry> {
     fn get_log_level(&self) -> Option<super::LogLevel> {
         self.entry.get_log_level()
     }
-
-    fn to_value(&self) -> serde_json::Value {
-        let mut json = json!(self.entry);
-        json["pdp_id"] = json!(self.pdp_id);
-        if let Some(app_name) = self.app_name.as_ref() {
-            json["application_id"] = json!(app_name);
-        }
-        json
-    }
 }
 
 // Implementation of LogWriter
@@ -116,8 +106,8 @@ impl LogWriter for LogStrategy {
     }
 }
 
-impl<Entry: Loggable> LogEntryWithClientInfo<Entry> {
-    pub fn from_loggable(entry: Entry, pdp_id: PdpID, app_name: Option<ApplicationName>) -> Self {
+impl<E: Loggable> LogEntryWithClientInfo<E> {
+    pub fn from_loggable(entry: E, pdp_id: PdpID, app_name: Option<ApplicationName>) -> Self {
         Self {
             entry,
             pdp_id,

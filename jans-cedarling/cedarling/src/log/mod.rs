@@ -49,6 +49,7 @@
 //!
 //!  Currently only [MemoryLogger](`memory_logger::MemoryLogger`) implement this.
 
+mod err_log_entry;
 pub mod interface;
 mod log_entry;
 mod log_level;

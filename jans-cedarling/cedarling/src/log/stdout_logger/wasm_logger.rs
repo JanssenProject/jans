@@ -4,6 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use crate::log::LogLevel;
+use crate::log::err_log_entry::ErrorLogEntry;
 use crate::log::interface::{LogWriter, Loggable};
 
 use web_sys::console;
@@ -29,7 +30,15 @@ impl LogWriter for StdOutLogger {
             return;
         }
 
-        let json_string = entry.to_value().to_string();
+        let json_string = match serde_json::to_value(&entry) {
+            Ok(json) => json.to_string(),
+            Err(err) => {
+                let err_msg = format!("failed to serialize log entry to JSON: {err}");
+                serde_json::to_value(ErrorLogEntry::from_loggable(&entry, err_msg.clone()))
+                    .expect(&err_msg)
+                    .to_string()
+            },
+        };
         let js_string = JsValue::from(json_string);
 
         let js_array = Array::new();

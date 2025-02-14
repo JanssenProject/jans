@@ -9,6 +9,7 @@ use std::sync::Mutex;
 use sparkv::{Config as ConfigSparKV, SparKV};
 
 use super::LogLevel;
+use super::err_log_entry::ErrorLogEntry;
 use super::interface::{LogStorage, LogWriter, Loggable, composite_key};
 use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::MemoryLogConfig;
@@ -53,7 +54,6 @@ impl MemoryLogger {
 mod fallback {
     use crate::LogLevel;
     use crate::app_types::{ApplicationName, PdpID};
-    use serde_json::{Value, json};
 
     /// conform to Loggable requirement imposed by LogStrategy
     #[derive(serde::Serialize)]
@@ -77,10 +77,6 @@ mod fallback {
         fn get_log_level(&self) -> Option<LogLevel> {
             // These must always be logged.
             Some(LogLevel::TRACE)
-        }
-
-        fn to_value(&self) -> Value {
-            json!(self)
         }
     }
 
@@ -112,7 +108,14 @@ impl LogWriter for MemoryLogger {
 
         let entry_id = entry.get_id().to_string();
         let index_keys = entry.get_index_keys();
-        let json = entry.to_value();
+        let json = match serde_json::to_value(&entry) {
+            Ok(json) => json,
+            Err(err) => {
+                let err_msg = format!("failed to serialize log entry to JSON: {err}");
+                serde_json::to_value(ErrorLogEntry::from_loggable(&entry, err_msg.clone()))
+                    .expect(&err_msg)
+            },
+        };
 
         let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
 
@@ -198,6 +201,7 @@ mod tests {
     use super::super::{AuthorizationLogInfo, LogEntry, LogType};
     use super::*;
     use crate::log::gen_uuid7;
+    use serde_json::json;
     use test_utils::assert_eq;
 
     fn create_memory_logger(pdp_id: PdpID, app_name: Option<ApplicationName>) -> MemoryLogger {
@@ -235,8 +239,8 @@ mod tests {
         logger.log_any(entry1.clone());
         logger.log_any(entry2.clone());
 
-        let entry1_json = entry1.clone().to_value();
-        let entry2_json = entry2.clone().to_value();
+        let entry1_json = json!(entry1.clone());
+        let entry2_json = json!(entry2.clone());
 
         // check that we have two entries in the log database
         assert_eq!(logger.get_log_ids().len(), 2);
@@ -278,8 +282,8 @@ mod tests {
         logger.log_any(entry1.clone());
         logger.log_any(entry2.clone());
 
-        let entry1_json = entry1.clone().to_value();
-        let entry2_json = entry2.clone().to_value();
+        let entry1_json = json!(entry1.clone());
+        let entry2_json = json!(entry2.clone());
 
         // check that we have two entries in the log database
         let logs = logger.pop_logs();

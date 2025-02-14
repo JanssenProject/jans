@@ -11,12 +11,12 @@ use std::io::Write;
 
 use interface::{Indexed, LogWriter};
 use nop_logger::NopLogger;
+use serde_json::json;
 use stdout_logger::StdOutLogger;
 use test_utils::assert_eq;
 
 use super::*;
 use crate::bootstrap_config::log_config;
-use crate::log::interface::Loggable;
 use crate::log::log_strategy::{LogEntryWithClientInfo, LogStrategyLogger};
 use crate::log::stdout_logger::TestWriter;
 
@@ -113,12 +113,16 @@ fn test_log_memory_logger() {
     strategy.log_any(entry1.clone());
     strategy.log_any(entry2.clone());
 
-    let entry1_json =
-        LogEntryWithClientInfo::from_loggable(entry1.clone(), pdp_id.clone(), app_name.clone())
-            .to_value();
-    let entry2_json =
-        LogEntryWithClientInfo::from_loggable(entry2.clone(), pdp_id.clone(), app_name.clone())
-            .to_value();
+    let entry1_json = json!(LogEntryWithClientInfo::from_loggable(
+        entry1.clone(),
+        pdp_id.clone(),
+        app_name.clone()
+    ));
+    let entry2_json = json!(LogEntryWithClientInfo::from_loggable(
+        entry2.clone(),
+        pdp_id.clone(),
+        app_name.clone()
+    ));
 
     // check that we have two entries in the log database
     assert_eq!(strategy.get_log_ids().len(), 2);
@@ -164,10 +168,12 @@ fn test_log_stdout_logger() {
         cedar_sdk_version: None,
     };
     // Serialize the log entry to JSON
-    let json_str =
-        LogEntryWithClientInfo::from_loggable(log_entry.clone(), pdp_id.clone(), app_name.clone())
-            .to_value()
-            .to_string();
+    let json_str = json!(LogEntryWithClientInfo::from_loggable(
+        log_entry.clone(),
+        pdp_id.clone(),
+        app_name.clone()
+    ))
+    .to_string();
 
     let test_writer = TestWriter::new();
     let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
