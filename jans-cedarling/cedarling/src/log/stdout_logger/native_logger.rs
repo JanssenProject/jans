@@ -7,6 +7,7 @@ use std::io::Write;
 use std::sync::{Arc, Mutex};
 
 use crate::log::LogLevel;
+use crate::log::err_log_entry::ErrorLogEntry;
 use crate::log::interface::{LogWriter, Loggable};
 
 /// A logger that write to std output.
@@ -44,7 +45,16 @@ impl LogWriter for StdOutLogger {
             return;
         }
 
-        let json_str = serde_json::json!(&entry).to_string();
+        let json = match serde_json::to_value(&entry) {
+            Ok(json) => json.to_string(),
+            Err(err) => {
+                let err_msg = format!("failed to serialize log entry to JSON: {err}");
+                serde_json::to_value(ErrorLogEntry::from_loggable(&entry, err_msg.clone()))
+                    .expect(&err_msg)
+                    .to_string()
+            },
+        };
+
         // we can't handle error here or test it so we just panic if it happens.
         // we should have specific platform to get error
         writeln!(
@@ -52,7 +62,7 @@ impl LogWriter for StdOutLogger {
                 .lock()
                 .expect("In StdOutLogger writer mutex should unlock"),
             "{}",
-            &json_str
+            &json.to_string()
         )
         .unwrap();
     }
@@ -102,25 +112,34 @@ impl Write for TestWriter {
 mod tests {
     use std::io::Write;
 
+    use serde_json::json;
+
     use super::*;
     use crate::common::app_types::PdpID;
+    use crate::log::log_strategy::LogEntryWithClientInfo;
     use crate::log::{LogEntry, LogType, gen_uuid7};
 
     #[test]
     fn write_log_ok() {
+        let pdp_id = PdpID::new();
+        let app_name = None;
         // Create a log entry
         let log_entry = LogEntry {
-            base: crate::log::BaseLogEntry::new(PdpID::new(), LogType::Decision, gen_uuid7()),
-            application_id: Some("test_app".to_string().into()),
+            base: crate::log::BaseLogEntry::new(LogType::Decision, gen_uuid7()),
             auth_info: None,
             msg: "Test message".to_string(),
             error_msg: None,
             cedar_lang_version: None,
             cedar_sdk_version: None,
         };
+        let log_entry = LogEntryWithClientInfo::from_loggable(
+            log_entry.clone(),
+            pdp_id.clone(),
+            app_name.clone(),
+        );
 
         // Serialize the log entry to JSON
-        let json_str = serde_json::json!(&log_entry).to_string();
+        let json_str = json!(log_entry).to_string();
 
         // Create a test writer
         let mut test_writer = TestWriter::new();
