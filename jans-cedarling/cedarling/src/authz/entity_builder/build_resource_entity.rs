@@ -17,13 +17,19 @@ impl EntityBuilder {
     ) -> Result<Entity, BuildResourceEntityError> {
         let (entity_type_name, entity_type) = self
             .schema
-            .get_entity_schema(&resource.resource_type)?
+            .get_entity_schema(&resource.resource_type, None)?
             .ok_or(BuildEntityError::EntityNotInSchema(
                 resource.resource_type.clone(),
             ))?;
 
-        let entity_attrs =
-            build_entity_attrs_from_values(&self.schema, entity_type, &resource.payload)?;
+        let default_namespace = entity_type_name.namespace();
+
+        let entity_attrs = build_entity_attrs_from_values(
+            &self.schema,
+            Some(default_namespace.as_str()),
+            entity_type,
+            &resource.payload,
+        )?;
 
         // Build cedar entity
         let entity_id =
