@@ -10,7 +10,6 @@
 use super::service_config::ServiceConfig;
 use crate::authz::{Authz, AuthzConfig};
 use crate::bootstrap_config::BootstrapConfig;
-use crate::common::app_types;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt::{JwtService, JwtServiceInitError};
 use crate::log;
@@ -20,10 +19,7 @@ use std::sync::Arc;
 pub(crate) struct ServiceFactory<'a> {
     bootstrap_config: &'a BootstrapConfig,
     service_config: ServiceConfig,
-    // it is initialized before ServiceFactory is created
-    pdp_id: app_types::PdpID,
     log_service: log::Logger,
-
     container: SingletonContainer,
 }
 
@@ -40,25 +36,13 @@ impl<'a> ServiceFactory<'a> {
         bootstrap_config: &'a BootstrapConfig,
         service_config: ServiceConfig,
         log_service: log::Logger,
-        pdp_id: app_types::PdpID,
     ) -> Self {
         Self {
             bootstrap_config,
             service_config,
             log_service,
             container: Default::default(),
-            pdp_id,
         }
-    }
-
-    // get PdpID
-    pub fn pdp_id(&self) -> app_types::PdpID {
-        self.pdp_id
-    }
-
-    // get application name
-    pub fn application_name(&self) -> app_types::ApplicationName {
-        app_types::ApplicationName(self.bootstrap_config.application_name.to_string())
     }
 
     // get policy store
@@ -91,8 +75,6 @@ impl<'a> ServiceFactory<'a> {
         } else {
             let config = AuthzConfig {
                 log_service: self.log_service(),
-                pdp_id: self.pdp_id(),
-                application_name: self.application_name(),
                 policy_store: self.policy_store(),
                 jwt_service: self.jwt_service().await?,
                 authorization: self.bootstrap_config.authorization_config.clone(),
