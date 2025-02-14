@@ -67,6 +67,7 @@ impl LogStrategy {
 
 #[derive(Serialize, PartialEq)]
 pub(crate) struct LogEntryWithClientInfo<Entry: Loggable> {
+    #[serde(flatten)]
     entry: Entry,
     pdp_id: PdpID,
     #[serde(rename = "application_id", skip_serializing_if = "Option::is_none")]
