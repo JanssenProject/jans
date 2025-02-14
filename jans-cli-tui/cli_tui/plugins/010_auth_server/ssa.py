@@ -241,21 +241,21 @@ class SSA(DialogUtils):
                     title=_("Software ID"),
                     name='software_id',
                     value=data.get('software_id',''),
-                    style=cli_style.edit_text_required
+                    style=cli_style.edit_text
                 ),
 
                 self.app.getTitledText(
                     title=_("Organization"),
                     name='org_id',
                     value=data.get('org_id',''),
-                    style=cli_style.edit_text_required
+                    style=cli_style.edit_text
                 ),
 
                 self.app.getTitledText(
                     title=_("Description"),
                     name='description',
                     value=data.get('description',''),
-                    style=cli_style.edit_text_required
+                    style=cli_style.edit_text
                 ),
 
                 self.app.getTitledCheckBoxList(
@@ -271,7 +271,7 @@ class SSA(DialogUtils):
                     name='software_roles',
                     value='\n'.join(data.get('software_roles', [])),
                     height=3,
-                    style=cli_style.edit_text_required
+                    style=cli_style.edit_text
                 ),
 
                 #VSplit([
