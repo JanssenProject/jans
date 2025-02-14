@@ -164,7 +164,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             //If no scope is missing
             if (missingScopes == null || missingScopes.isEmpty()) {
                 logger.info(" No missing scopes and hence returning original accessToken");
-                return accessToken;
+                return AUTHENTICATION_SCHEME + accessToken;
             }
 
             logger.info("Generating new token with authSpecificScope");
