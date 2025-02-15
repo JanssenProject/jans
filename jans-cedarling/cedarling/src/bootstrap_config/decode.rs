@@ -72,9 +72,9 @@ impl BootstrapConfig {
             (Some(policy_store), None, None) => PolicyStoreConfig {
                 source: PolicyStoreSource::Json(policy_store),
             },
-            // Case: get the policy store from the lock master
+            // Case: get the policy store from the lock server
             (None, Some(policy_store_uri), None) => PolicyStoreConfig {
-                source: PolicyStoreSource::LockMaster(policy_store_uri),
+                source: PolicyStoreSource::LockServer(policy_store_uri),
             },
             // Case: get the policy store from a local JSON file
             (None, None, Some(raw_path)) => {

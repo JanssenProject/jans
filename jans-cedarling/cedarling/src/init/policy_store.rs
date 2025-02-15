@@ -18,8 +18,8 @@ pub enum PolicyStoreLoadError {
     ParseJson(#[from] serde_json::Error),
     #[error("failed to parse the policy store from policy_store yaml: {0}")]
     ParseYaml(#[from] serde_yml::Error),
-    #[error("failed to fetch the policy store from the lock master")]
-    FetchFromLockMaster(#[from] HttpClientError),
+    #[error("failed to fetch the policy store from the lock server")]
+    FetchFromLockServer(#[from] HttpClientError),
     #[error("Policy Store does not contain correct structure: {0}")]
     InvalidStore(String),
     #[error("Failed to load policy store from {0}: {1}")]
@@ -75,7 +75,7 @@ pub(crate) async fn load_policy_store(
                 .map_err(PolicyStoreLoadError::ParseYaml)?;
             extract_first_policy_store(&agama_policy_store)?
         },
-        PolicyStoreSource::LockMaster(policy_store_uri) => {
+        PolicyStoreSource::LockServer(policy_store_uri) => {
             load_policy_store_from_lock_master(policy_store_uri).await?
         },
         PolicyStoreSource::FileJson(path) => {
@@ -159,7 +159,7 @@ mod test {
         let uri = format!("{}/policy-store", mock_server.url()).to_string();
 
         load_policy_store(&PolicyStoreConfig {
-            source: crate::PolicyStoreSource::LockMaster(uri),
+            source: crate::PolicyStoreSource::LockServer(uri),
         })
         .await
         .expect("Should load policy store from Lock Master file");
