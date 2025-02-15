@@ -13,6 +13,8 @@ use serde_json::Value;
 /// Structure for storing `claim mappings`
 ///
 /// wrapper around hash map
+//
+// probably we can store as key composite key of `claim` name and `cedar type`
 #[derive(Debug, Default, PartialEq, Clone, Deserialize)]
 pub struct ClaimMappings(HashMap<String, ClaimMapping>);
 
@@ -93,6 +95,7 @@ impl ClaimMapping {
 /// - `fields`: A map of field names to `RegexField` values.
 #[derive(Debug, Clone)]
 pub struct RegexMapping {
+    // It is unused, maybe we can remove it?
     cedar_policy_type: String,
     regex_expression: String,
     regex: Regex,
@@ -108,7 +111,6 @@ impl RegexMapping {
     fn new(
         cedar_policy_type: String,
         regex_expression: String,
-
         fields: HashMap<String, RegexFieldMapping>,
     ) -> Result<Self, regex::Error> {
         Ok(Self {
@@ -245,7 +247,6 @@ impl<'de> Deserialize<'de> for ClaimMapping {
 /// - `attr`: The attribute name associated with the field (e.g., "uid").
 /// - `type`: The type of the attribute (e.g., "string").
 #[derive(Debug, PartialEq, Deserialize, Clone)]
-
 pub struct RegexFieldMapping {
     pub attr: String,
     pub r#type: RegexFieldMappingType,

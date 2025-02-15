@@ -35,6 +35,8 @@ impl EntityBuilder {
         .zip(DEFAULT_WORKLOAD_ENTITY_TKN_SRCS)
         {
             if let Some(token) = tokens.get(token_name) {
+                println!("token: {}\n", token.name);
+
                 match build_entity(
                     &self.schema,
                     entity_name,
