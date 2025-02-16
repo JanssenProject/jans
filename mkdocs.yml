@@ -419,8 +419,10 @@ nav:
       - cedarling/python/README.md
       - How to use: cedarling/python/usage.md
   - WASM: 'cedarling/cedarling-wasm.md'
-  - iOS: 'cedarling/cedarling-ios.md'
-  - Android: 'cedarling/cedarling-android.md'
+  - UniFFI:
+      - cedarling/uniffi/cedarling-uniffi.md
+      - iOS: 'cedarling/uniffi/cedarling-ios.md'
+      - Android: 'cedarling/uniffi/cedarling-android.md'
 - Agama:
   - Introduction: agama/introduction.md
   - Language reference: agama/language-reference.md

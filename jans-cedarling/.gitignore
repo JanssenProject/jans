@@ -99,4 +99,4 @@ docs/_build/
 .python-version
 
 # allow commit of cedarling_native_apps bindings
-!/bindings/cedarling_native_apps/src/bin
+!/bindings/cedarling_uniffi/src/bin

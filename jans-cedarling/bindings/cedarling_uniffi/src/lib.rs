@@ -185,6 +185,7 @@ impl Cedarling {
         }
     }
     //Get all log ids
+    #[uniffi::method]
     pub fn get_log_ids(&self) -> Vec<String> {
         let log_ids = self.inner.get_log_ids();
         let mut result = Vec::with_capacity(log_ids.len());
