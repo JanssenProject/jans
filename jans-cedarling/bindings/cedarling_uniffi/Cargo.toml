@@ -1,5 +1,5 @@
 [package]
-name = "cedarling_native_apps"
+name = "cedarling_uniffi"
 version = "0.1.0"
 edition = "2021"
 

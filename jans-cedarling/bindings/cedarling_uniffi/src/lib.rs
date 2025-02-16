@@ -47,11 +47,12 @@ pub struct AuthorizeResult {
     json_workload: String,
     json_person: String,
     decision: bool,
+    request_id: String,
 }
 
 impl AuthorizeResult {
     // Constructor to create a new AuthorizeResult instance
-    pub fn new(json_workload: &Value, json_person: &Value, decision: bool) -> Self {
+    pub fn new(json_workload: &Value, json_person: &Value, decision: bool, request_id: String) -> Self {
         let json_workload_string =
             serde_json::to_string(&json_workload).unwrap_or_else(|_| "null".to_string());
         let json_person_string =
@@ -60,6 +61,7 @@ impl AuthorizeResult {
             json_workload: json_workload_string,
             json_person: json_person_string,
             decision,
+            request_id
         }
     }
     // Convert workload string back to JSON Value
@@ -150,6 +152,7 @@ impl Cedarling {
             res_val.get("workload").unwrap(),
             res_val.get("person").unwrap(),
             result.decision,
+            result.request_id
         ))
     }
 
@@ -182,12 +185,14 @@ impl Cedarling {
         }
     }
     //Get all log ids
-    #[uniffi::method]
     pub fn get_log_ids(&self) -> Vec<String> {
-        let mut result = Vec::new();
-        for log_id in self.inner.get_log_ids() {
+        let log_ids = self.inner.get_log_ids();
+        let mut result = Vec::with_capacity(log_ids.len());
+        
+        for log_id in log_ids {
             result.push(log_id.clone());
         }
+        
         result
     }
 
@@ -195,13 +200,16 @@ impl Cedarling {
     /// Tag can be `log_kind`, `log_level`.
     #[uniffi::method]
     pub fn get_logs_by_tag(&self, tag: &str) -> Result<Vec<String>, LogError> {
-        let mut result = Vec::new();
-        for log in self.inner.get_logs_by_tag(tag) {
+        let logs = self.inner.get_logs_by_tag(tag);
+        let mut result = Vec::with_capacity(logs.len());
+    
+        for log in logs {
             let log_str = serde_json::to_string(&log).map_err(|e| LogError::LoggingFailed {
                 error_msg: e.to_string(),
             })?;
             result.push(log_str);
         }
+    
         Ok(result)
     }
 
@@ -209,8 +217,10 @@ impl Cedarling {
     /// Return log entries that match the given request_id.
     #[uniffi::method]
     pub fn get_logs_by_request_id(&self, request_id: &str) -> Result<Vec<String>, LogError> {
-        let mut result = Vec::new();
-        for log in self.inner.get_logs_by_request_id(request_id) {
+        let logs = self.inner.get_logs_by_request_id(request_id);
+        let mut result = Vec::with_capacity(logs.len());
+
+        for log in logs {
             let log_str = serde_json::to_string(&log).map_err(|e| LogError::LoggingFailed {
                 error_msg: e.to_string(),
             })?;
@@ -228,13 +238,16 @@ impl Cedarling {
         request_id: &str,
         tag: &str,
     ) -> Result<Vec<String>, LogError> {
-        let mut result = Vec::new();
-        for log in self.inner.get_logs_by_request_id_and_tag(request_id, tag) {
+        let logs = self.inner.get_logs_by_request_id_and_tag(request_id, tag);
+        let mut result = Vec::with_capacity(logs.len());
+    
+        for log in logs {
             let log_str = serde_json::to_string(&log).map_err(|e| LogError::LoggingFailed {
                 error_msg: e.to_string(),
             })?;
             result.push(log_str);
         }
+    
         Ok(result)
     }
 

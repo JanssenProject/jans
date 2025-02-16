@@ -48,7 +48,7 @@
                "CEDARLING_LOG_TTL": 120,
                "CEDARLING_LOG_TYPE": "memory",
                "CEDARLING_POLICY_STORE_ID": "840da5d85403f35ea76519ed1a18a33989f855bf1cf8",
-               "CEDARLING_POLICY_STORE_LOCAL_FN": "../../bindings/cedarling_native_apps/test_files/policy-store.json",
+               "CEDARLING_POLICY_STORE_LOCAL_FN": "../../bindings/cedarling_uniffi/test_files/policy-store.json",
                "CEDARLING_POLICY_STORE_URI": "",
                "CEDARLING_USER_AUTHZ": "enabled",
                "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",

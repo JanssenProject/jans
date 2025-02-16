@@ -15,7 +15,7 @@ use serde_json::json;
 fn test_authorize_success() {
     //reading bootstra.json and instantiate cedarling
     let cedarling = Cedarling::load_from_file(String::from(
-        "../../bindings/cedarling_native_apps/test_files/bootstrap.json",
+        "../../bindings/cedarling_uniffi/test_files/bootstrap.json",
     ))
     .expect("Error in initializing Cedarling");
 
