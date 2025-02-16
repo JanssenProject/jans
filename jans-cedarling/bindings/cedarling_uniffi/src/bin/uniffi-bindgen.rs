@@ -3,8 +3,6 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::env;
-
 fn main() {
     uniffi::uniffi_bindgen_main()
 }
