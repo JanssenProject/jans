@@ -57,7 +57,7 @@
 		<jackrabbit.version>2.21.13</jackrabbit.version>
 
 		<bc.version>1.78</bc.version>
-		<junit.jupiter.version>5.9.2</junit.jupiter.version>
+		<junit.jupiter.version>5.11.3</junit.jupiter.version>
 		<mockito.version>5.1.1</mockito.version>
 
 		<jetty.version>11.0.24</jetty.version>
