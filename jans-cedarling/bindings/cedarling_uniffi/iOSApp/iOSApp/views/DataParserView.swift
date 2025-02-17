@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 struct DataParserView: View {
+    var title: String?
     var jsonString: String
     @State private var jsonData: Any?
 
@@ -32,7 +33,7 @@ struct DataParserView: View {
                 }
             }
             .padding()
-            .navigationTitle(Labels.LOGS_TREE)
+            .navigationTitle(title ?? Labels.LOGS_TREE)
         }
         .onAppear {
             parseJSON()

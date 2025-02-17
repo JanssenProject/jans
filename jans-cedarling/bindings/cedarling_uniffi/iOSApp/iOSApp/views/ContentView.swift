@@ -110,7 +110,7 @@ struct ContentView: View {
             
             resultMessage = "Authorization Result: \(result.decision)"
             modelTextField = resultMessage
-            modelJsonField = "[\(result.jsonPerson), \(result.jsonWorkload)]"
+            modelJsonField = "[{\"person\": \(result.jsonPerson), \"workload\": \(result.jsonWorkload)}]"
             modelJsonLogField = Helper.processLogs(logs: logs)
             
             isAuthzRequest = true
@@ -187,9 +187,9 @@ struct ModalView: View {
                 case .result:
                     Text(title).font(.title).padding()
                     Text("\(modelTextField)").padding()
-                    DataParserView(jsonString: modelJsonField)
+                    DataParserView(title: Labels.MORE_INFO, jsonString: modelJsonField)
                 case .logs:
-                    DataParserView(jsonString: modelJsonLogField)
+                    DataParserView(title: nil, jsonString: modelJsonLogField)
                 default:
                     EmptyView()
                 }

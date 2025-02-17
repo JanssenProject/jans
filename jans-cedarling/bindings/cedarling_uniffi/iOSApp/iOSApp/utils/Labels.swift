@@ -18,6 +18,7 @@ struct Labels {
     static let CHOOSE_OPTION = "Choose an option"
     static let LOGS = "Logs"
     static let LOGS_TREE = "Logs Tree"
+    static let MORE_INFO = "More Info"
     //errors
     static let ERROR_DECODE_PAYLOAD = "Unexpected error occurred:  unable to decode payload"
     static let INVALID_JSON = "Invalid JSON"
