@@ -38,8 +38,8 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
-import io.jans.scim.model.GluuBoolean;
-import io.jans.scim.model.GluuGroup;
+import io.jans.scim.model.JansBoolean;
+import io.jans.scim.model.JansGroup;
 import io.jans.scim.model.scim.ScimCustomPerson;
 import io.jans.scim.model.scim2.BaseScimResource;
 import io.jans.scim.model.scim2.Meta;
@@ -333,7 +333,7 @@ public class Scim2UserService implements Serializable {
 		res.setTimezone(person.getTimezone());
 
 		res.setActive(Boolean.valueOf(person.getAttribute("jansActive"))
-				|| GluuBoolean.getByValue(person.getAttribute("jansStatus")).isBooleanValue());
+				|| JansBoolean.getByValue(person.getAttribute("jansStatus")).isBooleanValue());
 		res.setPassword(person.getUserPassword());
 
 		res.setEmails(getAttributeListValue(person, Email.class, "jansEmail"));
@@ -360,7 +360,7 @@ public class Scim2UserService implements Serializable {
 
 			for (String groupDN : listOfGroups) {
 				try {
-					GluuGroup gluuGroup = groupService.getGroupByDn(groupDN);
+					JansGroup gluuGroup = groupService.getGroupByDn(groupDN);
 
 					Group group = new Group();
 					group.setValue(gluuGroup.getInum());
