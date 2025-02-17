@@ -357,6 +357,21 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: `URL for MTLS Device Authorization endpoint. Example: 'https://server.example.com/jans-auth/restv1/mtls/device_authorization'`,
 			},
+			"access_evaluation_allow_basic_client_authorization": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value true allows basic client authorization.",
+			},
+			"access_evaluation_script_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Name of the access evaluation script.",
+			},
+			"access_evaluation_discovery_cache_lifetime_in_minutes": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The cache lifetime in minutes of the access evaluation discovery.",
+			},
 			"require_request_object_encryption": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -1436,6 +1451,11 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Share Subject ID between clients with same Sector ID.",
 			},
+			"use_openid_sub_attribute_value_for_pairwise_local_account_id": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Use OpenID sub attribute value for Pairwise Local Account ID.",
+			},
 			"web_keys_storage": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -1661,6 +1681,11 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid.",
 			},
+			"authorize_challenge_session_lifetime_in_seconds": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The lifetime of the authorize challenge session in seconds.",
+			},
 			"disable_u2f_endpoint": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -1742,7 +1767,7 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Boolean value specifying whether turn on FAPI compatibility mode. If true AS behaves in more strict mode.",
 			},
-			"force_id_token_hint_precense": {
+			"force_id_token_hint_presence": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Boolean value specifying whether force id_token_hint parameter presence.",
@@ -2130,6 +2155,7 @@ func resourceAppConfiguration() *schema.Resource {
 							"METRIC",
 							"STAT",
 							"PAR",
+							"ACCESS_EVALUATION",
 							"SSA",
 						}
 						return validateEnum(i, enums)

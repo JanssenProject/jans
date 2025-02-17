@@ -86,6 +86,7 @@ public class RegisterRequest extends BaseRequest {
     private List<String> spontaneousScopeScriptDns;
     private List<String> updateTokenScriptDns;
     private List<String> postAuthnScriptDns;
+    private List<String> tokenExchangeScriptDns;
     private List<String> consentGatheringScriptDns;
     private List<String> introspectionScriptDns;
     private List<String> rptClaimsScriptDns;
@@ -198,6 +199,7 @@ public class RegisterRequest extends BaseRequest {
         this.spontaneousScopeScriptDns = new ArrayList<>();
         this.updateTokenScriptDns = new ArrayList<>();
         this.postAuthnScriptDns = new ArrayList<>();
+        this.tokenExchangeScriptDns = new ArrayList<>();
         this.consentGatheringScriptDns = new ArrayList<>();
         this.introspectionScriptDns = new ArrayList<>();
         this.rptClaimsScriptDns = new ArrayList<>();
@@ -1702,6 +1704,26 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
+     * Gets token exchange script dns
+     *
+     * @return token exchange script dns
+     */
+    public List<String> getTokenExchangeScriptDns() {
+        return tokenExchangeScriptDns;
+    }
+
+    /**
+     * Sets token exchange script dns
+     *
+     * @param tokenExchangeScriptDns token exchange script dns
+     * @return register request object
+     */
+    public RegisterRequest setTokenExchangeScriptDns(List<String> tokenExchangeScriptDns) {
+        this.tokenExchangeScriptDns = tokenExchangeScriptDns;
+        return this;
+    }
+
+    /**
      * Gets consent gathering script dns
      *
      * @return consent gathering script dns
@@ -1854,6 +1876,7 @@ public class RegisterRequest extends BaseRequest {
         result.setSpontaneousScopeScriptDns(extractListByKey(requestObject, SPONTANEOUS_SCOPE_SCRIPT_DNS.toString()));
         result.setUpdateTokenScriptDns(extractListByKey(requestObject, UPDATE_TOKEN_SCRIPT_DNS.toString()));
         result.setPostAuthnScriptDns(extractListByKey(requestObject, POST_AUTHN_SCRIPT_DNS.toString()));
+        result.setTokenExchangeScriptDns(extractListByKey(requestObject, TOKEN_EXCHANGE_SCRIPT_DNS.toString()));
         result.setConsentGatheringScriptDns(extractListByKey(requestObject, CONSENT_GATHERING_SCRIPT_DNS.toString()));
         result.setIntrospectionScriptDns(extractListByKey(requestObject, INTROSPECTION_SCRIPT_DNS.toString()));
         result.setRptClaimsScriptDns(extractListByKey(requestObject, RPT_CLAIMS_SCRIPT_DNS.toString()));
@@ -2174,6 +2197,7 @@ public class RegisterRequest extends BaseRequest {
         applyArray(function, SPONTANEOUS_SCOPE_SCRIPT_DNS, spontaneousScopeScriptDns);
         applyArray(function, UPDATE_TOKEN_SCRIPT_DNS, updateTokenScriptDns);
         applyArray(function, POST_AUTHN_SCRIPT_DNS, postAuthnScriptDns);
+        applyArray(function, TOKEN_EXCHANGE_SCRIPT_DNS, tokenExchangeScriptDns);
         applyArray(function, CONSENT_GATHERING_SCRIPT_DNS, consentGatheringScriptDns);
         applyArray(function, INTROSPECTION_SCRIPT_DNS, introspectionScriptDns);
         applyArray(function, RPT_CLAIMS_SCRIPT_DNS, rptClaimsScriptDns);

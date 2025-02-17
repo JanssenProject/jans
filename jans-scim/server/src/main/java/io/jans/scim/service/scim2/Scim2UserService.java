@@ -160,7 +160,6 @@ public class Scim2UserService implements Serializable {
 	private void transferAttributesToPerson(UserResource res, ScimCustomPerson person) {
 
 		log.debug("transferAttributesToPerson");
-		// NOTE: calling person.setAttribute("ATTR", null) is not changing the attribute in LDAP :(
 
 		// Set values trying to follow the order found in BaseScimResource class
 		person.setAttribute("jansExtId", res.getExternalId());
