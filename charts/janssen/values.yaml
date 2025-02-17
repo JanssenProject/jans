@@ -47,7 +47,7 @@ auth-server:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/auth-server
     # -- Image  tag to use for deploying.
-    tag: 1.4.0-1
+    tag: 0.0.0-nightly
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -126,7 +126,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/certmanager
     # -- Image  tag to use for deploying.
-    tag: 1.4.0-1
+    tag: 0.0.0-nightly
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -324,7 +324,7 @@ config:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/configurator
     # -- Image  tag to use for deploying.
-    tag: 1.4.0-1
+    tag: 0.0.0-nightly
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Organization name. Used for certificate creation.
@@ -418,7 +418,7 @@ config-api:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/config-api
     # -- Image  tag to use for deploying.
-    tag: 1.4.0-1
+    tag: 0.0.0-nightly
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -523,7 +523,7 @@ fido2:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/fido2
     # -- Image  tag to use for deploying.
-    tag: 1.4.0-1
+    tag: 0.0.0-nightly
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -633,7 +633,7 @@ casa:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/casa
     # -- Image  tag to use for deploying.
-    tag: 1.4.0-1
+    tag: 0.0.0-nightly
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1252,7 +1252,7 @@ persistence:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/persistence-loader
     # -- Image  tag to use for deploying.
-    tag: 1.4.0-1
+    tag: 0.0.0-nightly
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -1338,7 +1338,7 @@ scim:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/scim
     # -- Image  tag to use for deploying.
-    tag: 1.4.0-1
+    tag: 0.0.0-nightly
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1448,7 +1448,7 @@ link:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/link
     # -- Image  tag to use for deploying.
-    tag: 1.4.0-1
+    tag: 0.0.0-nightly
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1557,7 +1557,7 @@ saml:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/saml
     # -- Image  tag to use for deploying.
-    tag: 1.4.0-1
+    tag: 0.0.0-nightly
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1638,7 +1638,7 @@ kc-scheduler:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/kc-scheduler
     # -- Image  tag to use for deploying.
-    tag: 1.4.0-1
+    tag: 0.0.0-nightly
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.

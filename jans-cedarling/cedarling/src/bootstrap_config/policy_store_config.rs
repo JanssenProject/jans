@@ -31,7 +31,7 @@ pub enum PolicyStoreSource {
     /// Fetch the policies from the Lock Master service using a specified identifier.
     ///
     /// The string contains a URI where the policy store can be retrieved.
-    LockMaster(String),
+    LockServer(String),
 
     /// Read policy from a JSON File.
     FileJson(Box<Path>),
