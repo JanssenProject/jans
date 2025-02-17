@@ -391,10 +391,15 @@ class Plugin(DialogUtils):
             self.clients_container.clear()
 
             for d in all_data:
+                grant_types = d.get('grantTypes', [])
+                for gt in grant_types[:]:
+                    if not gt:
+                        grant_types.remove(gt)
+
                 self.clients_container.add_item([
                     d['inum'],
                     d.get('clientName', ''),
-                    ','.join(d.get('grantTypes', [])),
+                    ','.join(grant_types),
                     d.get('subjectType', '') 
                     ])
 

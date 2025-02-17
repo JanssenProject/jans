@@ -55,7 +55,10 @@ class DialogUtils:
                     value_ = int(value_)
 
             if getattr(item, 'jans_list_type', False):
-                value_ = value_.split('\n')
+                if not value_.strip():
+                    value_ = []
+                else:
+                    value_ = value_.split('\n')
 
             return {'key':key_, 'value':value_}
 
