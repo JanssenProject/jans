@@ -67,8 +67,8 @@ It will return the result as below:
 
 ```json title="Sample Output" linenums="1"
 {
-  "issuer": "https://jans-project.lxd",
-  "baseEndpoint": "https://jans-project.lxd/jans-fido2/restv1",
+  "issuer": "https://example.jans.io",
+  "baseEndpoint": "https://example.jans.io/jans-fido2/restv1",
   "cleanServiceInterval": 60,
   "cleanServiceBatchChunkSize": 10000,
   "useLocalCache": true,
@@ -91,25 +91,36 @@ It will return the result as below:
     "checkU2fAttestations": false,
     "debugUserAutoEnrollment": false,
     "unfinishedRequestExpiration": 180,
-    "authenticationHistoryExpiration": 1296000,
+    "metadataRefreshInterval": 1296000,
     "serverMetadataFolder": "/etc/jans/conf/fido2/server_metadata",
     "enabledFidoAlgorithms": [
       "RS256",
       "ES256"
     ],
-    "rp": [
+    "metadataServers": [
       {
-        "id": "https://jans-project.lxd",
-        "origins": [
-          "jans-project.lxd"
-        ]
+        "url": "https://mds.fidoalliance.org/"
       }
     ],
     "disableMetadataService": false,
+    "hints": [
+      "security-key",
+      "client-device",
+      "hybrid"
+    ],
+    "enterpriseAttestation": false,
     "attestationMode": "monitor",
-    "assertionOptionsGenerateEndpointEnabled": true
+    "rp": [
+      {
+        "id": "https://example.jans.io",
+        "origins": [
+          "example.jans.io"
+        ]
+      }
+    ]
   }
 }
+
 
 ```
 
