@@ -17,7 +17,7 @@ on:
       jans_version:
         description: 'Janssen helm chart version'
         required: true
-        default: '1.4.0'
+        default: '0.0.0-nightly'
 permissions:
   contents: read
 
@@ -45,6 +45,6 @@ jobs:
           ip=$(curl ipinfo.io/ip)
           chmod u+x automation/startjanssendemo.sh
           JANS_VERSION=${{ github.event.inputs.jans_version }}
-          JANS_VERSION=${JANS_VERSION:-"1.4.0"}
+          JANS_VERSION=${JANS_VERSION:-"0.0.0-nightly"}
           sudo bash ./automation/startjanssendemo.sh demoexample.jans.io ${{ matrix.persistence-backends }} $JANS_VERSION $ip true ${{ matrix.istio }} 
           sudo bash ./automation/analyze_test_microk8s_setup.sh "${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" "${{ secrets.MOAUTO_ROCKETCHAT_ID }}" ${{ matrix.persistence-backends }}
