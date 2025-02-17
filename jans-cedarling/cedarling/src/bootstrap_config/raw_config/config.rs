@@ -176,9 +176,9 @@ pub struct BootstrapConfigRaw {
     /// Lock Master, i.e. .well-known/lock-master-configuration.
     ///
     /// ***Required*** if `LOCK == enabled`.
-    #[serde(rename = "CEDARLING_LOCK_MASTER_CONFIGURATION_URI", default)]
+    #[serde(rename = "CEDARLING_LOCK_SERVER_CONFIGURATION_URI", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub lock_master_configuration_uri: Option<String>,
+    pub lock_server_configuration_uri: Option<String>,
 
     /// Controls whether Cedarling should listen for SSE config updates.
     #[serde(rename = "CEDARLING_LOCK_DYNAMIC_CONFIGURATION", default)]
