@@ -26,9 +26,9 @@ public abstract class CustomEntry extends Entry implements Serializable, Cloneab
 	@CustomObjectClass
 	private String[] customObjectClasses;
 
-	public abstract List<GluuCustomAttribute> getCustomAttributes();
+	public abstract List<JansCustomAttribute> getCustomAttributes();
 
-	public abstract void setCustomAttributes(List<GluuCustomAttribute> customAttributes);
+	public abstract void setCustomAttributes(List<JansCustomAttribute> customAttributes);
 
 	public String[] getCustomObjectClasses() {
 		return customObjectClasses;
@@ -44,7 +44,7 @@ public abstract class CustomEntry extends Entry implements Serializable, Cloneab
 		}
 
 		String[] values = null;
-		for (GluuCustomAttribute attribute : getCustomAttributes()) {
+		for (JansCustomAttribute attribute : getCustomAttributes()) {
 			if (StringHelper.equalsIgnoreCase(attribute.getName(), attributeName)) {
 				values = attribute.getValues();
 				break;
@@ -59,7 +59,7 @@ public abstract class CustomEntry extends Entry implements Serializable, Cloneab
 		}
 
 		String value = null;
-		for (GluuCustomAttribute attribute : getCustomAttributes()) {
+		for (JansCustomAttribute attribute : getCustomAttributes()) {
 			if (StringHelper.equalsIgnoreCase(attribute.getName(), attributeName)) {
 				value = attribute.getValue();
 				break;
@@ -78,15 +78,15 @@ public abstract class CustomEntry extends Entry implements Serializable, Cloneab
 	}
 
 	public void setAttribute(String attributeName, String attributeValue) {
-		setAttribute(new GluuCustomAttribute(attributeName, attributeValue));
+		setAttribute(new JansCustomAttribute(attributeName, attributeValue));
 	}
 
 	public void setAttribute(String attributeName, String[] attributeValue) {
-		setAttribute(new GluuCustomAttribute(attributeName, attributeValue));
+		setAttribute(new JansCustomAttribute(attributeName, attributeValue));
 	}
 
-	public void setAttribute(GluuCustomAttribute attribute) {
-		List<GluuCustomAttribute> customAttributes = getCustomAttributes();
+	public void setAttribute(JansCustomAttribute attribute) {
+		List<JansCustomAttribute> customAttributes = getCustomAttributes();
 		customAttributes.remove(attribute);
 		customAttributes.add(attribute);
 	}

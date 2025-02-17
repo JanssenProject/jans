@@ -20,9 +20,8 @@ import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
-import io.jans.scim.model.GluuCustomPerson;
-import io.jans.scim.model.GluuFido2Device;
-import io.jans.scim.util.OxTrustConstants;
+import io.jans.scim.model.JansCustomPerson;
+import io.jans.scim.model.JansFido2Device;
 
 @ApplicationScoped
 public class Fido2DeviceService implements Serializable {
@@ -38,11 +37,11 @@ public class Fido2DeviceService implements Serializable {
 	@Inject
 	private OrganizationService organizationService;
 
-	public boolean removeFido2(GluuCustomPerson person, String deviceID) {
+	public boolean removeFido2(JansCustomPerson person, String deviceID) {
 		try {
 			String finalDn = String.format("jansId=%s,ou=fido2_register,", deviceID);
 			finalDn = finalDn.concat(person.getDn());
-			ldapEntryManager.removeRecursively(finalDn, GluuFido2Device.class);
+			ldapEntryManager.removeRecursively(finalDn, JansFido2Device.class);
 			return true;
 		} catch (Exception e) {
 			log.error("", e);
@@ -61,26 +60,26 @@ public class Fido2DeviceService implements Serializable {
 		return String.format("ou=people,%s", orgDn);
 	}
 
-	public List<GluuFido2Device> findAllFido2Devices(GluuCustomPerson person) {
+	public List<JansFido2Device> findAllFido2Devices(JansCustomPerson person) {
 		try {
 			String baseDnForU2fDevices = getDnForFido2Device(null, person.getInum());
-			Filter inumFilter = Filter.createEqualityFilter(OxTrustConstants.PERSON_INUM, person.getInum());
-			return ldapEntryManager.findEntries(baseDnForU2fDevices, GluuFido2Device.class, inumFilter);
+			Filter inumFilter = Filter.createEqualityFilter("personInum", person.getInum());
+			return ldapEntryManager.findEntries(baseDnForU2fDevices, JansFido2Device.class, inumFilter);
 		} catch (EntryPersistenceException e) {
 			log.warn("No fido2 devices enrolled for " + person.getDisplayName());
 			return new ArrayList<>();
 		}
 	}
 
-	public GluuFido2Device getFido2DeviceById(String userId, String id) {
-		GluuFido2Device f2d = null;
+	public JansFido2Device getFido2DeviceById(String userId, String id) {
+		JansFido2Device f2d = null;
 		try {
 			String dn = getDnForFido2Device(id, userId);
 			if (StringUtils.isNotEmpty(userId)) {
-				f2d = ldapEntryManager.find(GluuFido2Device.class, dn);
+				f2d = ldapEntryManager.find(JansFido2Device.class, dn);
 			} else {
 				Filter filter = Filter.createEqualityFilter("jansId", id);
-				f2d = ldapEntryManager.findEntries(dn, GluuFido2Device.class, filter).get(0);
+				f2d = ldapEntryManager.findEntries(dn, JansFido2Device.class, filter).get(0);
 			}
 		} catch (Exception e) {
 			log.error("Failed to find Fido 2 device with id " + id, e);
@@ -89,23 +88,23 @@ public class Fido2DeviceService implements Serializable {
 
 	}
 
-	public void updateFido2Device(GluuFido2Device fido2Device) {
+	public void updateFido2Device(JansFido2Device fido2Device) {
 		ldapEntryManager.merge(fido2Device);
 	}
 
-	public void removeFido2Device(GluuFido2Device fido2Device) {
-		ldapEntryManager.removeRecursively(fido2Device.getDn(), GluuFido2Device.class);
+	public void removeFido2Device(JansFido2Device fido2Device) {
+		ldapEntryManager.removeRecursively(fido2Device.getDn(), JansFido2Device.class);
 	}
 
-	public GluuFido2Device getGluuCustomFidoDeviceById(String id, String userId) {
-		GluuFido2Device gluuCustomFidoDevice = null;
+	public JansFido2Device getJansCustomFidoDeviceById(String id, String userId) {
+		JansFido2Device gluuCustomFidoDevice = null;
 		try {
 			String dn = getDnForFido2Device(id, userId);
 			if (StringUtils.isNotEmpty(userId))
-				gluuCustomFidoDevice = ldapEntryManager.find(GluuFido2Device.class, dn);
+				gluuCustomFidoDevice = ldapEntryManager.find(JansFido2Device.class, dn);
 			else {
 				Filter filter = Filter.createEqualityFilter("jansId", id);
-				gluuCustomFidoDevice = ldapEntryManager.findEntries(dn, GluuFido2Device.class, filter).get(0);
+				gluuCustomFidoDevice = ldapEntryManager.findEntries(dn, JansFido2Device.class, filter).get(0);
 			}
 		} catch (Exception e) {
 			log.error("Failed to find device by id " + id, e);

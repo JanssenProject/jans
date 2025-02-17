@@ -16,7 +16,7 @@ import io.jans.orm.annotation.ObjectClass;
  */
 @DataEntry(sortBy = { "id" }, sortByName = { "jansId" })
 @ObjectClass(value = "jansDeviceRegistration")
-public class GluuCustomFidoDevice extends Entry {
+public class JansCustomFidoDevice extends Entry {
 
 	/**
 	 * 
