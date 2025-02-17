@@ -40,7 +40,6 @@ struct DataParserView: View {
     }
 
     func parseJSON() {
-        print("```````````````````````````", jsonString)
         guard let data = Helper.removeNewLines(from: jsonString).data(using: .utf8),
               let jsonObject = try? JSONSerialization.jsonObject(with: data, options: []) else {
             return
