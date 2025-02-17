@@ -9125,17 +9125,17 @@ acrN - consentScriptN
 <tr>
 <td><code>getClient</code></td>
 <td>Gets a reference to the OAuth client associated to the authentication request</td>
-<td><a href="https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server/common/src/main/java/io/jans/as/common/model/registration/Client.java">Client</a></td>
+<td><a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/common/src/main/java/io/jans/as/common/model/registration/Client.java">Client</a></td>
 </tr>
 <tr>
 <td><code>getScopes</code></td>
 <td>A list of OAuth scopes requested</td>
-<td><a href="https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server/persistence-model/src/main/java/io/jans/as/persistence/model/Scope.java">Scope</a></td>
+<td><a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/persistence-model/src/main/java/io/jans/as/persistence/model/Scope.java">Scope</a></td>
 </tr>
 <tr>
 <td><code>getUser</code></td>
 <td>A reference to the user attempting authentication</td>
-<td><a href="https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java">User</a> / <a href="https://github.com/JanssenProject/jans/tree/nightly/jans-core/model/src/main/java/io/jans/model/user/SimpleUser.java">SimpleUser</a></td>
+<td><a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java">User</a> / <a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-core/model/src/main/java/io/jans/model/user/SimpleUser.java">SimpleUser</a></td>
 </tr>
 <tr>
 <td><code>getSessionAttributes</code></td>
@@ -9149,7 +9149,7 @@ acrN - consentScriptN
 import io.jans.service.cdi.util.CdiUtil;
 ...
 AgamaConsentUtil acu = CdiUtil.bean(AgamaConsentUtil.class);
-String name = acu.getClient().getClientName();        //retrieves the client&#39;s display name
+String name = acu.getClient().getClientName(); //retrieves the client&#39;s display name
 </code></pre></div>
 <p>Agama DSL example:</p>
 <div class="highlight"><pre><span></span><code>acuCls = Call io.jans.as.server.util.AgamaConsentUtil#class
@@ -9162,7 +9162,7 @@ name = acu.client.clientName        //retrieves the client&#39;s display name
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-03T12:26:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-03</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-17T17:20:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-17</span>
       
         <br>
         Created:
