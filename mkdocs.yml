@@ -421,6 +421,7 @@ nav:
     - JWT: 'cedarling/cedarling-jwt.md'
     - Logs: 'cedarling/cedarling-logs.md'
     - Properties: 'cedarling/cedarling-properties.md'
+    - Lock Server Integration: 'cedarling/cedarling-lock-server.md'
   - Developer:
     - Python:
         - cedarling/python/README.md
