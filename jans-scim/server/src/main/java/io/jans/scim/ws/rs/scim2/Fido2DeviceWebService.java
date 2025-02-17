@@ -45,7 +45,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import io.jans.scim.model.exception.SCIMException;
 import io.jans.scim.model.fido2.Fido2DeviceData;
-import io.jans.scim.model.GluuFido2Device;
+import io.jans.scim.model.JansFido2Device;
 import io.jans.scim.model.scim2.*;
 import io.jans.scim.model.scim2.fido.DeviceData;
 import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
@@ -149,7 +149,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
         try {
             log.debug("Executing web service method. getF2DeviceById");
 
-            GluuFido2Device device = fidoDeviceService.getFido2DeviceById(userId, id);
+            JansFido2Device device = fidoDeviceService.getFido2DeviceById(userId, id);
             if (device == null) return notFoundResponse(id, fido2ResourceType);
             
             response = externalConstraintsService.applyEntityCheck(device, null,
@@ -194,8 +194,11 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
                 throw new SCIMException("Parameter id does not match id attribute of Device");
 
             String userId = fidoDeviceResource.getUserId();
-            GluuFido2Device device = fidoDeviceService.getFido2DeviceById(userId, id);
+            JansFido2Device device = fidoDeviceService.getFido2DeviceById(userId, id);
             if (device == null) return notFoundResponse(id, fido2ResourceType);
+            
+            if (userId == null)
+                userId = userPersistenceHelper.getUserInumFromDN(device.getDn());
 
             response = externalConstraintsService.applyEntityCheck(device, fidoDeviceResource,
                     httpHeaders, uriInfo, HttpMethod.PUT, fido2ResourceType);
@@ -241,7 +244,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
         try {
             log.debug("Executing web service method. deleteDevice");
 
-            GluuFido2Device device = fidoDeviceService.getFido2DeviceById(null, id);
+            JansFido2Device device = fidoDeviceService.getFido2DeviceById(null, id);
             if (device == null) return notFoundResponse(id, fido2ResourceType);
 
             response = externalConstraintsService.applyEntityCheck(device, null,
@@ -305,7 +308,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
 
     }
 
-    private void transferAttributesToFido2Resource(GluuFido2Device fidoDevice, Fido2DeviceResource res, String url, String userId) {
+    private void transferAttributesToFido2Resource(JansFido2Device fidoDevice, Fido2DeviceResource res, String url, String userId) {
 
         res.setId(fidoDevice.getId());
 
@@ -346,7 +349,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
         
     }
 
-    private void transferAttributesToDevice(Fido2DeviceResource res, GluuFido2Device device) {
+    private void transferAttributesToDevice(Fido2DeviceResource res, JansFido2Device device) {
 
         device.setId(res.getId());
 
@@ -387,10 +390,10 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
         	ldapFilter=Filter.createANDFilter(ldapFilter, Filter.createEqualityFilter("personInum", userId));
         }
 
-        PagedResult<GluuFido2Device> list;
+        PagedResult<JansFido2Device> list;
         try {
             list = entryManager.findPagedEntries(fidoDeviceService.getDnForFido2Device(null, userId),
-                    GluuFido2Device.class, ldapFilter, null, sortBy, sortOrder, startIndex - 1, count, getMaxCount());
+                    JansFido2Device.class, ldapFilter, null, sortBy, sortOrder, startIndex - 1, count, getMaxCount());
         } catch (Exception e) {
             log.info("Returning an empty listViewReponse");
             log.error(e.getMessage(), e);
@@ -399,7 +402,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
         }
         List<BaseScimResource> resources=new ArrayList<>();
 
-        for (GluuFido2Device device : list.getEntries()){
+        for (JansFido2Device device : list.getEntries()){
             Fido2DeviceResource scimDev=new Fido2DeviceResource();
             transferAttributesToFido2Resource(device, scimDev, endpointUrl, userPersistenceHelper.getUserInumFromDN(device.getDn()));
             resources.add(scimDev);

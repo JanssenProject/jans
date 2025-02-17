@@ -20,7 +20,7 @@ import java.util.Date;
 @SuppressWarnings("serial")
 @DataEntry
 @ObjectClass(value = "jansFido2RegistrationEntry")
-public class GluuFido2Device extends Fido2Entry implements Serializable {
+public class JansFido2Device extends Fido2Entry implements Serializable {
 
     @JsonObject
     @AttributeName(name = "jansRegistrationData")
@@ -36,10 +36,10 @@ public class GluuFido2Device extends Fido2Entry implements Serializable {
 	@AttributeName(name = "jansDeviceData")
 	private Fido2DeviceData deviceData;
 
-    public GluuFido2Device() {
+    public JansFido2Device() {
     }
 
-    public GluuFido2Device(String dn, String id, Date creationDate, String sessionId, String userInum,
+    public JansFido2Device(String dn, String id, Date creationDate, String sessionId, String userInum,
                            Fido2Data registrationData, String challenge) {
         super(dn, id, creationDate, sessionId, userInum, challenge);
         this.registrationData = registrationData;

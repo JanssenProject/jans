@@ -13,10 +13,8 @@ import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.search.filter.Filter;
-import io.jans.scim.model.GluuCustomPerson;
-import io.jans.scim.model.GluuGroup;
-import io.jans.scim.model.GluuGroupVisibility;
-import io.jans.scim.util.OxTrustConstants;
+import io.jans.scim.model.JansCustomPerson;
+import io.jans.scim.model.JansGroup;
 import io.jans.util.ArrayHelper;
 import io.jans.util.StringHelper;
 
@@ -54,10 +52,10 @@ public class GroupService implements Serializable {
 	@Inject
 	private ExternalIdGeneratorService idGeneratorService;
 
-	public void addGroup(GluuGroup group) throws Exception {
-		GluuGroup displayNameGroup = new GluuGroup();
+	public void addGroup(JansGroup group) throws Exception {
+		JansGroup displayNameGroup = new JansGroup();
 		displayNameGroup.setDisplayName(group.getDisplayName());
-		List<GluuGroup> groups = findGroups(displayNameGroup, 1);
+		List<JansGroup> groups = findGroups(displayNameGroup, 1);
 		if (groups == null || groups.size() == 0) {
 			persistenceEntryManager.persist(group);
 		} else {
@@ -65,16 +63,16 @@ public class GroupService implements Serializable {
 		}
 	}
 
-	public void updateGroup(GluuGroup group) {
+	public void updateGroup(JansGroup group) {
 		persistenceEntryManager.merge(group);
 	}
 
-	public void removeGroup(GluuGroup group) {
+	public void removeGroup(JansGroup group) {
 		if (group.getMembers() != null) {
 			List<String> memberDNs = group.getMembers();
 			for (String memberDN : memberDNs) {
 				if (personService.contains(memberDN)) {
-					GluuCustomPerson person = personService.getPersonByDn(memberDN);
+					JansCustomPerson person = personService.getPersonByDn(memberDN);
 					List<String> groupDNs = person.getMemberOf();
 					List<String> updatedGroupDNs = new ArrayList<String>();
 					updatedGroupDNs.addAll(groupDNs);
@@ -93,18 +91,18 @@ public class GroupService implements Serializable {
 		// clear references in gluuPerson entries
 	}
 
-	public List<GluuGroup> getAllGroups() {
-		return persistenceEntryManager.findEntries(getDnForGroup(null), GluuGroup.class, null);
+	public List<JansGroup> getAllGroups() {
+		return persistenceEntryManager.findEntries(getDnForGroup(null), JansGroup.class, null);
 	}
 
 	public boolean isMemberOrOwner(String groupDN, String personDN) {
-		Filter ownerFilter = Filter.createEqualityFilter(OxTrustConstants.owner, personDN);
-		Filter memberFilter = Filter.createEqualityFilter(OxTrustConstants.member, personDN);
+		Filter ownerFilter = Filter.createEqualityFilter("owner", personDN);
+		Filter memberFilter = Filter.createEqualityFilter("member", personDN);
 		Filter searchFilter = Filter.createORFilter(ownerFilter, memberFilter);
 
 		boolean isMemberOrOwner = false;
 		try {
-			isMemberOrOwner = persistenceEntryManager.findEntries(groupDN, GluuGroup.class, searchFilter, 1).size() > 0;
+			isMemberOrOwner = persistenceEntryManager.findEntries(groupDN, JansGroup.class, searchFilter, 1).size() > 0;
 		} catch (EntryPersistenceException ex) {
 			log.error("Failed to determine if person '{}' memeber or owner of group '{}'", personDN, groupDN, ex);
 		}
@@ -112,10 +110,10 @@ public class GroupService implements Serializable {
 		return isMemberOrOwner;
 	}
 
-	public GluuGroup getGroupByInum(String inum) {
-		GluuGroup result = null;
+	public JansGroup getGroupByInum(String inum) {
+		JansGroup result = null;
 		try {
-			result = persistenceEntryManager.find(GluuGroup.class, getDnForGroup(inum));
+			result = persistenceEntryManager.find(JansGroup.class, getDnForGroup(inum));
 		} catch (Exception e) {
 			log.error("Failed to find group by Inum " + inum, e);
 		}
@@ -135,7 +133,7 @@ public class GroupService implements Serializable {
 	public int countGroups() {
 		String dn = getDnForGroup(null);
 
-		Class<?> searchClass = GluuGroup.class;
+		Class<?> searchClass = JansGroup.class;
 		if (persistenceEntryManager.hasBranchesSupport(dn)) {
 			searchClass = SimpleBranch.class;
 		}
@@ -144,36 +142,32 @@ public class GroupService implements Serializable {
 	}
 
 	public boolean contains(String groupDn) {
-		return persistenceEntryManager.contains(groupDn, GluuCustomPerson.class);
+		return persistenceEntryManager.contains(groupDn, JansCustomPerson.class);
 	}
 
 	public String generateInumForNewGroup() throws Exception {
-		GluuGroup group = new GluuGroup();
+		JansGroup group = new JansGroup();
 		String newInum = null;
 		String newDn = null;
 		do {
 			newInum = generateInumForNewGroupImpl();
 			newDn = getDnForGroup(newInum);
 			group.setDn(newDn);
-		} while (persistenceEntryManager.contains(newDn, GluuCustomPerson.class));
+		} while (persistenceEntryManager.contains(newDn, JansCustomPerson.class));
 
 		return newInum;
 	}
 
-	public List<GluuGroup> searchGroups(String pattern, int sizeLimit) throws Exception {
+	public List<JansGroup> searchGroups(String pattern, int sizeLimit) throws Exception {
 		String[] targetArray = new String[] { pattern };
-		Filter displayNameFilter = Filter.createSubstringFilter(OxTrustConstants.displayName, null, targetArray, null);
-		Filter descriptionFilter = Filter.createSubstringFilter(OxTrustConstants.description, null, targetArray, null);
+		Filter displayNameFilter = Filter.createSubstringFilter("displayName", null, targetArray, null);
+		Filter descriptionFilter = Filter.createSubstringFilter("description", null, targetArray, null);
 		Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter);
-		return persistenceEntryManager.findEntries(getDnForGroup(null), GluuGroup.class, searchFilter, sizeLimit);
+		return persistenceEntryManager.findEntries(getDnForGroup(null), JansGroup.class, searchFilter, sizeLimit);
 	}
 
-	public List<GluuGroup> getAllGroups(int sizeLimit) {
-		return persistenceEntryManager.findEntries(getDnForGroup(null), GluuGroup.class, null, sizeLimit);
-	}
-
-	public GluuGroupVisibility[] getVisibilityTypes() {
-		return GluuGroupVisibility.values();
+	public List<JansGroup> getAllGroups(int sizeLimit) {
+		return persistenceEntryManager.findEntries(getDnForGroup(null), JansGroup.class, null, sizeLimit);
 	}
 
 	/**
@@ -197,15 +191,15 @@ public class GroupService implements Serializable {
 
 	}
 
-	public GluuGroup getGroupByDn(String Dn) {
-		return persistenceEntryManager.find(GluuGroup.class, Dn);
+	public JansGroup getGroupByDn(String Dn) {
+		return persistenceEntryManager.find(JansGroup.class, Dn);
 	}
 
-	public GluuGroup getGroupByDisplayName(String DisplayName) throws Exception {
-		GluuGroup group = new GluuGroup();
+	public JansGroup getGroupByDisplayName(String DisplayName) throws Exception {
+		JansGroup group = new JansGroup();
 		group.setBaseDn(getDnForGroup(null));
 		group.setDisplayName(DisplayName);
-		List<GluuGroup> groups = persistenceEntryManager.findEntries(group);
+		List<JansGroup> groups = persistenceEntryManager.findEntries(group);
 		if ((groups != null) && (groups.size() > 0)) {
 			return groups.get(0);
 		}
@@ -219,7 +213,7 @@ public class GroupService implements Serializable {
 	 * @param sizeLimit
 	 * @return
 	 */
-	public List<GluuGroup> findGroups(GluuGroup group, int sizeLimit) {
+	public List<JansGroup> findGroups(JansGroup group, int sizeLimit) {
 		group.setBaseDn(getDnForGroup(null));
 		return persistenceEntryManager.findEntries(group, sizeLimit);
 	}
