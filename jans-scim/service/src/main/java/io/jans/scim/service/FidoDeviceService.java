@@ -19,7 +19,7 @@ import io.jans.orm.search.filter.Filter;
 
 import org.slf4j.Logger;
 
-import io.jans.scim.model.fido.GluuCustomFidoDevice;
+import io.jans.scim.model.fido.JansCustomFidoDevice;
 
 /**
  * @author Val Pecaoco Updated by jgomer on 2017-10-22
@@ -52,16 +52,16 @@ public class FidoDeviceService implements Serializable {
 		return baseDn;
 	}
 
-	public GluuCustomFidoDevice getGluuCustomFidoDeviceById(String userId, String id) {
-		GluuCustomFidoDevice gluuCustomFidoDevice = null;
+	public JansCustomFidoDevice getJansCustomFidoDeviceById(String userId, String id) {
+		JansCustomFidoDevice gluuCustomFidoDevice = null;
 
 		try {
 			String dn = getDnForFidoDevice(userId, id);
 			if (StringUtils.isNotEmpty(userId))
-				gluuCustomFidoDevice = ldapEntryManager.find(GluuCustomFidoDevice.class, dn);
+				gluuCustomFidoDevice = ldapEntryManager.find(JansCustomFidoDevice.class, dn);
 			else {
 				Filter filter = Filter.createEqualityFilter("jansId", id);
-				gluuCustomFidoDevice = ldapEntryManager.findEntries(dn, GluuCustomFidoDevice.class, filter).get(0);
+				gluuCustomFidoDevice = ldapEntryManager.findEntries(dn, JansCustomFidoDevice.class, filter).get(0);
 			}
 		} catch (Exception e) {
 			log.error("Failed to find device by id " + id, e);
@@ -70,11 +70,11 @@ public class FidoDeviceService implements Serializable {
 		return gluuCustomFidoDevice;
 	}
 
-	public GluuCustomFidoDevice searchFidoDevice(Filter filter, String userId, String id) throws Exception {
-		GluuCustomFidoDevice gluuCustomFidoDevice = null;
+	public JansCustomFidoDevice searchFidoDevice(Filter filter, String userId, String id) throws Exception {
+		JansCustomFidoDevice gluuCustomFidoDevice = null;
 
-		List<GluuCustomFidoDevice> gluuCustomFidoDevices = ldapEntryManager.findEntries(getDnForFidoDevice(userId, id),
-				GluuCustomFidoDevice.class, filter, 1);
+		List<JansCustomFidoDevice> gluuCustomFidoDevices = ldapEntryManager.findEntries(getDnForFidoDevice(userId, id),
+				JansCustomFidoDevice.class, filter, 1);
 		if (gluuCustomFidoDevices != null && !gluuCustomFidoDevices.isEmpty()) {
 			gluuCustomFidoDevice = gluuCustomFidoDevices.get(0);
 		}
@@ -82,18 +82,18 @@ public class FidoDeviceService implements Serializable {
 		return gluuCustomFidoDevice;
 	}
 
-	public void updateGluuCustomFidoDevice(GluuCustomFidoDevice gluuCustomFidoDevice) {
+	public void updateJansCustomFidoDevice(JansCustomFidoDevice gluuCustomFidoDevice) {
 		ldapEntryManager.merge(gluuCustomFidoDevice);
 	}
 
-	public void removeGluuCustomFidoDevice(GluuCustomFidoDevice gluuCustomFidoDevice) {
-		ldapEntryManager.removeRecursively(gluuCustomFidoDevice.getDn(), GluuCustomFidoDevice.class);
+	public void removeJansCustomFidoDevice(JansCustomFidoDevice gluuCustomFidoDevice) {
+		ldapEntryManager.removeRecursively(gluuCustomFidoDevice.getDn(), JansCustomFidoDevice.class);
 	}
 
-	public List<GluuCustomFidoDevice> searchFidoDevices(String userInum, String... returnAttributes) {
+	public List<JansCustomFidoDevice> searchFidoDevices(String userInum, String... returnAttributes) {
 		try {
 			Filter equalityFilter = Filter.createEqualityFilter("personInum", userInum);
-			return ldapEntryManager.findEntries(getDnForFidoDevice(userInum, null), GluuCustomFidoDevice.class,
+			return ldapEntryManager.findEntries(getDnForFidoDevice(userInum, null), JansCustomFidoDevice.class,
 					equalityFilter, returnAttributes);
 		} catch (Exception e) {
 			log.error("", e);

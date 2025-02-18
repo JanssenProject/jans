@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
-import io.jans.scim.model.GluuGroup;
+import io.jans.scim.model.JansGroup;
 import io.jans.scim.model.scim.ScimCustomPerson;
 import io.jans.scim.model.scim2.user.Email;
 import io.jans.scim.model.scim2.util.DateUtil;
@@ -109,7 +109,7 @@ public class UserPersistenceHelper {
         
         for (String oneGroup : groups) {
             try {
-                GluuGroup aGroup = groupService.getGroupByDn(oneGroup);
+                JansGroup aGroup = groupService.getGroupByDn(oneGroup);
                 List<String> groupMembers = aGroup.getMembers();
                 int idx = Optional.ofNullable(groupMembers).map(l -> l.indexOf(dn)).orElse(-1);
                 

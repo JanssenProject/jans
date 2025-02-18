@@ -37,7 +37,7 @@ use authz::Authz;
 pub use authz::request::{Request, ResourceData, Tokens};
 pub use authz::{AuthorizeError, AuthorizeResult};
 pub use bootstrap_config::*;
-use common::app_types;
+use common::app_types::{self, ApplicationName};
 use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
@@ -95,28 +95,30 @@ impl Cedarling {
 
     /// Create a new instance of the Cedarling application.
     pub async fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
-        let log = log::init_logger(&config.log_config);
         let pdp_id = app_types::PdpID::new();
+        let app_name = (!config.application_name.is_empty())
+            .then(|| ApplicationName(config.application_name.clone()));
+        let log = log::init_logger(&config.log_config, pdp_id, app_name);
 
         let service_config = ServiceConfig::new(config)
             .await
             .inspect(|_| {
                 log.log_any(
-                    LogEntry::new_with_data(pdp_id, None, LogType::System, None)
+                    LogEntry::new_with_data(LogType::System, None)
                         .set_level(LogLevel::DEBUG)
                         .set_message("configuration parsed successfully".to_string()),
                 )
             })
             .inspect_err(|err| {
                 log.log_any(
-                    LogEntry::new_with_data(pdp_id, None, LogType::System, None)
+                    LogEntry::new_with_data(LogType::System, None)
                         .set_error(err.to_string())
                         .set_level(LogLevel::ERROR)
                         .set_message("configuration parsed with error".to_string()),
                 )
             })?;
 
-        let mut service_factory = ServiceFactory::new(config, service_config, log.clone(), pdp_id);
+        let mut service_factory = ServiceFactory::new(config, service_config, log.clone());
 
         Ok(Cedarling {
             log,
