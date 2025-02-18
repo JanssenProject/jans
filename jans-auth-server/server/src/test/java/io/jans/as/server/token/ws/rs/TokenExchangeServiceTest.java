@@ -2,13 +2,16 @@ package io.jans.as.server.token.ws.rs;
 
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.authorize.ws.rs.AuthzDetailsService;
+import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.external.ExternalTokenExchangeService;
+import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import org.apache.commons.lang3.StringUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -35,19 +38,34 @@ public class TokenExchangeServiceTest {
     private AppConfiguration appConfiguration;
 
     @Mock
+    private SessionIdService sessionIdService;
+
+    @Mock
+    private TokenRestWebServiceValidator tokenRestWebServiceValidator;
+
+    @Mock
+    private AuthorizationGrantList authorizationGrantList;
+
+    @Mock
+    private ExternalUpdateTokenService externalUpdateTokenService;
+
+    @Mock
+    private TokenCreatorService tokenCreatorService;
+
+    @Mock
+    private AttributeService attributeService;
+
+    @Mock
+    private AuthzDetailsService authzDetailsService;
+
+    @Mock
+    private ExternalTokenExchangeService externalTokenExchangeService;
+
+    @Mock
     private ApplicationAuditLogger applicationAuditLogger;
 
     @Mock
     private ErrorResponseFactory errorResponseFactory;
-
-    @Mock
-    private AbstractCryptoProvider cryptoProvider;
-
-    @Mock
-    private SessionIdService sessionIdService;
-
-    @Mock
-    private AuthzDetailsService authzDetailsService;
 
     @InjectMocks
     private TokenExchangeService tokenExchangeService;

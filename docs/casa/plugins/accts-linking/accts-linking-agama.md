@@ -59,7 +59,7 @@ The tables shown in [this](https://github.com/JanssenProject/jans/blob/vreplace-
 
 ## Configuring attribute mappings
 
-An introduction to attribute mapping can be found [here](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/agama-catalog/jans/inboundID/README.md#attribute-mappings). Unless an elaborated processing of attributes is required, a basic knowledge of Java language suffices to write a useful mapping.
+An introduction to attribute mapping can be found [here](../../../agama-catalog/jans/inboundID/README.md#attribute-mappings). Unless an elaborated processing of attributes is required, a basic knowledge of Java language suffices to write a useful mapping.
 
 To write a mapping, you can use the samples provided as a guideline (see folder `lib/io/jans/casa/acctlinking` in the Agama accounts linking project). You can add your mapping in the same file or create a new Java class for this purpose.  Then save your changes, re-package (zip) the project, re-deploy, and update (re-import) the configuration if necessary.
 

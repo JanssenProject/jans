@@ -28,7 +28,7 @@ import io.jans.orm.model.base.Entry;
 @DataEntry(sortBy = { "displayName" })
 @ObjectClass(value = "jansOrganization")
 @JsonInclude(Include.NON_NULL)
-public class GluuOrganization extends Entry implements Serializable {
+public class JansOrganization extends Entry implements Serializable {
 
 	private static final long serialVersionUID = -8284018077740582699L;
 

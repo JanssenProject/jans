@@ -100,7 +100,8 @@ To test the plugin, you will need:
       resource is gatewayDemo::HTTP_Request
     )
     when {
-    ((principal has "access_token") && ((principal["access_token"]) has "scope")) && (((principal["access_token"])["scope"]).contains("profile"))
+        principal has access_token.scope &&
+        principal.access_token.scope.contains("profile")
     };
     ```
 - This policy will allow access so long as the access token contains the `profile` scope.

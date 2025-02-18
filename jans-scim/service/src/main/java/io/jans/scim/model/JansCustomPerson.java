@@ -28,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @DataEntry(sortBy = { "displayName" })
 @ObjectClass(value = "jansPerson")
 @JsonInclude(Include.NON_NULL)
-public class GluuCustomPerson extends User 
+public class JansCustomPerson extends User 
                                     implements Serializable {
 
     private static final long serialVersionUID = -1879582184398161112L;
@@ -150,7 +150,7 @@ public class GluuCustomPerson extends User
 
     public List<String> getMemberOf() {
         String[] value = {};
-        for (GluuCustomAttribute attribute : customAttributes) {
+        for (JansCustomAttribute attribute : customAttributes) {
             if (attribute.getName().equalsIgnoreCase("memberOf")) {
                 value = attribute.getValues();
                 break;
@@ -189,7 +189,7 @@ public class GluuCustomPerson extends User
 
     public int getAttributeIndex(String attributeName) {
         int idx = 0;
-        for (GluuCustomAttribute attribute : customAttributes) {
+        for (JansCustomAttribute attribute : customAttributes) {
             if (attribute.getName().equalsIgnoreCase(attributeName)) {
                 return idx;
             }
@@ -201,7 +201,7 @@ public class GluuCustomPerson extends User
 
     public String getAttribute(String attributeName) {
         String value = null;
-        for (GluuCustomAttribute attribute : customAttributes) {
+        for (JansCustomAttribute attribute : customAttributes) {
             if (attribute.getName().equalsIgnoreCase(attributeName)) {
                 value = attribute.getValue();
                 break;
@@ -212,7 +212,7 @@ public class GluuCustomPerson extends User
     
     public String[] getAttributeValues(String attributeName) {
         String[] value = null;
-        for (GluuCustomAttribute attribute : customAttributes) {
+        for (JansCustomAttribute attribute : customAttributes) {
             if (attribute.getName().equalsIgnoreCase(attributeName)) {
                 value = attribute.getValues();
                 break;
@@ -222,8 +222,8 @@ public class GluuCustomPerson extends User
     }
 
     public String[] getAttributeArray(String attributeName) {
-        GluuCustomAttribute gluuCustomAttribute = 
-                                getGluuCustomAttribute(attributeName);
+        JansCustomAttribute gluuCustomAttribute = 
+                                getJansCustomAttribute(attributeName);
         if (gluuCustomAttribute == null) {
             return null;
         } else {
@@ -231,8 +231,8 @@ public class GluuCustomPerson extends User
         }
     }
 
-    public GluuCustomAttribute getGluuCustomAttribute(String attributeName) {
-        for (GluuCustomAttribute gluuCustomAttribute : customAttributes) {
+    public JansCustomAttribute getJansCustomAttribute(String attributeName) {
+        for (JansCustomAttribute gluuCustomAttribute : customAttributes) {
             if (gluuCustomAttribute.getName().equalsIgnoreCase(attributeName)) {
                 return gluuCustomAttribute;
             }
@@ -242,23 +242,23 @@ public class GluuCustomPerson extends User
     }
 
     public void setAttribute(String attributeName, String attributeValue) {
-        GluuCustomAttribute attribute = new GluuCustomAttribute(attributeName, 
+        JansCustomAttribute attribute = new JansCustomAttribute(attributeName, 
                                                                 attributeValue);
         customAttributes.remove(attribute);
         customAttributes.add(attribute);
     }
 
     public void setAttribute(String attributeName, String[] attributeValue) {
-        GluuCustomAttribute attribute = new GluuCustomAttribute(attributeName, 
+        JansCustomAttribute attribute = new JansCustomAttribute(attributeName, 
                                                                 attributeValue);
         customAttributes.remove(attribute);
         customAttributes.add(attribute);
     }
 
     public void removeAttribute(String attributeName) {
-        for (Iterator<GluuCustomAttribute> it = customAttributes.iterator(); 
+        for (Iterator<JansCustomAttribute> it = customAttributes.iterator(); 
                                                                 it.hasNext();) {
-            GluuCustomAttribute attribute = (GluuCustomAttribute) it.next();
+            JansCustomAttribute attribute = (JansCustomAttribute) it.next();
             if (attribute.getName().equalsIgnoreCase(attributeName)) {
                 it.remove();
                 break;
@@ -341,15 +341,15 @@ public class GluuCustomPerson extends User
     @Override
     public boolean equals(Object obj) {
         boolean result = false;
-        if(obj != null && getInum()!=null && obj instanceof GluuCustomPerson){
-            result = getInum().equals(((GluuCustomPerson) obj).getInum());
+        if(obj != null && getInum()!=null && obj instanceof JansCustomPerson){
+            result = getInum().equals(((JansCustomPerson) obj).getInum());
         }
 
         return result;
     }
     
-    public GluuCustomPerson clone() throws CloneNotSupportedException{
-    	return (GluuCustomPerson) super.clone();
+    public JansCustomPerson clone() throws CloneNotSupportedException{
+    	return (JansCustomPerson) super.clone();
     }
 
 	public String getGuid() {

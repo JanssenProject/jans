@@ -67,7 +67,9 @@ import io.jans.model.custom.script.type.spontaneous.DummySpontaneousScopeType;
 import io.jans.model.custom.script.type.spontaneous.SpontaneousScopeType;
 import io.jans.model.custom.script.type.ssa.DummyModifySsaResponseType;
 import io.jans.model.custom.script.type.ssa.ModifySsaResponseType;
+import io.jans.model.custom.script.type.token.DummyTokenExchangeType;
 import io.jans.model.custom.script.type.token.DummyUpdateTokenType;
+import io.jans.model.custom.script.type.token.TokenExchangeType;
 import io.jans.model.custom.script.type.token.UpdateTokenType;
 import io.jans.model.custom.script.type.uma.*;
 import io.jans.model.custom.script.type.user.CacheRefreshType;
@@ -106,6 +108,7 @@ public enum CustomScriptType implements AttributeEnum {
             new DummyAccessEvaluationType()),
     ACCESS_EVALUATION_DISCOVERY("access_evaluation_discovery", "Access Evaluation Discovery", AccessEvaluationDiscoveryType.class, CustomScript.class, "AccessEvaluationDiscovery",
             new DummyAccessEvaluationDiscoveryType()),
+    TOKEN_EXCHANGE("token_exchange", "Token Exchange", TokenExchangeType.class, CustomScript.class, "TokenExchange", new DummyTokenExchangeType()),
     CONSENT_GATHERING("consent_gathering", "Consent Gathering", ConsentGatheringType.class, CustomScript.class, "ConsentGathering",
             new DummyConsentGatheringType()),
     DYNAMIC_SCOPE("dynamic_scope", "Dynamic Scopes", DynamicScopeType.class, CustomScript.class, "DynamicScope",

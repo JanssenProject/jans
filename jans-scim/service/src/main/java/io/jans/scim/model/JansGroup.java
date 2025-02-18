@@ -31,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @DataEntry(sortBy = { "displayName" })
 @ObjectClass(value = "jansGrp")
 @JsonInclude(Include.NON_NULL)
-public class GluuGroup extends Entry implements Serializable {
+public class JansGroup extends Entry implements Serializable {
 
 	private static final long serialVersionUID = -2812480357430436503L;
 
@@ -70,7 +70,7 @@ public class GluuGroup extends Entry implements Serializable {
 
 	@AttributesList(name = "name", value = "values", sortByName = true, attributesConfiguration = {
 			@AttributeName(name = "inum", ignoreDuringUpdate = true) })
-	private List<GluuCustomAttribute> customAttributes = new ArrayList<GluuCustomAttribute>();
+	private List<JansCustomAttribute> customAttributes = new ArrayList<JansCustomAttribute>();
 
 	public String getInum() {
 		return inum;
@@ -155,22 +155,22 @@ public class GluuGroup extends Entry implements Serializable {
 	@Override
 	public String toString() {
 		return String.format(
-				"GluuGroup [countryName=%s, description=%s, displayName=%s,  inum=%s, members=%s, organization=%s, owner=%s, seeAlso=%s, status=%s, toString()=%s]",
+				"JansGroup [countryName=%s, description=%s, displayName=%s,  inum=%s, members=%s, organization=%s, owner=%s, seeAlso=%s, status=%s, toString()=%s]",
 				countryName, description, displayName, inum, members, organization, owner, seeAlso, status,
 				super.toString());
 	}
 
-	public List<GluuCustomAttribute> getCustomAttributes() {
+	public List<JansCustomAttribute> getCustomAttributes() {
 		return customAttributes;
 	}
 
-	public void setCustomAttributes(List<GluuCustomAttribute> customAttributes) {
+	public void setCustomAttributes(List<JansCustomAttribute> customAttributes) {
 		this.customAttributes = customAttributes;
 	}
 
 	public String getAttribute(String attributeName) {
 		String value = null;
-		for (GluuCustomAttribute attribute : customAttributes) {
+		for (JansCustomAttribute attribute : customAttributes) {
 			if (attribute.getName().equalsIgnoreCase(attributeName)) {
 				value = attribute.getValue();
 				break;
@@ -180,7 +180,7 @@ public class GluuGroup extends Entry implements Serializable {
 	}
 
 	public String[] getAttributeArray(String attributeName) {
-		GluuCustomAttribute gluuCustomAttribute = getGluuCustomAttribute(attributeName);
+		JansCustomAttribute gluuCustomAttribute = getJansCustomAttribute(attributeName);
 		if (gluuCustomAttribute == null) {
 			return null;
 		} else {
@@ -188,8 +188,8 @@ public class GluuGroup extends Entry implements Serializable {
 		}
 	}
 
-	public GluuCustomAttribute getGluuCustomAttribute(String attributeName) {
-		for (GluuCustomAttribute gluuCustomAttribute : customAttributes) {
+	public JansCustomAttribute getJansCustomAttribute(String attributeName) {
+		for (JansCustomAttribute gluuCustomAttribute : customAttributes) {
 			if (gluuCustomAttribute.getName().equalsIgnoreCase(attributeName)) {
 				return gluuCustomAttribute;
 			}
@@ -199,14 +199,15 @@ public class GluuGroup extends Entry implements Serializable {
 	}
 
 	public void setAttribute(String attributeName, String attributeValue) {
-		GluuCustomAttribute attribute = new GluuCustomAttribute(attributeName, attributeValue);
+		JansCustomAttribute attribute = new JansCustomAttribute(attributeName, attributeValue);
 		customAttributes.remove(attribute);
 		customAttributes.add(attribute);
 	}
 
 	public void setAttribute(String attributeName, String[] attributeValue) {
-		GluuCustomAttribute attribute = new GluuCustomAttribute(attributeName, attributeValue);
+		JansCustomAttribute attribute = new JansCustomAttribute(attributeName, attributeValue);
 		customAttributes.remove(attribute);
 		customAttributes.add(attribute);
 	}
+
 }
