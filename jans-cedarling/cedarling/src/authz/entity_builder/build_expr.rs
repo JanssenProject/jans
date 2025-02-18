@@ -7,7 +7,8 @@ use super::built_entities::BuiltEntities;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
 use cedar_policy::{
-    EntityId, EntityUid, ExpressionConstructionError, ParseErrors, RestrictedExpression,
+    EntityId, EntityTypeName, EntityUid, ExpressionConstructionError, ParseErrors,
+    RestrictedExpression,
 };
 use serde_json::Value;
 use std::collections::HashMap;
@@ -178,34 +179,22 @@ impl Attribute {
             // Handle Entity attributes
             Attribute::Entity { required, name } => {
                 // Check if the entity is in the schema
-                let entity_type_name = if let Some((type_name, _type_schema)) = schema
+                if let Some((type_name, _type_schema)) = schema
                     .get_entity_schema(name, default_namespace)
                     .map_err(|e| BuildExprError::ParseTypeName(name.clone(), e))?
                 {
-                    type_name
+                    return build_entity(
+                        src_key,
+                        attr_claim_value_opt,
+                        built_entities,
+                        type_name,
+                        *required,
+                    );
                 } else if *required {
                     return Err(BuildExprError::EntityNotInSchema(name.to_string()));
                 } else {
                     return Ok(None);
                 };
-
-                let entity_id = if let Some(entity_id) = built_entities.get(&entity_type_name) {
-                    entity_id
-                } else if let Some(entity_id) = attr_claim_value_opt.and_then(|v| v.as_str()) {
-                    entity_id
-                } else {
-                    return Err(KeyedJsonTypeError::type_mismatch_optional(
-                        src_key,
-                        "string",
-                        attr_claim_value_opt,
-                    )
-                    .into());
-                };
-
-                let type_id = EntityId::new(entity_id);
-                let uid = EntityUid::from_type_name_and_id(entity_type_name, type_id);
-                let expr = RestrictedExpression::new_entity_uid(uid);
-                Ok(Some(expr))
             },
 
             // Handle Extension attributes
@@ -235,6 +224,21 @@ impl Attribute {
 
             // Handle EntityOrCommon attributes
             Attribute::EntityOrCommon { required, name } => {
+                // Check if we work with an entity, and if it is we handle it.
+                // Because it can have special case when we map entity from `built_entities`.
+                if let Some((type_name, _type_schema)) = schema
+                    .get_entity_schema(name, default_namespace)
+                    .map_err(|e| BuildExprError::ParseTypeName(name.clone(), e))?
+                {
+                    return build_entity(
+                        src_key,
+                        attr_claim_value_opt,
+                        built_entities,
+                        type_name,
+                        *required,
+                    );
+                };
+
                 let Some(attr_claim_value) = attr_claim_value_opt else {
                     if *required {
                         return Err(BuildExprError::MissingSource(src_key.to_string()));
@@ -255,23 +259,6 @@ impl Attribute {
                         schema,
                         built_entities,
                     )
-                } else if schema
-                    .get_entity_schema(name, default_namespace)
-                    .map_err(|e| BuildExprError::ParseTypeName(name.clone(), e))?
-                    .is_some()
-                {
-                    // it is entity type, so we build expression with "link" to the entity
-                    let attr = Attribute::Entity {
-                        required: *required,
-                        name: name.to_string(),
-                    };
-                    attr.build_expr(
-                        name,
-                        Some(attr_claim_value),
-                        default_namespace,
-                        schema,
-                        built_entities,
-                    )
                 } else if let Some(attr) = str_to_primitive_type(*required, name) {
                     attr.build_expr(
                         name,
@@ -288,6 +275,34 @@ impl Attribute {
             },
         }
     }
+}
+
+fn build_entity(
+    src_key: &str,
+    attr_claim_value_opt: Option<&Value>,
+    built_entities: &BuiltEntities,
+    entity_type_name: EntityTypeName,
+    is_required: bool,
+) -> Result<Option<RestrictedExpression>, BuildExprError> {
+    let entity_id = if let Some(entity_id) = built_entities.get(&entity_type_name) {
+        entity_id
+    } else if let Some(entity_id) = attr_claim_value_opt.and_then(|v| v.as_str()) {
+        entity_id
+    } else if is_required {
+        return Err(KeyedJsonTypeError::type_mismatch_optional(
+            src_key,
+            "string",
+            attr_claim_value_opt,
+        )
+        .into());
+    } else {
+        return Ok(None);
+    };
+
+    let type_id = EntityId::new(entity_id);
+    let uid = EntityUid::from_type_name_and_id(entity_type_name, type_id);
+    let expr = RestrictedExpression::new_entity_uid(uid);
+    Ok(Some(expr))
 }
 
 fn str_to_primitive_type(required: bool, name: &str) -> Option<Attribute> {
