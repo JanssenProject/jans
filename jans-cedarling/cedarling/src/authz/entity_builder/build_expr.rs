@@ -183,18 +183,18 @@ impl Attribute {
                     .get_entity_schema(name, default_namespace)
                     .map_err(|e| BuildExprError::ParseTypeName(name.clone(), e))?
                 {
-                    return build_entity(
+                    build_entity(
                         src_key,
                         attr_claim_value_opt,
                         built_entities,
                         type_name,
                         *required,
-                    );
+                    )
                 } else if *required {
-                    return Err(BuildExprError::EntityNotInSchema(name.to_string()));
+                    Err(BuildExprError::EntityNotInSchema(name.to_string()))
                 } else {
-                    return Ok(None);
-                };
+                    Ok(None)
+                }
             },
 
             // Handle Extension attributes
