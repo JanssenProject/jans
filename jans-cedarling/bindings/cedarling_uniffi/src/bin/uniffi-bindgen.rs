@@ -7,3 +7,8 @@
 fn main() {
     uniffi::uniffi_bindgen_main()
 }
+
+// just to avoid clippy error about missing `main` function
+#[cfg(target_arch = "wasm32")]
+fn main() {
+}

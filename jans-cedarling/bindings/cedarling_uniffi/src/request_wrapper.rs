@@ -33,14 +33,14 @@ impl RequestWrapper {
     ) -> Result<Self, RequestError> {
         // Validate tokens: ensure all values are non-empty after trimming
         let mut validated_tokens = HashMap::new();
-        for (key, value) in tokens.iter() {
+        for (key, mut value) in tokens.into_iter() {
             let trimmed_value = value.trim();
             if trimmed_value.is_empty() {
                 return Err(RequestError::RequestParsingFailed {
                     error_msg: format!("Token '{}' must not be empty.", key),
                 });
             }
-            validated_tokens.insert(key.clone(), trimmed_value.to_string());
+            validated_tokens.insert(key, trimmed_value.to_string());
         }
         // Parse context
         let parsed_context: Value =
