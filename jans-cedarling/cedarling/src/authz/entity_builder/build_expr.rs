@@ -35,17 +35,17 @@ impl Attribute {
         schema: &CedarSchemaJson,
         built_entities: &BuiltEntities,
     ) -> Result<Option<RestrictedExpression>, BuildExprError> {
-        let Some(attr_claim_value) = attr_claim_value_opt else {
-            if self.is_required() {
-                return Err(BuildExprError::MissingSource(src_key.to_string()));
-            } else {
-                return Ok(None);
-            }
-        };
-
         match self {
             // Handle String attributes
-            Attribute::String { required: _ } => {
+            Attribute::String { required } => {
+                let Some(attr_claim_value) = attr_claim_value_opt else {
+                    if *required {
+                        return Err(BuildExprError::MissingSource(src_key.to_string()));
+                    } else {
+                        return Ok(None);
+                    }
+                };
+
                 let claim = attr_claim_value
                     .as_str()
                     .ok_or(KeyedJsonTypeError::type_mismatch(
@@ -58,7 +58,15 @@ impl Attribute {
             },
 
             // Handle Long attributes
-            Attribute::Long { required: _ } => {
+            Attribute::Long { required } => {
+                let Some(attr_claim_value) = attr_claim_value_opt else {
+                    if *required {
+                        return Err(BuildExprError::MissingSource(src_key.to_string()));
+                    } else {
+                        return Ok(None);
+                    }
+                };
+
                 let claim = attr_claim_value
                     .as_i64()
                     .ok_or(KeyedJsonTypeError::type_mismatch(
@@ -70,7 +78,15 @@ impl Attribute {
             },
 
             // Handle Boolean attributes
-            Attribute::Boolean { required: _ } => {
+            Attribute::Boolean { required } => {
+                let Some(attr_claim_value) = attr_claim_value_opt else {
+                    if *required {
+                        return Err(BuildExprError::MissingSource(src_key.to_string()));
+                    } else {
+                        return Ok(None);
+                    }
+                };
+
                 let claim = attr_claim_value
                     .as_bool()
                     .ok_or(KeyedJsonTypeError::type_mismatch(
@@ -83,6 +99,14 @@ impl Attribute {
 
             // Handle Record attributes
             Attribute::Record { attrs, required } => {
+                let Some(attr_claim_value) = attr_claim_value_opt else {
+                    if *required {
+                        return Err(BuildExprError::MissingSource(src_key.to_string()));
+                    } else {
+                        return Ok(None);
+                    }
+                };
+
                 let attr_claim_object =
                     attr_claim_value
                         .as_object()
@@ -115,10 +139,15 @@ impl Attribute {
             },
 
             // Handle Set attributes
-            Attribute::Set {
-                required: _,
-                element,
-            } => {
+            Attribute::Set { required, element } => {
+                let Some(attr_claim_value) = attr_claim_value_opt else {
+                    if *required {
+                        return Err(BuildExprError::MissingSource(src_key.to_string()));
+                    } else {
+                        return Ok(None);
+                    }
+                };
+
                 let claim =
                     attr_claim_value
                         .as_array()
@@ -162,13 +191,13 @@ impl Attribute {
 
                 let entity_id = if let Some(entity_id) = built_entities.get(&entity_type_name) {
                     entity_id
-                } else if let Some(entity_id) = attr_claim_value.as_str() {
+                } else if let Some(entity_id) = attr_claim_value_opt.and_then(|v| v.as_str()) {
                     entity_id
                 } else {
-                    return Err(KeyedJsonTypeError::type_mismatch(
+                    return Err(KeyedJsonTypeError::type_mismatch_optional(
                         src_key,
                         "string",
-                        attr_claim_value,
+                        attr_claim_value_opt,
                     )
                     .into());
                 };
@@ -180,7 +209,15 @@ impl Attribute {
             },
 
             // Handle Extension attributes
-            Attribute::Extension { required: _, name } => {
+            Attribute::Extension { required, name } => {
+                let Some(attr_claim_value) = attr_claim_value_opt else {
+                    if *required {
+                        return Err(BuildExprError::MissingSource(src_key.to_string()));
+                    } else {
+                        return Ok(None);
+                    }
+                };
+
                 let claim = attr_claim_value
                     .as_str()
                     .ok_or(KeyedJsonTypeError::type_mismatch(
@@ -198,6 +235,14 @@ impl Attribute {
 
             // Handle EntityOrCommon attributes
             Attribute::EntityOrCommon { required, name } => {
+                let Some(attr_claim_value) = attr_claim_value_opt else {
+                    if *required {
+                        return Err(BuildExprError::MissingSource(src_key.to_string()));
+                    } else {
+                        return Ok(None);
+                    }
+                };
+
                 if let Some((entity_type_name, attr)) = schema
                     .get_common_type(name, default_namespace)
                     .map_err(|e| BuildExprError::ParseTypeName(name.clone(), e))?
