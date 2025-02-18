@@ -3,15 +3,12 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::built_entities::BuiltEntities;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
-use crate::common::policy_store::ClaimMappings;
 use cedar_policy::{
     EntityId, EntityUid, ExpressionConstructionError, ParseErrors, RestrictedExpression,
 };
-use serde_json::{Value, json};
-use smol_str::ToSmolStr;
+use serde_json::Value;
 use std::collections::HashMap;
 
 impl Attribute {
@@ -302,7 +299,7 @@ impl KeyedJsonTypeError {
 #[cfg(test)]
 mod test {
     use crate::{
-        authz::entity_builder::{BuildExprError, built_entities::BuiltEntities},
+        authz::entity_builder::BuildExprError,
         common::cedar_schema::cedar_json::{CedarSchemaJson, attribute::Attribute},
     };
     use serde_json::json;
@@ -324,7 +321,7 @@ mod test {
         let attr = Attribute::string();
         let src = HashMap::from([("src_key".to_string(), json!("attr-val"))]);
         let expr = attr
-            .build_expr(&src, "src_key", None, &schema, &BuiltEntities::default())
+            .build_expr(&src, "src_key", None, &schema)
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built")
     }
@@ -345,7 +342,7 @@ mod test {
         let attr = Attribute::long();
         let src = HashMap::from([("src_key".to_string(), json!(123))]);
         let expr = attr
-            .build_expr(&src, "src_key", None, &schema, &BuiltEntities::default())
+            .build_expr(&src, "src_key", None, &schema)
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built")
     }
@@ -366,7 +363,7 @@ mod test {
         let attr = Attribute::boolean();
         let src = HashMap::from([("src_key".to_string(), json!(true))]);
         let expr = attr
-            .build_expr(&src, "src_key", None, &schema, &BuiltEntities::default())
+            .build_expr(&src, "src_key", None, &schema)
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built")
     }
@@ -395,7 +392,7 @@ mod test {
         )]));
         let src = HashMap::from([("inner_attr".to_string(), json!("test"))]);
         let expr = attr
-            .build_expr(&src, "src_key", None, &schema, &BuiltEntities::default())
+            .build_expr(&src, "src_key", None, &schema)
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built")
     }
@@ -421,7 +418,7 @@ mod test {
         let attr = Attribute::set(Attribute::string());
         let src = HashMap::from([("src_key".to_string(), json!(["admin", "user"]))]);
         let expr = attr
-            .build_expr(&src, "src_key", None, &schema, &BuiltEntities::default())
+            .build_expr(&src, "src_key", None, &schema)
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built")
     }
@@ -447,7 +444,7 @@ mod test {
         let attr = Attribute::set(Attribute::string());
         let src = HashMap::from([("src_key".to_string(), json!(["admin", 123]))]);
         let err = attr
-            .build_expr(&src, "src_key", None, &schema, &BuiltEntities::default())
+            .build_expr(&src, "src_key", None, &schema)
             .expect_err("should error");
         assert!(
             matches!(err, BuildExprError::TypeMismatch(_)),
@@ -478,13 +475,7 @@ mod test {
         let attr = Attribute::entity("OtherEntity");
         let src = HashMap::from([("src_key".to_string(), json!("test"))]);
         let expr = attr
-            .build_expr(
-                &src,
-                "src_key",
-                Some("Jans"),
-                &schema,
-                &BuiltEntities::default(),
-            )
+            .build_expr(&src, "src_key", Some("Jans"), &schema)
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built");
     }
@@ -511,13 +502,7 @@ mod test {
         let attr = Attribute::entity("OtherEntity");
         let src = HashMap::from([("src_key".to_string(), json!("test"))]);
         let expr = attr
-            .build_expr(
-                &src,
-                "src_key",
-                Some("Jans"),
-                &schema,
-                &BuiltEntities::default(),
-            )
+            .build_expr(&src, "src_key", Some("Jans"), &schema)
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built");
     }
@@ -541,7 +526,7 @@ mod test {
         let attr = Attribute::entity("OtherEntity");
         let src = HashMap::from([("src_key".to_string(), json!("test"))]);
         let err = attr
-            .build_expr(&src, "src_key", None, &schema, &BuiltEntities::default())
+            .build_expr(&src, "src_key", None, &schema)
             .expect_err("should error");
         assert!(
             matches!(
@@ -570,7 +555,7 @@ mod test {
         let attr = Attribute::string();
         let src = HashMap::from([("src_key".to_string(), json!("0.0.0.0"))]);
         let expr = attr
-            .build_expr(&src, "src_key", None, &schema, &BuiltEntities::default())
+            .build_expr(&src, "src_key", None, &schema)
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built")
     }
@@ -591,7 +576,7 @@ mod test {
         let attr = Attribute::string();
         let src = HashMap::from([("src_key".to_string(), json!("1.1"))]);
         let expr = attr
-            .build_expr(&src, "src_key", None, &schema, &BuiltEntities::default())
+            .build_expr(&src, "src_key", None, &schema)
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built")
     }
@@ -612,7 +597,7 @@ mod test {
         let attr = Attribute::String { required: false };
         let src = HashMap::new();
         let expr = attr
-            .build_expr(&src, "client_id", None, &schema, &BuiltEntities::default())
+            .build_expr(&src, "client_id", None, &schema)
             .expect("should not error");
         assert!(expr.is_none(), "a restricted expression shouldn't built")
     }
@@ -633,7 +618,7 @@ mod test {
         let attr = Attribute::string();
         let src = HashMap::from([("src_key".to_string(), json!(123))]);
         let err = attr
-            .build_expr(&src, "src_key", None, &schema, &BuiltEntities::default())
+            .build_expr(&src, "src_key", None, &schema)
             .expect_err("should error");
         assert!(
             matches!(err, BuildExprError::TypeMismatch(_)),

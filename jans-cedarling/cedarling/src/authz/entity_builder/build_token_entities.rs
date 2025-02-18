@@ -12,7 +12,6 @@ impl EntityBuilder {
         &self,
         entity_name: &str,
         token: &Token,
-        built_entities: &BuiltEntities,
     ) -> Result<Entity, BuildTokenEntityError> {
         let id_src_claim = token
             .get_metadata()
@@ -25,7 +24,6 @@ impl EntityBuilder {
             id_src_claim,
             Vec::new(),
             HashSet::new(),
-            built_entities,
         )
         .map_err(|err| BuildTokenEntityError {
             token_name: token.name.clone(),
@@ -135,7 +133,7 @@ mod test {
 
     fn test_build_entity(tkn_entity_type_name: &str, token: Token, builder: &EntityBuilder) {
         let entity = builder
-            .build_tkn_entity(tkn_entity_type_name, &token, &BuiltEntities::default())
+            .build_tkn_entity(tkn_entity_type_name, &token)
             .expect("expected to successfully build token entity");
 
         assert_eq!(

@@ -19,7 +19,6 @@ impl EntityBuilder {
     pub fn build_workload_entity(
         &self,
         tokens: &HashMap<String, Token>,
-        built_entities: &BuiltEntities,
     ) -> Result<Entity, BuildWorkloadEntityError> {
         let entity_name = self.entity_names.workload.as_ref();
         let mut errors = vec![];
@@ -42,7 +41,6 @@ impl EntityBuilder {
                     workload_id_claim,
                     claim_aliases,
                     HashSet::new(),
-                    built_entities,
                 ) {
                     Ok(entity) => {
                         return Ok(entity);
@@ -118,7 +116,7 @@ mod test {
         );
         let tokens = HashMap::from([("access_token".to_string(), access_token)]);
         let entity = builder
-            .build_workload_entity(&tokens, &BuiltEntities::default())
+            .build_workload_entity(&tokens)
             .expect("expeted to successfully build workload entity");
         assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
         assert_eq!(
@@ -164,7 +162,7 @@ mod test {
         );
         let tokens = HashMap::from([("id_token".to_string(), id_token)]);
         let entity = builder
-            .build_workload_entity(&tokens, &BuiltEntities::default())
+            .build_workload_entity(&tokens)
             .expect("expected to successfully build workload entity");
         assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
         assert_eq!(
@@ -255,7 +253,7 @@ mod test {
         );
         let tokens = HashMap::from([("access_token".to_string(), access_token)]);
         let entity = builder
-            .build_workload_entity(&tokens, &BuiltEntities::default())
+            .build_workload_entity(&tokens)
             .expect("expected to successfully build workload entity");
 
         assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
@@ -349,7 +347,7 @@ mod test {
         );
         let tokens = HashMap::from([("access_token".to_string(), access_token)]);
         let entity = builder
-            .build_workload_entity(&tokens, &BuiltEntities::default())
+            .build_workload_entity(&tokens)
             .expect("expected to successfully build workload entity");
 
         assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
@@ -404,7 +402,7 @@ mod test {
             ("id_token".to_string(), id_token),
         ]);
         let err = builder
-            .build_workload_entity(&tokens, &BuiltEntities::default())
+            .build_workload_entity(&tokens)
             .expect_err("expected to error while building the workload entity");
 
         assert_eq!(err.errors.len(), 2);
@@ -444,9 +442,7 @@ mod test {
         .unwrap();
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let tokens = HashMap::new();
-        let err = builder
-            .build_workload_entity(&tokens, &BuiltEntities::default())
-            .unwrap_err();
+        let err = builder.build_workload_entity(&tokens).unwrap_err();
 
         assert_eq!(err.errors.len(), 0);
     }
