@@ -6,7 +6,7 @@
 use super::*;
 use crate::common::cedar_schema::cedar_json::entity_type::EntityType;
 use cedar_policy::RestrictedExpression;
-use serde_json::Value;
+use serde_json::{Value, json};
 use std::collections::HashMap;
 
 /// Builds Cedar entity attributes using a JWT.
@@ -30,8 +30,10 @@ pub fn build_entity_attrs_from_tkn(
     let mut claims = token.claims_value().clone();
     apply_claim_aliases(&mut claims, claim_aliases);
 
+    let claim_mapping = token.claim_mapping();
+
     for (attr_name, attr) in shape.attrs.iter() {
-        let expression = if let Some(mapping) = token.claim_mapping().and_then(|x| x.get(attr_name))
+        let expression = if let Some(mapper) = token.claim_mapping().and_then(|x| x.get(attr_name))
         {
             let claim = claims.get(attr_name).ok_or_else(|| {
                 BuildAttrError::new(
@@ -39,17 +41,17 @@ pub fn build_entity_attrs_from_tkn(
                     BuildAttrErrorKind::MissingSource(attr_name.to_string()),
                 )
             })?;
-            let mapped_claim = mapping.apply_mapping(claim);
+            let mapped_claim_json_val = json!(mapper.apply_mapping(claim));
+
             attr.build_expr(
-                &mapped_claim,
                 attr_name,
+                Some(&mapped_claim_json_val),
                 default_namespace,
                 schema,
-                built_entities,
             )
             .map_err(|e| BuildAttrError::new(attr_name, e.into()))?
         } else {
-            match attr.build_expr(&claims, attr_name, default_namespace, schema, built_entities) {
+            match attr.build_expr(attr_name, claims.get(attr_name), default_namespace, schema) {
                 Ok(expr) => expr,
                 Err(err) if attr.is_required() => Err(BuildAttrError::new(attr_name, err.into()))?,
                 // just skip when attribute isn't required even if it errors
@@ -98,7 +100,10 @@ pub fn build_entity_attrs_from_values(
             src
         };
 
-        let expression = match attr.build_expr(src, attr_name, default_namespace, schema, &BuiltEntities::default()) {
+        let attr_claim_val = src.get(attr_name);
+
+        let expression = match attr.build_expr(attr_name, attr_claim_val, default_namespace, schema)
+        {
             Ok(expr) => expr,
             Err(err) if attr.is_required() => {
                 return Err(BuildAttrError::new(attr_name, err.into()))?;
@@ -284,8 +289,9 @@ mod test {
         };
         let src_values = HashMap::from([("client_id".to_string(), json!("workload-123"))]);
 
-        let attrs = build_entity_attrs_from_values(&schema,Some("Jans"), &entity_type, &src_values)
-            .expect("should build entity attrs");
+        let attrs =
+            build_entity_attrs_from_values(&schema, Some("Jans"), &entity_type, &src_values)
+                .expect("should build entity attrs");
         // RestrictedExpression does not implement PartialEq so the best we can do is check
         // if the attribute was created
         assert!(

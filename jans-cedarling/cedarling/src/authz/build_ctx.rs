@@ -41,9 +41,10 @@ pub fn build_context(
                 }
             },
             Attribute::EntityOrCommon { name, .. } => {
-                // TODO: handle potential namespace collisions when Cedarling starts
-                // supporting multiple namespaces
-                if let Some((_namespace, attr)) = json_schema.get_common_type(name) {
+                if let Some((_namespace, attr)) = json_schema
+                    .get_common_type(name, None)
+                    .map_err(|err| BuildContextError::ParseEntityName(name.clone(), err))?
+                {
                     match attr {
                         Attribute::Record { attrs, .. } => {
                             for (key, attr) in attrs.iter() {

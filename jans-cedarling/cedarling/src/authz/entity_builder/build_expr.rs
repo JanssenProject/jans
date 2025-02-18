@@ -6,10 +6,12 @@
 use super::built_entities::BuiltEntities;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
+use crate::common::policy_store::ClaimMappings;
 use cedar_policy::{
     EntityId, EntityUid, ExpressionConstructionError, ParseErrors, RestrictedExpression,
 };
-use serde_json::Value;
+use serde_json::{Value, json};
+use smol_str::ToSmolStr;
 use std::collections::HashMap;
 
 impl Attribute {
@@ -29,65 +31,77 @@ impl Attribute {
     /// Builds a [`RestrictedExpression`] while checking the schema
     pub fn build_expr(
         &self,
-        attr_src: &HashMap<String, Value>,
         src_key: &str,
+        attr_claim_value_opt: Option<&Value>,
         default_namespace: Option<&str>,
         schema: &CedarSchemaJson,
-        built_entities: &BuiltEntities,
     ) -> Result<Option<RestrictedExpression>, BuildExprError> {
+        let Some(attr_claim_value) = attr_claim_value_opt else {
+            if self.is_required() {
+                return Err(BuildExprError::MissingSource(src_key.to_string()));
+            } else {
+                return Ok(None);
+            }
+        };
+
         match self {
             // Handle String attributes
-            Attribute::String { required } => {
-                if let Some(claim) = attr_src.get(src_key) {
-                    let claim = claim
-                        .as_str()
-                        .ok_or(KeyedJsonTypeError::type_mismatch(src_key, "string", claim))?
-                        .to_string();
-                    Ok(Some(RestrictedExpression::new_string(claim)))
-                } else if *required {
-                    Err(BuildExprError::MissingSource(src_key.to_string()))
-                } else {
-                    Ok(None)
-                }
+            Attribute::String { required: _ } => {
+                let claim = attr_claim_value
+                    .as_str()
+                    .ok_or(KeyedJsonTypeError::type_mismatch(
+                        src_key,
+                        "string",
+                        attr_claim_value,
+                    ))?
+                    .to_string();
+                Ok(Some(RestrictedExpression::new_string(claim)))
             },
 
             // Handle Long attributes
-            Attribute::Long { required } => {
-                if let Some(claim) = attr_src.get(src_key) {
-                    let claim = claim
-                        .as_i64()
-                        .ok_or(KeyedJsonTypeError::type_mismatch(src_key, "number", claim))?;
-                    Ok(Some(RestrictedExpression::new_long(claim)))
-                } else if *required {
-                    Err(BuildExprError::MissingSource(src_key.to_string()))
-                } else {
-                    Ok(None)
-                }
+            Attribute::Long { required: _ } => {
+                let claim = attr_claim_value
+                    .as_i64()
+                    .ok_or(KeyedJsonTypeError::type_mismatch(
+                        src_key,
+                        "number",
+                        attr_claim_value,
+                    ))?;
+                Ok(Some(RestrictedExpression::new_long(claim)))
             },
 
             // Handle Boolean attributes
-            Attribute::Boolean { required } => {
-                if let Some(claim) = attr_src.get(src_key) {
-                    let claim = claim
-                        .as_bool()
-                        .ok_or(KeyedJsonTypeError::type_mismatch(src_key, "bool", claim))?;
-                    Ok(Some(RestrictedExpression::new_bool(claim)))
-                } else if *required {
-                    Err(BuildExprError::MissingSource(src_key.to_string()))
-                } else {
-                    Ok(None)
-                }
+            Attribute::Boolean { required: _ } => {
+                let claim = attr_claim_value
+                    .as_bool()
+                    .ok_or(KeyedJsonTypeError::type_mismatch(
+                        src_key,
+                        "bool",
+                        attr_claim_value,
+                    ))?;
+                Ok(Some(RestrictedExpression::new_bool(claim)))
             },
 
             // Handle Record attributes
             Attribute::Record { attrs, required } => {
+                let attr_claim_object =
+                    attr_claim_value
+                        .as_object()
+                        .ok_or(KeyedJsonTypeError::type_mismatch(
+                            src_key,
+                            "object",
+                            attr_claim_value,
+                        ))?;
+
                 let mut fields = HashMap::new();
-                for (name, kind) in attrs.iter() {
-                    if let Some(expr) =
-                        kind.build_expr(attr_src, name, default_namespace, schema, built_entities)?
-                    {
-                        fields.insert(name.to_string(), expr);
-                    }
+                for (key, kind) in attrs.iter() {
+                    if let Some(obj_value) = attr_claim_object.get(key) {
+                        if let Some(expr) =
+                            kind.build_expr(key, Some(obj_value), default_namespace, schema)?
+                        {
+                            fields.insert(key.to_string(), expr);
+                        }
+                    };
                 }
 
                 if fields.is_empty() && !required {
@@ -98,31 +112,34 @@ impl Attribute {
             },
 
             // Handle Set attributes
-            Attribute::Set { required, element } => {
-                if let Some(claim) = attr_src.get(src_key) {
-                    let claim = claim
+            Attribute::Set {
+                required: _,
+                element,
+            } => {
+                let claim =
+                    attr_claim_value
                         .as_array()
-                        .ok_or(KeyedJsonTypeError::type_mismatch(src_key, "array", claim))?;
+                        .ok_or(KeyedJsonTypeError::type_mismatch(
+                            src_key,
+                            "array",
+                            attr_claim_value,
+                        ))?;
 
-                    let mut values = Vec::new();
-                    for (i, val) in claim.iter().enumerate() {
-                        let claim_name = i.to_string();
-                        if let Some(expr) = element.build_expr(
-                            &HashMap::from([(claim_name.clone(), val.clone())]),
-                            &claim_name,
-                            default_namespace,
-                            schema,
-                            built_entities,
-                        )? {
-                            values.push(expr);
-                        }
+                let mut values = Vec::new();
+                for (i, val) in claim.iter().enumerate() {
+                    let attr_claim_value = Some(val);
+
+                    let claim_name = i.to_string();
+                    if let Some(expr) = element.build_expr(
+                        &claim_name,
+                        attr_claim_value,
+                        default_namespace,
+                        schema,
+                    )? {
+                        values.push(expr);
                     }
-                    Ok(Some(RestrictedExpression::new_set(values)))
-                } else if *required {
-                    Err(BuildExprError::MissingSource(src_key.to_string()))
-                } else {
-                    Ok(None)
                 }
+                Ok(Some(RestrictedExpression::new_set(values)))
             },
 
             // Handle Entity attributes
@@ -139,22 +156,14 @@ impl Attribute {
                     return Ok(None);
                 };
 
-                // Get the entity id
-                let entity_id = if let Some(entity_id) = built_entities.get(&entity_type_name) {
-                    entity_id
-                } else if let Some(entity_id) = built_entities.get(&entity_type_name) {
-                    entity_id
-                } else if let Some(claim) = attr_src.get(src_key) {
-                    claim
-                        .as_str()
-                        .ok_or(KeyedJsonTypeError::type_mismatch(src_key, "string", claim))?
-                } else if *required {
-                    return Err(BuildExprError::MissingBuiltEntityRef(
-                        src_key.to_string(),
-                        name.to_string(),
-                    ));
-                } else {
-                    return Ok(None);
+                // Claim value should store ID of entity
+                let Some(entity_id) = attr_claim_value.as_str() else {
+                    return Err(KeyedJsonTypeError::type_mismatch(
+                        src_key,
+                        "string",
+                        attr_claim_value,
+                    )
+                    .into());
                 };
 
                 let type_id = EntityId::new(entity_id);
@@ -164,29 +173,35 @@ impl Attribute {
             },
 
             // Handle Extension attributes
-            Attribute::Extension { required, name } => {
-                if let Some(claim) = attr_src.get(src_key) {
-                    let claim = claim
-                        .as_str()
-                        .ok_or(KeyedJsonTypeError::type_mismatch(src_key, "string", claim))?;
-                    let expr = match name.as_str() {
-                        "ipaddr" => RestrictedExpression::new_ip(claim),
-                        "decimal" => RestrictedExpression::new_decimal(claim),
-                        name => RestrictedExpression::new_unknown(name),
-                    };
-                    Ok(Some(expr))
-                } else if *required {
-                    Err(BuildExprError::MissingSource(src_key.to_string()))
-                } else {
-                    Ok(None)
-                }
+            Attribute::Extension { required: _, name } => {
+                let claim = attr_claim_value
+                    .as_str()
+                    .ok_or(KeyedJsonTypeError::type_mismatch(
+                        src_key,
+                        "string",
+                        attr_claim_value,
+                    ))?;
+                let expr = match name.as_str() {
+                    "ipaddr" => RestrictedExpression::new_ip(claim),
+                    "decimal" => RestrictedExpression::new_decimal(claim),
+                    name => RestrictedExpression::new_unknown(name),
+                };
+                Ok(Some(expr))
             },
 
             // Handle EntityOrCommon attributes
             Attribute::EntityOrCommon { required, name } => {
-                if let Some((_namespace_name, attr)) = schema.get_common_type(name) {
+                if let Some((entity_type_name, attr)) = schema
+                    .get_common_type(name, default_namespace)
+                    .map_err(|e| BuildExprError::ParseTypeName(name.clone(), e))?
+                {
                     // It is common type, so we can build the expression directly.
-                    attr.build_expr(attr_src, src_key, default_namespace, schema, built_entities)
+                    attr.build_expr(
+                        name,
+                        Some(attr_claim_value),
+                        Some(entity_type_name.namespace().as_str()),
+                        schema,
+                    )
                 } else if schema
                     .get_entity_schema(name, default_namespace)
                     .map_err(|e| BuildExprError::ParseTypeName(name.clone(), e))?
@@ -197,11 +212,10 @@ impl Attribute {
                         required: *required,
                         name: name.to_string(),
                     };
-                    attr.build_expr(attr_src, src_key, default_namespace, schema, built_entities)
+                    attr.build_expr(name, Some(attr_claim_value), default_namespace, schema)
                 } else if let Some(attr) = str_to_primitive_type(*required, name) {
-                    attr.build_expr(attr_src, src_key, default_namespace, schema, built_entities)
+                    attr.build_expr(name, Some(attr_claim_value), default_namespace, schema)
                 } else if *required {
-                    // TODO: try to check if it has namespace and if has load from it
                     Err(BuildExprError::UnkownType(name.to_string()))
                 } else {
                     Ok(None)
@@ -252,19 +266,29 @@ pub struct KeyedJsonTypeError {
 
 impl KeyedJsonTypeError {
     /// Returns the JSON type name of the given value.
-    pub fn value_type_name(value: &Value) -> &'static str {
+    pub fn value_type_name(value: Option<&Value>) -> &'static str {
         match value {
-            Value::Null => "null",
-            Value::Bool(_) => "bool",
-            Value::Number(_) => "number",
-            Value::String(_) => "string",
-            Value::Array(_) => "array",
-            Value::Object(_) => "object",
+            Some(Value::Null) => "null",
+            Some(Value::Bool(_)) => "bool",
+            Some(Value::Number(_)) => "number",
+            Some(Value::String(_)) => "string",
+            Some(Value::Array(_)) => "array",
+            Some(Value::Object(_)) => "object",
+            None => "null",
         }
     }
 
     /// Constructs a `TypeMismatch` error with detailed information about the expected and actual types.
     pub fn type_mismatch(key: &str, expected_type_name: &str, got_value: &Value) -> Self {
+        Self::type_mismatch_optional(key, expected_type_name, Some(got_value))
+    }
+
+    /// Constructs a `TypeMismatch` error with detailed information about the expected and actual types.
+    pub fn type_mismatch_optional(
+        key: &str,
+        expected_type_name: &str,
+        got_value: Option<&Value>,
+    ) -> Self {
         let got_value_type_name = Self::value_type_name(got_value).to_string();
 
         Self {
