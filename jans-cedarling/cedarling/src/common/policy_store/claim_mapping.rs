@@ -21,32 +21,32 @@ impl ClaimMappings {
         self.0.get(claim)
     }
 
-    // returns (claim_name, &ClaimMapping)
-    pub fn get_mapping_for_type(&self, type_name: &str) -> Option<(&String, &ClaimMapping)> {
-        // PERF: we can probably avoiding iterating through all of this by changing the
-        // `claim_mapping` in the Token Entity Metadata Schema
-        self.0
-            .iter()
-            .find_map(|(claim_name, mapping)| match mapping {
-                ClaimMapping::Regex(regex_mapping) => {
-                    (regex_mapping.cedar_policy_type == type_name).then_some((claim_name, mapping))
-                },
-                ClaimMapping::Json { r#type } => {
-                    (r#type == type_name).then_some((claim_name, mapping))
-                },
-            })
-    }
+    // // returns (claim_name, &ClaimMapping)
+    // pub fn get_mapping_for_type(&self, type_name: &str) -> Option<(&String, &ClaimMapping)> {
+    //     // PERF: we can probably avoiding iterating through all of this by changing the
+    //     // `claim_mapping` in the Token Entity Metadata Schema
+    //     self.0
+    //         .iter()
+    //         .find_map(|(claim_name, mapping)| match mapping {
+    //             ClaimMapping::Regex(regex_mapping) => {
+    //                 (regex_mapping.cedar_policy_type == type_name).then_some((claim_name, mapping))
+    //             },
+    //             ClaimMapping::Json { r#type } => {
+    //                 (r#type == type_name).then_some((claim_name, mapping))
+    //             },
+    //         })
+    // }
 
-    pub fn get_mapping(&self, claim: &str, cedar_policy_type: &str) -> Option<&ClaimMapping> {
-        self.0
-            .get(claim)
-            .filter(|claim_mapping| match claim_mapping {
-                ClaimMapping::Regex(regexp_mapping) => {
-                    regexp_mapping.cedar_policy_type == cedar_policy_type
-                },
-                ClaimMapping::Json { r#type } => r#type == cedar_policy_type,
-            })
-    }
+    // pub fn get_mapping(&self, claim: &str, cedar_policy_type: &str) -> Option<&ClaimMapping> {
+    //     self.0
+    //         .get(claim)
+    //         .filter(|claim_mapping| match claim_mapping {
+    //             ClaimMapping::Regex(regexp_mapping) => {
+    //                 regexp_mapping.cedar_policy_type == cedar_policy_type
+    //             },
+    //             ClaimMapping::Json { r#type } => r#type == cedar_policy_type,
+    //         })
+    // }
 }
 
 /// Represents the mapping of claims based on the parser type.
@@ -93,7 +93,8 @@ impl ClaimMapping {
 /// - `fields`: A map of field names to `RegexField` values.
 #[derive(Debug, Clone)]
 pub struct RegexMapping {
-    cedar_policy_type: String,
+    // It is unused, maybe we can remove it?
+    // cedar_policy_type: String,
     regex_expression: String,
     regex: Regex,
 
@@ -113,7 +114,7 @@ impl RegexMapping {
     ) -> Result<Self, regex::Error> {
         Ok(Self {
             regex: Regex::new(regex_expression.as_str())?,
-            cedar_policy_type,
+            // cedar_policy_type,
             regex_expression,
             regex_group_mapping: fields,
         })
@@ -156,8 +157,8 @@ impl PartialEq for RegexMapping {
     // impl operator "==" to compare struct in test cases
     // `regex` is ignored because it is result of `regex_expression` string and actually not comparable
     fn eq(&self, other: &Self) -> bool {
-        self.cedar_policy_type == other.cedar_policy_type
-            && self.regex_expression == other.regex_expression
+        // self.cedar_policy_type == other.cedar_policy_type &&
+        self.regex_expression == other.regex_expression
             && self.regex_group_mapping == other.regex_group_mapping
     }
 }
@@ -220,7 +221,7 @@ impl<'de> Deserialize<'de> for ClaimMapping {
                             "could not parse field regex as regular expression:{err}"
                         ))
                     })?,
-                    cedar_policy_type: r#type,
+                    // cedar_policy_type: r#type,
                     regex_expression,
                     regex_group_mapping: fields,
                 }))

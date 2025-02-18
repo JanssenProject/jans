@@ -95,7 +95,7 @@ fn build_entity_refs_from_attr(
         Attribute::Entity { name, .. } => map_entity_id(namespace, name, type_ids),
         Attribute::EntityOrCommon { name, .. } => {
             if let Some((type_name, _type_schema)) = schema
-                .get_entity_schema(name)
+                .get_entity_schema(name, Some(namespace))
                 .map_err(|e| BuildContextError::ParseEntityName(name.to_string(), e))?
             {
                 if namespace == type_name.namespace() {

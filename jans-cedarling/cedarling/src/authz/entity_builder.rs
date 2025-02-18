@@ -191,12 +191,19 @@ fn build_entity(
 
     // Get entity namespace and type
     let (entity_type_name, type_schema) = schema
-        .get_entity_schema(entity_name)?
+        .get_entity_schema(entity_name, None)?
         .ok_or(BuildEntityError::EntityNotInSchema(entity_name.to_string()))?;
+    let default_namespace = entity_type_name.namespace();
 
     // Build entity attributes
-    let entity_attrs =
-        build_entity_attrs_from_tkn(schema, type_schema, token, claim_aliases, built_entities)?;
+    let entity_attrs = build_entity_attrs_from_tkn(
+        schema,
+        type_schema,
+        token,
+        Some(default_namespace.as_str()),
+        claim_aliases,
+        built_entities,
+    )?;
 
     // Build cedar entity
     let entity_id = EntityId::from_str(&entity_id).map_err(BuildEntityError::ParseEntityId)?;
@@ -328,8 +335,8 @@ mod test {
                             "attributes":  {
                                 "access_token": { "type": "Entity", "name": "Access_token" },
                                 "id_token": { "type": "Entity", "name": "Id_token" },
-                                "userinfo_token": { "type": "Entity", "name": "Userinfo_token" },
-                                "custom_token": { "type": "Entity", "name": "Custom_token" },
+                                "userinfo_token": { "type": "Entity", "name": "Custom::Userinfo_token" },
+                                "custom_token": { "type": "Entity", "name": "Custom::Custom_token" },
                             },
                         }
                     }
@@ -348,13 +355,16 @@ mod test {
             schema,
             EntityNames {
                 tokens: HashMap::from([
-                    ("access_token".to_string(), "Access_token".to_string()),
+                    ("access_token".to_string(), "Jans::Access_token".to_string()),
                     ("id_token".to_string(), "Jans::Id_token".to_string()),
                     (
                         "userinfo_token".to_string(),
                         "Custom::Userinfo_token".to_string(),
                     ),
-                    ("custom_token".to_string(), "Custom_token".to_string()),
+                    (
+                        "custom_token".to_string(),
+                        "Custom::Custom_token".to_string(),
+                    ),
                 ]),
                 ..Default::default()
             },
@@ -382,7 +392,7 @@ mod test {
 
         let entities = entity_builder
             .build_entities(&tokens, &ResourceData {
-                resource_type: "Resource".to_string(),
+                resource_type: "Jans::Resource".to_string(),
                 id: "res-123".to_string(),
                 payload: HashMap::new(),
             })
