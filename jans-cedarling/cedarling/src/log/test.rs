@@ -11,12 +11,13 @@ use std::io::Write;
 
 use interface::{Indexed, LogWriter};
 use nop_logger::NopLogger;
+use serde_json::json;
 use stdout_logger::StdOutLogger;
 use test_utils::assert_eq;
 
 use super::*;
 use crate::bootstrap_config::log_config;
-use crate::common::app_types;
+use crate::log::log_strategy::{LogEntryWithClientInfo, LogStrategyLogger};
 use crate::log::stdout_logger::TestWriter;
 
 #[test]
@@ -28,10 +29,10 @@ fn test_new_log_strategy_off() {
     };
 
     // Act
-    let strategy = LogStrategy::new(&config);
+    let strategy = LogStrategy::new(&config, PdpID::new(), None);
 
     // Assert
-    assert!(matches!(strategy, LogStrategy::Off(_)));
+    assert!(matches!(strategy.logger(), LogStrategyLogger::Off(_)));
 }
 
 #[test]
@@ -43,10 +44,13 @@ fn test_new_log_strategy_memory() {
     };
 
     // Act
-    let strategy = LogStrategy::new(&config);
+    let strategy = LogStrategy::new(&config, PdpID::new(), None);
 
     // Assert
-    assert!(matches!(strategy, LogStrategy::MemoryLogger(_)));
+    assert!(matches!(
+        strategy.logger(),
+        LogStrategyLogger::MemoryLogger(_)
+    ));
 }
 
 #[test]
@@ -58,23 +62,24 @@ fn test_new_logstrategy_stdout() {
     };
 
     // Act
-    let strategy = LogStrategy::new(&config);
+    let strategy = LogStrategy::new(&config, PdpID::new(), None);
 
     // Assert
-    assert!(matches!(strategy, LogStrategy::StdOut(_)));
+    assert!(matches!(strategy.logger(), LogStrategyLogger::StdOut(_)));
 }
 
 #[test]
 fn test_log_memory_logger() {
+    let pdp_id = PdpID::new();
+    let app_name = None;
     // Arrange
     let config = LogConfig {
         log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
         log_level: crate::LogLevel::TRACE,
     };
-    let strategy = LogStrategy::new(&config);
+    let strategy = LogStrategy::new(&config, pdp_id.clone(), app_name.clone());
     let entry = LogEntry {
-        base: BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision, gen_uuid7()),
-        application_id: Some("test_app".to_string().into()),
+        base: BaseLogEntry::new(LogType::Decision, gen_uuid7()),
         auth_info: None,
         msg: "Test message".to_string(),
         error_msg: None,
@@ -86,8 +91,8 @@ fn test_log_memory_logger() {
     strategy.log_any(entry);
 
     // Assert
-    match &strategy {
-        LogStrategy::MemoryLogger(memory_logger) => {
+    match &strategy.logger() {
+        LogStrategyLogger::MemoryLogger(memory_logger) => {
             assert!(!memory_logger.get_log_ids().is_empty());
             memory_logger.pop_logs();
             // after popping, the memory logger should be empty
@@ -99,27 +104,25 @@ fn test_log_memory_logger() {
 
     // make same test as for the memory logger
     // create log entries
-    let entry1 = LogEntry::new_with_data(
-        app_types::PdpID::new(),
-        Some(app_types::ApplicationName("app1".to_string())),
-        LogType::Decision,
-        None,
-    )
-    .set_message("some message".to_string());
+    let entry1 =
+        LogEntry::new_with_data(LogType::Decision, None).set_message("some message".to_string());
 
-    let entry2 = LogEntry::new_with_data(
-        app_types::PdpID::new(),
-        Some(app_types::ApplicationName("app2".to_string())),
-        LogType::System,
-        None,
-    );
+    let entry2 = LogEntry::new_with_data(LogType::System, None);
 
     // log entries
     strategy.log_any(entry1.clone());
     strategy.log_any(entry2.clone());
 
-    let entry1_json = serde_json::json!(entry1);
-    let entry2_json = serde_json::json!(entry2);
+    let entry1_json = json!(LogEntryWithClientInfo::from_loggable(
+        entry1.clone(),
+        pdp_id.clone(),
+        app_name.clone()
+    ));
+    let entry2_json = json!(LogEntryWithClientInfo::from_loggable(
+        entry2.clone(),
+        pdp_id.clone(),
+        app_name.clone()
+    ));
 
     // check that we have two entries in the log database
     assert_eq!(strategy.get_log_ids().len(), 2);
@@ -153,10 +156,11 @@ fn test_log_memory_logger() {
 
 #[test]
 fn test_log_stdout_logger() {
+    let pdp_id = PdpID::new();
+    let app_name = None;
     // Arrange
     let log_entry = LogEntry {
-        base: BaseLogEntry::new(app_types::PdpID::new(), LogType::Decision, gen_uuid7()),
-        application_id: Some("test_app".to_string().into()),
+        base: BaseLogEntry::new(LogType::Decision, gen_uuid7()),
         auth_info: None,
         msg: "Test message".to_string(),
         error_msg: None,
@@ -164,12 +168,18 @@ fn test_log_stdout_logger() {
         cedar_sdk_version: None,
     };
     // Serialize the log entry to JSON
-    let json_str = serde_json::json!(&log_entry).to_string();
+    let json_str = json!(LogEntryWithClientInfo::from_loggable(
+        log_entry.clone(),
+        pdp_id.clone(),
+        app_name.clone()
+    ))
+    .to_string();
 
     let test_writer = TestWriter::new();
     let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
     let logger = StdOutLogger::new_with(buffer, LogLevel::TRACE);
-    let strategy = LogStrategy::StdOut(logger);
+    let strategy =
+        LogStrategy::new_with_logger(LogStrategyLogger::StdOut(logger), pdp_id.clone(), app_name);
 
     // Act
     strategy.log_any(log_entry);
@@ -181,24 +191,15 @@ fn test_log_stdout_logger() {
 
 #[test]
 fn test_log_storage_for_only_writer() {
-    let strategy = LogStrategy::Off(NopLogger);
+    let logger = LogStrategyLogger::Off(NopLogger);
+    let strategy = LogStrategy::new_with_logger(logger, PdpID::new(), None);
 
     // make same test as for the memory logger
     // create log entries
-    let entry1 = LogEntry::new_with_data(
-        app_types::PdpID::new(),
-        Some(app_types::ApplicationName("app1".to_string())),
-        LogType::Decision,
-        None,
-    )
-    .set_message("some message".to_string());
+    let entry1 =
+        LogEntry::new_with_data(LogType::Decision, None).set_message("some message".to_string());
 
-    let entry2 = LogEntry::new_with_data(
-        app_types::PdpID::new(),
-        Some(app_types::ApplicationName("app2".to_string())),
-        LogType::System,
-        None,
-    );
+    let entry2 = LogEntry::new_with_data(LogType::System, None);
 
     // log entries
     strategy.log_any(entry1.clone());

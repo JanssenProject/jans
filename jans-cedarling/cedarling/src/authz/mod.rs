@@ -10,7 +10,6 @@
 
 use crate::authorization_config::IdTokenTrustMode;
 use crate::bootstrap_config::AuthorizationConfig;
-use crate::common::app_types;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt::{self, Token};
 use crate::log::interface::LogWriter;
@@ -42,8 +41,6 @@ pub use authorize_result::AuthorizeResult;
 /// Configuration to Authz to initialize service without errors
 pub(crate) struct AuthzConfig {
     pub log_service: Logger,
-    pub pdp_id: app_types::PdpID,
-    pub application_name: app_types::ApplicationName,
     pub policy_store: PolicyStoreWithID,
     pub jwt_service: Arc<jwt::JwtService>,
     pub authorization: AuthorizationConfig,
@@ -73,15 +70,10 @@ impl Authz {
         );
 
         config.log_service.log_any(
-            LogEntry::new_with_data(
-                config.pdp_id,
-                Some(config.application_name.clone()),
-                LogType::System,
-                None,
-            )
-            .set_cedar_version()
-            .set_level(LogLevel::INFO)
-            .set_message("Cedarling Authz initialized successfully".to_string()),
+            LogEntry::new_with_data(LogType::System, None)
+                .set_cedar_version()
+                .set_level(LogLevel::INFO)
+                .set_message("Cedarling Authz initialized successfully".to_string()),
         );
 
         Self {
@@ -275,7 +267,7 @@ impl Authz {
         // Decision log
         // we log decision log before debug log, to avoid cloning diagnostic info
         self.config.log_service.as_ref().log_any(&DecisionLogEntry {
-            base: BaseLogEntry::new(self.config.pdp_id, LogType::Decision, request_id),
+            base: BaseLogEntry::new(LogType::Decision, request_id),
             policystore_id: self.config.policy_store.id.as_str(),
             policystore_version: self.config.policy_store.get_store_version(),
             principal: PrincipalLogEntry::new(&self.config.authorization),
@@ -297,23 +289,18 @@ impl Authz {
         // Log all result information about both authorize checks.
         // Where principal is `"Jans::Workload"` and where principal is `"Jans::User"`.
         self.config.log_service.as_ref().log_any(
-            LogEntry::new_with_data(
-                self.config.pdp_id,
-                Some(self.config.application_name.clone()),
-                LogType::System,
-                Some(request_id),
-            )
-            .set_level(LogLevel::DEBUG)
-            .set_auth_info(AuthorizationLogInfo {
-                action: request.action.clone(),
-                context: request.context.clone(),
-                resource: resource_uid.to_string(),
-                entities: entities_json,
-                person_authorize_info: user_authz_info,
-                workload_authorize_info: workload_authz_info,
-                authorized: result.decision,
-            })
-            .set_message("Result of authorize.".to_string()),
+            LogEntry::new_with_data(LogType::System, Some(request_id))
+                .set_level(LogLevel::DEBUG)
+                .set_auth_info(AuthorizationLogInfo {
+                    action: request.action.clone(),
+                    context: request.context.clone(),
+                    resource: resource_uid.to_string(),
+                    entities: entities_json,
+                    person_authorize_info: user_authz_info,
+                    workload_authorize_info: workload_authz_info,
+                    authorized: result.decision,
+                })
+                .set_message("Result of authorize.".to_string()),
         );
 
         Ok(result)
