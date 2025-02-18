@@ -25,8 +25,8 @@ import org.apache.commons.io.IOUtils;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jans.scim.model.GluuCustomPerson;
-import io.jans.scim.model.GluuGroup;
+import io.jans.scim.model.JansCustomPerson;
+import io.jans.scim.model.JansGroup;
 import io.jans.scim.service.GroupService;
 import io.jans.scim.service.PersonService;
 
@@ -59,10 +59,10 @@ public class ServiceUtil implements Serializable {
 	 * @return void
 	 * @throws Exception
 	 */
-	public void deleteGroupFromPerson(GluuGroup group, String dn) throws Exception {
+	public void deleteGroupFromPerson(JansGroup group, String dn) throws Exception {
 		List<String> persons = group.getMembers();
 		for (String onePerson : persons) {
-			GluuCustomPerson gluuPerson = personService.getPersonByDn(onePerson);
+			JansCustomPerson gluuPerson = personService.getPersonByDn(onePerson);
 			List<String> memberOflist = gluuPerson.getMemberOf();
 
 			List<String> tempMemberOf = new ArrayList<>();
@@ -110,10 +110,10 @@ public class ServiceUtil implements Serializable {
 	 * @return void
 	 * @throws Exception
 	 */
-	public void personMembersAdder(GluuGroup gluuGroup, String dn) throws Exception {
+	public void personMembersAdder(JansGroup gluuGroup, String dn) throws Exception {
 		List<String> members = gluuGroup.getMembers();
 		for (String member : members) {
-			GluuCustomPerson gluuPerson = personService.getPersonByDn(member);
+			JansCustomPerson gluuPerson = personService.getPersonByDn(member);
 			List<String> groups = gluuPerson.getMemberOf();
 			if (!isMemberOfExist(groups, dn)) {
 				List<String> cleanGroups = new ArrayList<String>();
@@ -150,10 +150,10 @@ public class ServiceUtil implements Serializable {
 	 * @return void
 	 * @throws Exception
 	 */
-	public void groupMembersAdder(GluuCustomPerson gluuPerson, String dn) throws Exception {
+	public void groupMembersAdder(JansCustomPerson gluuPerson, String dn) throws Exception {
 		List<String> groups = gluuPerson.getMemberOf();
 		for (String group : groups) {
-			GluuGroup oneGroup = groupService.getGroupByDn(group);
+			JansGroup oneGroup = groupService.getGroupByDn(group);
 			List<String> groupMembers = oneGroup.getMembers();
 			if ((groupMembers != null && !groupMembers.isEmpty()) && !isMemberExist(groupMembers, dn)) {
 				List<String> cleanGroupMembers = new ArrayList<String>();

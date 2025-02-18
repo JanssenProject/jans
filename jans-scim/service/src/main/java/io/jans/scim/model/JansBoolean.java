@@ -18,7 +18,7 @@ import io.jans.orm.annotation.AttributeEnum;
  */
 
 @Deprecated // We need ot remove true/false from it at 
-public enum GluuBoolean implements AttributeEnum {
+public enum JansBoolean implements AttributeEnum {
 
     DISABLED(false, "disabled", "Disabled"), ENABLED(true, "enabled", "Enabled"), FALSE(false, "false", "False"), TRUE(true, "true", "True"),
     INACTIVE(false, "inactive", "Inactive"), ACTIVE(true, "active", "Active");
@@ -27,15 +27,15 @@ public enum GluuBoolean implements AttributeEnum {
     private String value;
     private String displayName;
 
-    private static Map<String, GluuBoolean> MAP_BY_VALUES = new HashMap<String, GluuBoolean>();
+    private static Map<String, JansBoolean> MAP_BY_VALUES = new HashMap<String, JansBoolean>();
 
     static {
-        for (GluuBoolean enumType : values()) {
+        for (JansBoolean enumType : values()) {
             MAP_BY_VALUES.put(enumType.getValue(), enumType);
         }
     }
 
-    GluuBoolean(boolean booleanValue, String value, String displayName) {
+    JansBoolean(boolean booleanValue, String value, String displayName) {
         this.booleanValue = booleanValue;
         this.value = value;
         this.displayName = displayName;
@@ -49,7 +49,7 @@ public enum GluuBoolean implements AttributeEnum {
         return booleanValue;
     }
 
-    public static GluuBoolean getByValue(String value) {
+    public static JansBoolean getByValue(String value) {
         return MAP_BY_VALUES.get(value);
     }
 

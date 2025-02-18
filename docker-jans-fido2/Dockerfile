@@ -61,7 +61,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=881c1e0818a0aed6b413280ee7d85bd02d92bbb6
+ENV JANS_SOURCE_VERSION=0d0794cf0cd68b95283fe7634d9890069278e60b
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)

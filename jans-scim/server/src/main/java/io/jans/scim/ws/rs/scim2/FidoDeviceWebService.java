@@ -41,7 +41,7 @@ import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import io.jans.scim.model.exception.SCIMException;
-import io.jans.scim.model.fido.GluuCustomFidoDevice;
+import io.jans.scim.model.fido.JansCustomFidoDevice;
 import io.jans.scim.model.scim2.BaseScimResource;
 import io.jans.scim.model.scim2.ErrorScimType;
 import io.jans.scim.model.scim2.Meta;
@@ -141,7 +141,7 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
         try {
             log.debug("Executing web service method. getDeviceById");
 
-            GluuCustomFidoDevice device = fidoDeviceService.getGluuCustomFidoDeviceById(userId, id);
+            JansCustomFidoDevice device = fidoDeviceService.getJansCustomFidoDeviceById(userId, id);
             if (device == null) return notFoundResponse(id, fidoResourceType);
             
             response = externalConstraintsService.applyEntityCheck(device, null,
@@ -186,7 +186,7 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
                 throw new SCIMException("Parameter id does not match id attribute of Device");
 
             String userId = fidoDeviceResource.getUserId();
-            GluuCustomFidoDevice device = fidoDeviceService.getGluuCustomFidoDeviceById(userId, id);            
+            JansCustomFidoDevice device = fidoDeviceService.getJansCustomFidoDeviceById(userId, id);            
             if (device == null) return notFoundResponse(id, fidoResourceType);
 
             response = externalConstraintsService.applyEntityCheck(device, fidoDeviceResource,
@@ -204,7 +204,7 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
             	updatedResource, extService.getResourceExtensions(updatedResource.getClass()));
             transferAttributesToDevice(updatedResource, device);
 
-            fidoDeviceService.updateGluuCustomFidoDevice(device);
+            fidoDeviceService.updateJansCustomFidoDevice(device);
 
             String json = resourceSerializer.serialize(updatedResource, attrsList, excludedAttrsList);
             response = Response.ok(new URI(updatedResource.getMeta().getLocation())).entity(json).build();
@@ -233,14 +233,14 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
         try {
             log.debug("Executing web service method. deleteDevice");
 
-            GluuCustomFidoDevice device = fidoDeviceService.getGluuCustomFidoDeviceById(null, id);
+            JansCustomFidoDevice device = fidoDeviceService.getJansCustomFidoDeviceById(null, id);
             if (device == null) return notFoundResponse(id, fidoResourceType);
 
             response = externalConstraintsService.applyEntityCheck(device, null,
                     httpHeaders, uriInfo, HttpMethod.DELETE, fidoResourceType);
             if (response != null) return response;
 
-            fidoDeviceService.removeGluuCustomFidoDevice(device);
+            fidoDeviceService.removeJansCustomFidoDevice(device);
             response = Response.noContent().build();
         } catch (Exception e) {
             log.error("Failure at deleteDevice method", e);
@@ -297,7 +297,7 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
 
     }
 
-    private void transferAttributesToFidoResource(GluuCustomFidoDevice fidoDevice, FidoDeviceResource res, String url, String userId) {
+    private void transferAttributesToFidoResource(JansCustomFidoDevice fidoDevice, FidoDeviceResource res, String url, String userId) {
 
         res.setId(fidoDevice.getId());
 
@@ -340,9 +340,9 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
      * @param res
      * @param device
      */
-    private void transferAttributesToDevice(FidoDeviceResource res, GluuCustomFidoDevice device){
+    private void transferAttributesToDevice(FidoDeviceResource res, JansCustomFidoDevice device){
 
-        //Set values trying to follow the order found in GluuCustomFidoDevice class
+        //Set values trying to follow the order found in JansCustomFidoDevice class
         device.setId(res.getId());
         String strDate = res.getMeta().getCreated();
         device.setCreationDate(ldapBackend ? DateUtil.ISOToGeneralizedStringDate(strDate) : DateUtil.gluuCouchbaseISODate(strDate));
@@ -380,10 +380,10 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
         	ldapFilter=Filter.createANDFilter(ldapFilter, Filter.createEqualityFilter("personInum", userId));
         }
         
-        PagedResult<GluuCustomFidoDevice> list;
+        PagedResult<JansCustomFidoDevice> list;
         try {
             list = entryManager.findPagedEntries(fidoDeviceService.getDnForFidoDevice(userId, null),
-                    GluuCustomFidoDevice.class, ldapFilter, null, sortBy, sortOrder, startIndex - 1, count, getMaxCount());
+                    JansCustomFidoDevice.class, ldapFilter, null, sortBy, sortOrder, startIndex - 1, count, getMaxCount());
         } catch (Exception e) {
             log.info("Returning an empty listViewReponse");
             log.error(e.getMessage(), e);
@@ -392,7 +392,7 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
         }
         List<BaseScimResource> resources=new ArrayList<>();
 
-        for (GluuCustomFidoDevice device : list.getEntries()){
+        for (JansCustomFidoDevice device : list.getEntries()){
             FidoDeviceResource scimDev=new FidoDeviceResource();
             transferAttributesToFidoResource(device, scimDev, endpointUrl, userPersistenceHelper.getUserInumFromDN(device.getDn()));
             resources.add(scimDev);

@@ -24,7 +24,7 @@ import io.jans.service.document.store.conf.DocumentStoreConfiguration;
 import io.jans.service.message.model.config.MessageConfiguration;
 
 /**
- * GluuConfiguration
+ * JansConfiguration
  * 
  * @author Reda Zerrad Date: 08.10.2012
  * @author Yuriy Movchan Date: 04/20/2014
@@ -32,7 +32,7 @@ import io.jans.service.message.model.config.MessageConfiguration;
 @DataEntry
 @ObjectClass(value = "jansAppConf")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GluuConfiguration extends InumEntry implements Serializable {
+public class JansConfiguration extends InumEntry implements Serializable {
 
 	private static final long serialVersionUID = -1817003894646725601L;
 

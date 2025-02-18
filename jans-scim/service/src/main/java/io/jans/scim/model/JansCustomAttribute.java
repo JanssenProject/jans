@@ -32,7 +32,7 @@ import io.jans.model.attribute.AttributeDataType;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlSeeAlso({JansAttribute.class})
-public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomAttribute> {
+public class JansCustomAttribute implements Serializable, Comparable<JansCustomAttribute> {
 
 	private static final long serialVersionUID = 1468440094325406153L;
 
@@ -47,42 +47,42 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 	
 	private transient boolean readonly = false;
 
-	private transient GluuBoolean[] booleanValues;
+	private transient JansBoolean[] booleanValues;
 	private transient boolean usedBooleanValues = false;
 
-	public GluuCustomAttribute() {
+	public JansCustomAttribute() {
 	}
 
-	public GluuCustomAttribute(String name, String value) {
+	public JansCustomAttribute(String name, String value) {
 		this.name = name;
 		setValue(value);
 	}
 
-	public GluuCustomAttribute(String name, String value, boolean newAttribute) {
+	public JansCustomAttribute(String name, String value, boolean newAttribute) {
 		this.name = name;
 		setValue(value);
 		this.newAttribute = newAttribute;
 	}
 
-	public GluuCustomAttribute(String name, String value, boolean newAttribute, boolean mandatory) {
+	public JansCustomAttribute(String name, String value, boolean newAttribute, boolean mandatory) {
 		this.name = name;
 		setValue(value);
 		this.newAttribute = newAttribute;
 		this.mandatory = mandatory;
 	}
-	public GluuCustomAttribute(String name, String[] values, boolean newAttribute, boolean mandatory) {
+	public JansCustomAttribute(String name, String[] values, boolean newAttribute, boolean mandatory) {
 		this.name = name;
 		this.values = values;
 		this.newAttribute = newAttribute;
 		this.mandatory = mandatory;
 	}
-	public GluuCustomAttribute(String name, String[] values) {
+	public JansCustomAttribute(String name, String[] values) {
 		this.name = name;
 		this.values = values;
 	}
 
 	// To avoid extra code in CR interceptor script
-	public GluuCustomAttribute(String name, Set<String> values) {
+	public JansCustomAttribute(String name, Set<String> values) {
 		this.name = name;
 		this.values = values.toArray(new String[0]);
 	}
@@ -110,7 +110,7 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 		this.values[0] = value;
 	}
 
-	public GluuBoolean getBooleanValue() {
+	public JansBoolean getBooleanValue() {
 		if (this.booleanValues == null) {
 			return null;
 		}
@@ -122,13 +122,13 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 		return null;
 	}
 
-	public void setBooleanValue(GluuBoolean value) {
+	public void setBooleanValue(JansBoolean value) {
 		if (this.booleanValues == null) {
-			this.booleanValues = new GluuBoolean[0];
+			this.booleanValues = new JansBoolean[0];
 		}
 
 		if (this.booleanValues.length != 1) {
-			this.booleanValues = new GluuBoolean[1];
+			this.booleanValues = new JansBoolean[1];
 		}
 		this.booleanValues[0] = value;
 	}
@@ -143,13 +143,13 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 		return values;
 	}
 
-	public GluuBoolean[] getBooleanValues() {
+	public JansBoolean[] getBooleanValues() {
 		this.usedBooleanValues = true; // Remove after adding separate type for status
 
 		return this.booleanValues;
 	}
 
-	public void setBooleanValues(GluuBoolean[] booleanValues) {
+	public void setBooleanValues(JansBoolean[] booleanValues) {
 		this.usedBooleanValues = true; // Remove after adding separate type for status
 
 		this.booleanValues = booleanValues;
@@ -236,8 +236,8 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 	}
 
 	// public boolean equals(Object attribute) {
-	// return (attribute instanceof GluuCustomAttribute) &&
-	// (((GluuCustomAttribute) attribute).getName().equals(getName()));
+	// return (attribute instanceof JansCustomAttribute) &&
+	// (((JansCustomAttribute) attribute).getName().equals(getName()));
 	// }
 
 	public String getName() {
@@ -293,7 +293,7 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 		if (o == null || getClass() != o.getClass())
 			return false;
 
-		GluuCustomAttribute that = (GluuCustomAttribute) o;
+		JansCustomAttribute that = (JansCustomAttribute) o;
 
 		return !(name != null ? !name.equalsIgnoreCase(that.name) : that.name != null);
 
@@ -309,7 +309,7 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 		return String.format("Attribute [name=%s, values=%s, metadata=%s]", name, Arrays.toString(values), metadata);
 	}
 	
-	public int compareTo(GluuCustomAttribute o) {
+	public int compareTo(JansCustomAttribute o) {
 		return name.compareTo(o.name);
 	}
 	/*
@@ -319,12 +319,12 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 	 */
 	Map<String[], String> idComponentMap = new HashMap<String[], String>();
 
-	private GluuBoolean[] toBooleanValuesFromStringValues(String[] inputValues) {
+	private JansBoolean[] toBooleanValuesFromStringValues(String[] inputValues) {
 		if (inputValues == null) {
 			return null;
 		}
 
-		GluuBoolean[] resultValues = new GluuBoolean[inputValues.length];
+		JansBoolean[] resultValues = new JansBoolean[inputValues.length];
 		for (int i = 0; i < inputValues.length; i++) {
 			resultValues[i] = toBooleanFromString(inputValues[i]);
 		}
@@ -332,7 +332,7 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 		return resultValues;
 	}
 
-	private String[] toStringValuesFromBooleanValues(GluuBoolean[] inputValues) {
+	private String[] toStringValuesFromBooleanValues(JansBoolean[] inputValues) {
 		if (inputValues == null) {
 			return null;
 		}
@@ -345,15 +345,15 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 		return resultValues;
 	}
 
-	protected GluuBoolean toBooleanFromString(String value) {
+	protected JansBoolean toBooleanFromString(String value) {
 		if (value == null) {
 			return null;
 		}
 
-		return GluuBoolean.getByValue(value);
+		return JansBoolean.getByValue(value);
 	}
 
-	protected String toStringFromBoolean(GluuBoolean value) {
+	protected String toStringFromBoolean(JansBoolean value) {
 		if (value == null) {
 			return null;
 		}
