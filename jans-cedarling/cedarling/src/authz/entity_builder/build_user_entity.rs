@@ -80,8 +80,8 @@ mod test {
     use test_utils::assert_eq;
 
     fn test_iss() -> TrustedIssuer {
-        let token_entity_metadata = TokenEntityMetadata {
-            claim_mapping: serde_json::from_value::<ClaimMappings>(json!({
+        let token_entity_metadata_builder = TokenEntityMetadata::builder().claim_mapping(
+            serde_json::from_value::<ClaimMappings>(json!({
                 "email": {
                     "parser": "regex",
                     "type": "Jans::Email",
@@ -91,12 +91,22 @@ mod test {
                 },
             }))
             .unwrap(),
-            ..Default::default()
-        };
+        );
         TrustedIssuer {
             tokens_metadata: HashMap::from([
-                ("id_token".to_string(), token_entity_metadata.clone()),
-                ("userinfo_token".to_string(), token_entity_metadata),
+                (
+                    "id_token".to_string(),
+                    token_entity_metadata_builder
+                        .clone()
+                        .entity_type_name("Jans::id_token".into())
+                        .build(),
+                ),
+                (
+                    "userinfo_token".to_string(),
+                    token_entity_metadata_builder
+                        .entity_type_name("Jans::Userinfo_token".into())
+                        .build(),
+                ),
             ]),
             ..Default::default()
         }

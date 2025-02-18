@@ -218,9 +218,7 @@ mod test {
             }}
         }))
         .unwrap();
-        let iss = TrustedIssuer {
-            tokens_metadata: HashMap::from([("access_token".to_string(), TokenEntityMetadata {
-                claim_mapping: serde_json::from_value::<ClaimMappings>(json!({
+        let token_entity_metadata_builder = TokenEntityMetadata::builder().claim_mapping(serde_json::from_value::<ClaimMappings>(json!({
                     "email": {
                         "parser": "regex",
                         "type": "Jans::Email",
@@ -237,9 +235,14 @@ mod test {
                         "PATH": {"attr": "path", "type": "String"}
                     }
                 }))
-                .unwrap(),
-                ..Default::default()
-            })]),
+                .unwrap());
+        let iss = TrustedIssuer {
+            tokens_metadata: HashMap::from([(
+                "access_token".to_string(),
+                token_entity_metadata_builder
+                    .entity_type_name("Jans::Access_token".into())
+                    .build(),
+            )]),
             ..Default::default()
         };
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);

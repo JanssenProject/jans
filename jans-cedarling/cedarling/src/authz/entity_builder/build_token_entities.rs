@@ -107,8 +107,8 @@ mod test {
     }
 
     fn test_issusers() -> HashMap<String, TrustedIssuer> {
-        let token_entity_metadata = TokenEntityMetadata {
-                claim_mapping: serde_json::from_value::<ClaimMappings>(json!({
+        let token_entity_metadata_builder = TokenEntityMetadata::builder().claim_mapping(
+serde_json::from_value::<ClaimMappings>(json!({
                     "url": {
                         "parser": "regex",
                         "type": "Jans::Url",
@@ -118,14 +118,31 @@ mod test {
                         "PATH": {"attr": "path", "type": "String"}
                     }
                 }))
-                .unwrap(),
-                ..Default::default()
-            };
+                .unwrap()
+        );
         let iss = TrustedIssuer {
             tokens_metadata: HashMap::from([
-                ("access_token".to_string(), token_entity_metadata.clone()),
-                ("id_token".to_string(), token_entity_metadata.clone()),
-                ("userinfo_token".to_string(), token_entity_metadata.clone()),
+                (
+                    "access_token".to_string(),
+                    token_entity_metadata_builder
+                        .clone()
+                        .entity_type_name("Jans::Access_token".into())
+                        .build(),
+                ),
+                (
+                    "id_token".to_string(),
+                    token_entity_metadata_builder
+                        .clone()
+                        .entity_type_name("Jans::id_token".into())
+                        .build(),
+                ),
+                (
+                    "userinfo_token".to_string(),
+                    token_entity_metadata_builder
+                        .clone()
+                        .entity_type_name("Jans::Userinfo_token".into())
+                        .build(),
+                ),
             ]),
             ..Default::default()
         };

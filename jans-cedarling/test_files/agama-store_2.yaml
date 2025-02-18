@@ -30,15 +30,18 @@ policy_stores:
         openid_configuration_endpoint: https://test-casa.gluu.info/.well-known/openid-configuration
         tokens_metadata:
           access_token:
+            entity_type_name: Jans::Access_token
             trusted: true
             principal_identifier: jti
             user_id: ''
             role_mapping: ''
             # claim_mapping: {}
           id_token:
+            entity_type_name: Jans::id_token
             user_id: ''
             role_mapping: ''
           userinfo_token:
+            entity_type_name: Jans::Userinfo_token
             user_id: sub
             role_mapping: role
             claim_mapping:
