@@ -33,7 +33,7 @@ pub fn build_context(
             Attribute::Record { attrs, .. } => {
                 for (key, attr) in attrs.iter() {
                     if let Some(entity_ref) =
-                        build_entity_refs_from_attr(namespace, attr, &build_entities, json_schema)?
+                        build_entity_refs_from_attr(namespace, attr, build_entities, json_schema)?
                     {
                         ctx_entity_refs[key] = entity_ref;
                     }
@@ -50,7 +50,7 @@ pub fn build_context(
                                 if let Some(entity_ref) = build_entity_refs_from_attr(
                                     namespace,
                                     attr,
-                                    &build_entities,
+                                    build_entities,
                                     json_schema,
                                 )? {
                                     ctx_entity_refs[key] = entity_ref;
@@ -97,7 +97,7 @@ fn build_entity_refs_from_attr(
                 .get_entity_schema(name, Some(namespace))
                 .map_err(|e| BuildContextError::ParseEntityName(name.to_string(), e))?
             {
-                return map_entity_id(&type_name, built_entities);
+                map_entity_id(&type_name, built_entities)
             } else {
                 Ok(None)
             }
