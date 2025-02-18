@@ -24,7 +24,7 @@ use build_role_entity::BuildRoleEntityError;
 pub use build_token_entities::BuildTokenEntityError;
 use build_user_entity::BuildUserEntityError;
 use build_workload_entity::BuildWorkloadEntityError;
-use built_entities::BuiltEntities;
+pub(crate) use built_entities::BuiltEntities;
 use cedar_policy::{Entity, EntityId, EntityUid};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
@@ -159,6 +159,7 @@ impl EntityBuilder {
         };
 
         let resource = self.build_resource_entity(resource)?;
+        built_entities.insert(&resource);
 
         Ok(AuthorizeEntitiesData {
             workload,
@@ -166,6 +167,7 @@ impl EntityBuilder {
             resource,
             roles,
             tokens: token_entities,
+            build_entities: built_entities,
         })
     }
 }

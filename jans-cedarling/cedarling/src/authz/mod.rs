@@ -351,13 +351,14 @@ struct ExecuteAuthorizeParameters<'a> {
 }
 
 /// Structure to hold entites created from tokens
-#[derive(Clone)]
 pub struct AuthorizeEntitiesData {
     pub workload: Option<Entity>,
     pub user: Option<Entity>,
     pub resource: Entity,
     pub roles: Vec<Entity>,
     pub tokens: HashMap<String, Entity>,
+
+    pub build_entities: BuiltEntities,
 }
 
 impl AuthorizeEntitiesData {

@@ -3,13 +3,12 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::{AuthorizeEntitiesData, AuthzConfig};
+use super::{AuthorizeEntitiesData, AuthzConfig, entity_builder::BuiltEntities};
 use crate::common::cedar_schema::CEDAR_NAMESPACE_SEPARATOR;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
-use cedar_policy::{ContextJsonError, ParseErrors};
+use cedar_policy::{ContextJsonError, EntityTypeName, ParseErrors};
 use serde_json::{Value, json, map::Entry};
-use std::collections::HashMap;
 
 /// Constructs the authorization context by adding the built entities from the tokens
 pub fn build_context(
@@ -28,21 +27,22 @@ pub fn build_context(
 
     // Get the entities required for the context
     let mut ctx_entity_refs = json!({});
-    let type_ids = entities_data.type_ids();
+    let build_entities = &entities_data.build_entities;
+
     if let Some(ctx) = action_schema.applies_to.context.as_ref() {
         match ctx {
             Attribute::Record { attrs, .. } => {
                 for (key, attr) in attrs.iter() {
                     if let Some(entity_ref) =
-                        build_entity_refs_from_attr(namespace, attr, &type_ids, json_schema)?
+                        build_entity_refs_from_attr(namespace, attr, &build_entities, json_schema)?
                     {
                         ctx_entity_refs[key] = entity_ref;
                     }
                 }
             },
             Attribute::EntityOrCommon { name, .. } => {
-                if let Some((_namespace, attr)) = json_schema
-                    .get_common_type(name, None)
+                if let Some((_entity_type_name, attr)) = json_schema
+                    .get_common_type(name, Some(namespace))
                     .map_err(|err| BuildContextError::ParseEntityName(name.clone(), err))?
                 {
                     match attr {
@@ -51,7 +51,7 @@ pub fn build_context(
                                 if let Some(entity_ref) = build_entity_refs_from_attr(
                                     namespace,
                                     attr,
-                                    &type_ids,
+                                    &build_entities,
                                     json_schema,
                                 )? {
                                     ctx_entity_refs[key] = entity_ref;
@@ -89,19 +89,26 @@ pub fn build_context(
 fn build_entity_refs_from_attr(
     namespace: &str,
     attr: &Attribute,
-    type_ids: &HashMap<String, String>,
+    built_entities: &BuiltEntities,
     schema: &CedarSchemaJson,
 ) -> Result<Option<Value>, BuildContextError> {
     match attr {
-        Attribute::Entity { name, .. } => map_entity_id(namespace, name, type_ids),
+        Attribute::Entity { name, .. } => {
+            if let Some((type_name, _type_schema)) = schema
+                .get_entity_schema(name, Some(namespace))
+                .map_err(|e| BuildContextError::ParseEntityName(name.to_string(), e))?
+            {
+                return map_entity_id(&type_name, built_entities);
+            } else {
+                Ok(None)
+            }
+        },
         Attribute::EntityOrCommon { name, .. } => {
             if let Some((type_name, _type_schema)) = schema
                 .get_entity_schema(name, Some(namespace))
                 .map_err(|e| BuildContextError::ParseEntityName(name.to_string(), e))?
             {
-                if namespace == type_name.namespace() {
-                    return map_entity_id(namespace, name, type_ids);
-                }
+                return map_entity_id(&type_name, built_entities);
             }
             Ok(None)
         },
@@ -111,13 +118,13 @@ fn build_entity_refs_from_attr(
 
 /// Maps a known entity ID to the entity reference
 fn map_entity_id(
-    namespace: &str,
-    name: &str,
-    type_ids: &HashMap<String, String>,
+    // namespace: &str,
+    name: &EntityTypeName,
+    built_entities: &BuiltEntities,
 ) -> Result<Option<Value>, BuildContextError> {
-    if let Some(type_id) = type_ids.get(name).as_ref() {
-        let name = join_namespace(namespace, name);
-        Ok(Some(json!({"type": name, "id": type_id})))
+    if let Some(type_id) = built_entities.get(name) {
+        // let name = join_namespace(namespace, name);
+        Ok(Some(json!({"type": name.to_string(), "id": type_id})))
     } else {
         Err(BuildContextError::MissingEntityId(name.to_string()))
     }
