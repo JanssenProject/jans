@@ -92,16 +92,7 @@ pub fn build_entity_attrs_from_values(
             _ => continue,
         };
 
-        let mapped_src = serde_json::from_value::<HashMap<String, Value>>(val.clone());
-        let src = if let Ok(mapped_src) = mapped_src.as_ref() {
-            mapped_src
-        } else {
-            src
-        };
-
-        let attr_claim_val = src.get(attr_name);
-
-        let expression = match attr.build_expr(attr_name, attr_claim_val, default_namespace, schema)
+        let expression = match attr.build_expr(attr_name, Some(val), default_namespace, schema)
         {
             Ok(expr) => expr,
             Err(err) if attr.is_required() => {
