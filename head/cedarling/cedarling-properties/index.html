@@ -7242,8 +7242,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_2">
@@ -7640,8 +7638,56 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_10" type="checkbox" id="__nav_2_10" >
+      
+      
+      
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2_10">
+          UniFFI
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="UniFFI" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_10">
+          <span class="md-nav__icon md-icon"></span>
+          UniFFI
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../cedarling-ios.md" class="md-nav__link">
+      <a href="../uniffi/cedarling-uniffi/" class="md-nav__link">
+        UniFFI binding for Cedarling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../uniffi/cedarling-ios/" class="md-nav__link">
         iOS
       </a>
     </li>
@@ -7655,9 +7701,16 @@
   
   
     <li class="md-nav__item">
-      <a href="../cedarling-android.md" class="md-nav__link">
+      <a href="../uniffi/cedarling-android.md" class="md-nav__link">
         Android
       </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -8869,7 +8922,7 @@
 <p>These Bootstrap Properties control default application level behavior.</p>
 <ul>
 <li><strong><code>CEDARLING_APPLICATION_NAME</code></strong> : Human friendly identifier for this application</li>
-<li><strong><code>CEDARLING_POLICY_STORE_URI</code></strong> : Location of policy store JSON, used if policy store is not local, or retreived from Lock Master.</li>
+<li><strong><code>CEDARLING_POLICY_STORE_URI</code></strong> : Location of policy store JSON, used if policy store is not local.</li>
 <li><strong><code>CEDARLING_POLICY_STORE_ID</code></strong> : The identifier of the policy store in case there is more then one policy_store_id in the policy store.</li>
 <li><strong><code>CEDARLING_USER_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a User principal.</li>
 <li><strong><code>CEDARLING_WORKLOAD_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a Workload principal.</li>
@@ -8902,13 +8955,13 @@
 </ul>
 <p><strong>The following bootstrap properties are only needed for enterprise deployments.</strong></p>
 <ul>
-<li><strong><code>CEDARLING_LOCK</code></strong> : <code>enabled</code> | <code>disabled</code>. If <code>enabled</code>, the Cedarling will connect to the Lock Master for policies, and subscribe for SSE events.</li>
-<li><strong><code>CEDARLING_LOCK_MASTER_CONFIGURATION_URI</code></strong> : Required if <code>LOCK</code> == <code>enabled</code>. URI where Cedarling can get JSON file with all required metadata about Lock Master, i.e. <code>.well-known/lock-master-configuration</code>.</li>
+<li><strong><code>CEDARLING_LOCK</code></strong> : <code>enabled</code> | <code>disabled</code>. If <code>enabled</code>, the Cedarling will connect to the Lock Server for policies, and subscribe for SSE events.</li>
+<li><strong><code>CEDARLING_LOCK_SERVER_CONFIGURATION_URI</code></strong> : Required if <code>LOCK</code> == <code>enabled</code>. URI where Cedarling can get JSON file with all required metadata about the Lock Server, i.e. <code>.well-known/lock-master-configuration</code>.</li>
 <li><strong><code>CEDARLING_LOCK_DYNAMIC_CONFIGURATION</code></strong> : <code>enabled</code> | <code>disabled</code>, controls whether Cedarling should listen for SSE config updates.</li>
-<li><strong><code>CEDARLING_LOCK_SSA_JWT</code></strong> : SSA for DCR in a Lock Master deployment. The Cedarling will validate this SSA JWT prior to DCR.</li>
-<li><strong><code>CEDARLING_LOCK_LOG_INTERVAL</code></strong> : How often to send log messages to Lock Master (0 to turn off trasmission).</li>
-<li><strong><code>CEDARLING_LOCK_HEALTH_INTERVAL</code></strong> : How often to send health messages to Lock Master (0 to turn off transmission).</li>
-<li><strong><code>CEDARLING_LOCK_TELEMETRY_INTERVAL</code></strong> : How often to send telemetry messages to Lock Master (0 to turn off transmission).</li>
+<li><strong><code>CEDARLING_LOCK_SSA_JWT</code></strong> : SSA for DCR in a Lock Server deployment. The Cedarling will validate this SSA JWT prior to DCR.</li>
+<li><strong><code>CEDARLING_LOCK_LOG_INTERVAL</code></strong> : How often to send log messages to Lock Server (0 to turn off trasmission).</li>
+<li><strong><code>CEDARLING_LOCK_HEALTH_INTERVAL</code></strong> : How often to send health messages to Lock Server (0 to turn off transmission).</li>
+<li><strong><code>CEDARLING_LOCK_TELEMETRY_INTERVAL</code></strong> : How often to send telemetry messages to Lock Server (0 to turn off transmission).</li>
 <li><strong><code>CEDARLING_LOCK_LISTEN_SSE</code></strong> :  <code>enabled</code> | <code>disabled</code>: controls whether Cedarling should listen for updates from the Lock Server.</li>
 </ul>
 <h2 id="required-keys-for-startup">Required keys for startup<a class="headerlink" href="#required-keys-for-startup" title="Permanent link">#</a></h2>
@@ -9094,7 +9147,7 @@
 <span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;CEDARLING_ID_TOKEN_TRUST_MODE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;strict&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;CEDARLING_LOCK&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;CEDARLING_LOCK_MASTER_CONFIGURATION_URI&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_LOCK_SERVER_CONFIGURATION_URI&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;CEDARLING_LOCK_DYNAMIC_CONFIGURATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;CEDARLING_LOCK_HEALTH_INTERVAL&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;CEDARLING_LOCK_TELEMETRY_INTERVAL&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
@@ -9150,7 +9203,7 @@
 
 <span class="nt">CEDARLING_ID_TOKEN_TRUST_MODE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">strict</span>
 <span class="nt">CEDARLING_LOCK</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disabled</span>
-<span class="nt">CEDARLING_LOCK_MASTER_CONFIGURATION_URI</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="nt">CEDARLING_LOCK_SERVER_CONFIGURATION_URI</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
 <span class="nt">CEDARLING_LOCK_DYNAMIC_CONFIGURATION</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disabled</span>
 <span class="nt">CEDARLING_LOCK_HEALTH_INTERVAL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 <span class="nt">CEDARLING_LOCK_TELEMETRY_INTERVAL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
@@ -9165,7 +9218,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-04T16:39:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-04</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-17T16:34:34+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-17</span>
       
         <br>
         Created:
