@@ -4,7 +4,6 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::{AuthorizeEntitiesData, AuthzConfig, entity_builder::BuiltEntities};
-use crate::common::cedar_schema::CEDAR_NAMESPACE_SEPARATOR;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
 use cedar_policy::{ContextJsonError, EntityTypeName, ParseErrors};
@@ -128,14 +127,6 @@ fn map_entity_id(
     } else {
         Err(BuildContextError::MissingEntityId(name.to_string()))
     }
-}
-
-/// Joins the given type name with the given namespace if it's not an empty string.
-fn join_namespace(namespace: &str, type_name: &str) -> String {
-    if namespace.is_empty() {
-        return type_name.to_string();
-    }
-    [namespace, type_name].join(CEDAR_NAMESPACE_SEPARATOR)
 }
 
 #[derive(Debug, thiserror::Error)]

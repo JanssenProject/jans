@@ -31,6 +31,14 @@ pub type EntityOrCommonName = String;
 pub type ExtensionName = String;
 pub type NamespaceName = String;
 
+/// Joins the given type name with the given namespace if it's not an empty string.
+fn join_namespace(namespace: &str, type_name: &str) -> String {
+    if namespace.is_empty() {
+        return type_name.to_string();
+    }
+    [namespace, type_name].join(CEDAR_NAMESPACE_SEPARATOR)
+}
+
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct CedarSchemaJson {
     #[serde(flatten)]
@@ -63,9 +71,8 @@ impl CedarSchemaJson {
         // If namespace is empty (in type_name), look for the type in the default namespace.
         if let Some(namespace) = default_namespace {
             if let Some(entity_schema) = self.get_comon_type_from_namespace(namespace, basename) {
-                let entity_type_name = cedar_policy::EntityTypeName::from_str(
-                    &[namespace, type_name].join(CEDAR_NAMESPACE_SEPARATOR),
-                )?;
+                let entity_type_name =
+                    cedar_policy::EntityTypeName::from_str(&join_namespace(namespace, type_name))?;
 
                 return Ok(Some((entity_type_name, entity_schema)));
             }
@@ -118,9 +125,8 @@ impl CedarSchemaJson {
         if let Some(namespace) = default_namespace {
             if let Some(entity_schema) = self.get_entity_schema_from_namespace(namespace, basename)
             {
-                let entity_type_name = cedar_policy::EntityTypeName::from_str(
-                    &[namespace, type_name].join(CEDAR_NAMESPACE_SEPARATOR),
-                )?;
+                let entity_type_name =
+                    cedar_policy::EntityTypeName::from_str(&join_namespace(namespace, type_name))?;
 
                 return Ok(Some((entity_type_name, entity_schema)));
             }
