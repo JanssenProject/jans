@@ -3,7 +3,6 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 #[cfg(not(target_arch = "wasm32"))]
-
 fn main() {
     uniffi::uniffi_bindgen_main()
 }
