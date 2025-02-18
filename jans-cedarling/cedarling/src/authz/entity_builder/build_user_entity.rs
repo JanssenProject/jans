@@ -15,6 +15,7 @@ impl EntityBuilder {
         &self,
         tokens: &HashMap<String, Token>,
         parents: HashSet<EntityUid>,
+        built_entities: &BuiltEntities,
     ) -> Result<Entity, BuildUserEntityError> {
         let entity_name = self.entity_names.user.as_ref();
         let mut errors = vec![];
@@ -32,6 +33,7 @@ impl EntityBuilder {
                 user_id_claim,
                 Vec::new(),
                 parents.clone(),
+                built_entities,
             ) {
                 Ok(entity) => return Ok(entity),
                 Err(err) => errors.push((token.name.clone(), err)),
@@ -141,7 +143,7 @@ mod test {
         let schema = test_schema();
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, true);
         let entity = builder
-            .build_user_entity(&tokens, HashSet::new())
+            .build_user_entity(&tokens, HashSet::new(), &BuiltEntities::default())
             .expect("expected to build user entity");
 
         assert_eq!(entity.uid().to_string(), "Jans::User::\"user-123\"");
@@ -221,7 +223,7 @@ mod test {
 
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, true);
         let err = builder
-            .build_user_entity(&tokens, HashSet::new())
+            .build_user_entity(&tokens, HashSet::new(), &BuiltEntities::default())
             .expect_err("expected to error while building the user entity");
 
         assert_eq!(err.errors.len(), 2);
@@ -247,7 +249,7 @@ mod test {
 
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, true);
         let err = builder
-            .build_user_entity(&tokens, HashSet::new())
+            .build_user_entity(&tokens, HashSet::new(), &BuiltEntities::default())
             .expect_err("expected to error while building the user entity");
 
         assert_eq!(err.errors.len(), 0);
@@ -276,7 +278,7 @@ mod test {
         ]);
 
         let user_entity = builder
-            .build_user_entity(&tokens, roles.clone())
+            .build_user_entity(&tokens, roles.clone(), &BuiltEntities::default())
             .expect("expected to build user entity");
 
         let (_, _, parents) = user_entity.into_inner();

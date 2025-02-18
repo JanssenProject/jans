@@ -10,6 +10,7 @@ mod build_role_entity;
 mod build_token_entities;
 mod build_user_entity;
 mod build_workload_entity;
+mod built_entities;
 mod mapping;
 
 use super::AuthorizeEntitiesData;
@@ -23,6 +24,7 @@ use build_role_entity::BuildRoleEntityError;
 pub use build_token_entities::BuildTokenEntityError;
 use build_user_entity::BuildUserEntityError;
 use build_workload_entity::BuildWorkloadEntityError;
+use built_entities::BuiltEntities;
 use cedar_policy::{Entity, EntityId, EntityUid};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
@@ -118,6 +120,8 @@ impl EntityBuilder {
         tokens: &HashMap<String, Token>,
         resource: &ResourceData,
     ) -> Result<AuthorizeEntitiesData, BuildCedarlingEntityError> {
+        let mut built_entities = BuiltEntities::default();
+
         let mut token_entities = HashMap::new();
         for (tkn_name, tkn) in tokens.iter() {
             let entity_name = if let Some(entity_name) = self.entity_names.tokens.get(tkn_name) {
@@ -125,12 +129,14 @@ impl EntityBuilder {
             } else {
                 continue;
             };
-            let entity = self.build_tkn_entity(entity_name, tkn)?;
+            let entity = self.build_tkn_entity(entity_name, tkn, &built_entities)?;
+            built_entities.insert(&entity);
             token_entities.insert(tkn_name.to_string(), entity);
         }
 
         let workload = if self.build_workload {
-            let workload_entity = self.build_workload_entity(tokens)?;
+            let workload_entity = self.build_workload_entity(tokens, &built_entities)?;
+            built_entities.insert(&workload_entity);
             Some(workload_entity)
         } else {
             None
@@ -140,9 +146,13 @@ impl EntityBuilder {
             let roles = self.try_build_role_entities(tokens)?;
             let parents = roles
                 .iter()
-                .map(|role| role.uid())
+                .map(|role| {
+                    built_entities.insert(role);
+                    role.uid()
+                })
                 .collect::<HashSet<EntityUid>>();
-            let user_entity = self.build_user_entity(tokens, parents)?;
+            let user_entity = self.build_user_entity(tokens, parents, &built_entities)?;
+            built_entities.insert(&user_entity);
             (Some(user_entity), roles)
         } else {
             (None, vec![])
@@ -168,6 +178,7 @@ fn build_entity(
     id_src_claim: &str,
     claim_aliases: Vec<ClaimAliasMap>,
     parents: HashSet<EntityUid>,
+    built_entities: &BuiltEntities,
 ) -> Result<Entity, BuildEntityError> {
     // Get entity Id from the specified token claim
     let entity_id = token
@@ -189,6 +200,7 @@ fn build_entity(
         token,
         Some(default_namespace.as_str()),
         claim_aliases,
+        built_entities,
     )?;
 
     // Build cedar entity
@@ -286,6 +298,7 @@ mod test {
             "client_id",
             Vec::new(),
             HashSet::new(),
+            &BuiltEntities::default(),
         )
         .expect("should successfully build entity");
 
@@ -480,6 +493,7 @@ mod test {
             "client_id",
             Vec::new(),
             HashSet::new(),
+            &BuiltEntities::default(),
         )
         .expect_err("should error while parsing entity type name");
 
@@ -504,6 +518,7 @@ mod test {
             "client_id",
             Vec::new(),
             HashSet::new(),
+            &BuiltEntities::default(),
         )
         .expect_err("should error while parsing entity type name");
 
@@ -544,6 +559,7 @@ mod test {
             "client_id",
             Vec::new(),
             HashSet::new(),
+            &BuiltEntities::default(),
         )
         .expect_err("should error due to unexpected json type");
 
@@ -576,6 +592,7 @@ mod test {
             "client_id",
             Vec::new(),
             HashSet::new(),
+            &BuiltEntities::default(),
         )
         .expect_err("should error due to entity not being in the schema");
         assert!(

@@ -3,6 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use super::built_entities::BuiltEntities;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
 use cedar_policy::{
@@ -32,6 +33,7 @@ impl Attribute {
         attr_claim_value_opt: Option<&Value>,
         default_namespace: Option<&str>,
         schema: &CedarSchemaJson,
+        built_entities: &BuiltEntities,
     ) -> Result<Option<RestrictedExpression>, BuildExprError> {
         let Some(attr_claim_value) = attr_claim_value_opt else {
             if self.is_required() {
@@ -93,9 +95,13 @@ impl Attribute {
                 let mut fields = HashMap::new();
                 for (key, kind) in attrs.iter() {
                     if let Some(obj_value) = attr_claim_object.get(key) {
-                        if let Some(expr) =
-                            kind.build_expr(key, Some(obj_value), default_namespace, schema)?
-                        {
+                        if let Some(expr) = kind.build_expr(
+                            key,
+                            Some(obj_value),
+                            default_namespace,
+                            schema,
+                            built_entities,
+                        )? {
                             fields.insert(key.to_string(), expr);
                         }
                     };
@@ -132,6 +138,7 @@ impl Attribute {
                         attr_claim_value,
                         default_namespace,
                         schema,
+                        built_entities,
                     )? {
                         values.push(expr);
                     }
@@ -153,8 +160,11 @@ impl Attribute {
                     return Ok(None);
                 };
 
-                // Claim value should store ID of entity
-                let Some(entity_id) = attr_claim_value.as_str() else {
+                let entity_id = if let Some(entity_id) = built_entities.get(&entity_type_name) {
+                    entity_id
+                } else if let Some(entity_id) = attr_claim_value.as_str() {
+                    entity_id
+                } else {
                     return Err(KeyedJsonTypeError::type_mismatch(
                         src_key,
                         "string",
@@ -198,6 +208,7 @@ impl Attribute {
                         Some(attr_claim_value),
                         Some(entity_type_name.namespace().as_str()),
                         schema,
+                        built_entities,
                     )
                 } else if schema
                     .get_entity_schema(name, default_namespace)
@@ -209,9 +220,21 @@ impl Attribute {
                         required: *required,
                         name: name.to_string(),
                     };
-                    attr.build_expr(name, Some(attr_claim_value), default_namespace, schema)
+                    attr.build_expr(
+                        name,
+                        Some(attr_claim_value),
+                        default_namespace,
+                        schema,
+                        built_entities,
+                    )
                 } else if let Some(attr) = str_to_primitive_type(*required, name) {
-                    attr.build_expr(name, Some(attr_claim_value), default_namespace, schema)
+                    attr.build_expr(
+                        name,
+                        Some(attr_claim_value),
+                        default_namespace,
+                        schema,
+                        built_entities,
+                    )
                 } else if *required {
                     Err(BuildExprError::UnkownType(name.to_string()))
                 } else {
@@ -299,7 +322,7 @@ impl KeyedJsonTypeError {
 #[cfg(test)]
 mod test {
     use crate::{
-        authz::entity_builder::BuildExprError,
+        authz::entity_builder::{BuildExprError, built_entities::BuiltEntities},
         common::cedar_schema::cedar_json::{CedarSchemaJson, attribute::Attribute},
     };
     use serde_json::json;
@@ -323,7 +346,13 @@ mod test {
         let srs_key = "src_key";
 
         let expr = attr
-            .build_expr(srs_key, src.get(srs_key), None, &schema)
+            .build_expr(
+                srs_key,
+                src.get(srs_key),
+                None,
+                &schema,
+                &BuiltEntities::default(),
+            )
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built")
     }
@@ -346,7 +375,13 @@ mod test {
         let srs_key = "src_key";
 
         let expr = attr
-            .build_expr(srs_key, src.get(srs_key), None, &schema)
+            .build_expr(
+                srs_key,
+                src.get(srs_key),
+                None,
+                &schema,
+                &BuiltEntities::default(),
+            )
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built")
     }
@@ -369,7 +404,13 @@ mod test {
         let srs_key = "src_key";
 
         let expr = attr
-            .build_expr(srs_key, src.get(srs_key), None, &schema)
+            .build_expr(
+                srs_key,
+                src.get(srs_key),
+                None,
+                &schema,
+                &BuiltEntities::default(),
+            )
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built")
     }
@@ -400,7 +441,13 @@ mod test {
         let srs_key = "inner_attr";
 
         let expr = attr
-            .build_expr(srs_key, Some(&json!(src)), None, &schema)
+            .build_expr(
+                srs_key,
+                Some(&json!(src)),
+                None,
+                &schema,
+                &BuiltEntities::default(),
+            )
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built")
     }
@@ -428,7 +475,13 @@ mod test {
         let srs_key = "attr1";
 
         let expr = attr
-            .build_expr(srs_key, src.get(srs_key), None, &schema)
+            .build_expr(
+                srs_key,
+                src.get(srs_key),
+                None,
+                &schema,
+                &BuiltEntities::default(),
+            )
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built")
     }
@@ -456,7 +509,13 @@ mod test {
         let srs_key = "src_key";
 
         let err = attr
-            .build_expr(srs_key, src.get(srs_key), None, &schema)
+            .build_expr(
+                srs_key,
+                src.get(srs_key),
+                None,
+                &schema,
+                &BuiltEntities::default(),
+            )
             .expect_err("should error");
         assert!(
             matches!(err, BuildExprError::TypeMismatch(_)),
@@ -489,7 +548,13 @@ mod test {
         let srs_key = "src_key";
 
         let expr = attr
-            .build_expr(srs_key, src.get(srs_key), Some("Jans"), &schema)
+            .build_expr(
+                srs_key,
+                src.get(srs_key),
+                None,
+                &schema,
+                &BuiltEntities::default(),
+            )
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built");
     }
@@ -518,7 +583,13 @@ mod test {
         let srs_key = "src_key";
 
         let expr = attr
-            .build_expr(srs_key, src.get(srs_key), Some("Jans"), &schema)
+            .build_expr(
+                srs_key,
+                src.get(srs_key),
+                None,
+                &schema,
+                &BuiltEntities::default(),
+            )
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built");
     }
@@ -544,7 +615,13 @@ mod test {
         let srs_key = "src_key";
 
         let err = attr
-            .build_expr(srs_key, src.get(srs_key), None, &schema)
+            .build_expr(
+                srs_key,
+                src.get(srs_key),
+                None,
+                &schema,
+                &BuiltEntities::default(),
+            )
             .expect_err("should error");
         assert!(
             matches!(
@@ -575,7 +652,13 @@ mod test {
         let srs_key = "src_key";
 
         let expr = attr
-            .build_expr(srs_key, src.get(srs_key), None, &schema)
+            .build_expr(
+                srs_key,
+                src.get(srs_key),
+                None,
+                &schema,
+                &BuiltEntities::default(),
+            )
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built")
     }
@@ -598,7 +681,13 @@ mod test {
         let srs_key = "src_key";
 
         let expr = attr
-            .build_expr(srs_key, src.get(srs_key), None, &schema)
+            .build_expr(
+                srs_key,
+                src.get(srs_key),
+                None,
+                &schema,
+                &BuiltEntities::default(),
+            )
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built")
     }
@@ -621,7 +710,13 @@ mod test {
         let srs_key = "client_id";
 
         let expr = attr
-            .build_expr(srs_key, src.get(srs_key), None, &schema)
+            .build_expr(
+                srs_key,
+                src.get(srs_key),
+                None,
+                &schema,
+                &BuiltEntities::default(),
+            )
             .expect("should not error");
         assert!(expr.is_none(), "a restricted expression shouldn't built")
     }
@@ -644,7 +739,13 @@ mod test {
         let srs_key = "src_key";
 
         let err = attr
-            .build_expr(srs_key, src.get(srs_key), None, &schema)
+            .build_expr(
+                srs_key,
+                src.get(srs_key),
+                None,
+                &schema,
+                &BuiltEntities::default(),
+            )
             .expect_err("should error");
         assert!(
             matches!(err, BuildExprError::TypeMismatch(_)),

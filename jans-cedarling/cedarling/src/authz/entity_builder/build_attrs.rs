@@ -18,6 +18,7 @@ pub fn build_entity_attrs_from_tkn(
     token: &Token,
     default_namespace: Option<&str>,
     claim_aliases: Vec<ClaimAliasMap>,
+    built_entities: &BuiltEntities,
 ) -> Result<HashMap<String, RestrictedExpression>, BuildAttrError> {
     let mut entity_attrs = HashMap::new();
 
@@ -47,10 +48,11 @@ pub fn build_entity_attrs_from_tkn(
                 Some(&mapped_claim_json_val),
                 default_namespace,
                 schema,
+                built_entities,
             )
             .map_err(|e| BuildAttrError::new(attr_name, e.into()))?
         } else {
-            match attr.build_expr(attr_name, claims.get(attr_name), default_namespace, schema) {
+            match attr.build_expr(attr_name, claims.get(attr_name), default_namespace, schema,built_entities) {
                 Ok(expr) => expr,
                 Err(err) if attr.is_required() => Err(BuildAttrError::new(attr_name, err.into()))?,
                 // just skip when attribute isn't required even if it errors
@@ -92,8 +94,7 @@ pub fn build_entity_attrs_from_values(
             _ => continue,
         };
 
-        let expression = match attr.build_expr(attr_name, Some(val), default_namespace, schema)
-        {
+        let expression = match attr.build_expr(attr_name, Some(val), default_namespace, schema, &BuiltEntities::default()) {
             Ok(expr) => expr,
             Err(err) if attr.is_required() => {
                 return Err(BuildAttrError::new(attr_name, err.into()))?;
@@ -198,6 +199,7 @@ mod test {
             &token,
             None,
             Vec::new(),
+            &BuiltEntities::default(),
         )
         .expect("should build entity attrs");
         // RestrictedExpression does not implement PartialEq so the best we can do is check
@@ -238,6 +240,7 @@ mod test {
             &token,
             None,
             Vec::new(),
+            &BuiltEntities::default(),
         )
         .expect_err("should error due to missing source");
         assert!(
