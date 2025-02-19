@@ -252,7 +252,7 @@ impl Authz {
             .as_ref()
             .map(|auth_info| &auth_info.diagnostics);
 
-        let workload_authz_diagnostic = user_authz_info
+        let workload_authz_diagnostic = workload_authz_info
             .as_ref()
             .map(|auth_info| &auth_info.diagnostics);
 
