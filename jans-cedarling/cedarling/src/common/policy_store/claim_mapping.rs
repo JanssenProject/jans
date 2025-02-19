@@ -95,7 +95,6 @@ impl ClaimMapping {
 /// - `fields`: A map of field names to `RegexField` values.
 #[derive(Debug, Clone)]
 pub struct RegexMapping {
-    // It is unused, maybe we can remove it?
     cedar_policy_type: String,
     regex_expression: String,
     regex: Regex,
