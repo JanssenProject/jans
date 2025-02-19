@@ -8674,65 +8674,57 @@
 <p><a href="https://mozilla.github.io/uniffi-rs/latest/">UniFFI</a> (Universal Foreign Function Interface) is a tool developed by Mozilla to simplify cross-language bindings, primarily between Rust and other languages like Kotlin, Swift, and Python. It allows Rust libraries to be used in these languages without manually writing complex foreign function interface (FFI) bindings. For eg. developing iOS applications typically involves languages like Swift or Objective-C. However, with the advent of UniFFI, it’s now possible to use rust code iOS apps.</p>
 <p>Speaking about Cedarling, it interacts with outside world mainly using 3 interfaces <code>init</code>, <code>authz</code> and <code>log</code>. The UniFFI binding for Cedarling wraps the init, authz and log interfaces of Cedarling and uses the <a href="https://mozilla.github.io/uniffi-rs/latest/proc_macro/index.html">Procedural Macros</a> to expose them to other languages. It also exposes the required Structs and Enums used as parameters and return-types in these interfaces.</p>
 <h2 id="exposed-functions">Exposed Functions<a class="headerlink" href="#exposed-functions" title="Permanent link">#</a></h2>
-<ol>
-<li>
-<p><strong>Cedarling::load_from_json</strong></p>
+<ul>
+<li><strong>Cedarling::load_from_json</strong></li>
+</ul>
 <p>Loads a Cedarling instance from a JSON configuration.</p>
 <div class="highlight"><pre><span></span><code>#[uniffi::constructor]
 pub fn load_from_json(config: String) -&gt; Result&lt;Self, CedarlingError&gt;
 </code></pre></div>
-</li>
-</ol>
 <p><strong>Usage in Swift:</strong></p>
 <div class="highlight"><pre><span></span><code>let cedarling = try Cedarling.loadFromJson(config: jsonString)
 </code></pre></div>
-<ol>
-<li>
-<p><strong>Cedarling::load_from_file</strong></p>
+<ul>
+<li><strong>Cedarling::load_from_file</strong></li>
+</ul>
 <p>Loads a Cedarling instance from a configuration file.</p>
 <div class="highlight"><pre><span></span><code>#[uniffi::constructor]
 pub fn load_from_file(path: String) -&gt; Result&lt;Self, CedarlingError&gt;
 </code></pre></div>
-</li>
-</ol>
 <p><strong>Usage in Swift:</strong></p>
 <div class="highlight"><pre><span></span><code>let cedarling = try Cedarling.loadFromFile(path: &quot;/path/to/config.json&quot;)
 </code></pre></div>
-<ol>
-<li>
-<p><strong>Cedarling::authorize</strong></p>
+<ul>
+<li><strong>Cedarling::authorize</strong></li>
+</ul>
 <p>Handles authorization requests.</p>
 <div class="highlight"><pre><span></span><code>#[uniffi::method]
-    pub fn authorize(
-        &amp;self,
-        tokens: HashMap&lt;String, String&gt;,
-        action: String,
-        resource_type: String,
-        resource_id: String,
-        payload: String,
-        context: String,
-    ) -&gt; Result&lt;AuthorizeResult, AuthorizeError&gt; 
+     pub fn authorize(
+         &amp;self,
+         tokens: HashMap&lt;String, String&gt;,
+         action: String,
+         resource_type: String,
+         resource_id: String,
+         payload: String,
+         context: String,
+     ) -&gt; Result&lt;AuthorizeResult, AuthorizeError&gt; 
 </code></pre></div>
-</li>
-</ol>
 <p><strong>Usage in Swift:</strong></p>
 <div class="highlight"><pre><span></span><code>let result = try cedarling.authorize(tokens: tokenMap, action: &quot;read&quot;, resourceType: &quot;file&quot;, resourceId: &quot;123&quot;, payload: &quot;{}&quot;, context: &quot;&quot;)
 </code></pre></div>
-<ol>
-<li>
-<p><strong>Cedarling::pop_logs</strong></p>
+<ul>
+<li><strong>Cedarling::pop_logs</strong></li>
+</ul>
 <p>Retrieves logs as JSON strings.</p>
 <div class="highlight"><pre><span></span><code>#[uniffi::method]
 pub fn pop_logs(&amp;self) -&gt; Result&lt;Vec&lt;String&gt;, LogError&gt; 
 </code></pre></div>
-</li>
-</ol>
 <p><strong>Usage in Swift:</strong></p>
 <div class="highlight"><pre><span></span><code>let logs = try cedarling.popLogs()
 </code></pre></div>
-<ol>
+<ul>
 <li><strong>Cedarling::get_log_by_id</strong></li>
-</ol>
+</ul>
 <p>Retrieves a log entry by ID.</p>
 <div class="highlight"><pre><span></span><code>#[uniffi::method]
 pub fn get_log_by_id(&amp;self, id: &amp;str) -&gt; Result&lt;String, LogError&gt;
@@ -8740,45 +8732,42 @@ pub fn get_log_by_id(&amp;self, id: &amp;str) -&gt; Result&lt;String, LogError&g
 <p><strong>Usage in Swift:</strong></p>
 <div class="highlight"><pre><span></span><code>let log = try cedarling.getLogById(id: &quot;log123&quot;)
 </code></pre></div>
-<ol>
+<ul>
 <li><strong>Cedarling::get_log_ids</strong></li>
-</ol>
+</ul>
 <p>Get all log ids</p>
 <div class="highlight"><pre><span></span><code>#[uniffi::method]
- pub fn get_log_ids(&amp;self) -&gt; Vec&lt;String&gt;
+pub fn get_log_ids(&amp;self) -&gt; Vec&lt;String&gt;
 </code></pre></div>
 <p><strong>Usage in Swift:</strong></p>
 <div class="highlight"><pre><span></span><code>let ids = try cedarling.getLogIds()
 </code></pre></div>
-<ol>
-<li>
-<p><strong>Cedarling::get_logs_by_tag</strong></p>
+<ul>
+<li><strong>Cedarling::get_logs_by_tag</strong></li>
+</ul>
 <p>Get logs by tag, like <code>log_kind</code> or <code>log level</code>.</p>
-<p>```declarative</p>
-<h1 id="uniffimethod">[uniffi::method]<a class="headerlink" href="#uniffimethod" title="Permanent link">#</a></h1>
-<p>pub fn get_logs_by_tag(&amp;self, tag: &amp;str) -&gt; Result<Vec\<String>, LogError> {</p>
-</li>
-</ol>
-<p>```</p>
+<div class="highlight"><pre><span></span><code>#[uniffi::method]
+pub fn get_logs_by_tag(&amp;self, tag: &amp;str) -&gt; Result&lt;Vec&lt;String&gt;, LogError&gt; {
+</code></pre></div>
 <p><strong>Usage in Swift:</strong></p>
 <div class="highlight"><pre><span></span><code>let logs = try cedarling.getLogsByTag(tag: &quot;DEBUG&quot;)
 </code></pre></div>
-<ol>
+<ul>
 <li><strong>Cedarling::get_logs_by_request_id</strong></li>
-</ol>
+</ul>
 <p>Get all logs by request_id</p>
 <div class="highlight"><pre><span></span><code>#[uniffi::method]
 pub fn get_logs_by_request_id(&amp;self, request_id: &amp;str) -&gt; Result&lt;Vec&lt;String&gt;, LogError&gt;
 </code></pre></div>
 <p><strong>Usage in Swift:</strong></p>
-<div class="highlight"><pre><span></span><code>   let logs = try cedarling.getLogsByRequestId(request_id: &quot;12434-32323-43434&quot;)
+<div class="highlight"><pre><span></span><code>let logs = try cedarling.getLogsByRequestId(request_id: &quot;12434-32323-43434&quot;)
 </code></pre></div>
-<ol>
+<ul>
 <li><strong>Cedarling::get_logs_by_request_id_and_tag</strong></li>
-</ol>
+</ul>
 <p>Get log by request_id and tag, like composite key <code>request_id</code> + <code>log_kind</code>.</p>
 <div class="highlight"><pre><span></span><code>#[uniffi::method]
- pub fn get_logs_by_request_id_and_tag(
+pub fn get_logs_by_request_id_and_tag(
      &amp;self,
      request_id: &amp;str,
      tag: &amp;str,
@@ -8793,7 +8782,7 @@ pub fn get_logs_by_request_id(&amp;self, request_id: &amp;str) -&gt; Result&lt;V
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-18T16:27:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-18</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-19T17:09:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-19</span>
       
         <br>
         Created:

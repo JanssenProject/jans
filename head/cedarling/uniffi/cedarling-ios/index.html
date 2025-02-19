@@ -8693,60 +8693,59 @@
 </ul>
 <h2 id="building">Building<a class="headerlink" href="#building" title="Permanent link">#</a></h2>
 <ol>
-<li>Clone the jans monorepo and change directory to /path/of/jans/jans-cedarling</li>
-</ol>
-<div class="highlight"><pre><span></span><code> git clone https://github.com/JanssenProject/jans.git
- cd /path/of/jans/jans-cedarling
+<li>
+<p>Clone the jans monorepo and change directory to <code>/path/of/jans/jans-cedarling</code>.
+   <div class="highlight"><pre><span></span><code><span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/JanssenProject/jans.git
+<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/path/of/jans/jans-cedarling
+</code></pre></div></p>
+</li>
+<li>
+<p>Build the library:
+   <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build
 </code></pre></div>
-<ol>
-<li>Build the library:</li>
-</ol>
-<div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build
-</code></pre></div>
-<p>In target/debug, you should find the libmobile.dylib file.</p>
-<ol>
-<li>Generate the bindings:</li>
-</ol>
-<div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>run<span class="w"> </span>--bin<span class="w"> </span>uniffi-bindgen<span class="w"> </span>generate<span class="w"> </span>--library<span class="w"> </span>./target/debug/libmobile.dylib<span class="w"> </span>--language<span class="w"> </span>swift<span class="w"> </span>--out-dir<span class="w"> </span>./bindings/cedarling_uniffi/output
-</code></pre></div>
-<ol>
-<li>Building the iOS binaries and adding these targets to Rust.</li>
-</ol>
-<div class="highlight"><pre><span></span><code>rustup<span class="w"> </span>target<span class="w"> </span>add<span class="w"> </span>aarch64-apple-ios-sim<span class="w"> </span>aarch64-apple-ios
-</code></pre></div>
-<ol>
-<li>Build the library for Swift.</li>
-</ol>
-<div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>--release<span class="w"> </span>--target<span class="o">=</span>aarch64-apple-ios-sim
+   In target/debug, you should find the libmobile.dylib file.</p>
+</li>
+<li>
+<p>Generate the bindings:
+   <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>run<span class="w"> </span>--bin<span class="w"> </span>uniffi-bindgen<span class="w"> </span>generate<span class="w"> </span>--library<span class="w"> </span>./target/debug/libmobile.dylib<span class="w"> </span>--language<span class="w"> </span>swift<span class="w"> </span>--out-dir<span class="w"> </span>./bindings/cedarling_uniffi/output
+</code></pre></div></p>
+</li>
+<li>
+<p>Building the iOS binaries and adding these targets to Rust.
+   <div class="highlight"><pre><span></span><code>rustup<span class="w"> </span>target<span class="w"> </span>add<span class="w"> </span>aarch64-apple-ios-sim<span class="w"> </span>aarch64-apple-ios
+</code></pre></div></p>
+</li>
+<li>
+<p>Build the library for Swift.
+   <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>--release<span class="w"> </span>--target<span class="o">=</span>aarch64-apple-ios-sim
 cargo<span class="w"> </span>build<span class="w"> </span>--release<span class="w"> </span>--target<span class="o">=</span>aarch64-apple-ios
 </code></pre></div>
-<p>You should have two binaries target/aarch64-apple-ios-sim/release/libmobile.a and target/aarch64-apple-ios/release/libmobile.a.</p>
-<ol>
-<li>The XCFramework will allow us to import the library with zero effort in Xcode. First, we need to rename the file ./bindings/cedarling_uniffi/output/mobileFFI.modulemap to ./bindings/cedarling_uniffi/output/module.modulemap.</li>
-</ol>
-<p>Then, we can create the XCFramework:</p>
-<div class="highlight"><pre><span></span><code>xcodebuild<span class="w"> </span>-create-xcframework<span class="w"> </span><span class="se">\</span>
+   You should have two binaries <code>target/aarch64-apple-ios-sim/release/libmobile.a</code> and <code>target/aarch64-apple-ios/release/libmobile.a</code>.</p>
+</li>
+<li>
+<p>The XCFramework will allow us to import the library with zero effort in Xcode. First, we need to rename the file ./bindings/cedarling_uniffi/output/mobileFFI.modulemap to ./bindings/cedarling_uniffi/output/module.modulemap. Then, we can create the XCFramework:
+   <div class="highlight"><pre><span></span><code>xcodebuild<span class="w"> </span>-create-xcframework<span class="w"> </span><span class="se">\</span>
 <span class="w">        </span>-library<span class="w"> </span>./target/aarch64-apple-ios-sim/release/libmobile.a<span class="w"> </span>-headers<span class="w"> </span>./bindings/cedarling_uniffi/output<span class="w"> </span><span class="se">\</span>
 <span class="w">        </span>-library<span class="w"> </span>./target/aarch64-apple-ios/release/libmobile.a<span class="w"> </span>-headers<span class="w"> </span>./bindings/cedarling_uniffi/output<span class="w"> </span><span class="se">\</span>
 <span class="w">        </span>-output<span class="w"> </span><span class="s2">&quot;ios/Mobile.xcframework&quot;</span>
-</code></pre></div>
-<ol>
+</code></pre></div></p>
+</li>
 <li>
-<p>Open ./jans-cedarling/bindings/cedarling_uniffi/iOSApp in Xcode. Import both the XCFramework Mobile.xcframework and the Swift file bindings bindings/output/mobile.swift files into your project (drag and drop should work).</p>
+<p>Open <code>./jans-cedarling/bindings/cedarling_uniffi/iOSApp</code> in Xcode. Import both the XCFramework Mobile.xcframework and the Swift file bindings <code>bindings/output/mobile.swift</code> files into your project (drag and drop should work).</p>
 </li>
 <li>
 <p>Run iOS project on simulator.</p>
 </li>
 </ol>
 <p>We have included <a href="https://github.com/JanssenProject/jans/tree/main/jans-cedarling/bindings/cedarling_uniffi/iOSApp">a sample iOS app</a> using Cedarling UniFFI binding for making authorisation decisions. Here is a demonstration video of its working.</p>
-<iframe src="https://www.loom.com/share/553e53a95a4a4e40ae54fc256538d7f9?sid=2e80f4bb-326d-4aa2-8d3b-f6abe62956db" allowfullscreen></iframe>
+<div style="position: relative; padding-bottom: 214.62686567164178%; height: 0;"><iframe src="https://www.loom.com/embed/9ee1a9cf5cc04c1ea17fdc638ca45625?sid=c22f2463-22f0-4531-8749-403a1e6a25db" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-18T16:27:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-18</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-19T17:09:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-19</span>
       
         <br>
         Created:
