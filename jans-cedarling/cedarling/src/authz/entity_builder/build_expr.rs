@@ -31,7 +31,7 @@ impl Attribute {
     pub fn build_expr(
         &self,
         src_key: &str,
-        attr_claim_value_opt: Option<&Value>,
+        attr_claim_value: Option<&Value>,
         default_namespace: Option<&str>,
         schema: &CedarSchemaJson,
         built_entities: &BuiltEntities,
@@ -39,7 +39,7 @@ impl Attribute {
         match self {
             // Handle String attributes
             Attribute::String { required } => {
-                let Some(attr_claim_value) = attr_claim_value_opt else {
+                let Some(attr_claim_value) = attr_claim_value else {
                     if *required {
                         return Err(BuildExprError::MissingSource(src_key.to_string()));
                     } else {
@@ -60,7 +60,7 @@ impl Attribute {
 
             // Handle Long attributes
             Attribute::Long { required } => {
-                let Some(attr_claim_value) = attr_claim_value_opt else {
+                let Some(attr_claim_value) = attr_claim_value else {
                     if *required {
                         return Err(BuildExprError::MissingSource(src_key.to_string()));
                     } else {
@@ -80,7 +80,7 @@ impl Attribute {
 
             // Handle Boolean attributes
             Attribute::Boolean { required } => {
-                let Some(attr_claim_value) = attr_claim_value_opt else {
+                let Some(attr_claim_value) = attr_claim_value else {
                     if *required {
                         return Err(BuildExprError::MissingSource(src_key.to_string()));
                     } else {
@@ -100,7 +100,7 @@ impl Attribute {
 
             // Handle Record attributes
             Attribute::Record { attrs, required } => {
-                let Some(attr_claim_value) = attr_claim_value_opt else {
+                let Some(attr_claim_value) = attr_claim_value else {
                     if *required {
                         return Err(BuildExprError::MissingSource(src_key.to_string()));
                     } else {
@@ -141,7 +141,7 @@ impl Attribute {
 
             // Handle Set attributes
             Attribute::Set { required, element } => {
-                let Some(attr_claim_value) = attr_claim_value_opt else {
+                let Some(attr_claim_value) = attr_claim_value else {
                     if *required {
                         return Err(BuildExprError::MissingSource(src_key.to_string()));
                     } else {
@@ -185,7 +185,7 @@ impl Attribute {
                 {
                     build_entity(
                         src_key,
-                        attr_claim_value_opt,
+                        attr_claim_value,
                         built_entities,
                         type_name,
                         *required,
@@ -199,7 +199,7 @@ impl Attribute {
 
             // Handle Extension attributes
             Attribute::Extension { required, name } => {
-                let Some(attr_claim_value) = attr_claim_value_opt else {
+                let Some(attr_claim_value) = attr_claim_value else {
                     if *required {
                         return Err(BuildExprError::MissingSource(src_key.to_string()));
                     } else {
@@ -232,14 +232,14 @@ impl Attribute {
                 {
                     return build_entity(
                         src_key,
-                        attr_claim_value_opt,
+                        attr_claim_value,
                         built_entities,
                         type_name,
                         *required,
                     );
                 };
 
-                let Some(attr_claim_value) = attr_claim_value_opt else {
+                let Some(attr_claim_value) = attr_claim_value else {
                     if *required {
                         return Err(BuildExprError::MissingSource(src_key.to_string()));
                     } else {
@@ -279,20 +279,20 @@ impl Attribute {
 
 fn build_entity(
     src_key: &str,
-    attr_claim_value_opt: Option<&Value>,
+    attr_claim_value: Option<&Value>,
     built_entities: &BuiltEntities,
     entity_type_name: EntityTypeName,
     is_required: bool,
 ) -> Result<Option<RestrictedExpression>, BuildExprError> {
     let entity_id = if let Some(entity_id) = built_entities.get(&entity_type_name) {
         entity_id
-    } else if let Some(entity_id) = attr_claim_value_opt.and_then(|v| v.as_str()) {
+    } else if let Some(entity_id) = attr_claim_value.and_then(|v| v.as_str()) {
         entity_id
     } else if is_required {
         return Err(KeyedJsonTypeError::type_mismatch_optional(
             src_key,
             "string",
-            attr_claim_value_opt,
+            attr_claim_value,
         )
         .into());
     } else {
