@@ -15,6 +15,13 @@ use serde_json::Value;
 /// wrapper around hash map
 //
 // probably we can store as key composite key of `claim` name and `cedar type`
+// for example using as key of hash map:
+// #[derive(Hash)]
+// struct ClaimMappingKey {
+//     claim_name: String,
+//     cedar_policy_type: String,
+// }
+// but for now current approach is OK
 #[derive(Debug, Default, PartialEq, Clone, Deserialize)]
 pub struct ClaimMappings(HashMap<String, ClaimMapping>);
 
