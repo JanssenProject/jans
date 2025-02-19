@@ -357,7 +357,6 @@ pub struct AuthorizeEntitiesData {
     pub resource: Entity,
     pub roles: Vec<Entity>,
     pub tokens: HashMap<String, Entity>,
-
     pub build_entities: BuiltEntities,
 }
 
