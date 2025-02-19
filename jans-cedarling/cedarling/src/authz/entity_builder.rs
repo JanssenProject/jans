@@ -11,7 +11,6 @@ mod build_token_entities;
 mod build_user_entity;
 mod build_workload_entity;
 mod built_entities;
-mod mapping;
 
 use super::AuthorizeEntitiesData;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;

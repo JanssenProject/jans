@@ -26,10 +26,6 @@ use serde_json::Value;
 pub struct ClaimMappings(HashMap<String, ClaimMapping>);
 
 impl ClaimMappings {
-    pub fn get(&self, claim: &str) -> Option<&ClaimMapping> {
-        self.0.get(claim)
-    }
-
     pub fn get_mapping(&self, claim: &str, cedar_policy_type: &str) -> Option<&ClaimMapping> {
         self.0
             .get(claim)
