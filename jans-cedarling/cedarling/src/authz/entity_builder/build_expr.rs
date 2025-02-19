@@ -253,7 +253,7 @@ impl Attribute {
                 {
                     // It is common type, so we can build the expression directly.
                     attr.build_expr(
-                        name,
+                        src_key,
                         Some(attr_claim_value),
                         Some(entity_type_name.namespace().as_str()),
                         schema,
@@ -261,7 +261,7 @@ impl Attribute {
                     )
                 } else if let Some(attr) = str_to_primitive_type(*required, name) {
                     attr.build_expr(
-                        name,
+                        src_key,
                         Some(attr_claim_value),
                         default_namespace,
                         schema,
