@@ -117,12 +117,10 @@ fn build_entity_refs_from_attr(
 
 /// Maps a known entity ID to the entity reference
 fn map_entity_id(
-    // namespace: &str,
     name: &EntityTypeName,
     built_entities: &BuiltEntities,
 ) -> Result<Option<Value>, BuildContextError> {
     if let Some(type_id) = built_entities.get(name) {
-        // let name = join_namespace(namespace, name);
         Ok(Some(json!({"type": name.to_string(), "id": type_id})))
     } else {
         Err(BuildContextError::MissingEntityId(name.to_string()))
