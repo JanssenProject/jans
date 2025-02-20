@@ -6,13 +6,6 @@ tags:
 
 # Bindings Offered by Cedarling
 
-Cedarling bindings offer ways to integrate Cedarling with apps running in 
-various execution environments. 
-
-- Browser apps: Cedarling can run in a browser alongside JavaScript 
-application using [WASM binding](./cedarling-wasm.md). 
-- Android apps: 
-
 ## This content is in progress
 
 The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
