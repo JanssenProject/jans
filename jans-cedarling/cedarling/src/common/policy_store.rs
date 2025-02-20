@@ -139,6 +139,7 @@ impl TokenEntityMetadata {
             required_claims: HashSet::from(["iss".into(), "exp".into(), "jti".into()]),
             entity_type_name: "Jans::Access_token".into(),
             principal_mapping: HashSet::from(["Jans::Workload".into()]),
+            workload_id: Some("client_id".into()),
         }
     }
 
@@ -147,7 +148,7 @@ impl TokenEntityMetadata {
         Self {
             trusted: true,
             token_id: None,
-            user_id: None,
+            user_id: Some("aud".into()),
             role_mapping: None,
             claim_mapping: ClaimMappings::new(HashMap::new()),
             required_claims: HashSet::from([
@@ -158,6 +159,7 @@ impl TokenEntityMetadata {
             ]),
             entity_type_name: "Jans::id_token".into(),
             principal_mapping: HashSet::from(["Jans::User".into()]),
+            workload_id: None,
         }
     }
 
@@ -166,7 +168,7 @@ impl TokenEntityMetadata {
         Self {
             trusted: true,
             token_id: None,
-            user_id: None,
+            user_id: Some("aud".into()),
             role_mapping: None,
             claim_mapping: ClaimMappings::new(HashMap::new()),
             required_claims: HashSet::from([
@@ -177,6 +179,7 @@ impl TokenEntityMetadata {
             ]),
             entity_type_name: "Jans::Userinfo_token".into(),
             principal_mapping: HashSet::from(["Jans::User".into()]),
+            workload_id: None,
         }
     }
 }

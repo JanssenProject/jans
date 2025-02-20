@@ -22,6 +22,12 @@ pub struct TokenEntityMetadata {
     #[serde(default = "default_trusted")]
     #[builder(default = true)]
     pub trusted: bool,
+    /// The Cedar entity name that represents this token
+    pub entity_type_name: String,
+    /// The Cedar entities that this token is an attribute of
+    #[serde(default)]
+    #[builder(default)]
+    pub principal_mapping: HashSet<String>,
     /// An optional string representing the principal identifier (e.g., `jti`).
     #[serde(default, deserialize_with = "parse_option_string")]
     #[builder(default)]
@@ -34,6 +40,9 @@ pub struct TokenEntityMetadata {
     #[serde(deserialize_with = "parse_option_string", default)]
     #[builder(default)]
     pub role_mapping: Option<String>,
+    #[serde(deserialize_with = "parse_option_string", default)]
+    #[builder(default)]
+    pub workload_id: Option<String>,
     /// An optional mapping of claims to their values. Each claim is represented
     /// by a key-value pair where the key is the claim name and the value is
     /// a `ClaimMapping` struct.
@@ -45,12 +54,6 @@ pub struct TokenEntityMetadata {
     #[serde(default)]
     #[builder(default)]
     pub required_claims: HashSet<String>,
-    /// The Cedar entity name that represents this token
-    pub entity_type_name: String,
-    /// The Cedar entities that this token is an attribute of
-    #[serde(default)]
-    #[builder(default)]
-    pub principal_mapping: HashSet<String>,
 }
 
 fn default_trusted() -> bool {
