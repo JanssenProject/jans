@@ -21,6 +21,7 @@ policy_stores:
             entity_type_name: "Jans::id_token"
           userinfo_token:
             entity_type_name: "Jans::Userinfo_token"
+            user_id: "sub"
     policies:
       840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
         description: simple policy example for principal workload

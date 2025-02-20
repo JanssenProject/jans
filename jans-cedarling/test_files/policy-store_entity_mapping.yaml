@@ -129,3 +129,4 @@ policy_stores:
             entity_type_name: Jans::MappedIdToken
           userinfo_token:
             entity_type_name: Jans::MappedUserinfo_token
+            user_id: sub

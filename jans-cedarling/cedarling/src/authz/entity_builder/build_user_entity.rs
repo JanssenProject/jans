@@ -25,7 +25,16 @@ impl EntityBuilder {
             .flat_map(|x| tokens.get(*x));
 
         for token in token_refs {
-            let user_id_claim = token.user_mapping();
+            let user_id_claim = if let Some(src) = token
+                .get_metadata()
+                .and_then(|metadata| metadata.user_id.as_ref())
+            {
+                src
+            } else {
+                // TODO: add errors
+                continue;
+            };
+
             match build_entity(
                 &self.schema,
                 entity_name,
@@ -98,12 +107,14 @@ mod test {
                     token_entity_metadata_builder
                         .clone()
                         .entity_type_name("Jans::id_token".into())
+                        .user_id(Some("sub".into()))
                         .build(),
                 ),
                 (
                     "userinfo_token".to_string(),
                     token_entity_metadata_builder
                         .entity_type_name("Jans::Userinfo_token".into())
+                        .user_id(Some("sub".into()))
                         .build(),
                 ),
             ]),
