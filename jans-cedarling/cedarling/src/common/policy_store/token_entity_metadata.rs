@@ -4,7 +4,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 pub use super::claim_mapping::ClaimMappings;
 use super::parse_option_string;
@@ -29,9 +29,9 @@ pub struct TokenEntityMetadata {
     #[builder(default)]
     pub principal_mapping: HashSet<String>,
     /// An optional string representing the principal identifier (e.g., `jti`).
-    #[serde(default, deserialize_with = "parse_option_string")]
-    #[builder(default)]
-    pub token_id: Option<String>,
+    #[serde(default = "default_token_id")]
+    #[builder(default = default_token_id())]
+    pub token_id: String,
     /// The claim used to create the user id
     #[serde(deserialize_with = "parse_option_string", default)]
     #[builder(default)]
@@ -58,6 +58,68 @@ pub struct TokenEntityMetadata {
 
 fn default_trusted() -> bool {
     true
+}
+
+fn default_token_id() -> String {
+    const DEFAULT_TKN_ID: &str = "jti";
+    DEFAULT_TKN_ID.to_string()
+}
+
+impl TokenEntityMetadata {
+    /// Default access token Metadata
+    pub fn access_token() -> Self {
+        Self {
+            trusted: true,
+            token_id: default_token_id(),
+            user_id: None,
+            role_mapping: None,
+            claim_mapping: ClaimMappings::new(HashMap::new()),
+            required_claims: HashSet::from(["iss".into(), "exp".into(), "jti".into()]),
+            entity_type_name: "Jans::Access_token".into(),
+            principal_mapping: HashSet::from(["Jans::Workload".into()]),
+            workload_id: Some("client_id".into()),
+        }
+    }
+
+    /// Default id token Metadata
+    pub fn id_token() -> Self {
+        Self {
+            trusted: true,
+            token_id: default_token_id(),
+            user_id: Some("aud".into()),
+            role_mapping: None,
+            claim_mapping: ClaimMappings::new(HashMap::new()),
+            required_claims: HashSet::from([
+                "iss".into(),
+                "sub".into(),
+                "aud".into(),
+                "exp".into(),
+            ]),
+            entity_type_name: "Jans::id_token".into(),
+            principal_mapping: HashSet::from(["Jans::User".into()]),
+            workload_id: None,
+        }
+    }
+
+    /// Default userinfo token Metadata
+    pub fn userinfo_token() -> Self {
+        Self {
+            trusted: true,
+            token_id: default_token_id(),
+            user_id: Some("aud".into()),
+            role_mapping: None,
+            claim_mapping: ClaimMappings::new(HashMap::new()),
+            required_claims: HashSet::from([
+                "iss".into(),
+                "sub".into(),
+                "aud".into(),
+                "exp".into(),
+            ]),
+            entity_type_name: "Jans::Userinfo_token".into(),
+            principal_mapping: HashSet::from(["Jans::User".into()]),
+            workload_id: None,
+        }
+    }
 }
 
 #[cfg(test)]

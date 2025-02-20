@@ -12,7 +12,7 @@ use super::cedar_schema::CedarSchema;
 use cedar_policy::PolicyId;
 use semver::Version;
 use serde::{Deserialize, Deserializer};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::sync::LazyLock;
 
 pub use token_entity_metadata::{ClaimMappings, TokenEntityMetadata};
@@ -23,7 +23,6 @@ pub struct AgamaPolicyStore {
     /// The cedar version to use when parsing the schema and policies.
     #[serde(deserialize_with = "parse_cedar_version")]
     pub cedar_version: Version,
-
     pub policy_stores: HashMap<String, PolicyStore>,
 }
 
@@ -125,63 +124,6 @@ fn default_tokens_metadata() -> HashMap<String, TokenEntityMetadata> {
             TokenEntityMetadata::userinfo_token(),
         ),
     ])
-}
-
-impl TokenEntityMetadata {
-    /// Default access token Metadata
-    fn access_token() -> Self {
-        Self {
-            trusted: true,
-            token_id: None,
-            user_id: None,
-            role_mapping: None,
-            claim_mapping: ClaimMappings::new(HashMap::new()),
-            required_claims: HashSet::from(["iss".into(), "exp".into(), "jti".into()]),
-            entity_type_name: "Jans::Access_token".into(),
-            principal_mapping: HashSet::from(["Jans::Workload".into()]),
-            workload_id: Some("client_id".into()),
-        }
-    }
-
-    /// Default id token Metadata
-    fn id_token() -> Self {
-        Self {
-            trusted: true,
-            token_id: None,
-            user_id: Some("aud".into()),
-            role_mapping: None,
-            claim_mapping: ClaimMappings::new(HashMap::new()),
-            required_claims: HashSet::from([
-                "iss".into(),
-                "sub".into(),
-                "aud".into(),
-                "exp".into(),
-            ]),
-            entity_type_name: "Jans::id_token".into(),
-            principal_mapping: HashSet::from(["Jans::User".into()]),
-            workload_id: None,
-        }
-    }
-
-    /// Default userinfo token Metadata
-    fn userinfo_token() -> Self {
-        Self {
-            trusted: true,
-            token_id: None,
-            user_id: Some("aud".into()),
-            role_mapping: None,
-            claim_mapping: ClaimMappings::new(HashMap::new()),
-            required_claims: HashSet::from([
-                "iss".into(),
-                "sub".into(),
-                "aud".into(),
-                "exp".into(),
-            ]),
-            entity_type_name: "Jans::Userinfo_token".into(),
-            principal_mapping: HashSet::from(["Jans::User".into()]),
-            workload_id: None,
-        }
-    }
 }
 
 impl Default for &TrustedIssuer {

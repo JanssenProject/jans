@@ -5,8 +5,6 @@
 
 use super::*;
 
-const DEFAULT_TKN_PRINCIPAL_IDENTIFIER: &str = "jti";
-
 impl EntityBuilder {
     pub fn build_tkn_entity(
         &self,
@@ -14,10 +12,14 @@ impl EntityBuilder {
         token: &Token,
         built_entities: &BuiltEntities,
     ) -> Result<Entity, BuildTokenEntityError> {
-        let id_src_claim = token
-            .get_metadata()
-            .and_then(|x| x.token_id.as_deref())
-            .unwrap_or(DEFAULT_TKN_PRINCIPAL_IDENTIFIER);
+        let id_src_claim =
+            token
+                .get_metadata()
+                .map(|x| x.token_id.as_ref())
+                .ok_or(BuildTokenEntityError {
+                    token_name: token.name.clone(),
+                    err: BuildEntityError::MissingTokenMetadata,
+                })?;
         let tkn_entity = build_entity(
             &self.schema,
             entity_name,

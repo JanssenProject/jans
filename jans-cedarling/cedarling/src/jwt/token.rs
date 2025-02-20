@@ -28,7 +28,7 @@ impl<'a> Token<'a> {
     }
 
     pub fn get_metadata(&self) -> Option<&TokenEntityMetadata> {
-        self.iss.unwrap_or_default().get_token_metadata(&self.name)
+        self.iss.and_then(|iss| iss.get_token_metadata(&self.name))
     }
 
     pub fn user_mapping(&self) -> &str {

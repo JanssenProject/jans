@@ -247,6 +247,8 @@ pub enum BuildEntityError {
     BuildEntityAttr(#[from] BuildAttrError),
     #[error("got {0} token, expected: {1}")]
     InvalidToken(String, String),
+    #[error("missing token metadata")]
+    MissingTokenMetadata,
 }
 
 impl BuildEntityError {
