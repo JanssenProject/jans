@@ -234,9 +234,10 @@ impl Authz {
         );
 
         // measure time how long request executes
-        let elapsed_ms = Utc::now()
-            .signed_duration_since(start_time)
-            .num_milliseconds();
+        let since_start = Utc::now().signed_duration_since(start_time);
+        let elapsed_micro_sec = since_start
+            .num_microseconds()
+            .unwrap_or_else(|| since_start.num_milliseconds() * 1000);
 
         // FROM THIS POINT WE ONLY MAKE LOGS
 
@@ -278,7 +279,7 @@ impl Authz {
             resource: resource_uid.to_string(),
             decision: result.decision.into(),
             tokens: tokens_logging_info,
-            decision_time_ms: elapsed_ms,
+            elapsed_micro_sec,
             diagnostics: DiagnosticsRefs::new(&[
                 &user_authz_diagnostic,
                 &workload_authz_diagnostic,
