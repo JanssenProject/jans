@@ -114,7 +114,7 @@ impl BootstrapConfig {
             jwt_sig_validation: raw.jwt_sig_validation.into(),
             jwt_status_validation: raw.jwt_status_validation.into(),
             signature_algorithms_supported: raw.jwt_signature_algorithms_supported.clone(),
-            token_validation_settings: raw.token_configs.clone().into(),
+            // token_validation_settings: raw.token_configs.clone().into(),
         };
 
         let authorization_config = AuthorizationConfig {

@@ -5,8 +5,7 @@
 
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, InitCedarlingError,
-    JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, Request,
-    TokenValidationConfig, WorkloadBoolOp,
+    JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, Request, WorkloadBoolOp,
 };
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use jsonwebtoken::Algorithm;
@@ -113,17 +112,17 @@ async fn prepare_cedarling_with_jwt_validation() -> Result<Cedarling, InitCedarl
             jwt_sig_validation: false,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
-            token_validation_settings: HashMap::from([
-                (
-                    "access_token".to_string(),
-                    TokenValidationConfig::access_token(),
-                ),
-                ("id_token".to_string(), TokenValidationConfig::id_token()),
-                (
-                    "userinfo_token".to_string(),
-                    TokenValidationConfig::userinfo_token(),
-                ),
-            ]),
+            // token_validation_settings: HashMap::from([
+            //     (
+            //         "access_token".to_string(),
+            //         TokenValidationConfig::access_token(),
+            //     ),
+            //     ("id_token".to_string(), TokenValidationConfig::id_token()),
+            //     (
+            //         "userinfo_token".to_string(),
+            //         TokenValidationConfig::userinfo_token(),
+            //     ),
+            // ]),
         },
         authorization_config: AuthorizationConfig {
             use_user_principal: true,

@@ -190,27 +190,27 @@ mod test {
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
-                token_validation_settings: HashMap::from([
-                    ("access_token".to_string(), TokenValidationConfig {
-                        exp_validation: true,
-                        ..Default::default()
-                    }),
-                    ("id_token".to_string(), TokenValidationConfig {
-                        iss_validation: true,
-                        aud_validation: true,
-                        sub_validation: true,
-                        iat_validation: true,
-                        exp_validation: true,
-                        ..Default::default()
-                    }),
-                    ("userinfo_token".to_string(), TokenValidationConfig {
-                        iss_validation: true,
-                        aud_validation: true,
-                        sub_validation: true,
-                        exp_validation: true,
-                        ..Default::default()
-                    }),
-                ]),
+                // token_validation_settings: HashMap::from([
+                //     ("access_token".to_string(), TokenValidationConfig {
+                //         exp_validation: true,
+                //         ..Default::default()
+                //     }),
+                //     ("id_token".to_string(), TokenValidationConfig {
+                //         iss_validation: true,
+                //         aud_validation: true,
+                //         sub_validation: true,
+                //         iat_validation: true,
+                //         exp_validation: true,
+                //         ..Default::default()
+                //     }),
+                //     ("userinfo_token".to_string(), TokenValidationConfig {
+                //         iss_validation: true,
+                //         aud_validation: true,
+                //         sub_validation: true,
+                //         exp_validation: true,
+                //         ..Default::default()
+                //     }),
+                // ]),
             },
             authorization_config: AuthorizationConfig {
                 use_user_principal: true,
@@ -256,27 +256,27 @@ mod test {
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
-                token_validation_settings: HashMap::from([
-                    ("access_token".to_string(), TokenValidationConfig {
-                        exp_validation: true,
-                        ..Default::default()
-                    }),
-                    ("id_token".to_string(), TokenValidationConfig {
-                        iss_validation: true,
-                        sub_validation: true,
-                        exp_validation: true,
-                        iat_validation: true,
-                        aud_validation: true,
-                        ..Default::default()
-                    }),
-                    ("userinfo_token".to_string(), TokenValidationConfig {
-                        iss_validation: true,
-                        sub_validation: true,
-                        aud_validation: true,
-                        exp_validation: true,
-                        ..Default::default()
-                    }),
-                ]),
+                // token_validation_settings: HashMap::from([
+                //     ("access_token".to_string(), TokenValidationConfig {
+                //         exp_validation: true,
+                //         ..Default::default()
+                //     }),
+                //     ("id_token".to_string(), TokenValidationConfig {
+                //         iss_validation: true,
+                //         sub_validation: true,
+                //         exp_validation: true,
+                //         iat_validation: true,
+                //         aud_validation: true,
+                //         ..Default::default()
+                //     }),
+                //     ("userinfo_token".to_string(), TokenValidationConfig {
+                //         iss_validation: true,
+                //         sub_validation: true,
+                //         aud_validation: true,
+                //         exp_validation: true,
+                //         ..Default::default()
+                //     }),
+                // ]),
             },
             authorization_config: AuthorizationConfig {
                 use_user_principal: true,

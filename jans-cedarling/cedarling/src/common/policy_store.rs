@@ -12,7 +12,7 @@ use super::cedar_schema::CedarSchema;
 use cedar_policy::PolicyId;
 use semver::Version;
 use serde::{Deserialize, Deserializer};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::LazyLock;
 
 pub use token_entity_metadata::{ClaimMappings, TokenEntityMetadata};
@@ -97,7 +97,8 @@ pub struct TrustedIssuer {
     /// The OpenID configuration endpoint for the issuer.
     ///
     /// This endpoint is used to obtain information about the issuer's capabilities.
-    pub openid_configuration_endpoint: String,
+    #[serde(rename = "openid_configuration_endpoint")]
+    pub oidc_endpoint: String,
 
     /// Metadata for tokens issued by the trusted issuer.
     #[serde(default)]
@@ -109,8 +110,73 @@ impl Default for TrustedIssuer {
         Self {
             name: "Jans".to_string(),
             description: Default::default(),
-            openid_configuration_endpoint: Default::default(),
-            tokens_metadata: Default::default(),
+            oidc_endpoint: Default::default(),
+            tokens_metadata: default_tokens_metadata(),
+        }
+    }
+}
+
+fn default_tokens_metadata() -> HashMap<String, TokenEntityMetadata> {
+    HashMap::from([
+        ("access_token".into(), TokenEntityMetadata::access_token()),
+        ("id_token".into(), TokenEntityMetadata::id_token()),
+        (
+            "userinfo_token".into(),
+            TokenEntityMetadata::userinfo_token(),
+        ),
+    ])
+}
+
+impl TokenEntityMetadata {
+    /// Default access token Metadata
+    fn access_token() -> Self {
+        Self {
+            trusted: true,
+            principal_identifier: None,
+            user_id: None,
+            role_mapping: None,
+            claim_mapping: ClaimMappings::new(HashMap::new()),
+            required_claims: HashSet::from(["iss".into(), "exp".into(), "jti".into()]),
+            entity_type_name: "Jans::Access_token".into(),
+            entity_mapping: HashSet::from(["Jans::Workload".into()]),
+        }
+    }
+
+    /// Default id token Metadata
+    fn id_token() -> Self {
+        Self {
+            trusted: true,
+            principal_identifier: None,
+            user_id: None,
+            role_mapping: None,
+            claim_mapping: ClaimMappings::new(HashMap::new()),
+            required_claims: HashSet::from([
+                "iss".into(),
+                "sub".into(),
+                "aud".into(),
+                "exp".into(),
+            ]),
+            entity_type_name: "Jans::id_token".into(),
+            entity_mapping: HashSet::from(["Jans::User".into()]),
+        }
+    }
+
+    /// Default userinfo token Metadata
+    fn userinfo_token() -> Self {
+        Self {
+            trusted: true,
+            principal_identifier: None,
+            user_id: None,
+            role_mapping: None,
+            claim_mapping: ClaimMappings::new(HashMap::new()),
+            required_claims: HashSet::from([
+                "iss".into(),
+                "sub".into(),
+                "aud".into(),
+                "exp".into(),
+            ]),
+            entity_type_name: "Jans::Userinfo_token".into(),
+            entity_mapping: HashSet::from(["Jans::User".into()]),
         }
     }
 }

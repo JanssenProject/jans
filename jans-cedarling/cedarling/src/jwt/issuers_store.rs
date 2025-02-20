@@ -33,7 +33,7 @@ impl TrustedIssuersStore {
             Some(issuers) => issuers
                 .values()
                 .map(|iss| {
-                    let endpoint = Url::parse(&iss.openid_configuration_endpoint).unwrap();
+                    let endpoint = Url::parse(&iss.oidc_endpoint).unwrap();
                     let iss_origin: IssuerOrigin = endpoint.origin().ascii_serialization();
                     (iss_origin, iss.clone())
                 })

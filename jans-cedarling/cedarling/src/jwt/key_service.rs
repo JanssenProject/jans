@@ -250,7 +250,7 @@ mod test {
             ("first".to_string(), TrustedIssuer {
                 name: "First IDP".to_string(),
                 description: "".to_string(),
-                openid_configuration_endpoint: format!(
+                oidc_endpoint: format!(
                     "{}/first/.well-known/openid-configuration",
                     mock_server.url()
                 ),
@@ -259,7 +259,7 @@ mod test {
             ("second".to_string(), TrustedIssuer {
                 name: "Second IDP".to_string(),
                 description: "".to_string(),
-                openid_configuration_endpoint: format!(
+                oidc_endpoint: format!(
                     "{}/second/.well-known/openid-configuration",
                     mock_server.url()
                 ),

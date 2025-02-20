@@ -24,7 +24,7 @@ async fn success_test_json() {
                 "access_token": generate_token_using_claims(json!({
                     "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
                     "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
-                    "iss": "https://admin-ui-test.gluu.org",
+                    "iss": "https://account.gluu.org",
                     "token_type": "Bearer",
                     "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
                     "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
@@ -43,7 +43,7 @@ async fn success_test_json() {
                     "status": {
                       "status_list": {
                         "idx": 201,
-                        "uri": "https://admin-ui-test.gluu.org/jans-auth/restv1/status_list"
+                        "uri": "https://account.gluu.org/jans-auth/restv1/status_list"
                       }
                     }
                 })),
@@ -54,7 +54,7 @@ async fn success_test_json() {
                     "exp": 1724835859,
                     "iat": 1724832259,
                     "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
-                    "iss": "https://admin-ui-test.gluu.org",
+                    "iss": "https://account.gluu.org",
                     "jti": "sk3T40NYSYuk5saHZNpkZw",
                     "nonce": "c3872af9-a0f5-4c3f-a1af-f9d0e8846e81",
                     "sid": "6a7fe50a-d810-454d-be5d-549d29595a09",
@@ -65,7 +65,7 @@ async fn success_test_json() {
                     "status": {
                       "status_list": {
                         "idx": 202,
-                        "uri": "https://admin-ui-test.gluu.org/jans-auth/restv1/status_list"
+                        "uri": "https://account.gluu.org/jans-auth/restv1/status_list"
                       }
                     },
                     "role":"Admin"
@@ -75,7 +75,7 @@ async fn success_test_json() {
                     "email": "user@example.com",
                     "username": "UserNameExample",
                     "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
-                    "iss": "https://admin-ui-test.gluu.org",
+                    "iss": "https://account.gluu.org",
                     "given_name": "Admin",
                     "middle_name": "Admin",
                     "inum": "8d1cde6a-1447-4766-b3c8-16663e13b458",

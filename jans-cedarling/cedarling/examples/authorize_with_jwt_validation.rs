@@ -5,8 +5,7 @@
 
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource, Request, ResourceData, TokenValidationConfig,
-    WorkloadBoolOp,
+    PolicyStoreConfig, PolicyStoreSource, Request, ResourceData, WorkloadBoolOp,
 };
 use jsonwebtoken::Algorithm;
 use std::collections::{HashMap, HashSet};
@@ -24,17 +23,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         jwt_sig_validation: true,
         jwt_status_validation: false,
         signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
-        token_validation_settings: HashMap::from([
-            (
-                "access_token".to_string(),
-                TokenValidationConfig::access_token(),
-            ),
-            ("id_token".to_string(), TokenValidationConfig::id_token()),
-            (
-                "userinfo_token".to_string(),
-                TokenValidationConfig::userinfo_token(),
-            ),
-        ]),
+        // token_validation_settings: HashMap::from([
+        //     (
+        //         "access_token".to_string(),
+        //         TokenValidationConfig::access_token(),
+        //     ),
+        //     ("id_token".to_string(), TokenValidationConfig::id_token()),
+        //     (
+        //         "userinfo_token".to_string(),
+        //         TokenValidationConfig::userinfo_token(),
+        //     ),
+        // ]),
     };
 
     // You must change this with your own tokens

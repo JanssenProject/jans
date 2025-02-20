@@ -17,6 +17,10 @@ use serde_json::Value;
 pub struct ClaimMappings(HashMap<String, ClaimMapping>);
 
 impl ClaimMappings {
+    pub fn new(mappings: HashMap<String, ClaimMapping>) -> Self {
+        Self(mappings)
+    }
+
     pub fn get(&self, claim: &str) -> Option<&ClaimMapping> {
         self.0.get(claim)
     }
@@ -108,7 +112,6 @@ impl RegexMapping {
     fn new(
         cedar_policy_type: String,
         regex_expression: String,
-
         fields: HashMap<String, RegexFieldMapping>,
     ) -> Result<Self, regex::Error> {
         Ok(Self {

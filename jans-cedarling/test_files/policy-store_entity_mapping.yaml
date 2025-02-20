@@ -120,17 +120,14 @@ policy_stores:
       3e59e1d6f009a16d40a33b2f10fc259d05a1a5d9a922:
         name: TestAgama
         description: TestAgama trusted issuer
-        openid_configuration_endpoint: https://test-casa.gluu.info/.well-known/openid-configuration
-        access_tokens:
-          trusted: true
-          principal_identifier: jti
-          user_id: ''
-          role_mapping: role
-          # claim_mapping: {}
-        id_tokens:
-          user_id: ''
-          role_mapping: role
-        userinfo_tokens:
-          user_id: ''
-          role_mapping: role
-          # claim_mapping: {}
+        openid_configuration_endpoint: https://account.gluu.org/.well-known/openid-configuration
+        tokens_metadata:
+          access_token:
+            entity_type_name: Jans::MappedAccess_token
+            role_mapping: role
+          id_token:
+            entity_type_name: Jans::MappedIdToken
+            role_mapping: role
+          userinfo_token:
+            entity_type_name: Jans::MappedUserinfo_token
+            role_mapping: role

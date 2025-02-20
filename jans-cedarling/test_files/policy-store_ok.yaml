@@ -8,6 +8,18 @@ policy_stores:
     cedar_version: v4.0.0
     name: Jans
     description: A test policy store where everything is fine.
+    trusted_issuers:
+      Jans123123:
+        name: "Jans"
+        description: "A Test IDP"
+        openid_configuration_endpoint: "https://account.gluu.org/.well-known/openid-configuration"
+        tokens_metadata:
+          access_token:
+            entity_type_name: "Jans::Access_token"
+          id_token:
+            entity_type_name: "Jans::id_token"
+          userinfo_token:
+            entity_type_name: "Jans::Userinfo_token"
     policies:
       840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
         description: simple policy example for principal workload

@@ -8,6 +8,18 @@ policy_stores:
     cedar_version: v4.0.0
     name: "Jans2"
     description: A test policy store where everything is fine.
+    trusted_issuers:
+      Jans123123:
+        name: "Jans2"
+        description: "A Test IDP"
+        openid_configuration_endpoint: "https://account.gluu.org/.well-known/openid-configuration"
+        tokens_metadata:
+          access_token:
+            entity_type_name: "Jans2::Access_token"
+          id_token:
+            entity_type_name: "Jans2::id_token"
+          userinfo_token:
+            entity_type_name: "Jans2::Userinfo_token"
     policies:
       1:
         description: simple policy example for principal workload, permit when workload org_id same with resource

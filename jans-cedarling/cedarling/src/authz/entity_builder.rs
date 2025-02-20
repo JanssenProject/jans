@@ -122,6 +122,7 @@ impl EntityBuilder {
         tokens: &HashMap<String, Token>,
         resource: &ResourceData,
     ) -> Result<AuthorizeEntitiesData, BuildCedarlingEntityError> {
+        println!("tokens:\n{:#?}", tokens);
         let mut built_entities = BuiltEntities::default();
 
         let mut token_entities = HashMap::new();

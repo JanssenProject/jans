@@ -4,6 +4,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use std::collections::HashSet;
+
 pub use super::claim_mapping::ClaimMappings;
 use super::parse_option_string;
 use serde::Deserialize;
@@ -42,13 +44,13 @@ pub struct TokenEntityMetadata {
     /// validated if it is a registered claim listed in [`RFC 7519, Section 4.1`] (https://datatracker.ietf.org/doc/html/rfc7519#section-4.1)
     #[serde(default)]
     #[builder(default)]
-    pub required_claims: Vec<String>,
+    pub required_claims: HashSet<String>,
     /// The Cedar entity name that represents this token
     pub entity_type_name: String,
     /// The Cedar entities that this token is an attribute of
     #[serde(default)]
     #[builder(default)]
-    pub entity_mapping: Vec<String>,
+    pub entity_mapping: HashSet<String>,
 }
 
 fn default_trusted() -> bool {
