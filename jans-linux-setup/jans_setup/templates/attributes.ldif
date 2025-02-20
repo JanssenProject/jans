@@ -1205,16 +1205,15 @@ objectClass: jansAttr
 urn: urn:mace:dir:attribute-def:jansIMAPData
 
 dn: inum=6049,ou=attributes,o=jans
-description: jansPermission
-description: User permission or role
-displayName: User Permission
+description: User Role
+displayName: User Role
 inum: 6049
 jansAttrEditTyp: admin
 jansAttrName: role
 jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
-jansClaimName: user_permission
+jansClaimName: user_role
 jansMultivaluedAttr: true
 jansSAML1URI: urn:mace:dir:attribute-def:role
 jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.299
