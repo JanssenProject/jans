@@ -106,7 +106,7 @@ mod test {
         .expect("should deserialize schema")
     }
 
-    fn test_issusers() -> HashMap<String, TrustedIssuer> {
+    fn test_issuers() -> HashMap<String, TrustedIssuer> {
         let token_entity_metadata_builder = TokenEntityMetadata::builder().claim_mapping(
 serde_json::from_value::<ClaimMappings>(json!({
                     "url": {
@@ -189,7 +189,7 @@ serde_json::from_value::<ClaimMappings>(json!({
     #[test]
     fn can_build_access_tkn_entity() {
         let schema = test_schema();
-        let issuers = test_issusers();
+        let issuers = test_issuers();
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let access_token = Token::new(
             "access_token",
@@ -209,7 +209,7 @@ serde_json::from_value::<ClaimMappings>(json!({
     #[test]
     fn can_build_id_tkn_entity() {
         let schema = test_schema();
-        let issuers = test_issusers();
+        let issuers = test_issuers();
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let id_token = Token::new(
             "id_token",
@@ -229,7 +229,7 @@ serde_json::from_value::<ClaimMappings>(json!({
     #[test]
     fn can_build_userinfo_tkn_entity() {
         let schema = test_schema();
-        let issuers = test_issusers();
+        let issuers = test_issuers();
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
         let userinfo_token = Token::new(
             "userinfo_token",
