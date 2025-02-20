@@ -47,7 +47,7 @@ policy_stores:
             claim_mapping:
               email:
                 parser: regex
-                type: Test::email_address
+                type: Jans::email_address
                 regex_expression: "^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"
                 UID:
                   attr: uid
@@ -57,7 +57,7 @@ policy_stores:
                   type: String
               profile:
                 parser: regex
-                type: Test::Url
+                type: Jans::Url
                 regex_expression: |-
                     (?x) ^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?P<HOST>[^\/:\#?]+)(?::(?<PORT>\d+))?(?P<PATH>\/[^?\#]*)?(?:\?(?P<QUERY>[^\#]*))?(?:(?P<FRAGMENT>.*))?
                 SCHEME:

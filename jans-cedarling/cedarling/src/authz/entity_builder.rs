@@ -11,7 +11,6 @@ mod build_token_entities;
 mod build_user_entity;
 mod build_workload_entity;
 mod built_entities;
-mod mapping;
 
 use super::AuthorizeEntitiesData;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
@@ -24,7 +23,7 @@ use build_role_entity::BuildRoleEntityError;
 pub use build_token_entities::BuildTokenEntityError;
 use build_user_entity::BuildUserEntityError;
 use build_workload_entity::BuildWorkloadEntityError;
-use built_entities::BuiltEntities;
+pub(crate) use built_entities::BuiltEntities;
 use cedar_policy::{Entity, EntityId, EntityUid};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
@@ -32,8 +31,6 @@ use std::convert::Infallible;
 use std::fmt;
 use std::str::FromStr;
 
-// TODO: We could probably set the default to not have a namespace
-// once we support multiple namespaces
 const DEFAULT_WORKLOAD_ENTITY_NAME: &str = "Jans::Workload";
 const DEFAULT_USER_ENTITY_NAME: &str = "Jans::User";
 const DEFAULT_ACCESS_TKN_ENTITY_NAME: &str = "Jans::Access_token";
@@ -156,6 +153,7 @@ impl EntityBuilder {
         };
 
         let resource = self.build_resource_entity(resource)?;
+        built_entities.insert(&resource);
 
         Ok(AuthorizeEntitiesData {
             workload,
@@ -163,6 +161,7 @@ impl EntityBuilder {
             resource,
             roles,
             tokens: token_entities,
+            build_entities: built_entities,
         })
     }
 }
@@ -195,12 +194,19 @@ fn build_entity(
 
     // Get entity namespace and type
     let (entity_type_name, type_schema) = schema
-        .get_entity_schema(entity_name)?
+        .get_entity_schema(entity_name, None)?
         .ok_or(BuildEntityError::EntityNotInSchema(entity_name.to_string()))?;
+    let default_namespace = entity_type_name.namespace();
 
     // Build entity attributes
-    let entity_attrs =
-        build_entity_attrs_from_tkn(schema, type_schema, token, claim_aliases, built_entities)?;
+    let entity_attrs = build_entity_attrs_from_tkn(
+        schema,
+        type_schema,
+        token,
+        Some(default_namespace.as_str()),
+        claim_aliases,
+        built_entities,
+    )?;
 
     // Build cedar entity
     let entity_id = EntityId::from_str(&entity_id).map_err(BuildEntityError::ParseEntityId)?;
@@ -335,8 +341,8 @@ mod test {
                             "attributes":  {
                                 "access_token": { "type": "Entity", "name": "Access_token" },
                                 "id_token": { "type": "Entity", "name": "Id_token" },
-                                "userinfo_token": { "type": "Entity", "name": "Userinfo_token" },
-                                "custom_token": { "type": "Entity", "name": "Custom_token" },
+                                "userinfo_token": { "type": "Entity", "name": "Custom::Userinfo_token" },
+                                "custom_token": { "type": "Entity", "name": "Custom::Custom_token" },
                             },
                         }
                     }
@@ -401,7 +407,7 @@ mod test {
 
         let entities = entity_builder
             .build_entities(&tokens, &ResourceData {
-                resource_type: "Resource".to_string(),
+                resource_type: "Jans::Resource".to_string(),
                 id: "res-123".to_string(),
                 payload: HashMap::new(),
             })

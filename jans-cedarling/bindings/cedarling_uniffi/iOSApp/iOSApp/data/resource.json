@@ -1,0 +1,12 @@
+
+{"payload": {
+          "app_id": "admin_ui_id",
+          "id": "admin_ui_id",
+          "name": "My App",
+          "permission": "view_clients",
+          "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+          "type": "Jans::Issue"
+        },
+"resource_id": "some_id",
+"resource_type": "Jans::Issue"
+}

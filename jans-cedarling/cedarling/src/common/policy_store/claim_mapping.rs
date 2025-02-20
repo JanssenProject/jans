@@ -13,6 +13,15 @@ use serde_json::Value;
 /// Structure for storing `claim mappings`
 ///
 /// wrapper around hash map
+//
+// probably we can store as key composite key of `claim` name and `cedar type`
+// for example using as key of hash map:
+// #[derive(Hash)]
+// struct ClaimMappingKey {
+//     claim_name: String,
+//     cedar_policy_type: String,
+// }
+// but for now current approach is OK
 #[derive(Debug, Default, PartialEq, Clone, Deserialize)]
 pub struct ClaimMappings(HashMap<String, ClaimMapping>);
 
@@ -20,27 +29,6 @@ impl ClaimMappings {
     pub fn new(mappings: HashMap<String, ClaimMapping>) -> Self {
         Self(mappings)
     }
-
-    pub fn get(&self, claim: &str) -> Option<&ClaimMapping> {
-        self.0.get(claim)
-    }
-
-    // returns (claim_name, &ClaimMapping)
-    pub fn get_mapping_for_type(&self, type_name: &str) -> Option<(&String, &ClaimMapping)> {
-        // PERF: we can probably avoiding iterating through all of this by changing the
-        // `claim_mapping` in the Token Entity Metadata Schema
-        self.0
-            .iter()
-            .find_map(|(claim_name, mapping)| match mapping {
-                ClaimMapping::Regex(regex_mapping) => {
-                    (regex_mapping.cedar_policy_type == type_name).then_some((claim_name, mapping))
-                },
-                ClaimMapping::Json { r#type } => {
-                    (r#type == type_name).then_some((claim_name, mapping))
-                },
-            })
-    }
-
     pub fn get_mapping(&self, claim: &str, cedar_policy_type: &str) -> Option<&ClaimMapping> {
         self.0
             .get(claim)
@@ -248,7 +236,6 @@ impl<'de> Deserialize<'de> for ClaimMapping {
 /// - `attr`: The attribute name associated with the field (e.g., "uid").
 /// - `type`: The type of the attribute (e.g., "string").
 #[derive(Debug, PartialEq, Deserialize, Clone)]
-
 pub struct RegexFieldMapping {
     pub attr: String,
     pub r#type: RegexFieldMappingType,
