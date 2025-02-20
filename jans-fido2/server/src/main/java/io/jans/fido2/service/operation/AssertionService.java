@@ -32,9 +32,7 @@ import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.common.PublicKeyCredentialDescriptor;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
-import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
-import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.external.context.ExternalFido2Context;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;
@@ -51,8 +49,6 @@ import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import io.jans.orm.model.fido2.UserVerification;
-import io.jans.service.net.NetworkService;
-import io.jans.u2f.service.persist.DeviceRegistrationService;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -86,9 +82,6 @@ public class AssertionService {
 	private AuthenticationPersistenceService authenticationPersistenceService;
 
 	@Inject
-	private DeviceRegistrationService deviceRegistrationService;
-
-	@Inject
 	private UserSessionIdService userSessionIdService;
 
 	@Inject
@@ -98,19 +91,10 @@ public class AssertionService {
 	private ChallengeGenerator challengeGenerator;
 
 	@Inject
-	private DataMapperService dataMapperService;
-
-	@Inject
 	private CommonVerifiers commonVerifiers;
 
 	@Inject
-	private NetworkService networkService;
-
-	@Inject
 	private ExternalFido2Service externalFido2InterceptionService;
-
-	@Inject
-	private Base64Service base64Service;
 
 	@Inject
 	private ErrorResponseFactory errorResponseFactory;
@@ -156,12 +140,10 @@ public class AssertionService {
 		assertionOptionsResponse.setRpId(origin);
 		log.debug("Put rpId {}", origin);
 
-		
-
 		// Put allowCredentials
 		if (username != null && StringHelper.isNotEmpty(username)) {
-			Pair<List<PublicKeyCredentialDescriptor>, String> allowedCredentialsPair = prepareAllowedCredentials(
-					origin, username);
+			Pair<List<PublicKeyCredentialDescriptor>, String> allowedCredentialsPair = prepareAllowedCredentials(origin,
+					username);
 			List<PublicKeyCredentialDescriptor> allowedCredentials = allowedCredentialsPair.getLeft();
 			if (allowedCredentials.isEmpty()) {
 				throw errorResponseFactory.badRequestException(AssertionErrorResponseType.KEYS_NOT_FOUND,
@@ -171,9 +153,7 @@ public class AssertionService {
 			allowedCredentials.stream().forEach(ele -> log.debug("Put allowedCredentials {}", ele.toString()));
 			log.debug("Put allowedCredentials {}", allowedCredentials);
 
-			
-		}
-		else
+		} else
 		// Conditional UI
 		{
 			assertionOptionsResponse.setAllowCredentials(assertionOptions.getAllowCredentials());
@@ -195,7 +175,6 @@ public class AssertionService {
 			log.debug("Put extensions {}", assertionOptions.getExtensions());
 		}
 
-		
 		Fido2AuthenticationData entity = new Fido2AuthenticationData();
 		entity.setUsername(username);
 		entity.setChallenge(challenge);
@@ -224,7 +203,7 @@ public class AssertionService {
 		externalFido2InterceptionService.authenticateAssertionFinish(CommonUtilService.toJsonNode(assertionOptions),
 				externalFido2InterceptionContext);
 
-		log.debug("assertionOptionsResponse :"+ assertionOptionsResponse);
+		log.debug("assertionOptionsResponse :" + assertionOptionsResponse);
 		return assertionOptionsResponse;
 	}
 
@@ -374,24 +353,25 @@ public class AssertionService {
 		}
 
 		PublicKeyCredentialDescriptor credentialDescriptor = new PublicKeyCredentialDescriptor();
-		credentialDescriptor.setTransports(		registrationData.getTransports());
+		credentialDescriptor.setTransports(registrationData.getTransports());
 		credentialDescriptor.setId(registrationData.getPublicKeyId());
 		credentialDescriptor.setType("public-key");
-		
+
 		// Create result object
-		// TODO: why should registrationData.isUserPresentFlag() be a string, correct this
+		// TODO: why should registrationData.isUserPresentFlag() be a string, correct
+		// this
 		AttestationOrAssertionResponse assertionResultResponse = new AttestationOrAssertionResponse(
 				credentialDescriptor, "ok", "", registrationData.getUsername(),
-				registrationData.getAuthentictatorAttachment().toString(), String.valueOf(registrationData.isUserPresentFlag()), true,
-				registrationData.getBackupStateFlag(), registrationData.getBackupEligibilityFlag(),
-				registrationData.getType().toString(), true, "level", "aaguid", "authenticatorName", registrationData.getOrigin(),
-				"hint", registrationData.getChallenge(), registrationData.getRpId(), null, Long.valueOf(9000), null);
+				registrationData.getAuthentictatorAttachment().toString(),
+				String.valueOf(registrationData.isUserPresentFlag()), true, registrationData.getBackupStateFlag(),
+				registrationData.getBackupEligibilityFlag(), registrationData.getType().toString(), true, "level",
+				"aaguid", "authenticatorName", registrationData.getOrigin(), "hint", registrationData.getChallenge(),
+				registrationData.getRpId(), null, Long.valueOf(9000), null);
 
 		externalFido2InterceptionContext.addToContext(registrationEntry, authenticationEntity);
 		externalFido2InterceptionService.verifyAssertionFinish(CommonUtilService.toJsonNode(assertionResultResponse),
 				externalFido2InterceptionContext);
 
-		
 		return assertionResultResponse;
 	}
 
