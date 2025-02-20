@@ -7,10 +7,6 @@ use super::*;
 use cedar_policy::Entity;
 use std::collections::HashSet;
 
-// Default claims to use for the Workload Entity's ID.
-const DEFAULT_ACCESS_TKN_WORKLOAD_CLAIM: &str = "client_id";
-const DEFAULT_ID_TKN_WORKLOAD_CLAIM: &str = "aud";
-
 // TODO: make a bootstrap property to control which tokens to use
 // to create this entity
 const DEFAULT_WORKLOAD_ENTITY_TKN_SRCS: [&str; 2] = ["access_token", "id_token"];
@@ -24,31 +20,33 @@ impl EntityBuilder {
         let entity_name = self.entity_names.workload.as_ref();
         let mut errors = vec![];
 
-        for ((workload_id_claim, claim_aliases), token_name) in [
-            (DEFAULT_ACCESS_TKN_WORKLOAD_CLAIM, Vec::new()),
-            (DEFAULT_ID_TKN_WORKLOAD_CLAIM, vec![ClaimAliasMap::new(
-                "aud",
-                "client_id",
-            )]),
-        ]
-        .into_iter()
-        .zip(DEFAULT_WORKLOAD_ENTITY_TKN_SRCS)
-        {
-            if let Some(token) = tokens.get(token_name) {
-                match build_entity(
-                    &self.schema,
-                    entity_name,
-                    token,
-                    workload_id_claim,
-                    claim_aliases,
-                    HashSet::new(),
-                    built_entities,
-                ) {
-                    Ok(entity) => {
-                        return Ok(entity);
-                    },
-                    Err(err) => errors.push((token.name.clone(), err)),
-                }
+        let token_refs = DEFAULT_WORKLOAD_ENTITY_TKN_SRCS
+            .iter()
+            .flat_map(|x| tokens.get(*x));
+
+        for token in token_refs {
+            let workload_id_claim = if let Some(src) = token
+                .get_metadata()
+                .and_then(|metadata| metadata.workload_id.as_ref())
+            {
+                src
+            } else {
+                // TODO: add errors
+                continue;
+            };
+
+            match build_entity(
+                &self.schema,
+                entity_name,
+                token,
+                workload_id_claim,
+                HashSet::new(),
+                built_entities,
+            ) {
+                Ok(entity) => {
+                    return Ok(entity);
+                },
+                Err(err) => errors.push((token.name.clone(), err)),
             }
         }
 
@@ -144,14 +142,18 @@ mod test {
                 "shape": {
                     "type": "Record",
                     "attributes":  {
-                        "client_id": { "type": "String" },
+                        "aud": { "type": "String" },
                         "name": { "type": "String" },
                     },
                 }
             }}}
         }))
         .unwrap();
-        let iss = TrustedIssuer::default();
+        let mut iss = TrustedIssuer::default();
+        iss.tokens_metadata
+            .get_mut("id_token")
+            .map(|metadata| metadata.workload_id = Some("aud".into()))
+            .expect("should have id token metadata");
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let id_token = Token::new(
             "id_token",
@@ -169,8 +171,8 @@ mod test {
         assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
         assert_eq!(
             entity
-                .attr("client_id")
-                .expect("expected workload entity to have a `client_id` attribute")
+                .attr("aud")
+                .expect("expected workload entity to have an `aud` attribute")
                 .unwrap(),
             EvalResult::String("workload-123".to_string()),
         );
@@ -241,6 +243,7 @@ mod test {
                 "access_token".to_string(),
                 token_entity_metadata_builder
                     .entity_type_name("Jans::Access_token".into())
+                    .workload_id(Some("client_id".into()))
                     .build(),
             )]),
             ..Default::default()
@@ -398,7 +401,11 @@ mod test {
             }}}
         }))
         .unwrap();
-        let iss = TrustedIssuer::default();
+        let mut iss = TrustedIssuer::default();
+        iss.tokens_metadata
+            .get_mut("id_token")
+            .map(|metadata| metadata.workload_id = Some("aud".into()))
+            .expect("there should be an id_token metadata");
         let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
         let access_token = Token::new("access_token", HashMap::new().into(), Some(&iss));
         let id_token = Token::new("id_token", HashMap::new().into(), Some(&iss));
@@ -410,7 +417,7 @@ mod test {
             .build_workload_entity(&tokens, &BuiltEntities::default())
             .expect_err("expected to error while building the workload entity");
 
-        assert_eq!(err.errors.len(), 2);
+        assert_eq!(err.errors.len(), 2, "errors: {:#?}", err);
         assert!(
             matches!(
                 err.errors[0],

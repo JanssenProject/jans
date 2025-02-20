@@ -33,13 +33,9 @@ policy_stores:
             entity_type_name: Jans::Access_token
             trusted: true
             token_id: jti
-            user_id: ''
-            role_mapping: ''
-            # claim_mapping: {}
+            workload_id: client_id
           id_token:
             entity_type_name: Jans::id_token
-            user_id: ''
-            role_mapping: ''
           userinfo_token:
             entity_type_name: Jans::Userinfo_token
             user_id: sub
@@ -78,10 +74,6 @@ policy_stores:
                 FRAGMENT:
                   attr: fragment
                   type: String
-            tx_token:
-              user_id: ''
-              role_mapping: ''
-              claim_mapping: ''
     schema:
       encoding: none
       content_type: cedar

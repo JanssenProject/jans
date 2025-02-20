@@ -18,7 +18,6 @@ pub fn build_entity_attrs_from_tkn(
     entity_type: &EntityType,
     token: &Token,
     default_namespace: Option<&str>,
-    claim_aliases: Vec<ClaimAliasMap>,
     built_entities: &BuiltEntities,
 ) -> Result<HashMap<String, RestrictedExpression>, BuildAttrError> {
     let mut entity_attrs = HashMap::new();
@@ -28,8 +27,7 @@ pub fn build_entity_attrs_from_tkn(
         None => return Ok(entity_attrs),
     };
 
-    let mut claims = token.claims_value().clone();
-    apply_claim_aliases(&mut claims, claim_aliases);
+    let claims = token.claims_value();
 
     let claim_mapping = token.claim_mapping();
 
@@ -128,26 +126,6 @@ pub fn build_entity_attrs_from_values(
     Ok(entity_attrs)
 }
 
-/// Describes how to rename a claim named `from` to `to`
-pub struct ClaimAliasMap<'a> {
-    from: &'a str,
-    to: &'a str,
-}
-
-impl<'a> ClaimAliasMap<'a> {
-    pub fn new(from: &'a str, to: &'a str) -> Self {
-        Self { from, to }
-    }
-}
-
-fn apply_claim_aliases(claims: &mut HashMap<String, Value>, aliases: Vec<ClaimAliasMap>) {
-    for map in aliases {
-        if let Some(claim) = claims.get(map.from) {
-            claims.insert(map.to.to_string(), claim.clone());
-        }
-    }
-}
-
 #[derive(Debug, thiserror::Error)]
 #[error("failed to build `{attr_name}` attribute: {source}")]
 pub struct BuildAttrError {
@@ -215,7 +193,6 @@ mod test {
             &entity_type,
             &token,
             None,
-            Vec::new(),
             &BuiltEntities::default(),
         )
         .expect("should build entity attrs");
@@ -256,7 +233,6 @@ mod test {
             &entity_type,
             &token,
             None,
-            Vec::new(),
             &BuiltEntities::default(),
         )
         .expect_err("should error due to missing source");

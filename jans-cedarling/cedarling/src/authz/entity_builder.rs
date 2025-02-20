@@ -16,7 +16,7 @@ use super::AuthorizeEntitiesData;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::jwt::{Token, TokenClaimTypeError};
 use crate::{AuthorizationConfig, ResourceData};
-use build_attrs::{BuildAttrError, ClaimAliasMap, build_entity_attrs_from_tkn};
+use build_attrs::{BuildAttrError, build_entity_attrs_from_tkn};
 use build_expr::*;
 use build_resource_entity::{BuildResourceEntityError, JsonTypeError};
 use build_role_entity::BuildRoleEntityError;
@@ -181,7 +181,6 @@ fn build_entity(
     entity_name: &str,
     token: &Token,
     id_src_claim: &str,
-    claim_aliases: Vec<ClaimAliasMap>,
     parents: HashSet<EntityUid>,
     built_entities: &BuiltEntities,
 ) -> Result<Entity, BuildEntityError> {
@@ -204,7 +203,6 @@ fn build_entity(
         type_schema,
         token,
         Some(default_namespace.as_str()),
-        claim_aliases,
         built_entities,
     )?;
 
@@ -304,7 +302,6 @@ mod test {
             "Jans::Workload",
             &token,
             "client_id",
-            Vec::new(),
             HashSet::new(),
             &BuiltEntities::default(),
         )
@@ -363,6 +360,7 @@ mod test {
                 "access_token".into(),
                 TokenEntityMetadata::builder()
                     .entity_type_name("Jans::Access_token".into())
+                    .workload_id(Some("jti".into()))
                     .build(),
             ),
             (
@@ -394,11 +392,7 @@ mod test {
             .map(|tkn_name| {
                 let token = Token::new(
                     tkn_name,
-                    HashMap::from([
-                        ("client_id".to_string(), json!(format!("{}_123", tkn_name))),
-                        ("jti".to_string(), json!(format!("{}_123", tkn_name))),
-                    ])
-                    .into(),
+                    HashMap::from([("jti".to_string(), json!(format!("{}_123", tkn_name)))]).into(),
                     Some(&iss),
                 );
                 (tkn_name.to_string(), token)
@@ -508,7 +502,6 @@ mod test {
             "Jans::Work:load",
             &token,
             "client_id",
-            Vec::new(),
             HashSet::new(),
             &BuiltEntities::default(),
         )
@@ -533,7 +526,6 @@ mod test {
             "Workload",
             &token,
             "client_id",
-            Vec::new(),
             HashSet::new(),
             &BuiltEntities::default(),
         )
@@ -574,7 +566,6 @@ mod test {
             "Workload",
             &token,
             "client_id",
-            Vec::new(),
             HashSet::new(),
             &BuiltEntities::default(),
         )
@@ -607,7 +598,6 @@ mod test {
             "Workload",
             &token,
             "client_id",
-            Vec::new(),
             HashSet::new(),
             &BuiltEntities::default(),
         )

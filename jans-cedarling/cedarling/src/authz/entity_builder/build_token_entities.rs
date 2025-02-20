@@ -25,7 +25,6 @@ impl EntityBuilder {
             entity_name,
             token,
             id_src_claim,
-            Vec::new(),
             HashSet::new(),
             built_entities,
         )

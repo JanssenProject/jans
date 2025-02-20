@@ -16,6 +16,7 @@ policy_stores:
         tokens_metadata:
           access_token:
             entity_type_name: "Jans::Access_token"
+            workload_id: "client_id"
           id_token:
             entity_type_name: "Jans::id_token"
           userinfo_token:

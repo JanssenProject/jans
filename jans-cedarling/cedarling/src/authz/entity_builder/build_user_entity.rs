@@ -31,7 +31,6 @@ impl EntityBuilder {
                 entity_name,
                 token,
                 user_id_claim,
-                Vec::new(),
                 parents.clone(),
                 built_entities,
             ) {
