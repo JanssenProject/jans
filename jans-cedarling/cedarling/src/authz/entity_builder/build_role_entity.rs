@@ -37,7 +37,7 @@ impl EntityBuilder {
         // Check if the entity is in the schema
         let entity_name = self.entity_names.role.to_string();
         self.schema
-            .get_entity_schema(&entity_name)
+            .get_entity_schema(&entity_name, None)
             .map_err(|e| BuildRoleEntityError::ParseTypeName(entity_name.clone(), e))?
             .ok_or(BuildRoleEntityError::EntityNotInSchema(entity_name.clone()))?;
 

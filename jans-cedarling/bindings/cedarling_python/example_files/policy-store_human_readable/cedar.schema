@@ -1,15 +1,85 @@
 namespace Jans {
+type Context = {"current_time": Long, "device_health": Set < String >, "fraud_indicators": Set < String >, "geolocation": Set < String >, "network": String, "network_type": String, "operating_system": String, "user_agent": String};
 type Url = {"host": String, "path": String, "protocol": String};
+type email_address = {"domain": String, "uid": String};
 entity TrustedIssuer = {"issuer_entity_id": Url};
-entity Issue = {"country": String, "org_id": String};
-entity id_token = {"acr": String, "amr": String, "aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String, "sub": String};
 entity Role;
-entity User in [Role] = {"country": String, "email": String, "sub": String, "username": String};
-entity Workload = {"client_id": String, "iss": TrustedIssuer, "name": String, "org_id": String};
-entity Access_token = {"aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String};
-action "Update" appliesTo {
-  principal: [Workload, User, Role],
-  resource: [Issue],
-  context: {}
+entity Application = {"app_id": String, "name": String, "url": Url};
+entity Workload = {"client_id": String, "iss": TrustedIssuer, "name"?: String, "rp_id"?: String, "spiffe_id"?: String};
+entity id_token = {"acr": String, "amr": Set < String >, "aud": String, "azp"?: String, "birthdate"?: String, "email"?: email_address, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String, "name"?: String, "phone_number"?: String, "role"?: Set < String >, "sub": String};
+entity User in [Role] = {"email": email_address, "phone_number"?: String, "role": Set < String >, "sub": String, "username"?: String};
+entity Access_token = {"aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String, "nbf": Long, "scope": Set < String >};
+entity Userinfo_token = {"aud": String, "birthdate"?: String, "email"?: email_address, "exp"?: Long, "iat"?: Long, "iss": TrustedIssuer, "jti": String, "name"?: String, "phone_number"?: String, "role"?: Set < String >, "sub": String};
+entity HTTP_Request = {"accept": Set < String >, "header": Set < String >, "url": Url};
+action "Monitor" appliesTo {
+  principal: [User, Role, Workload],
+  resource: [Application],
+  context: Context
+};
+action "Test" appliesTo {
+  principal: [User, Role, Workload],
+  resource: [Application],
+  context: Context
+};
+action "Write" appliesTo {
+  principal: [User, Role, Workload],
+  resource: [Application],
+  context: Context
+};
+action "Read" appliesTo {
+  principal: [User, Role, Workload],
+  resource: [Application],
+  context: Context
+};
+action "HEAD" appliesTo {
+  principal: [Workload],
+  resource: [HTTP_Request],
+  context: Context
+};
+action "Search" appliesTo {
+  principal: [User, Role, Workload],
+  resource: [Application],
+  context: Context
+};
+action "Share" appliesTo {
+  principal: [User, Role, Workload],
+  resource: [Application],
+  context: Context
+};
+action "Compare" appliesTo {
+  principal: [User, Role, Workload],
+  resource: [Application],
+  context: Context
+};
+action "PATCH" appliesTo {
+  principal: [Workload],
+  resource: [HTTP_Request],
+  context: Context
+};
+action "PUT" appliesTo {
+  principal: [Workload],
+  resource: [HTTP_Request],
+  context: Context
+};
+action "Execute" appliesTo {
+  principal: [User, Role, Workload],
+  resource: [Application],
+  context: Context
+};
+action "GET" appliesTo {
+  principal: [Workload],
+  resource: [HTTP_Request],
+  context: Context
+};
+action "Tag" appliesTo {
+  principal: [User, Role, Workload],
+  resource: [Application],
+  context: Context
+};
+action "DELETE" appliesTo {
+  principal: [Workload],
+  resource: [HTTP_Request],
+  context: Context
 };
 }
+
