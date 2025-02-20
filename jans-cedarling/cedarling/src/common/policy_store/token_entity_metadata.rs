@@ -25,7 +25,7 @@ pub struct TokenEntityMetadata {
     /// An optional string representing the principal identifier (e.g., `jti`).
     #[serde(default, deserialize_with = "parse_option_string")]
     #[builder(default)]
-    pub principal_identifier: Option<String>,
+    pub token_id: Option<String>,
     /// The claim used to create the user id
     #[serde(deserialize_with = "parse_option_string", default)]
     #[builder(default)]

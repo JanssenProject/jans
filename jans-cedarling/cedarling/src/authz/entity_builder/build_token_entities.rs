@@ -16,7 +16,7 @@ impl EntityBuilder {
     ) -> Result<Entity, BuildTokenEntityError> {
         let id_src_claim = token
             .get_metadata()
-            .and_then(|x| x.principal_identifier.as_deref())
+            .and_then(|x| x.token_id.as_deref())
             .unwrap_or(DEFAULT_TKN_PRINCIPAL_IDENTIFIER);
         let tkn_entity = build_entity(
             &self.schema,

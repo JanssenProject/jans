@@ -32,7 +32,7 @@ policy_stores:
           access_token:
             entity_type_name: Jans::Access_token
             trusted: true
-            principal_identifier: jti
+            token_id: jti
             user_id: ''
             role_mapping: ''
             # claim_mapping: {}

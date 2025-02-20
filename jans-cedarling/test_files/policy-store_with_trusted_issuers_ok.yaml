@@ -42,7 +42,7 @@ trusted_issuers:
     openid_configuration_endpoint: 'https://accounts.google.com/.well-known/openid-configuration'
     access_tokens:
         trusted: true
-        principal_identifier: jti
+        token_id: jti
         user_id: ''
         role_mapping: ''
         claim_mapping: {}

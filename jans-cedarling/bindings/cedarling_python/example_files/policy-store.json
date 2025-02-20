@@ -24,7 +24,7 @@
                     "tokens_metadata": {
                         "access_token": {
                             "trusted": true,
-                            "principal_identifier": "jti"
+                            "token_id": "jti"
                         },
                         "id_token": {},
                         "userinfo_token": {

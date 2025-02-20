@@ -132,7 +132,7 @@ impl TokenEntityMetadata {
     fn access_token() -> Self {
         Self {
             trusted: true,
-            principal_identifier: None,
+            token_id: None,
             user_id: None,
             role_mapping: None,
             claim_mapping: ClaimMappings::new(HashMap::new()),
@@ -146,7 +146,7 @@ impl TokenEntityMetadata {
     fn id_token() -> Self {
         Self {
             trusted: true,
-            principal_identifier: None,
+            token_id: None,
             user_id: None,
             role_mapping: None,
             claim_mapping: ClaimMappings::new(HashMap::new()),
@@ -165,7 +165,7 @@ impl TokenEntityMetadata {
     fn userinfo_token() -> Self {
         Self {
             trusted: true,
-            principal_identifier: None,
+            token_id: None,
             user_id: None,
             role_mapping: None,
             claim_mapping: ClaimMappings::new(HashMap::new()),
