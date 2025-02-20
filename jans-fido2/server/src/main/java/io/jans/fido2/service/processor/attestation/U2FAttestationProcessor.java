@@ -18,30 +18,28 @@
 
 package io.jans.fido2.service.processor.attestation;
 
-import java.io.IOException;
 import java.security.PublicKey;
-
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.asn1.x509.Extensions;
-
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import io.jans.fido2.model.attestation.AttestationErrorResponseType;
-import io.jans.fido2.model.error.ErrorResponseFactory;
-import io.jans.orm.model.fido2.Fido2RegistrationData;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.exception.Fido2MissingAttestationCertException;
+import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.AttestationMode;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
 import io.jans.fido2.service.CoseService;
@@ -51,11 +49,9 @@ import io.jans.fido2.service.verifier.AuthenticatorDataVerifier;
 import io.jans.fido2.service.verifier.CertificateVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.UserVerificationVerifier;
-
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.slf4j.Logger;
-
-import com.fasterxml.jackson.databind.JsonNode;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * Attestation processor for attestations of fmt =fido-u2f
@@ -114,8 +110,8 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 		commonVerifiers.verifyRpIdHash(authData, registration.getOrigin());
 
 		// if attestation mode is enabled in the global config
-		if (appConfiguration.getFido2Configuration().getAttestationMode()
-				.equalsIgnoreCase(AttestationMode.DISABLED.getValue()) == false) {
+		if (!appConfiguration.getFido2Configuration().getAttestationMode()
+				.equalsIgnoreCase(AttestationMode.DISABLED.getValue()) ) {
 			if (attStmt.hasNonNull("x5c")) {
 				Iterator<JsonNode> i = attStmt.get("x5c").elements();
 				ArrayList<String> certificatePath = new ArrayList<>();

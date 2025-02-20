@@ -1,6 +1,6 @@
 package io.jans.fido2.model.attestation;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,7 +11,7 @@ public class AttestationResult {
 	private String type;
 	private String rawId;
 	private Response response;
-	private HashMap<String, Object> clientExtensionResults;
+	private Map<String, Object> clientExtensionResults;
 	private String authentictatorAttachment;
 
 	public String getId() {
@@ -38,11 +38,11 @@ public class AttestationResult {
 		this.response = response;
 	}
 
-	public HashMap<String, Object> getClientExtensionResults() {
+	public Map<String, Object> getClientExtensionResults() {
 		return clientExtensionResults;
 	}
 
-	public void setClientExtensionResults(HashMap<String, Object> clientExtensionResults) {
+	public void setClientExtensionResults(Map<String, Object> clientExtensionResults) {
 		this.clientExtensionResults = clientExtensionResults;
 	}
 

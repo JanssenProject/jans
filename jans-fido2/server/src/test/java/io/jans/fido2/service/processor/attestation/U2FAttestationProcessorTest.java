@@ -118,7 +118,6 @@ class U2FAttestationProcessorTest {
         verify(attestationCertificateService).getAttestationRootCertificates((JsonNode) eq(null), anyList());
         verify(certificateVerifier).verifyAttestationCertificates(anyList(), anyList());
         verify(authenticatorDataVerifier, never()).verifyU2FAttestationSignature(any(AuthData.class), any(byte[].class), any(String.class), any(X509Certificate.class), any(Integer.class));
-        //verify(log, never()).warn(contains("Failed to find attestation validation signature public certificate with DN"), anyString());
         verifyNoInteractions(authenticatorDataVerifier, coseService, base64Service);
     }
 
@@ -136,10 +135,8 @@ class U2FAttestationProcessorTest {
         when(x5cNode.elements()).thenReturn(Collections.singletonList((JsonNode) new TextNode("cert1")).iterator());
         when(attStmt.get("sig")).thenReturn(mock(JsonNode.class));
         when(commonVerifiers.verifyBase64String(any())).thenReturn("test-signature");
-        //when(certificateVerifier.verifyAttestationCertificates(any(), any())).thenThrow(new Fido2MissingAttestationCertException("test missing"));
         X509Certificate publicCert1 = mock(X509Certificate.class);
         when(certificateService.getCertificates(anyList())).thenReturn(Collections.singletonList(publicCert1));
-        //when(publicCert1.getIssuerDN()).thenReturn((UserPrincipal) () -> "test-issuer");
         when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
@@ -154,10 +151,7 @@ class U2FAttestationProcessorTest {
         verify(userVerificationVerifier).verifyUserPresent(authData);
         verify(commonVerifiers).verifyRpIdHash(authData, "test-domain");
         verify(certificateService).getCertificates(anyList());
-        //verify(attestationCertificateService).getAttestationRootCertificates((JsonNode) eq(null), anyList());
-        //verify(certificateVerifier).verifyAttestationCertificates(anyList(), anyList());
         verify(authenticatorDataVerifier, never()).verifyU2FAttestationSignature(any(AuthData.class), any(byte[].class), any(String.class), any(X509Certificate.class), any(Integer.class));
-        //verify(log).warn("Failed to find attestation validation signature public certificate with DN: '{}'", "test-issuer");
         verifyNoInteractions(authenticatorDataVerifier, coseService, base64Service);
     }
 
@@ -190,7 +184,6 @@ class U2FAttestationProcessorTest {
         verify(certificateVerifier).verifyAttestationCertificates(anyList(), anyList());
         verify(authenticatorDataVerifier).verifyU2FAttestationSignature(any(AuthData.class), any(byte[].class), any(String.class), any(X509Certificate.class), any(Integer.class));
         verify(base64Service, times(2)).urlEncodeToString(any());
-        //verifyNoInteractions(log, coseService);
     }
 
 

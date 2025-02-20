@@ -179,7 +179,7 @@ public class AttestationCertificateService {
 			try {
 				log.info("No Local metadata for authenticator {}. Checking for metadata MDS3 blob",
 						attestationCertificateKeyIdentifiers);
-				if (fido2Configuration.isDisableMetadataService() == false) {
+				if (!fido2Configuration.isDisableMetadataService() ) {
 					JsonNode metadata = mdsService.fetchMetadata(attestationCertificateKeyIdentifiers.getBytes());
 					commonVerifiers.verifyThatMetadataIsValid(metadata);
 					metadataForAuthenticator = metadata;

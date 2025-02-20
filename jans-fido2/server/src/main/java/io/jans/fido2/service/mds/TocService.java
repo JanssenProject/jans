@@ -7,7 +7,6 @@
 package io.jans.fido2.service.mds;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.ArrayMap;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -143,7 +142,7 @@ public class TocService {
 
 			maps.add(result.getSecond());
 		} catch (Exception e) {
-			log.warn("Can't access or open path: {}", e.getMessage(), e);
+			log.warn("Can't access document : {}", e.getMessage(), e);
 		} 
 
 		return mergeAndResolveDuplicateEntries(maps);
@@ -302,7 +301,7 @@ public class TocService {
 			log.info("TOC file updated.");
 			return true;
 		} catch (IOException e) {
-			log.warn("Can't access or open path: {}", metadataUrl, e);
+			log.warn("Can't access document {}", metadataUrl, e);
 			throw new Fido2RuntimeException("Can't access or open path: {}" + metadataUrl + e.getMessage(), e);
 		}
 	}
@@ -473,7 +472,7 @@ public class TocService {
 					certificateVerifier.verifyStatusAcceptable(aaguid, metadataEntryNode);
 					if (!metadataEntryNode.has("metadataStatement")) {
 						log.warn("This entry doesn't contains metadataStatement");
-						continue;
+						
 					}
 					entries.put(aaguid, metadataEntryNode);
 					log.info("Added TOC entry: {} ", aaguid);
@@ -499,7 +498,7 @@ public class TocService {
 				} catch (IOException e) {
 					log.error("Failed to add attestationCertificateKeyIdentifiers addition to tocEntries :"
 							+ attestationCertificateKeyIdentifiers);
-					continue;
+					
 				}
 			} else {
 				log.debug("Null aaguid, aaid, attestationCertificateKeyIdentifiers - Added TOC entry with status {}",
