@@ -166,12 +166,22 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/nightly/cedarling/cedarling-binding-types/</loc>
+         <lastmod>2025-02-20</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/nightly/cedarling/cedarling-jwt/</loc>
          <lastmod>2025-02-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/nightly/cedarling/cedarling-krakend/</loc>
+         <lastmod>2025-02-20</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/cedarling/cedarling-lock-server/</loc>
          <lastmod>2025-02-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -196,6 +206,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/nightly/cedarling/cedarling-quick-start/</loc>
+         <lastmod>2025-02-20</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/nightly/cedarling/cedarling-sidecar/</loc>
          <lastmod>2025-02-20</lastmod>
          <changefreq>daily</changefreq>
@@ -212,6 +227,11 @@
     </url>
     <url>
          <loc>https://jans.io/docs/nightly/cedarling/python/usage/</loc>
+         <lastmod>2025-02-20</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/nightly/cedarling/uniffi/cedarling-android/</loc>
          <lastmod>2025-02-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
