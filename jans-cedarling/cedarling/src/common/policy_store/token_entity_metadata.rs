@@ -50,7 +50,7 @@ pub struct TokenEntityMetadata {
     /// The Cedar entities that this token is an attribute of
     #[serde(default)]
     #[builder(default)]
-    pub entity_mapping: HashSet<String>,
+    pub principal_mapping: HashSet<String>,
 }
 
 fn default_trusted() -> bool {
