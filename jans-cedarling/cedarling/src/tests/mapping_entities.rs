@@ -6,7 +6,6 @@
 //! In this test cases we check mapping entities using Bootstrap properties:
 //! CEDARLING_MAPPING_USER
 //! CEDARLING_MAPPING_WORKLOAD
-//! CEDARLING_TOKEN_CONFIGS
 
 use super::utils::*;
 use crate::{Cedarling, cmp_decision, cmp_policy};

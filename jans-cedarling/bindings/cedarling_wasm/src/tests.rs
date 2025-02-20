@@ -31,11 +31,6 @@ static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
         "CEDARLING_WORKLOAD_AUTHZ": "enabled",
         "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
         "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
-        "CEDARLING_TOKEN_CONFIGS": {
-            "access_token": {"entity_type_name": "Jans::Access_token"},
-            "id_token": {"entity_type_name": "Jans::id_token"},
-            "userinfo_token": {"entity_type_name": "Jans::Userinfo_token"},
-        },
     })
 });
 
@@ -270,11 +265,6 @@ async fn test_memory_log_interface() {
         "CEDARLING_WORKLOAD_AUTHZ": "enabled",
         "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
         "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
-        "CEDARLING_TOKEN_CONFIGS": {
-            "access_token": {"entity_type_name": "Access_token"},
-            "id_token": {"entity_type_name": "id_token"},
-            "userinfo_token": {"entity_type_name": "Userinfo_token"},
-        },
     });
 
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
