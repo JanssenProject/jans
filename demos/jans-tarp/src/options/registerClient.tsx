@@ -280,8 +280,9 @@ export default function RegisterClient({ isOpen, handleDialog }) {
                 if (details.option.create && reason !== 'removeOption') {
                   valueList.push({ id: undefined, name: details.option.name, create: details.option.create });
                   setSelectedScopes(valueList);
-                }
-                else {
+                } else if(reason === 'createOption') {
+                  valueList.push({ id: undefined, name: details.option, create: true });
+                } else {
                   setSelectedScopes(newValue);
                 }
               }}

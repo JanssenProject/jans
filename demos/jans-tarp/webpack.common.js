@@ -58,6 +58,9 @@ const assetArr = [{
     from: path.resolve('src/static/icon.png')
 },
 {
+    from: path.resolve('src/static/logo.jpg')
+},
+{
     from: path.resolve('src/static/tarpDocs1.png')
 },
 {
