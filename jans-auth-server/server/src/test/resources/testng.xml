@@ -68,6 +68,11 @@
             <!-- USER INFO -->
             <class name="io.jans.as.server.userinfo.ws.rs.UserInfoServiceTest" />
 
+            <!-- SSA -->
+            <class name="io.jans.as.server.ssa.ws.rs.SsaServiceTest" />
+            <class name="io.jans.as.server.ssa.ws.rs.SsaRestWebServiceImplTest" />
+            <class name="io.jans.as.server.ssa.ws.rs.SsaJsonServiceTest" />
+
             <!-- UTIL -->
             <class name="io.jans.as.server.util.ServerUtilTest" />
         </classes>

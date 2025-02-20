@@ -148,7 +148,7 @@ public class SsaCreateRequest extends BaseRequest {
     public static SsaCreateRequest fromJson(JSONObject requestObject) throws JSONException {
         final SsaCreateRequest result = new SsaCreateRequest();
         JsonApplier.getInstance().apply(requestObject, result);
-        result.setOrgId(requestObject.getString(ORG_ID.getName()));
+        result.setOrgId(requestObject.optString(ORG_ID.getName()));
         result.setExpiration(longOrNull(requestObject, EXPIRATION.getName()));
         result.setDescription(requestObject.optString(DESCRIPTION.getName()));
         result.setSoftwareId(requestObject.optString(SOFTWARE_ID.getName()));

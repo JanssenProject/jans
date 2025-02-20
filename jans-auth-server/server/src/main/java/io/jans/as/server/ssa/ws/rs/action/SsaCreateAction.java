@@ -37,6 +37,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -110,6 +111,7 @@ public class SsaCreateAction {
             final SsaCreateRequest ssaCreateRequest = SsaCreateRequest.fromJson(jsonRequest);
             log.debug("Attempting to create ssa: {}", ssaCreateRequest);
 
+            prepareCreateRequest(ssaCreateRequest);
             ssaRestWebServiceValidator.validateSsaCreateRequest(ssaCreateRequest);
 
             String ssaBaseDN = staticConfiguration.getBaseDn().getSsa();
@@ -118,7 +120,7 @@ public class SsaCreateAction {
             ssaRestWebServiceValidator.checkScopesPolicy(client, SsaScopeType.SSA_ADMIN.getValue());
 
             final Date creationDate = new Date();
-            final Date expirationDate = getExpiration(ssaCreateRequest);
+            final Date expirationDate = getExpiration(ssaCreateRequest.getExpiration());
 
             final Ssa ssa = new Ssa();
             ssa.setDn("inum=" + inum + "," + ssaBaseDN);
@@ -169,6 +171,22 @@ public class SsaCreateAction {
         return builder.build();
     }
 
+    private void prepareCreateRequest(SsaCreateRequest request) {
+        if (request.getExpiration() == null || request.getExpiration() == 0) {
+            final Date expiration = getExpiration(request.getExpiration());
+            request.setExpiration(expiration.getTime() / 1000L);
+        }
+        if (request.getLifetime() == null || request.getLifetime() < 1) {
+            int lifetime = (int) (request.getExpiration() - (new Date().getTime() / 1000L));
+            request.setLifetime(lifetime);
+        }
+
+        // Mike: All are optional. If the software_id isn't provided, we should just create a uuid.
+        if (StringUtils.isBlank(request.getSoftwareId())) {
+            request.setSoftwareId(UUID.randomUUID().toString());
+        }
+    }
+
     /**
      * Get custom attributes from a request, previously configured in SSA global parameters.
      * <p>
@@ -216,13 +234,13 @@ public class SsaCreateAction {
      * of the request is null.
      * </p>
      *
-     * @param ssaCreateRequest Request of SSA
+     * @param expiration date in UTC
      * @return Respective new Date instance.
      */
-    private Date getExpiration(SsaCreateRequest ssaCreateRequest) {
+    private Date getExpiration(Long expiration) {
         Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
-        if (ssaCreateRequest.getExpiration() != null && ssaCreateRequest.getExpiration() > 0) {
-            calendar.setTimeInMillis(ssaCreateRequest.getExpiration() * 1000L);
+        if (expiration != null && expiration > 0) {
+            calendar.setTimeInMillis(expiration * 1000L);
             return calendar.getTime();
         }
         calendar.add(Calendar.DATE, appConfiguration.getSsaConfiguration().getSsaExpirationInDays());

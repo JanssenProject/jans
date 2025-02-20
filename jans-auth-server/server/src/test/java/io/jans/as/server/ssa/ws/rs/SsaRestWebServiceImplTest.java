@@ -9,6 +9,7 @@ import jakarta.ws.rs.core.Response;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -34,6 +35,9 @@ public class SsaRestWebServiceImplTest {
 
     @Mock
     private SsaRevokeAction ssaRevokeAction;
+
+    @Mock
+    private Logger log;
 
     @Test
     public void create_validParams_validResponse() {
