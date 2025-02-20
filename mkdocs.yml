@@ -407,24 +407,6 @@ nav:
       - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
 - Cedarling:
   - Overview: 'cedarling/cedarling-overview.md'
-<<<<<<< HEAD
-  - Authz: 'cedarling/cedarling-authz.md'
-  - Policy Store: 'cedarling/cedarling-policy-store.md'
-  - JWT: 'cedarling/cedarling-jwt.md'
-  - Logs: 'cedarling/cedarling-logs.md'
-  - Properties: 'cedarling/cedarling-properties.md'
-  - Sidecar: 
-      - cedarling/cedarling-sidecar.md
-      - KrakenD Plugin: cedarling/cedarling-krakend.md
-  - Python:
-      - cedarling/python/README.md
-      - How to use: cedarling/python/usage.md
-  - WASM: 'cedarling/cedarling-wasm.md'
-  - UniFFI:
-      - cedarling/uniffi/cedarling-uniffi.md
-      - iOS: 'cedarling/uniffi/cedarling-ios.md'
-      - Android: 'cedarling/uniffi/cedarling-android.md'
-=======
   - Quick Start Guide: 'cedarling/cedarling-quick-start.md'
   - How To Use:
     - Types Of Bindings: 'cedarling/cedarling-binding-types.md'
@@ -443,8 +425,11 @@ nav:
     - Python:
         - cedarling/python/README.md
         - How to use: cedarling/python/usage.md
+  - UniFFI:
+      - cedarling/uniffi/cedarling-uniffi.md
+      - iOS: 'cedarling/uniffi/cedarling-ios.md'
+      - Android: 'cedarling/uniffi/cedarling-android.md'
   
->>>>>>> a031b0b1c3b (docs: reorganize navigation)
 - Agama:
   - Introduction: agama/introduction.md
   - Language reference: agama/language-reference.md
@@ -503,9 +488,9 @@ plugins:
 - search
 - exclude-search:
     exclude_unreferenced: true
-- git-revision-date-localized:
-    enable_creation_date: true
-    type: timeago
+# - git-revision-date-localized:
+#     enable_creation_date: true
+#     type: timeago
 repo_name: GitHub
 repo_url: https://github.com/JanssenProject/jans/
 site_author: Janssen, Inc.
