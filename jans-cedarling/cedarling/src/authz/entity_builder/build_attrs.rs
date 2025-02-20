@@ -39,7 +39,7 @@ pub fn build_entity_attrs_from_tkn(
         let entity_type_name = match &attr{
             Attribute::EntityOrCommon { required:_, name } => {
                 if let Some((entity_type_name, _)) = schema
-                .get_common_type(&name, default_namespace)
+                .get_common_type(name, default_namespace)
                 .map_err(|e| BuildAttrError::new(name.clone(), BuildAttrErrorKind::BuildExpression(BuildExprError::ParseTypeName(name.clone(), e))))? {
                     Some(entity_type_name)
                 } else{
