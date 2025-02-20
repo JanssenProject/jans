@@ -9,57 +9,48 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
 
 ## Building
 
-1. Clone the jans monorepo and change directory to /path/of/jans/jans-cedarling
-
-   ```
+1. Clone the jans monorepo and change directory to `/path/of/jans/jans-cedarling`.
+   ```bash
     git clone https://github.com/JanssenProject/jans.git
     cd /path/of/jans/jans-cedarling
    ```
 
-1. Build the library:
+2. Build the library:
+   ```bash
+   cargo build
+   ```
+   In target/debug, you should find the libmobile.dylib file.
 
-```bash
-cargo build
-```
+3. Generate the bindings:
+   ```bash
+   cargo run --bin uniffi-bindgen generate --library ./target/debug/libmobile.dylib --language swift --out-dir ./bindings/cedarling_uniffi/output
+   ```
 
-In target/debug, you should find the libmobile.dylib file.
+4. Building the iOS binaries and adding these targets to Rust.
+   ```bash
+   rustup target add aarch64-apple-ios-sim aarch64-apple-ios
+   ```
 
-2. Generate the bindings:
+5. Build the library for Swift.
+   ```bash
+   cargo build --release --target=aarch64-apple-ios-sim
+   cargo build --release --target=aarch64-apple-ios
+   ```
+   You should have two binaries `target/aarch64-apple-ios-sim/release/libmobile.a` and `target/aarch64-apple-ios/release/libmobile.a`.
 
-```bash
-cargo run --bin uniffi-bindgen generate --library ./target/debug/libmobile.dylib --language swift --out-dir ./bindings/cedarling_uniffi/output
-```
+6. The XCFramework will allow us to import the library with zero effort in Xcode. First, we need to rename the file ./bindings/cedarling_uniffi/output/mobileFFI.modulemap to ./bindings/cedarling_uniffi/output/module.modulemap. Then, we can create the XCFramework:
+   ```bash
+   xcodebuild -create-xcframework \
+           -library ./target/aarch64-apple-ios-sim/release/libmobile.a -headers ./bindings/cedarling_uniffi/output \
+           -library ./target/aarch64-apple-ios/release/libmobile.a -headers ./bindings/cedarling_uniffi/output \
+           -output "ios/Mobile.xcframework"
+   ```
 
-3. Building the iOS binaries and adding these targets to Rust.
+7. Open `./jans-cedarling/bindings/cedarling_uniffi/iOSApp` in Xcode. Import both the XCFramework Mobile.xcframework and the Swift file bindings `bindings/output/mobile.swift` files into your project (drag and drop should work).
 
-```bash
-rustup target add aarch64-apple-ios-sim aarch64-apple-ios
-```
-
-4. Build the library for Swift.
-
-```bash
-cargo build --release --target=aarch64-apple-ios-sim
-cargo build --release --target=aarch64-apple-ios
-```
-
-You should have two binaries target/aarch64-apple-ios-sim/release/libmobile.a and target/aarch64-apple-ios/release/libmobile.a.
-
-5. The XCFramework will allow us to import the library with zero effort in Xcode. First, we need to rename the file ./bindings/cedarling_uniffi/output/mobileFFI.modulemap to ./bindings/cedarling_uniffi/output/module.modulemap.
-
-Then, we can create the XCFramework:
-
-```bash
-xcodebuild -create-xcframework \
-        -library ./target/aarch64-apple-ios-sim/release/libmobile.a -headers ./bindings/cedarling_uniffi/output \
-        -library ./target/aarch64-apple-ios/release/libmobile.a -headers ./bindings/cedarling_uniffi/output \
-        -output "ios/Mobile.xcframework"
-```
-
-6. Open ./jans-cedarling/bindings/cedarling_uniffi/iOSApp in Xcode. Import both the XCFramework Mobile.xcframework and the Swift file bindings bindings/output/mobile.swift files into your project (drag and drop should work).
-
-7. Run iOS project on simulator.
+8. Run iOS project on simulator.
 
 We have included [a sample iOS app](https://github.com/JanssenProject/jans/tree/main/jans-cedarling/bindings/cedarling_uniffi/iOSApp) using Cedarling UniFFI binding for making authorisation decisions. Here is a demonstration video of its working.
 
-<iframe src="https://www.loom.com/share/553e53a95a4a4e40ae54fc256538d7f9?sid=2e80f4bb-326d-4aa2-8d3b-f6abe62956db" allowfullscreen></iframe>
+
+<div style="position: relative; padding-bottom: 214.62686567164178%; height: 0;"><iframe src="https://www.loom.com/embed/9ee1a9cf5cc04c1ea17fdc638ca45625?sid=c22f2463-22f0-4531-8749-403a1e6a25db" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>
