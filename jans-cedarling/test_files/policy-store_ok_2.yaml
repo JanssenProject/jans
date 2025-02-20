@@ -21,6 +21,7 @@ policy_stores:
           userinfo_token:
             entity_type_name: "Jans::Userinfo_token"
             user_id: "sub"
+            role_mapping: "role"
     policies:
       1:
         description: simple policy example for principal workload, permit when workload org_id same with resource

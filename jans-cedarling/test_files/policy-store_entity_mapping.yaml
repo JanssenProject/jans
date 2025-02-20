@@ -1,6 +1,5 @@
 # This software is available under the Apache-2.0 license.
 # See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
-#
 # Copyright (c) 2024, Gluu, Inc.
 cedar_version: v4.0.0
 policy_stores:
@@ -125,8 +124,11 @@ policy_stores:
           access_token:
             entity_type_name: Jans::MappedAccess_token
             workload_id: client_id
+            role_mapping: role
           id_token:
             entity_type_name: Jans::MappedIdToken
+            role_mapping: role
           userinfo_token:
             entity_type_name: Jans::MappedUserinfo_token
             user_id: sub
+            role_mapping: role

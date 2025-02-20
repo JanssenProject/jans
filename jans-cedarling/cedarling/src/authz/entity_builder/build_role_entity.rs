@@ -48,8 +48,17 @@ impl EntityBuilder {
             .filter_map(|src| tokens.get(*src));
 
         for token in token_refs {
-            let role_claim = token.role_mapping();
-            if let Some(claim) = token.get_claim(role_claim).as_ref() {
+            let role_src_claim = if let Some(src) = token
+                .get_metadata()
+                .and_then(|metadata| metadata.role_mapping.as_ref())
+            {
+                src
+            } else {
+                // we skip tokens without a role_mapping
+                continue;
+            };
+
+            if let Some(claim) = token.get_claim(role_src_claim).as_ref() {
                 let unified_claims = UnifyClaims::deserialize(claim.value());
                 let claim_role_name_iter = match unified_claims {
                     Ok(ref unified_claims) => unified_claims.iter(),
@@ -58,7 +67,7 @@ impl EntityBuilder {
                             token,
                             BuildEntityError::TokenClaimTypeMismatch(
                                 TokenClaimTypeError::type_mismatch(
-                                    role_claim,
+                                    role_src_claim,
                                     "String or Array",
                                     claim.value(),
                                 ),
@@ -142,7 +151,11 @@ mod test {
 
     #[test]
     fn can_build_using_userinfo_tkn_vec_claim() {
-        let iss = TrustedIssuer::default();
+        let mut iss = TrustedIssuer::default();
+        iss.tokens_metadata
+            .get_mut("userinfo_token")
+            .map(|metadata| metadata.role_mapping = Some("role".into()))
+            .expect("should have userinfo token metadata");
         let userinfo_token = Token::new(
             "userinfo_token",
             HashMap::from([("role".to_string(), json!(["admin", "user"]))]).into(),
@@ -168,7 +181,11 @@ mod test {
 
     #[test]
     fn can_build_using_userinfo_tkn_string_claim() {
-        let iss = TrustedIssuer::default();
+        let mut iss = TrustedIssuer::default();
+        iss.tokens_metadata
+            .get_mut("userinfo_token")
+            .map(|metadata| metadata.role_mapping = Some("role".into()))
+            .expect("should have userinfo token metadata");
         let userinfo_token = Token::new(
             "userinfo_token",
             HashMap::from([("role".to_string(), json!("admin"))]).into(),
@@ -180,7 +197,11 @@ mod test {
 
     #[test]
     fn can_build_using_id_tkn() {
-        let iss = TrustedIssuer::default();
+        let mut iss = TrustedIssuer::default();
+        iss.tokens_metadata
+            .get_mut("id_token")
+            .map(|metadata| metadata.role_mapping = Some("role".into()))
+            .expect("should have id token metadata");
         let id_token = Token::new(
             "id_token",
             HashMap::from([("role".to_string(), json!("admin"))]).into(),
@@ -192,7 +213,11 @@ mod test {
 
     #[test]
     fn can_build_using_access_tkn() {
-        let iss = TrustedIssuer::default();
+        let mut iss = TrustedIssuer::default();
+        iss.tokens_metadata
+            .get_mut("access_token")
+            .map(|metadata| metadata.role_mapping = Some("role".into()))
+            .expect("should have access token metadata");
         let access_token = Token::new(
             "access_token",
             HashMap::from([("role".to_string(), json!("admin"))]).into(),
@@ -204,7 +229,19 @@ mod test {
 
     #[test]
     fn ignores_duplicate_roles() {
-        let iss = TrustedIssuer::default();
+        let mut iss = TrustedIssuer::default();
+        iss.tokens_metadata
+            .get_mut("access_token")
+            .map(|metadata| metadata.role_mapping = Some("role".into()))
+            .expect("should have access token metadata");
+        iss.tokens_metadata
+            .get_mut("id_token")
+            .map(|metadata| metadata.role_mapping = Some("role".into()))
+            .expect("should have id token metadata");
+        iss.tokens_metadata
+            .get_mut("userinfo_token")
+            .map(|metadata| metadata.role_mapping = Some("role".into()))
+            .expect("should have userinfo token metadata");
         let access_token = Token::new(
             "access_token",
             HashMap::from([("role".to_string(), json!("admin"))]).into(),
@@ -230,7 +267,19 @@ mod test {
 
     #[test]
     fn can_create_multiple_different_roles_from_different_tokens() {
-        let iss = TrustedIssuer::default();
+        let mut iss = TrustedIssuer::default();
+        iss.tokens_metadata
+            .get_mut("access_token")
+            .map(|metadata| metadata.role_mapping = Some("role".into()))
+            .expect("should have access token metadata");
+        iss.tokens_metadata
+            .get_mut("id_token")
+            .map(|metadata| metadata.role_mapping = Some("role".into()))
+            .expect("should have id token metadata");
+        iss.tokens_metadata
+            .get_mut("userinfo_token")
+            .map(|metadata| metadata.role_mapping = Some("role".into()))
+            .expect("should have userinfo token metadata");
         let schema = test_schema();
         let access_token = Token::new(
             "access_token",

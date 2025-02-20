@@ -8,7 +8,6 @@ use serde::Deserialize;
 use serde_json::Value;
 use std::collections::HashMap;
 
-const DEFAULT_USER_ID_SRC_CLAIM: &str = "sub";
 const DEFAULT_ROLE_SRC_CLAIM: &str = "role";
 
 #[derive(Debug, PartialEq)]
@@ -29,13 +28,6 @@ impl<'a> Token<'a> {
 
     pub fn get_metadata(&self) -> Option<&TokenEntityMetadata> {
         self.iss.and_then(|iss| iss.get_token_metadata(&self.name))
-    }
-
-    pub fn user_mapping(&self) -> &str {
-        self.iss
-            .unwrap_or_default()
-            .get_user_mapping(&self.name)
-            .unwrap_or(DEFAULT_USER_ID_SRC_CLAIM)
     }
 
     pub fn claim_mapping(&self) -> Option<&ClaimMappings> {
