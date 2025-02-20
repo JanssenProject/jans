@@ -410,11 +410,14 @@ nav:
   - Quick Start Guide: 'cedarling/cedarling-quick-start.md'
   - How To Use:
     - Types Of Bindings: 'cedarling/cedarling-binding-types.md'
-    - Browser based Apps: 'cedarling/cedarling-wasm.md'
-    - Android Apps: 'cedarling/cedarling-android.md'
-    - iOS Apps: 'cedarling/cedarling-ios.md'
-    - Web Servers: 'cedarling/cedarling-sidecar.md'
-    - API Gateways: 'cedarling/cedarling-krakend.md'
+    - Browser Apps: 'cedarling/cedarling-wasm.md'
+    - Mobile Apps:
+      - UniFFI interface: 'cedarling/uniffi/cedarling-uniffi.md'
+      - Android Apps: 'cedarling/uniffi/cedarling-android.md'
+      - iOS Apps: 'cedarling/uniffi/cedarling-ios.md'
+    - Web Server App: 
+      - Sidecar: 'cedarling/cedarling-sidecar.md'
+      - API Gateways: 'cedarling/cedarling-krakend.md'
   - Administration:
     - Authz: 'cedarling/cedarling-authz.md'
     - Policy Store: 'cedarling/cedarling-policy-store.md'
@@ -426,10 +429,6 @@ nav:
     - Python:
         - cedarling/python/README.md
         - How to use: cedarling/python/usage.md
-  - UniFFI:
-      - cedarling/uniffi/cedarling-uniffi.md
-      - iOS: 'cedarling/uniffi/cedarling-ios.md'
-      - Android: 'cedarling/uniffi/cedarling-android.md'
   
 - Agama:
   - Introduction: agama/introduction.md
@@ -489,9 +488,9 @@ plugins:
 - search
 - exclude-search:
     exclude_unreferenced: true
-# - git-revision-date-localized:
-#     enable_creation_date: true
-#     type: timeago
+- git-revision-date-localized:
+    enable_creation_date: true
+    type: timeago
 repo_name: GitHub
 repo_url: https://github.com/JanssenProject/jans/
 site_author: Janssen, Inc.
