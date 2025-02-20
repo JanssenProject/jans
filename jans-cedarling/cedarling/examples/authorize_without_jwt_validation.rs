@@ -43,13 +43,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             decision_log_user_claims: vec!["client_id".to_string(), "username".to_string()],
             decision_log_workload_claims: vec!["org_id".to_string()],
             id_token_trust_mode: IdTokenTrustMode::None,
-            mapping_tokens: HashMap::from([
-                ("access_token".to_string(), "Access_token".to_string()),
-                ("id_token".to_string(), "id_token".to_string()),
-                ("userinfo_token".to_string(), "Userinfo_token".to_string()),
-                ("custom_token".to_string(), "Custom_token".to_string()),
-            ])
-            .into(),
             ..Default::default()
         },
     })

@@ -9,7 +9,6 @@ use cedarling::{
 };
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use lazy_static::lazy_static;
-use std::collections::HashMap;
 use tokio::runtime::Runtime;
 
 const POLICY_STORE: &str = include_str!("../../test_files/policy-store_ok.yaml");
@@ -48,15 +47,6 @@ lazy_static! {
             mapping_user: Some("Jans::User".to_string()),
             mapping_workload: Some("Jans::Workload".to_string()),
             mapping_role: Some("Jans::Role".to_string()),
-            mapping_tokens: HashMap::from([
-                ("access_token".to_string(), "Jans::Access_token".to_string()),
-                ("id_token".to_string(), "Jans::id_token".to_string()),
-                (
-                    "userinfo_token".to_string(),
-                    "Jans::Userinfo_token".to_string(),
-                ),
-            ])
-            .into(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },

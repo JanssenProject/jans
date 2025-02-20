@@ -124,10 +124,7 @@ policy_stores:
         tokens_metadata:
           access_token:
             entity_type_name: Jans::MappedAccess_token
-            role_mapping: role
           id_token:
             entity_type_name: Jans::MappedIdToken
-            role_mapping: role
           userinfo_token:
             entity_type_name: Jans::MappedUserinfo_token
-            role_mapping: role

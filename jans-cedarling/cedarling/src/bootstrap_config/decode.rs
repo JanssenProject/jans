@@ -114,7 +114,6 @@ impl BootstrapConfig {
             jwt_sig_validation: raw.jwt_sig_validation.into(),
             jwt_status_validation: raw.jwt_status_validation.into(),
             signature_algorithms_supported: raw.jwt_signature_algorithms_supported.clone(),
-            // token_validation_settings: raw.token_configs.clone().into(),
         };
 
         let authorization_config = AuthorizationConfig {
@@ -127,7 +126,6 @@ impl BootstrapConfig {
             mapping_user: raw.mapping_user.clone(),
             mapping_workload: raw.mapping_workload.clone(),
             mapping_role: raw.mapping_role.clone(),
-            mapping_tokens: raw.token_configs.clone().into(),
             id_token_trust_mode: raw.id_token_trust_mode,
         };
 

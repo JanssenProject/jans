@@ -42,12 +42,16 @@ const DEFAULT_USERINFO_TKN_ENTITY_NAME: &str = "Jans::Userinfo_token";
 const DEFAULT_ROLE_ENTITY_NAME: &str = "Jans::Role";
 
 /// The names of the entities in the schema
+///
+/// Note that the entity names for the tokens can be found in the trusted issuer
+/// struct under their respective token entity metadata. The entity names here
+/// only belong to the entity names that could be set using the bootstrap
+/// properties
 #[derive(Debug)]
 pub struct EntityNames {
     user: String,
     workload: String,
     role: String,
-    tokens: HashMap<String, String>,
 }
 
 impl From<&AuthorizationConfig> for EntityNames {
@@ -65,32 +69,16 @@ impl From<&AuthorizationConfig> for EntityNames {
                 .mapping_role
                 .clone()
                 .unwrap_or_else(|| DEFAULT_ROLE_ENTITY_NAME.to_string()),
-            tokens: config.mapping_tokens.clone().into(),
         }
     }
 }
 
 impl Default for EntityNames {
     fn default() -> Self {
-        let tokens = HashMap::from([
-            (
-                "access_token".to_string(),
-                DEFAULT_ACCESS_TKN_ENTITY_NAME.to_string(),
-            ),
-            (
-                "id_token".to_string(),
-                DEFAULT_ID_TKN_ENTITY_NAME.to_string(),
-            ),
-            (
-                "userinfo_token".to_string(),
-                DEFAULT_USERINFO_TKN_ENTITY_NAME.to_string(),
-            ),
-        ]);
         Self {
             user: DEFAULT_USER_ENTITY_NAME.to_string(),
             workload: DEFAULT_WORKLOAD_ENTITY_NAME.to_string(),
             role: DEFAULT_ROLE_ENTITY_NAME.to_string(),
-            tokens,
         }
     }
 }
@@ -122,16 +110,22 @@ impl EntityBuilder {
         tokens: &HashMap<String, Token>,
         resource: &ResourceData,
     ) -> Result<AuthorizeEntitiesData, BuildCedarlingEntityError> {
-        println!("tokens:\n{:#?}", tokens);
         let mut built_entities = BuiltEntities::default();
 
         let mut token_entities = HashMap::new();
         for (tkn_name, tkn) in tokens.iter() {
-            let entity_name = if let Some(entity_name) = self.entity_names.tokens.get(tkn_name) {
+            let entity_name = tkn
+                .iss
+                .and_then(|iss| iss.tokens_metadata.get(tkn_name))
+                .map(|metadata| metadata.entity_type_name.as_str())
+                .or_else(|| default_tkn_entity_name(tkn_name));
+
+            let entity_name = if let Some(entity_name) = entity_name {
                 entity_name
             } else {
                 continue;
             };
+
             let entity = self.build_tkn_entity(entity_name, tkn, &built_entities)?;
             built_entities.insert(&entity);
             token_entities.insert(tkn_name.to_string(), entity);
@@ -170,6 +164,15 @@ impl EntityBuilder {
             roles,
             tokens: token_entities,
         })
+    }
+}
+
+fn default_tkn_entity_name(tkn_name: &str) -> Option<&'static str> {
+    match tkn_name {
+        "access_token" => Some(DEFAULT_ACCESS_TKN_ENTITY_NAME),
+        "id_token" => Some(DEFAULT_ID_TKN_ENTITY_NAME),
+        "userinfo_token" => Some(DEFAULT_USERINFO_TKN_ENTITY_NAME),
+        _ => None,
     }
 }
 
@@ -255,7 +258,8 @@ impl BuildEntityError {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::common::{cedar_schema::cedar_json::CedarSchemaJson, policy_store::TrustedIssuer};
+    use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
+    use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
     use cedar_policy::EvalResult;
     use serde_json::json;
     use std::collections::HashMap;
@@ -344,24 +348,36 @@ mod test {
             }
         }))
         .expect("should successfully build schema");
-        let iss = TrustedIssuer::default();
-        let entity_builder = EntityBuilder::new(
-            schema,
-            EntityNames {
-                tokens: HashMap::from([
-                    ("access_token".to_string(), "Access_token".to_string()),
-                    ("id_token".to_string(), "Jans::Id_token".to_string()),
-                    (
-                        "userinfo_token".to_string(),
-                        "Custom::Userinfo_token".to_string(),
-                    ),
-                    ("custom_token".to_string(), "Custom_token".to_string()),
-                ]),
-                ..Default::default()
-            },
-            true,
-            false,
-        );
+
+        let mut iss = TrustedIssuer::default();
+        iss.tokens_metadata = HashMap::from([
+            (
+                "access_token".into(),
+                TokenEntityMetadata::builder()
+                    .entity_type_name("Jans::Access_token".into())
+                    .build(),
+            ),
+            (
+                "id_token".into(),
+                TokenEntityMetadata::builder()
+                    .entity_type_name("Jans::Id_token".into())
+                    .build(),
+            ),
+            (
+                "userinfo_token".into(),
+                TokenEntityMetadata::builder()
+                    .entity_type_name("Custom::Userinfo_token".into())
+                    .build(),
+            ),
+            (
+                "custom_token".into(),
+                TokenEntityMetadata::builder()
+                    .entity_type_name("Custom::Custom_token".into())
+                    .build(),
+            ),
+        ]);
+
+        let entity_builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
 
         let tkn_names = ["access_token", "id_token", "userinfo_token", "custom_token"];
 

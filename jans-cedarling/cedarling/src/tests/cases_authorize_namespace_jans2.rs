@@ -3,8 +3,6 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::HashMap;
-
 use cedarling_util::get_config;
 use test_utils::assert_eq;
 use tokio::test;
@@ -25,18 +23,6 @@ async fn test_namespace_jans2() {
     bs_config.authorization_config.mapping_user = Some("Jans2::User".to_string());
     bs_config.authorization_config.mapping_workload = Some("Jans2::Workload".to_string());
     bs_config.authorization_config.mapping_role = Some("Jans2::Role".to_string());
-    bs_config.authorization_config.mapping_tokens = HashMap::from([
-        (
-            "access_token".to_string(),
-            "Jans2::Access_token".to_string(),
-        ),
-        ("id_token".to_string(), "Jans2::id_token".to_string()),
-        (
-            "userinfo_token".to_string(),
-            "Jans2::Userinfo_token".to_string(),
-        ),
-    ])
-    .into();
     let cedarling = Cedarling::new(&bs_config)
         .await
         .expect("bootstrap config should initialize correctly");

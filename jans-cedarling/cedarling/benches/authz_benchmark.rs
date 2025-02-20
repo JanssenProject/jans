@@ -11,7 +11,7 @@ use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_ma
 use jsonwebtoken::Algorithm;
 use serde::Deserialize;
 use serde_json::json;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use test_utils::token_claims::generate_token_using_claims;
 use tokio::runtime::Runtime;
 
@@ -80,15 +80,6 @@ async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCed
             mapping_user: Some("Jans::User".to_string()),
             mapping_workload: Some("Jans::Workload".to_string()),
             mapping_role: Some("Jans::Role".to_string()),
-            mapping_tokens: HashMap::from([
-                ("access_token".to_string(), "Jans::Access_token".to_string()),
-                ("id_token".to_string(), "Jans::id_token".to_string()),
-                (
-                    "userinfo_token".to_string(),
-                    "Jans::Userinfo_token".to_string(),
-                ),
-            ])
-            .into(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
@@ -112,17 +103,6 @@ async fn prepare_cedarling_with_jwt_validation() -> Result<Cedarling, InitCedarl
             jwt_sig_validation: false,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
-            // token_validation_settings: HashMap::from([
-            //     (
-            //         "access_token".to_string(),
-            //         TokenValidationConfig::access_token(),
-            //     ),
-            //     ("id_token".to_string(), TokenValidationConfig::id_token()),
-            //     (
-            //         "userinfo_token".to_string(),
-            //         TokenValidationConfig::userinfo_token(),
-            //     ),
-            // ]),
         },
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
@@ -131,15 +111,6 @@ async fn prepare_cedarling_with_jwt_validation() -> Result<Cedarling, InitCedarl
             mapping_user: Some("Jans::User".to_string()),
             mapping_workload: Some("Jans::Workload".to_string()),
             mapping_role: Some("Jans::Role".to_string()),
-            mapping_tokens: HashMap::from([
-                ("access_token".to_string(), "Jans::Access_token".to_string()),
-                ("id_token".to_string(), "Jans::id_token".to_string()),
-                (
-                    "userinfo_token".to_string(),
-                    "Jans::Userinfo_token".to_string(),
-                ),
-            ])
-            .into(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },

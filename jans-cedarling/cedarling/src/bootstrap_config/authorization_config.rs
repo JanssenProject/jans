@@ -51,9 +51,6 @@ pub struct AuthorizationConfig {
     /// Type Name of the Role entity
     pub mapping_role: Option<String>,
 
-    /// Name of Cedar token schema entities
-    pub mapping_tokens: TokenEntityNames,
-
     /// Sets the validation level for ID tokens.
     ///
     /// The available levels are [`None`] and [`Strict`].
