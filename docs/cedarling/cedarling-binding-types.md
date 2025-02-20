@@ -6,14 +6,23 @@ tags:
 
 # Bindings Offered by Cedarling
 
-## This content is in progress
+Cedarling bindings offer ways to integrate Cedarling with apps running in 
+various execution environments. 
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+## Browser apps 
 
-## Have questions in the meantime?
+Cedarling can run in a browser alongside JavaScript 
+application using [WASM binding](./cedarling-wasm.md). 
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+## Mobile apps
 
-## Want to contribute?
+Cedarling provides [UniFFI interface binding](./uniffi/cedarling-uniffi.md) to integrate with mobile applications running on [Android](./uniffi/cedarling-android.md) 
+or [iOS](./cedarling-ios.md).
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+## Server side applications
+
+Applications running on server can leverage 
+Cedarling [sidecar](./cedarling-sidecar.md) to integrate Cedarling. For instance,
+a [load balancer](./cedarling-krakend.md) can run sidecar container and use it
+to perform server-side authorization checks.
+
