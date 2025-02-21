@@ -408,4 +408,98 @@ mod tests {
             "1 system log entry should be present with WARN level"
         );
     }
+
+    #[test]
+    fn test_max_items_config() {
+        let default_config: ConfigSparKV = Default::default();
+
+        // Test default value when None
+        let logger = MemoryLogger::new(
+            MemoryLogConfig {
+                log_ttl: 10,
+                max_items: None,
+                max_item_size: None,
+            },
+            LogLevel::DEBUG,
+            PdpID::new(),
+            None,
+        );
+        assert_eq!(
+            logger.storage.lock().unwrap().config.max_items,
+            default_config.max_items
+        );
+
+        // Test disabled check when 0
+        let logger = MemoryLogger::new(
+            MemoryLogConfig {
+                log_ttl: 10,
+                max_items: Some(0),
+                max_item_size: None,
+            },
+            LogLevel::DEBUG,
+            PdpID::new(),
+            None,
+        );
+        assert_eq!(logger.storage.lock().unwrap().config.max_items, 0);
+
+        // Test custom value
+        let logger = MemoryLogger::new(
+            MemoryLogConfig {
+                log_ttl: 10,
+                max_items: Some(500),
+                max_item_size: None,
+            },
+            LogLevel::DEBUG,
+            PdpID::new(),
+            None,
+        );
+        assert_eq!(logger.storage.lock().unwrap().config.max_items, 500);
+    }
+
+    #[test]
+    fn test_max_item_size_config() {
+        let default_config: ConfigSparKV = Default::default();
+
+        // Test default value when None
+        let logger = MemoryLogger::new(
+            MemoryLogConfig {
+                log_ttl: 10,
+                max_items: None,
+                max_item_size: None,
+            },
+            LogLevel::DEBUG,
+            PdpID::new(),
+            None,
+        );
+        assert_eq!(
+            logger.storage.lock().unwrap().config.max_item_size,
+            default_config.max_item_size
+        );
+
+        // Test disabled check when 0
+        let logger = MemoryLogger::new(
+            MemoryLogConfig {
+                log_ttl: 10,
+                max_items: None,
+                max_item_size: Some(0),
+            },
+            LogLevel::DEBUG,
+            PdpID::new(),
+            None,
+        );
+        assert_eq!(logger.storage.lock().unwrap().config.max_item_size, 0);
+
+        // Test custom value
+        let logger = MemoryLogger::new(
+            MemoryLogConfig {
+                log_ttl: 10,
+                max_items: None,
+                max_item_size: Some(10_000),
+            },
+            LogLevel::DEBUG,
+            PdpID::new(),
+            None,
+        );
+        assert_eq!(logger.storage.lock().unwrap().config.max_item_size, 10_000);
+    }
 }

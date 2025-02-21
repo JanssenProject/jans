@@ -213,6 +213,30 @@ fn test_clear_expired_with_overwritten_key() {
 }
 
 #[test]
+fn test_capacity_disabled() {
+    let mut config: Config = Config::new();
+    config.max_items = 0; // disabled
+    let mut sparkv = SparKV::<String>::with_config(config);
+    
+    // Should be able to add unlimited items
+    for i in 0..1000 {
+        sparkv.set(&format!("key{}", i), format!("value{}", i), &[]).unwrap();
+    }
+    assert_eq!(sparkv.len(), 1000);
+}
+
+#[test]
+fn test_item_size_disabled() {
+    let mut config: Config = Config::new();
+    config.max_item_size = 0; // disabled
+    let mut sparkv = SparKV::<String>::with_config(config);
+    
+    // Should be able to add any size
+    sparkv.set("huge", "a".repeat(1_000_000), &[]).unwrap();
+    assert_eq!(sparkv.len(), 1);
+}
+
+#[test]
 fn test_clear_expired_with_auto_clear_expired_enabled() {
     let mut config: Config = Config::new();
     config.auto_clear_expired = true; // explicitly setting it to true
