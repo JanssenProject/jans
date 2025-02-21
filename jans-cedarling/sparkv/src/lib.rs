@@ -250,6 +250,11 @@ impl<T> SparKV<T> {
     }
 
     fn ensure_capacity(&self) -> Result<(), Error> {
+        if self.config.max_items == 0 {
+            // no limit
+            return Ok(());
+        }
+
         if self.len() >= self.config.max_items {
             return Err(Error::CapacityExceeded);
         }
