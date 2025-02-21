@@ -9437,7 +9437,8 @@ parameters as described below:</p>
   by the same client.</li>
 </ul>
 <h2 id="create-a-new-ssa">Create a new SSA<a class="headerlink" href="#create-a-new-ssa" title="Permanent link">#</a></h2>
-<p>Create <code>SSA</code> for the organization with <code>expiration</code> (optional).</p>
+<p>Create <code>SSA</code> for the organization with <code>expiration</code> (optional). 
+If <code>expiration</code> is not set take expiration from <code>ssaConfiguration.ssaExpirationInDays</code> AS configuration property.</p>
 <h3 id="request-body-description">Request body description<a class="headerlink" href="#request-body-description" title="Permanent link">#</a></h3>
 <table>
 <thead>
@@ -9460,7 +9461,7 @@ parameters as described below:</p>
 </tr>
 <tr>
 <td>software_id</td>
-<td>The "software_id" is used for software identification.</td>
+<td>The "software_id" is used for software identification. If not set, generates random UUID.</td>
 <td>false</td>
 </tr>
 <tr>
@@ -9476,22 +9477,22 @@ parameters as described below:</p>
 <tr>
 <td>expiration</td>
 <td>Expiration date. <code>(Default value: calculated based on global SSA settings)</code></td>
-<td>true</td>
+<td>false</td>
 </tr>
 <tr>
 <td>one_time_use</td>
 <td>Defined whether the SSA will be used only once or can be used multiple times. <code>(Default value: true)</code></td>
-<td>true</td>
+<td>false</td>
 </tr>
 <tr>
 <td>rotate_ssa</td>
 <td>TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA. <code>(Default value: true)</code></td>
-<td>true</td>
+<td>false</td>
 </tr>
 <tr>
 <td>lifetime</td>
-<td>SSA Lifetime in seconds</td>
-<td>true</td>
+<td>SSA Lifetime in seconds. If not set calculates lifetime, <code>lifetime = expiration - now</code></td>
+<td>false</td>
 </tr>
 </tbody>
 </table>
@@ -9869,7 +9870,7 @@ Connection: Keep-Alive
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-21T13:08:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-21</span>
       
         <br>
         Created:
