@@ -57,6 +57,16 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub log_ttl: Option<u64>,
 
+    /// Maximum number of log entities that can be stored using [`LogType::Memory`].
+    #[serde(rename = "CEDARLING_LOG_MAX_ITEMS", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub log_max_items: Option<usize>,
+
+    /// Maximum size of a single log entity in bytes using [`LogType::Memory`].
+    #[serde(rename = "CEDARLING_LOG_MAX_ITEM_SIZE", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub log_max_item_size: Option<usize>,
+
     /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
     #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]

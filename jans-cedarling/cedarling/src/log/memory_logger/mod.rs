@@ -34,12 +34,16 @@ impl MemoryLogger {
         pdp_id: PdpID,
         app_name: Option<ApplicationName>,
     ) -> Self {
+        let default_config: ConfigSparKV = Default::default();
+
         let sparkv_config = ConfigSparKV {
             default_ttl: Duration::new(
                 config.log_ttl.try_into().expect("u64 that fits in a i64"),
                 0,
             )
             .expect("a valid duration"),
+            max_items: config.max_items.unwrap_or(default_config.max_items),
+            max_item_size: config.max_item_size.unwrap_or(default_config.max_item_size),
             ..Default::default()
         };
 
@@ -211,7 +215,11 @@ mod tests {
     use test_utils::assert_eq;
 
     fn create_memory_logger(pdp_id: PdpID, app_name: Option<ApplicationName>) -> MemoryLogger {
-        let config = MemoryLogConfig { log_ttl: 60 };
+        let config = MemoryLogConfig {
+            log_ttl: 60,
+            max_items: None,
+            max_item_size: None,
+        };
         MemoryLogger::new(config, LogLevel::TRACE, pdp_id, app_name)
     }
 
@@ -309,7 +317,11 @@ mod tests {
         let request_id = gen_uuid7();
 
         let logger = MemoryLogger::new(
-            MemoryLogConfig { log_ttl: 10 },
+            MemoryLogConfig {
+                log_ttl: 10,
+                max_item_size: None,
+                max_items: None,
+            },
             LogLevel::DEBUG,
             PdpID::new(),
             None,
