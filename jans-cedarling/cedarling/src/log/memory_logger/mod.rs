@@ -14,6 +14,9 @@ use super::interface::{LogStorage, LogWriter, Loggable, composite_key};
 use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::MemoryLogConfig;
 
+mod memory_calc;
+use memory_calc::calculate_memory_usage;
+
 const STORAGE_MUTEX_EXPECT_MESSAGE: &str = "MemoryLogger storage mutex should unlock";
 
 /// A logger that store logs in-memory.
@@ -41,7 +44,10 @@ impl MemoryLogger {
         };
 
         MemoryLogger {
-            storage: Mutex::new(SparKV::with_config(sparkv_config)),
+            storage: Mutex::new(SparKV::with_config_and_sizer(
+                sparkv_config,
+                Some(calculate_memory_usage),
+            )),
             log_level,
             pdp_id,
             app_name,
