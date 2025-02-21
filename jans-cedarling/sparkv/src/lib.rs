@@ -142,6 +142,10 @@ impl<T> SparKV<T> {
         (item.expired_at > Utc::now()).then_some(item)
     }
 
+    pub fn get_oldest_key_by_expiration(&self) -> Option<&ExpEntry> {
+        self.expiries.peek()
+    }
+
     pub fn get_keys(&self) -> Vec<String> {
         self.data.keys().cloned().collect()
     }

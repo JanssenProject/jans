@@ -4,9 +4,10 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use chrono::Duration;
+use serde_json::Value;
 use std::sync::Mutex;
 
-use sparkv::{Config as ConfigSparKV, SparKV};
+use sparkv::{Config as ConfigSparKV, Error, SparKV};
 
 use super::LogLevel;
 use super::err_log_entry::ErrorLogEntry;
@@ -108,6 +109,17 @@ mod fallback {
     }
 }
 
+fn to_json_value<T: Loggable>(entry: &T) -> Value {
+    match serde_json::to_value(entry) {
+        Ok(json) => json,
+        Err(err) => {
+            let err_msg = format!("failed to serialize log entry to JSON: {err}");
+            serde_json::to_value(ErrorLogEntry::from_loggable(entry, err_msg.clone()))
+                .expect(&err_msg)
+        },
+    }
+}
+
 // Implementation of LogWriter
 impl LogWriter for MemoryLogger {
     fn log_any<T: Loggable>(&self, entry: T) {
@@ -118,26 +130,45 @@ impl LogWriter for MemoryLogger {
 
         let entry_id = entry.get_id().to_string();
         let index_keys = entry.get_index_keys();
-        let json = match serde_json::to_value(&entry) {
-            Ok(json) => json,
-            Err(err) => {
-                let err_msg = format!("failed to serialize log entry to JSON: {err}");
-                serde_json::to_value(ErrorLogEntry::from_loggable(&entry, err_msg.clone()))
-                    .expect(&err_msg)
-            },
-        };
+        let json = to_json_value(&entry);
 
         let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
 
         let set_result = storage.set(&entry_id, json, index_keys.as_slice());
 
-        if let Err(err) = set_result {
-            fallback::log(
-                &format!("could not store LogEntry to memory: {err:?}"),
-                &self.pdp_id,
-                &self.app_name,
-            );
+        let err = match set_result {
+            Ok(_) => return,
+            Err(Error::CapacityExceeded) => {
+                // remove oldest key and try again
+
+                let key_to_delete = storage
+                    .get_oldest_key_by_expiration()
+                    .map(|exp_entry| exp_entry.key.clone());
+
+                if let Some(key) = key_to_delete {
+                    storage.pop(&key);
+                }
+
+                // It should be rare case, so instead of cloning the whole entry,
+                // in success case we convert raw value to json (here).
+                // Or we should use Rc<LogEntry> and use Rc::clone() instead.
+                let json = to_json_value(&entry);
+
+                // set_again
+                if let Err(err) = storage.set(&entry_id, json, index_keys.as_slice()) {
+                    err
+                } else {
+                    return;
+                }
+            },
+            Err(err) => err,
         };
+
+        fallback::log(
+            &format!("could not store LogEntry to memory: {err:?}"),
+            &self.pdp_id,
+            &self.app_name,
+        );
     }
 }
 
