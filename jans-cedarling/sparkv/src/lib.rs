@@ -269,6 +269,11 @@ impl<T> SparKV<T> {
     }
 
     fn ensure_item_size(&self, value: &T) -> Result<(), Error> {
+        if self.config.max_item_size == 0 {
+            // no limit
+            return Ok(());
+        }
+
         if let Some(calc) = self.size_calculator {
             if calc(value) > self.config.max_item_size {
                 return Err(Error::ItemSizeExceeded);
