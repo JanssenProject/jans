@@ -24,6 +24,8 @@ from cedarling_python import (
 from main.logger import logger
 from flask import Flask
 import typing as _t
+from hashlib import sha256
+import json
 
 DictType = _t.Dict[str, _t.Any]
 KEYS_LIST = ["access_token", "id_token", "userinfo_token"]
@@ -55,6 +57,12 @@ class CedarlingInstance:
     def get_cedarling_instance(self) -> Cedarling:
         return self._cedarling
 
+    def generate_hash(self, input: DictType) -> str:
+        encoded_str = json.dumps(input).encode("utf-8")
+        digest = sha256(encoded_str).hexdigest()
+        return digest
+
+
     def generate_resource(self, resource: DictType) -> ResourceData:
         resource_properties = resource.get("properties", {})
         resource_entity_dict = {
@@ -76,7 +84,18 @@ class CedarlingInstance:
             if subject["properties"].get(key, None) is not None:
                 count += 1
             i += 1
-        return True if count > 0 else False
+        if count == 0:
+            return False
+        hash = self.generate_hash(subject["properties"])
+        id = subject["id"]
+        if hash != id:
+            return False
+        return True
+
+    def validate_resource(self, resource: DictType) -> bool:
+        hash = self.generate_hash(resource["properties"])
+        id = resource["id"]
+        return True if hash == id else False
 
     def generate_report(self, authorize_response: AuthorizeResultResponse | None, report: str) -> _t.List[str]:
         result = []
@@ -110,7 +129,16 @@ class CedarlingInstance:
             result_dict["context"] = {
                 "id": "-1",
                 "reason_user": {
-                    "422": "Missing one or more tokens"
+                    "422": "Subject is invalid"
+                }
+            }
+            return result_dict
+        if not self.validate_resource(resource):
+            result_dict["decision"] = False
+            result_dict["context"] = {
+                "id": "-1",
+                "reason_user": {
+                    "422": "Resource is invalid"
                 }
             }
             return result_dict
