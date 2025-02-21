@@ -58,11 +58,13 @@ pub struct BootstrapConfigRaw {
     pub log_ttl: Option<u64>,
 
     /// Maximum number of log entities that can be stored using [`LogType::Memory`].
+    /// If value is 0, there is no limit. But if None, default value is applied.
     #[serde(rename = "CEDARLING_LOG_MAX_ITEMS", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub log_max_items: Option<usize>,
 
     /// Maximum size of a single log entity in bytes using [`LogType::Memory`].
+    /// If value is 0, there is no limit. But if None, default value is applied.
     #[serde(rename = "CEDARLING_LOG_MAX_ITEM_SIZE", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub log_max_item_size: Option<usize>,
