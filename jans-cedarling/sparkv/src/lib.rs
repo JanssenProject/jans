@@ -102,11 +102,17 @@ impl<T> SparKV<T> {
         }
     }
 
-    pub fn set(&mut self, key: &str, value: T) -> Result<(), Error> {
-        self.set_with_ttl(key, value, self.config.default_ttl)
+    pub fn set(&mut self, key: &str, value: T, index_keys: &[String]) -> Result<(), Error> {
+        self.set_with_ttl(key, value, self.config.default_ttl, index_keys)
     }
 
-    pub fn set_with_ttl(&mut self, key: &str, value: T, ttl: Duration) -> Result<(), Error> {
+    pub fn set_with_ttl(
+        &mut self,
+        key: &str,
+        value: T,
+        ttl: Duration,
+        index_keys: &[String],
+    ) -> Result<(), Error> {
         self.clear_expired_if_auto();
         self.ensure_capacity_ignore_key(key)?;
         self.ensure_item_size(&value)?;
@@ -119,6 +125,10 @@ impl<T> SparKV<T> {
         self.index
             .add_key_value(index::IndexKey(key.into()), index::ValueKey(key.into()));
         self.data.insert(key.into(), item);
+
+        for index_key in index_keys {
+            self.add_additional_index(key, index_key);
+        }
         Ok(())
     }
 

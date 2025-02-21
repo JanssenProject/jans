@@ -129,7 +129,7 @@ impl LogWriter for MemoryLogger {
 
         let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
 
-        let set_result = storage.set(&entry_id, json);
+        let set_result = storage.set(&entry_id, json, index_keys.as_slice());
 
         if let Err(err) = set_result {
             fallback::log(
@@ -137,10 +137,6 @@ impl LogWriter for MemoryLogger {
                 &self.pdp_id,
                 &self.app_name,
             );
-        } else {
-            for index_key in index_keys {
-                storage.add_additional_index(entry_id.as_str(), index_key.as_str());
-            }
         };
     }
 }
