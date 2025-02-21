@@ -351,27 +351,16 @@ struct ExecuteAuthorizeParameters<'a> {
 }
 
 /// Structure to hold entites created from tokens
-#[derive(Clone)]
 pub struct AuthorizeEntitiesData {
     pub workload: Option<Entity>,
     pub user: Option<Entity>,
     pub resource: Entity,
     pub roles: Vec<Entity>,
     pub tokens: HashMap<String, Entity>,
+    pub build_entities: BuiltEntities,
 }
 
 impl AuthorizeEntitiesData {
-    // NOTE: the type ids created from these does not include the namespace
-    fn type_ids(&self) -> HashMap<String, String> {
-        self.iter()
-            .map(|entity| {
-                let type_name = entity.uid().type_name().basename().to_string();
-                let type_id = entity.uid().id().escaped().to_string();
-                (type_name, type_id)
-            })
-            .collect::<HashMap<String, String>>()
-    }
-
     /// Create iterator to get all entities
     fn into_iter(self) -> impl Iterator<Item = Entity> {
         vec![self.resource]
@@ -379,19 +368,6 @@ impl AuthorizeEntitiesData {
             .chain(self.roles)
             .chain(self.tokens.into_values())
             .chain(vec![self.user, self.workload].into_iter().flatten())
-    }
-
-    /// Create iterator to get all entities
-    fn iter(&self) -> impl Iterator<Item = &Entity> {
-        vec![&self.resource]
-            .into_iter()
-            .chain(self.roles.iter())
-            .chain(self.tokens.values())
-            .chain(
-                vec![self.user.as_ref(), self.workload.as_ref()]
-                    .into_iter()
-                    .flatten(),
-            )
     }
 
     /// Collect all entities to [`cedar_policy::Entities`]
