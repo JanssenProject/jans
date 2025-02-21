@@ -10,7 +10,7 @@ pub(crate) struct NopLogger;
 
 // Implementation of LogWriter
 impl LogWriter for NopLogger {
-    fn log_any<T: serde::Serialize>(&self, _entry: T) {
+    fn log_any<T>(&self, _entry: T) {
         // Do nothing
     }
 }

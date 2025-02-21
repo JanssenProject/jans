@@ -13,8 +13,7 @@ import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 import org.slf4j.Logger;
 
-import io.jans.scim.model.GluuConfiguration;
-import io.jans.scim.model.GluuOxTrustStat;
+import io.jans.scim.model.JansConfiguration;
 import io.jans.service.EncryptionService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.faces.context.FacesContext;
@@ -31,7 +30,7 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * GluuConfiguration service
+ * JansConfiguration service
  * 
  * @author Reda Zerrad Date: 08.10.2012
  */
@@ -57,7 +56,7 @@ public class ConfigurationService implements Serializable {
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 	public boolean contains(String configurationDn) {
-		return persistenceEntryManager.contains(configurationDn, GluuConfiguration.class);
+		return persistenceEntryManager.contains(configurationDn, JansConfiguration.class);
 	}
 
 	/**
@@ -66,7 +65,7 @@ public class ConfigurationService implements Serializable {
 	 * @param configuration
 	 *            Configuration
 	 */
-	public void addConfiguration(GluuConfiguration configuration) {
+	public void addConfiguration(JansConfiguration configuration) {
 		persistenceEntryManager.persist(configuration);
 	}
 
@@ -74,24 +73,14 @@ public class ConfigurationService implements Serializable {
 	 * Update configuration entry
 	 * 
 	 * @param configuration
-	 *            GluuConfiguration
+	 *            JansConfiguration
 	 */
-	public void updateConfiguration(GluuConfiguration configuration) {
+	public void updateConfiguration(JansConfiguration configuration) {
 		try {
 			persistenceEntryManager.merge(configuration);
 		} catch (Exception e) {
 			log.info("", e);
 		}
-	}
-
-	public void updateOxtrustStat(GluuOxTrustStat oxTrustStat) {
-		try {
-			persistenceEntryManager.merge(oxTrustStat);
-		} catch (Exception e) {
-			log.info("===============================Error");
-			log.info("", e);
-		}
-
 	}
 
 	/**
@@ -100,7 +89,7 @@ public class ConfigurationService implements Serializable {
 	 * @return True if configuration with specified attributes exist
 	 */
 	public boolean containsConfiguration(String dn) {
-		return persistenceEntryManager.contains(dn, GluuConfiguration.class);
+		return persistenceEntryManager.contains(dn, JansConfiguration.class);
 	}
 
 	/**
@@ -111,8 +100,8 @@ public class ConfigurationService implements Serializable {
 	 * @return Configuration
 	 * @throws Exception
 	 */
-	public GluuConfiguration getConfigurationByInum(String inum) {
-		return persistenceEntryManager.find(GluuConfiguration.class, getDnForConfiguration());
+	public JansConfiguration getConfigurationByInum(String inum) {
+		return persistenceEntryManager.find(JansConfiguration.class, getDnForConfiguration());
 	}
 
 	/**
@@ -121,21 +110,9 @@ public class ConfigurationService implements Serializable {
 	 * @return Configuration
 	 * @throws Exception
 	 */
-	public GluuConfiguration getConfiguration(String[] returnAttributes) {
-		GluuConfiguration result = null;
-		result = persistenceEntryManager.find(getDnForConfiguration(), GluuConfiguration.class, returnAttributes);
-		return result;
-	}
-
-	public GluuOxTrustStat getOxtrustStat(String[] returnAttributes) {
-		GluuOxTrustStat result = null;
-		if (persistenceEntryManager.contains(getDnForOxtrustStat(), GluuOxTrustStat.class)) {
-			result = persistenceEntryManager.find(getDnForOxtrustStat(), GluuOxTrustStat.class, returnAttributes);
-		} else {
-			result = new GluuOxTrustStat();
-			result.setDn(getDnForOxtrustStat());
-			persistenceEntryManager.persist(result);
-		}
+	public JansConfiguration getConfiguration(String[] returnAttributes) {
+		JansConfiguration result = null;
+		result = persistenceEntryManager.find(getDnForConfiguration(), JansConfiguration.class, returnAttributes);
 		return result;
 	}
 
@@ -145,12 +122,8 @@ public class ConfigurationService implements Serializable {
 	 * @return Configuration
 	 * @throws Exception
 	 */
-	public GluuConfiguration getConfiguration() {
+	public JansConfiguration getConfiguration() {
 		return getConfiguration(null);
-	}
-
-	public GluuOxTrustStat getOxtrustStat() {
-		return getOxtrustStat(null);
 	}
 
 	/**
@@ -159,8 +132,8 @@ public class ConfigurationService implements Serializable {
 	 * @return List of attributes
 	 * @throws Exception
 	 */
-	public List<GluuConfiguration> getConfigurations() {
-		return persistenceEntryManager.findEntries(getDnForConfiguration(), GluuConfiguration.class, null);
+	public List<JansConfiguration> getConfigurations() {
+		return persistenceEntryManager.findEntries(getDnForConfiguration(), JansConfiguration.class, null);
 	}
 
 	/**
@@ -173,10 +146,6 @@ public class ConfigurationService implements Serializable {
 	public String getDnForConfiguration() {
 		String baseDn = organizationService.getBaseDn();
 		return String.format("ou=configuration,%s", baseDn);
-	}
-
-	public String getDnForOxtrustStat() {
-		return buildDn(LocalDateTime.now().format(formatter), new Date(), ApplicationType.OX_TRUST);
 	}
 
 	public AuthenticationScriptUsageType[] getScriptUsageTypes() {
@@ -275,21 +244,6 @@ public class ConfigurationService implements Serializable {
 			return version;
 		}
 		return "";
-	}
-
-	private String buildDn(String uniqueIdentifier, Date creationDate, ApplicationType applicationType) {
-		final StringBuilder dn = new StringBuilder();
-		if (StringHelper.isNotEmpty(uniqueIdentifier) && (creationDate != null) && (applicationType != null)) {
-			dn.append(String.format("uniqueIdentifier=%s,", uniqueIdentifier));
-		}
-		if ((creationDate != null) && (applicationType != null)) {
-			dn.append(String.format("ou=%s,", PERIOD_DATE_FORMAT.format(creationDate)));
-		}
-		if (applicationType != null) {
-			dn.append(String.format("ou=%s,", applicationType.getValue()));
-		}
-		dn.append("ou=statistic,o=metric");
-		return dn.toString();
 	}
 
 }
