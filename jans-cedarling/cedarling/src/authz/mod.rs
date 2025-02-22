@@ -235,7 +235,7 @@ impl Authz {
 
         // measure time how long request executes
         let since_start = Utc::now().signed_duration_since(start_time);
-        let decision_time_micro_sec = since_start.num_microseconds().unwrap_or_else(|| {
+        let decision_time_micro_sec = since_start.num_microseconds().unwrap_or({
             //overflow (exceeding 2^63 microseconds in either direction)
             i64::MAX
         });
