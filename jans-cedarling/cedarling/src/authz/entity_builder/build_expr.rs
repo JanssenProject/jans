@@ -178,8 +178,6 @@ impl Attribute {
 
             // Handle Entity attributes
             Attribute::Entity { required, name } => {
-                println!("building entity");
-
                 let type_name = if let Some((type_name, _)) = schema
                     .get_entity_schema(name, default_namespace)
                     .map_err(|e| BuildExprError::ParseTypeName(name.clone(), e))?

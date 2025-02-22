@@ -14,6 +14,7 @@ mod built_entities;
 
 use super::AuthorizeEntitiesData;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
+use crate::common::policy_store::ClaimMappings;
 use crate::jwt::{Token, TokenClaimTypeError};
 use crate::{AuthorizationConfig, ResourceData};
 use build_attrs::{BuildAttrError, build_entity_attrs_from_tkn};
@@ -24,11 +25,12 @@ pub use build_token_entities::BuildTokenEntityError;
 use build_user_entity::BuildUserEntityError;
 use build_workload_entity::BuildWorkloadEntityError;
 pub(crate) use built_entities::BuiltEntities;
-use cedar_policy::{Entity, EntityId, EntityUid};
+use cedar_policy::{Entity, EntityId, EntityUid, RestrictedExpression};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::convert::Infallible;
 use std::fmt;
+use std::net::IpAddr;
 use std::str::FromStr;
 
 const DEFAULT_WORKLOAD_ENTITY_NAME: &str = "Jans::Workload";
@@ -210,6 +212,198 @@ fn build_entity(
     let entity_id = EntityId::from_str(&entity_id).map_err(BuildEntityError::ParseEntityId)?;
     let entity_uid = EntityUid::from_type_name_and_id(entity_type_name, entity_id);
     Ok(Entity::new(entity_uid, entity_attrs, parents)?)
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum NewBuildEntityError {
+    #[error("the token is missing a \"{0}\" claim which is required for this entity's entity_id")]
+    MissingIdSrc(String),
+    #[error(transparent)]
+    TokenClaimTypeMismatch(#[from] TokenClaimTypeError),
+    #[error("failed to parse entity uid")]
+    FailedToParseUid(#[from] cedar_policy::ParseErrors),
+    #[error("failed to parse entity uid")]
+    EntityAttrEval(#[from] cedar_policy::EntityAttrEvaluationError),
+}
+
+/// Builds a Cedar Entity using a JWT
+fn new_build_entity(
+    entity_type_name: &str,
+    id_src_claim: &str,
+    token: &Token,
+    parents: HashSet<EntityUid>,
+    tkn_principal_mappings: &HashMap<String, Vec<(String, RestrictedExpression)>>,
+) -> Result<Entity, NewBuildEntityError> {
+    // Get entity Id from the specified token claim
+    let entity_id = token
+        .get_claim(id_src_claim)
+        .ok_or(NewBuildEntityError::MissingIdSrc(id_src_claim.into()))?
+        .as_str()?
+        .to_owned();
+
+    // Build entity attributes
+    let mut attrs = build_attrs(token.claims_value(), token.claim_mapping());
+
+    // Add token references
+    if let Some(mapping) = tkn_principal_mappings.get(entity_type_name) {
+        attrs.extend(mapping.clone());
+    }
+
+    // Build cedar entity
+    let uid = EntityUid::from_str(&format!("{}::\"{}\"", entity_type_name, entity_id))?;
+    Ok(Entity::new(uid, attrs, parents)?)
+}
+
+fn build_attrs(
+    claims: &HashMap<String, Value>,
+    mappings: Option<&ClaimMappings>,
+) -> HashMap<String, RestrictedExpression> {
+    let mut attrs = HashMap::new();
+    for (name, value) in claims.iter() {
+        if let Some(mappings) = mappings {
+            if let Some(mapping) = mappings.mapping(name) {
+                let mapped_claims = mapping.apply_mapping(value);
+                let attrs_from_mapped_claims = build_attrs(&mapped_claims, None);
+                attrs.extend(attrs_from_mapped_claims);
+                continue;
+            };
+        }
+
+        if let Some(expr) = value_to_expr(value) {
+            attrs.insert(name.into(), expr);
+        }
+    }
+    attrs
+}
+
+/// Converts a [`Value`] to a [`RestrictedExpression`]
+fn value_to_expr(value: &Value) -> Option<RestrictedExpression> {
+    let expr = match value {
+        Value::Null => return None,
+        Value::Bool(val) => RestrictedExpression::new_bool(*val),
+        Value::Number(val) => {
+            if let Some(int) = val.as_i64() {
+                RestrictedExpression::new_long(int)
+            } else if let Some(float) = val.as_f64() {
+                RestrictedExpression::new_decimal(float.to_string())
+            } else {
+                return None;
+            }
+        },
+        Value::String(val) => {
+            if IpAddr::from_str(val).is_ok() {
+                RestrictedExpression::new_ip(val)
+            } else {
+                RestrictedExpression::new_string(val.to_string())
+            }
+        },
+        Value::Array(values) => {
+            let exprs = values.iter().filter_map(value_to_expr).collect::<Vec<_>>();
+            RestrictedExpression::new_set(exprs)
+        },
+        Value::Object(map) => {
+            let fields = map
+                .iter()
+                .filter_map(|(key, val)| value_to_expr(val).map(|expr| (key.to_string(), expr)))
+                .collect::<Vec<_>>();
+            RestrictedExpression::new_record(fields).expect("there shouldn't be duplicate keys")
+        },
+    };
+    Some(expr)
+}
+
+#[cfg(test)]
+mod newtest {
+    use super::new_build_entity;
+    use crate::common::policy_store::TrustedIssuer;
+    use crate::jwt::Token;
+    use cedar_policy::{EntityUid, RestrictedExpression};
+    use serde_json::json;
+    use std::collections::{HashMap, HashSet};
+
+    #[test]
+    fn can_build_workload_entity() {
+        let iss = TrustedIssuer::default();
+        let token = Token::new(
+            "access_token",
+            HashMap::from([
+                ("client_id".into(), json!("some_client_id")),
+                ("test_bool".into(), json!(true)),
+                ("test_int".into(), json!(123)),
+                ("test_float".into(), json!(123.321)),
+                ("test_string".into(), json!("some_string")),
+                ("test_ipv4".into(), json!("127.0.0.1")),
+                (
+                    "test_ipv6".into(),
+                    json!("2001:db8:3333:4444:5555:6666:7777:8888"),
+                ),
+                ("test_array".into(), json!(["a", 1])),
+                (
+                    "test_map".into(),
+                    json!({
+                        "a": 1,
+                        "b": "b",
+                    }),
+                ),
+            ])
+            .into(),
+            Some(&iss),
+        );
+        let parents = HashSet::new();
+        let tkn_principal_mappings = HashMap::from([("Jans::Workload".into(), vec![(
+            "access_token".into(),
+            RestrictedExpression::new_entity_uid(
+                EntityUid::from_json(json!({"type": "Jans::Access_token", "id": "some_jti"}))
+                    .expect("should parse access token entity uid"),
+            ),
+        )])]);
+
+        let entity = new_build_entity(
+            "Jans::Workload",
+            "client_id",
+            &token,
+            parents,
+            &tkn_principal_mappings,
+        )
+        .expect("should build entity");
+
+        assert_eq!(
+            entity
+                .to_json_value()
+                .expect("should serialize entity to json"),
+            json!({
+                "uid": {
+                    "type": "Jans::Workload",
+                    "id": "some_client_id",
+                },
+                "attrs": {
+                    "client_id": "some_client_id",
+                    "test_bool": true,
+                    "test_int": 123,
+                    "test_float": { "__extn": {
+                        "fn": "decimal",
+                        "arg": "123.321",
+                    }},
+                    "test_string": "some_string",
+                    "test_ipv4": { "__extn": {
+                        "fn": "ip",
+                        "arg": "127.0.0.1",
+                     }},
+                    "test_ipv6": { "__extn": {
+                        "fn": "ip",
+                        "arg": "2001:db8:3333:4444:5555:6666:7777:8888",
+                     }},
+                    "test_array": [1, "a"],
+                    "test_map": {"a": 1, "b": "b"},
+                    "access_token": { "__entity": {
+                        "type": "Jans::Access_token",
+                        "id": "some_jti",
+                    },},
+                },
+                "parents": []
+            }),
+        );
+    }
 }
 
 /// Errors encountered when building a Cedarling-specific entity

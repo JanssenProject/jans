@@ -29,6 +29,7 @@ impl ClaimMappings {
     pub fn new(mappings: HashMap<String, ClaimMapping>) -> Self {
         Self(mappings)
     }
+
     pub fn get_mapping(&self, claim: &str, cedar_policy_type: &str) -> Option<&ClaimMapping> {
         self.0
             .get(claim)
@@ -38,6 +39,10 @@ impl ClaimMappings {
                 },
                 ClaimMapping::Json { r#type } => r#type == cedar_policy_type,
             })
+    }
+
+    pub fn mapping(&self, claim: &str) -> Option<&ClaimMapping> {
+        self.0.get(claim)
     }
 }
 
