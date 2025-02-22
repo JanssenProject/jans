@@ -6,14 +6,14 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
 
 ## Exposed Functions
 
-1. **Cedarling::load_from_json**
+- **Cedarling::load_from_json**
 
-    Loads a Cedarling instance from a JSON configuration.
+   Loads a Cedarling instance from a JSON configuration.
     
-    ```declarative
-    #[uniffi::constructor]
-    pub fn load_from_json(config: String) -> Result<Self, CedarlingError>
-    ```
+   ```declarative
+   #[uniffi::constructor]
+   pub fn load_from_json(config: String) -> Result<Self, CedarlingError>
+   ```
 
    **Usage in Swift:**
 
@@ -21,28 +21,27 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
    let cedarling = try Cedarling.loadFromJson(config: jsonString)
    ```
 
-2. **Cedarling::load_from_file**
+- **Cedarling::load_from_file**
 
-    Loads a Cedarling instance from a configuration file.
+   Loads a Cedarling instance from a configuration file.
     
-    ```declarative
-    #[uniffi::constructor]
-    pub fn load_from_file(path: String) -> Result<Self, CedarlingError>
-    ```
+   ```declarative
+   #[uniffi::constructor]
+   pub fn load_from_file(path: String) -> Result<Self, CedarlingError>
+   ```
 
    **Usage in Swift:**
 
    ```declarative
    let cedarling = try Cedarling.loadFromFile(path: "/path/to/config.json")
-
    ```
 
-3. **Cedarling::authorize**
+- **Cedarling::authorize**
 
-    Handles authorization requests.
+   Handles authorization requests.
     
-    ```declarative
-    #[uniffi::method]
+   ```declarative
+   #[uniffi::method]
         pub fn authorize(
             &self,
             tokens: HashMap<String, String>,
@@ -52,32 +51,30 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
             payload: String,
             context: String,
         ) -> Result<AuthorizeResult, AuthorizeError> 
-    ```
+   ```
 
    **Usage in Swift:**
 
    ```declarative
    let result = try cedarling.authorize(tokens: tokenMap, action: "read", resourceType: "file", resourceId: "123", payload: "{}", context: "")
-
    ```
 
-4. **Cedarling::pop_logs**
+- **Cedarling::pop_logs**
 
-    Retrieves logs as JSON strings.
+   Retrieves logs as JSON strings.
     
-    ```declarative
-    #[uniffi::method]
-    pub fn pop_logs(&self) -> Result<Vec<String>, LogError> 
-    ```
+   ```declarative
+   #[uniffi::method]
+   pub fn pop_logs(&self) -> Result<Vec<String>, LogError> 
+   ```
 
    **Usage in Swift:**
 
    ```declarative
    let logs = try cedarling.popLogs()
-
    ```
 
-5. **Cedarling::get_log_by_id**
+- **Cedarling::get_log_by_id**
 
    Retrieves a log entry by ID.
 
@@ -90,43 +87,39 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
 
    ```declarative
    let log = try cedarling.getLogById(id: "log123")
-
    ```
 
-6. **Cedarling::get_log_ids**
+- **Cedarling::get_log_ids**
 
    Get all log ids
 
    ```declarative
    #[uniffi::method]
-    pub fn get_log_ids(&self) -> Vec<String>
+   pub fn get_log_ids(&self) -> Vec<String>
    ```
 
    **Usage in Swift:**
 
    ```declarative
    let ids = try cedarling.getLogIds()
-
    ```
 
-7. **Cedarling::get_logs_by_tag**
+- **Cedarling::get_logs_by_tag**
 
-    Get logs by tag, like `log_kind` or `log level`.
+   Get logs by tag, like `log_kind` or `log level`.
 
-    ```declarative
-    #[uniffi::method]
-    pub fn get_logs_by_tag(&self, tag: &str) -> Result<Vec<String>, LogError> {
-
+   ```declarative
+   #[uniffi::method]
+   pub fn get_logs_by_tag(&self, tag: &str) -> Result<Vec<String>, LogError> {
    ```
 
    **Usage in Swift:**
 
    ```declarative
    let logs = try cedarling.getLogsByTag(tag: "DEBUG")
-
    ```
    
-8. **Cedarling::get_logs_by_request_id**
+- **Cedarling::get_logs_by_request_id**
 
    Get all logs by request_id
 
@@ -138,17 +131,16 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
    **Usage in Swift:**
 
    ```declarative
-      let logs = try cedarling.getLogsByRequestId(request_id: "12434-32323-43434")
-
+   let logs = try cedarling.getLogsByRequestId(request_id: "12434-32323-43434")
    ```
 
-9. **Cedarling::get_logs_by_request_id_and_tag**
+- **Cedarling::get_logs_by_request_id_and_tag**
 
    Get log by request_id and tag, like composite key `request_id` + `log_kind`.
 
    ```declarative
    #[uniffi::method]
-    pub fn get_logs_by_request_id_and_tag(
+   pub fn get_logs_by_request_id_and_tag(
         &self,
         request_id: &str,
         tag: &str,
@@ -159,5 +151,4 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
 
    ```declarative
    let logs = try cedarling.getLogsByRequestIdAndTag(request_id: "12434-32323-43434", tag: "Decision")
-
    ```
