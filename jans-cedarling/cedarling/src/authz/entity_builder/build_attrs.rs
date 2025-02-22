@@ -32,9 +32,8 @@ pub fn build_entity_attrs_from_tkn(
     let claim_mapping = token.claim_mapping();
 
     for (attr_name, attr) in shape.attrs.iter() {
-
         // only common types should be mapped
-        let entity_type_name = match &attr{
+        let common_type_name = match &attr{
             Attribute::EntityOrCommon { required:_, name } => {
                 if let Some((entity_type_name, _)) = schema
                 .get_common_type(name, default_namespace)
@@ -47,7 +46,7 @@ pub fn build_entity_attrs_from_tkn(
             _=> None,
         };
 
-        let expression = if let Some(mapper) = claim_mapping.zip(entity_type_name)
+        let expression = if let Some(mapper) = claim_mapping.zip(common_type_name)
             .and_then(|(mapping,entity_type_name)| mapping.get_mapping(attr_name, &entity_type_name.to_string() ))
         {
             let claim = claims.get(attr_name).ok_or_else(|| {
@@ -67,13 +66,14 @@ pub fn build_entity_attrs_from_tkn(
             )
             .map_err(|e| BuildAttrError::new(attr_name, e.into()))?
         } else {
-            match attr.build_expr(attr_name, claims.get(attr_name), default_namespace, schema, built_entities) {
+            let res = match attr.build_expr(attr_name, claims.get(attr_name), default_namespace, schema, built_entities) {
                 Ok(expr) => expr,
                 Err(err) if attr.is_required() => Err(BuildAttrError::new(attr_name, err.into()))?,
                 // just skip when attribute isn't required even if it errors
                 // TODO: though we should probably log this
                 Err(_) => continue,
-            }
+            };
+            res
         };
 
         if let Some(expr) = expression {
