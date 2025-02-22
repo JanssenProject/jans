@@ -91,7 +91,7 @@ class JansLockInstaller(JettyInstaller):
                 display_name="Jans Lock Config Api Client"
                 )
 
-        self.dbUtils.import_ldif([self.clients_ldif_fn])
+            self.dbUtils.import_ldif([self.clients_ldif_fn])
 
     def install_as_server(self):
         self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
