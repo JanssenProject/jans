@@ -271,9 +271,9 @@ async fn test_memory_log_interface() {
         "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
         "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
         "CEDARLING_TOKEN_CONFIGS": {
-            "access_token": {"entity_type_name": "Access_token"},
-            "id_token": {"entity_type_name": "id_token"},
-            "userinfo_token": {"entity_type_name": "Userinfo_token"},
+            "access_token": {"entity_type_name": "Jans::Access_token"},
+            "id_token": {"entity_type_name": "Jans::id_token"},
+            "userinfo_token": {"entity_type_name": "Jans::Userinfo_token"},
         },
     });
 
