@@ -346,8 +346,8 @@ pub struct DecisionLogEntry<'a> {
     pub decision: Decision,
     /// Dictionary with the token type and claims which should be included in the log
     pub tokens: LogTokensInfo<'a>,
-    /// time in milliseconds spent for decision
-    pub elapsed_micro_sec: i64,
+    /// time in micro-seconds spent for decision
+    pub decision_time_micro_sec: i64,
 }
 
 impl Indexed for &DecisionLogEntry<'_> {
