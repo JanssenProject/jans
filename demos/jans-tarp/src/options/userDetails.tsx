@@ -17,20 +17,29 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import __wbg_init, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
+import { jwtDecode } from "jwt-decode";
+import { IJWT } from './IJWT';
 
 const UserDetails = ({ data, notifyOnDataChange }) => {
     const [loading, setLoading] = useState(false);
-    const [showMoreIdToken, setShowMoreIdToken] = useState(false);
-    const [showMoreAT, setShowMoreAT] = useState(false);
-    const [showMoreUI, setShowMoreUI] = useState(false);
+    const [showPayloadIdToken, setShowPayloadIdToken] = useState(false);
+    const [showPayloadAT, setShowPayloadAT] = useState(false);
+    const [showPayloadUI, setShowPayloadUI] = useState(false);
     const [context, setContext] = React.useState({});
     const [action, setAction] = React.useState("");
-    const [accessToken, setAccessToken] = React.useState(false);
-    const [userInfoToken, setUserInfoToken] = React.useState(false);
-    const [idToken, setIdToken] = React.useState(false);
+    const [tokenSelection, setTokenSelection] = useState({ accessToken: false, userInfo: false, idToken: false });
+    const [decodedTokens, setDecodedTokens] = React.useState<{
+    accessToken: IJWT;
+    userInfoToken: IJWT;
+    idToken: IJWT;
+    }>({
+        accessToken: { header: {}, payload: {} },
+        userInfoToken: { header: {}, payload: {} },
+        idToken: { header: {}, payload: {} },
+    });
+
     const [resource, setResource] = React.useState({});
     const [cedarlingBootstrapPresent, setCedarlingBootstrapPresent] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState("")
     const [authzResult, setAuthzResult] = React.useState("")
     const [authzLogs, setAuthzLogs] = React.useState("")
     const [logType, setLogType] = React.useState('Decision');
@@ -49,8 +58,27 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                 setCedarlingBootstrapPresent(true);
             }
         });
-    }, [])
+        if (data) {
+            setDecodedTokens({
+                accessToken: decodeJWT(data.access_token),
+                userInfoToken: decodeJWT(data.userDetails),
+                idToken: decodeJWT(data.id_token),
+            });
+        }
+    }, [data])
 
+    const decodeJWT = (token: string | undefined): IJWT => {
+        try {
+            if (!token) return { header: {}, payload: {} }; // Handle undefined token
+            const payload = jwtDecode(token);
+            const header = jwtDecode(token, { header: true });
+            return { header, payload };
+        } catch (error) {
+            console.error("Error decoding JWT:", error);
+            return { header: {}, payload: {} }; // Return empty object on error
+        }
+    };
+    
     const triggerCedarlingAuthzRequest = async () => {
         setAuthzResult("");
         setAuthzLogs("");
@@ -71,7 +99,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
 
                 }
             } catch (err) {
-                setAuthzResult(err);
+                setAuthzResult(err.toString());
                 console.log("err:", err);
                 let logs = await instance.pop_logs();
                 if (logs.length != 0) {
@@ -85,26 +113,20 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
     }
 
     const createCedarlingAuthzRequestObj = async () => {
-        let reqObj = { tokens: { access_token: '', id_token: '', userinfo_token: '' }, action: "", resource: {}, context: {} };
-        if (accessToken) {
-            reqObj.tokens.access_token = (!!data ? data?.access_token : '');
-        }
-    
-        if (idToken) {
-            reqObj.tokens.id_token = (!!data ? data?.id_token : '');
-        }
-        
-        if (userInfoToken) {
-            reqObj.tokens.userinfo_token = (!!data ? data?.userDetails : '');
-        }
-        
-        reqObj.action = action;
-        reqObj.context = context;
-        reqObj.resource = resource;
-        
+        const reqObj = {
+            tokens: {
+                access_token: tokenSelection.accessToken ? data?.access_token || '' : '',
+                id_token: tokenSelection.idToken ? data?.id_token || '' : '',
+                userinfo_token: tokenSelection.userInfo ? data?.userDetails || '' : '', // Use userDetails if available
+            },
+            action,
+            context,
+            resource,
+        };
+
         chrome.storage.local.set({ authzRequest: reqObj });
         return reqObj;
-    }
+    };
 
     async function logout() {
         setLoading(true);
@@ -180,10 +202,14 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                             <Typography component="span"><strong>Access Token</strong></Typography>
                         </AccordionSummary>
                         <AccordionDetails>
-
                             <div className="alert alert-success alert-dismissable fade in">
-                                <p>{showMoreAT ? (!!data ? data?.access_token : '') : (!!data ? data?.access_token.substring(0, 250).concat(' ...') : '')}</p>
-                                <a href="#" onClick={() => setShowMoreAT(!showMoreAT)}>{showMoreAT ? "Show less" : "Show more"}</a>
+                                <p>{showPayloadAT ? (!!data ? 
+                                    <>
+                                        <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.accessToken.header} rootName="header" />
+                                        <JsonEditor data={decodedTokens.accessToken.payload} collapse={true} viewOnly={true} rootName="payload" />
+                                    </> 
+                                : '') : (!!data ? data?.access_token : '')}</p>
+                                <a href="#!" onClick={() => setShowPayloadAT(!showPayloadAT)}>{showPayloadAT ? "Show JWT" : "Show Payload"}</a>
                             </div>
                         </AccordionDetails>
                     </Accordion>
@@ -198,8 +224,13 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                         <AccordionDetails>
 
                             <div className="alert alert-success alert-dismissable fade in">
-                                <p>{showMoreIdToken ? (!!data ? data?.id_token : '') : (!!data ? data?.id_token.substring(0, 250).concat(' ...') : '')}</p>
-                                <a href="#" onClick={() => setShowMoreIdToken(!showMoreIdToken)}>{showMoreIdToken ? "Show less" : "Show more"}</a>
+                                <p>{showPayloadIdToken ? (!!data ? 
+                                    <>
+                                        <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.idToken.header} rootName="header" />
+                                        <JsonEditor data={decodedTokens.idToken.payload} collapse={true} viewOnly={true} rootName="payload" />
+                                    </>
+                                    : '') : (!!data ? data?.id_token : '')}</p>
+                                <a href="#!" onClick={() => setShowPayloadIdToken(!showPayloadIdToken)}>{showPayloadIdToken ? "Show JWT" : "Show Payload"}</a>
                             </div>
                         </AccordionDetails>
                     </Accordion>
@@ -215,9 +246,13 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                 </AccordionSummary>
                 <AccordionDetails>
                     <div className="alert alert-success alert-dismissable fade in">
-                        <strong>User Details</strong>
-                        <p>{showMoreUI ? (!!data ? data?.userDetails : '') : (!!data ? data?.userDetails.substring(0, 250).concat(' ...') : '')}</p>
-                        <a href="#" onClick={() => setShowMoreUI(!showMoreUI)}>{showMoreUI ? "Show less" : "Show more"}</a>
+                        <p>{showPayloadUI ? (!!data ? 
+                            <>
+                                <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.userInfoToken.header} rootName="header" />
+                                <JsonEditor data={decodedTokens.userInfoToken.payload} collapse={true} viewOnly={true} rootName="payload" />
+                            </>
+                            : '') : (!!data ? data?.userDetails : '')}</p>
+                        <a href="#!" onClick={() => setShowPayloadUI(!showPayloadUI)}>{showPayloadUI ? "Show JWT" : "Show Payload"}</a>
                     </div>
                 </AccordionDetails>
             </Accordion>
@@ -233,12 +268,11 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                 <AccordionDetails>
                     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                         <InputLabel id="principal-value-label">Principal</InputLabel>
-                        <FormControlLabel control={<Checkbox color="success" onChange={() => setAccessToken(!accessToken)} />} label="Access Token" />
-                        <FormControlLabel control={<Checkbox color="success" onChange={() => setUserInfoToken(!userInfoToken)} />} label="Userinfo Token" />
-                        <FormControlLabel control={<Checkbox color="success" onChange={() => setIdToken(!idToken)} />} label="Id Token" />
+                        <FormControlLabel control={<Checkbox color="success" onChange={() => setTokenSelection((prev) => ({ ...prev, accessToken: !prev.accessToken }))} />} label="Access Token" />
+                        <FormControlLabel control={<Checkbox color="success" onChange={() => setTokenSelection((prev) => ({ ...prev, userInfo: !prev.userInfo }))} />} label="Userinfo Token" />
+                        <FormControlLabel control={<Checkbox color="success" onChange={() => setTokenSelection((prev) => ({ ...prev, idToken: !prev.idToken }))} />} label="Id Token" />
 
                         <TextField
-                            error={errorMessage.length !== 0}
                             autoFocus
                             required
                             margin="dense"
@@ -248,7 +282,6 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                             type="text"
                             fullWidth
                             variant="outlined"
-                            helperText={errorMessage}
                             value={action}
                             onChange={(e) => {
                                 setAction(e.target.value);
