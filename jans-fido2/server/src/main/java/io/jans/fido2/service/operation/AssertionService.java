@@ -362,9 +362,9 @@ public class AssertionService {
 		// this
 		AttestationOrAssertionResponse assertionResultResponse = new AttestationOrAssertionResponse(
 				credentialDescriptor, "ok", "", registrationData.getUsername(),
-				registrationData.getAuthentictatorAttachment().toString(),
+				registrationData.getAuthentictatorAttachment(),
 				String.valueOf(registrationData.isUserPresentFlag()), true, registrationData.getBackupStateFlag(),
-				registrationData.getBackupEligibilityFlag(), registrationData.getType().toString(), true, "level",
+				registrationData.getBackupEligibilityFlag(), registrationData.getType(), true, "level",
 				"aaguid", "authenticatorName", registrationData.getOrigin(), "hint", registrationData.getChallenge(),
 				registrationData.getRpId(), null, Long.valueOf(9000), null);
 
