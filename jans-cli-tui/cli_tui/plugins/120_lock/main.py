@@ -13,7 +13,7 @@ from wui_components.widget_collections import get_logging_level_widget
 
 from utils.multi_lang import _
 from utils.utils import DialogUtils, common_data
-from utils.static import cli_style
+from utils.static import cli_style, common_strings
 
 
 class Plugin(DialogUtils):
