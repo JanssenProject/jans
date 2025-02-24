@@ -199,6 +199,7 @@ label.light {
   display: flex;
   flex-direction: column; /* Stack content vertically */
   align-items: center; /* Optional: Center align other content */
+  padding-bottom: 50px;
 }
 
 .image-container img {
@@ -212,4 +213,23 @@ label.light {
     max-width: 480px;
   }
 
+}
+
+a:link {
+  color: blue;
+}
+
+/* visited link */
+a:visited {
+  color: green;
+}
+
+/* mouse over link */
+a:hover {
+  color: green;
+}
+
+/* selected link */
+a:active {
+  color: blue;
 }
