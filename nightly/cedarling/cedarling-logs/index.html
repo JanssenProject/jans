@@ -9144,7 +9144,7 @@ analysis to show everything the attacker attempted, both allowed and denied.</p>
 <span class="w">            </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;access_tkn_jti&quot;</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;decision_time_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">    </span><span class="nt">&quot;decision_time_micro_sec&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span>
 <span class="p">}</span>
 </code></pre></div>
 <h4 id="field-definitions">Field Definitions<a class="headerlink" href="#field-definitions" title="Permanent link">#</a></h4>
@@ -9162,7 +9162,7 @@ analysis to show everything the attacker attempted, both allowed and denied.</p>
 <li><code>resource</code>: From the Request</li>
 <li><code>decision</code>: <code>ALLOW</code> or <code>DENY</code></li>
 <li><code>tokens</code>: Dictionary with the token type and claims which should be included in the log</li>
-<li><code>decision_time_ms</code>: how long the decision took</li>
+<li><code>decision_time_micro_sec</code>: how long the decision took</li>
 </ul>
 <h3 id="debug-log-sample">Debug Log Sample<a class="headerlink" href="#debug-log-sample" title="Permanent link">#</a></h3>
 <p>The result of the authorization is quite extensive because we log all <code>cedar-policy</code> entity information for forensic analysis. We cannot truncate the data, as it may contain critical information.</p>
@@ -9280,7 +9280,7 @@ analysis to show everything the attacker attempted, both allowed and denied.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-04T16:19:58+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-04</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-24T14:18:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-24</span>
       
         <br>
         Created:
