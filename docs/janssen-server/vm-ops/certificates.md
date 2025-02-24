@@ -41,10 +41,16 @@ On a fresh VM installation, Janssen generates self signed certificates. You will
    ```shell
    sudo apt remove certbot
    ```
- - Install certbot: 
+ - Update repo:
+   For Ubuntu:
    ```shell
-   sudo snap install --classic certbot
-   ``` 
+   sudo apt update
+   ```
+ - Install python package for apache:
+    For Ubuntu:
+    ```shell
+    sudo apt-get install python3-certbot-apache
+    ```
  - Issue certificate: 
    ```shell
    certbot --apache -d fqdn_of_Gluu_server
