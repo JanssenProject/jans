@@ -357,9 +357,6 @@ public class AssertionService {
 		credentialDescriptor.setId(registrationData.getPublicKeyId());
 		credentialDescriptor.setType("public-key");
 
-		// Create result object
-		// TODO: why should registrationData.isUserPresentFlag() be a string, correct
-		// this
 		AttestationOrAssertionResponse assertionResultResponse = new AttestationOrAssertionResponse(
 				credentialDescriptor, "ok", "", registrationData.getUsername(),
 				registrationData.getAuthentictatorAttachment(),

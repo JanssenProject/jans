@@ -508,7 +508,7 @@ public class TocService {
 	            log.info("Added TOC entry: {} ", keyIdentifier);
 	        }
 	    } catch (IOException e) {
-	        log.error("Failed to add attestationCertificateKeyIdentifiers to tocEntries: " + attestationCertificateKeyIdentifiers);
+	        log.error("Failed to add attestationCertificateKeyIdentifiers to tocEntries: {}" , attestationCertificateKeyIdentifiers);
 	    }
 	}
 }

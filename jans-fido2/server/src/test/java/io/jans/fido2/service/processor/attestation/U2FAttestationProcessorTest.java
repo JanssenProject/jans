@@ -27,7 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
-import java.nio.file.attribute.UserPrincipal;
+
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
@@ -195,8 +195,8 @@ class U2FAttestationProcessorTest {
 
 		assertNotNull(res);
 		assertNotNull(res.getResponse());
-		assertEquals(res.getResponse().getStatus(), 400);
-		assertEquals(res.getResponse().getEntity(), "test exception");
+		assertEquals(400, res.getResponse().getStatus());
+		assertEquals("test exception", res.getResponse().getEntity() );
 
 		verify(commonVerifiers).verifyAAGUIDZeroed(authData);
 		verify(userVerificationVerifier).verifyUserPresent(authData);

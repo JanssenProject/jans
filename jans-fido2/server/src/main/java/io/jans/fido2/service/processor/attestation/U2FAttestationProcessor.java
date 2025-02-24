@@ -142,7 +142,7 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	    credIdAndCounters.setSignatureAlgorithm(alg);
 	    
 	    try {
-	        JsonNode metaData = getMetaDataFromCertificates(certificates, attStmt);
+	        JsonNode metaData = getMetaDataFromCertificates(certificates);
 	        List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getAttestationRootCertificates(metaData, certificates);
 
 	        X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
@@ -152,13 +152,12 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	    } catch (Fido2MissingAttestationCertException ex) {
 	        handleAttestationCertException(certificates, ex);
 	    } catch (Exception e) {
-	        log.warn("Failed to find Attestation Certificate Key Identifier:", e.getMessage());
 	        throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE,
-	                "Error on verify attestation mds: " + e.getMessage());
+	                "Error on processX5cAttestation: " + e.getMessage());
 	    }
 	}
 
-	private JsonNode getMetaDataFromCertificates(List<X509Certificate> certificates, JsonNode attStmt) throws Exception {
+	private JsonNode getMetaDataFromCertificates(List<X509Certificate> certificates) throws Exception {
 	    for (X509Certificate cert : certificates) {
 	        X509CertificateHolder certificateHolder = convertToX509CertificateHolder(cert);
 	        Extension ext = certificateHolder.getExtension(Extension.subjectKeyIdentifier);
