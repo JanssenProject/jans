@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.lock.service.DataMapperService;
 import io.jans.lock.service.audit.AuditForwarderService;
 import io.jans.lock.service.stat.StatService;
+import io.jans.lock.service.ws.rs.base.BaseResource;
 import io.jans.lock.util.ServerUtil;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -48,7 +49,7 @@ import jakarta.ws.rs.core.SecurityContext;
  */
 @Dependent
 @Path("/audit")
-public class AuditRestWebServiceImpl implements AuditRestWebService {
+public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWebService {
 
 	private static final String LOG_PRINCIPAL_ID = "principalId";
 	private static final String LOG_CLIENT_ID = "clientId";

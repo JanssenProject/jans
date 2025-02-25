@@ -16,6 +16,7 @@ import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.ErrorResponseFactory;
 import io.jans.lock.model.error.StatErrorResponseType;
 import io.jans.lock.service.stat.StatResponseService;
+import io.jans.lock.service.ws.rs.base.BaseResource;
 import io.jans.lock.util.Constants;
 import io.jans.lock.util.ServerUtil;
 import io.prometheus.client.CollectorRegistry;
@@ -38,7 +39,7 @@ import jakarta.ws.rs.core.Response;
  */
 @Dependent
 @Path("/internal/stat")
-public class StatRestWebServiceImpl implements StatRestWebService {
+public class StatRestWebServiceImpl extends BaseResource implements StatRestWebService {
 
     @Inject
     private Logger log;

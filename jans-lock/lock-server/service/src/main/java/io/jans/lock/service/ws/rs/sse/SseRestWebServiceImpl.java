@@ -18,6 +18,7 @@ package io.jans.lock.service.ws.rs.sse;
 
 import org.slf4j.Logger;
 
+import io.jans.lock.service.ws.rs.base.BaseResource;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Path;
@@ -30,7 +31,7 @@ import jakarta.ws.rs.sse.SseEventSink;
  */
 @Dependent
 @Path("/")
-public class SseRestWebServiceImpl implements SseRestWebService {
+public class SseRestWebServiceImpl extends BaseResource implements SseRestWebService {
 
 	@Inject
 	private Logger log;

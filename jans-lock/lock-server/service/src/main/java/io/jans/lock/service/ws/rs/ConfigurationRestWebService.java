@@ -19,6 +19,7 @@ package io.jans.lock.service.ws.rs;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.jans.lock.service.config.ConfigurationService;
+import io.jans.lock.service.ws.rs.base.BaseResource;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -34,7 +35,7 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
  */
 @Dependent
 @Path("/configuration")
-public class ConfigurationRestWebService {
+public class ConfigurationRestWebService extends BaseResource {
 
     @Inject
 	private ConfigurationService configurationService;
