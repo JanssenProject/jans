@@ -4,15 +4,19 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use chrono::Duration;
+use serde_json::Value;
 use std::sync::Mutex;
 
-use sparkv::{Config as ConfigSparKV, SparKV};
+use sparkv::{Config as ConfigSparKV, Error, SparKV};
 
 use super::LogLevel;
 use super::err_log_entry::ErrorLogEntry;
 use super::interface::{LogStorage, LogWriter, Loggable, composite_key};
 use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::MemoryLogConfig;
+
+mod memory_calc;
+use memory_calc::calculate_memory_usage;
 
 const STORAGE_MUTEX_EXPECT_MESSAGE: &str = "MemoryLogger storage mutex should unlock";
 
@@ -31,17 +35,24 @@ impl MemoryLogger {
         pdp_id: PdpID,
         app_name: Option<ApplicationName>,
     ) -> Self {
+        let default_config: ConfigSparKV = Default::default();
+
         let sparkv_config = ConfigSparKV {
             default_ttl: Duration::new(
                 config.log_ttl.try_into().expect("u64 that fits in a i64"),
                 0,
             )
             .expect("a valid duration"),
+            max_items: config.max_items.unwrap_or(default_config.max_items),
+            max_item_size: config.max_item_size.unwrap_or(default_config.max_item_size),
             ..Default::default()
         };
 
         MemoryLogger {
-            storage: Mutex::new(SparKV::with_config(sparkv_config)),
+            storage: Mutex::new(SparKV::with_config_and_sizer(
+                sparkv_config,
+                Some(calculate_memory_usage),
+            )),
             log_level,
             pdp_id,
             app_name,
@@ -98,6 +109,17 @@ mod fallback {
     }
 }
 
+fn to_json_value<T: Loggable>(entry: &T) -> Value {
+    match serde_json::to_value(entry) {
+        Ok(json) => json,
+        Err(err) => {
+            let err_msg = format!("failed to serialize log entry to JSON: {err}");
+            serde_json::to_value(ErrorLogEntry::from_loggable(entry, err_msg.clone()))
+                .expect(&err_msg)
+        },
+    }
+}
+
 // Implementation of LogWriter
 impl LogWriter for MemoryLogger {
     fn log_any<T: Loggable>(&self, entry: T) {
@@ -108,30 +130,45 @@ impl LogWriter for MemoryLogger {
 
         let entry_id = entry.get_id().to_string();
         let index_keys = entry.get_index_keys();
-        let json = match serde_json::to_value(&entry) {
-            Ok(json) => json,
-            Err(err) => {
-                let err_msg = format!("failed to serialize log entry to JSON: {err}");
-                serde_json::to_value(ErrorLogEntry::from_loggable(&entry, err_msg.clone()))
-                    .expect(&err_msg)
-            },
-        };
+        let json = to_json_value(&entry);
 
         let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
 
-        let set_result = storage.set(&entry_id, json);
+        let set_result = storage.set(&entry_id, json, index_keys.as_slice());
 
-        if let Err(err) = set_result {
-            fallback::log(
-                &format!("could not store LogEntry to memory: {err:?}"),
-                &self.pdp_id,
-                &self.app_name,
-            );
-        } else {
-            for index_key in index_keys {
-                storage.add_additional_index(entry_id.as_str(), index_key.as_str());
-            }
+        let err = match set_result {
+            Ok(_) => return,
+            Err(Error::CapacityExceeded) => {
+                // remove oldest key and try again
+
+                let key_to_delete = storage
+                    .get_oldest_key_by_expiration()
+                    .map(|exp_entry| exp_entry.key.clone());
+
+                if let Some(key) = key_to_delete {
+                    storage.pop(&key);
+                }
+
+                // It should be rare case, so instead of cloning the whole entry,
+                // in success case we convert raw value to json (here).
+                // Or we should use Rc<LogEntry> and use Rc::clone() instead.
+                let json = to_json_value(&entry);
+
+                // set_again
+                if let Err(err) = storage.set(&entry_id, json, index_keys.as_slice()) {
+                    err
+                } else {
+                    return;
+                }
+            },
+            Err(err) => err,
         };
+
+        fallback::log(
+            &format!("could not store LogEntry to memory: {err:?}"),
+            &self.pdp_id,
+            &self.app_name,
+        );
     }
 }
 
@@ -205,7 +242,11 @@ mod tests {
     use test_utils::assert_eq;
 
     fn create_memory_logger(pdp_id: PdpID, app_name: Option<ApplicationName>) -> MemoryLogger {
-        let config = MemoryLogConfig { log_ttl: 60 };
+        let config = MemoryLogConfig {
+            log_ttl: 60,
+            max_items: None,
+            max_item_size: None,
+        };
         MemoryLogger::new(config, LogLevel::TRACE, pdp_id, app_name)
     }
 
@@ -303,7 +344,11 @@ mod tests {
         let request_id = gen_uuid7();
 
         let logger = MemoryLogger::new(
-            MemoryLogConfig { log_ttl: 10 },
+            MemoryLogConfig {
+                log_ttl: 10,
+                max_item_size: None,
+                max_items: None,
+            },
             LogLevel::DEBUG,
             PdpID::new(),
             None,
@@ -362,5 +407,99 @@ mod tests {
                 == 1,
             "1 system log entry should be present with WARN level"
         );
+    }
+
+    #[test]
+    fn test_max_items_config() {
+        let default_config: ConfigSparKV = Default::default();
+
+        // Test default value when None
+        let logger = MemoryLogger::new(
+            MemoryLogConfig {
+                log_ttl: 10,
+                max_items: None,
+                max_item_size: None,
+            },
+            LogLevel::DEBUG,
+            PdpID::new(),
+            None,
+        );
+        assert_eq!(
+            logger.storage.lock().unwrap().config.max_items,
+            default_config.max_items
+        );
+
+        // Test disabled check when 0
+        let logger = MemoryLogger::new(
+            MemoryLogConfig {
+                log_ttl: 10,
+                max_items: Some(0),
+                max_item_size: None,
+            },
+            LogLevel::DEBUG,
+            PdpID::new(),
+            None,
+        );
+        assert_eq!(logger.storage.lock().unwrap().config.max_items, 0);
+
+        // Test custom value
+        let logger = MemoryLogger::new(
+            MemoryLogConfig {
+                log_ttl: 10,
+                max_items: Some(500),
+                max_item_size: None,
+            },
+            LogLevel::DEBUG,
+            PdpID::new(),
+            None,
+        );
+        assert_eq!(logger.storage.lock().unwrap().config.max_items, 500);
+    }
+
+    #[test]
+    fn test_max_item_size_config() {
+        let default_config: ConfigSparKV = Default::default();
+
+        // Test default value when None
+        let logger = MemoryLogger::new(
+            MemoryLogConfig {
+                log_ttl: 10,
+                max_items: None,
+                max_item_size: None,
+            },
+            LogLevel::DEBUG,
+            PdpID::new(),
+            None,
+        );
+        assert_eq!(
+            logger.storage.lock().unwrap().config.max_item_size,
+            default_config.max_item_size
+        );
+
+        // Test disabled check when 0
+        let logger = MemoryLogger::new(
+            MemoryLogConfig {
+                log_ttl: 10,
+                max_items: None,
+                max_item_size: Some(0),
+            },
+            LogLevel::DEBUG,
+            PdpID::new(),
+            None,
+        );
+        assert_eq!(logger.storage.lock().unwrap().config.max_item_size, 0);
+
+        // Test custom value
+        let logger = MemoryLogger::new(
+            MemoryLogConfig {
+                log_ttl: 10,
+                max_items: None,
+                max_item_size: Some(10_000),
+            },
+            LogLevel::DEBUG,
+            PdpID::new(),
+            None,
+        );
+        assert_eq!(logger.storage.lock().unwrap().config.max_item_size, 10_000);
     }
 }

@@ -98,5 +98,9 @@ fn extract_memory_config(args: Vec<String>) -> LogTypeConfig {
     let log_ttl: u64 = args[2]
         .parse()
         .expect("Invalid ttl value, should be integer");
-    LogTypeConfig::Memory(MemoryLogConfig { log_ttl })
+    LogTypeConfig::Memory(MemoryLogConfig {
+        log_ttl,
+        max_item_size: None,
+        max_items: None,
+    })
 }
