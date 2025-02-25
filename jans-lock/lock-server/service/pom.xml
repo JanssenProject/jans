@@ -39,6 +39,26 @@
 					<skipTests>false</skipTests>
 				</configuration>
 			</plugin>
+
+			<!-- Swagger -->
+			<plugin>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-maven-plugin-jakarta</artifactId>
+				<executions>
+						<execution>
+							<configuration>
+								<outputFormat>YAML</outputFormat>
+								<outputFileName>lock-server</outputFileName>
+								<outputPath>${project.parent.basedir}/..</outputPath>
+								<prettyPrint>true</prettyPrint>
+							</configuration>
+							<phase>compile</phase>
+							<goals>
+								<goal>resolve</goal>
+							</goals>
+						</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
