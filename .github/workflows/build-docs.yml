@@ -57,7 +57,6 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        working-directory: docs
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           export PATH="$HOME/.local/bin:$PATH"
