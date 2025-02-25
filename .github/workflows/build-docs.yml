@@ -57,12 +57,12 @@ jobs:
           cache: pip
 
       - name: Install dependencies
+        working-directory: docs
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           export PATH="$HOME/.local/bin:$PATH"
-          cd docs
+          cp docs/pyproject.toml docs/poetry.lock ./
           poetry install --no-root
-          cd ..
           cp mkdocs.yml ../
 
       - name: Checkout jans ${{ github.event.inputs.version }}
