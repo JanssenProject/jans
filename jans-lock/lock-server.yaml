@@ -16,7 +16,6 @@ tags:
 - name: Lock - Audit Health
 - name: Lock - Audit Log
 - name: Lock - Audit Telemetry
-- name: Audit Telemetry
 - name: Lock - SSE
 paths:
   /configuration:
