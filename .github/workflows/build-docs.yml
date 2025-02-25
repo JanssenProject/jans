@@ -185,7 +185,7 @@ jobs:
         run: |
           LATEST=${{ steps.set_versions.outputs.LATEST }}
           STABLE=${{ steps.set_versions.outputs.STABLE }}
-          git checkout gh-pages
+          git checkout -f gh-pages
           git pull origin gh-pages
           mv ../janssen-*.tgz ./charts/
           cd ./charts
