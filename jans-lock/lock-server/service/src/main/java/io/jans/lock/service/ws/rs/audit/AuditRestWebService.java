@@ -49,9 +49,9 @@ import jakarta.ws.rs.core.SecurityContext;
 public interface AuditRestWebService {
 
 	@Operation(summary = "Save health data", description = "Save health data", tags = {
-	"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-			Constants.LOCK_HEALTH_WRITE_ACCESS }))
-    @RequestBody(description = "Health entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = HealthEntry.class)))
+			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+					Constants.LOCK_HEALTH_WRITE_ACCESS }))
+	@RequestBody(description = "Health entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = HealthEntry.class)))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -60,13 +60,14 @@ public interface AuditRestWebService {
 	@POST
 	@Path("/health")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = {"https://jans.io/oauth/lock/health.write"})
-	Response processHealthRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
+	@ProtectedApi(scopes = { "https://jans.io/oauth/lock/health.write" })
+	Response processHealthRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
+			@Context SecurityContext sec);
 
 	@Operation(summary = "Bulk save health data", description = "Bulk save health data", tags = {
-	"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-			Constants.LOCK_HEALTH_WRITE_ACCESS }))
-    @RequestBody(description = "Bulk health entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = HealthEntry.class))))
+			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+					Constants.LOCK_HEALTH_WRITE_ACCESS }))
+	@RequestBody(description = "Bulk health entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = HealthEntry.class))))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -75,13 +76,14 @@ public interface AuditRestWebService {
 	@POST
 	@Path("/health/bulk")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = {"https://jans.io/oauth/lock/health.write"})
-	Response processBulkHealthRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
+	@ProtectedApi(scopes = { "https://jans.io/oauth/lock/health.write" })
+	Response processBulkHealthRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
+			@Context SecurityContext sec);
 
 	@Operation(summary = "Save log data", description = "Save log data", tags = {
-	"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-			Constants.LOCK_LOG_WRITE_ACCESS }))
-    @RequestBody(description = "Log entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LogEntry.class)))
+			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+					Constants.LOCK_LOG_WRITE_ACCESS }))
+	@RequestBody(description = "Log entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LogEntry.class)))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -90,13 +92,14 @@ public interface AuditRestWebService {
 	@POST
 	@Path("/log")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = {"https://jans.io/oauth/lock/log.write"})
-	Response processLogRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
+	@ProtectedApi(scopes = { "https://jans.io/oauth/lock/log.write" })
+	Response processLogRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
+			@Context SecurityContext sec);
 
 	@Operation(summary = "Bulk save log data", description = "Bulk save log data", tags = {
-	"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-			Constants.LOCK_LOG_WRITE_ACCESS }))
-    @RequestBody(description = "Bulk log entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = LogEntry.class))))
+			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+					Constants.LOCK_LOG_WRITE_ACCESS }))
+	@RequestBody(description = "Bulk log entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = LogEntry.class))))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -105,13 +108,14 @@ public interface AuditRestWebService {
 	@POST
 	@Path("/log/bulk")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = {"https://jans.io/oauth/lock/log.write"})
-	Response processBulkLogRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
+	@ProtectedApi(scopes = { "https://jans.io/oauth/lock/log.write" })
+	Response processBulkLogRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
+			@Context SecurityContext sec);
 
 	@Operation(summary = "Save telemetry data", description = "Save telemetry data", tags = {
-	"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-			Constants.LOCK_TELEMETRY_WRITE_ACCESS }))
-    @RequestBody(description = "Telemetry entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TelemetryEntry.class)))
+			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+					Constants.LOCK_TELEMETRY_WRITE_ACCESS }))
+	@RequestBody(description = "Telemetry entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TelemetryEntry.class)))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -120,13 +124,14 @@ public interface AuditRestWebService {
 	@POST
 	@Path("/telemetry")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = {"https://jans.io/oauth/lock/telemetry.write"})
-	Response processTelemetryRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
+	@ProtectedApi(scopes = { "https://jans.io/oauth/lock/telemetry.write" })
+	Response processTelemetryRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
+			@Context SecurityContext sec);
 
 	@Operation(summary = "Bulk save telemetry data", description = "Bulk save telemetry data", tags = {
-	"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-			Constants.LOCK_TELEMETRY_WRITE_ACCESS }))
-    @RequestBody(description = "Bulk telemetry entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = TelemetryEntry.class))))
+			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+					Constants.LOCK_TELEMETRY_WRITE_ACCESS }))
+	@RequestBody(description = "Bulk telemetry entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = TelemetryEntry.class))))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -135,7 +140,8 @@ public interface AuditRestWebService {
 	@POST
 	@Path("/telemetry/bulk")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = {"https://jans.io/oauth/lock/telemetry.write"})
-	Response processBulkTelemetryRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
+	@ProtectedApi(scopes = { "https://jans.io/oauth/lock/telemetry.write" })
+	Response processBulkTelemetryRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
+			@Context SecurityContext sec);
 
 }

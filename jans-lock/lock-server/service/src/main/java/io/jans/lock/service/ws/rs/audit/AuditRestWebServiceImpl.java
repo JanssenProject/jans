@@ -117,14 +117,9 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
     private Response processAuditRequest(HttpServletRequest request, String requestType, boolean reportStat, boolean bulkData) {
         log.info("Processing request - request: {}, requestType: {}", request, requestType);
 
-        Response.ResponseBuilder builder = Response.ok();
-        builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
-        builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
-
         JsonNode json = getJsonNode(request);
 		if (json == null) {
-			builder.status(Status.BAD_REQUEST);
-			return builder.build();
+			throwBadRequestException("Failed to parse request");
 		}
 
         if (reportStat) {
@@ -136,22 +131,26 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
         }
 
         Response response = this.auditForwarderService.post(requestType, json.toString(), ContentType.APPLICATION_JSON);
-		log.debug("Response: {}", response);
+        if (response == null) {
+        	throwNotFoundException("Failed to forward request to config-api");
+        }
 
-        if (response != null) {
-			log.debug("Get response with status: {}, statusInfo: {}, entityClass: {}", response.getStatus(),
-					response.getStatusInfo(), response.getEntity().getClass());
-			
-            String entity = response.readEntity(String.class);
-            builder.entity(entity);
-			log.debug("Response entity: {}", entity);
+		log.debug("Get response with status: {}, statusInfo: {}, entityClass: {}", response.getStatus(),
+				response.getStatusInfo(), response.getEntity().getClass());
 
-            if (response.getStatusInfo().equals(Status.OK)) {
-				log.debug(" Status: {}, entity: {}", response.getStatus(), entity);
-            } else {
-				log.error("Error while saving audit data, statusInfo: {}, entity: {}", response.getStatusInfo(), entity);
-                builder.status(response.getStatusInfo());
-            }
+        Response.ResponseBuilder builder = Response.ok();
+        builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
+        builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
+		
+        String entity = response.readEntity(String.class);
+        builder.entity(entity);
+		log.debug("Response entity: {}", entity);
+
+        if (response.getStatusInfo().equals(Status.OK)) {
+			log.debug(" Status: {}, entity: {}", response.getStatus(), entity);
+        } else {
+			log.error("Error while saving audit data, statusInfo: {}, entity: {}", response.getStatusInfo(), entity);
+            builder.status(response.getStatusInfo());
         }
 
         return builder.build();
