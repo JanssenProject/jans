@@ -33,7 +33,7 @@ displayName: yubico-u2f-ca-cert.crt
 document: %(yubico_u2f_ca_cert_base64)s
 inum: %(yubico_u2f_ca_cert_inum)s
 jansEnabled: true
-jansFilePath: %(fido_document_certs_dir)s
+jansFilePath: %(fido_document_authenticator_cert_dir)s
 jansLevel: 0
 jansService: Fido2 MDS
 

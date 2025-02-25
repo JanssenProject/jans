@@ -164,13 +164,46 @@ public class AttestationCertificateService {
 		return metadataForAuthenticator;
 	}
 
+	
+
+	public JsonNode getMetadataForU2fAuthenticator(String attestationCertificateKeyIdentifiers) {
+
+		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+		JsonNode metadataForAuthenticator;
+		if (fido2Configuration.isEnterpriseAttestation()) {
+			metadataForAuthenticator = localMdsService.getAuthenticatorsMetadata(attestationCertificateKeyIdentifiers);
+			if (metadataForAuthenticator == null) {
+				metadataForAuthenticator = dataMapperService.createObjectNode();
+			}
+		} else {
+			try {
+				log.info("No Local metadata for authenticator {}. Checking for metadata MDS3 blob",
+						attestationCertificateKeyIdentifiers);
+				if (!fido2Configuration.isDisableMetadataService() ) {
+					JsonNode metadata = mdsService.fetchMetadata(attestationCertificateKeyIdentifiers.getBytes());
+					commonVerifiers.verifyThatMetadataIsValid(metadata);
+					metadataForAuthenticator = metadata;
+				} else {
+					metadataForAuthenticator = dataMapperService.createObjectNode();
+					log.debug("disableMetadataService has been configured as true");
+				}
+			} catch (Fido2RuntimeException ex) {
+				log.warn("Failed to get metadata from Fido2 meta-data server: {}", ex.getMessage(), ex);
+
+				metadataForAuthenticator = dataMapperService.createObjectNode();
+			}
+		}
+		return metadataForAuthenticator;
+	}
+
+	
 	public List<X509Certificate> getAttestationRootCertificates(AuthData authData, List<X509Certificate> attestationCertificates) {
 		JsonNode metadataForAuthenticator = getMetadataForAuthenticator(authData);
 		return getAttestationRootCertificates(metadataForAuthenticator, attestationCertificates);
 	}
 
 	public X509TrustManager populateTrustManager(AuthData authData, List<X509Certificate> attestationCertificates) {
-		String aaguid = Hex.encodeHexString(authData.getAaguid());
+		String aaguid = Hex.encodeHexString(authData. getAaguid());
 		List<X509Certificate> trustedCertificates = getAttestationRootCertificates(authData, attestationCertificates);
 		if ((trustedCertificates == null) || (trustedCertificates.size() == 0)) {
 			log.error("Failed to get trusted certificates");
