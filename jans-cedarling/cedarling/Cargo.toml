@@ -36,6 +36,7 @@ tokio = { version = "1.42.0", features = ["macros", "time"] }
 rand = "0.8.5"
 smol_str = "0.3.2"
 strum = { version = "0.26", features = ["derive"] }
+datalogic-rs = "2.1.2"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { workspace = true, features = ["console"] }
