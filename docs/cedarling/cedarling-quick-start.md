@@ -82,7 +82,7 @@ Before you begin, make sure you have the following:
 
 To begin using Cedarling, you need to set up a policy store. We’ll use this [Agama Lab](https://cloud.gluu.org/agama-lab/login) for this purpose.
 
-1. Sign in to Agama Lab using your GitHub account and click on Policy Designer.
+1. Sign in to [Agama Lab](https://cloud.gluu.org/agama-lab/login) using your GitHub account and click on Policy Designer.
    ![image](../assets/cedarling-policy-designer.png)
 2. Choose a repository to store your Cedarling policies and schemas. Ensure that the repository has at least one commit on the default branch.
    ![image](../assets/cedarling-select-repo.png)
@@ -185,7 +185,7 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_
 * Install the nightly wheel: poetry run 
 
 ```
-pip install cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.whl
+poetry run cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.whl
 ```
 * Modify `secrets/bootstrap.json` to your specifications.
 
