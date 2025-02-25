@@ -50,13 +50,10 @@ import io.swagger.v3.oas.annotations.servers.*;
 
         version = "OAS Version"),
 
-        tags = { @Tag(name = "Lock"), @Tag(name = "Cedarling"),
-                @Tag(name = "Audit Log"), @Tag(name = "Audit Health"),
+        tags = { @Tag(name = "Lock - Stat"), @Tag(name = "Lock - Audit Health"),
+                @Tag(name = "Lock - Audit Log"), @Tag(name = "Lock - Audit Telemetry"),
                 @Tag(name = "Audit Telemetry"), @Tag(name = "SSE broadcast"),
-                @Tag(name = "Token Status List"), @Tag(name = "Events"),
-                @Tag(name = "Statistics MAU"), @Tag(name = "Statistics MAC"),
-                @Tag(name = "Config API Lock Plugin"), @Tag(name = "Custom Scripts"),
-                @Tag(name = "Token"),
+                @Tag(name = "Lock - SSE"),
         },
 
         servers = { @Server(url = "https://jans.local.io", description = "The Jans server") })

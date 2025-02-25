@@ -12,19 +12,13 @@ servers:
 - url: https://jans.local.io
   description: The Jans server
 tags:
-- name: Lock
-- name: Cedarling
-- name: Audit Log
-- name: Audit Health
+- name: Lock - Stat
+- name: Lock - Audit Health
+- name: Lock - Audit Log
+- name: Lock - Audit Telemetry
 - name: Audit Telemetry
 - name: SSE broadcast
-- name: Token Status List
-- name: Events
-- name: Statistics MAU
-- name: Statistics MAC
-- name: Config API Lock Plugin
-- name: Custom Scripts
-- name: Token
+- name: Lock - SSE
 paths:
   /configuration:
     get:
@@ -37,7 +31,7 @@ paths:
   /audit/health/bulk:
     post:
       tags:
-      - Lock - Audit
+      - Lock - Audit Health
       summary: Bulk save health data
       description: Bulk save health data
       operationId: processBulkHealthRequest_1
@@ -78,7 +72,7 @@ paths:
   /audit/log/bulk:
     post:
       tags:
-      - Lock - Audit
+      - Lock - Audit Log
       summary: Bulk save log data
       description: Bulk save log data
       operationId: processBulkLogRequest_1
@@ -119,7 +113,7 @@ paths:
   /audit/telemetry/bulk:
     post:
       tags:
-      - Lock - Audit
+      - Lock - Audit Telemetry
       summary: Bulk save telemetry data
       description: Bulk save telemetry data
       operationId: processBulkTelemetryRequest_1
@@ -160,7 +154,7 @@ paths:
   /audit/health:
     post:
       tags:
-      - Lock - Audit
+      - Lock - Audit Health
       summary: Save health data
       description: Save health data
       operationId: processHealthRequest_1
@@ -199,7 +193,7 @@ paths:
   /audit/log:
     post:
       tags:
-      - Lock - Audit
+      - Lock - Audit Log
       summary: Save log data
       description: Save log data
       operationId: processLogRequest_1
@@ -238,7 +232,7 @@ paths:
   /audit/telemetry:
     post:
       tags:
-      - Lock - Audit
+      - Lock - Audit Telemetry
       summary: Save telemetry data
       description: Save telemetry data
       operationId: processTelemetryRequest_1
