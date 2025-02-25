@@ -410,7 +410,7 @@ Connection: Keep-Alive
 
 ## Revoke SSA
 
-Revoke existing active SSA based on `jti` or `org_id`.
+Revoke existing active SSA based on `jti` or `org_id`. On SSA revoke expiration date is set to `now` which makes it eligible for clean up.
 
 ### Query Parameters
 
@@ -505,7 +505,7 @@ def get(self, jsonArray, context):
 
 ### Revoke method
 
-This method is executed after the SSA list has been revoked.
+This method is executed after the SSA list has been revoked. On SSA revoke expiration date is set to `now` which makes it eligible for clean up.
 
 ```
 def revoke(self, ssaList, context):
