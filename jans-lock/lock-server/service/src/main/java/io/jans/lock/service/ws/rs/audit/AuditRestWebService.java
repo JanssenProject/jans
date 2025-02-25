@@ -20,7 +20,7 @@ import io.jans.lock.model.audit.HealthEntry;
 import io.jans.lock.model.audit.LogEntry;
 import io.jans.lock.model.audit.TelemetryEntry;
 import io.jans.lock.model.core.LockApiError;
-import io.jans.lock.util.Constants;
+import io.jans.lock.util.ApiAccessConstants;
 import io.jans.service.security.api.ProtectedApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -50,7 +50,7 @@ public interface AuditRestWebService {
 
 	@Operation(summary = "Save health data", description = "Save health data", tags = {
 			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					Constants.LOCK_HEALTH_WRITE_ACCESS }))
+					ApiAccessConstants.LOCK_HEALTH_WRITE_ACCESS }))
 	@RequestBody(description = "Health entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = HealthEntry.class)))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
@@ -66,7 +66,7 @@ public interface AuditRestWebService {
 
 	@Operation(summary = "Bulk save health data", description = "Bulk save health data", tags = {
 			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					Constants.LOCK_HEALTH_WRITE_ACCESS }))
+					ApiAccessConstants.LOCK_HEALTH_WRITE_ACCESS }))
 	@RequestBody(description = "Bulk health entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = HealthEntry.class))))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
@@ -82,7 +82,7 @@ public interface AuditRestWebService {
 
 	@Operation(summary = "Save log data", description = "Save log data", tags = {
 			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					Constants.LOCK_LOG_WRITE_ACCESS }))
+					ApiAccessConstants.LOCK_LOG_WRITE_ACCESS }))
 	@RequestBody(description = "Log entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LogEntry.class)))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
@@ -98,7 +98,7 @@ public interface AuditRestWebService {
 
 	@Operation(summary = "Bulk save log data", description = "Bulk save log data", tags = {
 			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					Constants.LOCK_LOG_WRITE_ACCESS }))
+					ApiAccessConstants.LOCK_LOG_WRITE_ACCESS }))
 	@RequestBody(description = "Bulk log entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = LogEntry.class))))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
@@ -114,7 +114,7 @@ public interface AuditRestWebService {
 
 	@Operation(summary = "Save telemetry data", description = "Save telemetry data", tags = {
 			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					Constants.LOCK_TELEMETRY_WRITE_ACCESS }))
+					ApiAccessConstants.LOCK_TELEMETRY_WRITE_ACCESS }))
 	@RequestBody(description = "Telemetry entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TelemetryEntry.class)))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
@@ -130,7 +130,7 @@ public interface AuditRestWebService {
 
 	@Operation(summary = "Bulk save telemetry data", description = "Bulk save telemetry data", tags = {
 			"Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					Constants.LOCK_TELEMETRY_WRITE_ACCESS }))
+					ApiAccessConstants.LOCK_TELEMETRY_WRITE_ACCESS }))
 	@RequestBody(description = "Bulk telemetry entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = TelemetryEntry.class))))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),

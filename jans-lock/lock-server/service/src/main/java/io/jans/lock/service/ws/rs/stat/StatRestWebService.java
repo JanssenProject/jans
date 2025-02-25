@@ -2,7 +2,7 @@ package io.jans.lock.service.ws.rs.stat;
 
 import io.jans.lock.model.core.LockApiError;
 import io.jans.lock.model.stat.FlatStatResponse;
-import io.jans.lock.util.Constants;
+import io.jans.lock.util.ApiAccessConstants;
 import io.jans.service.security.api.ProtectedApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,28 +31,28 @@ public interface StatRestWebService {
 
 	@Operation(summary = "Request stat data", description = "Request stat data", tags = {
 			"Lock - Stat" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					Constants.LOCK_HEALTH_WRITE_ACCESS }))
+					ApiAccessConstants.LOCK_STAT_READ_ACCESS }))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FlatStatResponse.class, description = "StatFound"))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
 			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "NotFoundException"))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@GET
-	@ProtectedApi(scopes = { "jans_stat" })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_STAT_READ_ACCESS })
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response statGet(@QueryParam("month") String months, @QueryParam("start-month") String startMonth,
 			@QueryParam("end-month") String endMonth, @QueryParam("format") String format);
 
 	@Operation(summary = "Request stat data", description = "Request stat data", tags = {
 			"Lock - Stat" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					Constants.LOCK_HEALTH_WRITE_ACCESS }))
+					ApiAccessConstants.LOCK_STAT_READ_ACCESS }))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FlatStatResponse.class, description = "StatFound"))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
 			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "NotFoundException"))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST
-	@ProtectedApi(scopes = { "jans_stat" })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_STAT_READ_ACCESS })
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response statPost(@FormParam("month") String months, @FormParam("start-month") String startMonth,
 			@FormParam("end-month") String endMonth, @FormParam("format") String format);

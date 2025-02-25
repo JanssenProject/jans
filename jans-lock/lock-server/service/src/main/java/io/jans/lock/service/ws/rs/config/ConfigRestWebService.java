@@ -16,6 +16,7 @@
 
 package io.jans.lock.service.ws.rs.config;
 
+import io.jans.lock.util.ApiAccessConstants;
 import io.jans.service.security.api.ProtectedApi;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,26 +38,26 @@ public interface ConfigRestWebService {
 	@GET
 	@Path("/config")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = {"https://jans.io/lock-server/config.read"})
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_CONFIG_READ_ACCESS })
 	Response processConfigRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
 
 	@GET
 	@Path("/config/issuers")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = {"https://jans.io/lock-server/issuers.read"})
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_CONFIG_ISSUERS_READ_ACCESS})
 	Response processIssuersRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@Context SecurityContext sec);
 
 	@GET
 	@Path("/config/schema")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = {"https://jans.io/lock-server/schema.read"})
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_CONFIG_SCHEMA_READ_ACCESS })
 	Response processSchemaRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
 
 	@GET
 	@Path("/config/policy")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = {"https://jans.io/lock-server/policy.read"})
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_CONFIG_POLICY_READ_ACCESS})
 	Response processPolicyRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
 
 }
