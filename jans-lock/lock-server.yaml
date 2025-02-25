@@ -1,305 +1,513 @@
-components:
-  responses:
-    DEFAULT_ERROR:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-      description: Default error response
-    UNPROCESSABLE_ENTITY:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-      description: Unprocessable Entity
-  schemas:
-    Audit:
-      properties:
-        client_id:
-          type: string
-        message:
-          type: string
-        result_code:
-          type: integer
-      required:
-      - client_id
-      - message
-      - result_code
-      type: object
-    Error:
-      properties:
-        code:
-          description: Error code
-          type: integer
-        errors:
-          description: Errors
-          type: object
-        message:
-          description: Error message
-          type: string
-        status:
-          description: Error name
-          type: string
-      type: object
-    PaginationMetadata:
-      properties:
-        first_page:
-          type: integer
-        last_page:
-          type: integer
-        next_page:
-          type: integer
-        page:
-          type: integer
-        previous_page:
-          type: integer
-        total:
-          type: integer
-        total_pages:
-          type: integer
-      type: object
-    WellKnown:
-      properties:
-        audit_uri:
-          type: string
-        config_uri:
-          type: string
-        lock_sse_uri:
-          type: string
-        oauth_as_well_known:
-          type: string
-      required:
-      - audit_uri
-      - config_uri
-      - lock_sse_uri
-      - oauth_as_well_known
-      type: object
-  securitySchemes:
-    Bearer:
-      bearerFormat: JWT
-      scheme: bearer
-      type: http
-    Client Credentials:
-      bearerFormat: JWT
-      description: Access Token for endpoint
-      flows:
-        clientCredentials:
-          scopes:
-            https://jans.io/oauth/scopes/cedarling: ''
-            https://jans.io/oauth/scopes/lock_sse: ''
-          tokenUrl: https://account.gluu.org/jans-auth/restv1/token
-      scheme: bearer
-      type: oauth2
-host: https://lock.master.gluu.cloud
-info:
-  title: Lock Server Endpoints
-  version: 0.1
-openapi: 3.0.2
+openapi: 3.0.1
 paths:
-  /.well-known/lock-server-configuration:
+  /configuration:
     get:
+      operationId: getConfiguration
       responses:
-        '200':
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /audit/health/bulk:
+    post:
+      tags:
+      - Lock - Audit
+      summary: Bulk save health data
+      description: Bulk save health data
+      operationId: processBulkHealthRequest_1
+      requestBody:
+        description: Bulk health entry
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/HealthEntry'
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Bad Request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WellKnown'
-          description: OK
-        default:
-          $ref: '#/components/responses/DEFAULT_ERROR'
+                $ref: '#/components/schemas/LockApiError'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockApiError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockApiError'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/health.write
+  /audit/log/bulk:
+    post:
       tags:
-      - Lock Server
+      - Lock - Audit
+      summary: Bulk save log data
+      description: Bulk save log data
+      operationId: processBulkLogRequest_1
+      requestBody:
+        description: Bulk log entry
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/LogEntry'
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockApiError'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockApiError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockApiError'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/log.write
+  /audit/telemetry/bulk:
+    post:
+      tags:
+      - Lock - Audit
+      summary: Bulk save telemetry data
+      description: Bulk save telemetry data
+      operationId: processBulkTelemetryRequest_1
+      requestBody:
+        description: Bulk telemetry entry
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TelemetryEntry'
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockApiError'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockApiError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockApiError'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/telemetry.write
   /audit/health:
     post:
+      tags:
+      - Lock - Audit
+      summary: Save health data
+      description: Save health data
+      operationId: processHealthRequest_1
       requestBody:
+        description: Health entry
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Audit'
-        required: true
+              $ref: '#/components/schemas/HealthEntry'
       responses:
-        '200':
-          description: OK
-        '422':
-          $ref: '#/components/responses/UNPROCESSABLE_ENTITY'
-        default:
-          $ref: '#/components/responses/DEFAULT_ERROR'
+        "200":
+          description: Ok
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockApiError'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockApiError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockApiError'
       security:
-      - Client Credentials:
-        - https://jans.io/oauth/scopes/cedarling
-      summary: Sends health check
-      tags:
-      - Audit
+      - oauth2:
+        - https://jans.io/oauth/lock/health.write
   /audit/log:
     post:
+      tags:
+      - Lock - Audit
+      summary: Save log data
+      description: Save log data
+      operationId: processLogRequest_1
       requestBody:
+        description: Log entry
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Audit'
-        required: true
+              $ref: '#/components/schemas/LogEntry'
       responses:
-        '200':
-          description: OK
-        '422':
-          $ref: '#/components/responses/UNPROCESSABLE_ENTITY'
-        default:
-          $ref: '#/components/responses/DEFAULT_ERROR'
+        "200":
+          description: Ok
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockApiError'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockApiError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockApiError'
       security:
-      - Client Credentials:
-        - https://jans.io/oauth/scopes/cedarling
-      summary: Sends log
-      tags:
-      - Audit
+      - oauth2:
+        - https://jans.io/oauth/lock/log.write
   /audit/telemetry:
     post:
+      tags:
+      - Lock - Audit
+      summary: Save telemetry data
+      description: Save telemetry data
+      operationId: processTelemetryRequest_1
       requestBody:
+        description: Telemetry entry
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Audit'
-        required: true
+              $ref: '#/components/schemas/TelemetryEntry'
       responses:
-        '200':
-          description: OK
-        '422':
-          $ref: '#/components/responses/UNPROCESSABLE_ENTITY'
-        default:
-          $ref: '#/components/responses/DEFAULT_ERROR'
+        "200":
+          description: Ok
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockApiError'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockApiError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockApiError'
       security:
-      - Client Credentials:
-        - https://jans.io/oauth/scopes/cedarling
-      summary: Sends telemetry log
-      tags:
-      - Audit
+      - oauth2:
+        - https://jans.io/oauth/lock/telemetry.write
   /config:
     get:
-      parameters:
-      - in: query
-        name: policy_store_format
-        required: false
-        schema:
-          type: string
-      - in: query
-        name: policy_store_id
-        required: false
-        schema:
-          type: string
+      operationId: processConfigRequest
       responses:
-        '200':
-          content:
-            application/octet-stream:
-              schema:
-                format: binary
-                type: string
-          description: OK
-        '422':
-          $ref: '#/components/responses/UNPROCESSABLE_ENTITY'
         default:
-          $ref: '#/components/responses/DEFAULT_ERROR'
-      security:
-      - Client Credentials:
-        - https://jans.io/oauth/scopes/cedarling
-      summary: Returns a zip containing policy store(s)
-      tags:
-      - Config
+          description: default response
+          content:
+            application/json: {}
   /config/issuers:
     get:
-      parameters:
-      - in: query
-        name: policy_store_format
-        required: false
-        schema:
-          type: string
-      - in: query
-        name: policy_store_id
-        required: false
-        schema:
-          type: string
+      operationId: processIssuersRequest
       responses:
-        '200':
-          description: OK
-        '422':
-          $ref: '#/components/responses/UNPROCESSABLE_ENTITY'
         default:
-          $ref: '#/components/responses/DEFAULT_ERROR'
-      security:
-      - Client Credentials:
-        - https://jans.io/oauth/scopes/cedarling
-      summary: Returns schema for trusted issuers
-      tags:
-      - Config
+          description: default response
+          content:
+            application/json: {}
   /config/policy:
     get:
-      parameters:
-      - in: query
-        name: policy_store_format
-        required: false
-        schema:
-          type: string
-      - in: query
-        name: policy_store_id
-        required: false
-        schema:
-          type: string
+      operationId: processPolicyRequest
       responses:
-        '200':
-          description: OK
-        '422':
-          $ref: '#/components/responses/UNPROCESSABLE_ENTITY'
         default:
-          $ref: '#/components/responses/DEFAULT_ERROR'
-      security:
-      - Client Credentials:
-        - https://jans.io/oauth/scopes/cedarling
-      summary: Returns the policy set
-      tags:
-      - Config
+          description: default response
+          content:
+            application/json: {}
   /config/schema:
     get:
-      parameters:
-      - in: query
-        name: policy_store_format
-        required: false
-        schema:
-          type: string
-      - in: query
-        name: policy_store_id
-        required: false
-        schema:
-          type: string
+      operationId: processSchemaRequest
       responses:
-        '200':
-          description: OK
-        '422':
-          $ref: '#/components/responses/UNPROCESSABLE_ENTITY'
         default:
-          $ref: '#/components/responses/DEFAULT_ERROR'
-      security:
-      - Client Credentials:
-        - https://jans.io/oauth/scopes/cedarling
-      summary: Returns the schema for the policy
-      tags:
-      - Config
-  /lock_sse:
+          description: default response
+          content:
+            application/json: {}
+  /sse:
     get:
+      operationId: subscribe
       responses:
-        '200':
-          description: OK
         default:
-          $ref: '#/components/responses/DEFAULT_ERROR'
-      security:
-      - Client Credentials:
-        - https://jans.io/oauth/scopes/lock_sse
-      summary: Subscribes to SSE stream
-      tags:
-      - Lock SSE
-tags:
-- description: Lock Server Endpoints
-  name: Lock Server
-- description: Posts Audit Log to Auth Server
-  name: Audit
-- description: Retrieve policy stores
-  name: Config
-- description: Subscribe to SSE
-  name: Lock SSE
+          description: default response
+          content:
+            text/event-stream: {}
+  /internal/stat:
+    get:
+      operationId: statGet_1
+      parameters:
+      - name: Authorization
+        in: header
+        schema:
+          type: string
+      - name: month
+        in: query
+        schema:
+          type: string
+      - name: start-month
+        in: query
+        schema:
+          type: string
+      - name: end-month
+        in: query
+        schema:
+          type: string
+      - name: format
+        in: query
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+    post:
+      operationId: statPost_1
+      parameters:
+      - name: Authorization
+        in: header
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: object
+              properties:
+                month:
+                  type: string
+                start-month:
+                  type: string
+                end-month:
+                  type: string
+                format:
+                  type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /{job-id}:
+    get:
+      operationId: get
+      parameters:
+      - name: wait
+        in: query
+        schema:
+          type: integer
+          format: int64
+          default: -1
+      - name: job-id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            '*/*': {}
+    post:
+      operationId: readAndRemove
+      parameters:
+      - name: wait
+        in: query
+        schema:
+          type: integer
+          format: int64
+          default: -1
+      - name: job-id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            '*/*': {}
+    delete:
+      operationId: remove
+      parameters:
+      - name: job-id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            '*/*': {}
+components:
+  schemas:
+    HealthEntry:
+      type: object
+      properties:
+        dn:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+        eventTime:
+          type: string
+          format: date-time
+        service:
+          type: string
+        nodeName:
+          type: string
+        status:
+          type: string
+        engineStatus:
+          type: string
+        baseDn:
+          type: string
+        inum:
+          type: string
+    LockApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        description:
+          type: string
+    LogEntry:
+      type: object
+      properties:
+        dn:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+        eventTime:
+          type: string
+          format: date-time
+        service:
+          type: string
+        nodeName:
+          type: string
+        eventType:
+          type: string
+        severetyLevel:
+          type: string
+        action:
+          type: string
+        decisionResult:
+          type: string
+        requestedResource:
+          type: string
+        princiaplId:
+          type: string
+        clientId:
+          type: string
+        contextInformation:
+          type: object
+          additionalProperties:
+            type: string
+        baseDn:
+          type: string
+        inum:
+          type: string
+    TelemetryEntry:
+      type: object
+      properties:
+        dn:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+        eventTime:
+          type: string
+          format: date-time
+        service:
+          type: string
+        nodeName:
+          type: string
+        status:
+          type: string
+        lastPolicyLoadSize:
+          type: integer
+          format: int32
+        policySuccessLoadCounter:
+          type: integer
+          format: int64
+        policyFailedLoadCounter:
+          type: integer
+          format: int64
+        lastPolicyEvaluationTimeNs:
+          type: integer
+          format: int32
+        avgPolicyEvaluationTimeNs:
+          type: integer
+          format: int32
+        evaluationRequestsCount:
+          type: integer
+          format: int64
+        policyStats:
+          type: object
+          additionalProperties:
+            type: string
+        baseDn:
+          type: string
+        inum:
+          type: string
+        memoryUsage:
+          type: string
