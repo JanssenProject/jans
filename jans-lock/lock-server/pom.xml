@@ -217,19 +217,6 @@
 					<groupId>io.swagger.core.v3</groupId>
 					<artifactId>swagger-maven-plugin-jakarta</artifactId>
 					<version>${swagger-maven-plugin-jakarta}</version>
-					<executions>
-						<execution>
-							<configuration>
-								<outputFormat>YAML</outputFormat>
-								<outputPath>${project.parent.basedir}/..</outputPath>
-								<prettyPrint>true</prettyPrint>
-							</configuration>
-							<phase>compile</phase>
-							<goals>
-								<goal>resolve</goal>
-							</goals>
-						</execution>
-					</executions>
 					<dependencies>
 						<dependency>
 							<groupId>io.swagger.core.v3</groupId>

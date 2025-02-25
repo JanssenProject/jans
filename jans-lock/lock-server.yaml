@@ -343,58 +343,6 @@ paths:
           description: default response
           content:
             application/json: {}
-  /{job-id}:
-    get:
-      operationId: get
-      parameters:
-      - name: wait
-        in: query
-        schema:
-          type: integer
-          format: int64
-          default: -1
-      - name: job-id
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        default:
-          description: default response
-          content:
-            '*/*': {}
-    post:
-      operationId: readAndRemove
-      parameters:
-      - name: wait
-        in: query
-        schema:
-          type: integer
-          format: int64
-          default: -1
-      - name: job-id
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        default:
-          description: default response
-          content:
-            '*/*': {}
-    delete:
-      operationId: remove
-      parameters:
-      - name: job-id
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        default:
-          description: default response
-          content:
-            '*/*': {}
 components:
   schemas:
     HealthEntry:
