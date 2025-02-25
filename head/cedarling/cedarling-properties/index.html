@@ -9101,6 +9101,8 @@
 <li><strong><code>CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS</code></strong> : List of claims to map from user entity, such as ["client_id", "rp_id", ...]</li>
 <li><strong><code>CEDARLING_DECISION_LOG_DEFAULT_JWT_ID</code></strong> : Token claims that will be used for decision logging. Default is "jti", but perhaps some other claim is needed.</li>
 <li><strong><code>CEDARLING_LOG_TTL</code></strong> : in case of <code>memory</code> store, TTL (time to live) of log entities in seconds.</li>
+<li><strong><code>CEDARLING_LOG_MAX_ITEMS</code></strong> : Maximum number of log entities that can be stored using Memory logger. If used <code>0</code> value means no limit. And If missed or None, default value is applied.</li>
+<li><strong><code>CEDARLING_LOG_MAX_ITEM_SIZE</code></strong> : Maximum size of a single log entity in bytes using Memory logger. If used <code>0</code> value means no limit. And If missed or None, default value is applied.</li>
 </ul>
 <p><strong>The following bootstrap properties are needed to configure JWT and cryptographic behavior:</strong></p>
 <ul>
@@ -9379,7 +9381,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-20T18:37:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-20</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-24T14:16:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-24</span>
       
         <br>
         Created:

@@ -8984,7 +8984,7 @@ sudo yum -y module enable mod_auth_openidc
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo yum install ~/jans-replace-janssen-version-stable-el8.x86_64.rpm
+<div class="highlight"><pre><span></span><code>sudo yum install ~/jans-replace-janssen-version-stable.el8.x86_64.rpm
 </code></pre></div>
 <h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>
@@ -9008,31 +9008,29 @@ interactive mode.</p>
 <p>Full TUI documentation can be found <a href="../../../config-guide/config-tools/jans-tui/">here</a></p>
 <p>If you have selected casa during installation you can access casa using url<code>https://&lt;host&gt;/jans-casa</code></p>
 <h2 id="enabling-https">Enabling HTTPS<a class="headerlink" href="#enabling-https" title="Permanent link">#</a></h2>
-<p>To enable communication with Janssen Server over TLS (https) in a production 
-environment, Janssen Server needs details about CA certificate. Update the 
+<p>To enable communication with Janssen Server over TLS (https) in a production
+environment, Janssen Server needs details about CA certificate. Update the
 HTTPS cofiguration file <code>https_jans.conf</code> as shown below:</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Want to use <code>Let's Encrypt</code> to get a certificate? Follow <a href="../../../../contribute/developer-faq/#how-to-get-certificate-from-lets-encrypt">this guide</a>.</p>
 </div>
 <ul>
-<li>
-<p>Open <code>https_jans.conf</code> 
-  <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>vi<span class="w"> </span>/etc/httpd/conf.d/https_jans.conf
-</code></pre></div></p>
-</li>
-<li>
-<p>Update <code>SSLCertificateFile</code> and <code>SSLCertificateKeyFile</code> parameters values
-  <div class="highlight"><pre><span></span><code>SSLCertificateFile<span class="w"> </span>location_of_fullchain.pem
-SSLCertificateKeyFile<span class="w"> </span>location_of_privkey.pem
-</code></pre></div></p>
-</li>
-<li>
-<p>Restart <code>httpd</code> service for changes to take effect
-  <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>service<span class="w"> </span>httpd<span class="w"> </span>restart
-</code></pre></div></p>
-</li>
+<li>Open <code>https_jans.conf</code></li>
 </ul>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>vi<span class="w"> </span>/etc/httpd/conf.d/https_jans.conf
+</code></pre></div>
+<ul>
+<li>Update <code>SSLCertificateFile</code> and <code>SSLCertificateKeyFile</code> parameters values</li>
+</ul>
+<div class="highlight"><pre><span></span><code>SSLCertificateFile<span class="w"> </span>location_of_fullchain.pem
+SSLCertificateKeyFile<span class="w"> </span>location_of_privkey.pem
+</code></pre></div>
+<ul>
+<li>Restart <code>httpd</code> service for changes to take effect</li>
+</ul>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>service<span class="w"> </span>httpd<span class="w"> </span>restart
+</code></pre></div>
 <h2 id="uninstall">Uninstall<a class="headerlink" href="#uninstall" title="Permanent link">#</a></h2>
 <p>Uninstall process involves two steps and removes all the Janssen Server components.</p>
 <div class="admonition note">
@@ -9097,7 +9095,7 @@ the removal of all the unused dependencies.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-22T10:03:52+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-22</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-25T08:10:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-25</span>
       
         <br>
         Created:
