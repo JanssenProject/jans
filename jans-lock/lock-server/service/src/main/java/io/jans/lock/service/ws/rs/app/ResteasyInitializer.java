@@ -52,8 +52,7 @@ import io.swagger.v3.oas.annotations.servers.*;
 
         tags = { @Tag(name = "Lock - Stat"), @Tag(name = "Lock - Audit Health"),
                 @Tag(name = "Lock - Audit Log"), @Tag(name = "Lock - Audit Telemetry"),
-                @Tag(name = "Audit Telemetry"), @Tag(name = "SSE broadcast"),
-                @Tag(name = "Lock - SSE"),
+                @Tag(name = "Audit Telemetry"), @Tag(name = "Lock - SSE"),
         },
 
         servers = { @Server(url = "https://jans.local.io", description = "The Jans server") })

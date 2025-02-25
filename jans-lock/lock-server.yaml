@@ -17,7 +17,6 @@ tags:
 - name: Lock - Audit Log
 - name: Lock - Audit Telemetry
 - name: Audit Telemetry
-- name: SSE broadcast
 - name: Lock - SSE
 paths:
   /configuration:
