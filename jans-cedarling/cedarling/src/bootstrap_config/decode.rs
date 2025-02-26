@@ -122,7 +122,7 @@ impl BootstrapConfig {
         let authorization_config = AuthorizationConfig {
             use_user_principal: raw.user_authz.is_enabled(),
             use_workload_principal: raw.workload_authz.is_enabled(),
-            principal_bool_operator: raw.principal_bool_op.clone(),
+            principal_bool_operator: raw.principal_bool_operation.clone(),
             decision_log_user_claims: raw.decision_log_user_claims.clone(),
             decision_log_workload_claims: raw.decision_log_workload_claims.clone(),
             decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),

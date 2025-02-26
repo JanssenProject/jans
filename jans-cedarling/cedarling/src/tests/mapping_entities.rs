@@ -128,7 +128,7 @@ async fn test_custom_mapping() {
         },
     }))
     .expect("valid token configs");
-    raw_config.principal_bool_op = JsonRule::new(json!({
+    raw_config.principal_bool_operation = JsonRule::new(json!({
         "and" : [
             {"===": [{"var": "Jans::MappedWorkload"}, "ALLOW"]},
             {"===": [{"var": "Jans::MappedUser"}, "ALLOW"]}

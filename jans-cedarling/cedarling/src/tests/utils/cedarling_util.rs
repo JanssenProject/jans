@@ -22,7 +22,7 @@ pub fn get_raw_config(local_policy_store: &str) -> BootstrapConfigRaw {
         application_name: "test_app".to_string(),
         user_authz: FeatureToggle::Enabled,
         workload_authz: FeatureToggle::Enabled,
-        principal_bool_op: JsonRule::default(),
+        principal_bool_operation: JsonRule::default(),
         log_type: crate::LoggerType::StdOut,
         local_policy_store: Some(local_policy_store_json.to_string()),
         jwt_status_validation: FeatureToggle::Disabled,

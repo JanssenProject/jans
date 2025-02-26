@@ -112,7 +112,7 @@ pub struct BootstrapConfigRaw {
     /// ```
     #[serde(rename = "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub principal_bool_op: JsonRule,
+    pub principal_bool_operation: JsonRule,
 
     /// Mapping name of cedar schema User entity
     #[serde(rename = "CEDARLING_MAPPING_USER", default)]
@@ -366,7 +366,7 @@ mod tests {
                 "Workload authorization should be disabled by default"
             );
             assert_eq!(
-                config.principal_bool_op,
+                config.principal_bool_operation,
                 JsonRule::default(),
                 "Default user-workload boolean operator should default"
             );
