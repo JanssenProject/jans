@@ -160,9 +160,7 @@ impl JwkStore {
         http_client: &HttpClient,
     ) -> Result<Self, JwkStoreError> {
         // fetch openid configuration
-        let response = http_client
-            .get(&issuer.oidc_endpoint)
-            .await?;
+        let response = http_client.get(issuer.oidc_endpoint.as_str()).await?;
         let openid_config = response
             .json::<OpenIdConfig>()
             .map_err(JwkStoreError::DeserializeOpenIdConfig)?;
@@ -241,6 +239,7 @@ mod test {
     use mockito::Server;
     use serde_json::json;
     use time::OffsetDateTime;
+    use url::Url;
 
     use crate::common::policy_store::TrustedIssuer;
     use crate::http::HttpClient;
@@ -367,10 +366,11 @@ mod test {
         let source_iss = TrustedIssuer {
             name: "Test Trusted Issuer".to_string(),
             description: "This is a test trusted issuer".to_string(),
-            oidc_endpoint: format!(
+            oidc_endpoint: Url::parse(&format!(
                 "{}/.well-known/openid-configuration",
                 mock_server.url()
-            ),
+            ))
+            .expect("should be a valid URL"),
             ..Default::default()
         };
 

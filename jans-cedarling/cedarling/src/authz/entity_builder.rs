@@ -3,38 +3,33 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-mod build_attrs;
 mod build_expr;
+mod build_iss_entity;
 mod build_resource_entity;
-mod build_role_entity;
 mod build_token_entities;
 mod build_user_entity;
 mod build_workload_entity;
 mod built_entities;
 
 use super::AuthorizeEntitiesData;
-use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
-use crate::common::policy_store::ClaimMappings;
+use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
 use crate::jwt::{Token, TokenClaimTypeError};
 use crate::{AuthorizationConfig, ResourceData};
-use build_attrs::{BuildAttrError, build_entity_attrs_from_tkn};
-use build_expr::*;
-use build_resource_entity::{BuildResourceEntityError, JsonTypeError};
-use build_role_entity::BuildRoleEntityError;
-pub use build_token_entities::BuildTokenEntityError;
-use build_user_entity::BuildUserEntityError;
-use build_workload_entity::BuildWorkloadEntityError;
+use build_iss_entity::build_iss_entity;
 pub(crate) use built_entities::BuiltEntities;
-use cedar_policy::{Entity, EntityId, EntityUid, RestrictedExpression};
+use cedar_policy::{Entity, EntityUid, RestrictedExpression};
+use derive_more::Display;
 use serde_json::Value;
+use smol_str::{SmolStr, ToSmolStr};
 use std::collections::{HashMap, HashSet};
-use std::convert::Infallible;
 use std::fmt;
 use std::net::IpAddr;
 use std::str::FromStr;
+use url::Origin;
 
 const DEFAULT_WORKLOAD_ENTITY_NAME: &str = "Jans::Workload";
 const DEFAULT_USER_ENTITY_NAME: &str = "Jans::User";
+const DEFAULT_ISS_ENTITY_NAME: &str = "Jans::TrustedIssuer";
 const DEFAULT_ACCESS_TKN_ENTITY_NAME: &str = "Jans::Access_token";
 const DEFAULT_ID_TKN_ENTITY_NAME: &str = "Jans::id_token";
 const DEFAULT_USERINFO_TKN_ENTITY_NAME: &str = "Jans::Userinfo_token";
@@ -51,6 +46,7 @@ pub struct EntityNames {
     user: String,
     workload: String,
     role: String,
+    iss: String,
 }
 
 impl From<&AuthorizationConfig> for EntityNames {
@@ -68,6 +64,9 @@ impl From<&AuthorizationConfig> for EntityNames {
                 .mapping_role
                 .clone()
                 .unwrap_or_else(|| DEFAULT_ROLE_ENTITY_NAME.to_string()),
+            // TODO: we should probably also add a default entity name for the
+            // trusted issuer entity
+            ..Default::default()
         }
     }
 }
@@ -78,29 +77,47 @@ impl Default for EntityNames {
             user: DEFAULT_USER_ENTITY_NAME.to_string(),
             workload: DEFAULT_WORKLOAD_ENTITY_NAME.to_string(),
             role: DEFAULT_ROLE_ENTITY_NAME.to_string(),
+            iss: DEFAULT_ISS_ENTITY_NAME.to_string(),
         }
     }
 }
 
 pub struct EntityBuilder {
-    schema: CedarSchemaJson,
     entity_names: EntityNames,
     build_workload: bool,
     build_user: bool,
+    iss_entities: HashMap<Origin, Entity>,
 }
 
 impl EntityBuilder {
+    // TODO: we can probably combine build_workload and build_user into a single HashSet of
+    // the names of the entities to be built
     pub fn new(
-        schema: CedarSchemaJson,
         entity_names: EntityNames,
         build_workload: bool,
         build_user: bool,
+        trusted_issuers: &HashMap<String, TrustedIssuer>,
     ) -> Self {
+        let (ok, errs): (Vec<_>, Vec<_>) = trusted_issuers
+            .iter()
+            .map(|(iss_id, iss)| build_iss_entity(&entity_names.iss, iss_id, iss))
+            .partition(|result| result.is_ok());
+
+        if !errs.is_empty() {
+            // TODO: gracefully handle errors
+            panic!("error while initializing entity builder: {:#?}", errs);
+        }
+
+        let iss_entities = ok
+            .into_iter()
+            .flatten()
+            .collect::<HashMap<Origin, Entity>>();
+
         Self {
-            schema,
             entity_names,
             build_workload,
             build_user,
+            iss_entities,
         }
     }
 
@@ -108,8 +125,8 @@ impl EntityBuilder {
         &self,
         tokens: &HashMap<String, Token>,
         resource: &ResourceData,
-    ) -> Result<AuthorizeEntitiesData, BuildCedarlingEntityError> {
-        let mut built_entities = BuiltEntities::default();
+    ) -> Result<AuthorizeEntitiesData, BuildEntityError> {
+        let mut tkn_principal_mappings = TokenPrincipalMappings::default();
 
         let mut token_entities = HashMap::new();
         for (tkn_name, tkn) in tokens.iter() {
@@ -125,37 +142,25 @@ impl EntityBuilder {
                 continue;
             };
 
-            let entity = self.build_tkn_entity(entity_name, tkn, &built_entities)?;
-            built_entities.insert(&entity);
+            let entity = self.build_tkn_entity(entity_name, tkn, &mut tkn_principal_mappings)?;
             token_entities.insert(tkn_name.to_string(), entity);
         }
 
         let workload = if self.build_workload {
-            let workload_entity = self.build_workload_entity(tokens, &built_entities)?;
-            built_entities.insert(&workload_entity);
+            let workload_entity = self.build_workload_entity(tokens, &tkn_principal_mappings)?;
             Some(workload_entity)
         } else {
             None
         };
 
         let (user, roles) = if self.build_user {
-            let roles = self.try_build_role_entities(tokens)?;
-            let parents = roles
-                .iter()
-                .map(|role| {
-                    built_entities.insert(role);
-                    role.uid()
-                })
-                .collect::<HashSet<EntityUid>>();
-            let user_entity = self.build_user_entity(tokens, parents, &built_entities)?;
-            built_entities.insert(&user_entity);
-            (Some(user_entity), roles)
+            let (user, roles) = self.build_user_entity(tokens, &tkn_principal_mappings)?;
+            (Some(user), roles)
         } else {
-            (None, vec![])
+            (None, Vec::new())
         };
 
         let resource = self.build_resource_entity(resource)?;
-        built_entities.insert(&resource);
 
         Ok(AuthorizeEntitiesData {
             workload,
@@ -163,9 +168,84 @@ impl EntityBuilder {
             resource,
             roles,
             tokens: token_entities,
-            build_entities: built_entities,
         })
     }
+}
+
+#[derive(Copy, Clone)]
+pub struct EntityIdSrc<'a> {
+    token: &'a Token<'a>,
+    claim: &'a str,
+}
+
+pub fn get_first_valid_entity_id<'a>(
+    id_srcs: &[EntityIdSrc],
+) -> Result<SmolStr, BuildEntityErrorKind> {
+    let mut errors = Vec::with_capacity(4);
+
+    println!("trying {} srcs", id_srcs.len());
+    for src in id_srcs.iter() {
+        println!("trying {} from {}", src.claim, src.token.name);
+        let claim = match src.token.get_claim_val(src.claim) {
+            Some(claim) => claim,
+            None => {
+                errors.push(GetEntityIdError {
+                    token: src.token.name.clone(),
+                    claim: src.claim.to_string(),
+                    reason: GetEntityIdErrorReason::MissingClaim,
+                });
+                continue;
+            },
+        };
+
+        let claim = claim.to_string();
+        let id = claim.trim_matches('"');
+
+        if id.is_empty() {
+            errors.push(GetEntityIdError {
+                token: src.token.name.clone(),
+                claim: src.claim.to_string(),
+                reason: GetEntityIdErrorReason::EmptyString,
+            });
+            continue;
+        }
+
+        return Ok(id.to_smolstr());
+    }
+
+    Err(BuildEntityErrorKind::MissingEntityId(errors.into()))
+}
+
+pub fn collect_all_valid_entity_ids<'a>(id_srcs: &[EntityIdSrc]) -> Vec<SmolStr> {
+    id_srcs
+        .iter()
+        .flat_map(|src| {
+            src.token.get_claim_val(src.claim).and_then(|claim| {
+                let claim = claim.to_string();
+                let id = claim.trim_matches('"');
+
+                if id.is_empty() {
+                    None
+                } else {
+                    Some(id.to_smolstr())
+                }
+            })
+        })
+        .collect()
+}
+
+pub fn build_cedar_entity(
+    type_name: &str,
+    id: &str,
+    attrs: HashMap<String, RestrictedExpression>,
+    parents: HashSet<EntityUid>,
+) -> Result<Entity, BuildEntityError> {
+    let uid = EntityUid::from_str(&format!("{}::\"{}\"", type_name, id))
+        .map_err(|e| BuildEntityErrorKind::from(e).while_building(type_name))?;
+    let entity = Entity::new(uid, attrs, parents)
+        .map_err(|e| BuildEntityErrorKind::from(e).while_building(type_name))?;
+
+    Ok(entity)
 }
 
 fn default_tkn_entity_name(tkn_name: &str) -> Option<&'static str> {
@@ -177,102 +257,154 @@ fn default_tkn_entity_name(tkn_name: &str) -> Option<&'static str> {
     }
 }
 
-/// Builds a Cedar Entity using a JWT
-fn build_entity(
-    schema: &CedarSchemaJson,
-    entity_name: &str,
-    token: &Token,
-    id_src_claim: &str,
-    parents: HashSet<EntityUid>,
-    built_entities: &BuiltEntities,
-) -> Result<Entity, BuildEntityError> {
-    // Get entity Id from the specified token claim
-    let entity_id = token
-        .get_claim(id_src_claim)
-        .ok_or(BuildEntityError::MissingClaim(id_src_claim.to_string()))?
-        .as_str()?
-        .to_owned();
-
-    // Get entity namespace and type
-    let (entity_type_name, type_schema) = schema
-        .get_entity_schema(entity_name, None)?
-        .ok_or(BuildEntityError::EntityNotInSchema(entity_name.to_string()))?;
-    let default_namespace = entity_type_name.namespace();
-
-    // Build entity attributes
-    let entity_attrs = build_entity_attrs_from_tkn(
-        schema,
-        type_schema,
-        token,
-        Some(default_namespace.as_str()),
-        built_entities,
-    )?;
-
-    // Build cedar entity
-    let entity_id = EntityId::from_str(&entity_id).map_err(BuildEntityError::ParseEntityId)?;
-    let entity_uid = EntityUid::from_type_name_and_id(entity_type_name, entity_id);
-    Ok(Entity::new(entity_uid, entity_attrs, parents)?)
+#[derive(Debug, thiserror::Error)]
+#[error("failed to build `\"{entity_type_name}\"`: {error}")]
+pub struct BuildEntityError {
+    pub entity_type_name: String,
+    pub error: BuildEntityErrorKind,
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum NewBuildEntityError {
-    #[error("the token is missing a \"{0}\" claim which is required for this entity's entity_id")]
-    MissingIdSrc(String),
+pub enum BuildEntityErrorKind {
+    #[error("unable to find a valid entity id: {0}")]
+    MissingEntityId(GetEntityIdErrors),
     #[error(transparent)]
     TokenClaimTypeMismatch(#[from] TokenClaimTypeError),
-    #[error("failed to parse entity uid")]
+    #[error("failed to parse entity uid: {0}")]
     FailedToParseUid(#[from] cedar_policy::ParseErrors),
-    #[error("failed to parse entity uid")]
+    #[error("failed to evaluate entity attribute or tag: {0}")]
     EntityAttrEval(#[from] cedar_policy::EntityAttrEvaluationError),
+    #[error("invalid issuer URL: {0}")]
+    InvalidIssUrl(#[from] url::ParseError),
+    #[error("missing required token: {0}")]
+    MissingRequiredToken(String),
 }
 
-/// Builds a Cedar Entity using a JWT
-fn new_build_entity(
+#[derive(Debug)]
+pub struct GetEntityIdErrors(Vec<GetEntityIdError>);
+
+#[cfg(test)]
+impl GetEntityIdErrors {
+    pub fn contains(&self, err: &GetEntityIdError) -> bool {
+        self.0.contains(err)
+    }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+}
+
+impl From<Vec<GetEntityIdError>> for GetEntityIdErrors {
+    fn from(errors: Vec<GetEntityIdError>) -> Self {
+        Self(errors)
+    }
+}
+
+impl Display for GetEntityIdErrors {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let err_msgs = self
+            .0
+            .iter()
+            .map(|err| err.to_string())
+            .collect::<Vec<_>>()
+            .join(", ");
+        write!(f, "[{}]", err_msgs)
+    }
+}
+
+#[derive(Debug, thiserror::Error, PartialEq)]
+#[error("failed to use {claim} from {token} since {reason}")]
+pub struct GetEntityIdError {
+    token: String,
+    claim: String,
+    reason: GetEntityIdErrorReason,
+}
+
+#[derive(Debug, thiserror::Error, PartialEq)]
+pub enum GetEntityIdErrorReason {
+    #[error("the claim cannot be an empty string")]
+    EmptyString,
+    #[error("the claim was not present in the token")]
+    MissingClaim,
+}
+
+impl BuildEntityErrorKind {
+    pub fn while_building(self, entity_type_name: &str) -> BuildEntityError {
+        BuildEntityError {
+            entity_type_name: entity_type_name.to_string(),
+            error: self,
+        }
+    }
+}
+
+pub struct EntityAttrSrc<'a> {
+    values: &'a HashMap<String, Value>,
+    mappings: Option<&'a ClaimMappings>,
+}
+
+impl<'a> From<&'a Token<'a>> for EntityAttrSrc<'a> {
+    fn from(token: &'a Token) -> Self {
+        Self {
+            values: token.claims_value(),
+            mappings: token.claim_mapping(),
+        }
+    }
+}
+
+impl<'a> From<&'a HashMap<String, Value>> for EntityAttrSrc<'a> {
+    fn from(map: &'a HashMap<String, Value>) -> Self {
+        Self {
+            values: map,
+            mappings: None,
+        }
+    }
+}
+
+/// Builds Cedar entity attributes using the given JWTs
+///
+/// This function will *JOIN* the token attributes bu&Token<'_>ilt from each token
+pub fn build_entity_attrs(attr_srcs: Vec<EntityAttrSrc>) -> HashMap<String, RestrictedExpression> {
+    attr_srcs.iter().fold(HashMap::new(), |mut acc, src| {
+        let attrs = src.values.iter().flat_map(|(name, value)| {
+            if let Some(mapping) = src.mappings.and_then(|m| m.mapping(name)) {
+                let mapped_claims = mapping.apply_mapping(value);
+                let attrs_from_mapped_claims =
+                    mapped_claims
+                        .iter()
+                        .fold(HashMap::new(), |mut acc, (name, value)| {
+                            if let Some(expr) = value_to_expr(value) {
+                                acc.insert(name.to_string(), expr);
+                            }
+                            acc
+                        });
+                let expr = RestrictedExpression::new_record(attrs_from_mapped_claims)
+                    .expect("TODO: handle error");
+
+                Some((name.into(), expr))
+            } else if let Some(expr) = value_to_expr(value) {
+                Some((name.into(), expr))
+            } else {
+                println!("skipped building attr for {}", name);
+                None
+            }
+        });
+
+        acc.extend(attrs);
+        acc
+    })
+}
+
+/// Adds token entity references to a principal entity's attributes if a
+/// token->principal mapping is present.
+pub fn add_token_references(
     entity_type_name: &str,
-    id_src_claim: &str,
-    token: &Token,
-    parents: HashSet<EntityUid>,
-    tkn_principal_mappings: &HashMap<String, Vec<(String, RestrictedExpression)>>,
-) -> Result<Entity, NewBuildEntityError> {
-    // Get entity Id from the specified token claim
-    let entity_id = token
-        .get_claim(id_src_claim)
-        .ok_or(NewBuildEntityError::MissingIdSrc(id_src_claim.into()))?
-        .as_str()?
-        .to_owned();
-
-    // Build entity attributes
-    let mut attrs = build_attrs(token.claims_value(), token.claim_mapping());
-
-    // Add token references
+    mut attrs: HashMap<String, RestrictedExpression>,
+    tkn_principal_mappings: &TokenPrincipalMappings,
+) -> HashMap<String, RestrictedExpression> {
     if let Some(mapping) = tkn_principal_mappings.get(entity_type_name) {
         attrs.extend(mapping.clone());
     }
 
-    // Build cedar entity
-    let uid = EntityUid::from_str(&format!("{}::\"{}\"", entity_type_name, entity_id))?;
-    Ok(Entity::new(uid, attrs, parents)?)
-}
-
-fn build_attrs(
-    claims: &HashMap<String, Value>,
-    mappings: Option<&ClaimMappings>,
-) -> HashMap<String, RestrictedExpression> {
-    let mut attrs = HashMap::new();
-    for (name, value) in claims.iter() {
-        if let Some(mappings) = mappings {
-            if let Some(mapping) = mappings.mapping(name) {
-                let mapped_claims = mapping.apply_mapping(value);
-                let attrs_from_mapped_claims = build_attrs(&mapped_claims, None);
-                attrs.extend(attrs_from_mapped_claims);
-                continue;
-            };
-        }
-
-        if let Some(expr) = value_to_expr(value) {
-            attrs.insert(name.into(), expr);
-        }
-    }
     attrs
 }
 
@@ -306,504 +438,340 @@ fn value_to_expr(value: &Value) -> Option<RestrictedExpression> {
                 .iter()
                 .filter_map(|(key, val)| value_to_expr(val).map(|expr| (key.to_string(), expr)))
                 .collect::<Vec<_>>();
+            // TODO: handle error
             RestrictedExpression::new_record(fields).expect("there shouldn't be duplicate keys")
         },
     };
     Some(expr)
 }
 
-#[cfg(test)]
-mod newtest {
-    use super::new_build_entity;
-    use crate::common::policy_store::TrustedIssuer;
-    use crate::jwt::Token;
-    use cedar_policy::{EntityUid, RestrictedExpression};
-    use serde_json::json;
-    use std::collections::{HashMap, HashSet};
+#[derive(Default)]
+pub struct TokenPrincipalMappings(HashMap<String, Vec<(String, RestrictedExpression)>>);
 
-    #[test]
-    fn can_build_workload_entity() {
-        let iss = TrustedIssuer::default();
-        let token = Token::new(
-            "access_token",
-            HashMap::from([
-                ("client_id".into(), json!("some_client_id")),
-                ("test_bool".into(), json!(true)),
-                ("test_int".into(), json!(123)),
-                ("test_float".into(), json!(123.321)),
-                ("test_string".into(), json!("some_string")),
-                ("test_ipv4".into(), json!("127.0.0.1")),
-                (
-                    "test_ipv6".into(),
-                    json!("2001:db8:3333:4444:5555:6666:7777:8888"),
-                ),
-                ("test_array".into(), json!(["a", 1])),
-                (
-                    "test_map".into(),
-                    json!({
-                        "a": 1,
-                        "b": "b",
-                    }),
-                ),
-            ])
-            .into(),
-            Some(&iss),
-        );
-        let parents = HashSet::new();
-        let tkn_principal_mappings = HashMap::from([("Jans::Workload".into(), vec![(
-            "access_token".into(),
-            RestrictedExpression::new_entity_uid(
-                EntityUid::from_json(json!({"type": "Jans::Access_token", "id": "some_jti"}))
-                    .expect("should parse access token entity uid"),
-            ),
-        )])]);
+/// Represents a token and it's UID
+pub struct TokenPrincipalMapping {
+    /// The principal where token will be inserted
+    principal: String,
+    /// The name of the attribute of the token
+    attr_name: String,
+    /// An EntityUID reference to the token
+    expr: RestrictedExpression,
+}
 
-        let entity = new_build_entity(
-            "Jans::Workload",
-            "client_id",
-            &token,
-            parents,
-            &tkn_principal_mappings,
-        )
-        .expect("should build entity");
-
-        assert_eq!(
-            entity
-                .to_json_value()
-                .expect("should serialize entity to json"),
-            json!({
-                "uid": {
-                    "type": "Jans::Workload",
-                    "id": "some_client_id",
-                },
-                "attrs": {
-                    "client_id": "some_client_id",
-                    "test_bool": true,
-                    "test_int": 123,
-                    "test_float": { "__extn": {
-                        "fn": "decimal",
-                        "arg": "123.321",
-                    }},
-                    "test_string": "some_string",
-                    "test_ipv4": { "__extn": {
-                        "fn": "ip",
-                        "arg": "127.0.0.1",
-                     }},
-                    "test_ipv6": { "__extn": {
-                        "fn": "ip",
-                        "arg": "2001:db8:3333:4444:5555:6666:7777:8888",
-                     }},
-                    "test_array": [1, "a"],
-                    "test_map": {"a": 1, "b": "b"},
-                    "access_token": { "__entity": {
-                        "type": "Jans::Access_token",
-                        "id": "some_jti",
-                    },},
-                },
-                "parents": []
-            }),
-        );
+impl TokenPrincipalMappings {
+    pub fn insert(&mut self, value: TokenPrincipalMapping) {
+        let entry = self.0.entry(value.principal).or_default();
+        entry.push((value.attr_name, value.expr));
     }
-}
 
-/// Errors encountered when building a Cedarling-specific entity
-#[derive(Debug, thiserror::Error)]
-pub enum BuildCedarlingEntityError {
-    #[error(transparent)]
-    Workload(#[from] BuildWorkloadEntityError),
-    #[error(transparent)]
-    User(#[from] BuildUserEntityError),
-    #[error(transparent)]
-    Role(#[from] BuildRoleEntityError),
-    #[error("failed to build resource entity: {0}")]
-    Resource(#[from] BuildResourceEntityError),
-    #[error(transparent)]
-    Token(#[from] BuildTokenEntityError),
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum BuildEntityError {
-    #[error("failed to parse entity type name: {0}")]
-    ParseEntityTypeName(#[from] cedar_policy::ParseErrors),
-    #[error("failed to parse entity id: {0}")]
-    ParseEntityId(#[source] Infallible),
-    #[error("failed to evaluate entity or tag: {0}")]
-    AttrEvaluation(#[from] cedar_policy::EntityAttrEvaluationError),
-    #[error("failed to build entity since a token was not provided")]
-    TokenUnavailable,
-    #[error("the given token is missing a `{0}` claim")]
-    MissingClaim(String),
-    #[error(transparent)]
-    TokenClaimTypeMismatch(#[from] TokenClaimTypeError),
-    #[error(transparent)]
-    JsonTypeError(#[from] JsonTypeError),
-    #[error("the entity `{0}` is not defined in the schema")]
-    EntityNotInSchema(String),
-    #[error("failed build restricted expression: {0}")]
-    BuildExpression(#[from] BuildExprError),
-    #[error("failed to build entity attribute: {0}")]
-    BuildEntityAttr(#[from] BuildAttrError),
-    #[error("got {0} token, expected: {1}")]
-    InvalidToken(String, String),
-    #[error("missing token metadata")]
-    MissingTokenMetadata,
-}
-
-impl BuildEntityError {
-    pub fn json_type_err(expected_type_name: &str, got_value: &Value) -> Self {
-        Self::JsonTypeError(JsonTypeError::type_mismatch(expected_type_name, got_value))
+    pub fn get(&self, principal: &str) -> Option<&Vec<(String, RestrictedExpression)>> {
+        self.0.get(principal)
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
-    use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
+    use crate::jwt::Token;
     use cedar_policy::EvalResult;
     use serde_json::json;
     use std::collections::HashMap;
 
     #[test]
-    fn can_build_entity_using_jwt() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-        "Jans": {
-            "entityTypes": {
-                "Workload": {
-                    "shape": {
-                        "type": "Record",
-                        "attributes":  {
-                            "client_id": { "type": "String" },
-                            "name": { "type": "String" },
-                        },
-                    }
-                }
-            }
-        }}))
-        .expect("should successfully build schema");
-        let iss = TrustedIssuer::default();
+    fn can_get_first_valid_eid() {
+        let expected_aud = "some_aud";
+        let expected_client_id = "some_client_id";
+
         let token = Token::new(
-            "access_token",
-            HashMap::from([
-                ("client_id".to_string(), json!("workload-123")),
-                ("name".to_string(), json!("somename")),
-            ])
-            .into(),
-            Some(&iss),
+            "test_token",
+            HashMap::from([("aud".into(), json!(expected_aud))]).into(),
+            None,
         );
-        let entity = build_entity(
-            &schema,
-            "Jans::Workload",
-            &token,
-            "client_id",
-            HashSet::new(),
-            &BuiltEntities::default(),
-        )
-        .expect("should successfully build entity");
 
-        assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
-        assert_eq!(
-            entity
-                .attr("client_id")
-                .expect("expected workload entity to have a `client_id` attribute")
-                .unwrap(),
-            EvalResult::String("workload-123".to_string()),
-        );
-        assert_eq!(
-            entity
-                .attr("name")
-                .expect("expected workload entity to have a `name` attribute")
-                .unwrap(),
-            EvalResult::String("somename".to_string()),
-        );
-    }
+        // Using the token's aud
+        let id = get_first_valid_entity_id(&vec![EntityIdSrc {
+            token: &token,
+            claim: "aud",
+        }])
+        .expect("should get entity id from token's aud");
+        assert_eq!(id, expected_aud);
 
-    #[test]
-    fn can_build_entity_with_token_ref() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": {
-                "entityTypes": {
-                    "Resource": {},
-                    "Access_token": {},
-                    "Id_token": {},
-                    "Workload": {
-                        "shape": {
-                            "type": "Record",
-                            "attributes":  {
-                                "access_token": { "type": "Entity", "name": "Access_token" },
-                                "id_token": { "type": "Entity", "name": "Id_token" },
-                                "userinfo_token": { "type": "Entity", "name": "Custom::Userinfo_token" },
-                                "custom_token": { "type": "Entity", "name": "Custom::Custom_token" },
-                            },
-                        }
-                    }
-                }
+        // Using the token's aud if the client_id is not present
+        let id = get_first_valid_entity_id(&vec![
+            EntityIdSrc {
+                token: &token,
+                claim: "client_id",
             },
-            "Custom": {
-                "entityTypes": {
-                    "Custom_token": {},
-                    "Userinfo_token": {},
-                }
-            }
-        }))
-        .expect("should successfully build schema");
+            EntityIdSrc {
+                token: &token,
+                claim: "aud",
+            },
+        ])
+        .expect("should get entity id from token's aud");
+        assert_eq!(id, expected_aud);
 
-        let mut iss = TrustedIssuer::default();
-        iss.tokens_metadata = HashMap::from([
-            (
-                "access_token".into(),
-                TokenEntityMetadata::builder()
-                    .entity_type_name("Jans::Access_token".into())
-                    .workload_id(Some("jti".into()))
-                    .build(),
-            ),
-            (
-                "id_token".into(),
-                TokenEntityMetadata::builder()
-                    .entity_type_name("Jans::Id_token".into())
-                    .build(),
-            ),
-            (
-                "userinfo_token".into(),
-                TokenEntityMetadata::builder()
-                    .entity_type_name("Custom::Userinfo_token".into())
-                    .build(),
-            ),
-            (
-                "custom_token".into(),
-                TokenEntityMetadata::builder()
-                    .entity_type_name("Custom::Custom_token".into())
-                    .build(),
-            ),
-        ]);
-
-        let entity_builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
-
-        let tkn_names = ["access_token", "id_token", "userinfo_token", "custom_token"];
-
-        let tokens = tkn_names
-            .iter()
-            .map(|tkn_name| {
-                let token = Token::new(
-                    tkn_name,
-                    HashMap::from([("jti".to_string(), json!(format!("{}_123", tkn_name)))]).into(),
-                    Some(&iss),
-                );
-                (tkn_name.to_string(), token)
-            })
-            .collect::<HashMap<String, Token>>();
-
-        let entities = entity_builder
-            .build_entities(&tokens, &ResourceData {
-                resource_type: "Jans::Resource".to_string(),
-                id: "res-123".to_string(),
-                payload: HashMap::new(),
-            })
-            .expect("build entities");
-
-        // Check if the token entities get created
-        assert_eq!(
-            entities
-                .tokens
-                .keys()
-                .map(|x| x.to_string())
-                .collect::<HashSet<String>>(),
-            tkn_names
-                .clone()
-                .iter()
-                .map(|x| x.to_string())
-                .collect::<HashSet<String>>(),
-            "should build all token entities",
-        );
-        let entity_names = [
-            "Jans::Access_token",
-            "Jans::Id_token",
-            "Custom::Userinfo_token",
-            "Custom::Custom_token",
-        ];
-        let entity_ids = tkn_names
-            .iter()
-            .map(|name| format!("{}_123", name))
-            .collect::<Vec<String>>();
-        for ((tkn_name, entity_name), entity_ids) in
-            tkn_names.iter().zip(entity_names).zip(&entity_ids)
-        {
-            let entity = entities
-                .tokens
-                .get(*tkn_name)
-                .expect(&format!("build {} entity", tkn_name));
-            assert_eq!(
-                entity.uid().type_name().to_string(),
-                entity_name,
-                "wrong type name for {}",
-                tkn_name
-            );
-            assert_eq!(
-                entity.uid().id().escaped(),
-                entity_ids,
-                "entity id for {}",
-                tkn_name
-            );
-        }
-
-        // Check if the tokens get added to the workload entity
-        let workload_entity = entities.workload.expect("should built workload entity");
-        assert_eq!(
-            workload_entity.uid().type_name().to_string(),
-            "Jans::Workload"
-        );
-        assert_eq!(workload_entity.uid().id().escaped(), "access_token_123");
-        for ((tkn_name, entity_name), entity_id) in
-            tkn_names.iter().zip(entity_names).zip(entity_ids)
-        {
-            assert_eq!(
-                workload_entity.attr(tkn_name),
-                Some(Ok(EvalResult::EntityUid(
-                    EntityUid::from_str(&format!("{}::\"{}\"", entity_name, entity_id))
-                        .expect("build entity uid")
-                )))
-            );
-        }
-    }
-
-    #[test]
-    fn errors_on_invalid_entity_type_name() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Work:load": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "client_id": { "type": "String" },
-                        "name": { "type": "String" },
-                    },
-                }
-            }}}
-        }))
-        .expect("should successfully build schema");
-        let iss = TrustedIssuer::default();
         let token = Token::new(
-            "access_token",
+            "test_token",
             HashMap::from([
-                ("client_id".to_string(), json!("workload-123")),
-                ("name".to_string(), json!("somename")),
+                ("aud".into(), json!(expected_aud)),
+                ("client_id".into(), json!(expected_client_id)),
             ])
             .into(),
-            Some(&iss),
+            None,
         );
 
-        let err = build_entity(
-            &schema,
-            "Jans::Work:load",
-            &token,
-            "client_id",
-            HashSet::new(),
-            &BuiltEntities::default(),
-        )
-        .expect_err("should error while parsing entity type name");
+        // Using the first valid id even if others are also valid
+        let id = get_first_valid_entity_id(&vec![
+            EntityIdSrc {
+                token: &token,
+                claim: "client_id",
+            },
+            EntityIdSrc {
+                token: &token,
+                claim: "aud",
+            },
+        ])
+        .expect("should get entity id from token's client_id");
+        assert_eq!(id, expected_client_id);
 
-        assert!(
-            matches!(err, BuildEntityError::ParseEntityTypeName(_)),
-            "expected ParseEntityTypeName error but got: {:?}",
-            err
-        );
-    }
-
-    #[test]
-    fn errors_when_token_is_missing_entity_id_claim() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({}))
-            .expect("should successfully build schema");
-        let iss = TrustedIssuer::default();
-        let token = Token::new("access_token", HashMap::new().into(), Some(&iss));
-
-        let err = build_entity(
-            &schema,
-            "Workload",
-            &token,
-            "client_id",
-            HashSet::new(),
-            &BuiltEntities::default(),
-        )
-        .expect_err("should error while parsing entity type name");
-
-        assert!(
-            matches!(
-                err,
-                BuildEntityError::MissingClaim(ref claim_name)
-                if claim_name =="client_id"
-            ),
-            "expected MissingClaim error but got: {}",
-            err
-        );
-    }
-
-    #[test]
-    fn errors_token_claim_has_unexpected_type() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Workload": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "client_id": { "type": "String" },
-                    },
-                }
-            }}}
-        }))
-        .expect("should successfully build schema");
-        let iss = TrustedIssuer::default();
         let token = Token::new(
-            "access_token",
-            HashMap::from([("client_id".to_string(), json!(123))]).into(),
-            Some(&iss),
+            "test_token",
+            HashMap::from([("empty".into(), json!(""))]).into(),
+            None,
         );
-        let err = build_entity(
-            &schema,
-            "Workload",
-            &token,
-            "client_id",
-            HashSet::new(),
-            &BuiltEntities::default(),
-        )
-        .expect_err("should error due to unexpected json type");
 
-        assert!(
-            matches!(
-                err,
-                BuildEntityError::TokenClaimTypeMismatch(ref err)
-                if err == &TokenClaimTypeError::type_mismatch("client_id", "String", &json!(123))
+        // Errors when no valid ids found
+        let err = get_first_valid_entity_id(&vec![
+            EntityIdSrc {
+                token: &token,
+                claim: "empty",
+            },
+            EntityIdSrc {
+                token: &token,
+                claim: "missing",
+            },
+        ])
+        .expect_err("should error while getting id");
+        let expected_errs = vec![
+            GetEntityIdError {
+                token: "test_token".into(),
+                claim: "empty".into(),
+                reason: GetEntityIdErrorReason::EmptyString,
+            },
+            GetEntityIdError {
+                token: "test_token".into(),
+                claim: "missing".into(),
+                reason: GetEntityIdErrorReason::MissingClaim,
+            },
+        ];
+        assert!(matches!(
+            err,
+            BuildEntityErrorKind::MissingEntityId(GetEntityIdErrors(ref errs))
+                if *errs == expected_errs
+        ));
+    }
+
+    #[test]
+    fn test_collect_all_entity_ids() {
+        let token1 = Token::new(
+            "tkn1",
+            HashMap::from([("role".into(), json!("role1"))]).into(),
+            None,
+        );
+        let token2 = Token::new(
+            "tkn1",
+            HashMap::from([("role".into(), json!("role2"))]).into(),
+            None,
+        );
+
+        // Collecting one valid id
+        let ids = collect_all_valid_entity_ids(&vec![EntityIdSrc {
+            token: &token1,
+            claim: "role",
+        }]);
+        assert_eq!(ids, vec!["role1"]);
+
+        // Collecting multiple valid ids
+        let ids = collect_all_valid_entity_ids(&vec![
+            EntityIdSrc {
+                token: &token1,
+                claim: "role",
+            },
+            EntityIdSrc {
+                token: &token2,
+                claim: "role",
+            },
+        ]);
+        assert_eq!(ids, vec!["role1", "role2"]);
+
+        // Ignore invalid ids
+        let ids = collect_all_valid_entity_ids(&vec![
+            EntityIdSrc {
+                token: &token1,
+                claim: "role",
+            },
+            EntityIdSrc {
+                token: &token1,
+                claim: "missing",
+            },
+            EntityIdSrc {
+                token: &token1,
+                claim: "",
+            },
+            EntityIdSrc {
+                token: &token2,
+                claim: "role",
+            },
+        ]);
+        assert_eq!(ids, vec!["role1", "role2"]);
+    }
+
+    #[test]
+    pub fn test_adding_token_refs_to_principals() {
+        // Define mappings
+        let mut mappings = TokenPrincipalMappings::default();
+        mappings.insert(TokenPrincipalMapping {
+            principal: "Workload".into(),
+            attr_name: "access_token".into(),
+            expr: RestrictedExpression::new_entity_uid(
+                EntityUid::from_str("Access_token::\"some_access_tkn\"").unwrap(),
             ),
-            "expected TokenClaimTypeMismatch error but got: {:?}",
-            err
+        });
+        mappings.insert(TokenPrincipalMapping {
+            principal: "User".into(),
+            attr_name: "id_token".into(),
+            expr: RestrictedExpression::new_entity_uid(
+                EntityUid::from_str("Id_token::\"some_id_tkn\"").unwrap(),
+            ),
+        });
+        mappings.insert(TokenPrincipalMapping {
+            principal: "User".into(),
+            attr_name: "userinfo_token".into(),
+            expr: RestrictedExpression::new_entity_uid(
+                EntityUid::from_str("Userinfo_token::\"some_userinfo_tkn\"").unwrap(),
+            ),
+        });
+
+        // Test for Workload
+        let attrs = HashMap::new();
+        let attrs = add_token_references("Workload", attrs, &mappings);
+        let entity = Entity::new(
+            EntityUid::from_str("Workload::\"some_workload\"")
+                .expect("should parse EntityUid from str"),
+            attrs,
+            HashSet::new(),
+        )
+        .expect("should build workload entity")
+        .to_json_value()
+        .expect("should serialize entity to JSON");
+        assert_eq!(
+            entity,
+            json!({
+                "uid": {"type": "Workload", "id": "some_workload"},
+                "attrs": {
+                    "access_token": { "__entity": {
+                        "type": "Access_token",
+                        "id": "some_access_tkn"
+                    }}
+                },
+                "parents": [],
+            })
+        );
+
+        // Test for User
+        let attrs = HashMap::new();
+        let attrs = add_token_references("User", attrs, &mappings);
+        let entity = Entity::new(
+            EntityUid::from_str("User::\"some_user\"").expect("should parse EntityUid from str"),
+            attrs,
+            HashSet::new(),
+        )
+        .expect("should build user entity")
+        .to_json_value()
+        .expect("should serialize entity to JSON");
+        assert_eq!(
+            entity,
+            json!({
+                "uid": {"type": "User", "id": "some_user"},
+                "attrs": {
+                    "id_token": { "__entity": {
+                        "type": "Id_token",
+                        "id": "some_id_tkn"
+                    }},
+                    "userinfo_token": { "__entity": {
+                        "type": "Userinfo_token",
+                        "id": "some_userinfo_tkn"
+                    }}
+                },
+                "parents": [],
+            })
         );
     }
 
     #[test]
-    fn errors_when_entity_not_in_schema() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({}))
-            .expect("should successfully build schema");
-        let iss = TrustedIssuer::default();
-        let token = Token::new(
-            "access_token",
-            HashMap::from([("client_id".to_string(), json!("client-123"))]).into(),
-            Some(&iss),
+    pub fn test_value_to_expr() {
+        // Value::
+        let attrs = HashMap::from_iter(
+            [
+                ("test_null", value_to_expr(&json!(Value::Null))),
+                ("test_bool", value_to_expr(&json!(true))),
+                ("test_long", value_to_expr(&json!(521))),
+                ("test_decimal", value_to_expr(&json!(12.5))),
+                ("test_str", value_to_expr(&json!("some str"))),
+                ("test_set", value_to_expr(&json!(["a", 1]))),
+                ("test_record", value_to_expr(&json!({"a": 1, "b": "b"}))),
+            ]
+            .into_iter()
+            .flat_map(|(key, expr)| expr.map(|expr| (key.to_string(), expr))),
         );
 
-        let err = build_entity(
-            &schema,
-            "Workload",
-            &token,
-            "client_id",
+        let entity = Entity::new(
+            EntityUid::from_str("Test::\"test\"").expect("should parse EntityUid"),
+            attrs,
             HashSet::new(),
-            &BuiltEntities::default(),
         )
-        .expect_err("should error due to entity not being in the schema");
-        assert!(
-            matches!(
-                err,
-                BuildEntityError::EntityNotInSchema(ref type_name)
-                if type_name == "Workload"
-            ),
-            "expected EntityNotInSchema error but got: {:?}",
-            err
-        );
+        .expect("should create entity");
+
+        assert!(matches!(
+            entity.attr("test_bool").expect("entity should have a `test_bool` attribute").expect("should be a valid value"),
+            EvalResult::Bool(ref val)
+                if *val == true,
+        ));
+
+        assert!(matches!(
+            entity.attr("test_long").expect("entity should have a `test_long` attribute").expect("should be a valid value"),
+            EvalResult::Long(ref val)
+                if *val == 521,
+        ));
+
+        assert!(matches!(
+            entity.attr("test_decimal").expect("entity should have a `test_decimal` attribute").expect("should be a valid value"),
+            EvalResult::ExtensionValue(ref val)
+                if *val == "decimal(\"12.5\")",
+        ));
+
+        assert!(matches!(
+            entity.attr("test_str").expect("entity should have a `test_str` attribute").expect("should be a valid value"),
+            EvalResult::String(ref val)
+                if *val == "some str",
+        ));
+
+        assert!(matches!(
+            entity.attr("test_set").expect("entity should have a `test_set` attribute").expect("should be a valid value"),
+            EvalResult::Set(set)
+                if
+                    set.len() == 2 &&
+                    set.contains(&EvalResult::String("a".into())) &&
+                    set.contains(&EvalResult::Long(1))
+        ));
+
+        assert!(matches!(
+            entity.attr("test_record").expect("entity should have a `test_record` attribute").expect("should be a valid value"),
+            EvalResult::Record(record)
+                if
+                    record.len() == 2 &&
+                    record.get("a") == Some(&EvalResult::Long(1)) &&
+                    record.get("b") == Some(&EvalResult::String("b".into()))
+        ));
     }
 }

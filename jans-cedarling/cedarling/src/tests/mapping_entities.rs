@@ -42,7 +42,6 @@ static REQUEST: LazyLock<Request> = LazyLock::new(|| {
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "https://account.gluu.org",
-                    "client_id": "some_client_id",
                     "role": "Admin",
                 })),
             },

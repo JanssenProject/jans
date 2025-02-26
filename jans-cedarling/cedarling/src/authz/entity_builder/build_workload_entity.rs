@@ -5,52 +5,44 @@
 
 use super::*;
 use cedar_policy::Entity;
+use derive_more::derive::Deref;
 use std::collections::HashSet;
 
-// TODO: make a bootstrap property to control which tokens to use
-// to create this entity
-const DEFAULT_WORKLOAD_ENTITY_TKN_SRCS: [&str; 2] = ["access_token", "id_token"];
+const DEFAULT_WORKLOAD_ATTR_SRCS: [&str; 1] = ["access_token"];
 
 impl EntityBuilder {
     pub fn build_workload_entity(
         &self,
         tokens: &HashMap<String, Token>,
-        built_entities: &BuiltEntities,
-    ) -> Result<Entity, BuildWorkloadEntityError> {
-        let entity_name = self.entity_names.workload.as_ref();
-        let mut errors = vec![];
+        // tkn_principal_mappings: &HashMap<String, Vec<(String, RestrictedExpression)>>,
+        tkn_principal_mappings: &TokenPrincipalMappings,
+    ) -> Result<Entity, BuildEntityError> {
+        let workload_type_name = self.entity_names.workload.as_ref();
 
-        let token_refs = DEFAULT_WORKLOAD_ENTITY_TKN_SRCS
+        // Get Workload Entity ID
+        let workload_id_srcs = WorkloadIdSrcs::resolve(tokens);
+        let workload_id = get_first_valid_entity_id(&workload_id_srcs)
+            .map_err(|e| e.while_building(workload_type_name))?;
+
+        // Get Workload Entity attributes
+        let workload_attr_srcs = DEFAULT_WORKLOAD_ATTR_SRCS
             .iter()
-            .flat_map(|x| tokens.get(*x));
+            .filter_map(|src| tokens.get(*src).map(|tkn| tkn.into()))
+            .collect::<Vec<_>>();
+        let workload_attrs = build_entity_attrs(workload_attr_srcs);
 
-        for token in token_refs {
-            let workload_id_claim = if let Some(src) = token
-                .get_metadata()
-                .and_then(|metadata| metadata.workload_id.as_ref())
-            {
-                src
-            } else {
-                // TODO: add errors
-                continue;
-            };
+        // Insert token references in the entity attributes
+        let workload_attrs =
+            add_token_references(workload_type_name, workload_attrs, tkn_principal_mappings);
 
-            match build_entity(
-                &self.schema,
-                entity_name,
-                token,
-                workload_id_claim,
-                HashSet::new(),
-                built_entities,
-            ) {
-                Ok(entity) => {
-                    return Ok(entity);
-                },
-                Err(err) => errors.push((token.name.clone(), err)),
-            }
-        }
+        let workload_entity = build_cedar_entity(
+            workload_type_name,
+            &workload_id,
+            workload_attrs,
+            HashSet::new(),
+        )?;
 
-        Err(BuildWorkloadEntityError { errors })
+        Ok(workload_entity)
     }
 }
 
@@ -79,147 +71,331 @@ impl fmt::Display for BuildWorkloadEntityError {
     }
 }
 
+#[derive(Deref)]
+struct WorkloadIdSrcs<'a>(Vec<EntityIdSrc<'a>>);
+
+#[derive(Clone, Copy)]
+struct WorkloadIdSrc<'a> {
+    token: &'a str,
+    claim: &'a str,
+}
+
+impl<'a> WorkloadIdSrcs<'a> {
+    fn resolve(tokens: &'a HashMap<String, Token>) -> Self {
+        const DEFAULT_WORKLOAD_ID_SRCS: &[WorkloadIdSrc] = &[
+            WorkloadIdSrc {
+                token: "access_token",
+                claim: "aud",
+            },
+            WorkloadIdSrc {
+                token: "access_token",
+                claim: "client_id",
+            },
+            WorkloadIdSrc {
+                token: "id_token",
+                claim: "aud",
+            },
+        ];
+
+        Self(
+            DEFAULT_WORKLOAD_ID_SRCS
+                .iter()
+                .fold(Vec::new(), |mut acc, &src| {
+                    if let Some((token, claim)) = tokens.get(src.token).and_then(|tkn| {
+                        tkn.get_metadata()
+                            .and_then(|m| m.workload_id.as_ref().map(|claim| (tkn, claim)))
+                    }) {
+                        acc.push(EntityIdSrc { token, claim });
+                        if claim != src.claim {
+                            acc.push(EntityIdSrc {
+                                token,
+                                claim: src.claim,
+                            });
+                        }
+                    }
+
+                    acc
+                }),
+        )
+    }
+}
+
+// TODO: move these tests to the top level
+#[cfg(test)]
+mod test_get_id {
+    use super::*;
+    use crate::authz::entity_builder::build_workload_entity::GetEntityIdError;
+    use serde_json::json;
+    use std::collections::HashMap;
+
+    const TEST_ID_SRCS: &[WorkloadIdSrc] = &[
+        WorkloadIdSrc {
+            token: "access_token",
+            claim: "aud",
+        },
+        WorkloadIdSrc {
+            token: "access_token",
+            claim: "client_id",
+        },
+        WorkloadIdSrc {
+            token: "id_token",
+            claim: "aud",
+        },
+    ];
+
+    #[test]
+    fn can_get_id() {
+        let expected_id = "some_workload_id";
+
+        // Using access token's aud
+        let tokens = HashMap::<String, Token>::from([(
+            "access_token".into(),
+            Token::new(
+                "access_token",
+                HashMap::from([("aud".into(), json!(expected_id))]).into(),
+                None,
+            ),
+        )]);
+        let workload_id_srcs = TEST_ID_SRCS
+            .iter()
+            .filter_map(|src| {
+                tokens.get(src.token).map(|token| {
+                    let claim = token
+                        .get_metadata()
+                        .and_then(|m| m.user_id.as_deref())
+                        .unwrap_or(src.claim);
+                    EntityIdSrc { token, claim }
+                })
+            })
+            .collect::<Vec<_>>();
+        let id = get_first_valid_entity_id(&workload_id_srcs)
+            .expect("should get workload id from access_token's aud");
+        assert_eq!(id, expected_id);
+
+        // Using access token's client_id
+        let tokens = HashMap::<String, Token>::from([(
+            "access_token".into(),
+            Token::new(
+                "access_token",
+                HashMap::from([("client_id".into(), json!(expected_id))]).into(),
+                None,
+            ),
+        )]);
+        let workload_id_srcs = TEST_ID_SRCS
+            .iter()
+            .filter_map(|src| {
+                tokens.get(src.token).map(|token| {
+                    let claim = token
+                        .get_metadata()
+                        .and_then(|m| m.user_id.as_deref())
+                        .unwrap_or(src.claim);
+                    EntityIdSrc { token, claim }
+                })
+            })
+            .collect::<Vec<_>>();
+        let id = get_first_valid_entity_id(&workload_id_srcs)
+            .expect("should get workload id from access_token's aud");
+        assert_eq!(id, expected_id);
+
+        // Using id token's aud
+        let tokens = HashMap::<String, Token>::from([(
+            "id_token".into(),
+            Token::new(
+                "id_token",
+                HashMap::from([("aud".into(), json!(expected_id))]).into(),
+                None,
+            ),
+        )]);
+        let workload_id_srcs = TEST_ID_SRCS
+            .iter()
+            .filter_map(|src| {
+                tokens.get(src.token).map(|token| {
+                    let claim = token
+                        .get_metadata()
+                        .and_then(|m| m.user_id.as_deref())
+                        .unwrap_or(src.claim);
+                    EntityIdSrc { token, claim }
+                })
+            })
+            .collect::<Vec<_>>();
+        let id = get_first_valid_entity_id(&workload_id_srcs)
+            .expect("should get workload id from access_token's aud");
+        assert_eq!(id, expected_id);
+    }
+
+    #[test]
+    fn errors_on_missing_claim() {
+        let token_names = vec!["access_token", "id_token"];
+        let tokens = HashMap::<String, Token>::from_iter(token_names.iter().map(|name| {
+            (
+                name.to_string(),
+                Token::new(*name, HashMap::new().into(), None),
+            )
+        }));
+        let workload_id_srcs = TEST_ID_SRCS
+            .iter()
+            .filter_map(|src| {
+                tokens.get(src.token).map(|token| {
+                    let claim = token
+                        .get_metadata()
+                        .and_then(|m| m.user_id.as_deref())
+                        .unwrap_or(src.claim);
+                    EntityIdSrc { token, claim }
+                })
+            })
+            .collect::<Vec<_>>();
+        let err = get_first_valid_entity_id(&workload_id_srcs)
+            .expect_err("should error while getting workload id");
+        if let BuildEntityErrorKind::MissingEntityId(errs) = err {
+            assert_eq!(errs.len(), 3);
+            for (token, claim) in TEST_ID_SRCS.iter().map(|src| (src.token, src.claim)) {
+                let expected_err = &GetEntityIdError {
+                    token: token.into(),
+                    claim: claim.into(),
+                    reason: GetEntityIdErrorReason::MissingClaim,
+                };
+                assert!(
+                    errs.contains(expected_err),
+                    "errors {:#?} do not contain {:#?}",
+                    errs,
+                    expected_err
+                );
+            }
+        } else {
+            panic!("error should be of kind MissingEntityId: {}", err);
+        }
+    }
+
+    #[test]
+    fn errors_on_empty_string() {
+        let token_names = vec!["access_token", "id_token"];
+        let tokens = HashMap::<String, Token>::from_iter(token_names.iter().map(|name| {
+            (
+                name.to_string(),
+                Token::new(
+                    *name,
+                    HashMap::from([("aud".into(), json!("")), ("client_id".into(), json!(""))])
+                        .into(),
+                    None,
+                ),
+            )
+        }));
+        let workload_id_srcs = TEST_ID_SRCS
+            .iter()
+            .filter_map(|src| {
+                tokens.get(src.token).map(|token| {
+                    let claim = token
+                        .get_metadata()
+                        .and_then(|m| m.user_id.as_deref())
+                        .unwrap_or(src.claim);
+                    EntityIdSrc { token, claim }
+                })
+            })
+            .collect::<Vec<_>>();
+        let err = get_first_valid_entity_id(&workload_id_srcs)
+            .expect_err("should error while getting workload id");
+        if let BuildEntityErrorKind::MissingEntityId(errs) = err {
+            for (token, claim) in TEST_ID_SRCS.iter().map(|src| (src.token, src.claim)) {
+                assert_eq!(errs.len(), 3);
+                let expected_err = &GetEntityIdError {
+                    token: token.into(),
+                    claim: claim.into(),
+                    reason: GetEntityIdErrorReason::EmptyString,
+                };
+                assert!(
+                    errs.contains(expected_err),
+                    "errors {:#?} do not contain {:#?}",
+                    errs,
+                    expected_err
+                );
+            }
+        } else {
+            panic!("error should be of kind MissingEntityId: {}", err);
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::super::*;
-    use crate::authz::entity_builder::BuildEntityError;
-    use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
+    use super::*;
     use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer};
     use cedar_policy::EvalResult;
     use serde_json::json;
     use std::collections::HashMap;
 
     #[test]
-    fn can_build_using_access_tkn() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Workload": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "client_id": { "type": "String" },
-                        "name": { "type": "String" },
-                    },
-                }
-            }}}
-        }))
-        .unwrap();
+    fn can_build_using_access_tkn_aud() {
         let iss = TrustedIssuer::default();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
+        let builder = EntityBuilder::new(EntityNames::default(), true, false, &HashMap::new());
         let access_token = Token::new(
             "access_token",
             HashMap::from([
-                ("client_id".to_string(), json!("workload-123")),
-                ("name".to_string(), json!("somename")),
+                ("jti".to_string(), json!("some_jti")),
+                ("aud".to_string(), json!("some_aud")),
+                ("name".to_string(), json!("some_name")),
             ])
             .into(),
             Some(&iss),
         );
         let tokens = HashMap::from([("access_token".to_string(), access_token)]);
         let entity = builder
-            .build_workload_entity(&tokens, &BuiltEntities::default())
-            .expect("expeted to successfully build workload entity");
-        assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
+            .build_workload_entity(&tokens, &TokenPrincipalMappings::default())
+            .expect("should build workload entity")
+            .to_json_value()
+            .expect("should serialize entity to JSON");
+
         assert_eq!(
-            entity
-                .attr("client_id")
-                .expect("expected workload entity to have a `client_id` attribute")
-                .unwrap(),
-            EvalResult::String("workload-123".to_string()),
-        );
-        assert_eq!(
-            entity
-                .attr("name")
-                .expect("expected workload entity to have a `name` attribute")
-                .unwrap(),
-            EvalResult::String("somename".to_string()),
+            entity,
+            json!({
+                "uid": {"type": "Jans::Workload", "id": "some_aud"},
+                "attrs": {
+                    "jti": "some_jti",
+                    "aud": "some_aud",
+                    "name": "some_name",
+                },
+                "parents": [],
+            })
         );
     }
 
     #[test]
-    fn can_build_using_id_tkn() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Workload": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "aud": { "type": "String" },
-                        "name": { "type": "String" },
-                    },
-                }
-            }}}
-        }))
-        .unwrap();
-        let mut iss = TrustedIssuer::default();
-        iss.tokens_metadata
-            .get_mut("id_token")
-            .map(|metadata| metadata.workload_id = Some("aud".into()))
-            .expect("should have id token metadata");
-        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
-        let id_token = Token::new(
-            "id_token",
+    fn can_build_using_access_tkn_client_id() {
+        let iss = TrustedIssuer::default();
+        let builder = EntityBuilder::new(EntityNames::default(), true, false, &HashMap::new());
+        let access_token = Token::new(
+            "access_token",
             HashMap::from([
-                ("aud".to_string(), json!("workload-123")),
-                ("name".to_string(), json!("somename")),
+                ("jti".to_string(), json!("some_jti")),
+                ("client_id".to_string(), json!("some_client_id")),
+                ("name".to_string(), json!("some_name")),
             ])
             .into(),
             Some(&iss),
         );
-        let tokens = HashMap::from([("id_token".to_string(), id_token)]);
+        let tokens = HashMap::from([("access_token".to_string(), access_token)]);
         let entity = builder
-            .build_workload_entity(&tokens, &BuiltEntities::default())
-            .expect("expected to successfully build workload entity");
-        assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
+            .build_workload_entity(&tokens, &TokenPrincipalMappings::default())
+            .expect("should build workload entity")
+            .to_json_value()
+            .expect("should serialize entity to JSON");
+
         assert_eq!(
-            entity
-                .attr("aud")
-                .expect("expected workload entity to have an `aud` attribute")
-                .unwrap(),
-            EvalResult::String("workload-123".to_string()),
-        );
-        assert_eq!(
-            entity
-                .attr("name")
-                .expect("expected workload entity to have a `name` attribute")
-                .unwrap(),
-            EvalResult::String("somename".to_string()),
+            entity,
+            json!({
+                "uid": {"type": "Jans::Workload", "id": "some_client_id"},
+                "attrs": {
+                    "jti": "some_jti",
+                    "client_id": "some_client_id",
+                    "name": "some_name",
+                },
+                "parents": [],
+            })
         );
     }
 
     #[test]
     fn can_build_expression_with_regex_mapping() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": {
-                "commonTypes": {
-                    "Email": {
-                        "type": "Record",
-                        "attributes": {
-                            "uid": { "type": "String" },
-                            "domain": { "type": "String" },
-                        },
-                    },
-                    "Url": {
-                        "type": "Record",
-                        "attributes": {
-                            "scheme": { "type": "String" },
-                            "path": { "type": "String" },
-                            "domain": { "type": "String" },
-                        },
-                    },
-                },
-                "entityTypes": {
-                    "Workload": {
-                        "shape": {
-                            "type": "Record",
-                            "attributes":  {
-                                "client_id": { "type": "String" },
-                                "email": { "type": "EntityOrCommon", "name": "Email" },
-                                "url": { "type": "EntityOrCommon", "name": "Url" },
-                            },
-                        }
-                    }
-            }}
-        }))
-        .unwrap();
         let token_entity_metadata_builder = TokenEntityMetadata::builder().claim_mapping(serde_json::from_value::<ClaimMappings>(json!({
                     "email": {
                         "parser": "regex",
@@ -248,7 +424,7 @@ mod test {
             )]),
             ..Default::default()
         };
-        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
+        let builder = EntityBuilder::new(EntityNames::default(), true, false, &HashMap::new());
         let access_token = Token::new(
             "access_token",
             HashMap::from([
@@ -261,7 +437,7 @@ mod test {
         );
         let tokens = HashMap::from([("access_token".to_string(), access_token)]);
         let entity = builder
-            .build_workload_entity(&tokens, &BuiltEntities::default())
+            .build_workload_entity(&tokens, &TokenPrincipalMappings::default())
             .expect("expected to successfully build workload entity");
 
         assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
@@ -319,145 +495,5 @@ mod test {
                 email
             );
         }
-    }
-
-    #[test]
-    fn can_build_entity_with_entity_ref() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": {
-                "entityTypes": {
-                    "TrustedIss": {},
-                    "Workload": {
-                        "shape": {
-                            "type": "Record",
-                            "attributes":  {
-                                "client_id": { "type": "String" },
-                                "iss": { "type": "EntityOrCommon", "name": "TrustedIss" },
-                            },
-                        }
-                    }
-            }}
-        }))
-        .unwrap();
-        let iss = TrustedIssuer::default();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
-        let access_token = Token::new(
-            "access_token",
-            HashMap::from([
-                ("client_id".to_string(), json!("workload-123")),
-                (
-                    "iss".to_string(),
-                    json!("https://test.com/.well-known/openid-configuration"),
-                ),
-            ])
-            .into(),
-            Some(&iss),
-        );
-        let tokens = HashMap::from([("access_token".to_string(), access_token)]);
-        let entity = builder
-            .build_workload_entity(&tokens, &BuiltEntities::default())
-            .expect("expected to successfully build workload entity");
-
-        assert_eq!(entity.uid().to_string(), "Jans::Workload::\"workload-123\"");
-
-        assert_eq!(
-            entity
-                .attr("client_id")
-                .expect("expected to workload entity to have a `client_id` attribute")
-                .unwrap(),
-            EvalResult::String("workload-123".to_string()),
-        );
-
-        let iss = entity
-            .attr("iss")
-            .expect("entity must have a `iss` attribute")
-            .unwrap();
-        if let EvalResult::EntityUid(uid) = iss {
-            assert_eq!(uid.type_name().namespace(), "Jans");
-            assert_eq!(uid.type_name().basename(), "TrustedIss");
-            assert_eq!(
-                uid.id().escaped(),
-                "https://test.com/.well-known/openid-configuration"
-            );
-        } else {
-            panic!(
-                "expected the attribute `iss` to be an EntityUid, got: {:?}",
-                iss
-            );
-        }
-    }
-
-    #[test]
-    fn errors_when_token_has_missing_claim() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Workload": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "client_id": { "type": "String" },
-                        "name": { "type": "String" },
-                    },
-                }
-            }}}
-        }))
-        .unwrap();
-        let mut iss = TrustedIssuer::default();
-        iss.tokens_metadata
-            .get_mut("id_token")
-            .map(|metadata| metadata.workload_id = Some("aud".into()))
-            .expect("there should be an id_token metadata");
-        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
-        let access_token = Token::new("access_token", HashMap::new().into(), Some(&iss));
-        let id_token = Token::new("id_token", HashMap::new().into(), Some(&iss));
-        let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
-        ]);
-        let err = builder
-            .build_workload_entity(&tokens, &BuiltEntities::default())
-            .expect_err("expected to error while building the workload entity");
-
-        assert_eq!(err.errors.len(), 2, "errors: {:#?}", err);
-        assert!(
-            matches!(
-                err.errors[0],
-                (ref tkn_name, BuildEntityError::MissingClaim(ref claim_name))
-                    if tkn_name == "access_token" &&
-                        claim_name == "client_id"
-            ),
-            "expected an error due to missing the `client_id` claim"
-        );
-        assert!(
-            matches!(
-                err.errors[1],
-                (ref tkn_name, BuildEntityError::MissingClaim(ref claim_name))
-                    if tkn_name == "id_token" &&
-                        claim_name == "aud"
-            ),
-            "expected an error due to missing the `aud` claim"
-        );
-    }
-
-    #[test]
-    fn errors_when_tokens_unavailable() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Workload": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "client_id": { "type": "String" },
-                        "name": { "type": "String" },
-                    },
-                }
-            }}}
-        }))
-        .unwrap();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), true, false);
-        let tokens = HashMap::new();
-        let err = builder
-            .build_workload_entity(&tokens, &BuiltEntities::default())
-            .unwrap_err();
-
-        assert_eq!(err.errors.len(), 0);
     }
 }

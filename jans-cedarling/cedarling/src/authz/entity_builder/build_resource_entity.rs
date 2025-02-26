@@ -3,10 +3,6 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use build_attrs::build_entity_attrs_from_values;
-use cedar_policy::{EntityAttrEvaluationError, ExpressionConstructionError, ParseErrors};
-use serde_json::Value;
-
 use super::*;
 use crate::ResourceData;
 
@@ -14,45 +10,18 @@ impl EntityBuilder {
     pub fn build_resource_entity(
         &self,
         resource: &ResourceData,
-    ) -> Result<Entity, BuildResourceEntityError> {
-        let (entity_type_name, entity_type) = self
-            .schema
-            .get_entity_schema(&resource.resource_type, None)?
-            .ok_or(BuildEntityError::EntityNotInSchema(
-                resource.resource_type.clone(),
-            ))?;
+    ) -> Result<Entity, BuildEntityError> {
+        let resource_type_name = &resource.resource_type;
 
-        let default_namespace = entity_type_name.namespace();
+        let uid = EntityUid::from_str(&format!("{}::\"{}\"", resource_type_name, resource.id))
+            .expect("TODO: return error");
 
-        let entity_attrs = build_entity_attrs_from_values(
-            &self.schema,
-            Some(default_namespace.as_str()),
-            entity_type,
-            &resource.payload,
-        )?;
+        let attrs = build_entity_attrs(vec![(&resource.payload).into()]);
+        let resource = Entity::new(uid, attrs, HashSet::new())
+            .map_err(|e| BuildEntityErrorKind::from(e).while_building(resource_type_name))?;
 
-        // Build cedar entity
-        let entity_id =
-            EntityId::from_str(&resource.id).map_err(BuildEntityError::ParseEntityId)?;
-        let entity_uid = EntityUid::from_type_name_and_id(entity_type_name, entity_id);
-        Ok(Entity::new(entity_uid, entity_attrs, HashSet::new())?)
+        Ok(resource)
     }
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum BuildResourceEntityError {
-    #[error(transparent)]
-    BuildEntity(#[from] BuildEntityError),
-    #[error(transparent)]
-    TypeMismatch(#[from] JsonTypeError),
-    #[error(transparent)]
-    ExpressionConstructExpression(#[from] ExpressionConstructionError),
-    #[error(transparent)]
-    EntityAttrEvaluationError(#[from] EntityAttrEvaluationError),
-    #[error(transparent)]
-    BuildAttr(#[from] BuildAttrError),
-    #[error("invalid entity name: {0}")]
-    InvalidEntityName(#[from] ParseErrors),
 }
 
 #[derive(Debug, thiserror::Error, PartialEq)]
@@ -62,73 +31,16 @@ pub struct JsonTypeError {
     pub actual_type: String,
 }
 
-impl JsonTypeError {
-    /// Returns the JSON type name of the given value.
-    pub fn value_type_name(value: &Value) -> String {
-        match value {
-            Value::Null => "null".to_string(),
-            Value::Bool(_) => "bool".to_string(),
-            Value::Number(_) => "number".to_string(),
-            Value::String(_) => "string".to_string(),
-            Value::Array(_) => "array".to_string(),
-            Value::Object(_) => "object".to_string(),
-        }
-    }
-
-    /// Constructs a `TypeMismatch` error with detailed information about the expected and actual types.
-    pub fn type_mismatch(expected_type_name: &str, got_value: &Value) -> Self {
-        let got_value_type_name = Self::value_type_name(got_value);
-
-        Self {
-            expected_type: expected_type_name.to_string(),
-            actual_type: got_value_type_name,
-        }
-    }
-}
-
 #[cfg(test)]
 mod test {
     use super::super::*;
     use super::*;
-    use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
     use cedar_policy::EvalResult;
     use serde_json::json;
 
     #[test]
     fn can_build_entity() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": {
-                "commonTypes": {
-                    "Url": {
-                        "type": "Record",
-                        "attributes": {
-                            "host": { "type": "String" },
-                            "path": { "type": "String" },
-                            "protocol": { "type": "String" },
-                        },
-                    },
-                },
-                "entityTypes": {
-                    "Role": {},
-                    "HttpRequest": {
-                        "shape": {
-                            "type": "Record",
-                            "attributes":  {
-                                "header": {
-                                    "type": "Record",
-                                    "attributes": {
-                                        "Accept": { "type": "EntityOrCommon", "name": "String" },
-                                    },
-                                },
-                                "url": { "type": "EntityOrCommon", "name": "Url" },
-                            },
-                        }
-                    }
-                }
-            }
-        }))
-        .expect("should successfully create test schema");
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let builder = EntityBuilder::new(EntityNames::default(), false, false, &HashMap::new());
         let resource_data = ResourceData {
             resource_type: "Jans::HttpRequest".to_string(),
             id: "request-123".to_string(),
@@ -197,33 +109,7 @@ mod test {
 
     #[test]
     fn can_build_entity_with_optional_attr() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": {
-                "commonTypes": {
-                    "Url": {
-                        "type": "Record",
-                        "attributes": {
-                            "host": { "type": "String" },
-                            "path": { "type": "String" },
-                            "protocol": { "type": "String" },
-                        },
-                    },
-                },
-                "entityTypes": {
-                    "Role": {},
-                    "HttpRequest": {
-                        "shape": {
-                            "type": "Record",
-                            "attributes":  {
-                                "url": { "type": "EntityOrCommon", "name": "Url", "required": false},
-                            },
-                        }
-                    }
-                }
-            }
-        }))
-        .expect("should successfully create test schema");
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let builder = EntityBuilder::new(EntityNames::default(), false, false, &HashMap::new());
         let resource_data = ResourceData {
             resource_type: "Jans::HttpRequest".to_string(),
             id: "request-123".to_string(),
@@ -241,39 +127,7 @@ mod test {
 
     #[test]
     fn can_build_entity_with_optional_record_attr() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": {
-                "commonTypes": {
-                    "Url": {
-                        "type": "Record",
-                        "attributes": {
-                            "host": { "type": "String" },
-                            "path": { "type": "String" },
-                            "protocol": { "type": "String" },
-                        },
-                    },
-                },
-                "entityTypes": {
-                    "Role": {},
-                    "HttpRequest": {
-                        "shape": {
-                            "type": "Record",
-                            "attributes":  {
-                                "header": {
-                                    "type": "Record",
-                                    "attributes": {
-                                        "Accept": { "type": "EntityOrCommon", "name": "String", "required": false },
-                                    },
-                                },
-                                "url": { "type": "EntityOrCommon", "name": "Url" },
-                            },
-                        }
-                    }
-                }
-            }
-        }))
-        .expect("should successfully create test schema");
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let builder = EntityBuilder::new(EntityNames::default(), false, false, &HashMap::new());
         let resource_data = ResourceData {
             resource_type: "Jans::HttpRequest".to_string(),
             id: "request-123".to_string(),

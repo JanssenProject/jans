@@ -60,7 +60,7 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    EntitiesError,
+    ValidateEntitiesError,
     AuthorizeError,
     "Error encountered while collecting all entities"
 );
@@ -136,7 +136,7 @@ errors_functions! {
     CreateContext => CreateContextError,
     WorkloadRequestValidation => WorkloadRequestValidationError,
     UserRequestValidation => UserRequestValidationError,
-    Entities => EntitiesError,
+    ValidateEntities => ValidateEntitiesError,
     EntitiesToJson => EntitiesToJsonError,
     BuildContext => BuildContextError,
     IdTokenTrustMode => IdTokenTrustModeError,

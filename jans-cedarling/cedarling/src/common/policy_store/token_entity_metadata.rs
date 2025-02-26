@@ -77,7 +77,7 @@ impl TokenEntityMetadata {
             required_claims: HashSet::from(["iss".into(), "exp".into(), "jti".into()]),
             entity_type_name: "Jans::Access_token".into(),
             principal_mapping: HashSet::from(["Jans::Workload".into()]),
-            workload_id: Some("client_id".into()),
+            workload_id: Some("aud".into()),
         }
     }
 

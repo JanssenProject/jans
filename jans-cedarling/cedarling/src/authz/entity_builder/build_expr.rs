@@ -400,10 +400,8 @@ impl KeyedJsonTypeError {
 
 #[cfg(test)]
 mod test {
-    use crate::{
-        authz::entity_builder::{BuildExprError, built_entities::BuiltEntities},
-        common::cedar_schema::cedar_json::{CedarSchemaJson, attribute::Attribute},
-    };
+    use crate::authz::entity_builder::built_entities::BuiltEntities;
+    use crate::common::cedar_schema::cedar_json::{CedarSchemaJson, attribute::Attribute};
     use serde_json::json;
     use std::collections::HashMap;
 
@@ -566,44 +564,6 @@ mod test {
     }
 
     #[test]
-    fn errors_when_expected_set_has_different_types() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Test": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "attr1": {
-                            "type": "Set",
-                            "element": {
-                              "type": "String",
-                            }
-                        },
-                    },
-                }
-            }}}
-        }))
-        .expect("should successfully build schema");
-        let attr = Attribute::set(Attribute::string());
-        let src = HashMap::from([("src_key".to_string(), json!(["admin", 123]))]);
-        let srs_key = "src_key";
-
-        let err = attr
-            .build_expr(
-                srs_key,
-                src.get(srs_key),
-                Some("Jans"),
-                &schema,
-                &BuiltEntities::default(),
-            )
-            .expect_err("should error");
-        assert!(
-            matches!(err, BuildExprError::TypeMismatch(_)),
-            "should error due to type mismatch but got: {:?}",
-            err
-        );
-    }
-
-    #[test]
     fn can_build_entity_expr() {
         let schema = serde_json::from_value::<CedarSchemaJson>(json!({
             "Jans": { "entityTypes": {
@@ -671,46 +631,6 @@ mod test {
             )
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built");
-    }
-
-    #[test]
-    fn errors_when_entity_isnt_in_schema() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Test": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "attr1": {
-                            "type": "Entity",
-                            "name": "OtherEntity",
-                        },
-                    },
-                }
-            }}}
-        }))
-        .expect("should successfully build schema");
-        let attr = Attribute::entity("OtherEntity");
-        let src = HashMap::from([("src_key".to_string(), json!("test"))]);
-        let srs_key = "src_key";
-
-        let err = attr
-            .build_expr(
-                srs_key,
-                src.get(srs_key),
-                Some("Jans"),
-                &schema,
-                &BuiltEntities::default(),
-            )
-            .expect_err("should error");
-        assert!(
-            matches!(
-                err,
-                BuildExprError::EntityNotInSchema(ref entity_name)
-                    if entity_name == "OtherEntity"
-            ),
-            "should error due to type mismatch but got: {:?}",
-            err
-        );
     }
 
     #[test]
@@ -798,38 +718,5 @@ mod test {
             )
             .expect("should not error");
         assert!(expr.is_none(), "a restricted expression shouldn't built")
-    }
-
-    #[test]
-    fn errors_on_type_mismatch() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Test": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "attr1": { "type": "String" },
-                    },
-                }
-            }}}
-        }))
-        .expect("should successfully build schema");
-        let attr = Attribute::string();
-        let src = HashMap::from([("src_key".to_string(), json!(123))]);
-        let srs_key = "src_key";
-
-        let err = attr
-            .build_expr(
-                srs_key,
-                src.get(srs_key),
-                Some("Jans"),
-                &schema,
-                &BuiltEntities::default(),
-            )
-            .expect_err("should error");
-        assert!(
-            matches!(err, BuildExprError::TypeMismatch(_)),
-            "should error due to type mismatch but got: {:?}",
-            err
-        );
     }
 }

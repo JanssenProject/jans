@@ -26,9 +26,7 @@ use base64::Engine;
 use base64::prelude::*;
 use key_service::{KeyService, KeyServiceError};
 use std::collections::{HashMap, HashSet};
-use std::str::FromStr;
 use std::sync::Arc;
-use url::Url;
 use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
 
 pub use jsonwebtoken::Algorithm;
@@ -143,10 +141,8 @@ impl JwtService {
 
         let mut validators = HashMap::new();
         if let Some(issuers) = trusted_issuers.as_ref() {
-            for (iss_id, iss) in issuers.iter() {
-                let oidc_endpoint = Url::from_str(&iss.oidc_endpoint)
-                    .map_err(|e| JwtServiceInitError::ParseOidcUrl(iss_id.clone(), e))?;
-                let origin = oidc_endpoint.origin().ascii_serialization();
+            for iss in issuers.values() {
+                let origin = iss.oidc_endpoint.origin().ascii_serialization();
                 for (tkn, metadata) in iss.tokens_metadata.iter() {
                     if !metadata.trusted {
                         continue;
@@ -258,6 +254,7 @@ mod test {
     use serde_json::{Value, json};
     use std::collections::{HashMap, HashSet};
     use tokio::test;
+    use url::Url;
 
     #[test]
     pub async fn can_validate_token() {
@@ -315,7 +312,8 @@ mod test {
             .create();
 
         let mut iss = TrustedIssuer::default();
-        iss.oidc_endpoint = server.url() + "/.well-known/openid-configuration";
+        iss.oidc_endpoint = Url::parse(&(server.url() + "/.well-known/openid-configuration"))
+            .expect("should be a valid url");
         // we remove the `iss` claims since mockito can't really create https
         // endpoints and the validation requires the `iss` to be https.
         for (_name, metadata) in iss.tokens_metadata.iter_mut() {

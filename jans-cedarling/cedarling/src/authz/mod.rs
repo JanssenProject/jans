@@ -10,7 +10,7 @@
 
 use crate::authorization_config::IdTokenTrustMode;
 use crate::bootstrap_config::AuthorizationConfig;
-use crate::common::policy_store::PolicyStoreWithID;
+use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuer};
 use crate::jwt::{self, Token};
 use crate::log::interface::LogWriter;
 use crate::log::{
@@ -23,6 +23,7 @@ use cedar_policy::{Entities, Entity, EntityUid};
 use chrono::Utc;
 use entity_builder::*;
 use request::Request;
+use smol_str::{SmolStr, ToSmolStr};
 use std::collections::HashMap;
 use std::io::Cursor;
 use std::str::FromStr;
@@ -44,6 +45,7 @@ pub(crate) struct AuthzConfig {
     pub policy_store: PolicyStoreWithID,
     pub jwt_service: Arc<jwt::JwtService>,
     pub authorization: AuthorizationConfig,
+    pub trusted_issuers: HashMap<String, TrustedIssuer>,
 }
 
 /// Authorization Service
@@ -58,15 +60,14 @@ pub struct Authz {
 impl Authz {
     /// Create a new Authorization Service
     pub(crate) fn new(config: AuthzConfig) -> Self {
-        let json_schema = config.policy_store.schema.json.clone();
         let entity_names = EntityNames::from(&config.authorization);
         let build_workload = config.authorization.use_workload_principal;
         let build_user = config.authorization.use_user_principal;
         let entity_builder = entity_builder::EntityBuilder::new(
-            json_schema,
             entity_names,
             build_workload,
             build_user,
+            &config.trusted_issuers,
         );
 
         config.log_service.log_any(
@@ -352,12 +353,11 @@ struct ExecuteAuthorizeParameters<'a> {
 
 /// Structure to hold entites created from tokens
 pub struct AuthorizeEntitiesData {
+    pub tokens: HashMap<String, Entity>,
     pub workload: Option<Entity>,
     pub user: Option<Entity>,
-    pub resource: Entity,
     pub roles: Vec<Entity>,
-    pub tokens: HashMap<String, Entity>,
-    pub build_entities: BuiltEntities,
+    pub resource: Entity,
 }
 
 impl AuthorizeEntitiesData {
@@ -377,6 +377,39 @@ impl AuthorizeEntitiesData {
     ) -> Result<cedar_policy::Entities, cedar_policy::entities_errors::EntitiesError> {
         Entities::from_entities(self.into_iter(), schema)
     }
+
+    /// Returns the names and IDs of built entities for inclusion in the context.
+    ///
+    /// This includes:
+    /// - **Token Entities**: e.g., `access_token`, `id_token`, etc.
+    /// - **Principal Entities**: e.g., `Workload`, `User`, etc.
+    /// - **Role Entities**
+    ///
+    /// Only entities that have been built will be included
+    fn entities_for_context(&self) -> BuiltEntities {
+        let token_entities = self
+            .tokens
+            .iter()
+            .map(|(_, entity)| get_name_and_id(entity));
+        let principal_entities = [self.workload.as_ref(), self.user.as_ref()]
+            .into_iter()
+            .flatten()
+            .map(get_name_and_id);
+        let role_entities = self.roles.iter().map(get_name_and_id);
+
+        HashMap::from_iter(
+            token_entities
+                .chain(principal_entities)
+                .chain(role_entities),
+        )
+        .into()
+    }
+}
+
+fn get_name_and_id(entity: &Entity) -> (SmolStr, SmolStr) {
+    let name = entity.uid().type_name().to_smolstr();
+    let id = entity.uid().id().escaped();
+    (name, id)
 }
 
 /// Error type for Authorization Service
@@ -397,9 +430,9 @@ pub enum AuthorizeError {
     /// Error encountered while creating [`cedar_policy::Request`] for user entity principal
     #[error("The request for `User` does not conform to the schema: {0}")]
     UserRequestValidation(cedar_policy::RequestValidationError),
-    /// Error encountered while collecting all entities
-    #[error("could not collect all entities: {0}")]
-    Entities(#[from] cedar_policy::entities_errors::EntitiesError),
+    /// Error encountered while checking if the Entities adhere to the schema
+    #[error(transparent)]
+    ValidateEntities(#[from] cedar_policy::entities_errors::EntitiesError),
     /// Error encountered while parsing all entities to json for logging
     #[error("could convert entities to json: {0}")]
     EntitiesToJson(serde_json::Error),
@@ -411,7 +444,7 @@ pub enum AuthorizeError {
     IdTokenTrustMode(#[from] IdTokenTrustModeError),
     /// Error encountered while building Cedar Entities
     #[error(transparent)]
-    BuildEntity(#[from] BuildCedarlingEntityError),
+    BuildEntity(#[from] BuildEntityError),
 }
 
 #[derive(Debug, derive_more::Error, derive_more::Display)]

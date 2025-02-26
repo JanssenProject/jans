@@ -4,35 +4,91 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::*;
+use derive_more::derive::Deref;
+use url::Url;
+
+const REGISTERED_ISS_CLAIM_NAME: &str = "iss";
+const DEFAULT_ISS_ATTR_NAME: &str = "iss";
 
 impl EntityBuilder {
     pub fn build_tkn_entity(
         &self,
-        entity_name: &str,
+        tkn_type_name: &str,
         token: &Token,
-        built_entities: &BuiltEntities,
-    ) -> Result<Entity, BuildTokenEntityError> {
-        let id_src_claim =
-            token
-                .get_metadata()
-                .map(|x| x.token_id.as_ref())
-                .ok_or(BuildTokenEntityError {
-                    token_name: token.name.clone(),
-                    err: BuildEntityError::MissingTokenMetadata,
-                })?;
-        let tkn_entity = build_entity(
-            &self.schema,
-            entity_name,
-            token,
-            id_src_claim,
-            HashSet::new(),
-            built_entities,
-        )
-        .map_err(|err| BuildTokenEntityError {
-            token_name: token.name.clone(),
-            err,
-        })?;
+        tkn_principal_mappings: &mut TokenPrincipalMappings,
+    ) -> Result<Entity, BuildEntityError> {
+        // Build entity attributes
+        let mut attrs = build_entity_attrs(vec![token.claims_value().into()]);
+
+        // Overwrite the iss attribute with an entity reference to the attribute
+        // if available
+        if let Some(claim) = token.get_claim(REGISTERED_ISS_CLAIM_NAME) {
+            let iss_claim_value = claim.as_str().map_err(|e| {
+                BuildEntityErrorKind::from(e).while_building(&self.entity_names.iss)
+            })?;
+            let iss_url = Url::parse(iss_claim_value).map_err(|e| {
+                BuildEntityErrorKind::from(e).while_building(&self.entity_names.iss)
+            })?;
+            if let Some(entity) = self.iss_entities.get(&iss_url.origin()) {
+                let entity_ref = RestrictedExpression::new_entity_uid(entity.uid());
+                attrs.insert(DEFAULT_ISS_ATTR_NAME.into(), entity_ref);
+            }
+        }
+
+        let entity_id = get_first_valid_entity_id(&TokenIdSrcs::resolve(token))
+            .map_err(|e| e.while_building(tkn_type_name))?;
+
+        let uid = EntityUid::from_str(&format!("{}::\"{}\"", tkn_type_name, entity_id))
+            .map_err(|e| BuildEntityErrorKind::from(e).while_building(tkn_type_name))?;
+        let tkn_entity = Entity::new(uid, attrs, HashSet::new())
+            .map_err(|e| BuildEntityErrorKind::from(e).while_building(tkn_type_name))?;
+
+        // Record the principal mappings for later use
+        if let Some(metadata) = token.get_metadata() {
+            let expr = RestrictedExpression::new_entity_uid(tkn_entity.uid());
+            for principal in metadata.principal_mapping.iter() {
+                tkn_principal_mappings.insert(TokenPrincipalMapping {
+                    principal: principal.clone(),
+                    attr_name: token.name.clone(),
+                    expr: expr.clone(),
+                });
+            }
+        }
+
         Ok(tkn_entity)
+    }
+}
+
+#[derive(Deref)]
+struct TokenIdSrcs<'a>(Vec<EntityIdSrc<'a>>);
+
+#[derive(Clone, Copy)]
+struct TokenIdSrc<'a> {
+    claim: &'a str,
+}
+
+impl<'a> TokenIdSrcs<'a> {
+    fn resolve(token: &'a Token) -> Self {
+        let default_srcs: &[TokenIdSrc; 1] = &[TokenIdSrc { claim: "jti" }];
+
+        Self(default_srcs.iter().fold(Vec::new(), |mut acc, &src| {
+            if let Some(claim) = token.get_metadata().map(|m| &m.token_id) {
+                acc.push(EntityIdSrc { token, claim });
+                if claim != src.claim {
+                    acc.push(EntityIdSrc {
+                        token,
+                        claim: src.claim,
+                    });
+                }
+            } else {
+                acc.push(EntityIdSrc {
+                    token,
+                    claim: src.claim,
+                });
+            };
+
+            acc
+        }))
     }
 }
 
@@ -46,81 +102,24 @@ pub struct BuildTokenEntityError {
 #[cfg(test)]
 mod test {
     use super::super::*;
-    use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
     use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer};
-    use cedar_policy::EvalResult;
     use serde_json::json;
     use std::collections::HashMap;
     use test_utils::assert_eq;
 
-    fn test_schema() -> CedarSchemaJson {
-        serde_json::from_value::<CedarSchemaJson>(json!({
-        "Jans": {
-            "commonTypes": {
-                "Url": {
-                    "type": "Record",
-                    "attributes": {
-                        "scheme": { "type": "String" },
-                        "path": { "type": "String" },
-                        "domain": { "type": "String" },
-                    },
-                },
-            },
-            "entityTypes": {
-                "Access_token": {
-                    "shape": {
-                        "type": "Record",
-                        "attributes":  {
-                            "jti": { "type": "String" },
-                            "trusted_issuer": { "type": "EntityOrCommon", "name": "TrustedIssuer" },
-                        },
-                    }
-                },
-                "id_token": {
-                    "shape": {
-                        "type": "Record",
-                        "attributes":  {
-                            "jti": { "type": "String" },
-                            "trusted_issuer": { "type": "EntityOrCommon", "name": "TrustedIssuer" },
-                        },
-                    }
-                },
-                "Userinfo_token": {
-                    "shape": {
-                        "type": "Record",
-                        "attributes":  {
-                            "jti": { "type": "String" },
-                            "trusted_issuer": { "type": "EntityOrCommon", "name": "TrustedIssuer" },
-                        },
-                    }
-                },
-                "TrustedIssuer": {
-                    "shape": {
-                        "type": "Record",
-                        "attributes":  {
-                            "issuer_entity_id": { "type": "EntityOrCommon", "name": "Url" }
-                        },
-                    }
-                }
-            }
-        }}))
-        .expect("should deserialize schema")
-    }
-
     fn test_issuers() -> HashMap<String, TrustedIssuer> {
         let token_entity_metadata_builder = TokenEntityMetadata::builder().claim_mapping(
-serde_json::from_value::<ClaimMappings>(json!({
-                    "url": {
-                        "parser": "regex",
-                        "type": "Jans::Url",
-                        "regex_expression": r#"^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?P<DOMAIN>[^\/]+)(?P<PATH>\/.*)?$"#,
-                        "SCHEME": {"attr": "scheme", "type": "String"},
-                        "DOMAIN": {"attr": "domain", "type": "String"},
-                        "PATH": {"attr": "path", "type": "String"}
-                    }
-                }))
-                .unwrap()
-        );
+            serde_json::from_value::<ClaimMappings>(json!({
+                "url": {
+                    "parser": "regex",
+                    "type": "Jans::Url",
+                    "regex_expression": r#"^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?P<DOMAIN>[^\/]+)(?P<PATH>\/.*)?$"#,
+                    "SCHEME": {"attr": "scheme", "type": "String"},
+                    "DOMAIN": {"attr": "domain", "type": "String"},
+                    "PATH": {"attr": "path", "type": "String"}
+                }
+            }))
+        .unwrap());
         let iss = TrustedIssuer {
             tokens_metadata: HashMap::from([
                 (
@@ -153,53 +152,44 @@ serde_json::from_value::<ClaimMappings>(json!({
 
     fn test_build_entity(tkn_entity_type_name: &str, token: Token, builder: &EntityBuilder) {
         let entity = builder
-            .build_tkn_entity(tkn_entity_type_name, &token, &BuiltEntities::default())
+            .build_tkn_entity(
+                tkn_entity_type_name,
+                &token,
+                &mut TokenPrincipalMappings::default(),
+            )
             .expect("expected to successfully build token entity");
 
+        let entity_json = entity
+            .to_json_value()
+            .expect("should serialize entity to json");
         assert_eq!(
-            entity.uid().to_string(),
-            format!("{}::\"tkn-123\"", tkn_entity_type_name)
+            entity_json,
+            json!({
+                "uid": {
+                    "type": tkn_entity_type_name,
+                    "id": "tkn-123",
+                },
+                "attrs": {
+                    "jti": "tkn-123",
+                    "iss": { "__entity": {
+                        "type": "Jans::TrustedIssuer",
+                        "id": "test_iss",
+                    }}
+                },
+                "parents": [],
+            })
         );
-
-        assert_eq!(
-            entity
-                .attr("jti")
-                .expect("expected entity to have a `jti` attribute")
-                .unwrap(),
-            EvalResult::String("tkn-123".to_string()),
-        );
-
-        let trusted_iss = entity
-            .attr("trusted_issuer")
-            .expect("expected entity to have a `trusted_issuer` attribute")
-            .unwrap();
-        if let EvalResult::EntityUid(ref uid) = trusted_iss {
-            assert_eq!(uid.type_name().basename(), "TrustedIssuer");
-            assert_eq!(
-                uid.id().escaped(),
-                "https://some-iss.com/.well-known/openid-configuration"
-            );
-        } else {
-            panic!(
-                "expected the attribute `trusted_issuer` to be an EntityUid, got: {:?}",
-                trusted_iss
-            );
-        }
     }
 
     #[test]
     fn can_build_access_tkn_entity() {
-        let schema = test_schema();
         let issuers = test_issuers();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let builder = EntityBuilder::new(EntityNames::default(), false, false, &issuers);
         let access_token = Token::new(
             "access_token",
             HashMap::from([
                 ("jti".to_string(), json!("tkn-123")),
-                (
-                    "trusted_issuer".to_string(),
-                    json!("https://some-iss.com/.well-known/openid-configuration"),
-                ),
+                ("iss".to_string(), json!("https://test.jans.org/")),
             ])
             .into(),
             Some(&issuers.get("test_iss").unwrap()),
@@ -209,16 +199,15 @@ serde_json::from_value::<ClaimMappings>(json!({
 
     #[test]
     fn can_build_id_tkn_entity() {
-        let schema = test_schema();
         let issuers = test_issuers();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let builder = EntityBuilder::new(EntityNames::default(), false, false, &issuers);
         let id_token = Token::new(
             "id_token",
             HashMap::from([
                 ("jti".to_string(), json!("tkn-123")),
                 (
-                    "trusted_issuer".to_string(),
-                    json!("https://some-iss.com/.well-known/openid-configuration"),
+                    "iss".to_string(),
+                    json!("https://test.jans.org/.well-known/openid-configuration"),
                 ),
             ])
             .into(),
@@ -229,16 +218,15 @@ serde_json::from_value::<ClaimMappings>(json!({
 
     #[test]
     fn can_build_userinfo_tkn_entity() {
-        let schema = test_schema();
         let issuers = test_issuers();
-        let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
+        let builder = EntityBuilder::new(EntityNames::default(), false, false, &issuers);
         let userinfo_token = Token::new(
-            "userinfo_token",
+            "iss",
             HashMap::from([
                 ("jti".to_string(), json!("tkn-123")),
                 (
-                    "trusted_issuer".to_string(),
-                    json!("https://some-iss.com/.well-known/openid-configuration"),
+                    "iss".to_string(),
+                    json!("https://test.jans.org/.well-known/openid-configuration"),
                 ),
             ])
             .into(),

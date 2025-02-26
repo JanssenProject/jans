@@ -78,6 +78,11 @@ impl<'a> ServiceFactory<'a> {
                 policy_store: self.policy_store(),
                 jwt_service: self.jwt_service().await?,
                 authorization: self.bootstrap_config.authorization_config.clone(),
+                trusted_issuers: self
+                    .policy_store()
+                    .trusted_issuers
+                    .clone()
+                    .unwrap_or_default(),
             };
             let service = Arc::new(Authz::new(config));
             self.container.authz_service = Some(service.clone());
