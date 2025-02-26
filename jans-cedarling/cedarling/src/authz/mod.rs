@@ -234,9 +234,11 @@ impl Authz {
         );
 
         // measure time how long request executes
-        let elapsed_ms = Utc::now()
-            .signed_duration_since(start_time)
-            .num_milliseconds();
+        let since_start = Utc::now().signed_duration_since(start_time);
+        let decision_time_micro_sec = since_start.num_microseconds().unwrap_or({
+            //overflow (exceeding 2^63 microseconds in either direction)
+            i64::MAX
+        });
 
         // FROM THIS POINT WE ONLY MAKE LOGS
 
@@ -278,7 +280,7 @@ impl Authz {
             resource: resource_uid.to_string(),
             decision: result.decision.into(),
             tokens: tokens_logging_info,
-            decision_time_ms: elapsed_ms,
+            decision_time_micro_sec,
             diagnostics: DiagnosticsRefs::new(&[
                 &user_authz_diagnostic,
                 &workload_authz_diagnostic,
@@ -351,27 +353,16 @@ struct ExecuteAuthorizeParameters<'a> {
 }
 
 /// Structure to hold entites created from tokens
-#[derive(Clone)]
 pub struct AuthorizeEntitiesData {
     pub workload: Option<Entity>,
     pub user: Option<Entity>,
     pub resource: Entity,
     pub roles: Vec<Entity>,
     pub tokens: HashMap<String, Entity>,
+    pub build_entities: BuiltEntities,
 }
 
 impl AuthorizeEntitiesData {
-    // NOTE: the type ids created from these does not include the namespace
-    fn type_ids(&self) -> HashMap<String, String> {
-        self.iter()
-            .map(|entity| {
-                let type_name = entity.uid().type_name().basename().to_string();
-                let type_id = entity.uid().id().escaped().to_string();
-                (type_name, type_id)
-            })
-            .collect::<HashMap<String, String>>()
-    }
-
     /// Create iterator to get all entities
     fn into_iter(self) -> impl Iterator<Item = Entity> {
         vec![self.resource]
@@ -379,19 +370,6 @@ impl AuthorizeEntitiesData {
             .chain(self.roles)
             .chain(self.tokens.into_values())
             .chain(vec![self.user, self.workload].into_iter().flatten())
-    }
-
-    /// Create iterator to get all entities
-    fn iter(&self) -> impl Iterator<Item = &Entity> {
-        vec![&self.resource]
-            .into_iter()
-            .chain(self.roles.iter())
-            .chain(self.tokens.values())
-            .chain(
-                vec![self.user.as_ref(), self.workload.as_ref()]
-                    .into_iter()
-                    .flatten(),
-            )
     }
 
     /// Collect all entities to [`cedar_policy::Entities`]
