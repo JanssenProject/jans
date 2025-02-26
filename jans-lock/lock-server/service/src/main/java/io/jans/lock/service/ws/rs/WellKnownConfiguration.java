@@ -13,11 +13,12 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import io.jans.lock.model.audit.TelemetryEntry;
 import io.jans.lock.model.core.LockApiError;
 import io.jans.lock.service.config.ConfigurationService;
 import io.jans.lock.util.ServerUtil;
+import io.swagger.annotations.ApiModelProperty;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -74,16 +75,14 @@ public class WellKnownConfiguration extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */   
 	@Operation(summary = "Request .well-known data", description = "Request .well-know Lock server configuration", tags = {
-			"Lock - Server Configuration" })
-	@RequestBody(description = "Telemetry entry", content = @Content)
+			"Lock - Server Configuration" })	
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = String.class, description = "ConfigurationFound"))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
-
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON })
 	@Override
-	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public void doGet(@Parameter(hidden = true) HttpServletRequest request, @Parameter(hidden = true) HttpServletResponse response) throws IOException {
 		processRequest(request, response);
 	}
 

@@ -54,9 +54,8 @@ import jakarta.ws.rs.core.Application;
 
         version = "OAS Version"),
 
-        tags = { @Tag(name = "Lock - Stat"), @Tag(name = "Lock - Audit Health"),
-                @Tag(name = "Lock - Audit Log"), @Tag(name = "Lock - Audit Telemetry"),
-                @Tag(name = "Lock - SSE"),
+        tags = { @Tag(name = "Lock - Server Configuration"), @Tag(name = "Lock - Stat"), @Tag(name = "Lock - Audit Health"),
+                @Tag(name = "Lock - Audit Log"), @Tag(name = "Lock - Audit Telemetry"), @Tag(name = "Lock - SSE"),
         },
 
         servers = { @Server(url = "https://jans.local.io", description = "The Jans server") })

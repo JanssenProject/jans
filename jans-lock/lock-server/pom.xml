@@ -41,6 +41,7 @@
 		<swagger.version>2.2.7</swagger.version>
 		<swagger-maven-plugin-jakarta>2.2.19</swagger-maven-plugin-jakarta>
 		<swagger-models-jakarta>2.2.7</swagger-models-jakarta>
+		<swagger-annotations>1.6.15</swagger-annotations>
 	</properties>
 
 	<prerequisites>
@@ -102,6 +103,12 @@
 				<groupId>io.jans</groupId>
 				<artifactId>jans-lock-service</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.swagger</groupId>
+				<artifactId>swagger-annotations</artifactId>
+				<version>${swagger-annotations}</version>
+				<scope>compile</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
