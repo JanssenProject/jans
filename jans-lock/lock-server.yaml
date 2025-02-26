@@ -19,7 +19,7 @@ tags:
 - name: Lock - Audit Telemetry
 - name: Lock - SSE
 paths:
-  /configuration:
+  /api/v1/configuration:
     get:
       tags:
       - Lock - Server Configuration
@@ -59,7 +59,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LockApiError'
-  /audit/health/bulk:
+  /api/v1/audit/health/bulk:
     post:
       tags:
       - Lock - Audit Health
@@ -100,7 +100,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/health.write
-  /audit/log/bulk:
+  /api/v1/audit/log/bulk:
     post:
       tags:
       - Lock - Audit Log
@@ -141,7 +141,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/log.write
-  /audit/telemetry/bulk:
+  /api/v1/audit/telemetry/bulk:
     post:
       tags:
       - Lock - Audit Telemetry
@@ -182,7 +182,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/telemetry.write
-  /audit/health:
+  /api/v1/audit/health:
     post:
       tags:
       - Lock - Audit Health
@@ -221,7 +221,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/health.write
-  /audit/log:
+  /api/v1/audit/log:
     post:
       tags:
       - Lock - Audit Log
@@ -260,7 +260,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/log.write
-  /audit/telemetry:
+  /api/v1/audit/telemetry:
     post:
       tags:
       - Lock - Audit Telemetry
@@ -299,7 +299,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/telemetry.write
-  /sse:
+  /api/v1/sse:
     get:
       tags:
       - Lock - SSE
@@ -332,7 +332,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/sse.readonly
-  /internal/stat:
+  /api/v1/internal/stat:
     get:
       tags:
       - Lock - Stat
