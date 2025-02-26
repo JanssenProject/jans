@@ -60,8 +60,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             use_workload_principal: true,
             principal_bool_operator: JsonRule::new(serde_json::json!({
                 "and" : [
-                    {"==": [{"var": "Jans::Workload"}, "ALLOW"]},
-                    {"==": [{"var": "Jans::User"}, "ALLOW"]}
+                    {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+                    {"===": [{"var": "Jans::User"}, "ALLOW"]}
                 ]
             }))
             .unwrap(),

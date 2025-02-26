@@ -57,8 +57,8 @@ impl Default for JsonRule {
     fn default() -> Self {
         let value = serde_json::json!({
             "and" : [
-                {"==": [{"var": "Jans::Workload"}, "ALLOW"]},
-                {"==": [{"var": "Jans::User"}, "ALLOW"]}
+                {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+                {"===": [{"var": "Jans::User"}, "ALLOW"]}
             ]
         });
 

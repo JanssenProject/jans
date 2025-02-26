@@ -366,9 +366,9 @@ mod tests {
                 "Workload authorization should be disabled by default"
             );
             assert_eq!(
-                config.usr_workload_bool_op,
-                WorkloadBoolOp::And,
-                "Default user-workload boolean operator should be AND"
+                config.principal_bool_op,
+                JsonRule::default(),
+                "Default user-workload boolean operator should default"
             );
         });
     }

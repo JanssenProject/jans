@@ -5,7 +5,7 @@
 
 use crate::authorization_config::IdTokenTrustMode;
 use crate::raw_config::token_settings::TokenConfigs;
-use crate::{AuthorizationConfig, JwtConfig, WorkloadBoolOp};
+use crate::{AuthorizationConfig, JsonRule, JwtConfig};
 pub use crate::{
     BootstrapConfig, BootstrapConfigRaw, Cedarling, FeatureToggle, LogConfig, LogTypeConfig,
     PolicyStoreConfig, PolicyStoreSource,
@@ -22,7 +22,7 @@ pub fn get_raw_config(local_policy_store: &str) -> BootstrapConfigRaw {
         application_name: "test_app".to_string(),
         user_authz: FeatureToggle::Enabled,
         workload_authz: FeatureToggle::Enabled,
-        usr_workload_bool_op: WorkloadBoolOp::And,
+        principal_bool_op: JsonRule::default(),
         log_type: crate::LoggerType::StdOut,
         local_policy_store: Some(local_policy_store_json.to_string()),
         jwt_status_validation: FeatureToggle::Disabled,
@@ -47,7 +47,7 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::And,
+            principal_bool_operator: JsonRule::default(),
             mapping_user: Some("Jans::User".to_string()),
             mapping_workload: Some("Jans::Workload".to_string()),
             mapping_role: Some("Jans::Role".to_string()),
