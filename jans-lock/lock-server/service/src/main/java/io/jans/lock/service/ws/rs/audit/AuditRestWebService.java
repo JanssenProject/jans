@@ -21,6 +21,7 @@ import io.jans.lock.model.audit.LogEntry;
 import io.jans.lock.model.audit.TelemetryEntry;
 import io.jans.lock.model.core.LockApiError;
 import io.jans.lock.util.ApiAccessConstants;
+import io.jans.lock.util.Constants;
 import io.jans.service.security.api.ProtectedApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -45,7 +46,7 @@ import jakarta.ws.rs.core.SecurityContext;
  *
  * @author Yuriy Movchan Date: 05/24/2024
  */
-@Path("/audit")
+@Path(Constants.BASE_PATH + "/audit")
 public interface AuditRestWebService {
 
 	@Operation(summary = "Save health data", description = "Save health data", tags = {

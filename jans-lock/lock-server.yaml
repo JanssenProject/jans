@@ -19,7 +19,7 @@ tags:
 - name: Lock - Audit Telemetry
 - name: Lock - SSE
 paths:
-  /configuration:
+  /api/v1/configuration:
     get:
       tags:
       - Lock - Server Configuration
@@ -59,13 +59,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LockApiError'
-  /audit/health/bulk:
+  /api/v1/audit/health/bulk:
     post:
       tags:
       - Lock - Audit Health
       summary: Bulk save health data
       description: Bulk save health data
-      operationId: processBulkHealthRequest_1
+      operationId: processBulkHealthRequest
       requestBody:
         description: Bulk health entry
         content:
@@ -100,13 +100,13 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/health.write
-  /audit/log/bulk:
+  /api/v1/audit/log/bulk:
     post:
       tags:
       - Lock - Audit Log
       summary: Bulk save log data
       description: Bulk save log data
-      operationId: processBulkLogRequest_1
+      operationId: processBulkLogRequest
       requestBody:
         description: Bulk log entry
         content:
@@ -141,13 +141,13 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/log.write
-  /audit/telemetry/bulk:
+  /api/v1/audit/telemetry/bulk:
     post:
       tags:
       - Lock - Audit Telemetry
       summary: Bulk save telemetry data
       description: Bulk save telemetry data
-      operationId: processBulkTelemetryRequest_1
+      operationId: processBulkTelemetryRequest
       requestBody:
         description: Bulk telemetry entry
         content:
@@ -182,13 +182,13 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/telemetry.write
-  /audit/health:
+  /api/v1/audit/health:
     post:
       tags:
       - Lock - Audit Health
       summary: Save health data
       description: Save health data
-      operationId: processHealthRequest_1
+      operationId: processHealthRequest
       requestBody:
         description: Health entry
         content:
@@ -221,13 +221,13 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/health.write
-  /audit/log:
+  /api/v1/audit/log:
     post:
       tags:
       - Lock - Audit Log
       summary: Save log data
       description: Save log data
-      operationId: processLogRequest_1
+      operationId: processLogRequest
       requestBody:
         description: Log entry
         content:
@@ -260,13 +260,13 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/log.write
-  /audit/telemetry:
+  /api/v1/audit/telemetry:
     post:
       tags:
       - Lock - Audit Telemetry
       summary: Save telemetry data
       description: Save telemetry data
-      operationId: processTelemetryRequest_1
+      operationId: processTelemetryRequest
       requestBody:
         description: Telemetry entry
         content:
@@ -299,7 +299,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/telemetry.write
-  /config:
+  /api/v1/config:
     get:
       operationId: processConfigRequest
       responses:
@@ -307,7 +307,7 @@ paths:
           description: default response
           content:
             application/json: {}
-  /config/issuers:
+  /api/v1/config/issuers:
     get:
       operationId: processIssuersRequest
       responses:
@@ -315,7 +315,7 @@ paths:
           description: default response
           content:
             application/json: {}
-  /config/policy:
+  /api/v1/config/policy:
     get:
       operationId: processPolicyRequest
       responses:
@@ -323,7 +323,7 @@ paths:
           description: default response
           content:
             application/json: {}
-  /config/schema:
+  /api/v1/config/schema:
     get:
       operationId: processSchemaRequest
       responses:
@@ -331,7 +331,7 @@ paths:
           description: default response
           content:
             application/json: {}
-  /sse:
+  /api/v1/sse:
     get:
       tags:
       - Lock - SSE

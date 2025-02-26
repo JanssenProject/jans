@@ -30,7 +30,6 @@ import jakarta.ws.rs.sse.SseEventSink;
  * @author Yuriy Movchan Date: 05/24/2024
  */
 @Dependent
-@Path("/")
 public class SseRestWebServiceImpl extends BaseResource implements SseRestWebService {
 
 	@Inject

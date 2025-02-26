@@ -18,6 +18,7 @@ package io.jans.lock.service.ws.rs.sse;
 
 import io.jans.lock.model.core.LockApiError;
 import io.jans.lock.util.ApiAccessConstants;
+import io.jans.lock.util.Constants;
 import io.jans.service.security.api.ProtectedApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -36,6 +37,7 @@ import jakarta.ws.rs.sse.SseEventSink;
 /**
  * @author Yuriy Movchan Date: 05/24/2024
  */
+@Path(Constants.BASE_PATH)
 public interface SseRestWebService {
 
 	@Operation(summary = "Subscribe to SSE events", description = "Subscribe to SSE events", tags = {

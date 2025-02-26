@@ -48,7 +48,6 @@ import jakarta.ws.rs.core.SecurityContext;
  * @author Yuriy Movchan Date: 06/06/2024
  */
 @Dependent
-@Path("/audit")
 public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWebService {
 
 	private static final String LOG_PRINCIPAL_ID = "principalId";

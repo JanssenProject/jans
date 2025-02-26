@@ -17,6 +17,7 @@
 package io.jans.lock.service.ws.rs.config;
 
 import io.jans.lock.util.ApiAccessConstants;
+import io.jans.lock.util.Constants;
 import io.jans.service.security.api.ProtectedApi;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,6 +34,7 @@ import jakarta.ws.rs.core.SecurityContext;
  *
  * @author Yuriy Movchan Date: 06/06/2024
  */
+@Path(Constants.BASE_PATH)
 public interface ConfigRestWebService {
 
 	@GET
