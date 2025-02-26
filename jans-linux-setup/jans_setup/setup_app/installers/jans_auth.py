@@ -60,6 +60,7 @@ class JansAuthInstaller(JettyInstaller):
         self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
         self.set_class_path([os.path.join(self.custom_lib_dir, '*')])
         self.external_libs()
+        self.session_cleaner_crontab()
         self.setup_agama()
         if Config.persistence_type == 'ldap':
             self.populate_jans_db_auth()
@@ -242,3 +243,12 @@ class JansAuthInstaller(JettyInstaller):
 
         self.logIt(f"Populating jansDbAuth with {ldap_config}")
         self.dbUtils.set_configuration('jansDbAuth', json.dumps(ldap_config, indent=2), dn='ou=configuration,o=jans')
+
+
+    def session_cleaner_crontab(self):
+
+        crontab_script_fn = os.path.join(
+                        Config.jansOptBinFolder, 
+                        os.path.basename(Config.session_cleaner_crontab_fn)
+                        )
+        self.run([crontab_script_fn])
