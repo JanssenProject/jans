@@ -1,8 +1,9 @@
 package io.jans.fido2.model.attestation;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AttestationResult {
@@ -10,7 +11,7 @@ public class AttestationResult {
 	private String type;
 	private String rawId;
 	private Response response;
-	private HashMap<String, String> clientExtensionResults;
+	private Map<String, Object> clientExtensionResults;
 	private String authentictatorAttachment;
 
 	public String getId() {
@@ -37,11 +38,11 @@ public class AttestationResult {
 		this.response = response;
 	}
 
-	public HashMap<String, String> getClientExtensionResults() {
+	public Map<String, Object> getClientExtensionResults() {
 		return clientExtensionResults;
 	}
 
-	public void setClientExtensionResults(HashMap<String, String> clientExtensionResults) {
+	public void setClientExtensionResults(Map<String, Object> clientExtensionResults) {
 		this.clientExtensionResults = clientExtensionResults;
 	}
 
@@ -61,8 +62,6 @@ public class AttestationResult {
 		this.rawId = rawId;
 	}
 
-	
-
 	@Override
 	public String toString() {
 		return "AttestationResult [id=" + id + ", type=" + type + ", rawId=" + rawId + ", response=" + response
@@ -70,5 +69,32 @@ public class AttestationResult {
 				+ authentictatorAttachment + "]";
 	}
 
+}
+
+class ClientExtensionResults {
+	@JsonProperty("credProps")
+	private CredProps credProps;
+
+	public CredProps getCredProps() {
+		return credProps;
+	}
+
+	public void setCredProps(CredProps credProps) {
+		this.credProps = credProps;
+	}
+
+}
+
+class CredProps {
+	@JsonProperty("rk")
+	private boolean rk;
+
+	public boolean isRk() {
+		return rk;
+	}
+
+	public void setRk(boolean rk) {
+		this.rk = rk;
+	}
 
 }
