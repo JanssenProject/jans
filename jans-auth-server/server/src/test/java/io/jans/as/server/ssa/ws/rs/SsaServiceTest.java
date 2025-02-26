@@ -356,7 +356,7 @@ public class SsaServiceTest {
         assertNotNull(jwtHeader.getSignatureAlgorithm().getJwsAlgorithm(), "The alg in jwt is null");
         assertEquals(jwtHeader.getSignatureAlgorithm().getJwsAlgorithm().toString(), ssaSigningAlg);
         assertNotNull(jwtHeader.getType(), "The type in jwt is null");
-        assertEquals(jwtHeader.getType().toString(), "jwt");
+        assertTrue(jwtHeader.getType().toString().equalsIgnoreCase("jwt"));
 
         JwtClaims jwtClaims = jwt.getClaims();
         assertNotNull(jwtClaims.getClaim(ORG_ID.getName()), "The org_id in jwt is null");

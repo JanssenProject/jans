@@ -31,6 +31,8 @@ These Bootstrap Properties control default application level behavior.
 * **`CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS`** : List of claims to map from user entity, such as ["client_id", "rp_id", ...]
 * **`CEDARLING_DECISION_LOG_DEFAULT_JWT_ID`** : Token claims that will be used for decision logging. Default is "jti", but perhaps some other claim is needed.
 * **`CEDARLING_LOG_TTL`** : in case of `memory` store, TTL (time to live) of log entities in seconds.
+* **`CEDARLING_LOG_MAX_ITEMS`** : Maximum number of log entities that can be stored using Memory logger. If used `0` value means no limit. And If missed or None, default value is applied.
+* **`CEDARLING_LOG_MAX_ITEM_SIZE`** : Maximum size of a single log entity in bytes using Memory logger. If used `0` value means no limit. And If missed or None, default value is applied.
 
 **The following bootstrap properties are needed to configure JWT and cryptographic behavior:**
 
@@ -89,7 +91,7 @@ The token configs property sets the entity type name of a token and it's validat
 ```js
 CEDARLING_TOKEN_CONFIGS = {
   "access_token": {
-    "entity_type_name": "Access_token",
+    "entity_type_name": "Jans::Access_token",
     "iss": "enabled",
     "aud": "enabled",
     "sub": "enabled",
@@ -99,19 +101,19 @@ CEDARLING_TOKEN_CONFIGS = {
     "exp": "enabled",
   },
   "id_token": {
-    "entity_type_name": "id_token",
+    "entity_type_name": "Jans::id_token",
     "exp": "enabled",
   },
   "userinfo_token": {
-    "entity_type_name": "Userinfo_token",
+    "entity_type_name": "Jans::Userinfo_token",
     "exp": "enabled",
   },
   "custom_token1": {
-    "entity_type_name": "SomeCustom_token",
+    "entity_type_name": "Jans::SomeCustom_token",
     "exp": "enabled",
   },
   "custom_token2": {
-    "entity_type_name": "AnotherCustom_token",
+    "entity_type_name": "Jans::AnotherCustom_token",
     "exp": "enabled",
   },
   // more custom tokens can be added here
@@ -127,7 +129,7 @@ impl Default for TokenConfigs {
     fn default() -> Self {
         Self(HashMap::from([
             ("access_token".to_string(), TokenConfig {
-                entity_type_name: "Access_token".to_string(),
+                entity_type_name: "Jans::Access_token".to_string(),
                 claims: ClaimsValidationConfig {
                     iss: FeatureToggle::Enabled,
                     sub: FeatureToggle::Disabled,
@@ -139,7 +141,7 @@ impl Default for TokenConfigs {
                 },
             }),
             ("id_token".to_string(), TokenConfig {
-                entity_type_name: "id_token".to_string(),
+                entity_type_name: "Jans::id_token".to_string(),
                 claims: ClaimsValidationConfig {
                     iss: FeatureToggle::Enabled,
                     sub: FeatureToggle::Enabled,
@@ -151,7 +153,7 @@ impl Default for TokenConfigs {
                 },
             }),
             ("userinfo_token".to_string(), TokenConfig {
-                entity_type_name: "Userinfo_token".to_string(),
+                entity_type_name: "Jans::Userinfo_token".to_string(),
                 claims: ClaimsValidationConfig {
                     iss: FeatureToggle::Enabled,
                     sub: FeatureToggle::Enabled,
@@ -233,13 +235,13 @@ Below is an example of a bootstrap config in JSON format. Not all fields should 
   "CEDARLING_POLICY_STORE_LOCAL_FN": "./example_files/policy-store.json",
   "CEDARLING_TOKEN_CONFIGS": {
     "access_token": {
-      "entity_type_name": "Access_token"
+      "entity_type_name": "Jans::Access_token"
     },
     "id_token": {
-      "entity_type_name": "id_token"
+      "entity_type_name": "Jans::id_token"
     },
     "userinfo_token": {
-      "entity_type_name": "Userinfo_token"
+      "entity_type_name": "Jans::Userinfo_token"
     }
   },
   "CEDARLING_POLICY_STORE_ID": "gICAgcHJpbmNpcGFsIGlz",
@@ -303,9 +305,9 @@ CEDARLING_POLICY_STORE_URI: null
 CEDARLING_POLICY_STORE_LOCAL: null
 CEDARLING_POLICY_STORE_LOCAL_FN: ./example_files/policy-store.json
 CEDARLING_TOKEN_CONFIGS:
-    access_token: { entity_type_name: "Access_token" }
-    id_token: { entity_type_name: "id_token" }
-    userinfo_token: { entity_type_name: "Userinfo_token" }
+    access_token: { entity_type_name: "Jans::Access_token" }
+    id_token: { entity_type_name: "Jans::id_token" }
+    userinfo_token: { entity_type_name: "Jans::Userinfo_token" }
 
 CEDARLING_POLICY_STORE_ID: gICAgcHJpbmNpcGFsIGlz
 CEDARLING_LOG_TYPE: std_out
