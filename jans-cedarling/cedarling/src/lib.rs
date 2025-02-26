@@ -31,6 +31,7 @@ mod tests;
 
 use std::sync::Arc;
 
+pub use crate::common::json_rules::JsonRule;
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
 use authz::Authz;
