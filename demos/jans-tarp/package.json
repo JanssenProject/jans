@@ -34,7 +34,7 @@
     "@janssenproject/cedarling_wasm": "^0.0.0",
     "@mui/icons-material": "^5.15.10",
     "@mui/material": "^5.15.10",
-    "@mui/x-date-pickers": "^6.19.5",
+    "@mui/x-date-pickers": "^7.27.1",
     "@types/uuid": "^9.0.1",
     "adm-zip": "^0.5.10",
     "autoprefixer": "^10.4.7",
