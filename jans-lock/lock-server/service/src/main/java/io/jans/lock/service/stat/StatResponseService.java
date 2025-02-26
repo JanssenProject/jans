@@ -16,8 +16,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 
 import io.jans.lock.model.StatEntry;
-import io.jans.lock.service.ws.rs.stat.StatResponse;
-import io.jans.lock.service.ws.rs.stat.StatResponseItem;
+import io.jans.lock.model.stat.StatResponse;
+import io.jans.lock.model.stat.StatResponseItem;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import jakarta.enterprise.context.ApplicationScoped;

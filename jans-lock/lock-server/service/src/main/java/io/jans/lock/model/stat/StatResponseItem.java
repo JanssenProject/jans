@@ -1,4 +1,4 @@
-package io.jans.lock.service.ws.rs.stat;
+package io.jans.lock.model.stat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

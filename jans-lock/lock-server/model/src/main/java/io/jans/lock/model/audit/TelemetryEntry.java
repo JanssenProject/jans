@@ -1,4 +1,4 @@
-package io.jans.configapi.plugin.lock.model.stat;
+package io.jans.lock.model.audit;
 
 import java.io.Serializable;
 import java.util.Date;
