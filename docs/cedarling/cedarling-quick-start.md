@@ -182,10 +182,10 @@ it is your Docker container ID.
 ```bash
 wget https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.whl
 ```
-* Install the nightly wheel: poetry run 
+* Install the nightly wheel: 
 
 ```
-poetry run cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.whl
+poetry run pip install cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.whl
 ```
 * Modify `secrets/bootstrap.json` to your specifications.
 
