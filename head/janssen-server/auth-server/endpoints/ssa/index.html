@@ -9759,7 +9759,7 @@ Connection: Keep-Alive
 &lt;Response body is empty&gt;
 </code></pre></div>
 <h2 id="revoke-ssa">Revoke SSA<a class="headerlink" href="#revoke-ssa" title="Permanent link">#</a></h2>
-<p>Revoke existing active SSA based on <code>jti</code> or <code>org_id</code>.</p>
+<p>Revoke existing active SSA based on <code>jti</code> or <code>org_id</code>. On SSA revoke expiration date is set to <code>now</code> which makes it eligible for clean up.</p>
 <h3 id="query-parameters_2">Query Parameters<a class="headerlink" href="#query-parameters_2" title="Permanent link">#</a></h3>
 <ul>
 <li><code>jti</code> — for revoke only one SSA, the specified by jti</li>
@@ -9829,7 +9829,7 @@ Connection: Keep-Alive
 <li><code>context</code> — Contains, SSA global configuration class, client, execution context, etc.</li>
 </ul>
 <h3 id="revoke-method">Revoke method<a class="headerlink" href="#revoke-method" title="Permanent link">#</a></h3>
-<p>This method is executed after the SSA list has been revoked.</p>
+<p>This method is executed after the SSA list has been revoked. On SSA revoke expiration date is set to <code>now</code> which makes it eligible for clean up.</p>
 <div class="highlight"><pre><span></span><code>def revoke(self, ssaList, context):
     print &quot;Modify ssa response script. Modify revoke ssaList: %s&quot; % ssaList
     return True
@@ -9870,7 +9870,7 @@ Connection: Keep-Alive
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-21T13:08:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-21</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-25T16:29:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-25</span>
       
         <br>
         Created:
@@ -9936,7 +9936,7 @@ Connection: Keep-Alive
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright &copy; 2024, The Janssen Project
+      Copyright &copy; 2025, The Janssen Project
     </div>
   
   
