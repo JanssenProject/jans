@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 /// JsonLogic rule using [JsonLogic](https://jsonlogic.com/)
-/// Have default implementation:
+/// Default implementation:
 /// ```json
 /// {
 ///     "and" : [
@@ -17,7 +17,7 @@ use serde_json::Value;
 ///     ]
 /// }
 /// ```
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct JsonRule {
     rule: Rule,
     value: Value,
@@ -25,11 +25,11 @@ pub struct JsonRule {
 
 #[derive(Debug, derive_more::Display, derive_more::Error)]
 #[display("Parse json rule error: {source}")]
-pub struct Error {
+pub struct ParseRuleError {
     source: datalogic_rs::Error,
 }
 
-impl From<datalogic_rs::Error> for Error {
+impl From<datalogic_rs::Error> for ParseRuleError {
     fn from(source: datalogic_rs::Error) -> Self {
         Self { source }
     }
@@ -37,7 +37,7 @@ impl From<datalogic_rs::Error> for Error {
 
 impl JsonRule {
     /// Create a new `JsonRule` from a JSON value.
-    pub fn new(rule_value: Value) -> Result<Self, Error> {
+    pub fn new(rule_value: Value) -> Result<Self, ParseRuleError> {
         let rule = Rule::from_value(&rule_value)?;
 
         Ok(JsonRule {

@@ -8,10 +8,11 @@
 use cedar_policy::Decision;
 use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
-use std::collections::HashSet;
+use smol_str::SmolStr;
+use std::collections::{HashMap, HashSet};
 use uuid7::Uuid;
 
-use crate::bootstrap_config::WorkloadBoolOp;
+use crate::common::json_rules::{ApplyRuleError, JsonRule, RuleApplier};
 
 /// Result of authorization and evaluation cedar policy
 /// based on the [Request](crate::models::request::Request) and policy store
@@ -73,17 +74,39 @@ where
 impl AuthorizeResult {
     /// Builder function for AuthorizeResult
     pub(crate) fn new(
-        user_workload_operator: WorkloadBoolOp,
+        principal_bool_operator: &JsonRule,
+
+        workload_typename: Option<SmolStr>,
+        person_typename: Option<SmolStr>,
+
         workload: Option<cedar_policy::Response>,
         person: Option<cedar_policy::Response>,
         request_id: Uuid,
-    ) -> Self {
-        Self {
-            decision: calc_decision(&user_workload_operator, &workload, &person),
+    ) -> Result<Self, ApplyRuleError> {
+        let mut principal_info: HashMap<SmolStr, Decision> = HashMap::new();
+
+        workload_typename
+            .into_iter()
+            .zip(workload.iter())
+            .for_each(|(typename, response)| {
+                principal_info.insert(typename, response.decision());
+            });
+
+        person_typename
+            .into_iter()
+            .zip(person.iter())
+            .for_each(|(typename, response)| {
+                principal_info.insert(typename, response.decision());
+            });
+
+        let decision = RuleApplier::new(principal_bool_operator, principal_info).apply()?;
+
+        Ok(Self {
+            decision,
             workload,
             person,
             request_id: request_id.to_string(),
-        }
+        })
     }
 
     /// Decision of result
@@ -94,33 +117,5 @@ impl AuthorizeResult {
         } else {
             Decision::Deny
         }
-    }
-}
-
-/// Evaluates the authorization result to determine if the request is allowed.  
-///  
-/// If present only workload result return true if decision is `ALLOW`.
-/// If present only person result  return true if decision is `ALLOW`.
-/// If person and workload is present will be used operator (AND or OR) based on `CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION` bootstrap property.
-/// If none present return false.
-fn calc_decision(
-    user_workload_operator: &WorkloadBoolOp,
-    workload: &Option<cedar_policy::Response>,
-    person: &Option<cedar_policy::Response>,
-) -> bool {
-    let workload_allowed = workload
-        .as_ref()
-        .map(|response| response.decision() == Decision::Allow);
-
-    let person_allowed = person
-        .as_ref()
-        .map(|response| response.decision() == Decision::Allow);
-
-    // cover each possible case when any of value is Some or None
-    match (workload_allowed, person_allowed) {
-        (None, None) => false,
-        (None, Some(person)) => person,
-        (Some(workload), None) => workload,
-        (Some(workload), Some(person)) => user_workload_operator.calc(workload, person),
     }
 }

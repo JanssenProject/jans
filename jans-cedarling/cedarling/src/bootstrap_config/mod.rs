@@ -21,7 +21,7 @@ pub use authorization_config::{AuthorizationConfig, IdTokenTrustMode};
 pub use jwt_config::*;
 pub use log_config::*;
 pub use policy_store_config::*;
-pub use raw_config::{BootstrapConfigRaw, FeatureToggle, LoggerType, WorkloadBoolOp};
+pub use raw_config::{BootstrapConfigRaw, FeatureToggle, LoggerType};
 
 /// Bootstrap configuration
 /// properties for configuration [`Cedarling`](crate::Cedarling) application.
