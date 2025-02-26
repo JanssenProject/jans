@@ -26,6 +26,7 @@ import io.jans.lock.service.ws.rs.config.ConfigRestWebServiceImpl;
 import io.jans.lock.service.ws.rs.sse.SseRestWebServiceImpl;
 import io.jans.lock.service.ws.rs.stat.StatRestWebServiceImpl;
 import io.jans.lock.util.ApiAccessConstants;
+import io.jans.lock.util.Constants;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Contact;
@@ -45,7 +46,7 @@ import jakarta.ws.rs.core.Application;
  * 
  * @author Yuriy Movchan Date: 06/06/2024
  */
-@ApplicationPath("/api/v1")
+@ApplicationPath(Constants.BASE_PATH)
 @OpenAPIDefinition(info = @Info(title = "Jans Lock API", contact =
 @Contact(name = "Contact", url = "https://github.com/JanssenProject/jans/discussions"),
 

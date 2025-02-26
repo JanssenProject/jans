@@ -34,7 +34,6 @@ import jakarta.ws.rs.core.SecurityContext;
  *
  * @author Yuriy Movchan Date: 06/06/2024
  */
-@Path(Constants.BASE_PATH)
 public interface ConfigRestWebService {
 
 	@GET

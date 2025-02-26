@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.lock.model.core.LockApiError;
 import io.jans.lock.service.config.ConfigurationService;
 import io.jans.lock.service.ws.rs.base.BaseResource;
-import io.jans.lock.util.Constants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -42,7 +41,7 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
  * @author Yuriy Movchan Date: 12/19/2018
  */
 @Dependent
-@Path(Constants.BASE_PATH + "/configuration")
+@Path("/configuration")
 public class ConfigurationRestWebService extends BaseResource {
 
 	@Inject

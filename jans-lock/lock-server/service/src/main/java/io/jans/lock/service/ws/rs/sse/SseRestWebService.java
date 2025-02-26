@@ -18,7 +18,6 @@ package io.jans.lock.service.ws.rs.sse;
 
 import io.jans.lock.model.core.LockApiError;
 import io.jans.lock.util.ApiAccessConstants;
-import io.jans.lock.util.Constants;
 import io.jans.service.security.api.ProtectedApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -37,12 +36,12 @@ import jakarta.ws.rs.sse.SseEventSink;
 /**
  * @author Yuriy Movchan Date: 05/24/2024
  */
-@Path(Constants.BASE_PATH)
+@Path("/sse")
 public interface SseRestWebService {
 
 	@Operation(summary = "Subscribe to SSE events", description = "Subscribe to SSE events", tags = {
 			"Lock - SSE" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					ApiAccessConstants.LOCK_STAT_READ_ACCESS }))
+					ApiAccessConstants.LOCK_SSE_READ_ACCESS }))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -50,7 +49,6 @@ public interface SseRestWebService {
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 
 	@GET
-	@Path("/sse")
 	@Produces(MediaType.SERVER_SENT_EVENTS)
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_SSE_READ_ACCESS })
 	public void subscribe(@Context Sse sse, @Context SseEventSink sseEventSink);

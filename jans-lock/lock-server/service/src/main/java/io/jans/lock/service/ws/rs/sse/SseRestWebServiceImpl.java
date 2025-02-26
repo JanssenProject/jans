@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import io.jans.lock.service.ws.rs.base.BaseResource;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.sse.Sse;
 import jakarta.ws.rs.sse.SseEventSink;

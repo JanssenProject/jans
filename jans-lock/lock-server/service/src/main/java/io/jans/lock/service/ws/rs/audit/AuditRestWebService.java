@@ -21,7 +21,6 @@ import io.jans.lock.model.audit.LogEntry;
 import io.jans.lock.model.audit.TelemetryEntry;
 import io.jans.lock.model.core.LockApiError;
 import io.jans.lock.util.ApiAccessConstants;
-import io.jans.lock.util.Constants;
 import io.jans.service.security.api.ProtectedApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -46,7 +45,7 @@ import jakarta.ws.rs.core.SecurityContext;
  *
  * @author Yuriy Movchan Date: 05/24/2024
  */
-@Path(Constants.BASE_PATH + "/audit")
+@Path("/audit")
 public interface AuditRestWebService {
 
 	@Operation(summary = "Save health data", description = "Save health data", tags = {
@@ -61,7 +60,7 @@ public interface AuditRestWebService {
 	@POST
 	@Path("/health")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { "https://jans.io/oauth/lock/health.write" })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_HEALTH_WRITE_ACCESS })
 	Response processHealthRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@Context SecurityContext sec);
 
@@ -77,7 +76,7 @@ public interface AuditRestWebService {
 	@POST
 	@Path("/health/bulk")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { "https://jans.io/oauth/lock/health.write" })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_HEALTH_WRITE_ACCESS })
 	Response processBulkHealthRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@Context SecurityContext sec);
 
@@ -93,7 +92,7 @@ public interface AuditRestWebService {
 	@POST
 	@Path("/log")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { "https://jans.io/oauth/lock/log.write" })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_LOG_WRITE_ACCESS })
 	Response processLogRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@Context SecurityContext sec);
 
@@ -109,7 +108,7 @@ public interface AuditRestWebService {
 	@POST
 	@Path("/log/bulk")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { "https://jans.io/oauth/lock/log.write" })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_LOG_WRITE_ACCESS })
 	Response processBulkLogRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@Context SecurityContext sec);
 
@@ -125,7 +124,7 @@ public interface AuditRestWebService {
 	@POST
 	@Path("/telemetry")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { "https://jans.io/oauth/lock/telemetry.write" })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TELEMETRY_WRITE_ACCESS })
 	Response processTelemetryRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@Context SecurityContext sec);
 
@@ -141,7 +140,7 @@ public interface AuditRestWebService {
 	@POST
 	@Path("/telemetry/bulk")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { "https://jans.io/oauth/lock/telemetry.write" })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TELEMETRY_WRITE_ACCESS })
 	Response processBulkTelemetryRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@Context SecurityContext sec);
 

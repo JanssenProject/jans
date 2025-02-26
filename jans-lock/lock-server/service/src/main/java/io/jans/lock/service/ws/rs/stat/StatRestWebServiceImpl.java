@@ -41,7 +41,6 @@ import jakarta.ws.rs.core.Response;
  * @author Yuriy Movchan Date: 12/02/2024
  */
 @Dependent
-@Path("/internal/stat")
 public class StatRestWebServiceImpl extends BaseResource implements StatRestWebService {
 
     @Inject
