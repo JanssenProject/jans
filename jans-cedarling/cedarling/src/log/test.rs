@@ -39,7 +39,11 @@ fn test_new_log_strategy_off() {
 fn test_new_log_strategy_memory() {
     // Arrange
     let config = LogConfig {
-        log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
+        log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig {
+            log_ttl: 60,
+            max_item_size: None,
+            max_items: None,
+        }),
         log_level: crate::LogLevel::DEBUG,
     };
 
@@ -74,7 +78,11 @@ fn test_log_memory_logger() {
     let app_name = None;
     // Arrange
     let config = LogConfig {
-        log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
+        log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig {
+            log_ttl: 60,
+            max_item_size: None,
+            max_items: None,
+        }),
         log_level: crate::LogLevel::TRACE,
     };
     let strategy = LogStrategy::new(&config, pdp_id.clone(), app_name.clone());

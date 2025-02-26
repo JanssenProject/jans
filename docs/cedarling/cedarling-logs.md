@@ -157,7 +157,7 @@ Example of decision log.
             "jti": "access_tkn_jti"
         }
     },
-    "decision_time_ms": 3
+    "decision_time_micro_sec": 3
 }
 ```
 
@@ -176,7 +176,7 @@ Example of decision log.
 * `resource`: From the Request
 * `decision`: `ALLOW` or `DENY`
 * `tokens`: Dictionary with the token type and claims which should be included in the log
-* `decision_time_ms`: how long the decision took
+* `decision_time_micro_sec`: how long the decision took
 
 ### Debug Log Sample
 
