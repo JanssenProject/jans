@@ -46,10 +46,9 @@ paths:
       description: Request .well-know Lock server configuration
       operationId: doGet
       requestBody:
+        description: Telemetry entry
         content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/HttpServletRequest'
+          '*/*': {}
       responses:
         "200":
           description: Ok
@@ -486,13 +485,13 @@ components:
     AsyncContext:
       type: object
       properties:
-        response:
-          $ref: '#/components/schemas/ServletResponse'
-        request:
-          $ref: '#/components/schemas/ServletRequest'
         timeout:
           type: integer
           format: int64
+        request:
+          $ref: '#/components/schemas/ServletRequest'
+        response:
+          $ref: '#/components/schemas/ServletResponse'
     Cookie:
       type: object
       properties:
@@ -542,8 +541,6 @@ components:
           type: string
         servletName:
           type: string
-        matchValue:
-          type: string
         mappingMatch:
           type: string
           enum:
@@ -552,25 +549,64 @@ components:
           - EXACT
           - EXTENSION
           - PATH
+        matchValue:
+          type: string
     HttpServletRequest:
       type: object
       properties:
         method:
           type: string
+        session:
+          $ref: '#/components/schemas/HttpSession'
+        userPrincipal:
+          type: object
+          properties:
+            name:
+              type: string
+        httpServletMapping:
+          $ref: '#/components/schemas/HttpServletMapping'
+        requestedSessionId:
+          type: string
+        requestedSessionIdValid:
+          type: boolean
+        requestedSessionIdFromCookie:
+          type: boolean
+        requestedSessionIdFromURL:
+          type: boolean
+        trailerFieldsReady:
+          type: boolean
+        requestedSessionIdFromUrl:
+          type: boolean
+        requestURI:
+          type: string
+        headerNames:
+          type: object
+        queryString:
+          type: string
+        authType:
+          type: string
+        pathInfo:
+          type: string
         contextPath:
+          type: string
+        remoteUser:
+          type: string
+        pathTranslated:
+          type: string
+        cookies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Cookie'
+        trailerFields:
+          type: object
+          additionalProperties:
+            type: string
+        servletPath:
           type: string
         parts:
           type: array
           items:
             $ref: '#/components/schemas/Part'
-        cookies:
-          type: array
-          items:
-            $ref: '#/components/schemas/Cookie'
-        queryString:
-          type: string
-        authType:
-          type: string
         requestURL:
           type: object
           properties:
@@ -580,43 +616,13 @@ components:
               writeOnly: true
             empty:
               type: boolean
-        pathInfo:
+        contentLengthLong:
+          type: integer
+          format: int64
+        contentType:
           type: string
-        remoteUser:
+        localName:
           type: string
-        pathTranslated:
-          type: string
-        servletPath:
-          type: string
-        trailerFields:
-          type: object
-          additionalProperties:
-            type: string
-        session:
-          $ref: '#/components/schemas/HttpSession'
-        userPrincipal:
-          type: object
-          properties:
-            name:
-              type: string
-        headerNames:
-          type: object
-        requestURI:
-          type: string
-        httpServletMapping:
-          $ref: '#/components/schemas/HttpServletMapping'
-        requestedSessionIdValid:
-          type: boolean
-        trailerFieldsReady:
-          type: boolean
-        requestedSessionIdFromCookie:
-          type: boolean
-        requestedSessionIdFromURL:
-          type: boolean
-        requestedSessionId:
-          type: string
-        requestedSessionIdFromUrl:
-          type: boolean
         scheme:
           type: string
         inputStream:
@@ -666,50 +672,6 @@ components:
         contentLength:
           type: integer
           format: int32
-        remoteHost:
-          type: string
-        localPort:
-          type: integer
-          format: int32
-        asyncSupported:
-          type: boolean
-        serverName:
-          type: string
-        remoteAddr:
-          type: string
-        dispatcherType:
-          type: string
-          enum:
-          - FORWARD
-          - INCLUDE
-          - REQUEST
-          - ASYNC
-          - ERROR
-        locales:
-          type: object
-        parameterNames:
-          type: object
-        remotePort:
-          type: integer
-          format: int32
-        serverPort:
-          type: integer
-          format: int32
-        localAddr:
-          type: string
-        asyncStarted:
-          type: boolean
-        secure:
-          type: boolean
-        asyncContext:
-          $ref: '#/components/schemas/AsyncContext'
-        contentLengthLong:
-          type: integer
-          format: int64
-        contentType:
-          type: string
-        localName:
-          type: string
         attributeNames:
           type: object
         parameterMap:
@@ -718,12 +680,49 @@ components:
             type: array
             items:
               type: string
-        servletContext:
-          $ref: '#/components/schemas/ServletContext'
-        reader:
-          type: object
         characterEncoding:
           type: string
+        reader:
+          type: object
+        servletContext:
+          $ref: '#/components/schemas/ServletContext'
+        serverName:
+          type: string
+        serverPort:
+          type: integer
+          format: int32
+        remoteAddr:
+          type: string
+        remoteHost:
+          type: string
+        locales:
+          type: object
+        remotePort:
+          type: integer
+          format: int32
+        secure:
+          type: boolean
+        localAddr:
+          type: string
+        parameterNames:
+          type: object
+        localPort:
+          type: integer
+          format: int32
+        dispatcherType:
+          type: string
+          enum:
+          - FORWARD
+          - INCLUDE
+          - REQUEST
+          - ASYNC
+          - ERROR
+        asyncStarted:
+          type: boolean
+        asyncContext:
+          $ref: '#/components/schemas/AsyncContext'
+        asyncSupported:
+          type: boolean
     HttpSession:
       type: object
       properties:
@@ -734,22 +733,22 @@ components:
           format: int64
         attributeNames:
           type: object
-        servletContext:
-          $ref: '#/components/schemas/ServletContext'
-        sessionContext:
-          $ref: '#/components/schemas/HttpSessionContext'
-        valueNames:
-          type: array
-          items:
-            type: string
-        new:
-          type: boolean
         maxInactiveInterval:
           type: integer
           format: int32
         lastAccessedTime:
           type: integer
           format: int64
+        servletContext:
+          $ref: '#/components/schemas/ServletContext'
+        new:
+          type: boolean
+        sessionContext:
+          $ref: '#/components/schemas/HttpSessionContext'
+        valueNames:
+          type: array
+          items:
+            type: string
     HttpSessionContext:
       type: object
       properties:
@@ -758,26 +757,28 @@ components:
     JspConfigDescriptor:
       type: object
       properties:
-        taglibs:
-          type: array
-          items:
-            $ref: '#/components/schemas/TaglibDescriptor'
         jspPropertyGroups:
           type: array
           items:
             $ref: '#/components/schemas/JspPropertyGroupDescriptor'
+        taglibs:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaglibDescriptor'
     JspPropertyGroupDescriptor:
       type: object
       properties:
         buffer:
           type: string
-        urlPatterns:
-          type: array
-          items:
-            type: string
-        elIgnored:
+        scriptingInvalid:
           type: string
-        pageEncoding:
+        trimDirectiveWhitespaces:
+          type: string
+        deferredSyntaxAllowedAsLiteral:
+          type: string
+        defaultContentType:
+          type: string
+        errorOnUndeclaredNamespace:
           type: string
         isXml:
           type: string
@@ -785,23 +786,23 @@ components:
           type: array
           items:
             type: string
+        urlPatterns:
+          type: array
+          items:
+            type: string
+        pageEncoding:
+          type: string
         includeCodas:
           type: array
           items:
             type: string
-        deferredSyntaxAllowedAsLiteral:
-          type: string
-        errorOnUndeclaredNamespace:
-          type: string
-        scriptingInvalid:
-          type: string
-        defaultContentType:
-          type: string
-        trimDirectiveWhitespaces:
+        elIgnored:
           type: string
     Part:
       type: object
       properties:
+        contentType:
+          type: string
         name:
           type: string
         size:
@@ -809,8 +810,6 @@ components:
           format: int64
         inputStream:
           type: object
-        contentType:
-          type: string
         headerNames:
           type: array
           items:
@@ -964,34 +963,27 @@ components:
         minorVersion:
           type: integer
           format: int32
-        contextPath:
-          type: string
         attributeNames:
+          type: object
+        servlets:
           type: object
         servletNames:
           type: object
         serverInfo:
           type: string
-        servlets:
+        filterRegistrations:
           type: object
-        sessionTimeout:
-          type: integer
-          format: int32
-        effectiveMajorVersion:
-          type: integer
-          format: int32
-        effectiveMinorVersion:
-          type: integer
-          format: int32
+          additionalProperties:
+            $ref: '#/components/schemas/FilterRegistration'
         servletContextName:
           type: string
         servletRegistrations:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/ServletRegistration'
-        requestCharacterEncoding:
-          type: string
-        effectiveSessionTrackingModes:
+        sessionCookieConfig:
+          $ref: '#/components/schemas/SessionCookieConfig'
+        defaultSessionTrackingModes:
           uniqueItems: true
           type: array
           items:
@@ -1010,11 +1002,16 @@ components:
             - COOKIE
             - URL
             - SSL
-        filterRegistrations:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/FilterRegistration'
-        defaultSessionTrackingModes:
+        virtualServerName:
+          type: string
+        requestCharacterEncoding:
+          type: string
+        responseCharacterEncoding:
+          type: string
+        effectiveMinorVersion:
+          type: integer
+          format: int32
+        effectiveSessionTrackingModes:
           uniqueItems: true
           type: array
           items:
@@ -1025,30 +1022,32 @@ components:
             - SSL
         jspConfigDescriptor:
           $ref: '#/components/schemas/JspConfigDescriptor'
-        sessionCookieConfig:
-          $ref: '#/components/schemas/SessionCookieConfig'
-        responseCharacterEncoding:
-          type: string
-        virtualServerName:
+        effectiveMajorVersion:
+          type: integer
+          format: int32
+        contextPath:
           type: string
         initParameterNames:
           type: object
+        sessionTimeout:
+          type: integer
+          format: int32
     ServletInputStream:
       type: object
       properties:
+        finished:
+          type: boolean
         ready:
           type: boolean
         readListener:
           $ref: '#/components/schemas/ReadListener'
-        finished:
-          type: boolean
     ServletOutputStream:
       type: object
       properties:
-        ready:
-          type: boolean
         writeListener:
           $ref: '#/components/schemas/WriteListener'
+        ready:
+          type: boolean
     ServletRegistration:
       type: object
       properties:
@@ -1069,6 +1068,13 @@ components:
     ServletRequest:
       type: object
       properties:
+        contentLengthLong:
+          type: integer
+          format: int64
+        contentType:
+          type: string
+        localName:
+          type: string
         scheme:
           type: string
         inputStream:
@@ -1118,50 +1124,6 @@ components:
         contentLength:
           type: integer
           format: int32
-        remoteHost:
-          type: string
-        localPort:
-          type: integer
-          format: int32
-        asyncSupported:
-          type: boolean
-        serverName:
-          type: string
-        remoteAddr:
-          type: string
-        dispatcherType:
-          type: string
-          enum:
-          - FORWARD
-          - INCLUDE
-          - REQUEST
-          - ASYNC
-          - ERROR
-        locales:
-          type: object
-        parameterNames:
-          type: object
-        remotePort:
-          type: integer
-          format: int32
-        serverPort:
-          type: integer
-          format: int32
-        localAddr:
-          type: string
-        asyncStarted:
-          type: boolean
-        secure:
-          type: boolean
-        asyncContext:
-          $ref: '#/components/schemas/AsyncContext'
-        contentLengthLong:
-          type: integer
-          format: int64
-        contentType:
-          type: string
-        localName:
-          type: string
         attributeNames:
           type: object
         parameterMap:
@@ -1170,15 +1132,60 @@ components:
             type: array
             items:
               type: string
-        servletContext:
-          $ref: '#/components/schemas/ServletContext'
-        reader:
-          type: object
         characterEncoding:
           type: string
+        reader:
+          type: object
+        servletContext:
+          $ref: '#/components/schemas/ServletContext'
+        serverName:
+          type: string
+        serverPort:
+          type: integer
+          format: int32
+        remoteAddr:
+          type: string
+        remoteHost:
+          type: string
+        locales:
+          type: object
+        remotePort:
+          type: integer
+          format: int32
+        secure:
+          type: boolean
+        localAddr:
+          type: string
+        parameterNames:
+          type: object
+        localPort:
+          type: integer
+          format: int32
+        dispatcherType:
+          type: string
+          enum:
+          - FORWARD
+          - INCLUDE
+          - REQUEST
+          - ASYNC
+          - ERROR
+        asyncStarted:
+          type: boolean
+        asyncContext:
+          $ref: '#/components/schemas/AsyncContext'
+        asyncSupported:
+          type: boolean
     ServletResponse:
       type: object
       properties:
+        contentType:
+          type: string
+        contentLength:
+          type: integer
+          format: int32
+          writeOnly: true
+        outputStream:
+          $ref: '#/components/schemas/ServletOutputStream'
         locale:
           type: object
           properties:
@@ -1219,27 +1226,19 @@ components:
               type: string
             iso3Country:
               type: string
-        contentType:
+        characterEncoding:
           type: string
-        contentLength:
-          type: integer
-          format: int32
-          writeOnly: true
-        outputStream:
-          $ref: '#/components/schemas/ServletOutputStream'
         writer:
           type: object
-        bufferSize:
-          type: integer
-          format: int32
-        committed:
-          type: boolean
         contentLengthLong:
           type: integer
           format: int64
           writeOnly: true
-        characterEncoding:
-          type: string
+        committed:
+          type: boolean
+        bufferSize:
+          type: integer
+          format: int32
     SessionCookieConfig:
       type: object
       properties:
@@ -1251,34 +1250,42 @@ components:
           type: string
         secure:
           type: boolean
+        httpOnly:
+          type: boolean
+        domain:
+          type: string
         maxAge:
           type: integer
           format: int32
-        domain:
-          type: string
-        httpOnly:
-          type: boolean
     TaglibDescriptor:
       type: object
       properties:
-        taglibURI:
-          type: string
         taglibLocation:
+          type: string
+        taglibURI:
           type: string
     WriteListener:
       type: object
     HttpServletResponse:
       type: object
       properties:
-        trailerFields:
-          type: object
         status:
           type: integer
           format: int32
+        trailerFields:
+          type: object
         headerNames:
           type: array
           items:
             type: string
+        contentType:
+          type: string
+        contentLength:
+          type: integer
+          format: int32
+          writeOnly: true
+        outputStream:
+          $ref: '#/components/schemas/ServletOutputStream'
         locale:
           type: object
           properties:
@@ -1319,27 +1326,19 @@ components:
               type: string
             iso3Country:
               type: string
-        contentType:
+        characterEncoding:
           type: string
-        contentLength:
-          type: integer
-          format: int32
-          writeOnly: true
-        outputStream:
-          $ref: '#/components/schemas/ServletOutputStream'
         writer:
           type: object
-        bufferSize:
-          type: integer
-          format: int32
-        committed:
-          type: boolean
         contentLengthLong:
           type: integer
           format: int64
           writeOnly: true
-        characterEncoding:
-          type: string
+        committed:
+          type: boolean
+        bufferSize:
+          type: integer
+          format: int32
     HealthEntry:
       type: object
       properties:
