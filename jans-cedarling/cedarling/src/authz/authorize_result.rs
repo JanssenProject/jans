@@ -83,20 +83,20 @@ impl AuthorizeResult {
         person: Option<cedar_policy::Response>,
         request_id: Uuid,
     ) -> Result<Self, ApplyRuleError> {
-        let mut principal_info: HashMap<SmolStr, Decision> = HashMap::new();
+        let mut principal_info = HashMap::new();
 
         workload_typename
             .into_iter()
             .zip(workload.iter())
             .for_each(|(typename, response)| {
-                principal_info.insert(typename, response.decision());
+                principal_info.insert(typename, response.decision().into());
             });
 
         person_typename
             .into_iter()
             .zip(person.iter())
             .for_each(|(typename, response)| {
-                principal_info.insert(typename, response.decision());
+                principal_info.insert(typename, response.decision().into());
             });
 
         let decision = RuleApplier::new(principal_bool_operator, principal_info).apply()?;

@@ -5,7 +5,7 @@
 
 use std::collections::HashMap;
 
-use cedar_policy::Decision;
+use crate::log::Decision;
 use datalogic_rs::JsonLogic;
 use smol_str::SmolStr;
 
