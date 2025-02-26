@@ -80,10 +80,7 @@ impl<'de> Deserialize<'de> for JsonRule {
         let value = Value::deserialize(deserializer)?;
 
         let rule = JsonRule::new(value).map_err(|e| {
-            serde::de::Error::custom(format!(
-                "Failed to deserialize JSON rule: {}",
-                e.to_string()
-            ))
+            serde::de::Error::custom(format!("Failed to deserialize JSON rule: {}", e))
         })?;
         Ok(rule)
     }
