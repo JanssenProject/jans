@@ -38,7 +38,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
   /.well-known/lock-server-configuration:
     get:
       tags:
@@ -58,7 +58,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
   /api/v1/audit/health/bulk:
     post:
       tags:
@@ -73,7 +73,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/HealthEntry'
+                $ref: "#/components/schemas/HealthEntry"
       responses:
         "200":
           description: Ok
@@ -82,7 +82,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
         "401":
           description: Unauthorized
         "404":
@@ -90,13 +90,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
       security:
       - oauth2:
         - https://jans.io/oauth/lock/health.write
@@ -114,7 +114,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/LogEntry'
+                $ref: "#/components/schemas/LogEntry"
       responses:
         "200":
           description: Ok
@@ -123,7 +123,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
         "401":
           description: Unauthorized
         "404":
@@ -131,13 +131,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
       security:
       - oauth2:
         - https://jans.io/oauth/lock/log.write
@@ -155,7 +155,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/TelemetryEntry'
+                $ref: "#/components/schemas/TelemetryEntry"
       responses:
         "200":
           description: Ok
@@ -164,7 +164,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
         "401":
           description: Unauthorized
         "404":
@@ -172,13 +172,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
       security:
       - oauth2:
         - https://jans.io/oauth/lock/telemetry.write
@@ -194,7 +194,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/HealthEntry'
+              $ref: "#/components/schemas/HealthEntry"
       responses:
         "200":
           description: Ok
@@ -203,7 +203,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
         "401":
           description: Unauthorized
         "404":
@@ -211,13 +211,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
       security:
       - oauth2:
         - https://jans.io/oauth/lock/health.write
@@ -233,7 +233,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LogEntry'
+              $ref: "#/components/schemas/LogEntry"
       responses:
         "200":
           description: Ok
@@ -242,7 +242,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
         "401":
           description: Unauthorized
         "404":
@@ -250,13 +250,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
       security:
       - oauth2:
         - https://jans.io/oauth/lock/log.write
@@ -272,7 +272,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TelemetryEntry'
+              $ref: "#/components/schemas/TelemetryEntry"
       responses:
         "200":
           description: Ok
@@ -281,7 +281,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
         "401":
           description: Unauthorized
         "404":
@@ -289,13 +289,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
       security:
       - oauth2:
         - https://jans.io/oauth/lock/telemetry.write
@@ -314,7 +314,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
         "401":
           description: Unauthorized
         "404":
@@ -322,13 +322,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
       security:
       - oauth2:
         - https://jans.io/oauth/lock/sse.readonly
@@ -362,13 +362,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FlatStatResponse'
+                $ref: "#/components/schemas/FlatStatResponse"
         "400":
           description: Bad Request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
         "401":
           description: Unauthorized
         "404":
@@ -376,13 +376,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
       security:
       - oauth2:
         - jans_stat
@@ -412,13 +412,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FlatStatResponse'
+                $ref: "#/components/schemas/FlatStatResponse"
         "400":
           description: Bad Request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
         "401":
           description: Unauthorized
         "404":
@@ -426,13 +426,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockApiError'
+                $ref: "#/components/schemas/LockApiError"
       security:
       - oauth2:
         - jans_stat
@@ -558,7 +558,7 @@ components:
         response:
           type: array
           items:
-            $ref: '#/components/schemas/StatResponseItem'
+            $ref: "#/components/schemas/StatResponseItem"
     StatResponseItem:
       type: object
       properties:

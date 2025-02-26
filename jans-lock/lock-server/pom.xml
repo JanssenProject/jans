@@ -39,9 +39,7 @@
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
 		<swagger.version>2.2.28</swagger.version>
-		<swagger-maven-plugin-jakarta>2.2.19</swagger-maven-plugin-jakarta>
-		<swagger-models-jakarta>2.2.7</swagger-models-jakarta>
-		<swagger-annotations>1.6.15</swagger-annotations>
+		<swagger-maven-plugin-jakarta>2.2.28</swagger-maven-plugin-jakarta>
 	</properties>
 
 	<prerequisites>
@@ -107,9 +105,9 @@
 
 			<!-- Swagger -->
 			<dependency>
-				<groupId>io.swagger</groupId>
+				<groupId>io.swagger.core.v3</groupId>
 				<artifactId>swagger-annotations</artifactId>
-				<version>${swagger-annotations}</version>
+				<version>${swagger.version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
@@ -238,13 +236,6 @@
 					<groupId>io.swagger.core.v3</groupId>
 					<artifactId>swagger-maven-plugin-jakarta</artifactId>
 					<version>${swagger-maven-plugin-jakarta}</version>
-					<dependencies>
-						<dependency>
-							<groupId>io.swagger.core.v3</groupId>
-							<artifactId>swagger-models-jakarta</artifactId>
-							<version>${swagger-models-jakarta}</version>
-						</dependency>
-					</dependencies>
 				</plugin>
 			</plugins>
 		</pluginManagement>
