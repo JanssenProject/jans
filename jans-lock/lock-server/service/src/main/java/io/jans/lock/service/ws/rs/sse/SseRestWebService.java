@@ -17,7 +17,6 @@
 package io.jans.lock.service.ws.rs.sse;
 
 import io.jans.lock.model.core.LockApiError;
-import io.jans.lock.model.stat.FlatStatResponse;
 import io.jans.lock.util.ApiAccessConstants;
 import io.jans.service.security.api.ProtectedApi;
 import io.swagger.v3.oas.annotations.Operation;

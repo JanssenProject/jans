@@ -26,15 +26,19 @@ import io.jans.lock.service.ws.rs.config.ConfigRestWebServiceImpl;
 import io.jans.lock.service.ws.rs.sse.SseRestWebServiceImpl;
 import io.jans.lock.service.ws.rs.stat.StatRestWebServiceImpl;
 import io.jans.lock.util.ApiAccessConstants;
-import jakarta.ws.rs.ApplicationPath;
-import jakarta.ws.rs.core.Application;
-
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
-import io.swagger.v3.oas.annotations.info.*;
-import io.swagger.v3.oas.annotations.tags.*;
-import io.swagger.v3.oas.annotations.security.*;
-import io.swagger.v3.oas.annotations.servers.*;
+import io.swagger.v3.oas.annotations.info.Contact;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.info.License;
+import io.swagger.v3.oas.annotations.security.OAuthFlow;
+import io.swagger.v3.oas.annotations.security.OAuthFlows;
+import io.swagger.v3.oas.annotations.security.OAuthScope;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.servers.Server;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 
 /**
  * Integration with Resteasy
@@ -75,6 +79,7 @@ public class ResteasyInitializer extends Application {
 	@Override
 	public Set<Class<?>> getClasses() {
 		HashSet<Class<?>> classes = new HashSet<Class<?>>();
+
 		classes.add(ConfigurationRestWebService.class);
 
 		classes.add(AuditRestWebServiceImpl.class);
