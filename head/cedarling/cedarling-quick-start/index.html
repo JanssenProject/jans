@@ -9100,7 +9100,7 @@ end
    <img alt="image" src="../../assets/cedarling-policy-designer.png" /></li>
 <li>Choose a repository to store your Cedarling policies and schemas. Ensure that the repository has at least one commit on the default branch.
    <img alt="image" src="../../assets/cedarling-select-repo.png" /></li>
-<li>After initialization, create a policy store named <code>gatewayDemo</code>. This will be your Cedar namespace.
+<li>After initialization, create a policy store named <code>gatewayDemo</code>.
    <img alt="image" src="../../assets/cedarling-policy-store-name.png" /></li>
 <li>Open the policy store and navigate to Policies.</li>
 <li>Click <code>Add Policy</code>, select <code>Text Editor</code>.
@@ -9108,13 +9108,13 @@ end
 <li>Paste the following Cedar policy:
     <div class="highlight"><pre><span></span><code>@id<span class="o">(</span><span class="s2">&quot;allow_one&quot;</span><span class="o">)</span>
 permit<span class="o">(</span>
-principal<span class="w"> </span>is<span class="w"> </span>gatewayDemo::Workload,
-<span class="nv">action</span><span class="w"> </span><span class="o">==</span><span class="w"> </span>gatewayDemo::Action::<span class="s2">&quot;GET&quot;</span>,
-resource<span class="w"> </span>is<span class="w"> </span>gatewayDemo::HTTP_Request
+<span class="w">  </span>principal<span class="w"> </span>is<span class="w"> </span>Jans::Workload,
+<span class="w">  </span><span class="nv">action</span><span class="w"> </span><span class="o">==</span><span class="w"> </span>Jans::Action::<span class="s2">&quot;GET&quot;</span>,
+<span class="w">  </span>resource<span class="w"> </span>is<span class="w"> </span>Jans::HTTP_Request
 <span class="o">)</span>
 when<span class="w"> </span><span class="o">{</span>
-principal<span class="w"> </span>has<span class="w"> </span>access_token.scope<span class="w"> </span><span class="o">&amp;&amp;</span>
-principal.access_token.scope.contains<span class="o">(</span><span class="s2">&quot;profile&quot;</span><span class="o">)</span>
+<span class="w">  </span>principal<span class="w"> </span>has<span class="w"> </span>access_token.scope<span class="w"> </span><span class="o">&amp;&amp;</span>
+<span class="w">  </span>principal.access_token.scope.contains<span class="o">(</span><span class="s2">&quot;openid&quot;</span><span class="o">)</span>
 <span class="o">}</span><span class="p">;</span>
 </code></pre></div></li>
 <li>Click <code>Save</code>. Agama Lab will validate your policy. </li>
@@ -9139,7 +9139,7 @@ principal.access_token.scope.contains<span class="o">(</span><span class="s2">&q
 </ul>
 <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gatewayDemo::Access_token&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_token&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
@@ -9148,7 +9148,7 @@ principal.access_token.scope.contains<span class="o">(</span><span class="s2">&q
 <span class="w">    </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span>
 <span class="w">   </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gatewayDemo::id_token&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::id_token&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
@@ -9157,7 +9157,7 @@ principal.access_token.scope.contains<span class="o">(</span><span class="s2">&q
 <span class="w">    </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;userinfo_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gatewayDemo::Userinfo_token&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Userinfo_token&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
@@ -9169,7 +9169,7 @@ principal.access_token.scope.contains<span class="o">(</span><span class="s2">&q
 </code></pre></div>
 <ul>
 <li>
-<p>Set <code>CEDARLING_MAPPING_WORKLOAD</code> to gatewayDemo::Workload</p>
+<p>Set <code>CEDARLING_MAPPING_WORKLOAD</code> to <code>Jans::Workload</code></p>
 </li>
 <li>
 <p>Set <code>CEDARLING_ID_TOKEN_TRUST_MODE</code> to "none"</p>
@@ -9190,26 +9190,28 @@ it is your Docker container ID.</p>
 <li>Download and install the latest Cedarling nightly wheel:
 <div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.whl
 </code></pre></div></li>
-<li>Install the nightly wheel: </li>
-</ul>
-<p><div class="highlight"><pre><span></span><code>poetry run pip install cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.whl
-</code></pre></div>
-* Modify <code>secrets/bootstrap.json</code> to your specifications.</p>
-<ul>
+<li>Install the nightly wheel: 
+<div class="highlight"><pre><span></span><code>poetry run pip install cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.whl
+</code></pre></div></li>
+<li>
+<p>Modify <code>secrets/bootstrap.json</code> to your specifications.</p>
+</li>
 <li>
 <p>Navigate to <code>jans/jans-cedarling/flask-sidecar/main</code></p>
 </li>
 <li>
-<p>Create a file called <code>.env</code> and paste in the following content. Alternatively, set the following environment variables:</p>
-</li>
-</ul>
-<p><div class="highlight"><pre><span></span><code>APP_MODE=development
+<p>Create a file called <code>.env</code> and paste in the following content. Alternatively, set the following environment variables:
+<div class="highlight"><pre><span></span><code>APP_MODE=development
 CEDARLING_BOOTSTRAP_CONFIG_FILE=../secrets/bootstrap.json
 SIDECAR_DEBUG_RESPONSE=False
-</code></pre></div>
-* Run the sidecar: poetry run <code>flask run</code></p>
-<ul>
-<li>The sidecar is now running on <a href="http://127.0.0.1:5000">http://127.0.0.1:5000</a></li>
+</code></pre></div></p>
+</li>
+<li>
+<p>Run the sidecar: <code>poetry run flask run</code></p>
+</li>
+<li>
+<p>The sidecar is now running on <a href="http://127.0.0.1:5000">http://127.0.0.1:5000</a></p>
+</li>
 </ul>
 <h2 id="setup-test-gateway">Setup Test Gateway<a class="headerlink" href="#setup-test-gateway" title="Permanent link">#</a></h2>
 <p>We will use Flask to create a simple API Gateway.</p>
@@ -9248,7 +9250,7 @@ SIDECAR_DEBUG_RESPONSE=False
             <span class="p">}</span>
         <span class="p">},</span>
         <span class="s2">&quot;resource&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;gatewayDemo::HTTP_Request&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Jans::HTTP_Request&quot;</span><span class="p">,</span>
             <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;some_id&quot;</span><span class="p">,</span>
             <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;header&quot;</span><span class="p">:</span> <span class="p">{},</span>
@@ -9260,7 +9262,7 @@ SIDECAR_DEBUG_RESPONSE=False
             <span class="p">}</span>
         <span class="p">},</span>
         <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;gatewayDemo::Action::</span><span class="se">\&quot;</span><span class="s2">GET</span><span class="se">\&quot;</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Jans::Action::</span><span class="se">\&quot;</span><span class="s2">GET</span><span class="se">\&quot;</span><span class="s2">&quot;</span>
         <span class="p">},</span>
         <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="p">{}</span>
     <span class="p">}</span>
@@ -9313,8 +9315,8 @@ You should get a 403 Forbidden response.</p>
 <span class="w">    </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;</span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;errors&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gatewayDemo::Action::\&quot;GET\&quot;&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gatewayDemo::HTTP_Request::\&quot;some_id\&quot;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Action::\&quot;GET\&quot;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::HTTP_Request::\&quot;some_id\&quot;&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;decision&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -9391,9 +9393,9 @@ json should be similar to the one below:</p>
 <p>Let's make the corresponding changes in the policy.</p>
 <div class="highlight"><pre><span></span><code>@id(&quot;allow_one&quot;)
 permit(
-  principal is gatewayDemo::Workload,
-  action == gatewayDemo::Action::&quot;GET&quot;,
-  resource is gatewayDemo::HTTP_Request
+  principal is Jans::Workload,
+  action == Jans::Action::&quot;GET&quot;,
+  resource is Jans::HTTP_Request
 )
 when {
   principal has access_token.acr &amp;&amp;
@@ -9407,7 +9409,7 @@ when {
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-26T18:12:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-26</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-27T20:58:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-27</span>
       
         <br>
         Created:
