@@ -12,7 +12,6 @@ servers:
 - url: https://jans.local.io
   description: The Jans server
 tags:
-- name: Lock - Server Configuration
 - name: Lock - Stat
 - name: Lock - Audit Health
 - name: Lock - Audit Log
@@ -21,51 +20,19 @@ tags:
 paths:
   /configuration:
     get:
-      tags:
-      - Lock - Server Configuration
-      summary: Request .well-known data
-      description: Request .well-know Lock server configuration
       operationId: getConfiguration
       responses:
-        "200":
-          description: Ok
+        default:
+          description: default response
           content:
-            application/json:
-              schema:
-                type: string
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LockApiError'
-  /.well-known/lock-server-configuration:
-    get:
-      tags:
-      - Lock - Server Configuration
-      summary: Request .well-known data
-      description: Request .well-know Lock server configuration
-      operationId: doGet
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: string
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LockApiError'
+            application/json: {}
   /audit/health/bulk:
     post:
       tags:
       - Lock - Audit Health
       summary: Bulk save health data
       description: Bulk save health data
-      operationId: processBulkHealthRequest
+      operationId: processBulkHealthRequest_1
       requestBody:
         description: Bulk health entry
         content:
@@ -106,7 +73,7 @@ paths:
       - Lock - Audit Log
       summary: Bulk save log data
       description: Bulk save log data
-      operationId: processBulkLogRequest
+      operationId: processBulkLogRequest_1
       requestBody:
         description: Bulk log entry
         content:
@@ -147,7 +114,7 @@ paths:
       - Lock - Audit Telemetry
       summary: Bulk save telemetry data
       description: Bulk save telemetry data
-      operationId: processBulkTelemetryRequest
+      operationId: processBulkTelemetryRequest_1
       requestBody:
         description: Bulk telemetry entry
         content:
@@ -188,7 +155,7 @@ paths:
       - Lock - Audit Health
       summary: Save health data
       description: Save health data
-      operationId: processHealthRequest
+      operationId: processHealthRequest_1
       requestBody:
         description: Health entry
         content:
@@ -227,7 +194,7 @@ paths:
       - Lock - Audit Log
       summary: Save log data
       description: Save log data
-      operationId: processLogRequest
+      operationId: processLogRequest_1
       requestBody:
         description: Log entry
         content:
@@ -266,7 +233,7 @@ paths:
       - Lock - Audit Telemetry
       summary: Save telemetry data
       description: Save telemetry data
-      operationId: processTelemetryRequest
+      operationId: processTelemetryRequest_1
       requestBody:
         description: Telemetry entry
         content:
@@ -299,6 +266,38 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/telemetry.write
+  /config:
+    get:
+      operationId: processConfigRequest
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /config/issuers:
+    get:
+      operationId: processIssuersRequest
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /config/policy:
+    get:
+      operationId: processPolicyRequest
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /config/schema:
+    get:
+      operationId: processSchemaRequest
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
   /sse:
     get:
       tags:
@@ -331,14 +330,14 @@ paths:
                 $ref: '#/components/schemas/LockApiError'
       security:
       - oauth2:
-        - https://jans.io/oauth/lock/sse.readonly
+        - jans_stat
   /internal/stat:
     get:
       tags:
       - Lock - Stat
       summary: Request stat data
       description: Request stat data
-      operationId: statGet
+      operationId: statGet_1
       parameters:
       - name: month
         in: query
@@ -391,7 +390,7 @@ paths:
       - Lock - Stat
       summary: Request stat data
       description: Request stat data
-      operationId: statPost
+      operationId: statPost_1
       requestBody:
         content:
           '*/*':
@@ -438,15 +437,6 @@ paths:
         - jans_stat
 components:
   schemas:
-    LockApiError:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        description:
-          type: string
     HealthEntry:
       type: object
       properties:
@@ -469,6 +459,15 @@ components:
         baseDn:
           type: string
         inum:
+          type: string
+    LockApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        description:
           type: string
     LogEntry:
       type: object
@@ -586,11 +585,11 @@ components:
           scopes:
             https://jans.io/oauth/lock-config.readonly: View configuration related
               information
-            https://jans.io/lock-server/issuers.readonly: View issuers related information
-            https://jans.io/lock-server/schema.readonly: View schema related information
-            https://jans.io/lock-server/policy.readonly: View policy related information
+            https://jans.io/lock-server/issuers.read: View issuers related information
+            https://jans.io/lock-server/schema.read: View schema related information
+            https://jans.io/lock-server/policy.read: View policy related information
             https://jans.io/oauth/lock/health.write: Write audit health entries
             https://jans.io/oauth/lock/log.write: Write audit log entries
             https://jans.io/oauth/lock/telemetry.write: Write telemetry health entries
-            https://jans.io/oauth/lock/sse.readonly: Subscribe to SSE events
+            https://jans.io/oauth/lock/sse.read: Subscribe to SSE events
             jans_stat: View stat related information

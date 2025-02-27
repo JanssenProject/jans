@@ -37,6 +37,11 @@
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
 		<sonar.organization>janssenproject</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+
+		<swagger.version>2.2.7</swagger.version>
+		<swagger-maven-plugin-jakarta>2.2.19</swagger-maven-plugin-jakarta>
+		<swagger-models-jakarta>2.2.7</swagger-models-jakarta>
+		<swagger-annotations>1.6.15</swagger-annotations>
 	</properties>
 
 	<prerequisites>
@@ -98,6 +103,12 @@
 				<groupId>io.jans</groupId>
 				<artifactId>jans-lock-service</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.swagger</groupId>
+				<artifactId>swagger-annotations</artifactId>
+				<version>${swagger-annotations}</version>
+				<scope>compile</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -206,6 +217,20 @@
 					<configuration>
 						<additionalJOption>-Xdoclint:none</additionalJOption>
 					</configuration>
+				</plugin>
+
+				<!-- Swagger -->
+				<plugin>
+					<groupId>io.swagger.core.v3</groupId>
+					<artifactId>swagger-maven-plugin-jakarta</artifactId>
+					<version>${swagger-maven-plugin-jakarta}</version>
+					<dependencies>
+						<dependency>
+							<groupId>io.swagger.core.v3</groupId>
+							<artifactId>swagger-models-jakarta</artifactId>
+							<version>${swagger-models-jakarta}</version>
+						</dependency>
+					</dependencies>
 				</plugin>
 			</plugins>
 		</pluginManagement>

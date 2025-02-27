@@ -18,12 +18,20 @@ package io.jans.lock.service.ws.rs;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import io.jans.lock.model.core.LockApiError;
 import io.jans.lock.service.config.ConfigurationService;
+import io.jans.lock.service.ws.rs.base.BaseResource;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 
@@ -34,18 +42,24 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
  */
 @Dependent
 @Path("/configuration")
-public class ConfigurationRestWebService {
+public class ConfigurationRestWebService extends BaseResource {
 
-    @Inject
+	@Inject
 	private ConfigurationService configurationService;
-    
+
+	@Operation(summary = "Request .well-known data", description = "Request .well-know Lock server configuration", tags = {
+			"Lock - Server Configuration" })
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = String.class, description = "ConfigurationFound"))),
+			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
+
 	@GET
-	@Produces({ "application/json" })
+	@Produces({ MediaType.APPLICATION_JSON })
 	public Response getConfiguration() {
 		ObjectNode response = configurationService.getLockConfiguration();
 
-        ResponseBuilder builder = Response.ok().entity(response.toString());
-        return builder.build();
+		ResponseBuilder builder = Response.ok().entity(response.toString());
+		return builder.build();
 	}
 
 }
