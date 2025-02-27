@@ -18,6 +18,7 @@ import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.UmaScopeType;
+import io.jans.as.model.util.JsonUtil;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.model.common.AbstractToken;
 import io.jans.as.server.model.common.AccessToken;
@@ -199,6 +200,8 @@ public class IntrospectionWebService {
                 String scopes = StringUtils.join(response.getScope().toArray(), " ");
                 responseAsJsonObject.put("scope", scopes);
             }
+
+            responseAsJsonObject = JsonUtil.filterOutNulls(responseAsJsonObject);
 
             // Response as JWT
             if (introspectionService.isJwtResponse(responseAsJwt, accept)) {

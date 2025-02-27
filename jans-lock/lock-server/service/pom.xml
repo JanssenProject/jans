@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>jans-lock-server-parent</artifactId>
 		<groupId>io.jans</groupId>
-		<version>1.4.0</version>
+		<version>0.0.0-nightly</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -38,6 +38,29 @@
 				<configuration>
 					<skipTests>false</skipTests>
 				</configuration>
+			</plugin>
+
+			<!-- Swagger -->
+			<plugin>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-maven-plugin-jakarta</artifactId>
+				<executions>
+					<execution>
+						<configuration>
+							<outputFormat>YAML</outputFormat>
+							<outputFileName>lock-server</outputFileName>
+							<outputPath>${project.parent.basedir}/..</outputPath>
+							<prettyPrint>true</prettyPrint>
+							<resourcePackages>
+								<package>io.jans.lock.service.ws.rs</package>
+							</resourcePackages>
+						</configuration>
+						<phase>compile</phase>
+						<goals>
+							<goal>resolve</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -164,6 +187,10 @@
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-core-jakarta</artifactId>
 			<version>2.2.10</version>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-annotations</artifactId>
 		</dependency>
 
 		<!-- Documentation -->

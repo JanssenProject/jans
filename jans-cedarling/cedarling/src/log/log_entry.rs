@@ -10,18 +10,16 @@ use std::collections::{HashMap, HashSet};
 use std::fmt::Display;
 use std::hash::Hash;
 
-use uuid7::Uuid;
-
 use super::LogLevel;
 use super::interface::{Indexed, Loggable};
 use crate::bootstrap_config::AuthorizationConfig;
-use crate::common::app_types::{self, ApplicationName};
 use crate::common::policy_store::PoliciesContainer;
 use crate::jwt::Token;
+use uuid7::Uuid;
 
 /// ISO-8601 time format for [`chrono`]
 /// example: 2024-11-27T10:10:50.654Z
-const ISO8601: &str = "%Y-%m-%dT%H:%M:%S%.3fZ";
+pub(crate) const ISO8601: &str = "%Y-%m-%dT%H:%M:%S%.3fZ";
 
 /// LogEntry is a struct that encapsulates all relevant data for logging events.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -33,9 +31,6 @@ pub struct LogEntry {
 
     /// message of the event
     pub msg: String,
-    /// name of application from [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub application_id: Option<ApplicationName>,
     /// authorization information of the event
     #[serde(flatten)]
     pub auth_info: Option<AuthorizationLogInfo>,
@@ -51,18 +46,9 @@ pub struct LogEntry {
 }
 
 impl LogEntry {
-    pub(crate) fn new_with_data(
-        pdp_id: app_types::PdpID,
-        application_id: Option<app_types::ApplicationName>,
-        log_type: LogType,
-        request_id: Option<Uuid>,
-    ) -> LogEntry {
+    pub(crate) fn new_with_data(log_type: LogType, request_id: Option<Uuid>) -> LogEntry {
         Self {
-            base: BaseLogEntry::new_opt_request_id(pdp_id, log_type, request_id),
-            // We use uuid v7 because it is generated based on the time and sortable.
-            // and we need sortable ids to use it in the sparkv database.
-            // Sparkv store data in BTree. So we need have correct order of ids.
-            application_id,
+            base: BaseLogEntry::new_opt_request_id(log_type, request_id),
             auth_info: None,
             msg: String::new(),
             error_msg: None,
@@ -360,8 +346,8 @@ pub struct DecisionLogEntry<'a> {
     pub decision: Decision,
     /// Dictionary with the token type and claims which should be included in the log
     pub tokens: LogTokensInfo<'a>,
-    /// time in milliseconds spent for decision
-    pub decision_time_ms: i64,
+    /// time in micro-seconds spent for decision
+    pub decision_time_micro_sec: i64,
 }
 
 impl Indexed for &DecisionLogEntry<'_> {
@@ -422,15 +408,13 @@ pub struct BaseLogEntry {
     pub timestamp: Option<String>,
     /// kind of log entry
     pub log_kind: LogType,
-    /// unique id of cedarling
-    pub pdp_id: Uuid,
     /// log level of entry
     #[serde(skip_serializing_if = "Option::is_none")]
     pub level: Option<LogLevel>,
 }
 
 impl BaseLogEntry {
-    pub(crate) fn new(pdp_id: app_types::PdpID, log_type: LogType, request_id: Uuid) -> Self {
+    pub(crate) fn new(log_type: LogType, request_id: Uuid) -> Self {
         let local_time_string = chrono::Local::now().format(ISO8601).to_string();
 
         let default_log_level = if log_type == LogType::System {
@@ -444,16 +428,11 @@ impl BaseLogEntry {
             request_id: Some(request_id),
             timestamp: Some(local_time_string),
             log_kind: log_type,
-            pdp_id: pdp_id.0,
             level: default_log_level,
         }
     }
 
-    pub(crate) fn new_opt_request_id(
-        pdp_id: app_types::PdpID,
-        log_type: LogType,
-        request_id: Option<Uuid>,
-    ) -> Self {
+    pub(crate) fn new_opt_request_id(log_type: LogType, request_id: Option<Uuid>) -> Self {
         let local_time_string = chrono::Local::now().format(ISO8601).to_string();
 
         let default_log_level = if log_type == LogType::System {
@@ -467,7 +446,6 @@ impl BaseLogEntry {
             request_id,
             timestamp: Some(local_time_string),
             log_kind: log_type,
-            pdp_id: pdp_id.0,
             level: default_log_level,
         }
     }

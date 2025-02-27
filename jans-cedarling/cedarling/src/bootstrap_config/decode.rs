@@ -51,6 +51,8 @@ impl BootstrapConfig {
                 log_ttl: raw
                     .log_ttl
                     .ok_or(BootstrapConfigLoadingError::MissingLogTTL)?,
+                max_item_size: raw.log_max_item_size,
+                max_items: raw.log_max_items,
             }),
             LoggerType::StdOut => LogTypeConfig::StdOut,
             LoggerType::Lock => LogTypeConfig::Lock,
@@ -72,9 +74,9 @@ impl BootstrapConfig {
             (Some(policy_store), None, None) => PolicyStoreConfig {
                 source: PolicyStoreSource::Json(policy_store),
             },
-            // Case: get the policy store from the lock master
+            // Case: get the policy store from the lock server
             (None, Some(policy_store_uri), None) => PolicyStoreConfig {
-                source: PolicyStoreSource::LockMaster(policy_store_uri),
+                source: PolicyStoreSource::LockServer(policy_store_uri),
             },
             // Case: get the policy store from a local JSON file
             (None, None, Some(raw_path)) => {

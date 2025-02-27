@@ -34,6 +34,9 @@ pub struct AgamaPolicyStore {
 #[derive(Debug, Clone, serde::Deserialize, PartialEq)]
 pub struct PolicyStore {
     /// version of policy store
+    //
+    // alias to support Agama lab format
+    #[serde(alias = "policy_store_version")]
     pub version: Option<String>,
 
     /// Name is also name of namespace in `cedar-policy`

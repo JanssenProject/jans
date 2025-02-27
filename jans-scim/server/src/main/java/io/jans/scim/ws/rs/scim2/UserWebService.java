@@ -41,7 +41,7 @@ import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 
-import io.jans.scim.model.GluuCustomPerson;
+import io.jans.scim.model.JansCustomPerson;
 import io.jans.scim.model.exception.SCIMException;
 import io.jans.scim.model.scim2.BaseScimResource;
 import io.jans.scim.model.scim2.ErrorScimType;
@@ -84,7 +84,7 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
     private void checkUidExistence(String uid, String id) throws DuplicateEntryException {
 
         // Validate if there is an attempt to supply a userName already in use by a user other than current
-        List<GluuCustomPerson> list = null;
+        List<JansCustomPerson> list = null;
         try {
             list = personService.findPersonsByUids(Collections.singletonList(uid), new String[]{"inum"});
         } catch (Exception e) {

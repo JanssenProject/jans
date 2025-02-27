@@ -43,9 +43,6 @@ public class ScimConfigurationWS {
     private GroupWebService groupService;
 
     @Inject
-    private FidoDeviceWebService fidoService;
-
-    @Inject
     private Fido2DeviceWebService fido2Service;
 
     @Inject
@@ -75,7 +72,6 @@ public class ScimConfigurationWS {
             c2.setAuthorizationSupported(Collections.singletonList("oauth2"));
             c2.setUserEndpoint(userService.getEndpointUrl());
             c2.setGroupEndpoint(groupService.getEndpointUrl());
-            c2.setFidoDevicesEndpoint(fidoService.getEndpointUrl());
             c2.setFido2DevicesEndpoint(fido2Service.getEndpointUrl());
             c2.setBulkEndpoint(bulkService.getEndpointUrl());
             c2.setServiceProviderEndpoint(serviceProviderService.getEndpointUrl());

@@ -28,7 +28,6 @@ import io.jans.scim.model.scim2.ListResponse;
 import io.jans.scim.model.scim2.Meta;
 import io.jans.scim.model.scim2.annotations.Schema;
 import io.jans.scim.model.scim2.extensions.Extension;
-import io.jans.scim.model.scim2.fido.FidoDeviceResource;
 import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
 import io.jans.scim.model.scim2.group.GroupResource;
 import io.jans.scim.model.scim2.provider.resourcetypes.ResourceType;
@@ -45,7 +44,6 @@ public class ResourceTypeWS extends BaseScimWebService {
     //The following are not computed using the endpointUrl's of web services since they are required to be constant (used in @Path annotations)
     private static final String USER_SUFFIX="User";
     private static final String GROUP_SUFFIX="Group";
-    private static final String FIDO_SUFFIX="FidoDevice";
     private static final String FIDO2_SUFFIX="Fido2Device";
 
     @Inject
@@ -53,9 +51,6 @@ public class ResourceTypeWS extends BaseScimWebService {
 
     @Inject
     private GroupWebService groupService;
-
-    @Inject
-    private FidoDeviceWebService fidoService;
 
     @Inject
     private Fido2DeviceWebService fido2Service;
@@ -70,10 +65,9 @@ public class ResourceTypeWS extends BaseScimWebService {
     public Response serve() {
 
         try {
-            ListResponse listResponse = new ListResponse(1, 4, 4);
+            ListResponse listResponse = new ListResponse(1, 3, 3);
             listResponse.addResource(getUserResourceType());
             listResponse.addResource(getGroupResourceType());
-            listResponse.addResource(getFidoDeviceResourceType());
             listResponse.addResource(getFido2DeviceResourceType());
 
             String json = resourceSerializer.getListResponseMapper().writeValueAsString(listResponse);
@@ -117,23 +111,6 @@ public class ResourceTypeWS extends BaseScimWebService {
         }
         catch (Exception e){
             log.error("Failure at groupResourceType method", e);
-            return getErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Unexpected error: " + e.getMessage());
-        }
-
-    }
-
-    @Path(FIDO_SUFFIX)
-    @GET
-    @Produces(MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT)
-    @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @RejectFilterParam
-    public Response fidoResourceType() {
-        try {
-            URI uri=new URI(getResourceLocation(FIDO_SUFFIX));
-            return Response.ok(resourceSerializer.serialize(getFidoDeviceResourceType())).location(uri).build();
-        }
-        catch (Exception e){
-            log.error("Failure at fidoResourceType method", e);
             return getErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Unexpected error: " + e.getMessage());
         }
 
@@ -202,12 +179,6 @@ public class ResourceTypeWS extends BaseScimWebService {
         ResourceType grRT = new ResourceType();
         fillResourceType(grRT, ScimResourceUtil.getSchemaAnnotation(GroupResource.class), groupService.getEndpointUrl(), getResourceLocation(GROUP_SUFFIX), null);
         return grRT;
-    }
-
-    private ResourceType getFidoDeviceResourceType(){
-        ResourceType fidoRT = new ResourceType();
-        fillResourceType(fidoRT, ScimResourceUtil.getSchemaAnnotation(FidoDeviceResource.class), fidoService.getEndpointUrl(), getResourceLocation(FIDO_SUFFIX), null);
-        return fidoRT;
     }
 
     private ResourceType getFido2DeviceResourceType(){

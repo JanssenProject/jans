@@ -30,13 +30,13 @@ public class User extends CustomEntry implements Serializable, Cloneable {
 			attributesConfiguration = {
 			 @AttributeName(name = "inum", ignoreDuringUpdate = true),
 			 @AttributeName(name = "uid", ignoreDuringUpdate = false), @AttributeName(name = "userPassword", ignoreDuringRead = true) })
-	protected List<GluuCustomAttribute> customAttributes = new ArrayList<GluuCustomAttribute>();
+	protected List<JansCustomAttribute> customAttributes = new ArrayList<JansCustomAttribute>();
 
-	public List<GluuCustomAttribute> getCustomAttributes() {
+	public List<JansCustomAttribute> getCustomAttributes() {
 		return customAttributes;
 	}
 
-	public void setCustomAttributes(List<GluuCustomAttribute> customAttributes) {
+	public void setCustomAttributes(List<JansCustomAttribute> customAttributes) {
 		this.customAttributes = customAttributes;
 	}
 

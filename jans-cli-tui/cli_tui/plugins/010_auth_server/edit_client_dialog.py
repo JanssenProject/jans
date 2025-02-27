@@ -1094,7 +1094,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
             search_arg_lists.append(f'expirationDate<{date_before}')
 
         if search_arg_lists:
-            endpoint_args += '\,' + '\,'.join(search_arg_lists)
+            endpoint_args += '\\,' + '\\,'.join(search_arg_lists)
 
         if pattern:
             endpoint_args += f',pattern:{pattern}'

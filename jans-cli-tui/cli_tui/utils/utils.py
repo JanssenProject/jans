@@ -55,7 +55,10 @@ class DialogUtils:
                     value_ = int(value_)
 
             if getattr(item, 'jans_list_type', False):
-                value_ = value_.split('\n')
+                if not value_.strip():
+                    value_ = []
+                else:
+                    value_ = value_.split('\n')
 
             return {'key':key_, 'value':value_}
 
@@ -201,7 +204,7 @@ def fromisoformat(dt_str=None):
     return dt
 
 def check_email(email):
-    return re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,})$', email, re.IGNORECASE)
+    return re.match(r'^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,})$', email, re.IGNORECASE)
 
 def get_help_with(helps: str='', without: List[str]=None):
     if not without:

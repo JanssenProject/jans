@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>agama</artifactId>
 	<packaging>pom</packaging>
-	<version>1.4.0</version>
+	<version>0.0.0-nightly</version>
 	<name>agama parent</name>
 
     <prerequisites>

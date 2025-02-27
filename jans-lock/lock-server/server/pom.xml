@@ -6,7 +6,7 @@
 	<parent>
 		<artifactId>jans-lock-server-parent</artifactId>
 		<groupId>io.jans</groupId>
-		<version>1.4.0</version>
+		<version>0.0.0-nightly</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -127,10 +127,10 @@
 			<artifactId>jans-core-timer-weld</artifactId>
 		</dependency>
 
-        <dependency>
-            <groupId>io.jans</groupId>
-	    	<artifactId>jans-core-document-store</artifactId>
-        </dependency>
+        	<dependency>
+            		<groupId>io.jans</groupId>
+		    	<artifactId>jans-core-document-store</artifactId>
+        	</dependency>
 
 		<!-- RestEasy -->
 		<dependency>

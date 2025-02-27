@@ -57,6 +57,18 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub log_ttl: Option<u64>,
 
+    /// Maximum number of log entities that can be stored using [`LogType::Memory`].
+    /// If value is 0, there is no limit. But if None, default value is applied.
+    #[serde(rename = "CEDARLING_LOG_MAX_ITEMS", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub log_max_items: Option<usize>,
+
+    /// Maximum size of a single log entity in bytes using [`LogType::Memory`].
+    /// If value is 0, there is no limit. But if None, default value is applied.
+    #[serde(rename = "CEDARLING_LOG_MAX_ITEM_SIZE", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub log_max_item_size: Option<usize>,
+
     /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
     #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
@@ -176,9 +188,9 @@ pub struct BootstrapConfigRaw {
     /// Lock Master, i.e. .well-known/lock-master-configuration.
     ///
     /// ***Required*** if `LOCK == enabled`.
-    #[serde(rename = "CEDARLING_LOCK_MASTER_CONFIGURATION_URI", default)]
+    #[serde(rename = "CEDARLING_LOCK_SERVER_CONFIGURATION_URI", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub lock_master_configuration_uri: Option<String>,
+    pub lock_server_configuration_uri: Option<String>,
 
     /// Controls whether Cedarling should listen for SSE config updates.
     #[serde(rename = "CEDARLING_LOCK_DYNAMIC_CONFIGURATION", default)]

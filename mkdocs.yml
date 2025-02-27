@@ -1,4 +1,4 @@
-copyright: Copyright &copy; 2024, The Janssen Project
+copyright: Copyright &copy; 2025, The Janssen Project
 docs_dir: ./docs
 edit_uri: edit/main/docs/
 extra:
@@ -407,20 +407,29 @@ nav:
       - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
 - Cedarling:
   - Overview: 'cedarling/cedarling-overview.md'
-  - Authz: 'cedarling/cedarling-authz.md'
-  - Policy Store: 'cedarling/cedarling-policy-store.md'
-  - JWT: 'cedarling/cedarling-jwt.md'
-  - Logs: 'cedarling/cedarling-logs.md'
-  - Properties: 'cedarling/cedarling-properties.md'
-  - Sidecar: 
-      - cedarling/cedarling-sidecar.md
-      - KrakenD Plugin: cedarling/cedarling-krakend.md
-  - Python:
-      - cedarling/python/README.md
-      - How to use: cedarling/python/usage.md
-  - WASM: 'cedarling/cedarling-wasm.md'
-  - iOS: 'cedarling/cedarling-ios.md'
-  - Android: 'cedarling/cedarling-android.md'
+  - Quick Start Guide: 'cedarling/cedarling-quick-start.md'
+  - How To Use:
+    - Types Of Bindings: 'cedarling/cedarling-binding-types.md'
+    - Browser Apps: 'cedarling/cedarling-wasm.md'
+    - Mobile Apps:
+      - UniFFI interface: 'cedarling/uniffi/cedarling-uniffi.md'
+      - Android Apps: 'cedarling/uniffi/cedarling-android.md'
+      - iOS Apps: 'cedarling/uniffi/cedarling-ios.md'
+    - Web Server App: 
+      - Sidecar: 'cedarling/cedarling-sidecar.md'
+      - API Gateways: 'cedarling/cedarling-krakend.md'
+  - Administration:
+    - Authz: 'cedarling/cedarling-authz.md'
+    - Policy Store: 'cedarling/cedarling-policy-store.md'
+    - JWT: 'cedarling/cedarling-jwt.md'
+    - Logs: 'cedarling/cedarling-logs.md'
+    - Properties: 'cedarling/cedarling-properties.md'
+    - Lock Server Integration: 'cedarling/cedarling-lock-server.md'
+  - Developer:
+    - Python:
+        - cedarling/python/README.md
+        - How to use: cedarling/python/usage.md
+  
 - Agama:
   - Introduction: agama/introduction.md
   - Language reference: agama/language-reference.md
