@@ -16,20 +16,66 @@ Cedarling provides a binding for JavaScript programs via the `wasm-pack` tool. T
 
 ## Building
 
-- Install `wasm-pack` by:
 
-  ```sh
-  cargo install wasm-pack
-  ```
+**Install wasm-pack**
 
-- Build cedarling `wasm` in release:
+* To get started with WebAssembly in Rust, first install `wasm-pack` by running the following command:
 
-  ```bash
-  wasm-pack build --release --target web
-  ```
+```bash title="Command"
+cargo install wasm-pack
+```
 
-  `wasm-pack` automatically make optimization of `wasm` binary file, using `wasm-opt`.
-- Get result in the `pkg` folder.
+**Create a New Rust Project**
+
+* Create a new Rust library project using the cargo command. This will generate a new project with the necessary files.
+
+```bash title="Command"
+cargo new --lib wasm_example
+```
+
+* Navigate to the project directory:
+
+```bash title="Command"
+cd wasm_example
+```
+
+**Add WebAssembly Dependencies**
+
+* Open the `Cargo.toml` file in the project directory and add the necessary dependencies for WebAssembly. Specifically, we will use `wasm-bindgen`, which provides an interface between Rust and JavaScript.
+
+* Edit `Cargo.toml` to look like this:
+
+```
+[package]
+name = "my_wasm_project"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+wasm-bindgen = "0.2"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+```
+
+
+**Build the WebAssembly Project**
+
+* Once the dependencies are set up, build the WebAssembly package in release mode by running the following command:
+```bash title="Command"
+wasm-pack build --release --target web
+```
+
+* wasm-pack automatically optimizes the WebAssembly binary file using wasm-opt for better performance.
+
+**Run the Server**
+
+* To view the WebAssembly project in action, you can run a local server. One way to do this is by using http-server, a simple, zero-config static file server. You can install and run it using:
+
+```bash title="Command"
+npx http-server .
+```
 
 ## Including in projects
 
