@@ -9073,76 +9073,96 @@
 <table>
 <thead>
 <tr>
-<th>Field named</th>
-<th>Example</th>
-<th>Description</th>
+<th><strong>Field</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Description</strong></th>
+<th><strong>Default Value / Example</strong></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>authenticatorCertsFolder</td>
-<td>/etc/jans/conf/fido2/authenticator_cert</td>
-<td>Authenticators certificates fodler.</td>
+<td><code>authenticatorCertsFolder</code></td>
+<td>String</td>
+<td>The folder where authenticator certificates are stored.</td>
+<td><code>"%(fido2ConfigFolder)s/authenticator_cert"</code></td>
 </tr>
 <tr>
-<td>mdsCertsFolder</td>
-<td>/etc/jans/conf/fido2/mds/cert</td>
-<td>MDS TOC root certificates folder.</td>
+<td><code>mdsCertsFolder</code></td>
+<td>String</td>
+<td>The folder where MDS TOC root certificates are stored.</td>
+<td><code>"%(fido2ConfigFolder)s/mds/cert"</code></td>
 </tr>
 <tr>
-<td>mdsTocsFolder</td>
-<td>/etc/jans/conf/fido2/mds/toc</td>
-<td>MDS TOC files folder.</td>
+<td><code>mdsTocsFolder</code></td>
+<td>String</td>
+<td>The folder where MDS TOC files are stored.</td>
+<td><code>"%(fido2ConfigFolder)s/mds/toc"</code></td>
 </tr>
 <tr>
-<td>serverMetadataFolder</td>
-<td>/etc/jans/conf/fido2/server_metadata</td>
-<td>Authenticators metadata in json format. Example: virtual devices.</td>
+<td><code>userAutoEnrollment</code></td>
+<td>Boolean</td>
+<td>Whether to allow users to enroll on enrollment/authentication requests.</td>
+<td><code>false</code></td>
 </tr>
 <tr>
-<td>metadataUrlsProvider</td>
-<td>https://mds3.fido.tools</td>
-<td>String value to provide source of URLs with external metadata.</td>
+<td><code>unfinishedRequestExpiration</code></td>
+<td>Integer</td>
+<td>The expiration time in seconds for pending enrollment/authentication requests.</td>
+<td><code>120</code> (120 seconds)</td>
 </tr>
 <tr>
-<td>enabledFidoAlgorithms</td>
-<td>["RS256","ES256"]</td>
-<td></td>
+<td><code>metadataRefreshInterval</code></td>
+<td>Integer</td>
+<td>The expiration time in seconds for approved authentication requests.</td>
+<td><code>1296000</code> (15 days)</td>
 </tr>
 <tr>
-<td>rp</td>
-<td>[{"id":"https://my-jans-server.jans.io","origins":["my-jans-server.jans.io"]}]</td>
-<td>Requested party id.</td>
+<td><code>serverMetadataFolder</code></td>
+<td>String</td>
+<td>The folder where authenticators' metadata in JSON format is stored.</td>
+<td><code>"%(fido2ConfigFolder)s/server_metadata"</code></td>
 </tr>
 <tr>
-<td>debugUserAutoEnrollment</td>
-<td>false</td>
-<td>Allow to enroll users on enrollment/authentication requests. (Useful while running tests)</td>
+<td><code>enabledFidoAlgorithms</code></td>
+<td>Array of Strings</td>
+<td>The list of requested credential types for FIDO authentication.</td>
+<td><code>["RS256", "ES256"]</code></td>
 </tr>
 <tr>
-<td>unfinishedRequestExpiration</td>
-<td>180</td>
-<td>Expiration time in seconds for pending enrollment/authentication requests</td>
+<td><code>requestedParties</code></td>
+<td>Array of Objects</td>
+<td>The list of requested parties (RPs) configuration for FIDO authentication.</td>
+<td><code>[ { "id": "https://%(hostname)s", "origins": ["%(hostname)s"] } ]</code></td>
 </tr>
 <tr>
-<td>authenticationHistoryExpiration</td>
-<td>1296000</td>
-<td>Expiration time in seconds for approved authentication requests.</td>
+<td><code>metadataServers</code></td>
+<td>Array of Objects</td>
+<td>A list of metadata servers providing external metadata URLs for FIDO authentication.</td>
+<td><code>[ { "url": "https://mds.fidoalliance.org/" } ]</code></td>
 </tr>
 <tr>
-<td>disableMetadataService</td>
-<td>false</td>
-<td>Boolean value indicating whether the MDS download should be omitted</td>
+<td><code>disableMetadataService</code></td>
+<td>Boolean</td>
+<td>Whether downloading MDS metadata should be skipped.</td>
+<td><code>false</code></td>
 </tr>
 <tr>
-<td>attestationMode</td>
-<td>"monitor"</td>
-<td>Enum value indicating whether MDS validation should be omitted during attestation</td>
+<td><code>hints</code></td>
+<td>Array of Strings</td>
+<td>Hints provided to the RP (e.g., security-key, client-device, hybrid).</td>
+<td><code>["security-key", "client-device", "hybrid"]</code></td>
 </tr>
 <tr>
-<td>assertionOptionsGenerateEndpointEnabled</td>
-<td>false</td>
-<td>Boolean value indicating whether the assertion custom endpoint (used especially in passkey) is enabled.</td>
+<td><code>enterpriseAttestation</code></td>
+<td>Boolean</td>
+<td>Whether enterprise authenticators are enabled for use in a specific protected environment.</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>attestationMode</code></td>
+<td>String</td>
+<td>Whether MDS validation should be omitted during attestation.</td>
+<td><code>"monitor"</code></td>
 </tr>
 </tbody>
 </table>
@@ -9224,7 +9244,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-13T14:17:11+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-27T08:54:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-27</span>
       
         <br>
         Created:
