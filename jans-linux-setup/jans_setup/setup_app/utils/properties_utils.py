@@ -613,7 +613,7 @@ class PropertiesUtils(SetupUtils):
             self.promptForConfigApi()
             self.promptForScimServer()
             self.promptForFido2Server()
-            self.prompt_for_jans_link()
+            #self.prompt_for_jans_link()
             self.prompt_for_jans_keycloak_link()
             self.prompt_for_casa()
             self.pompt_for_jans_lock()
