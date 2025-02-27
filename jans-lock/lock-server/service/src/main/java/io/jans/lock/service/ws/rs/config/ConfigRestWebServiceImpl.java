@@ -33,7 +33,6 @@ import jakarta.ws.rs.core.SecurityContext;
  * @author Yuriy Movchan Date: 06/06/2024
  */
 @Dependent
-@Path("/")
 public class ConfigRestWebServiceImpl implements ConfigRestWebService {
 
 	@Inject

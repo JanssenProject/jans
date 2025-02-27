@@ -15,7 +15,12 @@ import org.slf4j.Logger;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.ErrorResponseFactory;
 import io.jans.lock.model.error.StatErrorResponseType;
+import io.jans.lock.model.stat.FlatStatResponse;
+import io.jans.lock.model.stat.Months;
+import io.jans.lock.model.stat.StatResponse;
+import io.jans.lock.model.stat.StatResponseItem;
 import io.jans.lock.service.stat.StatResponseService;
+import io.jans.lock.service.ws.rs.base.BaseResource;
 import io.jans.lock.util.Constants;
 import io.jans.lock.util.ServerUtil;
 import io.prometheus.client.CollectorRegistry;
@@ -24,7 +29,6 @@ import io.prometheus.client.exporter.common.TextFormat;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.FormParam;
-import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
@@ -37,8 +41,7 @@ import jakarta.ws.rs.core.Response;
  * @author Yuriy Movchan Date: 12/02/2024
  */
 @Dependent
-@Path("/internal/stat")
-public class StatRestWebServiceImpl implements StatRestWebService {
+public class StatRestWebServiceImpl extends BaseResource implements StatRestWebService {
 
     @Inject
     private Logger log;
@@ -53,21 +56,19 @@ public class StatRestWebServiceImpl implements StatRestWebService {
     private AppConfiguration appConfiguration;
 
     @Override
-    public Response statGet(@HeaderParam("Authorization") String authorization,
-                            @QueryParam("month") String months,
+    public Response statGet(@QueryParam("month") String months,
                             @QueryParam("start-month") String startMonth,
                             @QueryParam("end-month") String endMonth,
                             @QueryParam("format") String format) {
-        return stat(authorization, months, startMonth, endMonth, format);
+        return stat(months, startMonth, endMonth, format);
     }
 
     @Override
-    public Response statPost(@HeaderParam("Authorization") String authorization,
-                             @FormParam("month") String months,
+    public Response statPost(@FormParam("month") String months,
                              @FormParam("start-month") String startMonth,
                              @FormParam("end-month") String endMonth,
                              @FormParam("format") String format) {
-        return stat(authorization, months, startMonth, endMonth, format);
+        return stat(months, startMonth, endMonth, format);
     }
 
 	public static String createOpenMetricsResponse(StatResponse statResponse) throws IOException {
@@ -122,14 +123,14 @@ public class StatRestWebServiceImpl implements StatRestWebService {
         return v != null ? v : 0;
     }
 
-	public Response stat(String authorization, String monthsParam, String startMonth, String endMonth, String format) {
+	public Response stat(String monthsParam, String startMonth, String endMonth, String format) {
+		if (!appConfiguration.isStatEnabled()) {
+			throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, StatErrorResponseType.ACCESS_DENIED, "Future stat is disabled on server.");
+		}
+
 		if (log.isDebugEnabled()) {
 			log.debug("Attempting to request stat, month: {}, startMonth: {}, endMonth: {}, format: {}",
 					escapeLog(monthsParam), escapeLog(startMonth), escapeLog(endMonth), escapeLog(format));
-		}
-
-		if (!appConfiguration.isStatEnabled()) {
-			throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, StatErrorResponseType.ACCESS_DENIED, "Future stat is disabled on server.");
 		}
 
         final Set<String> months = validateMonths(monthsParam, startMonth, endMonth);

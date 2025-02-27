@@ -60,35 +60,36 @@ import java.util.stream.Stream;
 import static java.time.format.DateTimeFormatter.ISO_DATE;
 
 /**
- * TOC is parsed and Hashmap containing JSON object of individual Authenticators is created.
+ * TOC is parsed and Hashmap containing JSON object of individual Authenticators
+ * is created.
  *
  */
 @ApplicationScoped
 public class TocService {
 
-    @Inject
-    private Logger log;
+	@Inject
+	private Logger log;
 
-    @Inject
-    private DataMapperService dataMapperService;
+	@Inject
+	private DataMapperService dataMapperService;
 
-    @Inject
-    private CertificateVerifier certificateVerifier;
+	@Inject
+	private CertificateVerifier certificateVerifier;
 
-    @Inject
-    private CertificateService certificateService;
+	@Inject
+	private CertificateService certificateService;
 
-    @Inject
-    private Base64Service base64Service;
+	@Inject
+	private Base64Service base64Service;
 
-    @Inject
-    private AppConfiguration appConfiguration;
+	@Inject
+	private AppConfiguration appConfiguration;
 
 	@Inject
 	private ConfigurationFactory configurationFactory;
-    
+
 	@Inject
-    private FetchMdsProviderService fetchMdsProviderService;
+	private FetchMdsProviderService fetchMdsProviderService;
 
 	@Inject
 	private DBDocumentService dbDocumentService;
@@ -96,75 +97,53 @@ public class TocService {
 	@Inject
 	private Fido2Service fido2Service;
 
-    private Map<String, JsonNode> tocEntries;
-    
-    private LocalDate nextUpdate;
-    private MessageDigest digester;
+	private Map<String, JsonNode> tocEntries;
 
-    public LocalDate getNextUpdateDate()
-    {
-    	return nextUpdate;
-    }
+	private LocalDate nextUpdate;
+	private MessageDigest digester;
 
-    public void init(@Observes @ApplicationInitialized(ApplicationScoped.class) Object init) {
-        refresh();
+	public LocalDate getNextUpdateDate() {
+		return nextUpdate;
+	}
+
+	public void init(@Observes @ApplicationInitialized(ApplicationScoped.class) Object init) {
+		refresh();
 		loadMetadataServiceExternalProvider();
-    }
+	}
 
-    public void refresh() {
+	public void refresh() {
 		this.tocEntries = Collections.synchronizedMap(new HashMap<String, JsonNode>());
 		if (appConfiguration.getFido2Configuration().isDisableMetadataService()) {
 			log.debug("SkipDownloadMds is enabled");
-		}  else {
+		} else {
 			tocEntries.putAll(parseTOCs());
 		}
 	}
-    
+
 	private Map<String, JsonNode> parseTOCs() {
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+		List<Map<String, JsonNode>> maps = new ArrayList<>();
 		if (fido2Configuration == null) {
 			log.warn("Fido2 configuration not exists");
 			return new HashMap<String, JsonNode>();
 		}
 
 		String mdsTocRootCertsFolder = fido2Configuration.getMdsCertsFolder();
-		String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
-		if (StringHelper.isEmpty(mdsTocRootCertsFolder) || StringHelper.isEmpty(mdsTocFilesFolder)) {
+		if (StringHelper.isEmpty(mdsTocRootCertsFolder)) {
 			log.warn("Fido2 MDS cert and TOC properties should be set");
 			return new HashMap<String, JsonNode>();
 		}
 		log.info("Populating TOC certs entries from {}", mdsTocRootCertsFolder);
-		log.info("Populating TOC entries from {}", mdsTocFilesFolder);
 
 		try {
-			List<Document> tocRootCertsDocuments = dbDocumentService.getDocumentsByFilePath(mdsTocRootCertsFolder);
+			Document tocRootCertsDocument = dbDocumentService.getDocumentByDisplayName("mdsTocsFolder");
+			Pair<LocalDate, Map<String, JsonNode>> result = parseTOC(mdsTocRootCertsFolder, tocRootCertsDocument.getDocument());
+			log.info("Get TOC {} entries with nextUpdate date {}", result.getSecond().size(), result.getFirst());
+
+			maps.add(result.getSecond());
 		} catch (Exception e) {
-			log.error("Failed to fetch toc Root Certs Documents ", e);
-			throw new DocumentException(e);
-		}
-
-		List<Document> tocFilesdocuments = new ArrayList<>();
-		try {
-			tocFilesdocuments = dbDocumentService.getDocumentsByFilePath(mdsTocFilesFolder);
-		} catch (Exception e) {
-			log.error("Failed to fetch toc Files Documents ", e);
-			throw new DocumentException(e);
-		}
-
-		List<Map<String, JsonNode>> maps = new ArrayList<>();
-		for(Document document :tocFilesdocuments){
-				try {
-					Pair<LocalDate, Map<String, JsonNode>> result = parseTOC(mdsTocRootCertsFolder, document.getDocument());
-					log.info("Get TOC {} entries with nextUpdate date {}", result.getSecond().size(),
-							result.getFirst());
-
-					maps.add(result.getSecond());
-				} catch (IOException e) {
-					log.warn("Can't access or open path: {}", document.getFileName(), e);
-				} catch (ParseException e) {
-					log.warn("Can't parse path: {}", document.getFileName(), e);
-				}
-			}
+			log.warn("Can't access document : {}", e.getMessage(), e);
+		} 
 
 		return mergeAndResolveDuplicateEntries(maps);
 	}
@@ -183,104 +162,106 @@ public class TocService {
 		}
 	}
 
-    private JWSVerifier resolveVerifier(JWSAlgorithm algorithm, String mdsTocRootCertsFolder, List<String> certificateChain) {
-        List<X509Certificate> x509CertificateChain = certificateService.getCertificates(certificateChain);
-        List<X509Certificate> x509TrustedCertificates = certificateService.getCertificates(mdsTocRootCertsFolder);
+	private JWSVerifier resolveVerifier(JWSAlgorithm algorithm, String mdsTocRootCertsFolder,
+			List<String> certificateChain) {
+		List<X509Certificate> x509CertificateChain = certificateService.getCertificates(certificateChain);
+		List<X509Certificate> x509TrustedCertificates = certificateService.getCertificates(mdsTocRootCertsFolder);
 		List<String> enabledFidoAlgorithms = appConfiguration.getFido2Configuration().getEnabledFidoAlgorithms();
 
-        X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(x509CertificateChain, x509TrustedCertificates);
-        //possible set of algos are : ES256, RS256, PS256, ED256, ED25519
-        // no support for ED256 in JOSE library
+		X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(x509CertificateChain,
+				x509TrustedCertificates);
+		// possible set of algos are : ES256, RS256, PS256, ED256, ED25519
+		// no support for ED256 in JOSE library
 
-		if(!(enabledFidoAlgorithms.contains(algorithm.getName()) || enabledFidoAlgorithms.contains(Curve.Ed25519.getName()))) {
-			throw new Fido2RuntimeException("Unable to create a verifier for algorithm " + algorithm + " as it is not supported. Add this algorithm in the FIDO2 configuration to support it.");
+		if (!(enabledFidoAlgorithms.contains(algorithm.getName())
+				|| enabledFidoAlgorithms.contains(Curve.Ed25519.getName()))) {
+			throw new Fido2RuntimeException("Unable to create a verifier for algorithm " + algorithm
+					+ " as it is not supported. Add this algorithm in the FIDO2 configuration to support it.");
 		}
-        
-        if (JWSAlgorithm.ES256.equals(algorithm)) {
-        	log.debug("resolveVerifier : ES256");
-            try {
-                return new ECDSAVerifier((ECPublicKey) verifiedCert.getPublicKey());
-            } catch (JOSEException e) {
-                throw new Fido2RuntimeException("Unable to create verifier for algorithm " + algorithm, e);
-            }
-        }
-        else if (JWSAlgorithm.RS256.equals(algorithm) || JWSAlgorithm.PS256.equals(algorithm)) {
-        	log.debug("resolveVerifier : RS256");
-                return new RSASSAVerifier((RSAPublicKey) verifiedCert.getPublicKey());
-        }
-		else if (JWSAlgorithm.EdDSA.equals(algorithm) && ((OctetKeyPair) verifiedCert.getPublicKey()).getCurve().equals(Curve.Ed25519)) {
+
+		if (JWSAlgorithm.ES256.equals(algorithm)) {
+			log.debug("resolveVerifier : ES256");
+			try {
+				return new ECDSAVerifier((ECPublicKey) verifiedCert.getPublicKey());
+			} catch (JOSEException e) {
+				throw new Fido2RuntimeException("Unable to create verifier for algorithm " + algorithm, e);
+			}
+		} else if (JWSAlgorithm.RS256.equals(algorithm) || JWSAlgorithm.PS256.equals(algorithm)) {
+			log.debug("resolveVerifier : RS256");
+			return new RSASSAVerifier((RSAPublicKey) verifiedCert.getPublicKey());
+		} else if (JWSAlgorithm.EdDSA.equals(algorithm)
+				&& ((OctetKeyPair) verifiedCert.getPublicKey()).getCurve().equals(Curve.Ed25519)) {
 			log.debug("resolveVerifier : Ed25519");
 			try {
-					return new Ed25519Verifier((OctetKeyPair) verifiedCert.getPublicKey());
+				return new Ed25519Verifier((OctetKeyPair) verifiedCert.getPublicKey());
 			} catch (JOSEException e) {
 				throw new Fido2RuntimeException("Error during resolving Ed25519 verifier " + e.getMessage());
 			}
+		} else {
+			throw new Fido2RuntimeException("Don't know what to do with " + algorithm);
 		}
-        else { 
-            throw new Fido2RuntimeException("Don't know what to do with " + algorithm);
-        }
-    }
+	}
 
-    private MessageDigest resolveDigester(JWSAlgorithm algorithm) {
-    	// fix: algorithm RS256 added for https://github.com/GluuFederation/fido2/issues/16
-        if (JWSAlgorithm.ES256.equals(algorithm) || JWSAlgorithm.RS256.equals(algorithm) ) {
-            return DigestUtils.getSha256Digest();
-        } else if(JWSAlgorithm.EdDSA.equals(algorithm)) {
+	private MessageDigest resolveDigester(JWSAlgorithm algorithm) {
+		// fix: algorithm RS256 added for
+		// https://github.com/GluuFederation/fido2/issues/16
+		if (JWSAlgorithm.ES256.equals(algorithm) || JWSAlgorithm.RS256.equals(algorithm)) {
+			return DigestUtils.getSha256Digest();
+		} else if (JWSAlgorithm.EdDSA.equals(algorithm)) {
 			return DigestUtils.getSha512Digest();
 		} else {
-            throw new Fido2RuntimeException("Don't know what to do with " + algorithm);
-        }
-    }
+			throw new Fido2RuntimeException("Don't know what to do with " + algorithm);
+		}
+	}
 
-    private Map<String, JsonNode> mergeAndResolveDuplicateEntries(List<Map<String, JsonNode>> maps) {
-        Map<String, JsonNode> allEntries = new HashMap<>();
-        Map<String, JsonNode> a[] = new Map[maps.size()];
-        maps.toArray(a);
+	private Map<String, JsonNode> mergeAndResolveDuplicateEntries(List<Map<String, JsonNode>> maps) {
+		Map<String, JsonNode> allEntries = new HashMap<>();
+		Map<String, JsonNode> a[] = new Map[maps.size()];
+		maps.toArray(a);
 
-        allEntries.putAll(
-                Stream.of(a).flatMap(m -> m.entrySet().stream()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> {
-                    log.warn("Duplicate values {} {}", v1, v2);
+		allEntries.putAll(Stream.of(a).flatMap(m -> m.entrySet().stream())
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> {
+					log.warn("Duplicate values {} {}", v1, v2);
 
-                    LocalDate dateV1 = getDate(v1);
-                    LocalDate dateV2 = getDate(v2);
+					LocalDate dateV1 = getDate(v1);
+					LocalDate dateV2 = getDate(v2);
 
-                    JsonNode result;
-                    if (dateV1.isAfter(dateV2)) {
-                        result = v1;
-                    } else {
-                        result = v2;
-                    }
+					JsonNode result;
+					if (dateV1.isAfter(dateV2)) {
+						result = v1;
+					} else {
+						result = v2;
+					}
 
-                    log.debug("Selected value {} ", result);
+					log.debug("Selected value {} ", result);
 
-                    return result;
-                })));
+					return result;
+				})));
 
-        return allEntries;
-    }
+		return allEntries;
+	}
 
-    
-    private LocalDate getDate(JsonNode node) {
-        JsonNode dateNode = node.get("timeOfLastStatusChange");
-        LocalDate date;
-        if (dateNode != null) {
-            date = LocalDate.parse(dateNode.asText(), ISO_DATE);
-        } else {
-            date = LocalDate.now();
-        }
+	private LocalDate getDate(JsonNode node) {
+		JsonNode dateNode = node.get("timeOfLastStatusChange");
+		LocalDate date;
+		if (dateNode != null) {
+			date = LocalDate.parse(dateNode.asText(), ISO_DATE);
+		} else {
+			date = LocalDate.now();
+		}
 
-        return date;
-    }
+		return date;
+	}
 
-    public JsonNode getAuthenticatorsMetadata(String aaguid) {
-    	
-        return tocEntries.get(aaguid);
-    }
+	public JsonNode getAuthenticatorsMetadata(String aaguid) {
 
-    public MessageDigest getDigester() {
-        return digester;
-    }
-    
+		return tocEntries.get(aaguid);
+	}
+
+	public MessageDigest getDigester() {
+		return digester;
+	}
+
 	public boolean downloadMdsFromServer(URL metadataUrl) {
 
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
@@ -288,11 +269,11 @@ public class TocService {
 		String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
 		try {
 			List<Document> documents = dbDocumentService.getDocumentsByFilePath(mdsTocFilesFolder);
-			for (Document document : documents){
+			for (Document document : documents) {
 				dbDocumentService.removeDocument(document);
 			}
 		} catch (Exception e) {
-			log.error("Failed to remove old document of mdsTocFilesFolder" , e);
+			log.error("Failed to remove old document of mdsTocFilesFolder", e);
 			throw new DocumentException(e);
 		}
 
@@ -313,14 +294,14 @@ public class TocService {
 				document.setEnabled(true);
 				dbDocumentService.addDocument(document);
 			} catch (Exception e) {
-				log.error("Failed to add new document of mdsTocFilesFolder" , e);
+				log.error("Failed to add new document of mdsTocFilesFolder", e);
 				throw new DocumentException(e);
 			}
 
 			log.info("TOC file updated.");
 			return true;
 		} catch (IOException e) {
-			log.warn("Can't access or open path: {}", metadataUrl, e);
+			log.warn("Can't access document {}", metadataUrl, e);
 			throw new Fido2RuntimeException("Can't access or open path: {}" + metadataUrl + e.getMessage(), e);
 		}
 	}
@@ -331,15 +312,16 @@ public class TocService {
 		if (metadataServers != null && !metadataServers.isEmpty()) {
 			log.debug("metadataServers found: {}", metadataServers.size());
 			try {
-				for(MetadataServer metadataServer : metadataServers) {
+				for (MetadataServer metadataServer : metadataServers) {
 					String blobJWT = fetchMdsProviderService.fetchMdsV3Endpoints(metadataServer.getUrl());
 					Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
 					String mdsTocRootCertsFolder = fido2Configuration.getMdsCertsFolder();
-					List <String> documentsId = saveMetadataServerCertsInDB(metadataServer.getUrl(), blobJWT);
-					updatedmetadataServers.put(metadataServer.getUrl(),documentsId);
+					List<String> documentsId = saveMetadataServerCertsInDB(metadataServer.getUrl(), blobJWT);
+					updatedmetadataServers.put(metadataServer.getUrl(), documentsId);
 					List<Map<String, JsonNode>> entryList = new ArrayList<>();
 					try {
-						Pair<LocalDate, Map<String, JsonNode>> dateMapPair = readEntriesFromTocJWT(blobJWT, mdsTocRootCertsFolder, false);
+						Pair<LocalDate, Map<String, JsonNode>> dateMapPair = readEntriesFromTocJWT(blobJWT,
+								mdsTocRootCertsFolder, false);
 						entryList.add(dateMapPair.getSecond());
 					} catch (Fido2RuntimeException e) {
 						log.error(e.getMessage());
@@ -348,9 +330,9 @@ public class TocService {
 					log.info("🔐 MedataUrlsProvider successfully loaded");
 				}
 
-				List <MetadataServer> metadataServerList = new ArrayList<>();
+				List<MetadataServer> metadataServerList = new ArrayList<>();
 
-				for(String metadataserverurl : updatedmetadataServers.keySet()){
+				for (String metadataserverurl : updatedmetadataServers.keySet()) {
 					MetadataServer metadataServer = new MetadataServer();
 					metadataServer.setUrl(metadataserverurl);
 					metadataServer.setCertificateDocumentInum(updatedmetadataServers.get(metadataserverurl));
@@ -379,16 +361,15 @@ public class TocService {
 			throw new Fido2RuntimeException("Error when parsing TOC JWT: " + e.getMessage(), e);
 		}
 		List<String> headerCertificatesX5c = blobDecoded.getHeader().getX509CertChain().stream()
-				.map(c -> base64Service.encodeToString(c.decode()))
-				.collect(Collectors.toList());
+				.map(c -> base64Service.encodeToString(c.decode())).collect(Collectors.toList());
 		int index = 0;
-		if (!headerCertificatesX5c.isEmpty()){
+		if (!headerCertificatesX5c.isEmpty()) {
 			List<Document> oldCerts = dbDocumentService.searchDocuments(metadataServer, 100);
 			for (Document certDoc : oldCerts) {
 				try {
 					dbDocumentService.removeDocument(certDoc);
 				} catch (Exception e) {
-					log.error("Failed to remove document file[ath:'" +certDoc.getFilePath()+ "' : " , e);
+					log.error("Failed to remove document file[ath:'" + certDoc.getFilePath() + "' : ", e);
 					throw new DocumentException(e);
 				}
 			}
@@ -406,110 +387,128 @@ public class TocService {
 					dbDocumentService.addDocument(document);
 					result.add(document.getInum());
 				} catch (Exception e) {
-					log.error("Failed to add document for  '" + document.getFileName() + ", message: " + e.getMessage(), e);
+					log.error("Failed to add document for  '" + document.getFileName() + ", message: " + e.getMessage(),
+							e);
 					throw new DocumentException(e);
 				}
 			}
-	}
+		}
 		return result;
 	}
 
-	private Pair<LocalDate, Map<String, JsonNode>> readEntriesFromTocJWT(String tocJwt, String mdsTocRootCertsFolder, boolean loadGlobalVariables) {
-		log.debug("Attempting reading entries from JWT: {}", StringUtils.abbreviateMiddle(tocJwt, "...", 100));
-		JWSObject blobDecoded;
-		try {
-			blobDecoded = JWSObject.parse(tocJwt);
-		} catch (ParseException e) {
-			throw new Fido2RuntimeException("Error when parsing TOC JWT: " + e.getMessage(), e);
-		}
-		JWSAlgorithm algorithm = blobDecoded.getHeader().getAlgorithm();
-		List<String> headerCertificatesX5c = blobDecoded.getHeader().getX509CertChain().stream()
-				.map(c -> base64Service.encodeToString(c.decode()))
-				.collect(Collectors.toList());
-		// If the x5u attribute is present in the JWT Header then
-		// if (jwsObject.getHeader().getX509CertURL() != null) {
-		// 1. The FIDO Server MUST verify that the URL specified by the x5u attribute
-		// has the same web-origin as the URL used to download the metadata BLOB from.
-		// The FIDO Server SHOULD ignore the file if the web-origin differs (in order to
-		// prevent loading objects from arbitrary sites).
-		// 2. The FIDO Server MUST download the certificate (chain) from the URL
-		// specified by the x5u attribute [JWS]. The certificate chain MUST be verified
-		// to properly chain to the metadata BLOB signing trust anchor according to
-		// [RFC5280]. All certificates in the chain MUST be checked for revocation
-		// according to [RFC5280].
-		// 3. The FIDO Server SHOULD ignore the file if the chain cannot be verified or
-		// if one of the chain certificates is revoked.
+	private Pair<LocalDate, Map<String, JsonNode>> readEntriesFromTocJWT(
+	        String tocJwt, 
+	        String mdsTocRootCertsFolder, 
+	        boolean loadGlobalVariables) {
+	    log.debug("Attempting reading entries from JWT: {}", StringUtils.abbreviateMiddle(tocJwt, "...", 100));
+	    
+	    JWSObject blobDecoded = parseJwt(tocJwt);
+	    JWSAlgorithm algorithm = blobDecoded.getHeader().getAlgorithm();
+	    List<String> headerCertificatesX5c = getHeaderCertificatesX5c(blobDecoded);
+	    
+	    verifyJwsSignature(blobDecoded, mdsTocRootCertsFolder, headerCertificatesX5c, algorithm);
+	    
+	    JsonNode toc = parseTocPayload(blobDecoded);
+	    
+	    if (loadGlobalVariables) {
+	        loadGlobalVariables(toc, algorithm);
+	    }
 
-		// the chain should be retrieved from the x5c attribute.
-		// else if (certificateChain.isEmpty()) {
-		// The FIDO Server SHOULD ignore the file if the chain cannot be verified or if
-		// one of the chain certificates is revoked.
-		// } else {
-		log.info("Metadata BLOB signing trust anchor is considered the BLOB signing certificate chain");
-		// Metadata BLOB signing trust anchor is considered the BLOB signing certificate
-		// chain.
-		// Verify the signature of the Metadata BLOB object using the BLOB signing
-		// certificate chain (as determined by the steps above). The FIDO Server SHOULD
-		// ignore the file if the signature is invalid. It SHOULD also ignore the file
-		// if its number (no) is less or equal to the number of the last Metadata BLOB
-		// object cached locally.
-		// }
-		try {
-			JWSVerifier verifier = resolveVerifier(algorithm, mdsTocRootCertsFolder, headerCertificatesX5c);
-			if (!blobDecoded.verify(verifier)) {
-				throw new Fido2RuntimeException("Unable to verify JWS object using algorithm: " + algorithm);
-			}
-		} catch (Exception e) {
-			throw new Fido2RuntimeException("Unable to verify JWS object using algorithm: " + algorithm + ", message: " + e.getMessage(), e);
-		}
+	    JsonNode entriesNode = toc.get("entries");
+	    log.debug("Legal header: {}", toc.get("legalHeader"));
+	    log.debug("Property 'no' value: {}. serialNo: {}", toc.get("no").asInt(), entriesNode.size());
 
-		JsonNode toc;
-		try {
-			toc = dataMapperService.readTree(blobDecoded.getPayload().toString());
-		} catch (IOException e) {
-			throw new Fido2RuntimeException("Error when read JWT payload: " + e.getMessage(), e);
-		}
-		if (loadGlobalVariables) {
-			this.nextUpdate = LocalDate.parse(toc.get("nextUpdate").asText(), ISO_DATE);
-			this.digester = resolveDigester(algorithm);
-		}
+	    Map<String, JsonNode> entries = processMetadataEntries(entriesNode);
+	    
+	    LocalDate nextUpdateDate = LocalDate.parse(toc.get("nextUpdate").asText());
+	    return new Pair<>(nextUpdateDate, entries);
+	}
 
-		JsonNode entriesNode = toc.get("entries");
-		log.debug("Legal header: {}", toc.get("legalHeader"));
-		// The serial number of this UAF Metadata BLOB Payload. Serial numbers MUST be
-		// consecutive and strictly monotonic, i.e. the successor BLOB will have a no
-		// value exactly incremented by one.
-		log.debug("Property 'no' value: {}. serialNo: {}", toc.get("no").asInt(), entriesNode.size());
+	private JWSObject parseJwt(String tocJwt) {
+	    try {
+	        return JWSObject.parse(tocJwt);
+	    } catch (ParseException e) {
+	        throw new Fido2RuntimeException("Error when parsing TOC JWT: " + e.getMessage(), e);
+	    }
+	}
 
-		Map<String, JsonNode> entries = new HashMap<>();
-		for (JsonNode metadataEntryNode : entriesNode) {
-			if (metadataEntryNode.hasNonNull("aaguid")) {
-				String aaguid = metadataEntryNode.get("aaguid").asText();
-				try {
-					certificateVerifier.verifyStatusAcceptable(aaguid, metadataEntryNode);
-					if (!metadataEntryNode.has("metadataStatement")) {
-						log.warn("This entry doesn't contains metadataStatement");
-						continue;
-					}
-					entries.put(aaguid, metadataEntryNode);
-					log.info("Added TOC entry: {} ", aaguid);
-				} catch (Fido2RuntimeException e) {
-					log.error(e.getMessage());
-				}
-			} else if (metadataEntryNode.hasNonNull("aaid")) {
-				String aaid = metadataEntryNode.get("aaid").asText();
-				log.debug("TODO: handle aaid addition to tocEntries {}", aaid);
-			} else if (metadataEntryNode.hasNonNull("attestationCertificateKeyIdentifiers")) {
-				// FIDO U2F authenticators do not support AAID nor AAGUID, but they use
-				// attestation certificates dedicated to a single authenticator model.
-				String attestationCertificateKeyIdentifiers = metadataEntryNode.get("attestationCertificateKeyIdentifiers").asText();
-				log.debug("TODO: handle attestationCertificateKeyIdentifiers addition to tocEntries {}", attestationCertificateKeyIdentifiers);
-			} else {
-				log.debug("Null aaguid, aaid, attestationCertificateKeyIdentifiers - Added TOC entry with status {}", metadataEntryNode.get("statusReports").findValue("status"));
-			}
-		}
+	private List<String> getHeaderCertificatesX5c(JWSObject blobDecoded) {
+	    return blobDecoded.getHeader().getX509CertChain().stream()
+	            .map(c -> base64Service.encodeToString(c.decode()))
+	            .collect(Collectors.toList());
+	}
 
-		LocalDate nextUpdateDate = LocalDate.parse(toc.get("nextUpdate").asText());
-		return new Pair<>(nextUpdateDate, entries);
+	private void verifyJwsSignature(JWSObject blobDecoded, String mdsTocRootCertsFolder, 
+	        List<String> headerCertificatesX5c, JWSAlgorithm algorithm) {
+	    try {
+	        JWSVerifier verifier = resolveVerifier(algorithm, mdsTocRootCertsFolder, headerCertificatesX5c);
+	        if (!blobDecoded.verify(verifier)) {
+	            throw new Fido2RuntimeException("Unable to verify JWS object using algorithm: " + algorithm);
+	        }
+	    } catch (Exception e) {
+	        throw new Fido2RuntimeException("Unable to verify JWS object using algorithm: " + algorithm + ", message: " + e.getMessage(), e);
+	    }
+	}
+
+	private JsonNode parseTocPayload(JWSObject blobDecoded) {
+	    try {
+	        return dataMapperService.readTree(blobDecoded.getPayload().toString());
+	    } catch (IOException e) {
+	        throw new Fido2RuntimeException("Error when reading JWT payload: " + e.getMessage(), e);
+	    }
+	}
+
+	private void loadGlobalVariables(JsonNode toc, JWSAlgorithm algorithm) {
+	    this.nextUpdate = LocalDate.parse(toc.get("nextUpdate").asText(), ISO_DATE);
+	    this.digester = resolveDigester(algorithm);
+	}
+
+	private Map<String, JsonNode> processMetadataEntries(JsonNode entriesNode) {
+	    Map<String, JsonNode> entries = new HashMap<>();
+	    
+	    for (JsonNode metadataEntryNode : entriesNode) {
+	        Optional<String> aaguid = Optional.ofNullable(metadataEntryNode.get("aaguid")).map(JsonNode::asText);
+	        Optional<String> aaid = Optional.ofNullable(metadataEntryNode.get("aaid")).map(JsonNode::asText);
+	        Optional<String> attestationCertificateKeyIdentifiers = Optional.ofNullable(metadataEntryNode.get("attestationCertificateKeyIdentifiers"))
+	                .map(JsonNode::toString);
+
+	        if (aaguid.isPresent()) {
+	            processAaguidEntry(entries, metadataEntryNode, aaguid.get());
+	        } else if (aaid.isPresent()) {
+	            log.debug("TODO: handle aaid addition to tocEntries {}", aaid.get());
+	        } else if (attestationCertificateKeyIdentifiers.isPresent()) {
+	            processAttestationCertificateKeyIdentifiers(entries, entriesNode, attestationCertificateKeyIdentifiers.get());
+	        } else {
+	            log.debug("Null aaguid, aaid, attestationCertificateKeyIdentifiers - Added TOC entry with status {}",
+	                    metadataEntryNode.get("statusReports").findValue("status"));
+	        }
+	    }
+	    
+	    return entries;
+	}
+
+	private void processAaguidEntry(Map<String, JsonNode> entries, JsonNode metadataEntryNode, String aaguid) {
+	    try {
+	        certificateVerifier.verifyStatusAcceptable(aaguid, metadataEntryNode);
+	        if (!metadataEntryNode.has("metadataStatement")) {
+	            log.warn("This entry doesn't contain metadataStatement");
+	        }
+	        entries.put(aaguid, metadataEntryNode);
+	        log.info("Added TOC entry: {} ", aaguid);
+	    } catch (Fido2RuntimeException e) {
+	        log.error(e.getMessage());
+	    }
+	}
+
+	private void processAttestationCertificateKeyIdentifiers(Map<String, JsonNode> entries, JsonNode entriesNode, String attestationCertificateKeyIdentifiers) {
+	    try {
+	        List<String> keyIdentifiersList = dataMapperService.readValue(attestationCertificateKeyIdentifiers, List.class);
+	        for (String keyIdentifier : keyIdentifiersList) {
+	            entries.put(keyIdentifier, entriesNode);
+	            log.info("Added TOC entry: {} ", keyIdentifier);
+	        }
+	    } catch (IOException e) {
+	        log.error("Failed to add attestationCertificateKeyIdentifiers to tocEntries: {}" , attestationCertificateKeyIdentifiers);
+	    }
 	}
 }
