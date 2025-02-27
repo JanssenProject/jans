@@ -6,6 +6,7 @@ import uuid
 import shutil
 import json
 import tempfile
+import configparser
 
 from urllib.parse import urlparse
 
@@ -60,7 +61,7 @@ class JansAuthInstaller(JettyInstaller):
         self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
         self.set_class_path([os.path.join(self.custom_lib_dir, '*')])
         self.external_libs()
-        self.session_cleaner_crontab()
+        self.data_cleaner_crontab()
         self.setup_agama()
         if Config.persistence_type == 'ldap':
             self.populate_jans_db_auth()
@@ -245,7 +246,19 @@ class JansAuthInstaller(JettyInstaller):
         self.dbUtils.set_configuration('jansDbAuth', json.dumps(ldap_config, indent=2), dn='ou=configuration,o=jans')
 
 
-    def session_cleaner_crontab(self):
+    def data_cleaner_crontab(self):
+
+        tables = []
+        for schema_fn in Config.schema_files:
+            schema = base.readJsonFile(schema_fn)
+            for cls in schema['objectClasses']:
+                if 'exp' in cls['may'] and 'del' in cls['may']:
+                    tables.append(cls['names'][0])
+
+        config = configparser.ConfigParser()
+        config['main'] = { 'tables': ' '.join(tables) }
+        with open(Config.data_cleaner_config_fn, 'w') as configfile:
+            config.write(configfile)
 
         crontab_script_fn = os.path.join(
                         Config.jansOptBinFolder,

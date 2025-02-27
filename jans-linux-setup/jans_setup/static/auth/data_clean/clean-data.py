@@ -5,14 +5,16 @@ import sys
 import shutil
 import argparse
 import subprocess
-
+import configparser
 
 parser = argparse.ArgumentParser(description="This script removes Janssen Server tokens")
 parser.add_argument('-limit', help="Limit to delete entry per execution", type=int, default=1000)
 parser.add_argument('--yes', help="For execute without prompt", action='store_true')
 argsp = parser.parse_args()
 
-tables = ['jansToken', 'jansSessId', 'jansDeviceSess']
+config = configparser.ConfigParser()
+config.read('/etc/jans/data-clean.ini')
+tables = config['main']['tables'].split()
 
 if not argsp.yes:
     print(f"This command will remove first {argsp.limit} entires of the following tables where expiration is before than now")
@@ -51,4 +53,5 @@ if db_type == 'mysql':
     cmd = f'{mysql_cmd} --user={db_user} --host={db_host} --port={db_port} --password=$db_user_pw {db_name} -e '
     for table in tables:
         qcmd = cmd + f'"DELETE FROM {table} WHERE del=TRUE AND exp < NOW() LIMIT {argsp.limit};"'
+        print(f"Executing command: {qcmd}")
         subprocess.run(qcmd, shell=True, env={'db_user_pw': db_user_pw})

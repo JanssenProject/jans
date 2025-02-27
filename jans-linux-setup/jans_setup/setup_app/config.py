@@ -157,6 +157,7 @@ class Config:
         self.rdbm_password = None
         self.rdbm_password_enc = ''
         self.static_rdbm_dir = os.path.join(self.install_dir, 'static/rdbm')
+        self.schema_files = [os.path.join(self.install_dir, 'schema', schemma_fn) for schemma_fn in ('jans_schema.json', 'custom_schema.json')]
 
         # Jans components installation status
         self.loadData = True
@@ -221,16 +222,17 @@ class Config:
         self.extensionFolder = os.path.join(self.staticFolder, 'extension')
         self.script_catalog_dir = os.path.join(self.install_dir, 'script_catalog')
 
-        self.data_cleaner_crontab_fn = os.path.join(self.staticFolder, 'auth/session_clean/jans-clean-data-crontab.py')
+        self.data_cleaner_crontab_fn = os.path.join(self.staticFolder, 'auth/data_clean/jans-clean-data-crontab.py')
+        self.data_cleaner_config_fn = os.path.join(self.jansBaseFolder, 'data-clean.ini')
 
         self.jansScriptFiles = [
                             os.path.join(self.staticFolder, 'scripts/logmanager.sh'),
                             os.path.join(self.staticFolder, 'scripts/jans'),
                             os.path.join(self.staticFolder, 'scripts/jans_services_status.py'),
                             os.path.join(self.staticFolder, 'scripts/get_agama_lab_projects.py'),
-                            os.path.join(self.staticFolder, 'auth/session_clean/clean-data.py'),
+                            os.path.join(self.staticFolder, 'auth/data_clean/clean-data.py'),
                             os.path.join(base.pylib_dir, 'crontab.py'),
-                            self.session_cleaner_crontab_fn,
+                            self.data_cleaner_crontab_fn,
                             ]
 
         self.redhat_services = ['httpd', 'rsyslog']
