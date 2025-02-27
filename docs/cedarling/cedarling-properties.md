@@ -17,7 +17,7 @@ These Bootstrap Properties control default application level behavior.
 * **`CEDARLING_POLICY_STORE_ID`** : The identifier of the policy store in case there is more then one policy_store_id in the policy store.
 * **`CEDARLING_USER_AUTHZ`** : When `enabled`, Cedar engine authorization is queried for a User principal.
 * **`CEDARLING_WORKLOAD_AUTHZ`** : When `enabled`, Cedar engine authorization is queried for a Workload principal.
-* **`CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION`** :  `AND`, `OR`
+* **`CEDARLING_PRINCIPAL_BOOLEAN_OPERATION`** : property specifies what boolean operation to use for the `USER` and `WORKLOAD` when making authz (authorization) decisions. [See here](#user-workload-boolean-operation).
 * **`CEDARLING_MAPPING_USER`** : Name of Cedar User schema entity if we don't want to use default. When specified cedarling try build defined entity (from schema) as user instead of default `User` entity defined in `cedar` schema. Works in namespace defined in the policy store.
 * **`CEDARLING_MAPPING_WORKLOAD`** : Name of Cedar Workload schema entity
 * **`CEDARLING_MAPPING_ROLE`** : Name of Cedar Role schema entity
@@ -77,7 +77,22 @@ All other fields are optional and can be omitted. If a field is not provided, Ce
 
 ## User-Workload Boolean Operation
 
-The `CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION` property specifies what boolean operation to use for the `USER` and `WORKLOAD` when making authz (authorization) decisions.
+The `CEDARLING_PRINCIPAL_BOOLEAN_OPERATION` property specifies what boolean operation to use for the `USER` and `WORKLOAD` when making authz (authorization) decisions.
+
+Make sure that you use correct `var` name for `principal` types.
+
+Use [JsonLogic](https://jsonlogic.com/).
+Default value:
+
+```json
+{
+    "and" : [
+        {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+        {"===": [{"var": "Jans::User"}, "ALLOW"]}
+    ]
+}
+
+Note: For comparison better to use `===` instead of `==`. To avoid casting result to `Null` if something goes wrong.
 
 ### Available Operations
 
@@ -256,7 +271,12 @@ Below is an example of a bootstrap config in JSON format. Not all fields should 
     "client_id",
     "rp_id"
   ],
-  "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
+  "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+    "and" : [
+      {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+      {"===": [{"var": "Jans::User"}, "ALLOW"]}
+    ]
+  },
   "CEDARLING_LOCAL_JWKS": null,
   "CEDARLING_JWT_SIG_VALIDATION": "disabled",
   "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
@@ -315,7 +335,14 @@ CEDARLING_LOG_LEVEL: INFO
 CEDARLING_LOG_TTL: null
 CEDARLING_DECISION_LOG_USER_CLAIMS: ["sub","email"]
 CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS: ["client_id", "rp_id"]
-CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION: AND
+CEDARLING_PRINCIPAL_BOOLEAN_OPERATION:
+    and:
+        - "===":
+            - var: "Jans::Workload"
+            - "ALLOW"
+        - "===":
+            - var: "Jans::User"
+            - "ALLOW"
 CEDARLING_LOCAL_JWKS: null
 CEDARLING_JWT_SIG_VALIDATION: disabled
 CEDARLING_JWT_STATUS_VALIDATION: disabled

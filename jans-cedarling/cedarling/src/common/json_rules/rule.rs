@@ -12,8 +12,8 @@ use serde_json::Value;
 /// ```json
 /// {
 ///     "and" : [
-///         {"==": [{"var": "Jans::Workload"}, "ALLOW"]},
-///         {"==": [{"var": "Jans::User"}, "ALLOW"]}
+///         {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+///         {"===": [{"var": "Jans::User"}, "ALLOW"]}
 ///     ]
 /// }
 /// ```

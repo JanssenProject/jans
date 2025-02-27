@@ -105,8 +105,8 @@ pub struct BootstrapConfigRaw {
     /// ```json
     /// {
     ///     "and" : [
-    ///         {"==": [{"var": "Jans::Workload"}, "ALLOW"]},
-    ///         {"==": [{"var": "Jans::User"}, "ALLOW"]}
+    ///         {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+    ///         {"===": [{"var": "Jans::User"}, "ALLOW"]}
     ///     ]
     /// }
     /// ```
