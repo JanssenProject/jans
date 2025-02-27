@@ -221,14 +221,14 @@ class Config:
         self.extensionFolder = os.path.join(self.staticFolder, 'extension')
         self.script_catalog_dir = os.path.join(self.install_dir, 'script_catalog')
 
-        self.session_cleaner_crontab_fn = os.path.join(self.staticFolder, 'auth/session_clean/jans-clean-session-crontab.py')
+        self.data_cleaner_crontab_fn = os.path.join(self.staticFolder, 'auth/session_clean/jans-clean-data-crontab.py')
 
         self.jansScriptFiles = [
                             os.path.join(self.staticFolder, 'scripts/logmanager.sh'),
                             os.path.join(self.staticFolder, 'scripts/jans'),
                             os.path.join(self.staticFolder, 'scripts/jans_services_status.py'),
                             os.path.join(self.staticFolder, 'scripts/get_agama_lab_projects.py'),
-                            os.path.join(self.staticFolder, 'auth/session_clean/clean-session.py'),
+                            os.path.join(self.staticFolder, 'auth/session_clean/clean-data.py'),
                             os.path.join(base.pylib_dir, 'crontab.py'),
                             self.session_cleaner_crontab_fn,
                             ]

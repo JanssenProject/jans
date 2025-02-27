@@ -10,7 +10,7 @@ parser.add_argument('-interval', help="Interval to execute cronjob", choices=['e
 argsp = parser.parse_args()
 
 cron_file = '/etc/cron.d/jans-session'
-session_clean_file = '/opt/jans/bin/clean-session.py'
+session_clean_file = '/opt/jans/bin/clean-data.py'
 
 if not os.path.exists(cron_file):
     open(cron_file, 'w').close()

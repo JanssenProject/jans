@@ -248,7 +248,7 @@ class JansAuthInstaller(JettyInstaller):
     def session_cleaner_crontab(self):
 
         crontab_script_fn = os.path.join(
-                        Config.jansOptBinFolder, 
-                        os.path.basename(Config.session_cleaner_crontab_fn)
+                        Config.jansOptBinFolder,
+                        os.path.basename(Config.data_cleaner_crontab_fn)
                         )
         self.run([crontab_script_fn])
