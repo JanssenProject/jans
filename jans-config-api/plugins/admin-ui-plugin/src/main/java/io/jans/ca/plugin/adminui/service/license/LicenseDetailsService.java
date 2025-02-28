@@ -67,11 +67,22 @@ public class LicenseDetailsService extends BaseService {
     public static final String TRIAL_GENERATE_ERROR_RESPONSE = "Generate Trial license error response";
 
     /**
-     * The function checks the license key and the api key and returns a response object
+     * Validates the license configuration by checking for the presence of required parameters.
      *
-     * @return A LicenseApiResponse object is being returned.
+     * This method retrieves the license configuration from the persistence layer and checks the following:
+     * 1. The existence of the license hardware key.
+     * 2. The presence and validity of OIDC client details (OP host, client ID, client secret).
+     * 3. The presence of the SSA (Software Statement Assertion).
+     * 4. The existence of the license key.
+     * 5. The presence of the scan license API hostname.
+     * 6. The last updated date of the license details. If missing, it triggers synchronization of OIDC client details.
+     * 7. The time elapsed since the last license details update, comparing it with the configured synchronization interval.
+     * If the interval has passed, it initiates synchronization of OIDC client details.
+     *
+     * @return A GenericResponse object indicating the validity of the license configuration.
+     * - Returns a successful response (true, 200) if all required parameters are present and valid.
+     * - Returns an error response (false, various error codes) if any required parameter is missing or invalid.
      */
-
     public GenericResponse validateLicenseConfiguration() {
         log.debug("Inside validateLicenseConfiguration: the method to validate license configuration.");
         AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
@@ -112,6 +123,20 @@ public class LicenseDetailsService extends BaseService {
         return CommonUtils.createGenericResponse(true, 200, "No error in license configuration.");
     }
 
+    /**
+     * Synchronizes the OIDC client details used to access the License API on Agama Lab.
+     *
+     * This method attempts to synchronize the OIDC client details required to access the License API.
+     * It first tries to generate an access token using the existing client credentials. If that fails,
+     * it attempts to re-generate the client credentials using the provided SSA (Software Statement Assertion)
+     * and persists the newly generated client details.
+     *
+     * @param licenseConfig The license configuration containing OIDC client details and SSA.
+     * @return A GenericResponse object indicating the success or failure of the synchronization.
+     * - Returns a successful response (true, 200) if the OIDC client details are successfully synchronized.
+     * - Returns an error response (false, 500) if token generation fails, DCR (Dynamic Client Registration) fails,
+     * or saving the client details to persistence fails.
+     */
     private GenericResponse syncLicenseOIDCClientDetails(LicenseConfig licenseConfig) {
         log.debug("Inside syncLicenseOIDCClientDetails: the method to sync OIDC client details used to access License API on Agama Lab.");
 
@@ -136,7 +161,24 @@ public class LicenseDetailsService extends BaseService {
         }
         return CommonUtils.createGenericResponse(true, 200, "No error in license configuration.");
     }
-
+    /**
+     * Checks if the license details are valid and up-to-date.
+     *
+     * This method retrieves the license configuration from the persistence layer and performs several checks:
+     * 1. It verifies the presence of essential license configuration parameters like hardware key, license key, and scan API hostname.
+     * 2. It checks if the license validity and last update dates are available. If not, it triggers a synchronization with Agama Lab.
+     * 3. It calculates the time elapsed since the last license details update and compares it with the configured synchronization interval.
+     * If the interval has passed, it initiates a synchronization.
+     * 4. It determines if the license has expired by comparing the current date with the license validity date.
+     * If expired, it triggers a synchronization.
+     * 5. If all checks pass, it constructs a JSON response containing custom attributes (specifically, the MAU threshold)
+     * and returns a success response.
+     *
+     * @return A GenericResponse object indicating the validity of the license and containing relevant license details.
+     * - Returns a successful response (true, 200) with license details if the license is valid and up-to-date.
+     * - Returns an error response (false, various error codes) if any configuration is missing, the license is invalid,
+     * or an exception occurs during the process.
+     */
     public GenericResponse checkLicense() {
         log.debug("Inside checkLicense: the method to check if License details are valid.");
         try {
@@ -188,6 +230,26 @@ public class LicenseDetailsService extends BaseService {
         }
     }
 
+    /**
+     * Synchronizes license details from Agama Lab by checking the license status and updating local configurations.
+     *
+     * This method retrieves the license configuration, checks the license status with Agama Lab's API,
+     * and updates the local license configuration with the retrieved details. It performs the following steps:
+     * 1. Retrieves the AUI and license configurations.
+     * 2. Validates the presence of hardware ID, scan API hostname, and license key.
+     * 3. Constructs the URL for checking the license status ("/isActive").
+     * 4. Generates an access token for accessing the Agama Lab API.
+     * 5. Sends a POST request to the Agama Lab API with the license key and hardware ID.
+     * 6. Parses the response, checks for license activity and expiry, and handles errors.
+     * 7. Updates the local license configuration with the details from the response.
+     * 8. Persists the updated license configuration in the persistence layer.
+     * 9. Returns a success response with license details or an error response with error messages.
+     *
+     * @return A GenericResponse object indicating the success or failure of the synchronization.
+     * - Returns a successful response (true, 200) with license details if the license is valid and synchronization is successful.
+     * - Returns an error response (false, various error codes) if any configuration is missing, the license is invalid,
+     * API access fails, or an exception occurs during the process.
+     */
     private GenericResponse syncLicenseDetailsFromAgamaLab() {
         log.info("Inside syncLicenseDetailsFromAgamaLab: the method to sync license details from Agama lab");
         Response response = null;
@@ -457,6 +519,17 @@ public class LicenseDetailsService extends BaseService {
         }
     }
 
+    /**
+     * Sets the license configuration details from a JSON object entity.
+     *
+     * This method populates the `LicenseConfiguration` object with data extracted from the provided `JsonObject`.
+     * It handles various license details, including license key, type, validity, product information, customer details,
+     * MAU threshold, and license status (expired and active).
+     *
+     * @param entity             The `JsonObject` containing license details.
+     * @param licenseConfiguration The `LicenseConfiguration` object to be populated.
+     * @throws RuntimeException If an error occurs during the process of setting the license configuration.
+     */
     private void setToLicenseConfiguration(JsonObject entity, LicenseConfiguration licenseConfiguration) throws RuntimeException {
         try {
             log.debug("Inside setToLicenseConfiguration: the method to set licence configuration");
