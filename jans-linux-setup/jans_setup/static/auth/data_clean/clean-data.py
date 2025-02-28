@@ -55,3 +55,13 @@ if db_type == 'mysql':
         qcmd = cmd + f'"DELETE FROM {table} WHERE del=TRUE AND exp < NOW() LIMIT {argsp.limit};"'
         print(f"Executing command: {qcmd}")
         subprocess.run(qcmd, shell=True, env={'db_user_pw': db_user_pw})
+
+elif db_type == 'postgresql':
+    pgsql_cmd = shutil.which('psql')
+    cmd = f'{pgsql_cmd} --user={db_user} --host={db_host} --port={db_port} --dbname={db_name} --command '
+    for table in tables:
+        qcmd = cmd + f'\'DELETE FROM "{table}" WHERE "doc_id" IN (SELECT "doc_id" FROM "{table}" WHERE "del"=TRUE and "exp" < NOW() LIMIT {argsp.limit});\''
+        print(f"Executing command: {qcmd}")
+        subprocess.run(qcmd, shell=True, env={'PGPASSWORD': db_user_pw})
+else:
+    sys.stderr.write(f"Database {db_type} is not supported by this script.\n")
