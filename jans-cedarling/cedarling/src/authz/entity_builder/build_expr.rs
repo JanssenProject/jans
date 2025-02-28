@@ -286,34 +286,6 @@ impl Attribute {
     }
 }
 
-// fn build_entity(
-//     src_key: &str,
-//     attr_claim_value: Option<&Value>,
-//     built_entities: &BuiltEntities,
-//     entity_type_name: EntityTypeName,
-//     is_required: bool,
-// ) -> Result<Option<RestrictedExpression>, BuildExprError> {
-//     let entity_id = if let Some(entity_id) = built_entities.get(&entity_type_name) {
-//         entity_id
-//     } else if let Some(entity_id) = attr_claim_value.and_then(|v| v.as_str()) {
-//         entity_id
-//     } else if is_required {
-//         return Err(KeyedJsonTypeError::type_mismatch_optional(
-//             src_key,
-//             "string",
-//             attr_claim_value,
-//         )
-//         .into());
-//     } else {
-//         return Ok(None);
-//     };
-//
-//     let type_id = EntityId::new(entity_id);
-//     let uid = EntityUid::from_type_name_and_id(entity_type_name, type_id);
-//     let expr = RestrictedExpression::new_entity_uid(uid);
-//     Ok(Some(expr))
-// }
-
 fn build_entity(
     entity_id: &str,
     entity_type_name: EntityTypeName,

@@ -3,12 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use super::entity_id_getters::*;
 use super::*;
 use cedar_policy::Entity;
 use derive_more::derive::Deref;
 use std::collections::HashSet;
 
-const DEFAULT_USER_ATTR_SRCS: &[&str] = &["userinfo_token", "id_token"];
+const USER_ATTR_SRC_TKNS: &[&str] = &["userinfo_token", "id_token"];
+const USER_ATTR_SRC_CLAIMS: &[&str] = &["sub", "email", "phone_number", "role", "username"];
 
 impl EntityBuilder {
     pub fn build_user_entity(
@@ -36,11 +38,11 @@ impl EntityBuilder {
         }
 
         // Get User Entity attributes
-        let user_attr_srcs = DEFAULT_USER_ATTR_SRCS
-            .iter()
-            .filter_map(|src| tokens.get(*src).map(|tkn| tkn.into()))
-            .collect::<Vec<_>>();
-        let user_attrs = build_entity_attrs(user_attr_srcs);
+        let user_attrs = build_entity_attrs(EntityAttrsSrc::new(
+            tokens,
+            USER_ATTR_SRC_TKNS,
+            USER_ATTR_SRC_CLAIMS,
+        ));
 
         // Insert token references in the entity attributes
         let user_attrs = add_token_references(user_type_name, user_attrs, tkn_principal_mappings);
@@ -135,27 +137,110 @@ impl<'a> RoleIdSrcs<'a> {
     }
 }
 
-#[derive(Debug, thiserror::Error)]
-pub struct BuildUserEntityError {
-    pub errors: Vec<(String, BuildEntityError)>,
-}
+#[cfg(test)]
+mod test {
+    use super::super::*;
+    use super::*;
+    use crate::authz::entity_builder::test::{assert_entity_eq, cedarling_schema};
+    use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
+    use serde_json::json;
+    use std::collections::HashMap;
 
-impl fmt::Display for BuildUserEntityError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.errors.is_empty() {
-            writeln!(
-                f,
-                "failed to create User Entity since no tokens were provided"
-            )?;
-        } else {
-            writeln!(
-                f,
-                "failed to create User Entity due to the following errors:"
-            )?;
-            for (token_kind, error) in &self.errors {
-                writeln!(f, "- TokenKind {:?}: {}", token_kind, error)?;
-            }
+    #[test]
+    fn can_build_user_entity() {
+        let mut iss = TrustedIssuer::default();
+        let claim_mappings = ClaimMappings::builder().email("email").build();
+        for token in ["id_token", "userinfo_token"].iter() {
+            let metadata = iss
+                .tokens_metadata
+                .get_mut(*token)
+                .expect("should have token metadata");
+            metadata.claim_mapping = claim_mappings.clone();
         }
-        Ok(())
+        let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+        let builder = EntityBuilder::new(EntityNames::default(), true, false, &issuers);
+        let id_token = Token::new(
+            "id_token",
+            HashMap::from([
+                ("iss".to_string(), json!("https://test.jans.org/")),
+                ("sub".to_string(), json!("some_sub")),
+                ("username".to_string(), json!("some_username")),
+                ("role".to_string(), json!("role1")),
+                ("email".to_string(), json!("email@email.com")),
+                ("exp".to_string(), json!(123)),
+            ])
+            .into(),
+            Some(&iss),
+        );
+        let userinfo_token = Token::new(
+            "userinfo_token",
+            HashMap::from([
+                ("iss".to_string(), json!("https://test.jans.org/")),
+                ("sub".to_string(), json!("some_sub")),
+                ("role".to_string(), json!("role2")),
+                ("phone_number".to_string(), json!("1234567890")),
+                ("exp".to_string(), json!(123)),
+            ])
+            .into(),
+            Some(&iss),
+        );
+        let tokens = HashMap::from([
+            ("id_token".to_string(), id_token),
+            ("userinfo_token".to_string(), userinfo_token),
+        ]);
+        let token_principal_mappings = TokenPrincipalMappings::from(
+            [
+                TokenPrincipalMapping {
+                    principal: "Jans::User".into(),
+                    attr_name: "id_token".into(),
+                    expr: RestrictedExpression::new_entity_uid(
+                        EntityUid::from_str("Jans::id_token::\"some_jti\"".into())
+                            .expect("should parse id_token EntityUid"),
+                    ),
+                },
+                TokenPrincipalMapping {
+                    principal: "Jans::User".into(),
+                    attr_name: "userinfo_token".into(),
+                    expr: RestrictedExpression::new_entity_uid(
+                        EntityUid::from_str("Jans::Userinfo_token::\"some_jti\"".into())
+                            .expect("should parse Userinfo_token EntityUid"),
+                    ),
+                },
+            ]
+            .to_vec(),
+        );
+        let (entity, _) = builder
+            .build_user_entity(&tokens, &token_principal_mappings)
+            .expect("should build user entity");
+
+        assert_entity_eq(
+            &entity,
+            json!({
+                "uid": {"type": "Jans::User", "id": "some_sub"},
+                "attrs": {
+                    "sub": "some_sub",
+                    "email": {
+                        "domain": "email.com",
+                        "uid": "email",
+                    },
+                    "phone_number": "1234567890",
+                    "role": ["role1", "role2"],
+                    "username": "some_username",
+                    "id_token": {"__entity": {
+                        "type": "Jans::id_token",
+                        "id": "some_jti",
+                    }},
+                    "userinfo_token": {"__entity": {
+                        "type": "Jans::Userinfo_token",
+                        "id": "some_jti",
+                    }},
+                },
+                "parents": [
+                    {"type": "Jans::Role", "id": "role1"},
+                    {"type": "Jans::Role", "id": "role2"},
+                ],
+            }),
+            Some(cedarling_schema()),
+        );
     }
 }

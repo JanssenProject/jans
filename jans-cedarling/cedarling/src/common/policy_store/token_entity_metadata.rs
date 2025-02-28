@@ -6,7 +6,7 @@
 
 use std::collections::{HashMap, HashSet};
 
-pub use super::claim_mapping::ClaimMappings;
+use super::claim_mapping::ClaimMappings;
 use super::parse_option_string;
 use serde::Deserialize;
 use typed_builder::TypedBuilder;
@@ -73,7 +73,7 @@ impl TokenEntityMetadata {
             token_id: default_token_id(),
             user_id: None,
             role_mapping: None,
-            claim_mapping: ClaimMappings::new(HashMap::new()),
+            claim_mapping: HashMap::new().into(),
             required_claims: HashSet::from(["iss".into(), "exp".into(), "jti".into()]),
             entity_type_name: "Jans::Access_token".into(),
             principal_mapping: HashSet::from(["Jans::Workload".into()]),
@@ -88,7 +88,7 @@ impl TokenEntityMetadata {
             token_id: default_token_id(),
             user_id: Some("aud".into()),
             role_mapping: None,
-            claim_mapping: ClaimMappings::new(HashMap::new()),
+            claim_mapping: HashMap::new().into(),
             required_claims: HashSet::from([
                 "iss".into(),
                 "sub".into(),
@@ -108,7 +108,7 @@ impl TokenEntityMetadata {
             token_id: default_token_id(),
             user_id: Some("aud".into()),
             role_mapping: None,
-            claim_mapping: ClaimMappings::new(HashMap::new()),
+            claim_mapping: HashMap::new().into(),
             required_claims: HashSet::from([
                 "iss".into(),
                 "sub".into(),

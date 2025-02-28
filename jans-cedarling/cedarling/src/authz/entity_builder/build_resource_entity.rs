@@ -16,7 +16,7 @@ impl EntityBuilder {
         let uid = EntityUid::from_str(&format!("{}::\"{}\"", resource_type_name, resource.id))
             .expect("TODO: return error");
 
-        let attrs = build_entity_attrs(vec![(&resource.payload).into()]);
+        let attrs = build_entity_attrs((&resource.payload).into());
         let resource = Entity::new(uid, attrs, HashSet::new())
             .map_err(|e| BuildEntityErrorKind::from(e).while_building(resource_type_name))?;
 
@@ -33,17 +33,17 @@ pub struct JsonTypeError {
 
 #[cfg(test)]
 mod test {
+    use super::super::test::*;
     use super::super::*;
     use super::*;
-    use cedar_policy::EvalResult;
     use serde_json::json;
 
     #[test]
     fn can_build_entity() {
         let builder = EntityBuilder::new(EntityNames::default(), false, false, &HashMap::new());
         let resource_data = ResourceData {
-            resource_type: "Jans::HttpRequest".to_string(),
-            id: "request-123".to_string(),
+            resource_type: "Jans::HTTP_Request".to_string(),
+            id: "some_request".to_string(),
             payload: HashMap::from([
                 ("header".to_string(), json!({"Accept": "test"})),
                 (
@@ -56,63 +56,32 @@ mod test {
             .build_resource_entity(&resource_data)
             .expect("expected to build resource entity");
 
-        let url = entity
-            .attr("url")
-            .expect("entity must have an `url` attribute")
-            .unwrap();
-        if let EvalResult::Record(ref record) = url {
-            assert_eq!(record.len(), 3);
-            assert_eq!(
-                record
-                    .get("host")
-                    .expect("expected `url` to have a `host` attribute"),
-                &EvalResult::String("protected.host".to_string())
-            );
-            assert_eq!(
-                record
-                    .get("protocol")
-                    .expect("expected `url` to have a `domain` attribute"),
-                &EvalResult::String("http".to_string())
-            );
-            assert_eq!(
-                record
-                    .get("path")
-                    .expect("expected `url` to have a `path` attribute"),
-                &EvalResult::String("/protected".to_string())
-            );
-        } else {
-            panic!(
-                "expected the attribute `url` to be a record, got: {:?}",
-                url
-            );
-        }
-
-        let header = entity
-            .attr("header")
-            .expect("entity must have an `header` attribute")
-            .unwrap();
-        if let EvalResult::Record(ref record) = header {
-            assert_eq!(record.len(), 1);
-            assert_eq!(
-                record
-                    .get("Accept")
-                    .expect("expected `url` to have an `Accept` attribute"),
-                &EvalResult::String("test".to_string())
-            );
-        } else {
-            panic!(
-                "expected the attribute `header` to be a record, got: {:?}",
-                header
-            );
-        }
+        assert_entity_eq(
+            &entity,
+            json!({
+                "uid": {"type": "Jans::HTTP_Request", "id": "some_request"},
+                "attrs": {
+                    "url": {
+                        "host": "protected.host",
+                        "protocol": "http",
+                        "path": "/protected",
+                    },
+                    "header": {
+                        "Accept": "test",
+                    }
+                },
+                "parents": [],
+            }),
+            Some(&cedarling_schema()),
+        );
     }
 
     #[test]
     fn can_build_entity_with_optional_attr() {
         let builder = EntityBuilder::new(EntityNames::default(), false, false, &HashMap::new());
         let resource_data = ResourceData {
-            resource_type: "Jans::HttpRequest".to_string(),
-            id: "request-123".to_string(),
+            resource_type: "Jans::HTTP_Request".to_string(),
+            id: "some_request".to_string(),
             payload: HashMap::new(),
         };
         let entity = builder
@@ -123,68 +92,5 @@ mod test {
             entity.attr("url").is_none(),
             "entity should not have a `url` attribute"
         );
-    }
-
-    #[test]
-    fn can_build_entity_with_optional_record_attr() {
-        let builder = EntityBuilder::new(EntityNames::default(), false, false, &HashMap::new());
-        let resource_data = ResourceData {
-            resource_type: "Jans::HttpRequest".to_string(),
-            id: "request-123".to_string(),
-            payload: HashMap::from([
-                (
-                    "url".to_string(),
-                    json!({"host": "protected.host", "protocol": "http", "path": "/protected"}),
-                ),
-                ("header".to_string(), json!({})),
-            ]),
-        };
-        let entity = builder
-            .build_resource_entity(&resource_data)
-            .expect("expected to build resource entity");
-
-        let url = entity
-            .attr("url")
-            .expect("entity must have an `url` attribute")
-            .unwrap();
-        if let EvalResult::Record(ref record) = url {
-            assert_eq!(record.len(), 3);
-            assert_eq!(
-                record
-                    .get("host")
-                    .expect("expected `url` to have a `host` attribute"),
-                &EvalResult::String("protected.host".to_string())
-            );
-            assert_eq!(
-                record
-                    .get("protocol")
-                    .expect("expected `url` to have a `domain` attribute"),
-                &EvalResult::String("http".to_string())
-            );
-            assert_eq!(
-                record
-                    .get("path")
-                    .expect("expected `url` to have a `path` attribute"),
-                &EvalResult::String("/protected".to_string())
-            );
-        } else {
-            panic!(
-                "expected the attribute `url` to be a record, got: {:?}",
-                url
-            );
-        }
-
-        let header = entity
-            .attr("header")
-            .expect("entity must have an `header` attribute")
-            .unwrap();
-        if let EvalResult::Record(ref record) = header {
-            assert_eq!(record.len(), 0, "the header attribute must be empty");
-        } else {
-            panic!(
-                "expected the attribute `header` to be a record, got: {:?}",
-                header
-            );
-        }
     }
 }

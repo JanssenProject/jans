@@ -24,7 +24,7 @@ use chrono::Utc;
 use entity_builder::*;
 use request::Request;
 use smol_str::{SmolStr, ToSmolStr};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::io::Cursor;
 use std::str::FromStr;
 use std::sync::Arc;
@@ -353,6 +353,7 @@ struct ExecuteAuthorizeParameters<'a> {
 
 /// Structure to hold entites created from tokens
 pub struct AuthorizeEntitiesData {
+    pub issuers: HashSet<Entity>,
     pub tokens: HashMap<String, Entity>,
     pub workload: Option<Entity>,
     pub user: Option<Entity>,
@@ -365,6 +366,7 @@ impl AuthorizeEntitiesData {
     fn into_iter(self) -> impl Iterator<Item = Entity> {
         vec![self.resource]
             .into_iter()
+            .chain(self.issuers.into_iter())
             .chain(self.roles)
             .chain(self.tokens.into_values())
             .chain(vec![self.user, self.workload].into_iter().flatten())
