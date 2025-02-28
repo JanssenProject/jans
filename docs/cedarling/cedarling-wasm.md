@@ -25,21 +25,16 @@ cargo install wasm-pack
 
 * Clang with WebAssembly (WASM) Target Support
 Ensure that Clang is installed with support for WebAssembly targets. 
-This is necessary for compiling C/C++ code to WebAssembly. 
 You can check the installation and available targets with:
+```bash 
+clang -print-targets
+```
+Check `clang` version
 ```bash 
 clang --version
 ```
+
 ## Building
-
-
-**Install wasm-pack**
-
-* To get started with WebAssembly in Rust, first install `wasm-pack` by running the following command:
-
-```bash title="Command"
-cargo install wasm-pack
-```
 
 
   **Cloning the Jans Monorepo and Changing Directory**
@@ -62,10 +57,7 @@ Make sure to replace `/path/to/` with the actual path where the `jans` repositor
 **Add WebAssembly Dependencies**
 
 * Navigate to `/jans/jans-cedarling/test_utils`
-* Open the `Cargo.toml` file in the project directory and add the necessary dependencies 
-for WebAssembly. Specifically, we will use `wasm-bindgen`, which provides an 
-interface between Rust and JavaScript.
-
+* Open the `Cargo.toml` file in the project directory and add the necessary dependencies.
 * Edit `Cargo.toml` to look like this:
 
 ```
