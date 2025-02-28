@@ -127,10 +127,10 @@
 			<artifactId>jans-core-timer-weld</artifactId>
 		</dependency>
 
-        <dependency>
-            <groupId>io.jans</groupId>
-	    	<artifactId>jans-core-document-store</artifactId>
-        </dependency>
+        	<dependency>
+            		<groupId>io.jans</groupId>
+		    	<artifactId>jans-core-document-store</artifactId>
+        	</dependency>
 
 		<!-- RestEasy -->
 		<dependency>

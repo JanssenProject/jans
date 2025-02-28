@@ -26,21 +26,23 @@ tags:
 
 #### Fido2Configuration structure
 
-| Field named                             | Example                                                                        | Description                                                                                             |
-|-----------------------------------------|--------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
-| authenticatorCertsFolder                | /etc/jans/conf/fido2/authenticator_cert                                        | Authenticators certificates fodler.                                                                     |
-| mdsCertsFolder                          | /etc/jans/conf/fido2/mds/cert                                                  | MDS TOC root certificates folder.                                                                       |
-| mdsTocsFolder                           | /etc/jans/conf/fido2/mds/toc                                                   | MDS TOC files folder.                                                                                   |
-| serverMetadataFolder                    | /etc/jans/conf/fido2/server_metadata                                           | Authenticators metadata in json format. Example: virtual devices.                                       |
-| metadataUrlsProvider                    | https://mds3.fido.tools                                                        | String value to provide source of URLs with external metadata.                                          |
-| enabledFidoAlgorithms                   | ["RS256","ES256"]                                                              |                                                                                                         |
-| rp                                      | [{"id":"https://my-jans-server.jans.io","origins":["my-jans-server.jans.io"]}] | Requested party id.                                                                                     |
-| debugUserAutoEnrollment                 | false                                                                          | Allow to enroll users on enrollment/authentication requests. (Useful while running tests)               |
-| unfinishedRequestExpiration             | 180                                                                            | Expiration time in seconds for pending enrollment/authentication requests                               |
-| authenticationHistoryExpiration         | 1296000                                                                        | Expiration time in seconds for approved authentication requests.                                        |
-| disableMetadataService                  | false                                                                          | Boolean value indicating whether the MDS download should be omitted                                     |
-| attestationMode                         | "monitor"                                                                      | Enum value indicating whether MDS validation should be omitted during attestation                       |
-| assertionOptionsGenerateEndpointEnabled | false                                                                          | Boolean value indicating whether the assertion custom endpoint (used especially in passkey) is enabled. |
+| **Field**                    | **Type**            | **Description**                                                                                           | **Default Value / Example**                          |
+|------------------------------|---------------------|-----------------------------------------------------------------------------------------------------------|------------------------------------------------------|
+| `authenticatorCertsFolder`    | String              | The folder where authenticator certificates are stored.                                                   | `"%(fido2ConfigFolder)s/authenticator_cert"`         |
+| `mdsCertsFolder`              | String              | The folder where MDS TOC root certificates are stored.                                                   | `"%(fido2ConfigFolder)s/mds/cert"`                   |
+| `mdsTocsFolder`               | String              | The folder where MDS TOC files are stored.                                                                | `"%(fido2ConfigFolder)s/mds/toc"`                    |
+| `userAutoEnrollment`          | Boolean             | Whether to allow users to enroll on enrollment/authentication requests.                                    | `false`                                              |
+| `unfinishedRequestExpiration` | Integer             | The expiration time in seconds for pending enrollment/authentication requests.                             | `120` (120 seconds)                                  |
+| `metadataRefreshInterval`     | Integer             | The expiration time in seconds for approved authentication requests.                                      | `1296000` (15 days)                                  |
+| `serverMetadataFolder`        | String              | The folder where authenticators' metadata in JSON format is stored.                                       | `"%(fido2ConfigFolder)s/server_metadata"`            |
+| `enabledFidoAlgorithms`       | Array of Strings    | The list of requested credential types for FIDO authentication.                                           | `["RS256", "ES256"]`                                |
+| `requestedParties`            | Array of Objects    | The list of requested parties (RPs) configuration for FIDO authentication.                                 | `[ { "id": "https://%(hostname)s", "origins": ["%(hostname)s"] } ]` |
+| `metadataServers`             | Array of Objects    | A list of metadata servers providing external metadata URLs for FIDO authentication.                      | `[ { "url": "https://mds.fidoalliance.org/" } ]`      |
+| `disableMetadataService`      | Boolean             | Whether downloading MDS metadata should be skipped.                                                        | `false`                                              |
+| `hints`                       | Array of Strings    | Hints provided to the RP (e.g., security-key, client-device, hybrid).                                      | `["security-key", "client-device", "hybrid"]`        |
+| `enterpriseAttestation`       | Boolean             | Whether enterprise authenticators are enabled for use in a specific protected environment.                | `false`                                              |
+| `attestationMode`             | String              | Whether MDS validation should be omitted during attestation.                                              | `"monitor"`                                          |
+
 
 ### Configuring the FIDO2 server:
 #### 1. Read Configuration parameters:
