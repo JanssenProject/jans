@@ -56,7 +56,7 @@ public class AUIConfigurationService extends BaseService {
      * @return The AUIConfiguration object
      */
     public AUIConfiguration getAUIConfiguration(String appType) throws Exception {
-        logger.info("Inside method to read the configuration from the LDAP server and stores it in a map.");
+        logger.info("Inside method to read the configuration from the persistence and stores it in a map.");
         try {
             if (Strings.isNullOrEmpty(appType)) {
                 appType = AppConstants.APPLICATION_KEY_ADMIN_UI;
@@ -69,7 +69,9 @@ public class AUIConfigurationService extends BaseService {
 
             if (appConfigurationMap.get(appType) == null) {
                 AdminConf appConf = null;
+                logger.debug("Admin UI configuration is not stored in cache map.");
                 if (appType.equals(AppConstants.APPLICATION_KEY_ADMIN_UI)) {
+                    logger.debug("Reading Admin UI configuration from persistence.");
                     appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
                 } else if (appType.equals(AppConstants.APPLICATION_KEY_ADS)) {
                     appConf = entryManager.find(AdminConf.class, AppConstants.ADS_CONFIG_DN);
@@ -124,19 +126,32 @@ public class AUIConfigurationService extends BaseService {
     }
 
     private LicenseConfiguration addPropertiesToLicenseConfiguration(AdminConf appConf) {
+        logger.debug("Inside method to add Properties to license configuration.");
         LicenseConfiguration licenseConfiguration = new LicenseConfiguration();
         try {
             LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
 
             if (licenseConfig != null) {
-
-                validateLicenseClientOnAuthServer(licenseConfig);
+                //validateLicenseClientOnAuthServer(licenseConfig);
                 licenseConfiguration.setHardwareId(licenseConfig.getLicenseHardwareKey());
                 licenseConfiguration.setLicenseKey(licenseConfig.getLicenseKey());
                 licenseConfiguration.setScanApiHostname(licenseConfig.getScanLicenseApiHostname());
                 licenseConfiguration.setScanAuthServerHostname(licenseConfig.getOidcClient().getOpHost());
                 licenseConfiguration.setScanApiClientId(licenseConfig.getOidcClient().getClientId());
                 licenseConfiguration.setScanApiClientSecret(licenseConfig.getOidcClient().getClientSecret());
+                licenseConfiguration.setLicenseValidUpto(licenseConfig.getLicenseValidUpto());
+                licenseConfiguration.setLicenseDetailsLastUpdatedOn(licenseConfig.getLicenseDetailsLastUpdatedOn());
+                licenseConfiguration.setIntervalForSyncLicenseDetailsInDays(licenseConfig.getIntervalForSyncLicenseDetailsInDays());
+                licenseConfiguration.setProductCode(licenseConfig.getProductCode());
+                licenseConfiguration.setProductName(licenseConfig.getProductName());
+                licenseConfiguration.setLicenseType(licenseConfig.getLicenseType());
+                licenseConfiguration.setCustomerFirstName(licenseConfig.getCustomerFirstName());
+                licenseConfiguration.setCustomerLastName(licenseConfig.getCustomerLastName());
+                licenseConfiguration.setCustomerEmail(licenseConfig.getCustomerEmail());
+                licenseConfiguration.setCompanyName(licenseConfig.getCompanyName());
+                licenseConfiguration.setLicenseActive(licenseConfig.getLicenseActive());
+                licenseConfiguration.setLicenseExpired(licenseConfig.getLicenseExpired());
+                licenseConfiguration.setIntervalForSyncLicenseDetailsInDays(licenseConfig.getIntervalForSyncLicenseDetailsInDays());
             }
             return licenseConfiguration;
         } catch (Exception e) {
