@@ -50,11 +50,11 @@ db_user_pw = os.popen(f'/opt/jans/bin/encode.py -D {db_user_pw_enc}').read().str
 
 if db_type == 'mysql':
     mysql_cmd = shutil.which('mysql')
-    cmd = f'{mysql_cmd} --user={db_user} --host={db_host} --port={db_port} --password=$db_user_pw {db_name} -e '
+    cmd = f'{mysql_cmd} --user={db_user} --host={db_host} --port={db_port} {db_name} -e '
     for table in tables:
         qcmd = cmd + f'"DELETE FROM {table} WHERE del=TRUE AND exp < NOW() LIMIT {argsp.limit};"'
         print(f"Executing command: {qcmd}")
-        subprocess.run(qcmd, shell=True, env={'db_user_pw': db_user_pw})
+        subprocess.run(qcmd, shell=True, env={'MYSQL_PWD': db_user_pw})
 
 elif db_type == 'postgresql':
     pgsql_cmd = shutil.which('psql')
