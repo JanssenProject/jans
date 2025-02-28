@@ -6,14 +6,30 @@ tags:
 
 # WASM for Cedarling
 
-Cedarling provides a binding for JavaScript programs via the `wasm-pack` tool. This allows browser developers to use the cedarling crate in their code directly.
+Cedarling provides a binding for JavaScript programs via the `wasm-pack` tool. 
+This allows browser developers to use the cedarling crate in their code directly.
 
 ## Requirements
 
-- Rust 1.63 or greater
-- Installed `wasm-pack` via `cargo`
-- clang with `wasm` target support
+* Rust 1.63 or Greater. Ensure that you have `Rust` version 1.63 or higher installed. You can check your 
+  current version of Rust by running the following command in your terminal:
+```bash   
+rustc --version
+```
 
+* Installed `wasm-pack` via `Cargo`. 
+You can install it with the following command:
+```bash
+cargo install wasm-pack
+```
+
+* Clang with WebAssembly (WASM) Target Support
+Ensure that Clang is installed with support for WebAssembly targets. 
+This is necessary for compiling C/C++ code to WebAssembly. 
+You can check the installation and available targets with:
+```bash 
+clang --version
+```
 ## Building
 
 
@@ -25,74 +41,97 @@ Cedarling provides a binding for JavaScript programs via the `wasm-pack` tool. T
 cargo install wasm-pack
 ```
 
-**Create a New Rust Project**
 
-* Create a new Rust library project using the cargo command. This will generate a new project with the necessary files.
+  **Cloning the Jans Monorepo and Changing Directory**
 
-```bash title="Command"
-cargo new --lib wasm_example
-```
+  1. Clone the Jans Monorepo
+  First, clone the Jans monorepository from GitHub using the following command:
+  ```bash title="Command"
+  git clone https://github.com/JanssenProject/jans.git
+  ```
+  This will create a local copy of the repository on your system.
 
-* Navigate to the project directory:
+2. Navigate to the jans-cedarling Directory
+  After cloning the repository, change the directory to the jans-cedarling folder by running:
+  ```bash title="Command"
+  cd /path/to/jans/jans-cedarling
+  ```
+Make sure to replace `/path/to/` with the actual path where the `jans` repository was cloned.
 
-```bash title="Command"
-cd wasm_example
-```
 
 **Add WebAssembly Dependencies**
 
-* Open the `Cargo.toml` file in the project directory and add the necessary dependencies for WebAssembly. Specifically, we will use `wasm-bindgen`, which provides an interface between Rust and JavaScript.
+* Navigate to `/jans/jans-cedarling/test_utils`
+* Open the `Cargo.toml` file in the project directory and add the necessary dependencies 
+for WebAssembly. Specifically, we will use `wasm-bindgen`, which provides an 
+interface between Rust and JavaScript.
 
 * Edit `Cargo.toml` to look like this:
 
 ```
 [package]
-name = "my_wasm_project"
-version = "0.1.0"
-edition = "2024"
+name = "test_utils"
+version = "0.0.0-nightly"
+edition = "2021"
 
 [dependencies]
-wasm-bindgen = "0.2"
+pretty_assertions = "1"
+serde_json = { workspace = true }
+jsonwebtoken = { workspace = true }
+jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
+serde = { workspace = true }
+
 
 [lib]
 crate-type = ["cdylib", "rlib"]
-
 ```
 
 
 **Build the WebAssembly Project**
 
-* Once the dependencies are set up, build the WebAssembly package in release mode by running the following command:
+* Once the dependencies are set up, build the WebAssembly package in release mode 
+by running the following command:
 ```bash title="Command"
 wasm-pack build --release --target web
 ```
 
-* wasm-pack automatically optimizes the WebAssembly binary file using wasm-opt for better performance.
+* wasm-pack automatically optimizes the WebAssembly binary file using 
+wasm-opt for better performance.
 
-**Run the Server**
-
-* To view the WebAssembly project in action, you can run a local server. One way to do this is by using http-server, a simple, zero-config static file server. You can install and run it using:
-
-```bash title="Command"
-npx http-server .
-```
 
 ## Including in projects
 
-For using result files in browser project you need make result `pkg` folder accessible for loading in the browser so that you can later import the corresponding file from the browser.
+
+For using result files in browser project you need make result `pkg` folder 
+accessible for loading in the browser so that you can later import the 
+corresponding file from the browser.
+
+Create a new `pkg/index.html` file and add the below code.
 
 Here is example of code snippet:
 
 ```html
-   <script type="module">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAssembly Cedarling Example</title>
+</head>
+<body>
+    <h1>WebAssembly Cedarling Project</h1>
+    <p>This is a simple example to run WebAssembly in the browser.</p>
+
+    <!-- Include the script to load WebAssembly -->
+    <script type="module">
         import initWasm, { init } from "/pkg/cedarling_wasm.js";
 
         async function main() {
             await initWasm(); // Initialize the WebAssembly module
 
-            // init cedarling with `BOOTSTRAP` config
+            // Initialize Cedarling with `BOOTSTRAP` config
             let instance = await init({
-               "CEDARLING_APPLICATION_NAME": "My App",
+                "CEDARLING_APPLICATION_NAME": "My App",
                 "CEDARLING_POLICY_STORE_URI": "https://example.com/policy-store.json",
                 "CEDARLING_LOG_TYPE": "memory",
                 "CEDARLING_LOG_LEVEL": "INFO",
@@ -103,7 +142,8 @@ Here is example of code snippet:
                 "CEDARLING_WORKLOAD_AUTHZ": "enabled",
                 "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
             });
-            // make authorize request
+
+            // Make authorize request
             let result = await instance.authorize({
                 "tokens": {
                     "access_token": "...",
@@ -135,9 +175,27 @@ Here is example of code snippet:
             });
             console.log("result:", result);
         }
+
         main().catch(console.error);
     </script>
+</body>
+</html>
+
 ```
+
+
+
+## Run the Server
+
+* To view the WebAssembly project in action, you can run a local server. 
+One way to do this is by using `http-server`, a simple, zero-config static 
+file server. You can install and run it using:
+
+```bash title="Command"
+npx http-server .
+```
+
+
 
 ## Usage
 
