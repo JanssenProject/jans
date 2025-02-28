@@ -1,4 +1,4 @@
-package io.jans.lock.service.ws.rs.stat;
+package io.jans.lock.model.stat;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
