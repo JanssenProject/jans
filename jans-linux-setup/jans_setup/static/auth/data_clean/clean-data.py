@@ -20,7 +20,7 @@ if not argsp.yes:
     print(f"This command will remove first {argsp.limit} entires of the following tables where expiration is before than now")
     print(', '.join(tables))
     response = input("Are you sure you want to do this? Type yes to approve. ")
-    if not response == 'yes':
+    if response != 'yes':
         print("Exiting without doing anyting...")
         sys.exit()
 
