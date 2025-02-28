@@ -5,6 +5,7 @@
 
 use super::BuildEntityErrorKind;
 use crate::jwt::Token;
+use serde_json::Value;
 use smol_str::{SmolStr, ToSmolStr};
 use std::fmt::Display;
 
@@ -51,21 +52,31 @@ pub fn get_first_valid_entity_id<'a>(
 }
 
 pub fn collect_all_valid_entity_ids<'a>(id_srcs: &[EntityIdSrc]) -> Vec<SmolStr> {
-    id_srcs
-        .iter()
-        .flat_map(|src| {
-            src.token.get_claim_val(src.claim).and_then(|claim| {
-                let claim = claim.to_string();
-                let id = claim.trim_matches('"');
+    id_srcs.iter().fold(Vec::new(), |mut acc, src| {
+        if let Some(claim) = src.token.get_claim_val(src.claim) {
+            acc.extend(claim_to_ids(claim));
+        }
+        acc
+    })
+}
 
-                if id.is_empty() {
-                    None
-                } else {
-                    Some(id.to_smolstr())
-                }
-            })
-        })
-        .collect()
+fn claim_to_ids<'a>(claim: &'a Value) -> Vec<SmolStr> {
+    let mut ids = Vec::new();
+    match claim {
+        serde_json::Value::Number(number) => {
+            ids.push(number.to_smolstr());
+        },
+        serde_json::Value::String(string) => {
+            ids.push(string.trim_matches('"').into());
+        },
+        serde_json::Value::Array(values) => {
+            for value in values {
+                ids.append(&mut claim_to_ids(value));
+            }
+        },
+        _ => {},
+    }
+    ids
 }
 
 #[derive(Debug, thiserror::Error, PartialEq)]

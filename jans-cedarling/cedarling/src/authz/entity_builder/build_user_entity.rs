@@ -10,7 +10,15 @@ use derive_more::derive::Deref;
 use std::collections::HashSet;
 
 const USER_ATTR_SRC_TKNS: &[&str] = &["userinfo_token", "id_token"];
-const USER_ATTR_SRC_CLAIMS: &[&str] = &["sub", "email", "phone_number", "role", "username"];
+const USER_ATTR_SRC_CLAIMS: &[&str] = &[
+    "sub",
+    "email",
+    "phone_number",
+    "role",
+    "username",
+    "country",
+    "birthdate",
+];
 
 impl EntityBuilder {
     pub fn build_user_entity(
@@ -177,7 +185,7 @@ mod test {
             HashMap::from([
                 ("iss".to_string(), json!("https://test.jans.org/")),
                 ("sub".to_string(), json!("some_sub")),
-                ("role".to_string(), json!("role2")),
+                ("role".to_string(), json!(["role2", "role3"])),
                 ("phone_number".to_string(), json!("1234567890")),
                 ("exp".to_string(), json!(123)),
             ])
@@ -224,7 +232,7 @@ mod test {
                         "uid": "email",
                     },
                     "phone_number": "1234567890",
-                    "role": ["role1", "role2"],
+                    "role": ["role1", "role2", "role3"],
                     "username": "some_username",
                     "id_token": {"__entity": {
                         "type": "Jans::id_token",
@@ -238,6 +246,7 @@ mod test {
                 "parents": [
                     {"type": "Jans::Role", "id": "role1"},
                     {"type": "Jans::Role", "id": "role2"},
+                    {"type": "Jans::Role", "id": "role3"},
                 ],
             }),
             Some(cedarling_schema()),

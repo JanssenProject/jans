@@ -12,7 +12,6 @@ mod build_user_entity;
 mod build_workload_entity;
 mod built_entities;
 mod entity_id_getters;
-mod errors;
 mod value_to_expr;
 
 use super::AuthorizeEntitiesData;
