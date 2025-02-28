@@ -84,7 +84,7 @@ public class LicenseDetailsService extends BaseService {
      * - Returns an error response (false, various error codes) if any required parameter is missing or invalid.
      */
     public GenericResponse validateLicenseConfiguration() {
-        log.debug("Inside validateLicenseConfiguration: the method to validate license configuration.");
+        log.info("Inside validateLicenseConfiguration: the method to validate license configuration.");
         AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
         LicenseConfig licenseConfiguration = appConf.getMainSettings().getLicenseConfig();
 
@@ -116,7 +116,7 @@ public class LicenseDetailsService extends BaseService {
         }
         long daysDiffOfLicenseDetailsLastUpdated = ChronoUnit.DAYS.between(LocalDate.now(), CommonUtils.convertStringToLocalDate(licenseConfiguration.getLicenseDetailsLastUpdatedOn()));
         long intervalForSyncLicenseDetailsInDays = licenseConfiguration.getIntervalForSyncLicenseDetailsInDays() == null ? AppConstants.LICENSE_DETAILS_SYNC_INTERVAL_IN_DAYS : licenseConfiguration.getIntervalForSyncLicenseDetailsInDays();
-        log.debug("License details were last updated before {} days. The sync process will run after an interval of {} days.", daysDiffOfLicenseDetailsLastUpdated, intervalForSyncLicenseDetailsInDays);
+        log.info("License details were last updated before {} days. The sync process will run after an interval of {} days.", daysDiffOfLicenseDetailsLastUpdated, intervalForSyncLicenseDetailsInDays);
         if (daysDiffOfLicenseDetailsLastUpdated > intervalForSyncLicenseDetailsInDays) {
             return syncLicenseOIDCClientDetails(licenseConfiguration);
         }
@@ -138,7 +138,7 @@ public class LicenseDetailsService extends BaseService {
      * or saving the client details to persistence fails.
      */
     private GenericResponse syncLicenseOIDCClientDetails(LicenseConfig licenseConfig) {
-        log.debug("Inside syncLicenseOIDCClientDetails: the method to sync OIDC client details used to access License API on Agama Lab.");
+        log.info("Inside syncLicenseOIDCClientDetails: the method to sync OIDC client details used to access License API on Agama Lab.");
 
         io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfig.getOidcClient().getOpHost(), licenseConfig.getOidcClient().getClientId(), licenseConfig.getOidcClient().getClientSecret());
 
@@ -180,7 +180,7 @@ public class LicenseDetailsService extends BaseService {
      * or an exception occurs during the process.
      */
     public GenericResponse checkLicense() {
-        log.debug("Inside checkLicense: the method to check if License details are valid.");
+        log.info("Inside checkLicense: the method to check if License details are valid.");
         try {
             AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             LicenseConfig licenseConfiguration = appConf.getMainSettings().getLicenseConfig();
@@ -207,13 +207,13 @@ public class LicenseDetailsService extends BaseService {
             }
             long daysDiffOfLicenseDetailsLastUpdated = ChronoUnit.DAYS.between(LocalDate.now(), CommonUtils.convertStringToLocalDate(licenseConfiguration.getLicenseDetailsLastUpdatedOn()));
             long intervalForSyncLicenseDetailsInDays = licenseConfiguration.getIntervalForSyncLicenseDetailsInDays() == null ? AppConstants.LICENSE_DETAILS_SYNC_INTERVAL_IN_DAYS : licenseConfiguration.getIntervalForSyncLicenseDetailsInDays();
-            log.debug("License details were last updated before {} days. The sync process will run after an interval of {} days.", daysDiffOfLicenseDetailsLastUpdated, intervalForSyncLicenseDetailsInDays);
+            log.info("License details were last updated before {} days. The sync process will run after an interval of {} days.", daysDiffOfLicenseDetailsLastUpdated, intervalForSyncLicenseDetailsInDays);
             if (daysDiffOfLicenseDetailsLastUpdated > intervalForSyncLicenseDetailsInDays) {
                 return syncLicenseDetailsFromAgamaLab();
             }
             //calculate if license is expired
             long daysDiffOfLicenseValidity = ChronoUnit.DAYS.between(LocalDate.now(), CommonUtils.convertStringToLocalDate(licenseConfiguration.getLicenseValidUpto()));
-            log.debug("License will expire after {} days", daysDiffOfLicenseValidity);
+            log.info("License will expire after {} days", daysDiffOfLicenseValidity);
             if (daysDiffOfLicenseValidity < 0) {
                 return syncLicenseDetailsFromAgamaLab();
             }
@@ -532,7 +532,7 @@ public class LicenseDetailsService extends BaseService {
      */
     private void setToLicenseConfiguration(JsonObject entity, LicenseConfiguration licenseConfiguration) throws RuntimeException {
         try {
-            log.debug("Inside setToLicenseConfiguration: the method to set licence configuration");
+            log.info("Inside setToLicenseConfiguration: the method to set licence configuration");
             licenseConfiguration.setLicenseKey(entity.getString("license_key"));
             licenseConfiguration.setLicenseType(entity.getString("license_type"));
             licenseConfiguration.setLicenseDetailsLastUpdatedOn(CommonUtils.convertLocalDateToString(LocalDate.now()));
@@ -586,6 +586,7 @@ public class LicenseDetailsService extends BaseService {
      * @return The method is returning a LicenseApiResponse object.
      */
     public GenericResponse generateTrialLicense() {
+        log.info("Inside generateTrialLicense: the method to generate trial license");
         Response response = null;
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
@@ -659,6 +660,7 @@ public class LicenseDetailsService extends BaseService {
      * @return A LicenseResponse object
      */
     public LicenseResponse getLicenseDetails() {
+        log.info("Inside getLicenseDetails: the method to get license details");
         LicenseResponse licenseResponse = new LicenseResponse();
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
