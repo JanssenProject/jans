@@ -6,12 +6,9 @@ import io.jans.as.client.TokenRequest;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.adminui.AdminConf;
 import io.jans.as.model.config.adminui.LicenseConfig;
-import io.jans.as.model.config.adminui.OIDCClientSettings;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.ca.plugin.adminui.model.auth.DCRResponse;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.config.LicenseConfiguration;
-import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.rest.license.LicenseResource;
 import io.jans.ca.plugin.adminui.service.BaseService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
@@ -21,7 +18,6 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.EncryptionService;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
@@ -132,7 +128,6 @@ public class AUIConfigurationService extends BaseService {
             LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
 
             if (licenseConfig != null) {
-                //validateLicenseClientOnAuthServer(licenseConfig);
                 licenseConfiguration.setHardwareId(licenseConfig.getLicenseHardwareKey());
                 licenseConfiguration.setLicenseKey(licenseConfig.getLicenseKey());
                 licenseConfiguration.setScanApiHostname(licenseConfig.getScanLicenseApiHostname());
@@ -152,41 +147,13 @@ public class AUIConfigurationService extends BaseService {
                 licenseConfiguration.setLicenseActive(licenseConfig.getLicenseActive());
                 licenseConfiguration.setLicenseExpired(licenseConfig.getLicenseExpired());
                 licenseConfiguration.setIntervalForSyncLicenseDetailsInDays(licenseConfig.getIntervalForSyncLicenseDetailsInDays());
+                licenseConfiguration.setLicenseMAUThreshold(licenseConfig.getLicenseMAUThreshold());
             }
             return licenseConfiguration;
         } catch (Exception e) {
             logger.error(ErrorResponse.ERROR_IN_LICENSE_CONFIGURATION_VALIDATION.getDescription());
         }
         return null;
-    }
-
-    private void validateLicenseClientOnAuthServer(LicenseConfig licenseConfig) throws ApplicationException {
-        try {
-            logger.info("Inside method to request license credentials from SCAN api.");
-            io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfig.getOidcClient().getOpHost(), licenseConfig.getOidcClient().getClientId(), licenseConfig.getOidcClient().getClientSecret());
-            if (tokenResponse == null) {
-                //try to re-generate clients using old SSA
-                DCRResponse dcrResponse = executeDCR(licenseConfig.getSsa());
-                if (dcrResponse == null) {
-                    throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.ERROR_IN_DCR.getDescription());
-                }
-                tokenResponse = generateToken(licenseConfig.getOidcClient().getOpHost(), licenseConfig.getOidcClient().getClientId(), licenseConfig.getOidcClient().getClientSecret());
-
-                if (tokenResponse == null) {
-                    throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
-                }
-                AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-                LicenseConfig lc = appConf.getMainSettings().getLicenseConfig();
-                lc.setScanLicenseApiHostname(dcrResponse.getScanHostname());
-                OIDCClientSettings oidcClient = new OIDCClientSettings(dcrResponse.getOpHost(), dcrResponse.getClientId(), dcrResponse.getClientSecret());
-                lc.setOidcClient(oidcClient);
-                appConf.getMainSettings().setLicenseConfig(lc);
-                entryManager.merge(appConf);
-            }
-        } catch (Exception e) {
-            logger.error(ErrorResponse.ERROR_IN_LICENSE_CONFIGURATION_VALIDATION.getDescription());
-            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.ERROR_IN_LICENSE_CONFIGURATION_VALIDATION.getDescription());
-        }
     }
 
     private io.jans.as.client.TokenResponse generateToken(String opHost, String clientId, String clientSecret) {
