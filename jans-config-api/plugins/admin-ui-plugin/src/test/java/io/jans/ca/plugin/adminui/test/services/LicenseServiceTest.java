@@ -5,6 +5,9 @@ import io.jans.as.model.config.adminui.LicenseConfig;
 import io.jans.as.model.config.adminui.MainSettings;
 import io.jans.as.model.config.adminui.OIDCClientSettings;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
+import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
+import io.jans.ca.plugin.adminui.model.config.LicenseConfiguration;
+import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.service.license.LicenseDetailsService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
@@ -27,25 +30,32 @@ import java.time.LocalDate;
 public class LicenseServiceTest {
     @Mock
     private PersistenceEntryManager entryManager;
-
     @Mock
     private Logger log;
-
     @InjectMocks
     private LicenseDetailsService licenseDetailsService;
+    @Mock
+    private AUIConfigurationService auiConfigurationService;
+    @Mock
+    private LicenseConfiguration licenseConfiguration;
 
     private AdminConf adminConf;
     private LicenseConfig licenseConfig;
+    private AUIConfiguration auiConfiguration;
 
     @BeforeMethod
     public void setUp() {
+
         MockitoAnnotations.openMocks(this);  // Initialize mocks
 
         adminConf = mock(AdminConf.class);
         licenseConfig = mock(LicenseConfig.class);
-        when(entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN)).thenReturn(adminConf);
-        when(adminConf.getMainSettings()).thenReturn(mock(MainSettings.class));
-        when(adminConf.getMainSettings().getLicenseConfig()).thenReturn(licenseConfig);
+        auiConfiguration = mock(AUIConfiguration.class);
+        //licenseConfiguration = mock(LicenseConfiguration.class);
+        lenient().when(entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN)).thenReturn(adminConf);
+        lenient().when(adminConf.getMainSettings()).thenReturn(mock(MainSettings.class));
+        lenient().when(adminConf.getMainSettings().getLicenseConfig()).thenReturn(licenseConfig);
+
     }
 
     @Test
@@ -96,15 +106,16 @@ public class LicenseServiceTest {
     }
 
     @Test
-    public void testCheckLicense_ValidLicense() {
+    public void testCheckLicense_ValidLicense() throws Exception {
         // Mock the admin config and license config
-
-        when(licenseConfig.getLicenseHardwareKey()).thenReturn("hardware-key-123");
-        when(licenseConfig.getLicenseKey()).thenReturn("valid-license-key");
-        when(licenseConfig.getScanLicenseApiHostname()).thenReturn("https://scan.api.hostname");
-        when(licenseConfig.getLicenseValidUpto()).thenReturn(LocalDate.now().plusDays(30).toString());
-        when(licenseConfig.getLicenseDetailsLastUpdatedOn()).thenReturn(LocalDate.now().minusDays(5).toString());
-        when(licenseConfig.getIntervalForSyncLicenseDetailsInDays()).thenReturn(10L);
+        lenient().when(auiConfigurationService.getAUIConfiguration()).thenReturn(auiConfiguration);
+        lenient().when(auiConfiguration.getLicenseConfiguration()).thenReturn(licenseConfiguration);
+        lenient().when(licenseConfiguration.getHardwareId()).thenReturn("hardware-key-123");
+        lenient().when(licenseConfiguration.getLicenseKey()).thenReturn("valid-license-key");//License key missing
+        lenient().when(licenseConfiguration.getScanApiHostname()).thenReturn("https://scan.api.hostname");
+        lenient().when(licenseConfiguration.getLicenseValidUpto()).thenReturn(LocalDate.now().plusDays(30).toString());
+        lenient().when(licenseConfiguration.getLicenseDetailsLastUpdatedOn()).thenReturn(LocalDate.now().minusDays(5).toString());
+        lenient().when(licenseConfiguration.getIntervalForSyncLicenseDetailsInDays()).thenReturn(10L);
 
         // Call the method under test
         GenericResponse response = licenseDetailsService.checkLicense();
@@ -116,14 +127,16 @@ public class LicenseServiceTest {
     }
 
     @Test
-    public void testCheckLicense_NoLicenseKey() {
+    public void testCheckLicense_NoLicenseKey() throws Exception {
         // Mock missing license key
-        lenient().when(licenseConfig.getLicenseHardwareKey()).thenReturn("hardware-key-123");
-        lenient().when(licenseConfig.getLicenseKey()).thenReturn("");//License key missing
-        lenient().when(licenseConfig.getScanLicenseApiHostname()).thenReturn("https://scan.api.hostname");
-        lenient().when(licenseConfig.getLicenseValidUpto()).thenReturn(LocalDate.now().plusDays(30).toString());
-        lenient().when(licenseConfig.getLicenseDetailsLastUpdatedOn()).thenReturn(LocalDate.now().minusDays(5).toString());
-        lenient().when(licenseConfig.getIntervalForSyncLicenseDetailsInDays()).thenReturn(10L);
+        lenient().when(auiConfigurationService.getAUIConfiguration()).thenReturn(auiConfiguration);
+        lenient().when(auiConfiguration.getLicenseConfiguration()).thenReturn(licenseConfiguration);
+        lenient().when(licenseConfiguration.getHardwareId()).thenReturn("hardware-key-123");
+        lenient().when(licenseConfiguration.getLicenseKey()).thenReturn("");//License key missing
+        lenient().when(licenseConfiguration.getScanApiHostname()).thenReturn("https://scan.api.hostname");
+        lenient().when(licenseConfiguration.getLicenseValidUpto()).thenReturn(LocalDate.now().plusDays(30).toString());
+        lenient().when(licenseConfiguration.getLicenseDetailsLastUpdatedOn()).thenReturn(LocalDate.now().minusDays(5).toString());
+        lenient().when(licenseConfiguration.getIntervalForSyncLicenseDetailsInDays()).thenReturn(10L);
 
         // Call the method under test
         GenericResponse response = licenseDetailsService.checkLicense();
