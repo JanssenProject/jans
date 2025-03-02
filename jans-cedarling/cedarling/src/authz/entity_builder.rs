@@ -21,7 +21,7 @@ use crate::{AuthorizationConfig, ResourceData};
 use build_entity_attrs::*;
 use build_iss_entity::build_iss_entity;
 pub(crate) use built_entities::BuiltEntities;
-use cedar_policy::{Entity, EntityUid, RestrictedExpression};
+use cedar_policy::{Entity, EntityUid, ExpressionConstructionError, RestrictedExpression};
 use entity_id_getters::GetEntityIdErrors;
 use std::collections::hash_map::Entry;
 use std::collections::{HashMap, HashSet};
@@ -257,6 +257,8 @@ pub enum BuildEntityErrorKind {
     InvalidIssUrl(#[from] url::ParseError),
     #[error("missing required token: {0}")]
     MissingRequiredToken(String),
+    #[error("failed to build entity attributes: {0:?}")]
+    BuildAttrs(Vec<ExpressionConstructionError>),
 }
 
 impl BuildEntityErrorKind {

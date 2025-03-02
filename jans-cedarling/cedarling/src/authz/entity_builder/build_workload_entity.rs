@@ -31,7 +31,8 @@ impl EntityBuilder {
             tokens,
             WORKLOAD_ATTR_SRC_TKNS,
             WORKLOAD_ATTR_SRC_CLAIMS,
-        ));
+        ))
+        .map_err(|e| e.while_building(workload_type_name))?;
 
         // Insert token references in the entity attributes
         let mut workload_attrs =

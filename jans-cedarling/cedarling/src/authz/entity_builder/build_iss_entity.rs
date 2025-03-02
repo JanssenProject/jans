@@ -19,7 +19,8 @@ pub fn build_iss_entity(
 ) -> Result<(Origin, Entity), BuildEntityError> {
     let origin = iss.oidc_endpoint.origin();
 
-    let attrs = build_entity_attrs((&iss.entity_attr_srcs()).into());
+    let attrs = build_entity_attrs((&iss.entity_attr_srcs()).into())
+        .map_err(|e| e.while_building(iss_type_name))?;
 
     let uid = EntityUid::from_str(&format!("{}::\"{}\"", iss_type_name, id))
         .map_err(|e| BuildEntityErrorKind::from(e).while_building(iss_type_name))?;

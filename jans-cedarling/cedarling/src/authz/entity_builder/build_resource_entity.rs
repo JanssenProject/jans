@@ -14,9 +14,10 @@ impl EntityBuilder {
         let resource_type_name = &resource.resource_type;
 
         let uid = EntityUid::from_str(&format!("{}::\"{}\"", resource_type_name, resource.id))
-            .expect("TODO: return error");
+            .map_err(|e| BuildEntityErrorKind::from(e).while_building(resource_type_name))?;
 
-        let attrs = build_entity_attrs((&resource.payload).into());
+        let attrs = build_entity_attrs((&resource.payload).into())
+            .map_err(|e| e.while_building(resource_type_name))?;
         let resource = Entity::new(uid, attrs, HashSet::new())
             .map_err(|e| BuildEntityErrorKind::from(e).while_building(resource_type_name))?;
 

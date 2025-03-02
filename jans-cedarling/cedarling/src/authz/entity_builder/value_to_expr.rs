@@ -3,15 +3,18 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedar_policy::RestrictedExpression;
+use cedar_policy::{ExpressionConstructionError, RestrictedExpression};
 use serde_json::Value;
+use std::collections::HashMap;
 use std::net::IpAddr;
 use std::str::FromStr;
 
 /// Converts a [`Value`] to a [`RestrictedExpression`]
-pub fn value_to_expr(value: &Value) -> Option<RestrictedExpression> {
+pub fn value_to_expr(
+    value: &Value,
+) -> Result<Option<RestrictedExpression>, Vec<ExpressionConstructionError>> {
     let expr = match value {
-        Value::Null => return None,
+        Value::Null => return Ok(None),
         Value::Bool(val) => RestrictedExpression::new_bool(*val),
         Value::Number(val) => {
             if let Some(int) = val.as_i64() {
@@ -19,7 +22,7 @@ pub fn value_to_expr(value: &Value) -> Option<RestrictedExpression> {
             } else if let Some(float) = val.as_f64() {
                 RestrictedExpression::new_decimal(float.to_string())
             } else {
-                return None;
+                return Ok(None);
             }
         },
         Value::String(val) => {
@@ -30,19 +33,50 @@ pub fn value_to_expr(value: &Value) -> Option<RestrictedExpression> {
             }
         },
         Value::Array(values) => {
-            let exprs = values.iter().filter_map(value_to_expr).collect::<Vec<_>>();
-            RestrictedExpression::new_set(exprs)
+            let (values, errors): (Vec<_>, Vec<_>) = values
+                .iter()
+                .map(|v| value_to_expr(v))
+                .partition(Result::is_ok);
+
+            if !errors.is_empty() {
+                let errors = errors
+                    .into_iter()
+                    .flat_map(|e| e.unwrap_err())
+                    .collect::<Vec<_>>();
+                return Err(errors);
+            }
+
+            let values = values
+                .into_iter()
+                .filter_map(|v| v.unwrap())
+                .collect::<Vec<RestrictedExpression>>();
+            RestrictedExpression::new_set(values)
         },
         Value::Object(map) => {
-            let fields = map
+            let (fields, errors): (Vec<_>, Vec<_>) = map
                 .iter()
-                .filter_map(|(key, val)| value_to_expr(val).map(|expr| (key.to_string(), expr)))
-                .collect::<Vec<_>>();
-            // TODO: handle error
-            RestrictedExpression::new_record(fields).expect("there shouldn't be duplicate keys")
+                .map(|(key, val)| value_to_expr(val).map(|expr| (key.to_string(), expr)))
+                .partition(Result::is_ok);
+
+            if !errors.is_empty() {
+                let errors = errors
+                    .into_iter()
+                    .flat_map(|e| e.unwrap_err())
+                    .collect::<Vec<_>>();
+                return Err(errors);
+            }
+
+            let fields = fields
+                .into_iter()
+                .filter_map(|val| {
+                    let (key, val) = val.unwrap();
+                    val.map(|val| (key, val))
+                })
+                .collect::<HashMap<String, RestrictedExpression>>();
+            RestrictedExpression::new_record(fields).map_err(|e| vec![e])?
         },
     };
-    Some(expr)
+    Ok(Some(expr))
 }
 
 #[cfg(test)]
@@ -60,13 +94,16 @@ mod test {
     pub fn test_value_to_expr() {
         let attrs = HashMap::from_iter(
             [
-                ("test_null", value_to_expr(&json!(Value::Null))),
-                ("test_bool", value_to_expr(&json!(true))),
-                ("test_long", value_to_expr(&json!(521))),
-                ("test_decimal", value_to_expr(&json!(12.5))),
-                ("test_str", value_to_expr(&json!("some str"))),
-                ("test_set", value_to_expr(&json!(["a", 1]))),
-                ("test_record", value_to_expr(&json!({"a": 1, "b": "b"}))),
+                ("test_null", value_to_expr(&json!(Value::Null)).unwrap()),
+                ("test_bool", value_to_expr(&json!(true)).unwrap()),
+                ("test_long", value_to_expr(&json!(521)).unwrap()),
+                ("test_decimal", value_to_expr(&json!(12.5)).unwrap()),
+                ("test_str", value_to_expr(&json!("some str")).unwrap()),
+                ("test_set", value_to_expr(&json!(["a", 1])).unwrap()),
+                (
+                    "test_record",
+                    value_to_expr(&json!({"a": 1, "b": "b"})).unwrap(),
+                ),
             ]
             .into_iter()
             .flat_map(|(key, expr)| expr.map(|expr| (key.to_string(), expr))),

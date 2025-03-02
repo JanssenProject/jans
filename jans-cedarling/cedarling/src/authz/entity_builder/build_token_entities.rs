@@ -15,7 +15,8 @@ impl EntityBuilder {
         tkn_principal_mappings: &mut TokenPrincipalMappings,
     ) -> Result<(Entity, Option<Entity>), BuildEntityError> {
         // Build entity attributes
-        let mut attrs = build_entity_attrs(EntityAttrsSrc::from(token));
+        let mut attrs = build_entity_attrs(EntityAttrsSrc::from(token))
+            .map_err(|e| e.while_building(tkn_type_name))?;
 
         let iss_entity = self
             .replace_iss_with_entity(token, &mut attrs)

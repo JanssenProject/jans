@@ -50,7 +50,8 @@ impl EntityBuilder {
             tokens,
             USER_ATTR_SRC_TKNS,
             USER_ATTR_SRC_CLAIMS,
-        ));
+        ))
+        .map_err(|e| e.while_building(user_type_name))?;
 
         // Insert token references in the entity attributes
         let user_attrs = add_token_references(user_type_name, user_attrs, tkn_principal_mappings);

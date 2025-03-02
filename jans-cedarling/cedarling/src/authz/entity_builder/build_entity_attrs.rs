@@ -5,17 +5,20 @@
 
 use crate::common::policy_store::ClaimMapping;
 use crate::jwt::Token;
-use cedar_policy::RestrictedExpression;
+use cedar_policy::{ExpressionConstructionError, RestrictedExpression};
 use serde_json::{Value, json};
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 
+use super::BuildEntityErrorKind;
 use super::value_to_expr::value_to_expr;
 
 /// Builds Cedar entity attributes using the given JWTs
 ///
 /// This function will *JOIN* the token attributes built from each token
-pub fn build_entity_attrs(attrs_src: EntityAttrsSrc) -> HashMap<String, RestrictedExpression> {
+pub fn build_entity_attrs(
+    attrs_src: EntityAttrsSrc,
+) -> Result<HashMap<String, RestrictedExpression>, BuildEntityErrorKind> {
     let mut attrs = HashMap::new();
 
     for src in attrs_src.0.iter() {
@@ -39,10 +42,27 @@ pub fn build_entity_attrs(attrs_src: EntityAttrsSrc) -> HashMap<String, Restrict
         }
     }
 
-    attrs
+    let (attrs, errors): (Vec<_>, Vec<_>) = attrs
         .iter()
-        .filter_map(|(name, val)| value_to_expr(val).map(|expr| (name.to_string(), expr)))
-        .collect()
+        .map(|(name, val)| value_to_expr(val).map(|expr| (name.to_string(), expr)))
+        .partition(Result::is_ok);
+
+    if !errors.is_empty() {
+        let errors = errors
+            .into_iter()
+            .flat_map(|e| e.unwrap_err())
+            .collect::<Vec<ExpressionConstructionError>>();
+        return Err(BuildEntityErrorKind::BuildAttrs(errors));
+    }
+
+    let attrs = attrs
+        .into_iter()
+        .flat_map(|attr| {
+            let (name, value) = attr.unwrap();
+            value.map(|value| (name, value))
+        })
+        .collect::<HashMap<String, RestrictedExpression>>();
+    Ok(attrs)
 }
 
 pub struct EntityAttrsSrc<'a>(Vec<EntityAttrSrc<'a>>);
@@ -155,7 +175,7 @@ mod test {
                 mapping: claim_mappings.mapping("url"),
             },
         ]));
-        let attrs = build_entity_attrs(attr_srcs.into());
+        let attrs = build_entity_attrs(attr_srcs.into()).expect("should build entity attributes");
 
         let entity = Entity::new(
             EntityUid::from_str("Workload::\"some_workload\"")
