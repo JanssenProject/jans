@@ -42,32 +42,6 @@ type KeyId = Box<str>;
 pub enum JwtProcessingError {
     #[error("Invalid token `{0}`: {1}")]
     InvalidToken(String, JwtValidatorError),
-    #[error("Invalid Access token: {0}")]
-    InvalidAccessToken(#[source] JwtValidatorError),
-    #[error("Invalid ID token: {0}")]
-    InvalidIdToken(#[source] JwtValidatorError),
-    #[error("Invalid Userinfo token: {0}")]
-    InvalidUserinfoToken(#[source] JwtValidatorError),
-    #[error(
-        "Validation failed: id_token audience does not match the access_token client_id. \
-         id_token.aud: {0:?}, access_token.client_id: {1:?}"
-    )]
-    IdTokenAudienceMismatch(String, String),
-    #[error(
-        "Validation failed: Userinfo token subject does not match the id_token subject. \
-         userinfo_token.sub: {0:?}, id_token.sub: {1:?}"
-    )]
-    UserinfoSubMismatch(String, String),
-    #[error(
-        "Validation failed: Userinfo token audience ({0}) does not match the access_token \
-         client_id ({1})."
-    )]
-    UserinfoAudienceMismatch(String, String),
-    #[error(
-        "CEDARLING_ID_TOKEN_TRUST_MODE is set to 'Strict', but the {0} is missing a required \
-         claim: {1}"
-    )]
-    MissingClaimsInStrictMode(&'static str, &'static str),
     #[error("Failed to deserialize from Value to String: {0}")]
     StringDeserialization(#[from] serde_json::Error),
     #[error("error while trying to parse issuer from token: {0}")]

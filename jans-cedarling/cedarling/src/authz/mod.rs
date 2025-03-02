@@ -440,7 +440,7 @@ pub enum AuthorizeError {
     #[error("The request for `User` does not conform to the schema: {0}")]
     UserRequestValidation(cedar_policy::RequestValidationError),
     /// Error encountered while checking if the Entities adhere to the schema
-    #[error(transparent)]
+    #[error("failed to validate Cedar entities: {0:?}")]
     ValidateEntities(#[from] cedar_policy::entities_errors::EntitiesError),
     /// Error encountered while parsing all entities to json for logging
     #[error("could convert entities to json: {0}")]

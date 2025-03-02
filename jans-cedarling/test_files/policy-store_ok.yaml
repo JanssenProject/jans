@@ -12,7 +12,7 @@ policy_stores:
       Jans123123:
         name: "Jans"
         description: "A Test IDP"
-        openid_configuration_endpoint: "https://account.gluu.org/.well-known/openid-configuration"
+        openid_configuration_endpoint: "https://test.jans.org/.well-known/openid-configuration"
         tokens_metadata:
           access_token:
             entity_type_name: "Jans::Access_token"

@@ -62,7 +62,7 @@ create_exception!(
     authorize_errors,
     ValidateEntitiesError,
     AuthorizeError,
-    "Error encountered while collecting all entities"
+    "Error encountered while validating the entities to the schema"
 );
 
 create_exception!(

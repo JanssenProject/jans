@@ -31,7 +31,7 @@ impl Display for BuildEntityErrors {
 }
 
 #[derive(Debug, thiserror::Error)]
-#[error("failed to build `\"{entity_type_name}\"`: {error}")]
+#[error("failed to build `\"{entity_type_name}\"` entity: {error}")]
 pub struct BuildEntityError {
     pub entity_type_name: String,
     pub error: BuildEntityErrorKind,

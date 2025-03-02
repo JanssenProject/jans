@@ -88,12 +88,16 @@ impl<'a> WorkloadIdSrcs<'a> {
             DEFAULT_WORKLOAD_ID_SRCS
                 .iter()
                 .fold(Vec::new(), |mut acc, &src| {
-                    if let Some((token, claim)) = tokens.get(src.token).and_then(|tkn| {
-                        tkn.get_metadata()
-                            .and_then(|m| m.workload_id.as_ref().map(|claim| (tkn, claim)))
-                    }) {
-                        acc.push(EntityIdSrc { token, claim });
-                        if claim != src.claim {
+                    if let Some(token) = tokens.get(src.token) {
+                        let claim = token
+                            .get_metadata()
+                            .and_then(|m| m.workload_id.as_ref())
+                            .map(|claim| {
+                                acc.push(EntityIdSrc { token, claim });
+                                claim
+                            });
+
+                        if matches!(claim, Some(ref claim) if *claim != src.claim) {
                             acc.push(EntityIdSrc {
                                 token,
                                 claim: src.claim,
