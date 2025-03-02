@@ -15,9 +15,7 @@ pub struct EntityIdSrc<'a> {
     pub claim: &'a str,
 }
 
-pub fn get_first_valid_entity_id<'a>(
-    id_srcs: &[EntityIdSrc],
-) -> Result<SmolStr, BuildEntityErrorKind> {
+pub fn get_first_valid_entity_id(id_srcs: &[EntityIdSrc]) -> Result<SmolStr, BuildEntityErrorKind> {
     let mut errors = Vec::with_capacity(4);
 
     for src in id_srcs.iter() {
@@ -51,7 +49,7 @@ pub fn get_first_valid_entity_id<'a>(
     Err(BuildEntityErrorKind::MissingEntityId(errors.into()))
 }
 
-pub fn collect_all_valid_entity_ids<'a>(id_srcs: &[EntityIdSrc]) -> Vec<SmolStr> {
+pub fn collect_all_valid_entity_ids(id_srcs: &[EntityIdSrc]) -> Vec<SmolStr> {
     id_srcs.iter().fold(Vec::new(), |mut acc, src| {
         if let Some(claim) = src.token.get_claim_val(src.claim) {
             acc.extend(claim_to_ids(claim));
@@ -60,7 +58,7 @@ pub fn collect_all_valid_entity_ids<'a>(id_srcs: &[EntityIdSrc]) -> Vec<SmolStr>
     })
 }
 
-fn claim_to_ids<'a>(claim: &'a Value) -> Vec<SmolStr> {
+fn claim_to_ids(claim: &Value) -> Vec<SmolStr> {
     let mut ids = Vec::new();
     match claim {
         serde_json::Value::Number(number) => {

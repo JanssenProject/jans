@@ -198,8 +198,7 @@ impl EntityBuilder {
         let iss_url = match token.get_claim(REGISTERED_ISS_CLAIM_NAME) {
             Some(claim) => {
                 let iss_claim_value = claim.as_str()?;
-                let iss_url = Url::parse(iss_claim_value)?;
-                iss_url
+                Url::parse(iss_claim_value)?
             },
             None => return Ok(None),
         };
@@ -278,7 +277,6 @@ pub fn add_token_references(
 ) -> HashMap<String, RestrictedExpression> {
     if let Some(mapping) = tkn_principal_mappings.get(entity_type_name) {
         attrs.extend(mapping.clone());
-    } else {
     }
 
     attrs

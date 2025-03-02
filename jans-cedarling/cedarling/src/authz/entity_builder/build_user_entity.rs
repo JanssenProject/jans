@@ -30,7 +30,7 @@ impl EntityBuilder {
 
         // Get User Entity ID
         let user_id_srcs = UserIdSrcs::resolve(tokens);
-        let user_id = get_first_valid_entity_id(&*user_id_srcs)
+        let user_id = get_first_valid_entity_id(&user_id_srcs)
             .map_err(|e| e.while_building(user_type_name))?;
 
         // Build Role entities

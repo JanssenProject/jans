@@ -366,7 +366,7 @@ impl AuthorizeEntitiesData {
     fn into_iter(self) -> impl Iterator<Item = Entity> {
         vec![self.resource]
             .into_iter()
-            .chain(self.issuers.into_iter())
+            .chain(self.issuers)
             .chain(self.roles)
             .chain(self.tokens.into_values())
             .chain(vec![self.user, self.workload].into_iter().flatten())
@@ -389,10 +389,7 @@ impl AuthorizeEntitiesData {
     ///
     /// Only entities that have been built will be included
     fn entities_for_context(&self) -> BuiltEntities {
-        let token_entities = self
-            .tokens
-            .iter()
-            .map(|(_, entity)| get_name_and_id(entity));
+        let token_entities = self.tokens.values().map(get_name_and_id);
         let principal_entities = [self.workload.as_ref(), self.user.as_ref()]
             .into_iter()
             .flatten()

@@ -66,7 +66,7 @@ impl<'a> EntityAttrsSrc<'a> {
                     srcs.push(EntityAttrSrc {
                         attr_name: name,
                         value,
-                        mapping: token.claim_mapping(*name),
+                        mapping: token.claim_mapping(name),
                     });
                 } else {
                     continue;
