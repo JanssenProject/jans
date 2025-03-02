@@ -17,11 +17,17 @@ policy_stores:
           access_token:
             entity_type_name: "Jans::Access_token"
             workload_id: "client_id"
+            principal_mapping:
+              - "Jans::Workload"
           id_token:
             entity_type_name: "Jans::id_token"
+            principal_mapping:
+              - "Jans::User"
           userinfo_token:
             entity_type_name: "Jans::Userinfo_token"
             user_id: "sub"
+            principal_mapping:
+              - "Jans::User"
     policies:
       840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
         description: simple policy example for principal workload
@@ -35,8 +41,8 @@ policy_stores:
                 action in [Jans::Action::"Update"],
                 resource is Jans::Issue
             )when{
-                principal.org_id == resource.org_id &&
-                principal.access_token.aud == "5b4487c4-8db1-409d-a653-f907b8094039" 
+                principal.access_token.org_id == resource.org_id &&
+                principal.aud == "5b4487c4-8db1-409d-a653-f907b8094039" 
             };
       444da5d85403f35ea76519ed1a18a33989f855bf1cf8:
         cedar_version: v4.0.0
@@ -52,7 +58,7 @@ policy_stores:
                 resource is Jans::Issue
             )when{
                 principal.country == resource.country &&
-                principal.access_token.aud == "5b4487c4-8db1-409d-a653-f907b8094039" 
+                principal.id_token.aud == "5b4487c4-8db1-409d-a653-f907b8094039" 
             };
     schema:
       encoding: none
@@ -60,14 +66,93 @@ policy_stores:
       body: |-
         namespace Jans {
           type Url = {"host": String, "path": String, "protocol": String};
-          entity Access_token = {"aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String};
           entity Issue = {"country": String, "org_id": String};
           entity Role;
           entity TrustedIssuer = {"issuer_entity_id": Url};
-          entity User in [Role] = {"country": String, "email": String, "sub": String, "username": String, "access_token": Access_token};
-          entity Workload = {"client_id": String, "iss": TrustedIssuer, "name": String, "org_id": String, access_token: Access_token};
-          entity id_token = {"acr": String, "amr": String, "aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String, "sub": String};
-          entity Userinfo_token  = {"iss": String, "jti": String, "client_id": String};
+          entity User in [Role] = {
+            sub: String,
+            role: String,
+            email: String,
+            username: String,
+            country: String,
+            id_token: id_token,
+            userinfo_token: Userinfo_token,
+          };
+          entity Workload = {
+            iss: Jans::TrustedIssuer,
+            aud?: String,
+            client_id?: String,
+            name: String,
+            access_token: Access_token,
+          };
+          entity Access_token = {
+          iss: Jans::TrustedIssuer,
+            sub?: String,
+            aud?: String,
+            nbf?: Long,
+            exp?: Long,
+            iat?: Long,
+            jti?: String,
+            client_id: String,
+            code: String,
+            token_type: String,
+            acr: String,
+            "x5t#S256": String,
+            scope: Set<String>,
+            org_id: String,
+            auth_time: Long,
+            name: String,
+            status: {
+              status_list: {
+                idx: Long,
+                uri: String,
+              }
+            }
+          };
+          entity id_token = {
+            iss: Jans::TrustedIssuer,
+            sub?: String,
+            aud?: String,
+            nbf?: Long,
+            exp?: Long,
+            iat?: Long,
+            jti?: String,
+            acr: String,
+            amr: String,
+            nonce: String,
+            sid: String,
+            jansOpenIDConnectVersion: String,
+            c_hash: String,
+            auth_time: Long,
+            grant: String,
+            role: String,
+            status: {
+              status_list: {
+                idx: Long,
+                uri: String,
+              }
+            },
+          };
+          entity Userinfo_token  = {
+            iss: Jans::TrustedIssuer,
+            sub?: String,
+            aud?: String,
+            nbf?: Long,
+            exp?: Long,
+            iat?: Long,
+            jti?: String,
+            country: String,
+            email: String,
+            username: String,
+            given_name: String,
+            middle_name: String,
+            inum: String,
+            updated_at: Long,
+            name: String,
+            nickname: String,
+            family_name: String,
+            jansAdminUIRole: Set<String>,
+          };
           type Context = {
             user: User,
             workload: Workload,

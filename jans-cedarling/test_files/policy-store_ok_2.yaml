@@ -16,6 +16,8 @@ policy_stores:
           access_token:
             entity_type_name: "Jans::Access_token"
             workload_id: "client_id"
+            principal_mapping:
+              - "Jans::Workload"
           id_token:
             entity_type_name: "Jans::id_token"
           userinfo_token:
@@ -35,7 +37,7 @@ policy_stores:
                 action in [Jans::Action::"Update",Jans::Action::"UpdateForWorkload",Jans::Action::"UpdateForWorkloadAndRole"],
                 resource is Jans::Issue
             )when{
-                principal.org_id == resource.org_id
+                principal.access_token.org_id == resource.org_id
             };
       2:
         description: simple policy example for principal user, permit if user country same with the issue
@@ -84,12 +86,51 @@ policy_stores:
         type Url = {"host": String, "path": String, "protocol": String};
         entity TrustedIssuer = {"issuer_entity_id": Url};
         entity Issue = {"country": String, "org_id": String};
-        entity id_token = {"aud": String,"iss": String, "sub": String};
         entity Role;
-        entity User in [Role] = {"country": String};
-        entity Workload = {"org_id": String};
-        entity Access_token = {"aud": String,"iss": String, "jti": String, "client_id": String,"org_id": String};
-        entity Userinfo_token  = {"iss": String, "jti": String, "client_id": String};
+        entity User in [Role] = {
+          sub: String,
+          role?: Set<String>,
+          country: String,
+        };
+        entity Workload = {
+          iss: TrustedIssuer,
+          aud?: String,
+          client_id?: String,
+          access_token: Access_token,
+        };
+        entity Access_token = {
+          iss: TrustedIssuer,
+          sub?: String,
+          aud?: String,
+          nbf?: Long,
+          exp?: Long,
+          iat?: Long,
+          jti?: String,
+          client_id: String,
+          org_id: String
+        };
+        entity id_token = {
+          iss: TrustedIssuer,
+          sub?: String,
+          aud?: String,
+          nbf?: Long,
+          exp?: Long,
+          iat?: Long,
+          jti?: String,
+          country?: String,
+          role?: Set<String>,
+        };
+        entity Userinfo_token  = {
+          iss: TrustedIssuer,
+          sub?: String,
+          aud?: String,
+          nbf?: Long,
+          exp?: Long,
+          iat?: Long,
+          jti?: String,
+          country?: String,
+          role?: Set<String>,
+        };
         entity Empty;
         type Context = {
           user: User,

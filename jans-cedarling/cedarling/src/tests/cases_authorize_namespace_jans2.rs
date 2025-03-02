@@ -49,7 +49,6 @@ async fn test_namespace_jans2() {
                     "sub": "some_sub",
                     "iss": "https://account.gluu.org",
                     "jti": "some_jti",
-                    "client_id": "some_client_id",
                     "role": ["Admin"],
                 })),
             },

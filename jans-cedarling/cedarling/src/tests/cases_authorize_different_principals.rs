@@ -40,8 +40,7 @@ lazy_static! {
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "https://account.gluu.org",
-                    "client_id": "some_client_id",
-                    "role": "Admin",
+                    "role": ["Admin"],
                 })),
             },
             // we need specify action name in each test case

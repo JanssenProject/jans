@@ -12,12 +12,12 @@ use std::collections::HashSet;
 const USER_ATTR_SRC_TKNS: &[&str] = &["userinfo_token", "id_token"];
 const USER_ATTR_SRC_CLAIMS: &[&str] = &[
     "sub",
+    "role",
     "email",
     "phone_number",
-    "role",
     "username",
-    "country",
     "birthdate",
+    "country",
 ];
 
 impl EntityBuilder {

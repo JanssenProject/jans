@@ -17,11 +17,15 @@ policy_stores:
           access_token:
             entity_type_name: "Jans2::Access_token"
             workload_id: "client_id"
+            principal_mapping:
+              - "Jans2::Workload"
           id_token:
             entity_type_name: "Jans2::id_token"
           userinfo_token:
             entity_type_name: "Jans2::Userinfo_token"
             user_id: "sub"
+            principal_mapping:
+              - "Jans2::User"
     policies:
       1:
         description: simple policy example for principal workload, permit when workload org_id same with resource
@@ -35,7 +39,8 @@ policy_stores:
                 action in [Jans2::Action::"Update"],
                 resource is Jans2::Issue
             )when{
-                principal.org_id == resource.org_id
+                principal.client_id != "" &&
+                principal.access_token.org_id == resource.org_id
             };
       2:
         description: simple policy example for principal user, permit if user country same with the issue
@@ -49,7 +54,7 @@ policy_stores:
                 action in [Jans2::Action::"Update"],
                 resource is Jans2::Issue
             )when{
-                principal.country == resource.country
+                principal.role == ["Admin"]
             };
       3:
         description: simple policy example for principal role, permit when Admin
@@ -67,16 +72,57 @@ policy_stores:
       encoding: none
       content_type: cedar
       body: |-
+        namespace Jans {
+          entity TrustedIssuer = {"issuer_entity_id": Jans2::Url};
+        }
         namespace Jans2 {
           type Url = {"host": String, "path": String, "protocol": String};
-          entity TrustedIssuer = {"issuer_entity_id": Url};
           entity Issue = {"country": String, "org_id": String};
-          entity id_token = {"aud": String,"iss": String, "sub": String};
-          entity Userinfo_token  = {"iss": String, "jti": String, "client_id": String,"role": Set<String>};
           entity Role;
-          entity User in [Role] = {"country": String};
-          entity Workload = {"org_id": String};
-          entity Access_token = {"aud": String,"iss": String, "jti": String, "client_id": String,"org_id": String};
+          entity User in [Role] = {
+            sub: String,
+            role: Set<String>,
+            country?: String,
+            id_token?: id_token,
+            userinfo_token?: Userinfo_token,
+          };
+          entity Workload = {
+            iss: Jans::TrustedIssuer,
+            aud?: String,
+            client_id?: String,
+            access_token: Access_token,
+          };
+          entity Access_token = {
+          iss: Jans::TrustedIssuer,
+            sub?: String,
+            aud?: String,
+            nbf?: Long,
+            exp?: Long,
+            iat?: Long,
+            jti?: String,
+            client_id: String,
+            org_id: String,
+          };
+          entity id_token = {
+            iss: Jans::TrustedIssuer,
+            sub?: String,
+            aud?: String,
+            nbf?: Long,
+            exp?: Long,
+            iat?: Long,
+            jti?: String,
+          };
+          entity Userinfo_token  = {
+            iss: Jans::TrustedIssuer,
+            sub?: String,
+            aud?: String,
+            nbf?: Long,
+            exp?: Long,
+            iat?: Long,
+            jti?: String,
+            country?: String,
+            role?: Set<String>,
+          };
           type Context = {
             user: User,
             workload: Workload,

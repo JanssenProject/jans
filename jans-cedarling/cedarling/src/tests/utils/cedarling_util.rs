@@ -6,28 +6,8 @@
 use crate::authorization_config::IdTokenTrustMode;
 use crate::{AuthorizationConfig, JwtConfig, WorkloadBoolOp};
 pub use crate::{
-    BootstrapConfig, BootstrapConfigRaw, Cedarling, FeatureToggle, LogConfig, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource,
+    BootstrapConfig, Cedarling, LogConfig, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
 };
-
-/// fixture for [`BootstrapConfigRaw`]
-pub fn get_raw_config(local_policy_store: &str) -> BootstrapConfigRaw {
-    // field `local_policy_store` should get JSON field. So we map yaml to json
-    let local_policy_store_json: serde_json::Value =
-        serde_yml::from_str(local_policy_store).expect("yaml should be parsed without errors");
-
-    BootstrapConfigRaw {
-        application_name: "test_app".to_string(),
-        user_authz: FeatureToggle::Enabled,
-        workload_authz: FeatureToggle::Enabled,
-        usr_workload_bool_op: WorkloadBoolOp::And,
-        log_type: crate::LoggerType::StdOut,
-        local_policy_store: Some(local_policy_store_json.to_string()),
-        jwt_status_validation: FeatureToggle::Disabled,
-        id_token_trust_mode: IdTokenTrustMode::None,
-        ..Default::default()
-    }
-}
 
 /// fixture for [`BootstrapConfig`]
 pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
@@ -130,7 +110,10 @@ macro_rules! cmp_policy {
 
 /// util function for convenient conversion Decision
 pub fn get_decision(resp: &Option<cedar_policy::Response>) -> Option<cedar_policy::Decision> {
-    resp.as_ref().map(|v| v.decision())
+    resp.as_ref().map(|v| {
+        println!("diagnostics: {:?}\n", v.diagnostics());
+        v.decision()
+    })
 }
 
 /// This macro removes code duplication when comparing a decision in tests.
