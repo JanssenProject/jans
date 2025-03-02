@@ -156,15 +156,15 @@ Here is a non-normative example of the `policies` field:
 This record contains the information needed to validate tokens from this issuer:
 
 ```json
-"identity_source": {
-  "some_unique_id" : {
+"trusted_issuers": {
+  "trusted_issuer_id" : {
     "name": "name_of_the_trusted_issuer",
     "description": "description for the trusted issuer",
     "openid_configuration_endpoint": "https://<trusted-issuer-hostname>/.well-known/openid-configuration",
     "tokens_metadata": {
       "access_tokens": {
         "trusted": true,
-        "principal_identifier": "jti",
+        "token_id": "jti",
         ...
       },
       "id_tokens": { ... },
@@ -172,6 +172,9 @@ This record contains the information needed to validate tokens from this issuer:
       "tx_tokens": { ... },
       ...
     }
+  },
+  "another_issuer_id": {
+    ...
   }
   ...
 }
@@ -180,7 +183,7 @@ This record contains the information needed to validate tokens from this issuer:
 - **name** : (*String*) The name of the trusted issuer.
 - **description** : (*String*) A brief description of the trusted issuer, providing context for administrators.
 - **openid_configuration_endpoint** : (*String*) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at `/.well-known/openid-configuration`).
-- **identity_source** : (*Object*, *optional*) Metadata related to the tokens issued by this issuer.
+- **trusted_issuer_id** : (*Object*, *optional*) Metadata related to a particular issuer. You can add as many trusted issuers you want. Furthermore, the name this object is what will be used as the entity ID of the [Trusted Issuer](./cedarling-entities.md#trusted-issuer) that Cedarling automatically creates at startup.
 - **tokens_metadata** : (*Object*, *optional*) Tokens metadata in a map of *token name* -> *token metadata*. See  [Token Metadata Schema](#token-metadata-schema).
 
 ### Token Metadata Schema
@@ -189,8 +192,12 @@ The Token Entity Metadata Schema defines how tokens are mapped, parsed, and tran
 
 ```json
 {
-  "user_id": "<field name in token (e.g., 'email', 'sub', 'uid', etc.) or '' if not used>",
-  "role_mapping": "<field for role assignment (e.g., 'role', 'memberOf', etc.) or '' if not used>",
+  "trusted": true,
+  "token_id": "jti",
+  "workload_id": "aud | client_id",
+  "user_id": "sub | uid | email",
+  "role_mapping": "role | group | memberOf",
+  "required_claims": ["iss", "exp", "some_custom_claim", ...],
   "claim_mapping": {
     "mapping_target": {
       "parser": "<type of parser ('regex' or 'json')>",
@@ -288,7 +295,7 @@ Here is a non-normative example of a `cedarling_store.json` file:
         }
     },
     "schema": "schema_encoded_in_base64",
-    "identity_source": {
+    "trusted_issuers": {
         "08c6c18a654f492adcf3fe069d729b4d9e6bf82605cb" : {
             "name": "Google",
             "description": "Consumer IDP",
@@ -312,7 +319,7 @@ Here is a non-normative example of a `cedarling_store.json` file:
               "trusted": true,
               "principal_identifier": "",
               "role_mapping": "",
-            },            
+            },
         }
     }
 }
@@ -334,18 +341,18 @@ Here is example of a minimum supported `cedar-policy schema`:
 
 ```cedar-policy_schema
 namespace Jans {
-entity id_token = {"aud": String,"iss": String, "sub": String};
-entity Role;
-entity User in [Role] = {};
-entity Access_token = {"aud": String,"iss": String, "jti": String, "client_id": String};
-entity Workload = {};
+  entity id_token = {"aud": String,"iss": String, "sub": String};
+  entity Role;
+  entity User in [Role] = {};
+  entity Access_token = {"aud": String,"iss": String, "jti": String, "client_id": String};
+  entity Workload = {};
 
-entity Issue = {};
-action "Update" appliesTo {
-  principal: [Workload, User, Role],
-  resource: [Issue],
-  context: {}
-};
+  entity Issue = {};
+  action "Update" appliesTo {
+    principal: [Workload, User, Role],
+    resource: [Issue],
+    context: {}
+  };
 }
 ```
 
