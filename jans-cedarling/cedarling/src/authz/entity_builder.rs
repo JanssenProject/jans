@@ -12,21 +12,23 @@ mod build_user_entity;
 mod build_workload_entity;
 mod built_entities;
 mod entity_id_getters;
+mod error;
 mod value_to_expr;
 
 use super::AuthorizeEntitiesData;
 use crate::common::policy_store::TrustedIssuer;
-use crate::jwt::{Token, TokenClaimTypeError};
+use crate::jwt::Token;
 use crate::{AuthorizationConfig, ResourceData};
 use build_entity_attrs::*;
 use build_iss_entity::build_iss_entity;
 pub(crate) use built_entities::BuiltEntities;
-use cedar_policy::{Entity, EntityUid, ExpressionConstructionError, RestrictedExpression};
-use entity_id_getters::GetEntityIdErrors;
+use cedar_policy::{Entity, EntityUid, RestrictedExpression};
 use std::collections::hash_map::Entry;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 use url::{Origin, Url};
+
+pub use error::*;
 
 const DEFAULT_WORKLOAD_ENTITY_NAME: &str = "Jans::Workload";
 const DEFAULT_USER_ENTITY_NAME: &str = "Jans::User";
@@ -98,15 +100,18 @@ impl EntityBuilder {
         build_workload: bool,
         build_user: bool,
         trusted_issuers: &HashMap<String, TrustedIssuer>,
-    ) -> Self {
+    ) -> Result<Self, InitEntityBuilderError> {
         let (ok, errs): (Vec<_>, Vec<_>) = trusted_issuers
             .iter()
             .map(|(iss_id, iss)| build_iss_entity(&entity_names.iss, iss_id, iss))
             .partition(|result| result.is_ok());
 
         if !errs.is_empty() {
-            // TODO: gracefully handle errors
-            panic!("error while initializing entity builder: {:#?}", errs);
+            let errs = errs
+                .into_iter()
+                .map(|e| e.unwrap_err())
+                .collect::<Vec<BuildEntityError>>();
+            return Err(InitEntityBuilderError::BuildIssEntities(errs.into()));
         }
 
         let iss_entities = ok
@@ -114,12 +119,12 @@ impl EntityBuilder {
             .flatten()
             .collect::<HashMap<Origin, Entity>>();
 
-        Self {
+        Ok(Self {
             entity_names,
             build_workload,
             build_user,
             iss_entities,
-        }
+        })
     }
 
     pub fn build_entities(
@@ -233,40 +238,6 @@ fn default_tkn_entity_name(tkn_name: &str) -> Option<&'static str> {
         "id_token" => Some(DEFAULT_ID_TKN_ENTITY_NAME),
         "userinfo_token" => Some(DEFAULT_USERINFO_TKN_ENTITY_NAME),
         _ => None,
-    }
-}
-
-#[derive(Debug, thiserror::Error)]
-#[error("failed to build `\"{entity_type_name}\"`: {error}")]
-pub struct BuildEntityError {
-    pub entity_type_name: String,
-    pub error: BuildEntityErrorKind,
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum BuildEntityErrorKind {
-    #[error("unable to find a valid entity id, tried the following: {0}")]
-    MissingEntityId(GetEntityIdErrors),
-    #[error(transparent)]
-    TokenClaimTypeMismatch(#[from] TokenClaimTypeError),
-    #[error("failed to parse entity uid: {0}")]
-    FailedToParseUid(#[from] cedar_policy::ParseErrors),
-    #[error("failed to evaluate entity attribute or tag: {0}")]
-    EntityAttrEval(#[from] cedar_policy::EntityAttrEvaluationError),
-    #[error("invalid issuer URL: {0}")]
-    InvalidIssUrl(#[from] url::ParseError),
-    #[error("missing required token: {0}")]
-    MissingRequiredToken(String),
-    #[error("failed to build entity attributes: {0:?}")]
-    BuildAttrs(Vec<ExpressionConstructionError>),
-}
-
-impl BuildEntityErrorKind {
-    pub fn while_building(self, entity_type_name: &str) -> BuildEntityError {
-        BuildEntityError {
-            entity_type_name: entity_type_name.to_string(),
-            error: self,
-        }
     }
 }
 

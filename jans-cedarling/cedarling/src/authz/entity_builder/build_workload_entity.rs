@@ -121,7 +121,8 @@ mod test {
     fn can_build_using_access_tkn_aud() {
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityNames::default(), true, false, &issuers);
+        let builder = EntityBuilder::new(EntityNames::default(), true, false, &issuers)
+            .expect("should init entity builder");
         let access_token = Token::new(
             "access_token",
             HashMap::from([
@@ -187,7 +188,8 @@ mod test {
     fn can_build_using_access_tkn_client_id() {
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityNames::default(), true, false, &issuers);
+        let builder = EntityBuilder::new(EntityNames::default(), true, false, &issuers)
+            .expect("should init entity builder");
         let access_token = Token::new(
             "access_token",
             HashMap::from([

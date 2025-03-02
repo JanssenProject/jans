@@ -59,16 +59,18 @@ pub struct Authz {
 
 impl Authz {
     /// Create a new Authorization Service
-    pub(crate) fn new(config: AuthzConfig) -> Self {
+    pub(crate) fn new(config: AuthzConfig) -> Result<Self, AuthzServiceInitError> {
         let entity_names = EntityNames::from(&config.authorization);
         let build_workload = config.authorization.use_workload_principal;
         let build_user = config.authorization.use_user_principal;
+        // TODO: we should move entity builder to it's own module then initialize
+        // it in the service factory
         let entity_builder = entity_builder::EntityBuilder::new(
             entity_names,
             build_workload,
             build_user,
             &config.trusted_issuers,
-        );
+        )?;
 
         config.log_service.log_any(
             LogEntry::new_with_data(LogType::System, None)
@@ -77,11 +79,11 @@ impl Authz {
                 .set_message("Cedarling Authz initialized successfully".to_string()),
         );
 
-        Self {
+        Ok(Self {
             config,
             authorizer: cedar_policy::Authorizer::new(),
             entity_builder,
-        }
+        })
     }
 
     // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
@@ -340,6 +342,12 @@ impl Authz {
             .entity_builder
             .build_entities(tokens, &request.resource)?)
     }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum AuthzServiceInitError {
+    #[error(transparent)]
+    InitEntityBuilder(#[from] InitEntityBuilderError),
 }
 
 /// Helper struct to hold named parameters for [`Authz::execute_authorize`] method.

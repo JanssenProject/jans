@@ -167,7 +167,8 @@ mod test {
             metadata.claim_mapping = claim_mappings.clone();
         }
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityNames::default(), true, false, &issuers);
+        let builder = EntityBuilder::new(EntityNames::default(), true, false, &issuers)
+            .expect("should init entity builder");
         let id_token = Token::new(
             "id_token",
             HashMap::from([

@@ -52,7 +52,7 @@ pub fn build_entity_attrs(
             .into_iter()
             .flat_map(|e| e.unwrap_err())
             .collect::<Vec<ExpressionConstructionError>>();
-        return Err(BuildEntityErrorKind::BuildAttrs(errors));
+        return Err(BuildEntityErrorKind::BuildAttrs(errors.into()));
     }
 
     let attrs = attrs

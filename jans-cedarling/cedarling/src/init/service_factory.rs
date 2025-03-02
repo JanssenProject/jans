@@ -8,7 +8,7 @@
 //! Module to lazily initialize internal cedarling services
 
 use super::service_config::ServiceConfig;
-use crate::authz::{Authz, AuthzConfig};
+use crate::authz::{Authz, AuthzConfig, AuthzServiceInitError};
 use crate::bootstrap_config::BootstrapConfig;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::jwt::{JwtService, JwtServiceInitError};
@@ -84,7 +84,7 @@ impl<'a> ServiceFactory<'a> {
                     .clone()
                     .unwrap_or_default(),
             };
-            let service = Arc::new(Authz::new(config));
+            let service = Arc::new(Authz::new(config)?);
             self.container.authz_service = Some(service.clone());
             Ok(service)
         }
@@ -94,6 +94,8 @@ impl<'a> ServiceFactory<'a> {
 /// Error type for failing to initialize a service
 #[derive(Debug, thiserror::Error)]
 pub enum ServiceInitError {
+    #[error(transparent)]
+    AuthzService(#[from] AuthzServiceInitError),
     #[error(transparent)]
     JwtService(#[from] JwtServiceInitError),
 }

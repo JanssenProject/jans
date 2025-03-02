@@ -99,7 +99,8 @@ mod test {
     fn can_build_access_tkn_entity() {
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityNames::default(), false, false, &issuers);
+        let builder = EntityBuilder::new(EntityNames::default(), false, false, &issuers)
+            .expect("should init entity builder");
         let access_token = Token::new(
             "access_token",
             HashMap::from([
@@ -148,7 +149,8 @@ mod test {
     fn can_build_id_tkn_entity() {
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityNames::default(), false, false, &issuers);
+        let builder = EntityBuilder::new(EntityNames::default(), false, false, &issuers)
+            .expect("should init entity builder");
         let access_token = Token::new(
             "access_token",
             HashMap::from([
@@ -197,7 +199,8 @@ mod test {
     fn can_build_userinfo_tkn_entity() {
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityNames::default(), false, false, &issuers);
+        let builder = EntityBuilder::new(EntityNames::default(), false, false, &issuers)
+            .expect("should init entity builder");
         let access_token = Token::new(
             "userinfo_token",
             HashMap::from([
