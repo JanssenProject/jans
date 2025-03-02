@@ -79,7 +79,8 @@ To call SSA services, a token of type `client_credentials` must be generated wit
 
 ## Create a new SSA
 
-Create `SSA` for the organization with `expiration` (optional).
+Create `SSA` for the organization with `expiration` (optional). 
+If `expiration` is not set take expiration from `ssaConfiguration.ssaExpirationInDays` AS configuration property.
 
 ### Request body description
 
@@ -87,13 +88,13 @@ Create `SSA` for the organization with `expiration` (optional).
 |----------------|--------------------------------------------------------------------------------------------------------------------------|----------|
 | org_id         | The "org_id" is used for organization identification.                                                                    | false    |
 | description    | Describe SSA                                                                                                             | false    |
-| software_id    | The "software_id" is used for software identification.                                                                   | false    |
+| software_id    | The "software_id" is used for software identification. If not set, generates random UUID.                                | false    |
 | software_roles | List of string values, fixed value `["password", "notify"]`.                                                             | false    |
 | grant_types    | Fixed value Fixed value `["client_credentials"]`.                                                                        | false    |
-| expiration     | Expiration date. `(Default value: calculated based on global SSA settings)`                                              | true     |
-| one_time_use   | Defined whether the SSA will be used only once or can be used multiple times. `(Default value: true)`                    | true     |
-| rotate_ssa     | TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA. `(Default value: true)` | true     |
-| lifetime       | SSA Lifetime in seconds                                                                                                  | true     |
+| expiration     | Expiration date. `(Default value: calculated based on global SSA settings)`                                              | false     |
+| one_time_use   | Defined whether the SSA will be used only once or can be used multiple times. `(Default value: true)`                    | false     |
+| rotate_ssa     | TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA. `(Default value: true)` | false     |
+| lifetime       | SSA Lifetime in seconds. If not set calculates lifetime, `lifetime = expiration - now`                                   | false     |
 
 **Note:** You can add more `custom attributes` in the request, (you must have previously configured in the SSA global
 configuration).
@@ -409,7 +410,7 @@ Connection: Keep-Alive
 
 ## Revoke SSA
 
-Revoke existing active SSA based on `jti` or `org_id`.
+Revoke existing active SSA based on `jti` or `org_id`. On SSA revoke expiration date is set to `now` which makes it eligible for clean up.
 
 ### Query Parameters
 
@@ -504,7 +505,7 @@ def get(self, jsonArray, context):
 
 ### Revoke method
 
-This method is executed after the SSA list has been revoked.
+This method is executed after the SSA list has been revoked. On SSA revoke expiration date is set to `now` which makes it eligible for clean up.
 
 ```
 def revoke(self, ssaList, context):

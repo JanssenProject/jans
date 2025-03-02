@@ -18,6 +18,8 @@
 
 package io.jans.fido2.model.auth;
 
+import java.util.Arrays;
+
 /**
  * authData structure from https://www.w3.org/TR/webauthn/#authenticator-data
  * @author Yuriy Movchan
@@ -122,6 +124,15 @@ public class AuthData {
 	public AuthData setExtensions(byte[] extensions) {
 		this.extensions = extensions;
         return this;
+	}
+
+	@Override
+	public String toString() {
+		return "AuthData [rpIdHash=" + Arrays.toString(rpIdHash) + ", flags=" + Arrays.toString(flags) + ", counters="
+				+ Arrays.toString(counters) + ", aaguid=" + Arrays.toString(aaguid) + ", credId="
+				+ Arrays.toString(credId) + ", attestationBuffer=" + Arrays.toString(attestationBuffer) + ", keyType="
+				+ keyType + ", cosePublicKey=" + Arrays.toString(cosePublicKey) + ", extensions="
+				+ Arrays.toString(extensions) + ", authDataDecoded=" + Arrays.toString(authDataDecoded) + "]";
 	}
 
 }

@@ -234,7 +234,11 @@ mod test {
         let expected = BootstrapConfig {
             application_name: "My App".to_string(),
             log_config: LogConfig {
-                log_type: LogTypeConfig::Memory(MemoryLogConfig { log_ttl: 60 }),
+                log_type: LogTypeConfig::Memory(MemoryLogConfig {
+                    log_ttl: 60,
+                    max_item_size: None,
+                    max_items: None,
+                }),
                 log_level: crate::LogLevel::DEBUG,
             },
             policy_store_config: PolicyStoreConfig {

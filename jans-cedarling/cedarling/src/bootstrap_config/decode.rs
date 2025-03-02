@@ -51,6 +51,8 @@ impl BootstrapConfig {
                 log_ttl: raw
                     .log_ttl
                     .ok_or(BootstrapConfigLoadingError::MissingLogTTL)?,
+                max_item_size: raw.log_max_item_size,
+                max_items: raw.log_max_items,
             }),
             LoggerType::StdOut => LogTypeConfig::StdOut,
             LoggerType::Lock => LogTypeConfig::Lock,

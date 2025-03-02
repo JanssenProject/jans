@@ -790,7 +790,7 @@ class JCA_CLI:
 
     def get_url_param(self, url):
         if url.endswith('}'):
-            pname = re.findall('/\{(.*?)\}$', url)[0]
+            pname = re.findall(r'/\{(.*?)\}$', url)[0]
             return pname
 
     def get_endpiont_url_param(self, endpoint):
