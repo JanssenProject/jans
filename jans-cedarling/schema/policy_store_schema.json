@@ -1,0 +1,162 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Cedarling Policy Store Schema",
+    "description": "Defines the structure of the policy store used by Cedarling, which contains all data necessary to verify JWT tokens and evaluate Cedar policies.",
+    "type": "object",
+    "properties": {
+        "cedar_version": {
+            "description": "The version of the Cedar language that Cedarling should use for policy evaluation. If not set, Cedarling should default to the latest supported Cedar version.",
+            "type": "string"
+        },
+        "policy_store_version": {
+            "description": "The version identifier for this policy store, used to track changes across updates.",
+            "type": "string"
+        },
+        "policies": {
+            "description": "A collection of Cedar policies and their associated metadata.",
+            "$ref": "#/$defs/PolicyStore"
+        },
+        "policy_stores": {
+            "description": "A collection of logically separated policy stores. Each store can contain its own policies, trusted issuers, and schema.",
+            "$ref": "#/$defs/PolicyStore"
+        }
+    },
+    "required": [
+        "policy_store_version"
+    ],
+    "additionalProperties": false,
+    "$defs": {
+        "PolicyStore": {
+            "description": "Represents a single policy store, which includes policies, trusted issuers, and the Cedar schema used for evaluation.",
+            "type": "object",
+            "properties": {
+                "policies": {
+                    "description": "A map of policy identifiers to their associated Cedar policies.",
+                    "$ref": "#/$defs/CedarPolicy"
+                },
+                "trusted_issuers": {
+                    "description": "A map of trusted issuers (by identifier) that defines which external identity providers can be trusted when evaluating authorization requests.",
+                    "$ref": "#/$defs/TrustedIssuer"
+                },
+                "schema": {
+                    "description": "The Cedar schema definition (encoded in Base64) that defines the shape of entities, actions, and context within this policy store.",
+                    "type": "string"
+                }
+            },
+            "additionalProperties": true
+        },
+        "CedarPolicy": {
+            "description": "Represents an individual Cedar policy, including metadata and content.",
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "A short, optional description explaining the purpose of this policy.",
+                    "type": "string",
+                    "default": ""
+                },
+                "creation_date": {
+                    "description": "The date the policy was created, typically in ISO 8601 format (e.g., 2025-03-03T12:00:00Z).",
+                    "type": "string"
+                },
+                "policy_content": {
+                    "description": "The Cedar policy content, encoded as a Base64 string.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "creation_date",
+                "policy_content"
+            ],
+            "additionalProperties": true
+        },
+        "TrustedIssuer": {
+            "description": "Represents an external identity provider (IDP) or trusted issuer, which issues tokens used during authorization evaluation.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "A user-defined, human-readable identifier for this trusted issuer (e.g., 'Google', 'Azure AD').",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "A short description explaining the purpose of this trusted issuer.",
+                    "type": "string",
+                    "default": ""
+                },
+                "openid_configuration_endpoint": {
+                    "description": "The URL to the trusted issuer's OpenID Connect discovery document, which contains metadata about the issuer (e.g., authorization endpoint, token endpoint).",
+                    "type": "string",
+                    "format": "uri"
+                },
+                "tokens_metadata": {
+                    "description": "Metadata that describes how to interpret tokens issued by this trusted issuer.",
+                    "$ref": "#/$defs/TokenMetadata"
+                }
+            },
+            "required": [
+                "name",
+                "openid_configuration_endpoint"
+            ],
+            "additionalProperties": true
+        },
+        "TokenMetadata": {
+            "description": "Describes how Cedarling should interpret and map JWT tokens from a specific trusted issuer.",
+            "type": "object",
+            "properties": {
+                "trusted": {
+                    "description": "Indicates whether tokens from this issuer should be considered trusted by default. Defaults to true.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "entity_type_name": {
+                    "description": "The Cedar entity type that tokens from this issuer should be mapped to (e.g., 'Jans::AccessToken'). This is required.",
+                    "type": "string"
+                },
+                "principal_mapping": {
+                    "description": "A list of Cedar principal types to which this token should be mapped (e.g., ['Jans::Workload']). Defaults to an empty list.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [],
+                    "uniqueItems": true
+                },
+                "token_id": {
+                    "description": "The claim in the token that should be treated as the unique identifier for the token. Defaults to 'jti'.",
+                    "type": "string",
+                    "default": "jti"
+                },
+                "user_id": {
+                    "description": "The claim(s) in the token that should be treated as the user's unique identifier (e.g., 'email', 'sub', 'uid').",
+                    "type": "string"
+                },
+                "role_mapping": {
+                    "description": "The claim in the token that lists the user's roles (e.g., 'role', 'group', 'memberOf'). Defaults to 'role'.",
+                    "type": "string",
+                    "default": "role"
+                },
+                "workload_id": {
+                    "description": "The claim in the token that uniquely identifies the workload (e.g., 'client_id', 'rp_id'). Defaults to 'aud'.",
+                    "type": "string"
+                },
+                "claim_mapping": {
+                    "description": "An object defining custom mappings from token claims to Cedar entity attributes. Defaults to an empty object.",
+                    "type": "object",
+                    "default": {}
+                },
+                "required_claims": {
+                    "description": "A list of claims that must be present in the token for it to be considered valid. Defaults to an empty list.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [],
+                    "uniqueItems": true
+                }
+            },
+            "required": [
+                "entity_type_name"
+            ],
+            "additionalProperties": true
+        }
+    }
+}
