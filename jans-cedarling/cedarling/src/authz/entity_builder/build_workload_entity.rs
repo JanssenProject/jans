@@ -92,9 +92,8 @@ impl<'a> WorkloadIdSrcs<'a> {
                         let claim = token
                             .get_metadata()
                             .and_then(|m| m.workload_id.as_ref())
-                            .map(|claim| {
+                            .inspect(|claim| {
                                 acc.push(EntityIdSrc { token, claim });
-                                claim
                             });
 
                         match claim {

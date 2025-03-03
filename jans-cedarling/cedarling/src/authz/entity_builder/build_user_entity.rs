@@ -89,14 +89,12 @@ impl<'a> UserIdSrcs<'a> {
                 .iter()
                 .fold(Vec::new(), |mut acc, &src| {
                     if let Some(token) = tokens.get(src.token) {
-                        let claim =
-                            token
-                                .get_metadata()
-                                .and_then(|m| m.user_id.as_ref())
-                                .map(|claim| {
-                                    acc.push(EntityIdSrc { token, claim });
-                                    claim
-                                });
+                        let claim = token
+                            .get_metadata()
+                            .and_then(|m| m.user_id.as_ref())
+                            .inspect(|claim| {
+                                acc.push(EntityIdSrc { token, claim });
+                            });
 
                         match claim {
                             Some(claim) if claim != src.claim => {

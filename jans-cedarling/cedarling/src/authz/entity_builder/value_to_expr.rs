@@ -35,7 +35,7 @@ pub fn value_to_expr(
         Value::Array(values) => {
             let (values, errors): (Vec<_>, Vec<_>) = values
                 .iter()
-                .map(|v| value_to_expr(v))
+                .map(value_to_expr)
                 .partition(Result::is_ok);
 
             if !errors.is_empty() {

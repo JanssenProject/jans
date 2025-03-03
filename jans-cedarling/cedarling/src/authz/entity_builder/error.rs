@@ -79,7 +79,7 @@ impl BuildEntityErrorKind {
     }
 }
 
-fn collect_errors_to_str<T: Display>(errors: &Vec<T>) -> String {
+fn collect_errors_to_str<T: Display>(errors: &[T]) -> String {
     errors
         .iter()
         .map(|e| e.to_string())
