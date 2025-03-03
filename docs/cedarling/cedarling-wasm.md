@@ -39,56 +39,35 @@ clang --version
 
   **Cloning the Jans Monorepo and Changing Directory**
 
-  1. Clone the Jans Monorepo
-  First, clone the Jans monorepository from GitHub using the following command:
+  * clone the Jans monorepository from GitHub using the following command:
   ```bash title="Command"
   git clone https://github.com/JanssenProject/jans.git
   ```
-  This will create a local copy of the repository on your system.
-
-2. Navigate to the jans-cedarling Directory
-  After cloning the repository, change the directory to the jans-cedarling folder by running:
+  * This will create a local copy of the repository on your system.
+  * After cloning the repository, change the directory to the `cedarling_wasm` folder by running:
   ```bash title="Command"
-  cd /path/to/jans/jans-cedarling
+  cd /path/to/jans/jans-cedarling/bindings/cedarling_wasm
   ```
-Make sure to replace `/path/to/` with the actual path where the `jans` repository was cloned.
-
-
-**Add WebAssembly Dependencies**
-
-* Navigate to `/jans/jans-cedarling/test_utils`
-* Open the `Cargo.toml` file in the project directory and add the necessary dependencies.
-* Edit `Cargo.toml` to look like this:
-
-```
-[package]
-name = "test_utils"
-version = "0.0.0-nightly"
-edition = "2021"
-
-[dependencies]
-pretty_assertions = "1"
-serde_json = { workspace = true }
-jsonwebtoken = { workspace = true }
-jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
-serde = { workspace = true }
-
-
-[lib]
-crate-type = ["cdylib", "rlib"]
-```
-
+  * Make sure to replace `/path/to/` with the actual path where the `jans` repository was cloned.
 
 **Build the WebAssembly Project**
 
-* Once the dependencies are set up, build the WebAssembly package in release mode 
-by running the following command:
+* Build the WebAssembly package in release mode after you've reached the `cedarling_wasm` folder. 
 ```bash title="Command"
 wasm-pack build --release --target web
 ```
-
 * wasm-pack automatically optimizes the WebAssembly binary file using 
 wasm-opt for better performance.
+
+
+
+## Run the Server
+
+* To view the WebAssembly project in action, you can run a local server. 
+One way to do this is by using the following command:
+```bash title="Command"
+npx http-server .
+```
 
 
 ## Including in projects
@@ -98,9 +77,8 @@ For using result files in browser project you need make result `pkg` folder
 accessible for loading in the browser so that you can later import the 
 corresponding file from the browser.
 
-Create a new `pkg/index.html` file and add the below code.
-
 Here is example of code snippet:
+
 
 ```html
 <!DOCTYPE html>
@@ -174,20 +152,6 @@ Here is example of code snippet:
 </html>
 
 ```
-
-
-
-## Run the Server
-
-* To view the WebAssembly project in action, you can run a local server. 
-One way to do this is by using `http-server`, a simple, zero-config static 
-file server. You can install and run it using:
-
-```bash title="Command"
-npx http-server .
-```
-
-
 
 ## Usage
 
