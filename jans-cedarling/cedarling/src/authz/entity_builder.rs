@@ -34,7 +34,7 @@ const DEFAULT_WORKLOAD_ENTITY_NAME: &str = "Jans::Workload";
 const DEFAULT_USER_ENTITY_NAME: &str = "Jans::User";
 const DEFAULT_ISS_ENTITY_NAME: &str = "Jans::TrustedIssuer";
 const DEFAULT_ACCESS_TKN_ENTITY_NAME: &str = "Jans::Access_token";
-const DEFAULT_ID_TKN_ENTITY_NAME: &str = "Jans::id_token";
+const DEFAULT_ID_TKN_ENTITY_NAME: &str = "Jans::Id_token";
 const DEFAULT_USERINFO_TKN_ENTITY_NAME: &str = "Jans::Userinfo_token";
 const DEFAULT_ROLE_ENTITY_NAME: &str = "Jans::Role";
 

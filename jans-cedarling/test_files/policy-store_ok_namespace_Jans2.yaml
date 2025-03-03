@@ -20,7 +20,7 @@ policy_stores:
             principal_mapping:
               - "Jans2::Workload"
           id_token:
-            entity_type_name: "Jans2::id_token"
+            entity_type_name: "Jans2::Id_token"
           userinfo_token:
             entity_type_name: "Jans2::Userinfo_token"
             user_id: "sub"
@@ -83,7 +83,7 @@ policy_stores:
             sub: String,
             role: Set<String>,
             country?: String,
-            id_token?: id_token,
+            id_token?: Id_token,
             userinfo_token?: Userinfo_token,
           };
           entity Workload = {
@@ -103,7 +103,7 @@ policy_stores:
             client_id: String,
             org_id: String,
           };
-          entity id_token = {
+          entity Id_token = {
             iss: Jans::TrustedIssuer,
             sub?: String,
             aud?: String,
@@ -127,7 +127,7 @@ policy_stores:
             user: User,
             workload: Workload,
             access_token: Access_token,
-            id_token: id_token,
+            id_token: Id_token,
             userinfo_token: Userinfo_token,
           };
           action "Update" appliesTo {

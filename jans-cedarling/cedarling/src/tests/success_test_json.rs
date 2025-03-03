@@ -22,7 +22,7 @@ async fn success_test_json() {
         {
             "tokens": {
                 "access_token": generate_token_using_claims(json!({
-                    "iss": "https://account.gluu.org",
+                    "iss": "https://test.jans.org",
                     "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
                     "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
                     "exp": 1724945978,
@@ -43,12 +43,12 @@ async fn success_test_json() {
                     "status": {
                       "status_list": {
                         "idx": 201,
-                        "uri": "https://account.gluu.org/jans-auth/restv1/status_list"
+                        "uri": "https://test.jans.org/jans-auth/restv1/status_list"
                       }
                     }
                 })),
                 "id_token": generate_token_using_claims(json!({
-                    "iss": "https://account.gluu.org",
+                    "iss": "https://test.jans.org",
                     "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
                     "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
                     "exp": 1724835859,
@@ -66,12 +66,12 @@ async fn success_test_json() {
                     "status": {
                       "status_list": {
                         "idx": 202,
-                        "uri": "https://account.gluu.org/jans-auth/restv1/status_list"
+                        "uri": "https://test.jans.org/jans-auth/restv1/status_list"
                       }
                     },
                 })),
                 "userinfo_token":  generate_token_using_claims(json!({
-                    "iss": "https://account.gluu.org",
+                    "iss": "https://test.jans.org",
                     "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
                     "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
                     "exp": 1724945978,

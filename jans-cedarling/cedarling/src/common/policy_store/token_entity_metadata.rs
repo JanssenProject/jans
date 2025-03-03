@@ -95,7 +95,7 @@ impl TokenEntityMetadata {
                 "aud".into(),
                 "exp".into(),
             ]),
-            entity_type_name: "Jans::id_token".into(),
+            entity_type_name: "Jans::Id_token".into(),
             principal_mapping: HashSet::from(["Jans::User".into()]),
             workload_id: None,
         }

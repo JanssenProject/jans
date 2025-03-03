@@ -204,7 +204,7 @@ mod test {
                     principal: "Jans::User".into(),
                     attr_name: "id_token".into(),
                     expr: RestrictedExpression::new_entity_uid(
-                        EntityUid::from_str("Jans::id_token::\"some_jti\"".into())
+                        EntityUid::from_str("Jans::Id_token::\"some_jti\"".into())
                             .expect("should parse id_token EntityUid"),
                     ),
                 },
@@ -237,7 +237,7 @@ mod test {
                     "role": ["role1", "role2", "role3"],
                     "username": "some_username",
                     "id_token": {"__entity": {
-                        "type": "Jans::id_token",
+                        "type": "Jans::Id_token",
                         "id": "some_jti",
                     }},
                     "userinfo_token": {"__entity": {

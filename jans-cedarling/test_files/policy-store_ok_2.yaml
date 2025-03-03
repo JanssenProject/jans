@@ -19,7 +19,7 @@ policy_stores:
             principal_mapping:
               - "Jans::Workload"
           id_token:
-            entity_type_name: "Jans::id_token"
+            entity_type_name: "Jans::Id_token"
           userinfo_token:
             entity_type_name: "Jans::Userinfo_token"
             user_id: "sub"
@@ -109,7 +109,7 @@ policy_stores:
           client_id: String,
           org_id: String
         };
-        entity id_token = {
+        entity Id_token = {
           iss: TrustedIssuer,
           sub?: String,
           aud?: String,
@@ -136,19 +136,19 @@ policy_stores:
           user: User,
           workload: Workload,
           access_token: Access_token,
-          id_token: id_token,
+          id_token: Id_token,
           userinfo_token: Userinfo_token,
         };
         type ContextWithoutWorkload = {
           user: User,
           access_token: Access_token,
-          id_token: id_token,
+          id_token: Id_token,
           userinfo_token: Userinfo_token,
         };
         type ContextWithoutUser = {
           workload: Workload,
           access_token: Access_token,
-          id_token: id_token,
+          id_token: Id_token,
           userinfo_token: Userinfo_token,
         };
         action "Update" appliesTo {

@@ -163,20 +163,17 @@ mod test {
         );
         let (entity, _) = builder
             .build_tkn_entity(
-                "Jans::id_token",
+                "Jans::Id_token",
                 &access_token,
                 &mut TokenPrincipalMappings::default(),
             )
             .expect("should build id_token entity");
 
         // Check if the entity has the correct attributes
-        assert_eq!(
-            entity
-                .clone()
-                .to_json_value()
-                .expect("should serialize entity to JSON"),
+        assert_entity_eq(
+            &entity,
             json!({
-                "uid": {"type": "Jans::id_token", "id": "some_jti"},
+                "uid": {"type": "Jans::Id_token", "id": "some_jti"},
                 "attrs": {
                     "iss": {"__entity": {
                         "type": "Jans::TrustedIssuer",
@@ -187,12 +184,8 @@ mod test {
                 },
                 "parents": [],
             }),
-            "id_token entity should have the correct attrs"
+            Some(cedarling_schema()),
         );
-
-        // Check if the entity conforms to the schema
-        Entities::from_entities([entity], Some(cedarling_schema()))
-            .expect("id_token entity should conform to the schema");
     }
 
     #[test]

@@ -77,7 +77,7 @@ impl Default for TokenEntityNames {
     fn default() -> Self {
         Self(HashMap::from([
             ("access_token".to_string(), "Jans::Access_token".to_string()),
-            ("id_token".to_string(), "Jans::id_token".to_string()),
+            ("id_token".to_string(), "Jans::Id_token".to_string()),
             (
                 "userinfo_token".to_string(),
                 "Jans::Userinfo_token".to_string(),
