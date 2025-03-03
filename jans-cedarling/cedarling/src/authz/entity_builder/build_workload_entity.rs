@@ -97,11 +97,20 @@ impl<'a> WorkloadIdSrcs<'a> {
                                 claim
                             });
 
-                        if matches!(claim, Some(ref claim) if *claim != src.claim) {
-                            acc.push(EntityIdSrc {
-                                token,
-                                claim: src.claim,
-                            });
+                        match claim {
+                            Some(claim) if claim != src.claim => {
+                                acc.push(EntityIdSrc {
+                                    token,
+                                    claim: src.claim,
+                                });
+                            },
+                            None => {
+                                acc.push(EntityIdSrc {
+                                    token,
+                                    claim: src.claim,
+                                });
+                            },
+                            _ => {},
                         }
                     }
 
