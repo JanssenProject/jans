@@ -17,6 +17,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -163,5 +165,23 @@ public class CommonUtils {
             return false;
         }
         return true;
+    }
+
+    // Method to convert ISO datetime to formatted string (yyyy-MM-dd)
+    public static String convertIsoToDateString(String isoDateTime) {
+        Instant instant = Instant.parse(isoDateTime);
+        LocalDate localDate = instant.atZone(ZoneId.systemDefault()).toLocalDate();
+        return localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    }
+
+    // Method to convert formatted string (yyyy-MM-dd) back to LocalDate
+    public static LocalDate convertStringToLocalDate(String dateString) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        return LocalDate.parse(dateString, formatter);
+    }
+
+    public static String convertLocalDateToString(LocalDate date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        return date.format(formatter);
     }
 }

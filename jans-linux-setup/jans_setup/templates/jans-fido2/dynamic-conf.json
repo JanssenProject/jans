@@ -37,9 +37,8 @@
       "metadataServers":[{"url": "https://mds.fidoalliance.org/" }],
       "userAutoEnrollment":false,
       "unfinishedRequestExpiration":180,
-      "authenticationHistoryExpiration":1296000,
-      "metadataUrlsProvider":"",
-      "skipDownloadMdsEnabled":false,
+	  "metadataRefreshInterval":180,
+      "disableMetadataService":false,
       "attestationMode":"monitor",
       "enterpriseAttestation":"false",
       "hints":["security-key","client-device","hybrid"]

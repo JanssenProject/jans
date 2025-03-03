@@ -65,12 +65,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 for prompt_str, install_var in (
                         ('Install Fido2 Server', 'install_fido2'),
                         ('Install Scim Server', 'install_scim_server'),
-                        ('Install Jans LDAP Link Server', 'install_jans_ldap_link'),
                         ('Install Jans KC Link Server', 'install_jans_keycloak_link'),
                         ('Install Jans Casa', 'install_casa'),
                         ('Install Jans Lock', 'install_jans_lock'),
                         ('Install Jans KC', 'install_jans_saml')):
                     txt += get_install_string(prompt_str, install_var)
+
+                if base.argsp.install_jans_ldap_link:
+                    txt += get_install_string('Install Jans LDAP Link Server', 'install_jans_ldap_link')
 
             if base.argsp.t:
                 txt += 'Load Test Data '.ljust(30) + repr( base.argsp.t).rjust(35) + "\n"
