@@ -64,8 +64,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.SecurityContext;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.spi.NoLogWebApplicationException;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -77,7 +77,6 @@ import java.util.function.Function;
 
 import static io.jans.as.server.authorize.ws.rs.AuthzRequestService.canLogWebApplicationException;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
-import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.toBoolean;
 
 /**
@@ -358,7 +357,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         validateRequestJwt(authzRequest, isPar, client);
 
         authorizeRestWebServiceValidator.validate(authzRequest, responseTypes, client);
-        authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), authzRequest.getRedirectUriResponse());
+        authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), authzRequest.getRedirectUriResponse(), client);
 
         dpopService.validateDpopThumprintIsPresent(authzRequest.getDpopJkt(), authzRequest.getState());
 
