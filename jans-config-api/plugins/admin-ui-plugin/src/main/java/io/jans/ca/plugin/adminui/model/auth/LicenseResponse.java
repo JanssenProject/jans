@@ -13,6 +13,8 @@ public class LicenseResponse {
     private String customerEmail;
     private String customerFirstName;
     private String customerLastName;
+    private Long licenseMAUThreshold;
+
     private boolean licenseExpired;
 
     public boolean isLicenseEnabled() {
@@ -117,6 +119,18 @@ public class LicenseResponse {
 
     public void setLicenseExpired(boolean licenseExpired) {
         this.licenseExpired = licenseExpired;
+    }
+
+    public boolean isLicenseExpired() {
+        return licenseExpired;
+    }
+
+    public Long getLicenseMAUThreshold() {
+        return licenseMAUThreshold;
+    }
+
+    public void setLicenseMAUThreshold(Long licenseMAUThreshold) {
+        this.licenseMAUThreshold = licenseMAUThreshold;
     }
 
     @Override
