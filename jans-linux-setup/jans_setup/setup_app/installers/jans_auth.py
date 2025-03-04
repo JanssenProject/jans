@@ -248,6 +248,26 @@ class JansAuthInstaller(JettyInstaller):
 
     def data_cleaner_crontab(self):
 
+        cleaner_dir = '/opt/jans/data-cleaner'
+        cleaner_config_fn = os.path.join(cleaner_dir, 'data-clean.ini')
+
+        if not os.path.exists(cleaner_dir):
+            self.createDirs(cleaner_dir)
+
+        # copy files
+        crontab_fn = 'jans-clean-data-crontab.py'
+        cleaner_fn = 'clean-data.py'
+        for fn in (crontab_fn, cleaner_fn):
+            source = os.path.join(Config.staticFolder, 'auth/data_clean/', fn)
+            target = os.path.join(cleaner_dir, fn)
+            self.copyFile(source, target, backup=False)
+            self.run([paths.cmd_chmod, '+x', target])
+
+        crontab_lib = os.path.join(base.pylib_dir, 'crontab.py')
+        self.copyFile(crontab_lib, cleaner_dir, backup=False)
+
+
+        # scan tables to clean and write config file
         tables = []
         for schema_fn in Config.schema_files:
             schema = base.readJsonFile(schema_fn)
@@ -257,11 +277,8 @@ class JansAuthInstaller(JettyInstaller):
 
         config = configparser.ConfigParser()
         config['main'] = { 'tables': ' '.join(tables) }
-        with open(Config.data_cleaner_config_fn, 'w') as configfile:
+        with open(cleaner_config_fn, 'w') as configfile:
             config.write(configfile)
 
-        crontab_script_fn = os.path.join(
-                        Config.jansOptBinFolder,
-                        os.path.basename(Config.data_cleaner_crontab_fn)
-                        )
-        self.run([crontab_script_fn])
+        # create crontab entry
+        self.run([os.path.join(cleaner_dir, crontab_fn)])
