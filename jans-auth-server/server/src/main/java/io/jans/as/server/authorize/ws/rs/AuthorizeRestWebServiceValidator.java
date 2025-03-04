@@ -380,8 +380,9 @@ public class AuthorizeRestWebServiceValidator {
         return redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, reason);
     }
 
-    public void validatePkce(String codeChallenge, RedirectUriResponse redirectUriResponse) {
-        if (isTrue(appConfiguration.getRequirePkce()) && Strings.isNullOrEmpty(codeChallenge)) {
+    public void validatePkce(String codeChallenge, RedirectUriResponse redirectUriResponse, Client client) {
+        final boolean requirePkce = isTrue(appConfiguration.getRequirePkce()) || client.getAttributes().getRequirePkce();
+        if (requirePkce && Strings.isNullOrEmpty(codeChallenge)) {
             log.error("PKCE is required but code_challenge is blank.");
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST);
         }

@@ -1534,6 +1534,9 @@ paths:
                   type: integer
                   description: Specifies the Default Maximum Authentication Age.
                   example: 1000000
+                require_pkce:
+                  type: boolean
+                  description: Boolean specifying whether PKCE is required by client. Defalut value is false.
                 require_auth_time:
                   type: boolean
                   description: Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.
@@ -1984,6 +1987,9 @@ paths:
                   type: integer
                   description: Specifies the Default Maximum Authentication Age.
                   example: 1000000
+                require_pkce:
+                  type: boolean
+                  description: Boolean specifying whether PKCE is required by client. Defalut value is false.
                 require_auth_time:
                   type: boolean
                   description: Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.
