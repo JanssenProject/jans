@@ -39,7 +39,7 @@ clang --version
 
   **Cloning the Jans Monorepo and Changing Directory**
 
-  * clone the Jans monorepository from GitHub using the following command:
+  * Clone the Jans monorepository from GitHub using the following command:
   ```bash title="Command"
   git clone https://github.com/JanssenProject/jans.git
   ```
@@ -52,7 +52,7 @@ clang --version
 
 **Build the WebAssembly Project**
 
-* Build the WebAssembly package in release mode after you've reached the `cedarling_wasm` folder. 
+* Build the WebAssembly package in release mode after you've reached the `cedarling_wasm` folder.
 ```bash title="Command"
 wasm-pack build --release --target web
 ```
@@ -73,7 +73,7 @@ npx http-server .
 ## Including in projects
 
 
-For using result files in browser project you need make result `pkg` folder 
+For using result files in the browser project, you need to make the result `pkg` folder 
 accessible for loading in the browser so that you can later import the 
 corresponding file from the browser.
 
@@ -81,27 +81,15 @@ Here is example of code snippet:
 
 
 ```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebAssembly Cedarling Example</title>
-</head>
-<body>
-    <h1>WebAssembly Cedarling Project</h1>
-    <p>This is a simple example to run WebAssembly in the browser.</p>
-
-    <!-- Include the script to load WebAssembly -->
-    <script type="module">
+   <script type="module">
         import initWasm, { init } from "/pkg/cedarling_wasm.js";
 
         async function main() {
             await initWasm(); // Initialize the WebAssembly module
 
-            // Initialize Cedarling with `BOOTSTRAP` config
+            // init cedarling with `BOOTSTRAP` config
             let instance = await init({
-                "CEDARLING_APPLICATION_NAME": "My App",
+               "CEDARLING_APPLICATION_NAME": "My App",
                 "CEDARLING_POLICY_STORE_URI": "https://example.com/policy-store.json",
                 "CEDARLING_LOG_TYPE": "memory",
                 "CEDARLING_LOG_LEVEL": "INFO",
@@ -112,8 +100,7 @@ Here is example of code snippet:
                 "CEDARLING_WORKLOAD_AUTHZ": "enabled",
                 "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
             });
-
-            // Make authorize request
+            // make authorize request
             let result = await instance.authorize({
                 "tokens": {
                     "access_token": "...",
@@ -145,18 +132,14 @@ Here is example of code snippet:
             });
             console.log("result:", result);
         }
-
         main().catch(console.error);
     </script>
-</body>
-</html>
 
 ```
 
 ## Usage
 
-Before usage make sure that you have completed `Building` steps.
-You can find usage examples in the following locations:
+Before usage make sure that you have completed `Building` steps. You can find usage examples in the following locations:
 
 - `jans-cedarling/bindings/cedarling_wasm/index.html`: A simple example demonstrating basic usage.
 - `jans-cedarling/bindings/cedarling_wasm/cedarling_app.html`: A fully featured `Cedarling` browser app where you can test and validate your configuration.
