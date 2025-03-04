@@ -26,7 +26,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("report: {:?}", &report);
 
         // write output flamegraph to an SVG file
-        let file = File::create("../cedarling_profiling_flamegraph.svg").unwrap();
+        let file = File::create(format!(
+            "{}/../{}",
+            env!("CARGO_MANIFEST_DIR"),
+            "cedarling_profiling_flamegraph.svg",
+        ))
+        .unwrap();
         let mut options = pprof::flamegraph::Options::default();
         options.image_width = Some(3000);
         report.flamegraph_with_options(file, &mut options).unwrap();
