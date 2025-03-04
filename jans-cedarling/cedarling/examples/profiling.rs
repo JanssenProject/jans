@@ -22,8 +22,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // calls Cedarling::authorize
     call_authorize(&cedarling, &access_token, &id_token, &userinfo_token).await;
 
-    // write output to file
     if let Ok(report) = guard.report().build() {
+        println!("report: {:?}", &report);
+
+        // write output flamegraph to an SVG file
         let file = File::create("../cedarling_profiling_flamegraph.svg").unwrap();
         let mut options = pprof::flamegraph::Options::default();
         options.image_width = Some(3000);
