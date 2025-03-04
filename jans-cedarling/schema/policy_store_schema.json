@@ -126,7 +126,7 @@
                     "default": "jti"
                 },
                 "user_id": {
-                    "description": "The claim(s) in the token that should be treated as the user's unique identifier (e.g., 'email', 'sub', 'uid').",
+                    "description": "The primary claim to extract from the token to create the Workload entity. If not specified, Cedarling will attempt to use 'sub' before failing.",
                     "type": "string"
                 },
                 "role_mapping": {
@@ -135,7 +135,7 @@
                     "default": "role"
                 },
                 "workload_id": {
-                    "description": "The claim in the token that uniquely identifies the workload (e.g., 'client_id', 'rp_id'). Defaults to 'aud'.",
+                    "description": "The primary claim to extract from the token to create the Workload entity. If not specified, Cedarling will attempt to use 'aud', followed by 'client_id', before failing.",
                     "type": "string"
                 },
                 "claim_mapping": {
