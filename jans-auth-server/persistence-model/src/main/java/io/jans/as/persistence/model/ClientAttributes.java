@@ -116,6 +116,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("allowOfflineAccessWithoutConsent")
     private Boolean allowOfflineAccessWithoutConsent;
 
+    @JsonProperty("requirePkce")
+    private Boolean requirePkce = false;
+
     @JsonProperty("minimumAcrLevel")
     private Integer minimumAcrLevel = -1;
 
@@ -154,6 +157,17 @@ public class ClientAttributes implements Serializable {
 
     @JsonProperty("authorizationDetailsTypes")
     private List<String> authorizationDetailsTypes;
+
+    public Boolean getRequirePkce() {
+        if (requirePkce == null) {
+            requirePkce = false;
+        }
+        return requirePkce;
+    }
+
+    public void setRequirePkce(Boolean requirePkce) {
+        this.requirePkce = requirePkce;
+    }
 
     public List<String> getAuthorizationDetailsTypes() {
         if (authorizationDetailsTypes == null) authorizationDetailsTypes = new ArrayList<>();
