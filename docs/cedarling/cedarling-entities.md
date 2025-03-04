@@ -59,6 +59,7 @@ entity Workload = {
 #### Attribute Mappings
 
 | Attribute | Source |
+| --- | --- |
 | `iss` | Reference to the Trusted Issuer entity created at startup |
 | `client_id` | the `"lient_id` claim from the JWT |
 | `aud` | the `aud` claim from the JWT |
