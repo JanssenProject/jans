@@ -26,7 +26,7 @@ pub fn build_context(
 
     // Get the entities required for the context
     let mut ctx_entity_refs = json!({});
-    let build_entities = &entities_data.build_entities;
+    let build_entities = &entities_data.entities_for_context();
 
     if let Some(ctx) = action_schema.applies_to.context.as_ref() {
         match ctx {

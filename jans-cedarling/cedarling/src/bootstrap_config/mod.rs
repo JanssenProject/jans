@@ -163,7 +163,7 @@ mod test {
     use super::*;
     use crate::{BootstrapConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig};
     use jsonwebtoken::Algorithm;
-    use std::collections::{HashMap, HashSet};
+    use std::collections::HashSet;
     use std::path::Path;
     use test_utils::assert_eq;
 
@@ -190,41 +190,32 @@ mod test {
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
-                token_validation_settings: HashMap::from([
-                    ("access_token".to_string(), TokenValidationConfig {
-                        exp_validation: true,
-                        ..Default::default()
-                    }),
-                    ("id_token".to_string(), TokenValidationConfig {
-                        iss_validation: true,
-                        aud_validation: true,
-                        sub_validation: true,
-                        iat_validation: true,
-                        exp_validation: true,
-                        ..Default::default()
-                    }),
-                    ("userinfo_token".to_string(), TokenValidationConfig {
-                        iss_validation: true,
-                        aud_validation: true,
-                        sub_validation: true,
-                        exp_validation: true,
-                        ..Default::default()
-                    }),
-                ]),
+                // token_validation_settings: HashMap::from([
+                //     ("access_token".to_string(), TokenValidationConfig {
+                //         exp_validation: true,
+                //         ..Default::default()
+                //     }),
+                //     ("id_token".to_string(), TokenValidationConfig {
+                //         iss_validation: true,
+                //         aud_validation: true,
+                //         sub_validation: true,
+                //         iat_validation: true,
+                //         exp_validation: true,
+                //         ..Default::default()
+                //     }),
+                //     ("userinfo_token".to_string(), TokenValidationConfig {
+                //         iss_validation: true,
+                //         aud_validation: true,
+                //         sub_validation: true,
+                //         exp_validation: true,
+                //         ..Default::default()
+                //     }),
+                // ]),
             },
             authorization_config: AuthorizationConfig {
                 use_user_principal: true,
                 use_workload_principal: true,
                 user_workload_operator: WorkloadBoolOp::And,
-                mapping_tokens: HashMap::from([
-                    ("access_token".to_string(), "Test::Access_token".to_string()),
-                    ("id_token".to_string(), "Test::id_token".to_string()),
-                    (
-                        "userinfo_token".to_string(),
-                        "Test::Userinfo_token".to_string(),
-                    ),
-                ])
-                .into(),
                 decision_log_default_jwt_id: "jti".to_string(),
                 ..Default::default()
             },
@@ -260,41 +251,11 @@ mod test {
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256, Algorithm::RS256]),
-                token_validation_settings: HashMap::from([
-                    ("access_token".to_string(), TokenValidationConfig {
-                        exp_validation: true,
-                        ..Default::default()
-                    }),
-                    ("id_token".to_string(), TokenValidationConfig {
-                        iss_validation: true,
-                        sub_validation: true,
-                        exp_validation: true,
-                        iat_validation: true,
-                        aud_validation: true,
-                        ..Default::default()
-                    }),
-                    ("userinfo_token".to_string(), TokenValidationConfig {
-                        iss_validation: true,
-                        sub_validation: true,
-                        aud_validation: true,
-                        exp_validation: true,
-                        ..Default::default()
-                    }),
-                ]),
             },
             authorization_config: AuthorizationConfig {
                 use_user_principal: true,
                 use_workload_principal: true,
                 user_workload_operator: WorkloadBoolOp::And,
-                mapping_tokens: HashMap::from([
-                    ("access_token".to_string(), "Test::Access_token".to_string()),
-                    ("id_token".to_string(), "Test::id_token".to_string()),
-                    (
-                        "userinfo_token".to_string(),
-                        "Test::Userinfo_token".to_string(),
-                    ),
-                ])
-                .into(),
                 decision_log_default_jwt_id: "jti".to_string(),
                 ..Default::default()
             },

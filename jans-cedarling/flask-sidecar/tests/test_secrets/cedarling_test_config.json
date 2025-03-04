@@ -17,30 +17,6 @@
         "HS256",
         "RS256"
     ],
-    "CEDARLING_TOKEN_CONFIGS": {
-        "access_token": {
-            "entity_type_name": "Access_token",
-            "iss": "disabled",
-            "jti": "disabled",
-            "nbf": "disabled",
-            "exp": "enabled"
-        },
-        "id_token": {
-            "entity_type_name": "id_token",
-            "iss": "enabled",
-            "sub": "enabled",
-            "exp": "enabled",
-            "iat": "enabled",
-            "aud": "enabled"
-        },
-        "userinfo_token": {
-            "entity_type_name": "Userinfo_token",
-            "iss": "enabled",
-            "aud": "enabled",
-            "sub": "enabled",
-            "exp": "enabled"
-        }
-    },
     "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
     "CEDARLING_LOCK": "disabled",
     "CEDARLING_LOCK_SERVER_CONFIGURATION_URI": null,

@@ -19,26 +19,6 @@ CEDARLING_JWT_STATUS_VALIDATION: 'disabled'
 CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED:
     - 'HS256'
     - 'RS256'
-CEDARLING_TOKEN_CONFIGS:
-    access_token:
-        entity_type_name: 'Test::Access_token'
-        iss: 'disabled'
-        jti: 'disabled'
-        nbf: 'disabled'
-        exp: 'enabled'
-    id_token:
-        entity_type_name: 'Test::id_token'
-        iss: 'enabled'
-        sub: 'enabled'
-        exp: 'enabled'
-        iat: 'enabled'
-        aud: 'enabled'
-    userinfo_token:
-        entity_type_name: 'Test::Userinfo_token'
-        iss: 'enabled'
-        sub: 'enabled'
-        aud: 'enabled'
-        exp: 'enabled'
 CEDARLING_AT_ISS_VALIDATION: 'disabled'
 CEDARLING_AT_JTI_VALIDATION: 'disabled'
 CEDARLING_AT_NBF_VALIDATION: 'disabled'

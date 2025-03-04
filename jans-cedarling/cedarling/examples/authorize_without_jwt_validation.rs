@@ -6,7 +6,7 @@
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LogConfig,
     LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
-    TokenValidationConfig, WorkloadBoolOp,
+    WorkloadBoolOp,
 };
 use std::collections::{HashMap, HashSet};
 
@@ -28,11 +28,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             jwt_sig_validation: false,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::new(),
-            token_validation_settings: HashMap::from_iter(
-                ["access_token", "id_token", "userinfo_token", "custom_token"]
-                    .iter()
-                    .map(|tkn| (tkn.to_string(), TokenValidationConfig::default())),
-            ),
+            // token_validation_settings: HashMap::from_iter(
+            //     ["access_token", "id_token", "userinfo_token", "custom_token"]
+            //         .iter()
+            //         .map(|tkn| (tkn.to_string(), TokenValidationConfig::default())),
+            // ),
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
@@ -43,13 +43,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             decision_log_user_claims: vec!["client_id".to_string(), "username".to_string()],
             decision_log_workload_claims: vec!["org_id".to_string()],
             id_token_trust_mode: IdTokenTrustMode::None,
-            mapping_tokens: HashMap::from([
-                ("access_token".to_string(), "Access_token".to_string()),
-                ("id_token".to_string(), "id_token".to_string()),
-                ("userinfo_token".to_string(), "Userinfo_token".to_string()),
-                ("custom_token".to_string(), "Custom_token".to_string()),
-            ])
-            .into(),
             ..Default::default()
         },
     })

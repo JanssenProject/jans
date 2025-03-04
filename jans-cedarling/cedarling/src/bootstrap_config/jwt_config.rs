@@ -5,7 +5,6 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use jsonwebtoken::Algorithm;
-use std::collections::HashMap;
 use std::collections::HashSet;
 
 /// The set of Bootstrap properties related to JWT validation.
@@ -39,8 +38,6 @@ pub struct JwtConfig {
     pub jwt_status_validation: bool,
     /// Only tokens signed with algorithms in this list can be valid.
     pub signature_algorithms_supported: HashSet<Algorithm>,
-    /// Token validation settings
-    pub token_validation_settings: HashMap<String, TokenValidationConfig>,
 }
 
 /// Validation options related to JSON Web Tokens (JWT).
@@ -163,17 +160,17 @@ impl Default for JwtConfig {
             jwt_sig_validation: true,
             jwt_status_validation: true,
             signature_algorithms_supported: HashSet::new(),
-            token_validation_settings: HashMap::from([
-                (
-                    "access_token".to_string(),
-                    TokenValidationConfig::access_token(),
-                ),
-                ("id_token".to_string(), TokenValidationConfig::id_token()),
-                (
-                    "userinfo_token".to_string(),
-                    TokenValidationConfig::userinfo_token(),
-                ),
-            ]),
+            // token_validation_settings: HashMap::from([
+            //     (
+            //         "access_token".to_string(),
+            //         TokenValidationConfig::access_token(),
+            //     ),
+            //     ("id_token".to_string(), TokenValidationConfig::id_token()),
+            //     (
+            //         "userinfo_token".to_string(),
+            //         TokenValidationConfig::userinfo_token(),
+            //     ),
+            // ]),
         }
     }
 }
@@ -186,11 +183,11 @@ impl JwtConfig {
             jwt_sig_validation: false,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::new(),
-            token_validation_settings: HashMap::from_iter(
-                ["access_token", "id_token", "userinfo_token"]
-                    .iter()
-                    .map(|tkn| (tkn.to_string(), TokenValidationConfig::default())),
-            ),
+            // token_validation_settings: HashMap::from_iter(
+            //     ["access_token", "id_token", "userinfo_token"]
+            //         .iter()
+            //         .map(|tkn| (tkn.to_string(), TokenValidationConfig::default())),
+            // ),
         }
         .allow_all_algorithms()
     }

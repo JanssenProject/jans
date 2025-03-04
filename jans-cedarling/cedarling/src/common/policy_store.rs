@@ -11,11 +11,12 @@ mod token_entity_metadata;
 use super::cedar_schema::CedarSchema;
 use cedar_policy::PolicyId;
 use semver::Version;
-use serde::{Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer, de};
 use std::collections::HashMap;
-use std::sync::LazyLock;
+use url::Url;
 
-pub use token_entity_metadata::{ClaimMappings, TokenEntityMetadata};
+pub(crate) use claim_mapping::{ClaimMapping, ClaimMappings};
+pub use token_entity_metadata::TokenEntityMetadata;
 
 /// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
 #[derive(Debug, Clone, serde::Deserialize, PartialEq)]
@@ -23,7 +24,6 @@ pub struct AgamaPolicyStore {
     /// The cedar version to use when parsing the schema and policies.
     #[serde(deserialize_with = "parse_cedar_version")]
     pub cedar_version: Version,
-
     pub policy_stores: HashMap<String, PolicyStore>,
 }
 
@@ -93,34 +93,58 @@ pub struct PolicyStoreWithID {
 pub struct TrustedIssuer {
     /// The name of the trusted issuer.
     pub name: String,
-
     /// A brief description of the trusted issuer.
     pub description: String,
-
     /// The OpenID configuration endpoint for the issuer.
     ///
     /// This endpoint is used to obtain information about the issuer's capabilities.
-    pub openid_configuration_endpoint: String,
-
+    #[serde(
+        rename = "openid_configuration_endpoint",
+        deserialize_with = "de_oidc_endpoint_url"
+    )]
+    pub oidc_endpoint: Url,
     /// Metadata for tokens issued by the trusted issuer.
     #[serde(default)]
     pub tokens_metadata: HashMap<String, TokenEntityMetadata>,
 }
 
+fn de_oidc_endpoint_url<'de, D>(deserializer: D) -> Result<Url, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let url_str = String::deserialize(deserializer)?;
+    let url = Url::parse(&url_str).map_err(|_| {
+        de::Error::custom("the `\"openid_configuration_endpoint\"` is not a valid url")
+    })?;
+    Ok(url)
+}
+
+#[cfg(test)]
 impl Default for TrustedIssuer {
     fn default() -> Self {
         Self {
             name: "Jans".to_string(),
             description: Default::default(),
-            openid_configuration_endpoint: Default::default(),
-            tokens_metadata: Default::default(),
+            // This will only really be called during testing so we just put this test value
+            oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
+                .unwrap(),
+            tokens_metadata: HashMap::from([
+                ("access_token".into(), TokenEntityMetadata::access_token()),
+                ("id_token".into(), TokenEntityMetadata::id_token()),
+                (
+                    "userinfo_token".into(),
+                    TokenEntityMetadata::userinfo_token(),
+                ),
+            ]),
         }
     }
 }
 
+#[cfg(test)]
 impl Default for &TrustedIssuer {
     fn default() -> Self {
-        static DEFAULT: LazyLock<TrustedIssuer> = LazyLock::new(TrustedIssuer::default);
+        static DEFAULT: std::sync::LazyLock<TrustedIssuer> =
+            std::sync::LazyLock::new(TrustedIssuer::default);
         &DEFAULT
     }
 }

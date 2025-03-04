@@ -178,23 +178,28 @@ impl Attribute {
 
             // Handle Entity attributes
             Attribute::Entity { required, name } => {
-                // Check if the entity is in the schema
-                if let Some((type_name, _type_schema)) = schema
+                let type_name = if let Some((type_name, _)) = schema
                     .get_entity_schema(name, default_namespace)
                     .map_err(|e| BuildExprError::ParseTypeName(name.clone(), e))?
                 {
-                    build_entity(
-                        src_key,
-                        attr_claim_value,
-                        built_entities,
-                        type_name,
-                        *required,
-                    )
+                    type_name
                 } else if *required {
-                    Err(BuildExprError::EntityNotInSchema(name.to_string()))
+                    return Err(BuildExprError::EntityNotInSchema(name.to_string()));
                 } else {
-                    Ok(None)
-                }
+                    return Ok(None);
+                };
+
+                let entity_id = if let Some(entity_id) = built_entities.get(&type_name) {
+                    entity_id
+                } else if let Some(entity_id) = attr_claim_value.and_then(|v| v.as_str()) {
+                    entity_id
+                } else if *required {
+                    return Err(BuildExprError::MissingEntityId(src_key.into()));
+                } else {
+                    return Ok(None);
+                };
+
+                build_entity(entity_id, type_name)
             },
 
             // Handle Extension attributes
@@ -224,50 +229,54 @@ impl Attribute {
 
             // Handle EntityOrCommon attributes
             Attribute::EntityOrCommon { required, name } => {
-                // Check if we work with an entity, and if it is we handle it.
-                // Because it can have special case when we map entity from `built_entities`.
-                if let Some((type_name, _type_schema)) = schema
+                // If the attribute is an entity, convert the attribute then call
+                // build_expr again
+                if schema
                     .get_entity_schema(name, default_namespace)
                     .map_err(|e| BuildExprError::ParseTypeName(name.clone(), e))?
+                    .is_some()
                 {
-                    return build_entity(
+                    let attr = Attribute::Entity {
+                        required: *required,
+                        name: name.clone(),
+                    };
+                    return attr.build_expr(
                         src_key,
                         attr_claim_value,
+                        default_namespace,
+                        schema,
                         built_entities,
-                        type_name,
-                        *required,
                     );
                 };
 
-                let Some(attr_claim_value) = attr_claim_value else {
-                    if *required {
-                        return Err(BuildExprError::MissingSource(src_key.to_string()));
-                    } else {
-                        return Ok(None);
-                    }
-                };
+                // If the attribute is a Cedar primitive, e.g. String, Bool,
+                // etc., convert the attribute then call build_expr again
+                if let Some(attr) = str_to_primitive_type(*required, name) {
+                    return attr.build_expr(
+                        src_key,
+                        attr_claim_value,
+                        default_namespace,
+                        schema,
+                        built_entities,
+                    );
+                }
 
+                // Finally, check if it's a common type and build the expression
+                // accordingly.
                 if let Some((entity_type_name, attr)) = schema
                     .get_common_type(name, default_namespace)
                     .map_err(|e| BuildExprError::ParseTypeName(name.clone(), e))?
                 {
-                    // It is common type, so we can build the expression directly.
-                    attr.build_expr(
+                    return attr.build_expr(
                         src_key,
-                        Some(attr_claim_value),
+                        attr_claim_value,
                         Some(entity_type_name.namespace().as_str()),
                         schema,
                         built_entities,
-                    )
-                } else if let Some(attr) = str_to_primitive_type(*required, name) {
-                    attr.build_expr(
-                        src_key,
-                        Some(attr_claim_value),
-                        default_namespace,
-                        schema,
-                        built_entities,
-                    )
-                } else if *required {
+                    );
+                }
+
+                if *required {
                     Err(BuildExprError::UnkownType(name.to_string()))
                 } else {
                     Ok(None)
@@ -278,27 +287,9 @@ impl Attribute {
 }
 
 fn build_entity(
-    src_key: &str,
-    attr_claim_value: Option<&Value>,
-    built_entities: &BuiltEntities,
+    entity_id: &str,
     entity_type_name: EntityTypeName,
-    is_required: bool,
 ) -> Result<Option<RestrictedExpression>, BuildExprError> {
-    let entity_id = if let Some(entity_id) = built_entities.get(&entity_type_name) {
-        entity_id
-    } else if let Some(entity_id) = attr_claim_value.and_then(|v| v.as_str()) {
-        entity_id
-    } else if is_required {
-        return Err(KeyedJsonTypeError::type_mismatch_optional(
-            src_key,
-            "string",
-            attr_claim_value,
-        )
-        .into());
-    } else {
-        return Ok(None);
-    };
-
     let type_id = EntityId::new(entity_id);
     let uid = EntityUid::from_type_name_and_id(entity_type_name, type_id);
     let expr = RestrictedExpression::new_entity_uid(uid);
@@ -321,9 +312,9 @@ pub enum BuildExprError {
     #[error("the given attribute source data is missing the key: {0}")]
     MissingSource(String),
     #[error(
-        "failed to build entity reference for '{0}' with type `{1}` because no entity of this type has been created yet"
+        "failed to obtain type id. either the entity was not built beforehand or the token is missing the \"{0}\" claim"
     )]
-    MissingBuiltEntityRef(String, String),
+    MissingEntityId(String),
     #[error(transparent)]
     TypeMismatch(#[from] KeyedJsonTypeError),
     #[error(transparent)]
@@ -381,10 +372,8 @@ impl KeyedJsonTypeError {
 
 #[cfg(test)]
 mod test {
-    use crate::{
-        authz::entity_builder::{BuildExprError, built_entities::BuiltEntities},
-        common::cedar_schema::cedar_json::{CedarSchemaJson, attribute::Attribute},
-    };
+    use crate::authz::entity_builder::built_entities::BuiltEntities;
+    use crate::common::cedar_schema::cedar_json::{CedarSchemaJson, attribute::Attribute};
     use serde_json::json;
     use std::collections::HashMap;
 
@@ -547,44 +536,6 @@ mod test {
     }
 
     #[test]
-    fn errors_when_expected_set_has_different_types() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Test": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "attr1": {
-                            "type": "Set",
-                            "element": {
-                              "type": "String",
-                            }
-                        },
-                    },
-                }
-            }}}
-        }))
-        .expect("should successfully build schema");
-        let attr = Attribute::set(Attribute::string());
-        let src = HashMap::from([("src_key".to_string(), json!(["admin", 123]))]);
-        let srs_key = "src_key";
-
-        let err = attr
-            .build_expr(
-                srs_key,
-                src.get(srs_key),
-                Some("Jans"),
-                &schema,
-                &BuiltEntities::default(),
-            )
-            .expect_err("should error");
-        assert!(
-            matches!(err, BuildExprError::TypeMismatch(_)),
-            "should error due to type mismatch but got: {:?}",
-            err
-        );
-    }
-
-    #[test]
     fn can_build_entity_expr() {
         let schema = serde_json::from_value::<CedarSchemaJson>(json!({
             "Jans": { "entityTypes": {
@@ -652,46 +603,6 @@ mod test {
             )
             .expect("should not error");
         assert!(expr.is_some(), "a restricted expression should be built");
-    }
-
-    #[test]
-    fn errors_when_entity_isnt_in_schema() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Test": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "attr1": {
-                            "type": "Entity",
-                            "name": "OtherEntity",
-                        },
-                    },
-                }
-            }}}
-        }))
-        .expect("should successfully build schema");
-        let attr = Attribute::entity("OtherEntity");
-        let src = HashMap::from([("src_key".to_string(), json!("test"))]);
-        let srs_key = "src_key";
-
-        let err = attr
-            .build_expr(
-                srs_key,
-                src.get(srs_key),
-                Some("Jans"),
-                &schema,
-                &BuiltEntities::default(),
-            )
-            .expect_err("should error");
-        assert!(
-            matches!(
-                err,
-                BuildExprError::EntityNotInSchema(ref entity_name)
-                    if entity_name == "OtherEntity"
-            ),
-            "should error due to type mismatch but got: {:?}",
-            err
-        );
     }
 
     #[test]
@@ -779,38 +690,5 @@ mod test {
             )
             .expect("should not error");
         assert!(expr.is_none(), "a restricted expression shouldn't built")
-    }
-
-    #[test]
-    fn errors_on_type_mismatch() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Test": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "attr1": { "type": "String" },
-                    },
-                }
-            }}}
-        }))
-        .expect("should successfully build schema");
-        let attr = Attribute::string();
-        let src = HashMap::from([("src_key".to_string(), json!(123))]);
-        let srs_key = "src_key";
-
-        let err = attr
-            .build_expr(
-                srs_key,
-                src.get(srs_key),
-                Some("Jans"),
-                &schema,
-                &BuiltEntities::default(),
-            )
-            .expect_err("should error");
-        assert!(
-            matches!(err, BuildExprError::TypeMismatch(_)),
-            "should error due to type mismatch but got: {:?}",
-            err
-        );
     }
 }

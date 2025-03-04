@@ -121,43 +121,8 @@ Create a file named `bootstrap.json`. You may use the [sample](https://github.co
 
 * Set `CEDARLING_POLICY_STORE_URI` to the URL you copied from Agama Lab.
 * Set `CEDARLING_USER_AUTHZ` to "disabled"
-* Set `CEDARLING_TOKEN_CONFIGS` to the following value:
-
-```json
- {
-  "access_token": {
-    "entity_type_name": "Jans::Access_token",
-    "iss": "disabled",
-    "aud": "disabled",
-    "sub": "disabled",
-    "nbf": "disabled",
-    "exp": "disabled",
-    "jti": "disabled"
-   },
-  "id_token": {
-    "entity_type_name": "Jans::id_token",
-    "iss": "disabled",
-    "aud": "disabled",
-    "sub": "disabled",
-    "nbf": "disabled",
-    "exp": "disabled",
-    "jti": "disabled"
-  },
-  "userinfo_token": {
-    "entity_type_name": "Jans::Userinfo_token",
-    "iss": "disabled",
-    "aud": "disabled",
-    "sub": "disabled",
-    "nbf": "disabled",
-    "exp": "disabled",
-    "jti": "disabled"
-  }
-}
-```
-
- * Set `CEDARLING_MAPPING_WORKLOAD` to `Jans::Workload`
-
- * Set `CEDARLING_ID_TOKEN_TRUST_MODE` to "none"
+* Set `CEDARLING_MAPPING_WORKLOAD` to `Jans::Workload`
+* Set `CEDARLING_ID_TOKEN_TRUST_MODE` to "none"
 
  Pull the Docker image:
 

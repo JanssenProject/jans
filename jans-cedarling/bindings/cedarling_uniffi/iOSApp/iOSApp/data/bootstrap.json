@@ -1,34 +1,6 @@
 
 {
             "CEDARLING_APPLICATION_NAME": "My App",
-               "CEDARLING_TOKEN_CONFIGS": {
-                   "access_token": {
-                       "entity_type_name": "Jans::Access_token",
-                       "iss": "disabled",
-                       "jti": "disabled",
-                       "nbf": "disabled",
-                       "exp": "disabled"
-                   },
-                   "id_token": {
-                       "entity_type_name": "Jans::id_token",
-                       "iss": "enabled",
-                       "aud": "enabled",
-                       "sub": "enabled",
-                       "iat": "enabled",
-                       "exp": "enabled"
-                   },
-                   "userinfo_token": {
-                       "entity_type_name": "Jans::Userinfo_token",
-                       "iss": "disabled",
-                       "aud": "disabled",
-                       "sub": "disabled",
-                       "exp": "disabled",
-                       "amr": "disabled",
-                       "acr": "disabled",
-                       "iat": "disabled"
-
-                   }
-               },
                "CEDARLING_AUDIT_HEALTH_INTERVAL": 0,
                "CEDARLING_AUDIT_TELEMETRY_INTERVAL": 0,
                "CEDARLING_DYNAMIC_CONFIGURATION": "disabled",

@@ -1,0 +1,9 @@
+{
+	"iss": "some_iss",
+	"sub": "some_sub",
+	"aud": "some_id",
+	"exp": 123,
+	"jti": "some_jti",
+	"client_id": "some_id",
+	"custom": "some_custom_claim"
+}

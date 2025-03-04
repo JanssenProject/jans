@@ -409,6 +409,7 @@ nav:
   - Overview: 'cedarling/cedarling-overview.md'
   - Quick Start Guide: 'cedarling/cedarling-quick-start.md'
   - How To Use:
+    - Cedarling Entities: 'cedarling/cedarling-entities.md'
     - Types Of Bindings: 'cedarling/cedarling-binding-types.md'
     - Browser Apps: 'cedarling/cedarling-wasm.md'
     - Mobile Apps:
