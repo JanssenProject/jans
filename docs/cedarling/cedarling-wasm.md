@@ -23,8 +23,7 @@ You can install it with the following command:
 cargo install wasm-pack
 ```
 
-* Clang with WebAssembly (WASM) Target Support
-Ensure that Clang is installed with support for WebAssembly targets. 
+* Ensure that Clang is installed with support for WebAssembly targets. 
 You can check the installation and available targets with:
 ```bash 
 clang -print-targets
@@ -36,51 +35,43 @@ clang --version
 
 ## Building
 
-
-  **Cloning the Jans Monorepo and Changing Directory**
-
-  * Clone the Jans monorepository from GitHub using the following command:
-  ```bash title="Command"
-  git clone https://github.com/JanssenProject/jans.git
-  ```
-  * This will create a local copy of the repository on your system.
-  * After cloning the repository, change the directory to the `cedarling_wasm` folder by running:
+  * Clone the Janssen server repository from the GitHub and change the directory 
+  to the `cedarling_wasm` directory:
   ```bash title="Command"
   cd /path/to/jans/jans-cedarling/bindings/cedarling_wasm
   ```
-  * Make sure to replace `/path/to/` with the actual path where the `jans` repository was cloned.
 
-**Build the WebAssembly Project**
-
-* Build the WebAssembly package in release mode after you've reached the `cedarling_wasm` folder.
+  * Build the WebAssembly package in release mode after you've reached 
+the `cedarling_wasm` directory. `wasm-pack` automatically optimizes the 
+WebAssembly binary file using `wasm-opt` for better performance.
 ```bash title="Command"
 wasm-pack build --release --target web
 ```
-* wasm-pack automatically optimizes the WebAssembly binary file using 
-wasm-opt for better performance.
 
-
-
-## Run the Server
-
-* To view the WebAssembly project in action, you can run a local server. 
+  * To view the WebAssembly project in action, you can run a local server. 
 One way to do this is by using the following command:
 ```bash title="Command"
 npx http-server .
 ```
 
-
 ## Including in projects
 
+!!! info "Sample Apps"
 
-For using result files in the browser project, you need to make the result `pkg` folder 
-accessible for loading in the browser so that you can later import the 
-corresponding file from the browser.
+    You can find usage examples in the following locations in the Janssen server
+    repository:
 
-Here is example of code snippet:
+    - `jans/jans-cedarling/bindings/cedarling_wasm/index.html`: A simple example demonstrating basic usage.
+    - `jans/jans-cedarling/bindings/cedarling_wasm/cedarling_app.html`: A fully featured `Cedarling` browser app where you can test and validate your configuration.
 
 
-```html
+
+
+For using result files in the browser project, you need to make the 
+result `pkg` directory accessible for loading in the browser so that you can 
+later import the corresponding file from the browser.
+
+```html title="Example code snippet"
    <script type="module">
         import initWasm, { init } from "/pkg/cedarling_wasm.js";
 
@@ -137,14 +128,7 @@ Here is example of code snippet:
 
 ```
 
-## Usage
-
-Before usage make sure that you have completed `Building` steps. You can find usage examples in the following locations:
-
-- `jans-cedarling/bindings/cedarling_wasm/index.html`: A simple example demonstrating basic usage.
-- `jans-cedarling/bindings/cedarling_wasm/cedarling_app.html`: A fully featured `Cedarling` browser app where you can test and validate your configuration.
-
-### Defined API
+## Defined API
 
 ```ts
 /**
