@@ -157,6 +157,7 @@ class Config:
         self.rdbm_password = None
         self.rdbm_password_enc = ''
         self.static_rdbm_dir = os.path.join(self.install_dir, 'static/rdbm')
+        self.schema_files = [os.path.join(self.install_dir, 'schema', schemma_fn) for schemma_fn in ('jans_schema.json', 'custom_schema.json')]
 
         # Jans components installation status
         self.loadData = True
@@ -222,11 +223,10 @@ class Config:
         self.script_catalog_dir = os.path.join(self.install_dir, 'script_catalog')
 
         self.jansScriptFiles = [
-                            os.path.join(self.install_dir, 'static/scripts/logmanager.sh'),
-                            os.path.join(self.install_dir, 'static/scripts/testBind.py'),
-                            os.path.join(self.install_dir, 'static/scripts/jans'),
-                            os.path.join(self.install_dir, 'static/scripts/jans_services_status.py'),
-                            os.path.join(self.install_dir, 'static/scripts/get_agama_lab_projects.py'),
+                            os.path.join(self.staticFolder, 'scripts/logmanager.sh'),
+                            os.path.join(self.staticFolder, 'scripts/jans'),
+                            os.path.join(self.staticFolder, 'scripts/jans_services_status.py'),
+                            os.path.join(self.staticFolder, 'scripts/get_agama_lab_projects.py'),
                             ]
 
         self.redhat_services = ['httpd', 'rsyslog']

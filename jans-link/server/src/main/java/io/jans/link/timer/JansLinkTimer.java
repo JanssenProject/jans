@@ -163,7 +163,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 			this.lastFinishedTime = System.currentTimeMillis();
 		} catch (Throwable ex) {
 			ex.printStackTrace();
-			log.info("Exception happened while executing cache refresh synchronization"+ ex);
+			log.info("Exception happened while executing cache refresh synchronization (exception: {})", ex.getMessage()); //Giving Exception Details
 		}
 	}
 
@@ -206,7 +206,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 				}
 			}
 		} catch (SocketException ex) {
-			log.error("Failed to enumerate server IP addresses"+ ex);
+			log.error("Failed to enumerate server IP addresses (exception: {})", ex.getMessage()); //Giving Exception Details
 		}
 
 		if (!cacheRefreshServer) {
@@ -311,11 +311,11 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 			sourcePersons = loadSourceServerEntriesWithoutLimits(currentConfiguration, sourceServerConnections);
 		}
 
-		log.info("Found '{}' entries in source server"+ sourcePersons.size());
+		log.info("Found {} entries in source server", sourcePersons.size());
 
 		Map<CacheCompoundKey, GluuSimplePerson> sourcePersonCacheCompoundKeyMap = getSourcePersonCompoundKeyMap(
 				currentConfiguration, sourcePersons);
-		log.info("Found '{}' unique entries in source server"+ sourcePersonCacheCompoundKeyMap.size());
+		log.info("Found {} unique entries in source server", sourcePersonCacheCompoundKeyMap.size());
 
 		// Load all inum entries
 		List<JansInumMap> inumMaps = null;
@@ -326,9 +326,9 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 		if (loadedObject != null) {
 			try {
 				inumMaps = (List<JansInumMap>) loadedObject;
-				log.info("Found '{}' entries in inum objects disk cache"+ inumMaps.size());
+				log.info("Found {} entries in inum objects disk cache", inumMaps.size());
 			} catch (Exception ex) {
-				log.error("Failed to convert to GluuInumMap list"+ ex);
+				log.error("Failed to convert to GluuInumMap list (exception: {})", ex.getMessage()); //Giving Exception Details
 				objectSerializationService.cleanup(inumCachePath);
 			}
 		}
@@ -336,7 +336,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 		if (inumMaps == null) {
 			// Load all inum entries from LDAP
 			inumMaps = loadInumServerEntries(currentConfiguration, inumDbServerConnection);
-			log.info("Found '{}' entries in inum server"+ inumMaps.size());
+			log.info("Found {} entries in inum server", inumMaps.size());
 		}
 
 		HashMap<CacheCompoundKey, JansInumMap> primaryKeyAttrValueInumMap = getPrimaryKeyAttrValueInumMap(inumMaps);
@@ -348,11 +348,11 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 
 		HashMap<CacheCompoundKey, JansInumMap> allPrimaryKeyAttrValueInumMap = getAllInumServerEntries(
 				primaryKeyAttrValueInumMap, addedPrimaryKeyAttrValueInumMap);
-		log.info("Count actual inum entries '{}' after updating inum server"+ allPrimaryKeyAttrValueInumMap.size());
+		log.info("Count actual inum entries {} after updating inum server", allPrimaryKeyAttrValueInumMap.size());
 
 		HashMap<String, Integer> currInumWithEntryHashCodeMap = getSourcePersonsHashCodesMap(inumDbServerConnection,
 				sourcePersonCacheCompoundKeyMap, allPrimaryKeyAttrValueInumMap);
-		log.info("Count actual source entries '{}' after calculating hash code"+ currInumWithEntryHashCodeMap.size());
+		log.info("Count actual source entries {} after calculating hash code", currInumWithEntryHashCodeMap.size());
 
 		// Create snapshots cache folder if needed
 		boolean result = cacheRefreshSnapshotFileService.prepareSnapshotsFolder(currentConfiguration);
@@ -367,12 +367,12 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 		// Compare 2 snapshot and invoke update if needed
 		Set<String> changedInums = getChangedInums(currInumWithEntryHashCodeMap, prevInumWithEntryHashCodeMap,
 				isVDSMode);
-		log.info("Found '{}' changed entries"+ changedInums.size());
+		log.info("Found {} changed entries", changedInums.size());
 
 		// Load problem list from disk and add to changedInums
 		List<String> problemInums = cacheRefreshSnapshotFileService.readProblemList(currentConfiguration);
 		if (problemInums != null) {
-			log.info("Loaded '{}' problem entries from problem file"+ problemInums.size());
+			log.info("Loaded {} problem entries from problem file", problemInums.size());
 			// Process inums from problem list too
 			changedInums.addAll(problemInums);
 		}
@@ -386,9 +386,9 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 					allPrimaryKeyAttrValueInumMap, changedInums);
 		}
 
-		log.info("Updated '{}' entries"+ updatedInums.size());
+		log.info("Updated {} entries", updatedInums.size());
 		changedInums.removeAll(updatedInums);
-		log.info("Failed to update '{}' entries"+ changedInums.size());
+		log.info("Failed to update {} entries", changedInums.size());
 
 		// Persist snapshot to cache folder
 		result = cacheRefreshSnapshotFileService.createSnapshot(currentConfiguration,
@@ -409,7 +409,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 		List<GluuSimplePerson> personsForRemoval = null;
 
 		boolean keepExternalPerson = currentConfiguration.isKeepExternalPerson();
-		log.info("Keep external persons: '{}'"+ keepExternalPerson);
+		log.info("Keep external persons: {}", keepExternalPerson);
 		if (keepExternalPerson) {
 			// Determine entries which need to remove
 			personsForRemoval = getRemovedPersons(currInumWithEntryHashCodeMap, prevInumWithEntryHashCodeMap);
@@ -418,12 +418,12 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 
 			// Load all entries from Target server
 			List<TypedGluuSimplePerson> targetPersons = loadTargetServerEntries(currentConfiguration, getLdapEntryManager());
-			log.info("Found '{}' entries in target server"+ targetPersons.size());
+			log.info("Found {} entries in target server", targetPersons.size());
 
 			// Detect entries which need to remove
 			personsForRemoval = processTargetPersons(targetPersons, currInumWithEntryHashCodeMap);
 		}
-		log.info("Count entries '{}' for removal from target server"+ personsForRemoval.size());
+		log.info("Count entries {} for removal from target server", personsForRemoval.size());
 
 		// Remove entries from target server
 		HashMap<String, JansInumMap> inumInumMap = getInumInumMap(inumMaps);
@@ -431,7 +431,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 				getLdapEntryManager(), personsForRemoval, inumInumMap);
 		List<String> removedPersonInums = removeTargetEntriesResult.getFirst();
 		List<String> removedGluuInumMaps = removeTargetEntriesResult.getSecond();
-		log.info("Removed '{}' persons from target server"+ removedPersonInums.size());
+		log.info("Removed {} persons from target server", removedPersonInums.size());
 
 		// Prepare list of inum for serialization
 		ArrayList<JansInumMap> currentInumMaps = applyChangesToInumMap(inumInumMap, addedPrimaryKeyAttrValueInumMap,
@@ -481,14 +481,14 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 			if (clonedLdapDecryptedProperties.getProperty(bindPasswordPropertyKey) != null) {
 				clonedLdapDecryptedProperties.setProperty(bindPasswordPropertyKey, "REDACTED");
 			}
-			log.trace("Attempting to create PersistenceEntryManager with properties: {}"+ clonedLdapDecryptedProperties);
+			log.trace("Attempting to create PersistenceEntryManager with properties: {}", clonedLdapDecryptedProperties);
 		}
 		PersistenceEntryManager customPersistenceEntryManager = entryManagerFactory
 				.createEntryManager(ldapDecryptedProperties);
-		log.info("Created Cache Refresh PersistenceEntryManager: {}"+ customPersistenceEntryManager);
+		log.info("Created Cache Refresh PersistenceEntryManager: {}", customPersistenceEntryManager);
 
 		if (!customPersistenceEntryManager.getOperationService().isConnected()) {
-			log.error("Failed to connect to LDAP server using configuration {}"+ ldapConfig);
+			log.error("Failed to connect to LDAP server using configuration {}", ldapConfig);
 			return null;
 		}
 
@@ -511,7 +511,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 			// Update GluuInumMap if it exist
 			JansInumMap currentInumMap = inumInumMap.get(inum);
 			if (currentInumMap == null) {
-				log.warn("Can't find inum entry of person with DN: {}"+ removedPerson.getDn());
+				log.warn("Can't find inum entry of person with DN: {}", removedPerson.getDn());
 			} else {
 				JansInumMap removedInumMap = getMarkInumMapEntryAsRemoved(currentInumMap,
 						getLdapEntryManager().encodeTime(removedPerson.getDn(), runDate));
@@ -519,8 +519,8 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 					inumDbPersistenceEntryManager.merge(removedInumMap);
 					result2.add(removedInumMap.getInum());
 				} catch (BasePersistenceException ex) {
-					log.error("Failed to update entry with inum '{}' and DN: {}"+ currentInumMap.getInum(),
-							currentInumMap.getDn(), ex);
+					log.error("Failed to update entry with inum {} and DN: {} (exception: {})", currentInumMap.getInum(),
+							currentInumMap.getDn(), ex.getMessage()); //Giving Exception Details
 					continue;
 				}
 			}
@@ -546,11 +546,11 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 				}
 				result1.add(inum);
 			} catch (BasePersistenceException ex) {
-				log.error("Failed to remove person entry with inum '{}' and DN: {}"+ inum, removedPerson.getDn(), ex);
+				log.error("Failed to remove person entry with inum {} and DN: {} (exception: {})", inum, removedPerson.getDn(), ex.getMessage()); //Giving Exception Details
 				continue;
 			}
 
-			log.info("Person with DN: '{}' removed from target server"+ removedPerson.getDn());
+			log.info("Person with DN: {} removed from target server", removedPerson.getDn());
 		}
 
 		return new Pair<List<String>, List<String>>(result1, result2);
@@ -561,7 +561,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 		try {
 			clonedInumMap = (JansInumMap) BeanUtilsBean2.getInstance().cloneBean(currentInumMap);
 		} catch (Exception ex) {
-			log.error("Failed to prepare GluuInumMap for removal"+ ex);
+			log.error("Failed to prepare GluuInumMap for removal (exception: {})", ex.getMessage()); //Giving Exception Details
 			return null;
 		}
 
@@ -614,7 +614,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 			GluuSimplePerson sourcePerson = sourcePersonCacheCompoundKeyEntry.getValue();
 
 			if (log.isTraceEnabled()) {
-				log.trace("Checking source entry with key: '{}', and DN: {}"+ cacheCompoundKey, sourcePerson.getDn());
+				log.trace("Checking source entry with key: {}, and DN: {}", cacheCompoundKey, sourcePerson.getDn());
 			}
 
 			JansInumMap currentInumMap = primaryKeyAttrValueInumMap.get(cacheCompoundKey);
@@ -623,9 +623,9 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 				currentInumMap = addGluuInumMap(inumbaseDn, inumDbPersistenceEntryManager, keyAttributesWithoutValues,
 						keyAttributesValues);
 				result.put(cacheCompoundKey, currentInumMap);
-				log.info("Added new inum entry for DN: {}"+ sourcePerson.getDn());
+				log.info("Added new inum entry for DN: {}", sourcePerson.getDn());
 			} else {
-				log.trace("Inum entry for DN: '{}' exist"+ sourcePerson.getDn());
+				log.trace("Inum entry for DN: {} exist", sourcePerson.getDn());
 			}
 		}
 
@@ -650,7 +650,7 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 		}
 
 		for (CacheCompoundKey duplicateKey : duplicateKeys) {
-			log.error("Non-deterministic primary key. Skipping user with key: {}"+ duplicateKey);
+			log.error("Non-deterministic primary key. Skipping user with key: {}", duplicateKey);
 			result.remove(duplicateKey);
 		}
 
@@ -702,15 +702,15 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 
 	public ArrayList<JansInumMap> applyChangesToInumMap(HashMap<String, JansInumMap> inumInumMap,
                                                          HashMap<CacheCompoundKey, JansInumMap> addedPrimaryKeyAttrValueInumMap, List<String> removedGluuInumMaps) {
-        log.info("There are '{}' entries before updating inum list"+ inumInumMap.size());
+        log.info("There are {} entries before updating inum list", inumInumMap.size());
         for (String removedGluuInumMap : removedGluuInumMaps) {
             inumInumMap.remove(removedGluuInumMap);
         }
-        log.info("There are '{}' entries after removal '{}' entries" + inumInumMap.size() +" : " +removedGluuInumMaps.size());
+        log.info("There are {} entries after removal {} entries", inumInumMap.size(), removedGluuInumMaps.size());
 
         ArrayList<JansInumMap> currentInumMaps = new ArrayList<JansInumMap>(inumInumMap.values());
         currentInumMaps.addAll(addedPrimaryKeyAttrValueInumMap.values());
-        log.info("There are '{}' entries after adding '{}' entries"+ currentInumMaps.size()+" : " +
+        log.info("There are {} entries after adding {} entries", currentInumMaps.size(),
                 addedPrimaryKeyAttrValueInumMap.size());
 
         return currentInumMaps;
