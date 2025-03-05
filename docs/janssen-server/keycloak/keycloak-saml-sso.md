@@ -65,6 +65,44 @@ _This content is a work in progress_
 
 _This content is a work in progress_
 
+
+## Testing Jans SAML SSO with sptest
+
+### Configure IDP [Janssen Server]
+
+In this tutorial, we are going to use [Iamshowcase](https://sptest.iamshowcase.com) as a service provider. Lets create a TR, Apply following steps in Janssen Server:
+
+- Download sp metadata: `wget https://sptest.iamshowcase.com/testsp_metadata.xml`
+- Open Jans TUI and navigate to **Jans SAML > Service Providers > Add Service Provider**:
+
+<img src= "../../assets/SAML-Service-provider.png">
+
+- Release some attributes, for example: `email`, `username`
+  
+<img src= "../../assets/SAML-release-attribute.png">
+
+- Finally Save it.
+
+### Configure SP [IAMShowcase]
+
+Since We are done at Janssen Server side, now let's connect SP with the IDP:
+
+- browse and download IDP Metadata: `https://<yoour-janssen-server>/kc/realms/jans/protocol/saml/descriptor`
+- Go to: https://sptest.iamshowcase.com/instructions#spinit and upload the IDP metadata.
+- It will give you an SP link to test the SAML SSO flow:
+
+<img src ="../../assets/sp-url.png">
+
+### Test SSO
+
+Copy that link and open it in a browser. You can open it in incognito mode to avoid session issue. So, It will redirect you to janssen login page. Once you logged in with user credentials it will redirect back to the SP's protected page and show the user session details. 
+  
+### FAQ
+
+* Check KC scheduler log for any TR issue `/opt/kc-scheduler/logs/scheduler.log`
+* Also check file directory inside `/opt/idp/configs/keycloak/sp/metadata`
+
+
 ## Have questions in the meantime?
 
 You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
