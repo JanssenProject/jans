@@ -59,4 +59,55 @@ xcodebuild -create-xcframework \
 
 ## Android
 
-- WIP
+### Prerequisites
+
+- Rust: Install it from [the official Rust website](https://www.rust-lang.org/tools/install).
+- Android Studio: Download from [the official site](https://developer.android.com/studio).
+
+### Building
+
+1. Build the library:
+
+```bash
+cargo build
+```
+
+In target/debug, you should find the libmobile.dylib file.
+
+2. Set up cargo-ndk for cross-compiling:
+
+```
+cargo install cargo-ndk
+
+```
+
+3. Add targets for Android:
+
+```
+rustup target add \
+        aarch64-linux-android \
+        armv7-linux-androideabi \
+        i686-linux-android \
+        x86_64-linux-android
+```
+
+4. Compile the dynamic libraries in ./app/src/main/jniLibs (next to java and res directories) in the sample `androidApp` project.
+
+```
+cargo ndk -o ./bindings/cedarling_uniffi/androidApp/app/src/main/jniLibs \
+        --manifest-path ./Cargo.toml \
+        -t armeabi-v7a \
+        -t arm64-v8a \
+        -t x86 \
+        -t x86_64 \
+        build --release
+```
+
+5. Generate the bindings for Kotlin:
+
+```
+cargo run --bin uniffi-bindgen generate --library ./target/debug/libmobile.dylib --language kotlin --out-dir ./bindings/cedarling_uniffi/androidApp/app/src/main/java/com/example/androidapp/cedarling/uniffi
+
+```
+
+6. Open the `androidApp` project on Android Studio and run the project on simulator. 
