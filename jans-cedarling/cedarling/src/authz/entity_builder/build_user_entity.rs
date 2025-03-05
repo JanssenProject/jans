@@ -266,4 +266,97 @@ mod test {
             Some(cedarling_schema()),
         );
     }
+
+    #[test]
+    fn can_build_user_entity_without_role() {
+        let mut iss = TrustedIssuer::default();
+        let claim_mappings = ClaimMappings::builder().email("email").build();
+        for token in ["id_token", "userinfo_token"].iter() {
+            let metadata = iss
+                .tokens_metadata
+                .get_mut(*token)
+                .expect("should have token metadata");
+            metadata.claim_mapping = claim_mappings.clone();
+        }
+        let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+        let builder = EntityBuilder::new(EntityNames::default(), true, false, &issuers)
+            .expect("should init entity builder");
+        let id_token = Token::new(
+            "id_token",
+            HashMap::from([
+                ("iss".to_string(), json!("https://test.jans.org/")),
+                ("sub".to_string(), json!("some_sub")),
+                ("username".to_string(), json!("some_username")),
+                ("email".to_string(), json!("email@email.com")),
+                ("exp".to_string(), json!(123)),
+            ])
+            .into(),
+            Some(&iss),
+        );
+        let userinfo_token = Token::new(
+            "userinfo_token",
+            HashMap::from([
+                ("iss".to_string(), json!("https://test.jans.org/")),
+                ("sub".to_string(), json!("some_sub")),
+                ("phone_number".to_string(), json!("1234567890")),
+                ("exp".to_string(), json!(123)),
+            ])
+            .into(),
+            Some(&iss),
+        );
+        let tokens = HashMap::from([
+            ("id_token".to_string(), id_token),
+            ("userinfo_token".to_string(), userinfo_token),
+        ]);
+        let token_principal_mappings = TokenPrincipalMappings::from(
+            [
+                TokenPrincipalMapping {
+                    principal: "Jans::User".into(),
+                    attr_name: "id_token".into(),
+                    expr: RestrictedExpression::new_entity_uid(
+                        EntityUid::from_str("Jans::Id_token::\"some_jti\"".into())
+                            .expect("should parse id_token EntityUid"),
+                    ),
+                },
+                TokenPrincipalMapping {
+                    principal: "Jans::User".into(),
+                    attr_name: "userinfo_token".into(),
+                    expr: RestrictedExpression::new_entity_uid(
+                        EntityUid::from_str("Jans::Userinfo_token::\"some_jti\"".into())
+                            .expect("should parse Userinfo_token EntityUid"),
+                    ),
+                },
+            ]
+            .to_vec(),
+        );
+        let (entity, _) = builder
+            .build_user_entity(&tokens, &token_principal_mappings)
+            .expect("should build user entity");
+
+        assert_entity_eq(
+            &entity,
+            json!({
+                "uid": {"type": "Jans::User", "id": "some_sub"},
+                "attrs": {
+                    "sub": "some_sub",
+                    "email": {
+                        "domain": "email.com",
+                        "uid": "email",
+                    },
+                    "phone_number": "1234567890",
+                    "username": "some_username",
+                    "id_token": {"__entity": {
+                        "type": "Jans::Id_token",
+                        "id": "some_jti",
+                    }},
+                    "userinfo_token": {"__entity": {
+                        "type": "Jans::Userinfo_token",
+                        "id": "some_jti",
+                    }},
+                },
+                "parents": [],
+            }),
+            Some(cedarling_schema()),
+        );
+    }
 }

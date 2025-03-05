@@ -295,6 +295,7 @@ impl TokenPrincipalMappings {
 mod test {
     use super::*;
     use cedar_policy::{Entities, Schema};
+    use pretty_assertions::assert_eq;
     use serde_json::Value;
     use serde_json::json;
     use std::{collections::HashMap, sync::OnceLock};

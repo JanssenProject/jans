@@ -250,4 +250,39 @@ mod test {
             Some(cedarling_schema()),
         );
     }
+
+    #[test]
+    fn builds_str_iss_if_entity_is_unavailable() {
+        let builder = EntityBuilder::new(EntityNames::default(), false, false, &HashMap::new())
+            .expect("should init entity builder");
+        let access_token = Token::new(
+            "userinfo_token",
+            HashMap::from([
+                ("iss".to_string(), json!("https://test.jans.org/")),
+                ("jti".to_string(), json!("some_jti")),
+            ])
+            .into(),
+            None,
+        );
+        let (entity, _) = builder
+            .build_tkn_entity(
+                "Jans::Access_token",
+                &access_token,
+                &mut TokenPrincipalMappings::default(),
+            )
+            .expect("should build access_token entity");
+
+        assert_entity_eq(
+            &entity,
+            json!({
+                "uid": {"type": "Jans::Access_token", "id": "some_jti"},
+                "attrs": {
+                    "iss": "https://test.jans.org/",
+                    "jti": "some_jti",
+                },
+                "parents": [],
+            }),
+            None,
+        );
+    }
 }

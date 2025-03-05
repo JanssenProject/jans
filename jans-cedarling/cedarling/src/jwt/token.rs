@@ -63,6 +63,13 @@ impl From<HashMap<String, Value>> for TokenClaims {
     }
 }
 
+impl From<Value> for TokenClaims {
+    fn from(claims: Value) -> Self {
+        let claims = serde_json::from_value(claims).expect("should deserialize claims to hashmap");
+        Self { claims }
+    }
+}
+
 impl TokenClaims {
     pub fn get_claim(&self, name: &str) -> Option<TokenClaim> {
         self.claims.get(name).map(|value| TokenClaim {
