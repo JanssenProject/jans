@@ -13,7 +13,7 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
     ```bash
     cargo build
     ```
-In target/debug, you should find the libmobile.dylib file.
+   In target/debug, you should find the libmobile.dylib file.
 
 2. Set up cargo-ndk for cross-compiling:
     ```
