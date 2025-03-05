@@ -21,9 +21,6 @@
             "$ref": "#/$defs/PolicyStore"
         }
     },
-    "required": [
-        "policy_store_version"
-    ],
     "additionalProperties": false,
     "$defs": {
         "PolicyStore": {
