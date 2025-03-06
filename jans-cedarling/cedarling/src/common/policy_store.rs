@@ -66,10 +66,6 @@ pub struct PolicyStore {
 }
 
 impl PolicyStore {
-    pub(crate) fn namespace(&self) -> &str {
-        &self.name
-    }
-
     pub(crate) fn get_store_version(&self) -> &str {
         self.version.as_deref().unwrap_or("undefined")
     }

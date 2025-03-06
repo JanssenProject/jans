@@ -17,11 +17,15 @@ pub fn build_context(
     schema: &cedar_policy::Schema,
     action: &cedar_policy::EntityUid,
 ) -> Result<cedar_policy::Context, BuildContextError> {
-    let namespace = config.policy_store.namespace();
+    // NOTE: we use the context namespace to
+    let namespace = action.type_name().namespace();
     let action_name = &action.id().escaped();
     let json_schema = &config.policy_store.schema.json;
+
+    // TODO: we would to implement a way for the user to decide which entities
+    // should be added to the context that doesn't use the Cedar schema.
     let action_schema = json_schema
-        .get_action(namespace, action_name)
+        .get_action(&namespace, action_name)
         .ok_or(BuildContextError::UnknownAction(action_name.to_string()))?;
 
     // Get the entities required for the context
@@ -33,7 +37,7 @@ pub fn build_context(
             Attribute::Record { attrs, .. } => {
                 for (key, attr) in attrs.iter() {
                     if let Some(entity_ref) =
-                        build_entity_refs_from_attr(namespace, attr, build_entities, json_schema)?
+                        build_entity_refs_from_attr(&namespace, attr, build_entities, json_schema)?
                     {
                         ctx_entity_refs[key] = entity_ref;
                     }
@@ -41,14 +45,14 @@ pub fn build_context(
             },
             Attribute::EntityOrCommon { name, .. } => {
                 if let Some((_entity_type_name, attr)) = json_schema
-                    .get_common_type(name, Some(namespace))
+                    .get_common_type(name, Some(&namespace))
                     .map_err(|err| BuildContextError::ParseEntityName(name.clone(), err))?
                 {
                     match attr {
                         Attribute::Record { attrs, .. } => {
                             for (key, attr) in attrs.iter() {
                                 if let Some(entity_ref) = build_entity_refs_from_attr(
-                                    namespace,
+                                    &namespace,
                                     attr,
                                     build_entities,
                                     json_schema,
