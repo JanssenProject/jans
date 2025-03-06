@@ -51,7 +51,6 @@ jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
 mockito = "1.5.0"
 criterion = { version = "0.5.1", features = ["async_tokio"] }
 tokio = { version = "1.42.0", features = ["rt-multi-thread"] }
-pretty_assertions = "1.4.1"
 
 [[bench]]
 name = "authz_benchmark"
