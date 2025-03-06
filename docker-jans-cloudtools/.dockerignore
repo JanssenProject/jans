@@ -6,3 +6,4 @@ scripts/*.pyc
 !scripts
 !LICENSE
 !requirements.txt
+!templates

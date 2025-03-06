@@ -768,7 +768,7 @@ def _parse_opts(opts):
     return parsed_opts
 
 
-@click.group()
+@click.group(context_settings={"help_option_names": ["-h", "--help"]})
 def certmanager():
     """Manage certs and crypto keys."""
     ...
@@ -822,3 +822,7 @@ def prune(service, dry_run, opts):
 
     with manager.create_lock(f"certmanager-prune-{service}"):
         callback_cls(manager, dry_run, **parsed_opts).prune()
+
+
+if __name__ == "__main__":
+    certmanager(prog_name="certmanager")

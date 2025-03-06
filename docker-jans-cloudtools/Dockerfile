@@ -21,6 +21,25 @@ ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VE
 
 RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
 
+# ============
+# KC scheduler
+# ============
+
+ENV SCHEDULER_HOME=/opt/kc-scheduler
+
+RUN mkdir -p ${SCHEDULER_HOME}/bin \
+    ${SCHEDULER_HOME}/conf \
+    ${SCHEDULER_HOME}/lib \
+    ${SCHEDULER_HOME}/logs
+
+RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-scheduler/${CN_VERSION}/kc-jans-scheduler-${CN_VERSION}-deps.zip -O /tmp/kc-scheduler.zip \
+    && unzip /tmp/kc-scheduler.zip -d ${SCHEDULER_HOME}/lib \
+    && rm -rf /tmp/kc-scheduler.zip \
+    && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-scheduler/${CN_VERSION}/kc-jans-scheduler-${CN_VERSION}.jar -P ${SCHEDULER_HOME}/lib
+
+RUN wget -q https://repo1.maven.org/maven2/org/codehaus/janino/janino/3.1.9/janino-3.1.9.jar -P ${SCHEDULER_HOME}/lib \
+    && wget -q https://repo1.maven.org/maven2/org/codehaus/janino/commons-compiler/3.1.9/commons-compiler-3.1.9.jar -P ${SCHEDULER_HOME}/lib
+
 # ===========
 # Assets sync
 # ===========
@@ -132,11 +151,12 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cloudtools" \
     org.opencontainers.image.vendor="Janssen Project" \
     org.opencontainers.image.version="0.0.0-nightly" \
     org.opencontainers.image.title="Janssen Cloud Tools" \
-    org.opencontainers.image.description="Tools to run various helper commands"
+    org.opencontainers.image.description="Tools to run various helper commands for the cluster"
 
 RUN mkdir -p /etc/certs /etc/jans/conf
 
 COPY scripts /app/scripts
+COPY templates /app/templates/
 RUN chmod +x /app/scripts/entrypoint.sh
 
 RUN ln -sf /usr/lib/jvm/jre /opt/java
@@ -146,7 +166,10 @@ RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 1000
 
 # adjust ownership and permission
 RUN chmod -R g=u /etc/certs \
-    && chmod -R g=u /etc/jans
+    && chmod -R g=u /etc/jans \
+    && chmod 664 /opt/java/lib/security/cacerts \
+    && chown -R 1000:0 /opt/kc-scheduler \
+    && chown -R 1000:0 /app/templates
 
 USER 1000
 

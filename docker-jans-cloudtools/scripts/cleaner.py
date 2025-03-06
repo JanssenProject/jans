@@ -45,3 +45,7 @@ def cleanup(limit):
 
     finish_time = time.time()
     logger.info(f"Cleanup process finished after {(finish_time - start_time):0.2f} seconds")
+
+
+if __name__ == "__main__":
+    cleanup(prog_name="cleanup")
