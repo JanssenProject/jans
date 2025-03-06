@@ -23,17 +23,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         jwt_sig_validation: true,
         jwt_status_validation: false,
         signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
-        // token_validation_settings: HashMap::from([
-        //     (
-        //         "access_token".to_string(),
-        //         TokenValidationConfig::access_token(),
-        //     ),
-        //     ("id_token".to_string(), TokenValidationConfig::id_token()),
-        //     (
-        //         "userinfo_token".to_string(),
-        //         TokenValidationConfig::userinfo_token(),
-        //     ),
-        // ]),
     };
 
     // You must change this with your own tokens

@@ -28,11 +28,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             jwt_sig_validation: false,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::new(),
-            // token_validation_settings: HashMap::from_iter(
-            //     ["access_token", "id_token", "userinfo_token", "custom_token"]
-            //         .iter()
-            //         .map(|tkn| (tkn.to_string(), TokenValidationConfig::default())),
-            // ),
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
