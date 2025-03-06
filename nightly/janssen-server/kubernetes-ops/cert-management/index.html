@@ -7531,10 +7531,63 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3_4_1" type="checkbox" id="__nav_2_3_4_1" >
+      
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2_3_4_1">
+          Sidecar
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Sidecar" data-md-level="4">
+        <label class="md-nav__title" for="__nav_2_3_4_1">
+          <span class="md-nav__icon md-icon"></span>
+          Sidecar
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../../cedarling/cedarling-sidecar/" class="md-nav__link">
-        Sidecar
+      <a href="../../../cedarling/cedarling-sidecar-overview/" class="md-nav__link">
+        Sidecar Overview
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedarling/cedarling-sidecar-tutorial/" class="md-nav__link">
+        Sidecar Tutorial
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -7581,6 +7634,8 @@
       
       
       
+        
+          
         
           
         
@@ -7642,8 +7697,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../cedarling/cedarling-jwt/" class="md-nav__link">
-        JWT
+      <a href="../../../cedarling/cedarling-jwt-validation/" class="md-nav__link">
+        JWT Validation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedarling/cedarling-jwt-mapping/" class="md-nav__link">
+        JWT Mapping
       </a>
     </li>
   
@@ -8967,7 +9036,7 @@ If no mounted or downloaded files are found, it generates self-signed SSL certif
 <span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Never</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web-key-rotation</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/certmanager:0.0.0-nightly-1</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/certmanager:replace-janssen-version-1</span>
 <span class="w">          </span><span class="nt">envFrom</span><span class="p">:</span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">configMapRef</span><span class="p">:</span>
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen-config-cm</span><span class="w"> </span><span class="c1"># This may be differnet in Helm</span>
@@ -9019,7 +9088,7 @@ If no mounted or downloaded files are found, it generates self-signed SSL certif
 <span class="w">              </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web_https.key</span><span class="w">                              </span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">load-web-key-rotation</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/certmanager:0.0.0-nightly-1</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/certmanager:replace-janssen-version-1</span>
 <span class="w">          </span><span class="nt">envFrom</span><span class="p">:</span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">configMapRef</span><span class="p">:</span>
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen-config-cm</span><span class="w">  </span><span class="c1">#This may be differnet in Helm</span>
@@ -9079,7 +9148,7 @@ If no mounted or downloaded files are found, it generates self-signed SSL certif
 <span class="w">        </span><span class="nt">spec</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-key-rotation</span>
-<span class="w">              </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/certmanager:0.0.0-nightly-1</span>
+<span class="w">              </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/certmanager:replace-janssen-version-1</span>
 <span class="w">              </span><span class="nt">resources</span><span class="p">:</span>
 <span class="w">                </span><span class="nt">requests</span><span class="p">:</span>
 <span class="w">                  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;300Mi&quot;</span>

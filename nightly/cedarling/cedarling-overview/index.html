@@ -7328,8 +7328,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#why-zero-trust-needs-cedarling" class="md-nav__link">
-    Why Zero Trust Needs Cedarling
+  <a href="#why-zero-trust-needs-cedarlings" class="md-nav__link">
+    Why Zero Trust Needs Cedarlings
   </a>
   
 </li>
@@ -7560,10 +7560,63 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3_4_1" type="checkbox" id="__nav_2_3_4_1" >
+      
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2_3_4_1">
+          Sidecar
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Sidecar" data-md-level="4">
+        <label class="md-nav__title" for="__nav_2_3_4_1">
+          <span class="md-nav__icon md-icon"></span>
+          Sidecar
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../cedarling-sidecar/" class="md-nav__link">
-        Sidecar
+      <a href="../cedarling-sidecar-overview/" class="md-nav__link">
+        Sidecar Overview
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-sidecar-tutorial/" class="md-nav__link">
+        Sidecar Tutorial
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -7610,6 +7663,8 @@
       
       
       
+        
+          
         
           
         
@@ -7671,8 +7726,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../cedarling-jwt/" class="md-nav__link">
-        JWT
+      <a href="../cedarling-jwt-validation/" class="md-nav__link">
+        JWT Validation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-jwt-mapping/" class="md-nav__link">
+        JWT Mapping
       </a>
     </li>
   
@@ -8901,8 +8970,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#why-zero-trust-needs-cedarling" class="md-nav__link">
-    Why Zero Trust Needs Cedarling
+  <a href="#why-zero-trust-needs-cedarlings" class="md-nav__link">
+    Why Zero Trust Needs Cedarlings
   </a>
   
 </li>
@@ -8984,11 +9053,13 @@ centralized authorization services introduce latency, availability concerns, and
 complexity. The Cedarling provides a fast, embeddable, and self-contained solution for policy-based 
 authorization, designed for both client-side and server-side enforcement. This makes it 
 particularly well-suited for latency-sensitive environments like mobile apps, API gateways, and 
-embedded devices. Cedarling is designed for maximum deployment flexibility:
-* Embedded in browsers or mobile apps for client-side authorization.
-* Integrated into backend services using Java or Python SDKs.
-* Deployed as a sidecar or serverless function in cloud-native environments.
-* Used within databases and API gateways to enforce fine-grained authorization at multiple layers.</p>
+embedded devices. Cedarling is designed for maximum deployment flexibility:</p>
+<ul>
+<li>Embedded in browsers or mobile apps for client-side authorization</li>
+<li>Integrated into backend services using Java or Python SDKs</li>
+<li>Deployed as a sidecar or serverless function in cloud-native environments</li>
+<li>Used within databases and API gateways to enforce fine-grained authorization at multiple layers</li>
+</ul>
 <p><img alt="" src="../../assets/lock-cedarling-diagram-1.jpg" /></p>
 <p>The Cedarling is an embeddable Policy Decision Point (PDP), which includes an in-memory cache 
 for performance optimization, enabling low-latency access control and efficient logging. The 
@@ -8996,9 +9067,16 @@ Cedarling is built on the Rust Cedar engine, but unlike the standalone Cedar eng
 full-featured PDP that includes logging, JWT validation, and claims mapping, making it 
 more adaptable for real-world applications. It also has optional features to connect 
 to enterprise plumbing.</p>
-<p>If you never heard of Cedar, you might want to start <a href="./cedar-intro.md">here</a> with 
-a quick introduction and some links for further learning. These Cedarling docs assume 
-you have a basic understanding of Cedar policy syntax and language features. </p>
+<div class="admonition tip">
+<p class="admonition-title">About Cedar</p>
+<p><a href="https://www.cedarpolicy.com/en">Cedar</a> is a policy syntax invented by Amazon and used by their 
+  <a href="https://aws.amazon.com/verified-permissions/">Verified Permission</a> service. Cedar policies
+  enable developers to implement fine-grain access control and externalize policies. To learn more
+  about why the design of Cedar is <strong>intuitive</strong>, <strong>fast</strong> and <strong>safe</strong>, read this 
+  <a href="https://aws.amazon.com/blogs/security/how-we-designed-cedar-to-be-intuitive-to-use-fast-and-safe/">article</a> 
+  or watch this <a href="https://www.youtube.com/watch?v=k6pPcnLuOXY&amp;t=1779s">video</a></p>
+<p>These Cedarling docs assume you have a basic understanding of Cedar policy syntax and language features.</p>
+</div>
 <p>The Cedarling is written in Rust with bindings to WASM, iOS, Android, Python and Java. 
 This means that web, mobile, and cloud developers can use the Cedarling  to load a 
 "policy store"--a set of policies, a schema, and a list of trusted token issuers. 
@@ -9010,12 +9088,7 @@ it's small enough to load into your browser or mobile application. Backend
 applications can use the sidecar via a REST API, deploy the Cedarling in the cloud as a 
 serverless component (e.g. cloud WASM), or integrate directly via the Java or Python SDKs. </p>
 <p>The Cedarling is optimized for speed, typically returning authorization decisions in sub-millisecond time. By 
-keeping all necessary data locally available, it avoids costly cloud round-trips, ensuring predictable 
-performance.</p>
-<p>The Cedarling ensures consistent security policies across different environments while minimizing 
-attack surfaces by keeping authorization decisions local. Its design aligns with Zero Trust 
-principles, and its ability to validate JWTs and logs enhances auditability for compliance-focused 
-applications.</p>
+keeping all necessary data locally available, it avoids costly cloud round-trips, ensuring predictable performance.</p>
 <h2 id="token-based-access-control-tbac">Token Based Access Control (TBAC)<a class="headerlink" href="#token-based-access-control-tbac" title="Permanent link">#</a></h2>
 <p>Cedarling evaluates authorization requests based on Token-Based Access Control (TBAC), 
 answering the question: <em>"Given this bundle of tokens, is this action on this resource allowed 
@@ -9061,62 +9134,64 @@ above.</li>
 <li><strong>Lock Engine</strong> is used for enterprise deployments to load the Policy Store from a trusted source and send to store logs for central storage. </li>
 </ul>
 <h2 id="cedarling-and-zero-trust">Cedarling and Zero Trust<a class="headerlink" href="#cedarling-and-zero-trust" title="Permanent link">#</a></h2>
-<p>Zero Trust is a modern security model that assumes <strong>no implicit trust</strong>—every request must be <strong>explicitly authorized</strong> based on policies, identity, and context. Cedarling enables <strong>end-to-end Zero Trust enforcement</strong> by embedding fine-grained authorization across the entire security stack, from <strong>client devices</strong> to <strong>backend services and databases</strong>.</p>
+<p>Zero Trust is a modern security model that assumes no implicit trust—every request must be explicitly authorized based on policies, identity, and context. The Cedarling enables end-to-end Zero Trust enforcement by embedding fine-grained authorization across the entire security stack, from client devices to backend services and databases.</p>
 <h3 id="end-to-end-authorization-enforcement">End-to-End Authorization Enforcement<a class="headerlink" href="#end-to-end-authorization-enforcement" title="Permanent link">#</a></h3>
-<p>Cedarling can be deployed <strong>at every layer</strong> to ensure that access decisions are consistently enforced. The diagram below illustrates how Cedarling operates in a hypothetical <strong>mobile application architecture</strong>:</p>
+<p>The Cedarling can be deployed <strong>at every layer</strong> to ensure that access decisions are consistently enforced. The diagram below illustrates how the Cedarling operates in a hypothetical mobile application architecture:</p>
 <p><img alt="" src="../../assets/lock-cedarling-mobile-generic.jpg" /></p>
 <ol>
 <li><strong>Identity Provider (IDP) Enforcement</strong>  </li>
-<li>The IDP can use Cedarling to determine if a <strong>mobile application</strong> should be allowed to register.  </li>
+<li>The IDP can use the Cedarling to determine if a mobile application should be allowed to register.  </li>
 <li>
-<p>Example: An IDP policy might restrict registration to applications that present a <strong>valid Software Statement Assertion (SSA)</strong> or <strong>Google Play Integrity Attestation</strong>.</p>
+<p>Example: An IDP policy might restrict registration to applications that present a valid Software Statement Assertion (SSA) or Google Play Integrity Attestation.</p>
 </li>
 <li>
 <p><strong>Client-Side Authorization in Mobile and Web Apps</strong>  </p>
 </li>
-<li>A <strong>mobile application</strong> can embed Cedarling to enforce <strong>real-time access control</strong> before exposing UI components or calling APIs.  </li>
+<li>A mobile application can embed the Cedarling to enforce real-time access control before exposing UI components or calling APIs.  </li>
 <li>
-<p>Example: A finance app may check if a user's token has <strong>elevated risk signals</strong> (e.g., logging in from a new device) before enabling high-risk transactions.</p>
+<p>Example: A finance app may check if a user's token has elevated risk signals (e.g., logging in from a new device) before enabling high-risk transactions.</p>
 </li>
 <li>
 <p><strong>API Gateway Enforcement</strong>  </p>
 </li>
-<li>API gateways can use Cedarling to <strong>validate JWT claims and scope permissions</strong> before forwarding requests to backend services.  </li>
+<li>API gateways can use the Cedarling to validate JWT claims and scope permissions before forwarding requests to backend services.  </li>
 <li>
-<p>Example: A gateway might block API requests missing a <strong>valid "admin" scope</strong> or <strong>ensure an OAuth token has not expired</strong>.</p>
+<p>Example: A gateway might block API requests missing a valid <code>admin</code> scope or ensure an OAuth token is not revoked.</p>
 </li>
 <li>
 <p><strong>Backend Service Authorization</strong>  </p>
 </li>
-<li>The <strong>backend server</strong> can re-evaluate authorization decisions, ensuring <strong>end-to-end security</strong> rather than trusting the API gateway or mobile app.  </li>
+<li>The backend server can re-evaluate authorization decisions, ensuring end-to-end security rather than trusting the API gateway or mobile app.  </li>
 <li>
-<p>Example: Even if a request passes through an API gateway, the backend can <strong>recheck authorization policies</strong> to prevent <strong>privilege escalation</strong>.</p>
+<p>Example: Even if a request passes through an API gateway, the backend can recheck authorization policies to prevent privilege escalation.</p>
 </li>
 <li>
 <p><strong>Database-Level Policy Enforcement</strong>  </p>
 </li>
-<li>Cedarling can be embedded within databases to <strong>filter data at query time</strong>, ensuring <strong>only authorized records are returned</strong>.  </li>
-<li>Example: A <strong>multi-tenant SaaS</strong> application may enforce <strong>row-level security</strong> so a user can only access their own organization's data.</li>
+<li>The Cedarling can be embedded within databases to filter data at query time, ensuring only authorized records are returned.  </li>
+<li>Example: A multi-tenant SaaS application may enforce row-level security so a user can only access their own organization's data.</li>
 </ol>
-<h3 id="why-zero-trust-needs-cedarling">Why Zero Trust Needs Cedarling<a class="headerlink" href="#why-zero-trust-needs-cedarling" title="Permanent link">#</a></h3>
-<p>Traditional access control models assume <strong>network perimeters are secure</strong>, leading to excessive trust in internal components. <strong>Cedarling aligns with Zero Trust by:</strong>
-- <strong>Eliminating implicit trust</strong>—each authorization decision is enforced based on real-time policies.
-- <strong>Minimizing attack surfaces</strong>—authorization happens <strong>locally</strong> within apps, APIs, and services, reducing the risk of <strong>man-in-the-middle (MITM) attacks</strong>.
-- <strong>Ensuring consistent policies</strong>—from <strong>client devices</strong> to <strong>backend services and databases</strong>, enforcing the <strong>same security rules</strong> everywhere.</p>
+<h3 id="why-zero-trust-needs-cedarlings">Why Zero Trust Needs Cedarlings<a class="headerlink" href="#why-zero-trust-needs-cedarlings" title="Permanent link">#</a></h3>
+<p>Traditional access control models assume network perimeters are secure, leading to excessive trust in internal components. The Cedarling aligns with Zero Trust by:</p>
+<ul>
+<li>Eliminating implicit trust—each authorization decision is enforced based on real-time policies.</li>
+<li>Improving re-usability of policies across applications to enable multi-layer security</li>
+<li>Ensuring consistent policies—from client devices to backend services and databases, enforcing the same security rules everywhere.</li>
+</ul>
 <h3 id="cedarling-and-threat-detection">Cedarling and Threat Detection<a class="headerlink" href="#cedarling-and-threat-detection" title="Permanent link">#</a></h3>
-<p>Beyond enforcing policies, Cedarling plays a role in <strong>intrusion detection</strong> by <strong>logging every decision</strong>. These logs can be <strong>analyzed in a SIEM (Security Information and Event Management) system</strong> to detect:
-- <strong>Unusual access patterns</strong> (e.g., a user requesting sensitive data from an unrecognized location).
-- <strong>Token misuse</strong> (e.g., an expired JWT being replayed).
-- <strong>Privilege escalation attempts</strong> (e.g., a non-admin trying to access admin-only APIs).</p>
+<p>Beyond enforcing policies, the Cedarling plays a role in intrusion detection by logging every decision. These logs can be analyzed in a SIEM (Security Information and Event Management) system to detect:
+- Unusual access patterns (e.g., a user requesting sensitive data from an unrecognized location).
+- Token misuse (e.g., an expired JWT being replayed).
+- Privilege escalation attempts (e.g., a non-admin trying to access admin-only APIs).</p>
 <h3 id="zero-trust-conclusion">Zero Trust Conclusion<a class="headerlink" href="#zero-trust-conclusion" title="Permanent link">#</a></h3>
-<p>By embedding Cedarling across multiple layers of the application stack, organizations can <strong>enforce Zero Trust security</strong>, <strong>reduce unauthorized access</strong>, and <strong>gain visibility into access patterns</strong>. Whether it's <strong>protecting frontend applications, securing API gateways, or enforcing access policies at the database level</strong>, Cedarling ensures <strong>every request is explicitly authorized</strong>—everywhere.</p>
+<p>By embedding the Cedarling across multiple layers of the application stack, organizations can enforce Zero Trust security, reduce unauthorized access, and gain visibility into access patterns. Whether it's protecting frontend applications, securing API gateways, or enforcing access policies at the database level, the Cedarling ensures every request is explicitly authorized—-verywhere.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-03T07:48:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-03</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-06T12:50:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-06</span>
       
         <br>
         Created:

@@ -7458,10 +7458,63 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3_4_1" type="checkbox" id="__nav_2_3_4_1" >
+      
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2_3_4_1">
+          Sidecar
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Sidecar" data-md-level="4">
+        <label class="md-nav__title" for="__nav_2_3_4_1">
+          <span class="md-nav__icon md-icon"></span>
+          Sidecar
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../cedarling-sidecar/" class="md-nav__link">
-        Sidecar
+      <a href="../cedarling-sidecar-overview/" class="md-nav__link">
+        Sidecar Overview
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-sidecar-tutorial/" class="md-nav__link">
+        Sidecar Tutorial
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -7510,6 +7563,8 @@
       
       
       
+        
+          
         
           
         
@@ -7726,8 +7781,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../cedarling-jwt/" class="md-nav__link">
-        JWT
+      <a href="../cedarling-jwt-validation/" class="md-nav__link">
+        JWT Validation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-jwt-mapping/" class="md-nav__link">
+        JWT Mapping
       </a>
     </li>
   
@@ -9092,7 +9161,7 @@
 
 
 <h1 id="cedarling-policy-store">Cedarling Policy Store<a class="headerlink" href="#cedarling-policy-store" title="Permanent link">#</a></h1>
-<p>The Cedarling Policy Store uses a JSON file named <code>cedarling_store.json</code> to store all necessary data for evaluating policies and verifying JWT tokens. The structure includes the following key components:</p>
+<p>The Policy Store provides:</p>
 <ol>
 <li><strong>Cedar Schema</strong>: The Cedar schema encoded in Base64.</li>
 <li><strong>Cedar Policies</strong>: The Cedar policies encoded in Base64.</li>
@@ -9105,8 +9174,8 @@
 <span class="w">  </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v4.0.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;policy_stores&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;some_unique_string_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestPolicy&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Once upon a time there was a Policy, that lived in a Store.&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DoveCRM Policy Store&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DoveCRM policies, schema, and trusted JWT issuers.&quot;</span><span class="p">,</span>
 <span class="w">          </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
 <span class="w">          </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
 <span class="w">          </span><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">}</span>
@@ -9116,8 +9185,8 @@
 </code></pre></div>
 <ul>
 <li><strong>cedar_version</strong> : (<em>String</em>) The version of <a href="https://docs.cedarpolicy.com/">Cedar policy</a>. The protocols of this version will be followed when processing Cedar schema and policies.</li>
-<li><strong>policies</strong> : (<em>Object</em>) Object containing one or more policy IDs as keys, with their corresponding objects as values. See: <a href="#cedar-policies-schema">policies schema</a>.</li>
-<li><strong>schema</strong> : (<em>String</em> | <em>Object</em>) The Cedar Schema. See <a href="#schema">schema</a> below.</li>
+<li><strong>policies</strong> : (<em>Object</em>) Base64 encoded object containing one or more policy IDs as keys, with their corresponding objects as values. See: <a href="#cedar-policies-schema">policies schema</a>.</li>
+<li><strong>schema</strong> : (<em>String</em> | <em>Object</em>) Base64 encoded JSON Object. See <a href="#schema">schema</a> below.</li>
 <li><strong>trusted_issuers</strong> : (<em>Object of {unique_id =&gt; IdentitySource}(#trusted-issuer-schema)</em>) List of metadata for Identity Sources.</li>
 </ul>
 <h3 id="schema"><code>schema</code><a class="headerlink" href="#schema" title="Permanent link">#</a></h3>
@@ -9425,7 +9494,7 @@ action &quot;Update&quot; appliesTo {
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-29T15:54:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-29</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-04T15:22:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-04</span>
       
         <br>
         Created:
@@ -9470,13 +9539,13 @@ action &quot;Update&quot; appliesTo {
       
       
         
-        <a href="../cedarling-jwt/" class="md-footer__link md-footer__link--next" aria-label="Next: JWT" rel="next">
+        <a href="../cedarling-jwt-validation/" class="md-footer__link md-footer__link--next" aria-label="Next: JWT Validation" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              JWT
+              JWT Validation
             </div>
           </div>
           <div class="md-footer__button md-icon">

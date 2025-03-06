@@ -7517,10 +7517,63 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3_4_1" type="checkbox" id="__nav_2_3_4_1" >
+      
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2_3_4_1">
+          Sidecar
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Sidecar" data-md-level="4">
+        <label class="md-nav__title" for="__nav_2_3_4_1">
+          <span class="md-nav__icon md-icon"></span>
+          Sidecar
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../../../cedarling/cedarling-sidecar/" class="md-nav__link">
-        Sidecar
+      <a href="../../../../cedarling/cedarling-sidecar-overview/" class="md-nav__link">
+        Sidecar Overview
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../cedarling/cedarling-sidecar-tutorial/" class="md-nav__link">
+        Sidecar Tutorial
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -7567,6 +7620,8 @@
       
       
       
+        
+          
         
           
         
@@ -7628,8 +7683,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../cedarling/cedarling-jwt/" class="md-nav__link">
-        JWT
+      <a href="../../../../cedarling/cedarling-jwt-validation/" class="md-nav__link">
+        JWT Validation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../cedarling/cedarling-jwt-mapping/" class="md-nav__link">
+        JWT Mapping
       </a>
     </li>
   
@@ -8994,7 +9063,7 @@
 <p>Start a fresh Ubuntu <code>18.04</code>/<code>20.04</code>/<code>22.04</code> VM with ports <code>443</code> and <code>80</code> open. Then execute the following:</p>
 <p><div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>su<span class="w"> </span>-
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/startjanssendemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>chmod<span class="w"> </span>u+x<span class="w"> </span>startjanssendemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./startjanssendemo.sh
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>chmod<span class="w"> </span>u+x<span class="w"> </span>startjanssendemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./startjanssendemo.sh
 </code></pre></div></p>
 <p>This will install Docker, Microk8s, Helm and Janssen with the default settings that can be found inside <a href="https://github.com/JanssenProject/jans/blob/main/charts/janssen/values.yaml">values.yaml</a>.  </p>
 <p>The installer will automatically add a record to your hosts record in the VM but if you want to access the endpoints outside the VM you must map the <code>ip</code> of the instance running Ubuntu to the FQDN you provided and then access the endpoints at your browser such in the example in the table below.</p>

@@ -7530,10 +7530,63 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3_4_1" type="checkbox" id="__nav_2_3_4_1" >
+      
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2_3_4_1">
+          Sidecar
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Sidecar" data-md-level="4">
+        <label class="md-nav__title" for="__nav_2_3_4_1">
+          <span class="md-nav__icon md-icon"></span>
+          Sidecar
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../../cedarling/cedarling-sidecar/" class="md-nav__link">
-        Sidecar
+      <a href="../../../cedarling/cedarling-sidecar-overview/" class="md-nav__link">
+        Sidecar Overview
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedarling/cedarling-sidecar-tutorial/" class="md-nav__link">
+        Sidecar Tutorial
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -7580,6 +7633,8 @@
       
       
       
+        
+          
         
           
         
@@ -7641,8 +7696,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../cedarling/cedarling-jwt/" class="md-nav__link">
-        JWT
+      <a href="../../../cedarling/cedarling-jwt-validation/" class="md-nav__link">
+        JWT Validation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedarling/cedarling-jwt-mapping/" class="md-nav__link">
+        JWT Mapping
       </a>
     </li>
   
@@ -8920,7 +8989,7 @@
 
 
 <h1 id="persistence-script">Persistence Script<a class="headerlink" href="#persistence-script" title="Permanent link">#</a></h1>
-<p>By overriding the interface methods in <a href="https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java">PersistenceType</a> inside a custom script you can</p>
+<p>By overriding the interface methods in <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java">PersistenceType</a> inside a custom script you can</p>
 <ol>
 <li>Load initialization data from DB or initialize services after the creation of Entry Manager. </li>
 <li>Release resources, terminate services etc. after the destruction of Entry Manager.</li>
@@ -8934,7 +9003,7 @@ Information about an entity (person, session, client, scripts etc) constitutes a
 The Entry Manager (CRUD operations) implementation for each type of Persistence is available in the Janssen server and the relevant Entry Manager (SQLEntryManager, etc.) is created when the server starts up. </p>
 </div>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
-<p>The Jans-Auth server contains a <a href="https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/persistence_extension/PersistenceExtension.py"><code>PeristenceType</code></a> script.</p>
+<p>The Jans-Auth server contains a <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/persistence_extension/PersistenceExtension.py"><code>PeristenceType</code></a> script.</p>
 <h2 id="hashed-passwords">Hashed Passwords<a class="headerlink" href="#hashed-passwords" title="Permanent link">#</a></h2>
 <p>Hashed passwords can be created using any method from this <a href="https://github.com/JanssenProject/jans/blob/main/jans-orm/core/src/main/java/io/jans/orm/operation/auth/PasswordEncryptionMethod.java">enum</a>, instead of the native/default SSHA256.
 The ORM module of the Janssen server does the following: </p>
