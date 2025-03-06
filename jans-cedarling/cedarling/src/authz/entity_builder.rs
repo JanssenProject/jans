@@ -144,9 +144,7 @@ impl EntityBuilder {
                 .map(|metadata| metadata.entity_type_name.as_str())
                 .or_else(|| default_tkn_entity_name(tkn_name));
 
-            let entity_name = if let Some(entity_name) = entity_name {
-                entity_name
-            } else {
+            let Some(entity_name) = entity_name else {
                 continue;
             };
 
