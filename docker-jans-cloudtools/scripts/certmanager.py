@@ -1,0 +1,824 @@
+import json
+import logging.config
+import os
+import sys
+import time
+from collections import Counter
+from collections import deque
+from contextlib import suppress
+
+import click
+
+from jans.pycloudlib import get_manager
+from jans.pycloudlib.meta import DockerMeta
+from jans.pycloudlib.meta import KubernetesMeta
+from jans.pycloudlib.persistence.sql import SqlClient
+from jans.pycloudlib.persistence.utils import PersistenceMapper
+from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import encode_text
+from jans.pycloudlib.utils import exec_cmd
+from jans.pycloudlib.utils import generate_base64_contents
+from jans.pycloudlib.utils import generate_ssl_ca_certkey
+from jans.pycloudlib.utils import generate_signed_ssl_certkey
+
+from settings import LOGGING_CONFIG
+
+logging.config.dictConfig(LOGGING_CONFIG)
+logger = logging.getLogger("cloudtools")
+
+SIG_KEYS = "RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512"
+ENC_KEYS = "RSA1_5 RSA-OAEP ECDH-ES"
+KEY_STRATEGIES = ("OLDER", "NEWER", "FIRST")
+
+
+def keytool_import_key(src_jks_fn, dest_jks_fn, alias, password):
+    cmd = f"keytool -importkeystore -srckeystore {src_jks_fn} -srcstorepass {password} -srcalias {alias} -destkeystore {dest_jks_fn} -deststorepass {password} -destalias {alias}"
+    return exec_cmd(cmd)
+
+
+def keytool_delete_key(jks_fn, alias, password):
+    cmd = f"keytool -delete -alias {alias} -keystore {jks_fn} -storepass {password}"
+    return exec_cmd(cmd)
+
+
+def encode_jks(manager, jks="/etc/certs/auth-keys.jks"):
+    with open(jks, "rb") as fd:
+        return encode_text(fd.read(), manager.secret.get("encoded_salt"))
+
+
+def generate_openid_keys(passwd, jks_path, dn, exp=48, sig_keys=SIG_KEYS, enc_keys=ENC_KEYS, key_ops_type="connect"):
+    if os.path.isfile(jks_path):
+        os.unlink(jks_path)
+
+    cmd = (
+        "java -Dlog4j.defaultInitOverride=true "
+        "-cp /app/javalibs/* "
+        "io.jans.as.client.util.KeyGenerator "
+        f"-enc_keys {enc_keys} -sig_keys {sig_keys} "
+        f"-dnname '{dn}' -expiration_hours {exp} "
+        f"-keystore {jks_path} -keypasswd {passwd} "
+        f"-key_ops_type {key_ops_type}"
+    )
+    return exec_cmd(cmd)
+
+
+def resolve_sig_keys(keys: str) -> str:
+    """
+    Resolves signing keys.
+
+    :param keys: Space-separated signing keys.
+    :returns: Space-separated allowed signing keys.
+    """
+
+    default_sig_keys = SIG_KEYS.split()
+    sig_keys = []
+
+    for k in keys.split():
+        k = k.strip()
+
+        if k not in default_sig_keys:
+            continue
+        sig_keys.append(k)
+
+    if not sig_keys:
+        sig_keys = default_sig_keys
+        logger.warning(f"Signing keys are empty; fallback to default {SIG_KEYS}")
+    return " ".join(sig_keys)
+
+
+def resolve_enc_keys(keys: str) -> str:
+    """
+    Resolves encryption keys.
+
+    :param keys: Space-separated encryption keys.
+    :returns: Space-separated allowed encryption keys.
+    """
+
+    default_enc_keys = ENC_KEYS.split()
+    enc_keys = []
+
+    for k in keys.split():
+        k = k.strip()
+
+        if k not in default_enc_keys:
+            continue
+        enc_keys.append(k)
+
+    if not enc_keys:
+        enc_keys = default_enc_keys
+        logger.warning(f"Encryption keys are empty; fallback to default {ENC_KEYS}")
+    return " ".join(enc_keys)
+
+
+def key_ops_from_jwk(jwk):
+    """Resolve key_ops_type first value."""
+    types = jwk.get("key_ops_type") or []
+    try:
+        type_ = types[0]
+    except IndexError:
+        if jwk["kid"].startswith("connect_"):
+            type_ = "connect"
+        elif jwk["kid"].startswith("ssa_"):
+            type_ = "ssa"
+        else:
+            type_ = ""
+    return type_.lower()
+
+
+def has_ext_jwks_uri(conf_dynamic, manager) -> bool:
+    # avoid conflict with external JWKS URI
+    jwks_uri = conf_dynamic["jwksUri"]
+    default_jwks_uri = f"https://{manager.config.get('hostname')}/jans-auth/restv1/jwks"
+
+    # compare JWKS URI in persistence and the default one
+    # previously, the external JWKS URI is read from CN_OB_EXT_SIGNING_JWKS_URI env
+    # if they're different, we assume it's an external JWKS URI
+    if jwks_uri != default_jwks_uri:
+        logger.warning(
+            f"Found external JWKS URI at {jwks_uri}; "
+            "skipping proccess to avoid conflict with "
+            "builtin key rotation feature in jans-auth"
+        )
+        return True
+    return False
+
+
+# ===================
+# Persistence helpers
+# ===================
+
+
+class BasePersistence:
+    def get_auth_config(self):
+        raise NotImplementedError
+
+    def modify_auth_config(self, id_, rev, conf_dynamic, conf_webkeys):
+        raise NotImplementedError
+
+
+class SqlPersistence(BasePersistence):
+    def __init__(self, manager):
+        self.client = SqlClient(manager)
+
+    def get_auth_config(self):
+        config = self.client.get(
+            "jansAppConf",
+            "jans-auth",
+            ["jansRevision", "jansConfDyn", "jansConfWebKeys"],
+        )
+        if not config:
+            return {}
+
+        config["id"] = "jans-auth"
+        return config
+
+    def modify_auth_config(self, id_, rev, conf_dynamic, conf_webkeys):
+        return self.client.update(
+            "jansAppConf",
+            id_,
+            {"jansRevision": rev, "jansConfDyn": json.dumps(conf_dynamic), "jansConfWebKeys": json.dumps(conf_webkeys)}
+        )
+
+
+_backend_classes = {
+    "sql": SqlPersistence,
+}
+
+
+# ================
+# Service handlers
+# ================
+
+
+class AuthHandler:
+    def __init__(self, manager, dry_run, **opts):
+        self.manager = manager
+        self.dry_run = dry_run
+        self.opts = opts
+
+        # resolve backend
+        mapper = PersistenceMapper()
+        backend_type = mapper.mapping["default"]
+        self.backend = _backend_classes[backend_type](manager)
+
+        self.rotation_interval = opts.get("interval", 48)
+        self.push_keys = as_boolean(opts.get("push-to-container", True))
+        self.key_strategy = opts.get("key-strategy", "NEWER")
+        self.privkey_push_delay = int(opts.get("privkey-push-delay", 0))
+        self.privkey_push_strategy = opts.get("privkey-push-strategy", "NEWER")
+        self.sig_keys = resolve_sig_keys(opts.get("sig-keys", SIG_KEYS))
+        self.enc_keys = resolve_enc_keys(opts.get("enc-keys", ENC_KEYS))
+
+        metadata = os.environ.get("CN_CONTAINER_METADATA", "docker")
+        if metadata == "kubernetes":
+            self.meta_client = KubernetesMeta()
+        else:
+            self.meta_client = DockerMeta()
+
+    @property
+    def allowed_key_algs(self):
+        return self.sig_keys.split() + self.enc_keys.split()
+
+    def get_merged_keys(self, exp_hours):
+        # get previous JWKS
+        with open("/etc/certs/auth-keys.old.json") as f:
+            old_jwks = json.loads(f.read()).get("keys", [])
+
+        # get previous JKS
+        old_jks_fn = "/etc/certs/auth-keys.old.jks"
+        self.manager.secret.to_file("auth_jks_base64", old_jks_fn, decode=True, binary_mode=True)
+
+        # generate new JWKS and JKS
+        jks_pass = self.manager.secret.get("auth_openid_jks_pass")
+        jks_dn = r"{}".format(self.manager.config.get("default_openid_jks_dn_name"))
+        jks_fn = "/etc/certs/auth-keys.jks"
+        jwks_fn = "/etc/certs/auth-keys.json"
+        logger.info(f"Generating new {jwks_fn} and {jks_fn}")
+
+        # a counter to determine value of `key_ops_type` to be passed to `KeyGenerator`
+        ops_type_cnt = Counter(key_ops_from_jwk(jwk) for jwk in old_jwks)
+        logger.info(f"Detected key_ops_type={dict(ops_type_cnt)}")
+
+        # if we have ssa key, use `connect` keys
+        if ops_type_cnt["ssa"]:
+            logger.info("Found existing SSA keys ... generating keys with key_ops_type=connect")
+            key_ops_type = "connect"
+        else:
+            # likely upgrading from previous version where SSA keys are not generated initially
+            logger.info("No existing SSA keys ... generating keys with key_ops_type=all")
+            key_ops_type = "all"
+
+        # if ssa keys exist, use `key_ops_type=connect` otherwise use `key_ops_type=all`
+        out, err, retcode = generate_openid_keys(
+            jks_pass, jks_fn, jks_dn, exp=exp_hours, sig_keys=self.sig_keys, enc_keys=self.enc_keys, key_ops_type=key_ops_type,
+        )
+
+        if retcode != 0:
+            logger.error(f"Unable to generate keys; reason={err.decode()}")
+            return "", ""
+
+        new_jwks = deque(json.loads(out).get("keys", []))
+
+        logger.info("Merging keys from previous rotation (if any)")
+        # make sure keys sorted by newer ``exp`` first, so the older one
+        # won't be added to new JWKS
+        old_jwks = sorted(old_jwks, key=lambda k: k["exp"], reverse=True)
+
+        # counter for `connect` keys
+        cnt = Counter(
+            jwk["alg"].upper() for jwk in new_jwks
+            if key_ops_from_jwk(jwk) == "connect"
+        )
+
+        # counter for `ssa` keys
+        cnt_ssa = Counter(
+            jwk["alg"].upper() for jwk in new_jwks
+            if key_ops_from_jwk(jwk) == "ssa"
+        )
+
+        for jwk in old_jwks:
+            alg = jwk.get("alg", "").upper()
+
+            # exclude alg if it's not allowed
+            if alg not in self.allowed_key_algs:
+                continue
+
+            ops_type = key_ops_from_jwk(jwk)
+
+            # exclude unsupported key_ops_type
+            if ops_type not in ["ssa", "connect"]:
+                continue
+
+            # cannot have more than 2 connect keys for same algorithm in new JWKS
+            if ops_type == "connect" and cnt[alg] >= 2:
+                continue
+
+            # cannot have more than 1 ssa keys for same algorithm in new JWKS
+            if ops_type == "ssa" and cnt_ssa[alg] >= 1:
+                continue
+
+            # insert old key to new keys
+            new_jwks.appendleft(jwk)
+
+            if ops_type == "connect":
+                cnt[alg] += 1
+
+            if ops_type == "ssa":
+                cnt_ssa[alg] += 1
+
+            # import key to new JKS
+            keytool_import_key(old_jks_fn, jks_fn, jwk["kid"], jks_pass)
+
+        # update new JWKS file
+        with open(jwks_fn, "w") as f:
+            data = {"keys": list(new_jwks)}
+            f.write(json.dumps(data, indent=2))
+
+        # finalizing
+        return jwks_fn, jks_fn
+
+    def patch(self):
+        strategies = ", ".join(KEY_STRATEGIES)
+
+        if self.key_strategy not in KEY_STRATEGIES:
+            logger.error(f"Key strategy must be one of {strategies}")
+            sys.exit(1)
+
+        if self.privkey_push_strategy not in KEY_STRATEGIES:
+            logger.error(f"Private key push strategy must be one of {strategies}")
+            sys.exit(1)
+
+        push_delay_invalid = False
+        try:
+            if self.privkey_push_delay < 0:
+                push_delay_invalid = True
+        except ValueError:
+            push_delay_invalid = True
+
+        if push_delay_invalid:
+            logger.error("Invalid integer value for private key push delay")
+            sys.exit(1)
+
+        config = self.backend.get_auth_config()
+
+        if not config:
+            # search failed due to missing entry
+            logger.warning("Unable to find jans-auth config")
+            return
+
+        try:
+            conf_dynamic = json.loads(config["jansConfDyn"])
+        except TypeError:  # not string/buffer
+            conf_dynamic = config["jansConfDyn"]
+
+        if conf_dynamic["keyRegenerationEnabled"]:
+            logger.warning("keyRegenerationEnabled config was set to true; "
+                           "skipping proccess to avoid conflict with "
+                           "builtin key rotation feature in jans-auth")
+            return
+
+        # avoid conflict with external JWKS URI
+        if has_ext_jwks_uri(conf_dynamic, self.manager):
+            return
+
+        jks_pass = self.manager.secret.get("auth_openid_jks_pass")
+
+        conf_dynamic.update({
+            "keyRegenerationEnabled": False,  # always set to False
+            "keyRegenerationInterval": int(self.rotation_interval),
+            "webKeysStorage": "keystore",
+            "keyStoreSecret": jks_pass,
+            "keySelectionStrategy": self.key_strategy,
+            "keyAlgsAllowedForGeneration": self.allowed_key_algs,
+            "keyStoreFile": self.manager.config.get("auth_openid_jks_fn"),
+            "jwksUri": f"https://{self.manager.config.get('hostname')}/jans-auth/restv1/jwks",
+        })
+
+        # get old JWKS from persistence
+        try:
+            web_keys = json.loads(config["jansConfWebKeys"])
+        except TypeError:
+            web_keys = config["jansConfWebKeys"]
+        except json.decoder.JSONDecodeError as exc:
+            # probably corrupted JSON
+            logger.warning(f"Unable to load existing JWKS; reason={exc}. New JWKS will be created.")
+            web_keys = {"keys": []}
+
+        with open("/etc/certs/auth-keys.old.json", "w") as f:
+            f.write(json.dumps(web_keys, indent=2))
+
+        exp_hours = int(self.rotation_interval) + int(conf_dynamic["idTokenLifetime"] / 3600)
+
+        jwks_fn, jks_fn = self.get_merged_keys(exp_hours)
+
+        if self.dry_run:
+            return
+
+        auth_containers = []
+
+        if self.push_keys:
+            auth_containers = self.meta_client.get_containers("APP_NAME=auth-server")
+            if not auth_containers:
+                logger.warning(
+                    "Unable to find any jans-auth container; make sure "
+                    "to deploy jans-auth and set APP_NAME=auth-server "
+                    "label on container level; Note that pushing keys to "
+                    "containers will be skipped!"
+                )
+
+        for container in auth_containers:
+            name = self.meta_client.get_container_name(container)
+
+            logger.info(f"creating backup of {name}:{jwks_fn}")
+            self.meta_client.exec_cmd(container, f"cp {jwks_fn} {jwks_fn}.backup")
+            logger.info(f"creating new {name}:{jwks_fn}")
+            self.meta_client.copy_to_container(container, jwks_fn)
+
+            if self.privkey_push_delay > 0:
+                # delayed jks push
+                continue
+
+            logger.info(f"creating backup of {name}:{jks_fn}")
+            self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
+            logger.info(f"creating new {name}:{jks_fn}")
+            self.meta_client.copy_to_container(container, jks_fn)
+
+        try:
+            with open(jwks_fn) as f:
+                keys = json.loads(f.read())
+
+            logger.info("modifying jans-auth configuration")
+            logger.info(f"using keySelectionStrategy {self.key_strategy}")
+            rev = int(config["jansRevision"]) + 1
+            modified = self.backend.modify_auth_config(
+                config["id"],
+                rev,
+                conf_dynamic,
+                keys,
+            )
+
+            if not modified:
+                # restore jks and jwks
+                logger.warning("failed to modify jans-auth configuration")
+                for container in auth_containers:
+                    logger.info(f"restoring backup of {name}:{jwks_fn}")
+                    self.meta_client.exec_cmd(container, f"cp {jwks_fn}.backup {jwks_fn}")
+
+                    if self.privkey_push_delay > 0:
+                        # delayed jks revert
+                        continue
+
+                    name = self.meta_client.get_container_name(container)
+                    logger.info(f"restoring backup of {name}:{jks_fn}")
+                    self.meta_client.exec_cmd(container, f"cp {jks_fn}.backup {jks_fn}")
+
+            else:
+                self.manager.secret.set("auth_jks_base64", encode_jks(self.manager))
+                self.manager.config.set("auth_key_rotated_at", int(time.time()))
+                self.manager.secret.set("auth_openid_jks_pass", jks_pass)
+                self.manager.config.set("auth_sig_keys", self.sig_keys)
+                self.manager.config.set("auth_enc_keys", self.enc_keys)
+                # jwks
+                self.manager.secret.set(
+                    "auth_openid_key_base64",
+                    generate_base64_contents(json.dumps(keys)),
+                )
+
+                # publish delayed jks
+                if self.push_keys and self.privkey_push_delay > 0 and auth_containers:
+                    logger.info(f"Waiting for private key push delay ({self.privkey_push_delay} seconds) ...")
+                    time.sleep(self.privkey_push_delay)
+
+                    for container in auth_containers:
+                        logger.info(f"creating backup of {name}:{jks_fn}")
+                        self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
+                        logger.info(f"creating new {name}:{jks_fn}")
+                        self.meta_client.copy_to_container(container, jks_fn)
+
+                        # as new JKS pushed to container, we need to tell auth-server to reload the private keys
+                        # by increasing jansRevision again; note that as jansRevision may have been modified externally
+                        # we need to ensure we have fresh jansRevision value to increase to
+                        config = self.backend.get_auth_config()
+                        rev = int(config["jansRevision"]) + 1
+                        conf_dynamic.update({
+                            "keySelectionStrategy": self.privkey_push_strategy,
+                        })
+
+                        logger.info(f"using keySelectionStrategy {self.privkey_push_strategy}")
+
+                        self.backend.modify_auth_config(
+                            config["id"],
+                            rev,
+                            conf_dynamic,
+                            keys,
+                        )
+        except (TypeError, ValueError,) as exc:
+            logger.warning(f"Unable to get public keys; reason={exc}")
+
+    def prune(self):
+        config = self.backend.get_auth_config()
+
+        if not config:
+            # search failed due to missing entry
+            logger.warning("Unable to find jans-auth config")
+            return
+
+        try:
+            conf_dynamic = json.loads(config["jansConfDyn"])
+        except TypeError:  # not string/buffer
+            conf_dynamic = config["jansConfDyn"]
+
+        if conf_dynamic["keyRegenerationEnabled"]:
+            logger.warning("keyRegenerationEnabled config was set to true; "
+                           "skipping proccess to avoid conflict with "
+                           "builtin key rotation feature in jans-auth")
+            return
+
+        # avoid conflict with external JWKS URI
+        if has_ext_jwks_uri(conf_dynamic, self.manager):
+            return
+
+        jks_pass = self.manager.secret.get("auth_openid_jks_pass")
+
+        conf_dynamic.update({
+            "keyRegenerationEnabled": False,  # always set to False
+            "webKeysStorage": "keystore",
+            "keyStoreSecret": jks_pass,
+            "keyAlgsAllowedForGeneration": self.allowed_key_algs,
+            "keyStoreFile": self.manager.config.get("auth_openid_jks_fn"),
+            "jwksUri": f"https://{self.manager.config.get('hostname')}/jans-auth/restv1/jwks",
+        })
+
+        # get old JWKS from persistence
+        try:
+            web_keys = json.loads(config["jansConfWebKeys"])
+        except TypeError:
+            web_keys = config["jansConfWebKeys"]
+        except json.decoder.JSONDecodeError as exc:
+            # probably corrupted JSON
+            logger.warning(f"Unable to load existing JWKS; reason={exc}. Existing JWKS will be deleted.")
+            web_keys = {"keys": []}
+
+        logger.info("Cleaning up keys (if any)")
+
+        jks_fn = "/etc/certs/auth-keys.jks"
+        self.manager.secret.to_file("auth_jks_base64", jks_fn, decode=True, binary_mode=True)
+
+        # non-pruned keys
+        new_jwks = []
+
+        # make sure keys sorted by newer ``exp`` first, so the older one
+        # won't be added to new JWKS
+        old_jwks = web_keys.get("keys", [])
+        old_jwks = sorted(old_jwks, key=lambda k: k["exp"], reverse=True)
+
+        cnt = Counter(
+            jwk["alg"].upper() for jwk in new_jwks
+            if key_ops_from_jwk(jwk) == "connect"
+        )
+
+        cnt_ssa = Counter(
+            jwk["alg"].upper() for jwk in new_jwks
+            if key_ops_from_jwk(jwk) == "ssa"
+        )
+
+        for jwk in old_jwks:
+            alg = jwk.get("alg", "").upper()
+
+            # exclude alg if it's not allowed
+            if alg not in self.allowed_key_algs:
+                keytool_delete_key(jks_fn, jwk["kid"], jks_pass)
+                continue
+
+            ops_type = key_ops_from_jwk(jwk)
+
+            # cannot have more than 1 connect key for same algorithm in new JWKS
+            if ops_type == "connect" and cnt[alg] >= 1:
+                keytool_delete_key(jks_fn, jwk["kid"], jks_pass)
+                continue
+
+            # cannot have more than 1 ssa key for same algorithm in new JWKS
+            if ops_type == "ssa" and cnt_ssa[alg] >= 1:
+                keytool_delete_key(jks_fn, jwk["kid"], jks_pass)
+                continue
+
+            # preserve the key
+            new_jwks.append(jwk)
+
+            if ops_type == "connect":
+                cnt[alg] += 1
+
+            if ops_type == "ssa":
+                cnt_ssa[alg] += 1
+
+        web_keys["keys"] = new_jwks
+
+        jwks_fn = "/etc/certs/auth-keys.json"
+        with open(jwks_fn, "w") as f:
+            f.write(json.dumps(web_keys, indent=2))
+
+        if self.dry_run:
+            return
+
+        auth_containers = []
+
+        if self.push_keys:
+            auth_containers = self.meta_client.get_containers("APP_NAME=auth-server")
+            if not auth_containers:
+                logger.warning(
+                    "Unable to find any jans-auth container; make sure "
+                    "to deploy jans-auth and set APP_NAME=auth-server "
+                    "label on container level. Note that pushing keys to "
+                    "containers will be skipped!"
+                )
+                # exit immediately to avoid persistence/secrets being modified
+                return
+
+        for container in auth_containers:
+            name = self.meta_client.get_container_name(container)
+
+            logger.info(f"creating backup of {name}:{jks_fn}")
+            self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
+            logger.info(f"creating new {name}:{jks_fn}")
+            self.meta_client.copy_to_container(container, jks_fn)
+
+            logger.info(f"creating backup of {name}:{jwks_fn}")
+            self.meta_client.exec_cmd(container, f"cp {jwks_fn} {jwks_fn}.backup")
+            logger.info(f"creating new {name}:{jwks_fn}")
+            self.meta_client.copy_to_container(container, jwks_fn)
+
+        try:
+            with open(jwks_fn) as f:
+                keys = json.loads(f.read())
+
+            logger.info("modifying jans-auth configuration")
+            rev = int(config["jansRevision"])
+            modified = self.backend.modify_auth_config(
+                config["id"],
+                rev + 1,
+                conf_dynamic,
+                keys,
+            )
+
+            if not modified:
+                # restore jks and jwks
+                logger.warning("failed to modify jans-auth configuration")
+                for container in auth_containers:
+                    name = self.meta_client.get_container_name(container)
+                    logger.info(f"restoring backup of {name}:{jks_fn}")
+                    self.meta_client.exec_cmd(container, f"cp {jks_fn}.backup {jks_fn}")
+                    logger.info(f"restoring backup of {name}:{jwks_fn}")
+                    self.meta_client.exec_cmd(container, f"cp {jwks_fn}.backup {jwks_fn}")
+            else:
+                self.manager.secret.set("auth_jks_base64", encode_jks(self.manager))
+                self.manager.config.set("auth_key_rotated_at", int(time.time()))
+                self.manager.secret.set("auth_openid_jks_pass", jks_pass)
+                self.manager.config.set("auth_sig_keys", self.sig_keys)
+                self.manager.config.set("auth_enc_keys", self.enc_keys)
+                # jwks
+                self.manager.secret.set(
+                    "auth_openid_key_base64",
+                    generate_base64_contents(json.dumps(keys)),
+                )
+        except (TypeError, ValueError,) as exc:
+            logger.warning(f"Unable to get public keys; reason={exc}")
+
+
+class WebHandler:
+    def __init__(self, manager, dry_run, **opts):
+        self.manager = manager
+        self.dry_run = dry_run
+        self.opts = opts
+
+    def patch(self):
+        source = self.opts.get("source", "")
+
+        try:
+            valid_to = int(self.opts.get("valid-to", 365))
+        except ValueError:
+            valid_to = 365
+        finally:
+            if valid_to < 1:
+                valid_to = 365
+
+        ssl_cert = "/etc/certs/web_https.crt"
+        ssl_key = "/etc/certs/web_https.key"
+        ssl_csr = "/etc/certs/web_https.csr"
+
+        ssl_ca_cert = "/etc/certs/ca.crt"
+        ssl_ca_key = "/etc/certs/ca.key"
+
+        if source == "from-files":
+            if not any([os.path.isfile(ssl_cert), os.path.isfile(ssl_key)]):
+                logger.warning(f"Unable to find existing {ssl_cert} or {ssl_key}")
+            else:
+                logger.info(f"Using existing {ssl_cert} and {ssl_key}")
+        else:
+            email = self.manager.config.get("admin_email")
+            hostname = self.manager.config.get("hostname")
+            org_name = self.manager.config.get("orgName")
+            country_code = self.manager.config.get("country_code")
+            state = self.manager.config.get("state")
+            city = self.manager.config.get("city")
+
+            logger.info(f"Creating self-generated {ssl_ca_cert} and {ssl_ca_key}")
+
+            ca_cert, ca_key = generate_ssl_ca_certkey(
+                "ca",
+                email,
+                "Janssen CA",
+                org_name,
+                country_code,
+                state,
+                city,
+                valid_to=valid_to,
+            )
+
+            logger.info(f"Creating self-generated {ssl_csr}, {ssl_cert}, and {ssl_key}")
+            generate_signed_ssl_certkey(
+                "web_https",
+                ca_key,
+                ca_cert,
+                email,
+                hostname,
+                org_name,
+                country_code,
+                state,
+                city,
+                valid_to=valid_to,
+            )
+
+        if not self.dry_run:
+            if os.path.isfile(ssl_ca_key):
+                self.manager.secret.from_file("ssl_ca_key", ssl_ca_key)
+            if os.path.isfile(ssl_ca_cert):
+                self.manager.secret.from_file("ssl_ca_cert", ssl_ca_cert)
+
+            if os.path.isfile(ssl_cert):
+                self.manager.secret.from_file("ssl_cert", ssl_cert)
+            if os.path.isfile(ssl_key):
+                self.manager.secret.from_file("ssl_key", ssl_key)
+            if os.path.isfile(ssl_csr):
+                self.manager.secret.from_file("ssl_csr", ssl_csr)
+
+
+# ====
+# CLIs
+# ====
+
+
+#: Map between service name and its handler class
+PATCH_SERVICE_MAP = {
+    "web": WebHandler,
+    "auth": AuthHandler,
+}
+
+PRUNE_SERVICE_MAP = {
+    "auth": AuthHandler,
+}
+
+
+def _parse_opts(opts):
+    parsed_opts = {}
+    for opt in opts:
+        with suppress(ValueError):
+            k, v = opt.split(":", 1)
+            if k and v:
+                parsed_opts[k] = v
+    return parsed_opts
+
+
+@click.group()
+def certmanager():
+    """Manage certs and crypto keys."""
+    ...
+
+
+@certmanager.command()
+@click.argument("service", type=click.Choice(PATCH_SERVICE_MAP.keys()))
+@click.option("--dry-run", help="Enable dryrun mode.", is_flag=True)
+@click.option(
+    "--opts",
+    help="Options for targeted service (can be set multiple times).",
+    multiple=True,
+    metavar="KEY:VALUE",
+)
+def patch(service, dry_run, opts):
+    """Patch cert and/or crypto keys for the targeted service.
+    """
+    manager = get_manager()
+
+    if dry_run:
+        logger.warning("Dry-run mode is enabled!")
+
+    logger.info(f"Processing updates for service {service}")
+    parsed_opts = _parse_opts(opts)
+    callback_cls = PATCH_SERVICE_MAP[service]
+
+    with manager.create_lock(f"certmanager-patch-{service}"):
+        callback_cls(manager, dry_run, **parsed_opts).patch()
+
+
+@certmanager.command()
+@click.argument("service", type=click.Choice(PRUNE_SERVICE_MAP.keys()))
+@click.option("--dry-run", help="Enable dryrun mode.", is_flag=True)
+@click.option(
+    "--opts",
+    help="Options for targeted service (can be set multiple times).",
+    multiple=True,
+    metavar="KEY:VALUE",
+)
+def prune(service, dry_run, opts):
+    """Cleanup expired crypto keys for the targeted service.
+    """
+    manager = get_manager()
+
+    if dry_run:
+        logger.warning("Dry-run mode is enabled!")
+
+    logger.info(f"Processing updates for service {service}")
+    parsed_opts = _parse_opts(opts)
+    callback_cls = PRUNE_SERVICE_MAP[service]
+
+    with manager.create_lock(f"certmanager-prune-{service}"):
+        callback_cls(manager, dry_run, **parsed_opts).prune()
