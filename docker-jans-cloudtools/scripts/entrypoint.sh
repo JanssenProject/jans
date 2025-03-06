@@ -73,7 +73,7 @@ Usage: cloudtools [OPTIONS] COMMAND [ARGS]...
 Commands:
   certmanager   Manage cert and crypto keys
   cleanup       Cleanup expired entries in persistence
-  kc-sync       Sync config between config-jans-api and Keycloak
+  kc-sync       Sync config between jans-config-api and Keycloak
 EOF
 }
 
