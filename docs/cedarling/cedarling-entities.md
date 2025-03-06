@@ -41,6 +41,8 @@ Cedarling creates a **Workload** entity for each request when the `CEDARLING_WOR
 
   1. `aud` from the `access_token`
   2. `client_id` from the `access_token`
+  3. `aud` from the `id_token` -- note that the Workload attributes that will be created from this will still be from the `access_token`
+- *Entity Attributes*: Extracted from by the claims of the `access_token`. see [Workload Entity Attribute Mappings](#workload-entity-attribute-mappings).
 
 ### Example Workload Schema
 
@@ -56,7 +58,7 @@ entity Workload = {
 };
 ```
 
-#### Attribute Mappings
+#### Workload Entity Attribute Mappings
 
 | Attribute | Source |
 | --- | --- |
@@ -78,6 +80,8 @@ Cedarling creates a **User** entity for each request when the `CEDARLING_USER_AU
   1. `sub` from the `userinfo_token`
   2. `sub` from the `id_token`
 
+- *Entity Attributes*: Determined by the combined claims of the `id_token` and `userinfo_token` that's in the [user entity attribute mappings](#user-entity-attribute-mappings).
+
 ### Default User Schema
 
 ```cedarschema
@@ -92,11 +96,9 @@ entity User in [Role] = {
 };
 ```
 
-#### **Attribute Mappings**
+#### User Entity Attribute Mappings
 
-User attributes are derived from the combined claims in the `id_token` and the `userinfo_token` if available.
-
-**Standard Claims**
+User attributes are derived from the combined claims in the `id_token` and the `userinfo_token` that are on this list:
 
 - `sub`
 - `role`
