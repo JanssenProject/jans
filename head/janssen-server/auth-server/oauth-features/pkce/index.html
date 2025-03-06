@@ -7564,10 +7564,63 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3_4_1" type="checkbox" id="__nav_2_3_4_1" >
+      
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2_3_4_1">
+          Sidecar
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Sidecar" data-md-level="4">
+        <label class="md-nav__title" for="__nav_2_3_4_1">
+          <span class="md-nav__icon md-icon"></span>
+          Sidecar
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../../../cedarling/cedarling-sidecar/" class="md-nav__link">
-        Sidecar
+      <a href="../../../../cedarling/cedarling-sidecar-overview/" class="md-nav__link">
+        Sidecar Overview
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../cedarling/cedarling-sidecar-tutorial/" class="md-nav__link">
+        Sidecar Tutorial
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -7614,6 +7667,8 @@
       
       
       
+        
+          
         
           
         
@@ -7675,8 +7730,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../cedarling/cedarling-jwt/" class="md-nav__link">
-        JWT
+      <a href="../../../../cedarling/cedarling-jwt-validation/" class="md-nav__link">
+        JWT Validation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../cedarling/cedarling-jwt-mapping/" class="md-nav__link">
+        JWT Mapping
       </a>
     </li>
   
@@ -9005,6 +9074,8 @@ defaults to <code>true</code>. We can use
 <a href="../../../config-guide/config-tools/jans-tui/">TUI</a> to change this
 configuration as shown below:</p>
 <p><img alt="pkce3.png" src="../../../../assets/pkce3.png" /></p>
+<p>AS requires PKCE if <code>requirePkce</code> global AS configuration property is set to <code>true</code> or otherwise if 
+client involved in request has <code>requirePkce</code> set to <code>true</code> in client attributes ( inside <code>jansAttrs</code> json).</p>
 <h2 id="authorization-code-flow-pkce">Authorization Code Flow + PKCE<a class="headerlink" href="#authorization-code-flow-pkce" title="Permanent link">#</a></h2>
 <p>In this flow, we will execute the following steps:</p>
 <ol>
@@ -9178,7 +9249,7 @@ code=&lt;YOUR_CODE&gt;
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-04T11:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-04</span>
       
         <br>
         Created:

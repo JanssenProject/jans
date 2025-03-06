@@ -12,14 +12,14 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://jans.io/docs/head/cedarling/cedarling-jwt/">
+        <link rel="canonical" href="https://jans.io/docs/head/cedarling/cedarling-jwt-mapping/">
       
       <link rel="icon" href="../../assets/janssen_project_favicon_transparent_50px_50px.ico">
       <meta name="generator" content="mkdocs-1.4.1, mkdocs-material-8.5.7">
     
     
       
-        <title>JWT - Janssen Documentation</title>
+        <title>JWT Mapping - Janssen Documentation</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#cedarling-jwt-flow" class="md-skip">
+        <a href="#cedarling-jwt-mapping" class="md-skip">
           Skip to content
         </a>
       
@@ -128,7 +128,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              JWT
+              JWT Mapping
             
           </span>
         </div>
@@ -7458,10 +7458,63 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3_4_1" type="checkbox" id="__nav_2_3_4_1" >
+      
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2_3_4_1">
+          Sidecar
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Sidecar" data-md-level="4">
+        <label class="md-nav__title" for="__nav_2_3_4_1">
+          <span class="md-nav__icon md-icon"></span>
+          Sidecar
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../cedarling-sidecar/" class="md-nav__link">
-        Sidecar
+      <a href="../cedarling-sidecar-overview/" class="md-nav__link">
+        Sidecar Overview
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-sidecar-tutorial/" class="md-nav__link">
+        Sidecar Tutorial
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -7523,6 +7576,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_2_4">
@@ -7569,6 +7624,20 @@
               
   
   
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-jwt-validation/" class="md-nav__link">
+        JWT Validation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
     
   
   
@@ -7580,9 +7649,54 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          JWT Mapping
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
-        JWT
+        JWT Mapping
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#this-content-is-in-progress" class="md-nav__link">
+    This content is in progress
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#have-questions-in-the-meantime" class="md-nav__link">
+    Have questions in the meantime?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#want-to-contribute" class="md-nav__link">
+    Want to contribute?
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -8762,6 +8876,35 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#this-content-is-in-progress" class="md-nav__link">
+    This content is in progress
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#have-questions-in-the-meantime" class="md-nav__link">
+    Have questions in the meantime?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#want-to-contribute" class="md-nav__link">
+    Want to contribute?
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -8811,43 +8954,30 @@
 
 
 
-  <a href="https://github.com/JanssenProject/jans/edit/main/docs/cedarling/cedarling-jwt.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/JanssenProject/jans/edit/main/docs/cedarling/cedarling-jwt-mapping.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="cedarling-jwt-flow">Cedarling JWT Flow<a class="headerlink" href="#cedarling-jwt-flow" title="Permanent link">#</a></h1>
-<p><img alt="" src="../../assets/lock-cedarling-diagram-4.jpg" /></p>
-<h1 id="json-web-token-validation">Json Web Token Validation<a class="headerlink" href="#json-web-token-validation" title="Permanent link">#</a></h1>
-<p><strong>Note:</strong> To enable Json Web Token (JWT) Validation in Cedarling, it is required to populate the <a href="../cedarling-policy-store/#trusted-issuer-schema"><code>trusted_issuers</code></a> field in the <a href="../cedarling-policy-store/">Policy Store</a>.</p>
-<h3 id="enabling-jwt-signature-validation">Enabling JWT Signature Validation<a class="headerlink" href="#enabling-jwt-signature-validation" title="Permanent link">#</a></h3>
-<p>Cedarling can validate JWT signatures for enhanced security. To enable this feature, set the <code>CEDARLING_JWT_VALIDATION</code> bootstrap property to <code>True</code>. For development and testing purposes, you can set this property to <code>False</code> and submit an unsigned JWT, such as one generated from <a href="https://jwt.io">JWT.io</a>.</p>
-<h3 id="public-key-management">Public Key Management<a class="headerlink" href="#public-key-management" title="Permanent link">#</a></h3>
-<p>When token validation is enabled, Cedarling downloads the public keys of the Trusted IDPs specified in the policy store during initialization. Cedarling uses the JWT <code>iss</code> claim to select the appropriate keys for validation.</p>
-<h3 id="jwt-revocation">JWT Revocation<a class="headerlink" href="#jwt-revocation" title="Permanent link">#</a></h3>
-<p>In enterprise deployments, Cedarling can also check for JWT revocation. This is achieved by following the mechanism described in the <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">OAuth Status Lists</a> draft. Token status enforcement helps mitigate risks associated with account takeover by enabling immediate revocation of all tokens issued to an attacker. Additionally, domains may choose to use Token Status to implement single-use transaction tokens.</p>
-<h3 id="summary-of-jwt-validation-mechanisms">Summary of JWT Validation Mechanisms<a class="headerlink" href="#summary-of-jwt-validation-mechanisms" title="Permanent link">#</a></h3>
-<p>Depending on your bootstrap properties, Cedarling may validate JWTs through the following methods:</p>
-<ul>
-<li>Validate signatures from Trusted Issuers</li>
-<li>Check JWT status for revocation</li>
-<li>Discard <code>id_token</code> if the <code>aud</code> claim does not match the <code>client_id</code> of the access token</li>
-<li>Discard Userinfo tokens that are not associated with a <code>sub</code> claim from the <code>id_token</code></li>
-<li>Verify <code>exp</code> (expiration) and <code>nbf</code> (not before) claims of access tokens and id_tokens, if timestamps are provided in the context</li>
-</ul>
-<p><img alt="" src="./assets/lock-cedarling-diagram-4.jpg" /></p>
+<h1 id="cedarling-jwt-mapping">Cedarling JWT Mapping<a class="headerlink" href="#cedarling-jwt-mapping" title="Permanent link">#</a></h1>
+<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
+<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
+<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
+<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
+<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
+<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T08:26:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-06T12:50:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-06</span>
       
         <br>
         Created:
-        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-08T06:55:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-08</span>
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-04T15:22:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-04</span>
       
     
   </small>
@@ -8872,7 +9002,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../cedarling-policy-store/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Policy Store" rel="prev">
+        <a href="../cedarling-jwt-validation/" class="md-footer__link md-footer__link--prev" aria-label="Previous: JWT Validation" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -8881,7 +9011,7 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              Policy Store
+              JWT Validation
             </div>
           </div>
         </a>

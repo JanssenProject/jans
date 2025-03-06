@@ -12,14 +12,14 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://jans.io/docs/head/cedarling/cedarling-sidecar/">
+        <link rel="canonical" href="https://jans.io/docs/head/cedarling/cedarling-sidecar-overview/">
       
       <link rel="icon" href="../../assets/janssen_project_favicon_transparent_50px_50px.ico">
       <meta name="generator" content="mkdocs-1.4.1, mkdocs-material-8.5.7">
     
     
       
-        <title>Sidecar - Janssen Documentation</title>
+        <title>Sidecar Overview - Janssen Documentation</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#flask-sidecar" class="md-skip">
+        <a href="#sidecar-overview" class="md-skip">
           Skip to content
         </a>
       
@@ -128,7 +128,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Sidecar
+              Sidecar Overview
             
           </span>
         </div>
@@ -7464,6 +7464,40 @@
     
   
   
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3_4_1" type="checkbox" id="__nav_2_3_4_1" checked>
+      
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2_3_4_1">
+          Sidecar
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Sidecar" data-md-level="4">
+        <label class="md-nav__title" for="__nav_2_3_4_1">
+          <span class="md-nav__icon md-icon"></span>
+          Sidecar
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+    
+  
+  
     <li class="md-nav__item md-nav__item--active">
       
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
@@ -7473,12 +7507,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Sidecar
+          Sidecar Overview
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Sidecar
+        Sidecar Overview
       </a>
       
         
@@ -7525,6 +7559,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../cedarling-sidecar-tutorial/" class="md-nav__link">
+        Sidecar Tutorial
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../cedarling-krakend/" class="md-nav__link">
         API Gateways
       </a>
@@ -7560,6 +7615,8 @@
       
       
       
+        
+          
         
           
         
@@ -7621,8 +7678,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../cedarling-jwt/" class="md-nav__link">
-        JWT
+      <a href="../cedarling-jwt-validation/" class="md-nav__link">
+        JWT Validation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-jwt-mapping/" class="md-nav__link">
+        JWT Mapping
       </a>
     </li>
   
@@ -8853,13 +8924,13 @@
 
 
 
-  <a href="https://github.com/JanssenProject/jans/edit/main/docs/cedarling/cedarling-sidecar.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/JanssenProject/jans/edit/main/docs/cedarling/cedarling-sidecar-overview.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="flask-sidecar">Flask Sidecar<a class="headerlink" href="#flask-sidecar" title="Permanent link">#</a></h1>
+<h1 id="sidecar-overview">Sidecar Overview<a class="headerlink" href="#sidecar-overview" title="Permanent link">#</a></h1>
 <p>The sidecar is a containerized Flask project that uses the <code>cedarling_python</code> binding and implements the <a href="https://openid.github.io/authzen/">AuthZen</a> specification. This image can run alongside another service and uses cedarling to validate evaluation requests against a policy store. </p>
 <h2 id="docker-setup">Docker setup<a class="headerlink" href="#docker-setup" title="Permanent link">#</a></h2>
 <ul>
@@ -8963,7 +9034,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-17T14:47:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-17</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-06T12:50:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-06</span>
       
         <br>
         Created:
@@ -9008,13 +9079,13 @@
       
       
         
-        <a href="../cedarling-krakend/" class="md-footer__link md-footer__link--next" aria-label="Next: API Gateways" rel="next">
+        <a href="../cedarling-sidecar-tutorial/" class="md-footer__link md-footer__link--next" aria-label="Next: Sidecar Tutorial" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              API Gateways
+              Sidecar Tutorial
             </div>
           </div>
           <div class="md-footer__button md-icon">
