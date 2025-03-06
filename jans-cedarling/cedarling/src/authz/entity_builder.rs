@@ -67,9 +67,10 @@ impl From<&AuthorizationConfig> for EntityNames {
                 .mapping_role
                 .clone()
                 .unwrap_or_else(|| DEFAULT_ROLE_ENTITY_NAME.to_string()),
-            // TODO: we should probably also add a default entity name for the
-            // trusted issuer entity
-            ..Default::default()
+            iss: config
+                .mapping_iss
+                .clone()
+                .unwrap_or_else(|| DEFAULT_ISS_ENTITY_NAME.to_string()),
         }
     }
 }

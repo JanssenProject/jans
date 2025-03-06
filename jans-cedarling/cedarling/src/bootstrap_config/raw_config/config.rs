@@ -103,6 +103,11 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION", default)]
     pub usr_workload_bool_op: WorkloadBoolOp,
 
+    /// Mapping name of cedar schema TrustedIssuer entity
+    #[serde(rename = "CEDARLING_MAPPING_TRUSTED_ISSUER", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub mapping_iss: Option<String>,
+
     /// Mapping name of cedar schema User entity
     #[serde(rename = "CEDARLING_MAPPING_USER", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
