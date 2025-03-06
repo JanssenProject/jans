@@ -56,26 +56,30 @@ struct TokenIdSrc<'a> {
 
 impl<'a> TokenIdSrcs<'a> {
     fn resolve(token: &'a Token) -> Self {
-        let default_srcs: &[TokenIdSrc; 1] = &[TokenIdSrc { claim: "jti" }];
+        const DEFAULT_TKN_ID_SRCS: &[TokenIdSrc] = &[TokenIdSrc { claim: "jti" }];
 
-        Self(default_srcs.iter().fold(Vec::new(), |mut acc, &src| {
-            if let Some(claim) = token.get_metadata().map(|m| &m.token_id) {
-                acc.push(EntityIdSrc { token, claim });
-                if claim != src.claim {
-                    acc.push(EntityIdSrc {
-                        token,
-                        claim: src.claim,
-                    });
-                }
-            } else {
-                acc.push(EntityIdSrc {
-                    token,
-                    claim: src.claim,
-                });
-            };
+        Self(
+            DEFAULT_TKN_ID_SRCS
+                .iter()
+                .fold(Vec::new(), |mut acc, &src| {
+                    if let Some(claim) = token.get_metadata().map(|m| &m.token_id) {
+                        acc.push(EntityIdSrc { token, claim });
+                        if claim != src.claim {
+                            acc.push(EntityIdSrc {
+                                token,
+                                claim: src.claim,
+                            });
+                        }
+                    } else {
+                        acc.push(EntityIdSrc {
+                            token,
+                            claim: src.claim,
+                        });
+                    };
 
-            acc
-        }))
+                    acc
+                }),
+        )
     }
 }
 
