@@ -44,7 +44,7 @@ Cedarling creates a **Workload** entity for each request when the `CEDARLING_WOR
 
 ### Example Workload Schema
 
-```cedarschema/
+```cedarschema
 entity Workload = {
   iss: TrustedIssuer,
   client_id?: String,
@@ -61,7 +61,7 @@ entity Workload = {
 | Attribute | Source |
 | --- | --- |
 | `iss` | Reference to the Trusted Issuer entity created at startup |
-| `client_id` | the `"lient_id` claim from the JWT |
+| `client_id` | the `"client_id` claim from the JWT |
 | `aud` | the `aud` claim from the JWT |
 | `name` | the `name` claim from the JWT |
 | `spiffe_id` | the `spiffe_id` claim from the JWT |
