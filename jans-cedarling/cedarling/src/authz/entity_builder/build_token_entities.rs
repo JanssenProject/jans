@@ -58,6 +58,27 @@ impl<'a> TokenIdSrcs<'a> {
     fn resolve(token: &'a Token) -> Self {
         const DEFAULT_TKN_ID_SRCS: &[TokenIdSrc] = &[TokenIdSrc { claim: "jti" }];
 
+        let mut eid_srcs = Vec::with_capacity(2);
+
+        for src in DEFAULT_TKN_ID_SRCS.iter() {
+            // if a `token_id` is availble in the token's entity metadata
+            let claim = if let Some(claim) = token.get_metadata().and_then(|m| m.user_id.as_ref()) {
+                eid_srcs.push(EntityIdSrc { token, claim });
+                Some(claim)
+            } else {
+                None
+            };
+
+            // then we add the fallbacks in-case the token does not have the claims.
+            if claim.map(|claim| claim == src.claim).unwrap_or(false) {
+                continue;
+            }
+            eid_srcs.push(EntityIdSrc {
+                token,
+                claim: src.claim,
+            });
+        }
+
         Self(
             DEFAULT_TKN_ID_SRCS
                 .iter()

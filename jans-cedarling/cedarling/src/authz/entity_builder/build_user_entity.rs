@@ -84,38 +84,31 @@ impl<'a> UserIdSrcs<'a> {
             },
         ];
 
-        Self(
-            DEFAULT_USER_ID_SRCS
-                .iter()
-                .fold(Vec::new(), |mut acc, &src| {
-                    if let Some(token) = tokens.get(src.token) {
-                        let claim = token
-                            .get_metadata()
-                            .and_then(|m| m.user_id.as_ref())
-                            .inspect(|claim| {
-                                acc.push(EntityIdSrc { token, claim });
-                            });
+        let mut eid_srcs = Vec::with_capacity(4);
 
-                        match claim {
-                            Some(claim) if claim != src.claim => {
-                                acc.push(EntityIdSrc {
-                                    token,
-                                    claim: src.claim,
-                                });
-                            },
-                            None => {
-                                acc.push(EntityIdSrc {
-                                    token,
-                                    claim: src.claim,
-                                });
-                            },
-                            _ => {},
-                        }
-                    }
+        for src in DEFAULT_USER_ID_SRCS.iter() {
+            if let Some(token) = tokens.get(src.token) {
+                // if a `user_id` is availble in the token's entity metadata
+                let claim =
+                    if let Some(claim) = token.get_metadata().and_then(|m| m.user_id.as_ref()) {
+                        eid_srcs.push(EntityIdSrc { token, claim });
+                        Some(claim)
+                    } else {
+                        None
+                    };
 
-                    acc
-                }),
-        )
+                // then we add the fallbacks in-case the token does not have the claims.
+                if claim.map(|claim| claim == src.claim).unwrap_or(false) {
+                    continue;
+                }
+                eid_srcs.push(EntityIdSrc {
+                    token,
+                    claim: src.claim,
+                });
+            }
+        }
+
+        Self(eid_srcs)
     }
 }
 
