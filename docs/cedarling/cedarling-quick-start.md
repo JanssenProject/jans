@@ -1,10 +1,11 @@
 ---
 tags:
   - administration
+  - lock
+  - authorization / authz
   - Cedar
   - Cedarling
-  - Quick start guide
-  - Cedarling Hello World
+  - quick start
 ---
 
 # Cedarling Quick Start Guide
@@ -68,7 +69,7 @@ To begin using Cedarling, you need to set up a policy store. We’ll use this [A
     @id("allow_one")
     permit(
       principal is Jans::User,
-      action is Jans::Action::"<M-D-2>",
+      action is Jans::Action::"Read",
       resource
     )
     when {

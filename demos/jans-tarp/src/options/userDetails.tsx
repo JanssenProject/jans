@@ -115,9 +115,9 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
     const createCedarlingAuthzRequestObj = async () => {
         const reqObj = {
             tokens: {
-                access_token: tokenSelection.accessToken ? data?.access_token || '' : '',
-                id_token: tokenSelection.idToken ? data?.id_token || '' : '',
-                userinfo_token: tokenSelection.userInfo ? data?.userDetails || '' : '', // Use userDetails if available
+                ...(tokenSelection.accessToken && { access_token: data?.access_token}),
+                ...(tokenSelection.idToken && { id_token: data?.id_token}),
+                ...(tokenSelection.userInfo && { userinfo_token: data?.userDetails}),
             },
             action,
             context,
