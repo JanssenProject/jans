@@ -407,26 +407,29 @@ nav:
       - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
 - Cedarling:
   - Overview: 'cedarling/cedarling-overview.md'
-  - Reference:
-    - Policy Store: 'cedarling/cedarling-policy-store.md'
-    - Properties: 'cedarling/cedarling-properties.md'
-    - Logs: 'cedarling/cedarling-logs.md'
-    - JWT Validation: 'cedarling/cedarling-jwt-validation.md'
-    - JWT Mapping: 'cedarling/cedarling-jwt-mapping.md'
-    - Lock Configuration: 'cedarling/cedarling-lock-server.md'
-  - Developer:
-    - WASM: 'cedarling/cedarling-wasm.md'
-    - Python:
-      - cedarling/python/README.md
-      - How to use: cedarling/python/usage.md
+  - Quick Start Guide: 'cedarling/cedarling-quick-start.md'
+  - How To Use:
+    - Types Of Bindings: 'cedarling/cedarling-binding-types.md'
+    - Browser Apps: 'cedarling/cedarling-wasm.md'
     - Mobile Apps:
       - UniFFI interface: 'cedarling/uniffi/cedarling-uniffi.md'
       - Android Apps: 'cedarling/uniffi/cedarling-android.md'
       - iOS Apps: 'cedarling/uniffi/cedarling-ios.md'
-    - Sidecar: 'cedarling/cedarling-sidecar.md'
-      - Tutorial: 'cedarling/cedarling-sidecar-tutorial.md'
-  - Integrations: 
-      - Krakend: 'cedarling/cedarling-krakend.md'
+    - Web Server App: 
+      - Sidecar: 'cedarling/cedarling-sidecar.md'
+      - API Gateways: 'cedarling/cedarling-krakend.md'
+  - Administration:
+    - Authz: 'cedarling/cedarling-authz.md'
+    - Policy Store: 'cedarling/cedarling-policy-store.md'
+    - JWT: 'cedarling/cedarling-jwt.md'
+    - Logs: 'cedarling/cedarling-logs.md'
+    - Properties: 'cedarling/cedarling-properties.md'
+    - Lock Server Integration: 'cedarling/cedarling-lock-server.md'
+  - Developer:
+    - Python:
+        - cedarling/python/README.md
+        - How to use: cedarling/python/usage.md
+  
 - Agama:
   - Introduction: agama/introduction.md
   - Language reference: agama/language-reference.md

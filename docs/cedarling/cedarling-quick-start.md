@@ -7,13 +7,14 @@ tags:
   - Cedarling Hello World
 ---
 
-# Cedarling Sidecar Tutorial
+# Cedarling Quick Start Guide
 
 ## Introduction
 
-The goal of this tutorial is to show how to use the Cedarling Sidecar. To demonstrate this, 
-we'll build a very simple Python Flask API Gateway that calls the Cedarling sidecar Authzen 
-REST endpoint to authorize access based on the content of a JWT access token.
+Cedarling is an authorization decision service that allows fine-grained access control using policies. 
+In this guide, we'll demonstrate how to use Cedarling as a sidecar for an API Gateway to authorize requests. 
+This setup involves configuring the Cedarling sidecar to evaluate policies and authorizing requests to a 
+protected resource based on those policies.
 
 ### Sequence diagram
 

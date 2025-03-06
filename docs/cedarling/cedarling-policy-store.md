@@ -10,7 +10,7 @@ tags:
 
 # Cedarling Policy Store
 
-The Policy Store provides:
+The Cedarling Policy Store uses a JSON file named `cedarling_store.json` to store all necessary data for evaluating policies and verifying JWT tokens. The structure includes the following key components:
 
 1. **Cedar Schema**: The Cedar schema encoded in Base64.
 2. **Cedar Policies**: The Cedar policies encoded in Base64.
@@ -27,8 +27,8 @@ The JSON Schema accepted by cedarling is defined as follows:
   "cedar_version": "v4.0.0",
   "policy_stores": {
       "some_unique_string_id": {
-          "name": "DoveCRM Policy Store",
-          "description": "DoveCRM policies, schema, and trusted JWT issuers.",
+          "name": "TestPolicy",
+          "description": "Once upon a time there was a Policy, that lived in a Store.",
           "policies": { ... },
           "schema": { ... },
           "trusted_issuers": { ... }
@@ -38,8 +38,8 @@ The JSON Schema accepted by cedarling is defined as follows:
 ```
 
 - **cedar_version** : (*String*) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.
-- **policies** : (*Object*) Base64 encoded object containing one or more policy IDs as keys, with their corresponding objects as values. See: [policies schema](#cedar-policies-schema).
-- **schema** : (*String* | *Object*) Base64 encoded JSON Object. See [schema](#schema) below.
+- **policies** : (*Object*) Object containing one or more policy IDs as keys, with their corresponding objects as values. See: [policies schema](#cedar-policies-schema).
+- **schema** : (*String* | *Object*) The Cedar Schema. See [schema](#schema) below.
 - **trusted_issuers** : (*Object of {unique_id => IdentitySource}(#trusted-issuer-schema)*) List of metadata for Identity Sources.
 
 ### `schema`
