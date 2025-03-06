@@ -5,10 +5,10 @@ tags:
   - authorization / authz
   - Cedar
   - Cedarling
-  - quick start
+  - JWT
 ---
 
-# Cedarling Quick Start Guide
+# Cedarling JWT Mapping
 
 ## This content is in progress
 
