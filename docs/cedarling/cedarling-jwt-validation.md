@@ -12,7 +12,7 @@ tags:
 
 ![](../assets/lock-cedarling-diagram-4.jpg)
 
-# Json Web Token Validation
+## Json Web Token Validation
 
 **Note:** Make sure you have specified at least one [Trusted Issuer](./cedarling-policy-store.md#trusted-issuer-schema) in your [Policy Store](./cedarling-policy-store.md).
 

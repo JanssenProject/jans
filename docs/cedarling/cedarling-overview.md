@@ -30,9 +30,16 @@ full-featured PDP that includes logging, JWT validation, and claims mapping, mak
 more adaptable for real-world applications. It also has optional features to connect 
 to enterprise plumbing.
 
-If you never heard of Cedar, you might want to start [here](./cedar-intro.md) with 
-a quick introduction and some links for further learning. These Cedarling docs assume 
-you have a basic understanding of Cedar policy syntax and language features. 
+!!! tip "About Cedar"
+
+      [Cedar](https://www.cedarpolicy.com/en) is a policy syntax invented by Amazon and used by their 
+      [Verified Permission](https://aws.amazon.com/verified-permissions/) service. Cedar policies
+      enable developers to implement fine-grain access control and externalize policies. To learn more
+      about why the design of Cedar is **intuitive**, **fast** and **safe**, read this 
+      [article](https://aws.amazon.com/blogs/security/how-we-designed-cedar-to-be-intuitive-to-use-fast-and-safe/) 
+      or watch this [video](https://www.youtube.com/watch?v=k6pPcnLuOXY&t=1779s)
+
+      These Cedarling docs assume you have a basic understanding of Cedar policy syntax and language features.
 
 The Cedarling is written in Rust with bindings to WASM, iOS, Android, Python and Java. 
 This means that web, mobile, and cloud developers can use the Cedarling  to load a 
