@@ -1,6 +1,6 @@
 const BOOTSTRAP_CONFIG = {
     "CEDARLING_APPLICATION_NAME": "My App",
-    "CEDARLING_LOCAL_POLICY_STORE": {
+    "CEDARLING_POLICY_STORE_LOCAL": {
         "cedar_version": "v4.0.0",
         "policy_stores": {
             "gICAgcHJpbmNpcGFsIGlz": {
@@ -95,7 +95,6 @@ const BOOTSTRAP_CONFIG = {
     "CEDARLING_WORKLOAD_AUTHZ": "enabled",
     "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
     "CEDARLING_LOCAL_JWKS": null,
-    "CEDARLING_POLICY_STORE_LOCAL": null,
     "CEDARLING_POLICY_STORE_LOCAL_FN": null,
     "CEDARLING_JWT_SIG_VALIDATION": "disabled",
     "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
