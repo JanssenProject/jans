@@ -86,51 +86,6 @@ To begin using Cedarling, you need to set up a policy store. We’ll use this [A
     * Copy the URL for your policy store; you'll need it for the cedarling setup.
     ![image](../assets/cedarling-copylink.png)
 
-## Bootstrap Setup
-
-1. Create a file named `bootstrap.json`. Paste in the contents from the [sample bootstrap](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/flask-sidecar/secrets/bootstrap.json).
-2. Replace the following properties as such:
-
-  * `CEDARLING_POLICY_STORE_URI` to the URL you copied in the previous section
-  * `CEDARLING_WORKLOAD_AUTHZ` to `disabled`
-  * `CEDARLING_MAPPING_USER` to `Jans::User`
-  * `CEDARLING_MAPPING_WORKLOAD` to `Jans::Workload`
-  * `CEDARLING_ID_TOKEN_TRUST_MODE` to `none`
-  * `CEDARLING_TOKEN_CONFIGS` to the following value:
-
-  ```
-   {
-    "access_token": {
-      "entity_type_name": "Jans::Access_token",
-      "iss": "disabled",
-      "aud": "disabled",
-      "sub": "disabled",
-      "nbf": "disabled",
-      "exp": "disabled",
-      "jti": "disabled"
-     },
-    "id_token": {
-      "entity_type_name": "Jans::id_token",
-      "iss": "disabled",
-      "aud": "disabled",
-      "sub": "disabled",
-      "nbf": "disabled",
-      "exp": "disabled",
-      "jti": "disabled"
-    },
-    "userinfo_token": {
-      "entity_type_name": "Jans::Userinfo_token",
-      "iss": "disabled",
-      "aud": "disabled",
-      "sub": "disabled",
-      "nbf": "disabled",
-      "exp": "disabled",
-      "jti": "disabled"
-    }
-  }
-  ```
-3. Save the file. You will need its contents in the next section.
-
 ## Tarp Setup
 
 1. Open Tarp on your browser.
@@ -142,7 +97,68 @@ To begin using Cedarling, you need to set up a policy store. We’ll use this [A
    * Scopes: `openid` and `profile`.
 3. Click `Register`. 
 4. Click on `Cedarling`, then `Add Configurations`
-5. Paste in the contents of `bootstrap.json` in the `bootstrapConfig` field and click the check mark.
+5. Paste in the following configuration, replacing `<Policy Store URI>` with your policy store URL. 
+  ```json
+  {
+      "CEDARLING_APPLICATION_NAME": "My App",
+      "CEDARLING_POLICY_STORE_URI": "<Policy Store URI>",
+      "CEDARLING_POLICY_STORE_ID": "gICAgcHJpbmNpcGFsIGlz",
+      "CEDARLING_LOG_TYPE": "std_out",
+      "CEDARLING_LOG_LEVEL": "INFO",
+      "CEDARLING_LOG_TTL": null,
+      "CEDARLING_USER_AUTHZ": "enabled",
+      "CEDARLING_WORKLOAD_AUTHZ": "disabled",
+      "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
+      "CEDARLING_LOCAL_JWKS": null,
+      "CEDARLING_POLICY_STORE_LOCAL": null,
+      "CEDARLING_POLICY_STORE_LOCAL_FN": null,
+      "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+      "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
+      "CEDARLING_MAPPING_USER": "Jans::User",
+      "CEDARLING_MAPPING_WORKLOAD": "Jans::Workload",
+      "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
+          "HS256",
+          "RS256"
+      ],
+      "CEDARLING_TOKEN_CONFIGS": {
+          "access_token": {
+              "entity_type_name": "Jans::Access_token",
+              "iss": "disabled",
+              "aud": "disabled",
+              "sub": "disabled",
+              "nbf": "disabled",
+              "exp": "disabled",
+              "jti": "disabled"
+          },
+          "id_token": {
+              "entity_type_name": "Jans::id_token",
+              "iss": "disabled",
+              "aud": "disabled",
+              "sub": "disabled",
+              "nbf": "disabled",
+              "exp": "disabled",
+              "jti": "disabled"
+          },
+          "userinfo_token": {
+              "entity_type_name": "Jans::Userinfo_token",
+              "iss": "disabled",
+              "aud": "disabled",
+              "sub": "disabled",
+              "nbf": "disabled",
+              "exp": "disabled",
+              "jti": "disabled"
+          }
+      },
+      "CEDARLING_ID_TOKEN_TRUST_MODE": "none",
+      "CEDARLING_LOCK": "disabled",
+      "CEDARLING_LOCK_SERVER_CONFIGURATION_URI": null,
+      "CEDARLING_LOCK_DYNAMIC_CONFIGURATION": "disabled",
+      "CEDARLING_LOCK_SSA_JWT": "",
+      "CEDARLING_LOCK_HEALTH_INTERVAL": 0,
+      "CEDARLING_LOCK_TELEMETRY_INTERVAL": 0,
+      "CEDARLING_LOCK_LISTEN_SSE": "disabled"
+  }
+  ```
 6. Click `Save`. Tarp will validate your bootstrap and initialize Cedarling.
 
 ## Authentication Flow
