@@ -13,7 +13,11 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
     ```bash
     cargo build
     ```
-   In target/debug, you should find the libmobile.dylib file.
+   In `target/debug`, you should find the `libmobile.dylib`, `libmobile.so`, or `libmobile.dll` file, depending on the operating system you are using.
+
+    - **.so** (Shared Object) – This is the shared library format used in Linux and other Unix-based operating systems.
+    - **.dylib** (Dynamic Library) – This is the shared library format for macOS.
+    - **.dll** (Dynamic Link Library) - The shared library format used in Windows.
 
 2. Set up cargo-ndk for cross-compiling:
     ```
@@ -37,12 +41,13 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
             -t arm64-v8a \
             -t x86 \
             -t x86_64 \
-            build --release
+            build \
+            -p cedarling_uniffi --release
     ```
 
-5. Generate the bindings for Kotlin:
+5. Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libmobile.dylib`, `libmobile.so`, or `libmobile.dll`, depending on which file is generated in `target/debug`.
     ```
-    cargo run --bin uniffi-bindgen generate --library ./target/debug/libmobile.dylib --language kotlin --out-dir ./bindings/cedarling_uniffi/androidApp/app/src/main/java/com/example/androidapp/cedarling/uniffi
+    cargo run --bin uniffi-bindgen generate --library ./target/debug/{build_file} --language kotlin --out-dir ./bindings/cedarling_uniffi/androidApp/app/src/main/java/com/example/androidapp/cedarling/uniffi
     ```
 
 6. We have included a sample android app using Cedarling UniFFI binding for making authorisation decisions. Open the `androidApp` project on Android Studio and run the project on simulator.
