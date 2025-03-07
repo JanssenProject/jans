@@ -1,3 +1,4 @@
+
 # Using UniFFI binding Android App
 
 Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to different languages and on all the different platforms, including Kotlin for Android. This section covers how to build and use Cedarling UniFFI binding in an Android app.
