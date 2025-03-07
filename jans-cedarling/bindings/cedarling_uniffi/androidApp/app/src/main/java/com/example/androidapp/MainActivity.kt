@@ -45,7 +45,15 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    CardListScreen()
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CardListScreen()
+                    }
                 }
             }
         }
@@ -114,10 +122,7 @@ fun CardListScreen() {
 
         // Display the modal dialog
         if (showDialog) {
-
             val instance: Cedarling? = bootstrapConfig?.let {
-                //val file = File(context, "policy-store.json")
-                //val path = addFieldToJson(it, "CEDARLING_POLICY_STORE_LOCAL_FN", file.absolutePath);
                 Cedarling.loadFromJson(it);
             };
 
