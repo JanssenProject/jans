@@ -416,12 +416,15 @@ nav:
       - Android Apps: 'cedarling/uniffi/cedarling-android.md'
       - iOS Apps: 'cedarling/uniffi/cedarling-ios.md'
     - Web Server App: 
-      - Sidecar: 'cedarling/cedarling-sidecar.md'
+      - Sidecar: 
+          - Sidecar Overview: 'cedarling/cedarling-sidecar-overview.md'
+          - Sidecar Tutorial: 'cedarling/cedarling-sidecar-tutorial.md'
       - API Gateways: 'cedarling/cedarling-krakend.md'
   - Administration:
     - Authz: 'cedarling/cedarling-authz.md'
     - Policy Store: 'cedarling/cedarling-policy-store.md'
-    - JWT: 'cedarling/cedarling-jwt.md'
+    - JWT Validation: 'cedarling/cedarling-jwt-validation.md'
+    - JWT Mapping: 'cedarling/cedarling-jwt-mapping.md'
     - Logs: 'cedarling/cedarling-logs.md'
     - Properties: 'cedarling/cedarling-properties.md'
     - Lock Server Integration: 'cedarling/cedarling-lock-server.md'

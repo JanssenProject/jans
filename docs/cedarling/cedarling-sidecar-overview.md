@@ -4,7 +4,7 @@ tags:
   - sidecar
 ---
 
-# Flask Sidecar
+# Sidecar Overview
 
 The sidecar is a containerized Flask project that uses the `cedarling_python` binding and implements the [AuthZen](https://openid.github.io/authzen/) specification. This image can run alongside another service and uses cedarling to validate evaluation requests against a policy store. 
 
