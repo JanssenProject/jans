@@ -59,7 +59,7 @@ public class TokenRestWebServiceValidatorTest {
         grant.setCodeChallenge("E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM");
         grant.setCodeChallengeMethod("s256");
 
-        validator.validatePKCE(grant, "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk", AUDIT_LOG);
+        validator.validatePKCE(grant, "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk", AUDIT_LOG, new Client());
     }
 
     @Test(expectedExceptions = WebApplicationException.class)
@@ -68,7 +68,24 @@ public class TokenRestWebServiceValidatorTest {
         grant.setCodeChallenge("E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM");
         grant.setCodeChallengeMethod("s256");
 
-        validator.validatePKCE(grant, "invalid_verifier", AUDIT_LOG);
+        validator.validatePKCE(grant, "invalid_verifier", AUDIT_LOG, new Client());
+    }
+
+    @Test
+    public void validatePKCE_whenCodeVerifierIsBlankAndPkceIsNotRequired_shouldPass() {
+        AuthorizationCodeGrant grant = new AuthorizationCodeGrant();
+
+        validator.validatePKCE(grant, "", AUDIT_LOG, new Client());
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validatePKCE_whenCodeVerifierIsBlankAndPkceIsRequired_shouldFail() {
+        AuthorizationCodeGrant grant = new AuthorizationCodeGrant();
+
+        final Client client = new Client();
+        client.getAttributes().setRequirePkce(true);
+
+        validator.validatePKCE(grant, "", AUDIT_LOG, client);
     }
 
     @Test

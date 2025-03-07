@@ -137,6 +137,11 @@ public enum RegisterRequestParam {
     RPT_AS_JWT("rpt_as_jwt"),
 
     /**
+     * Whether to require PKCE
+     */
+    REQUIRE_PKCE("require_pkce"),
+
+    /**
      * Whether to return access token as signed JWT
      */
     ACCESS_TOKEN_AS_JWT("access_token_as_jwt"),

@@ -179,7 +179,7 @@ public class ParRestWebService {
             parValidator.validateRequestObject(redirectUriResponse, par, client);
 
             parValidator.validatePkce(par.getAttributes().getCodeChallenge(), par.getAttributes().getCodeChallengeMethod(), state);
-            authorizeRestWebServiceValidator.validatePkce(par.getAttributes().getCodeChallenge(), redirectUriResponse);
+            authorizeRestWebServiceValidator.validatePkce(par.getAttributes().getCodeChallenge(), redirectUriResponse, client);
 
             parService.persist(par);
 

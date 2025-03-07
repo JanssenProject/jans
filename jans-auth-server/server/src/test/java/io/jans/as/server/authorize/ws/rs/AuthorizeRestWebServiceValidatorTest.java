@@ -56,6 +56,27 @@ public class AuthorizeRestWebServiceValidatorTest {
     private ExternalAuthzDetailTypeService externalAuthzDetailTypeService;
 
     @Test
+    public void validatePkce_withBlankCodeChallengeAndWithoutRequiredPkce_shouldPass() {
+        final RedirectUri redirectUri = mock(RedirectUri.class);
+
+        final RedirectUriResponse redirectUriResponse = new RedirectUriResponse(redirectUri, "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class));
+        authorizeRestWebServiceValidator.validatePkce("", redirectUriResponse, new Client());
+    }
+
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validatePkce_withBlankCodeChallengeAndWithRequiredPkce_shouldFail() {
+        final RedirectUri redirectUri = mock(RedirectUri.class);
+        when(redirectUri.toString()).thenReturn("http://rp.com");
+
+        final RedirectUriResponse redirectUriResponse = new RedirectUriResponse(redirectUri, "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class));
+        final Client client = new Client();
+        client.getAttributes().setRequirePkce(true);
+
+        authorizeRestWebServiceValidator.validatePkce("", redirectUriResponse, client);
+    }
+
+    @Test
     public void validateRequestParameterSupported_whenRequestIsEmpty_shouldPass() {
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setState("state");
