@@ -51,7 +51,7 @@ wasm-pack build --release --target web
   * To view the WebAssembly project in action, you can run a local server. 
 One way to do this is by using the following command:
 ```bash title="Command"
-npx http-server .
+python3 -m http.server
 ```
 
 ## Including in projects
