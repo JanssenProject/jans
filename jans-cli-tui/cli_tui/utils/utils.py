@@ -18,6 +18,8 @@ from utils.multi_lang import _
 common_data = SimpleNamespace()
 common_data.background_tasks_feeds = {}
 
+from wui_components.jans_label_widget import JansLabelWidget
+
 class DialogUtils:
 
 
