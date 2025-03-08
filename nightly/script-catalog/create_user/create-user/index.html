@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://jans.io/docs/nightly/script-catalog/create_user/create-user/">
       
       <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
-      <meta name="generator" content="mkdocs-1.4.1, mkdocs-material-8.5.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.5.7">
     
     
       
@@ -8880,22 +8880,22 @@ At this point <code>prepare</code> method is called. It can be used to make prep
 <table>
 <thead>
 <tr>
-<th align="left">Method header</th>
-<th align="left">Method description</th>
+<th style="text-align: left;">Method header</th>
+<th style="text-align: left;">Method description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left"><code>def init(self, customScript, configurationAttributes)</code></td>
-<td align="left">This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc</td>
+<td style="text-align: left;"><code>def init(self, customScript, configurationAttributes)</code></td>
+<td style="text-align: left;">This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc</td>
 </tr>
 <tr>
-<td align="left"><code>def destroy(self, configurationAttributes)</code></td>
-<td align="left">This method is called once to destroy events. It can be used to free resource and objects created in the <code>init()</code> method</td>
+<td style="text-align: left;"><code>def destroy(self, configurationAttributes)</code></td>
+<td style="text-align: left;">This method is called once to destroy events. It can be used to free resource and objects created in the <code>init()</code> method</td>
 </tr>
 <tr>
-<td align="left"><code>def getApiVersion(self, configurationAttributes, customScript)</code></td>
-<td align="left">The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10</td>
+<td style="text-align: left;"><code>def getApiVersion(self, configurationAttributes, customScript)</code></td>
+<td style="text-align: left;">The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10</td>
 </tr>
 </tbody>
 </table>
@@ -8903,26 +8903,26 @@ At this point <code>prepare</code> method is called. It can be used to make prep
 <table>
 <thead>
 <tr>
-<th align="left">Method header</th>
-<th align="left">Method description</th>
+<th style="text-align: left;">Method header</th>
+<th style="text-align: left;">Method description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left"><code>def getCreateUserPage(self, context)</code></td>
-<td align="left">Called when the prompt=create authorization request is send and AS figuring out the right page to land the end-user</td>
+<td style="text-align: left;"><code>def getCreateUserPage(self, context)</code></td>
+<td style="text-align: left;">Called when the prompt=create authorization request is send and AS figuring out the right page to land the end-user</td>
 </tr>
 <tr>
-<td align="left"><code>def prepare(self, context)</code></td>
-<td align="left">Called when the form is filled and user hit submit button</td>
+<td style="text-align: left;"><code>def prepare(self, context)</code></td>
+<td style="text-align: left;">Called when the form is filled and user hit submit button</td>
 </tr>
 <tr>
-<td align="left"><code>def createUser(self, context)</code></td>
-<td align="left">Called right before user object persistence which allows to modify user object</td>
+<td style="text-align: left;"><code>def createUser(self, context)</code></td>
+<td style="text-align: left;">Called right before user object persistence which allows to modify user object</td>
 </tr>
 <tr>
-<td align="left"><code>def buildPostAuthorizeUrl(self, context)</code></td>
-<td align="left">Called after user persistence and construct authorization url to redirect end-user to</td>
+<td style="text-align: left;"><code>def buildPostAuthorizeUrl(self, context)</code></td>
+<td style="text-align: left;">Called after user persistence and construct authorization url to redirect end-user to</td>
 </tr>
 </tbody>
 </table>
@@ -8930,18 +8930,18 @@ At this point <code>prepare</code> method is called. It can be used to make prep
 <table>
 <thead>
 <tr>
-<th align="left">Object name</th>
-<th align="left">Object description</th>
+<th style="text-align: left;">Object name</th>
+<th style="text-align: left;">Object description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left"><code>customScript</code></td>
-<td align="left">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
+<td style="text-align: left;"><code>customScript</code></td>
+<td style="text-align: left;">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
 </tr>
 <tr>
-<td align="left"><code>context</code></td>
-<td align="left"><a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalScriptContext.java">Reference</a></td>
+<td style="text-align: left;"><code>context</code></td>
+<td style="text-align: left;"><a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalScriptContext.java">Reference</a></td>
 </tr>
 </tbody>
 </table>

@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://jans.io/docs/nightly/script-catalog/resource_owner_password_credentials/ropc/">
       
       <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
-      <meta name="generator" content="mkdocs-1.4.1, mkdocs-material-8.5.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.5.7">
     
     
       
@@ -8938,27 +8938,27 @@
 <p>Resource Owner Password Credentials script allows modifying the behavior of Resource Owner Password Credentials Grant (<a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.3">RFC 6749</a>).</p>
 <p>The script is invoked after normal authentication and can either leave current result or change it - authenticate if not authenticated - it should return True and optionally set user (via <code>context.setUser(user)</code>).</p>
 <h2 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">#</a></h2>
-<p>The ROPC script implements the <a href="https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java">ResourceOwnerPasswordCredentialsType</a> interface. This extends methods from the base script type in addition to adding new method:</p>
+<p>The ROPC script implements the <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java">ResourceOwnerPasswordCredentialsType</a> interface. This extends methods from the base script type in addition to adding new method:</p>
 <h3 id="inherited-methods">Inherited Methods<a class="headerlink" href="#inherited-methods" title="Permanent link">#</a></h3>
 <table>
 <thead>
 <tr>
-<th align="left">Method header</th>
-<th align="left">Method description</th>
+<th style="text-align: left;">Method header</th>
+<th style="text-align: left;">Method description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left"><code>def init(self, customScript, configurationAttributes)</code></td>
-<td align="left">This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc</td>
+<td style="text-align: left;"><code>def init(self, customScript, configurationAttributes)</code></td>
+<td style="text-align: left;">This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc</td>
 </tr>
 <tr>
-<td align="left"><code>def destroy(self, configurationAttributes)</code></td>
-<td align="left">This method is called once to destroy events. It can be used to free resource and objects created in the <code>init()</code> method</td>
+<td style="text-align: left;"><code>def destroy(self, configurationAttributes)</code></td>
+<td style="text-align: left;">This method is called once to destroy events. It can be used to free resource and objects created in the <code>init()</code> method</td>
 </tr>
 <tr>
-<td align="left"><code>def getApiVersion(self, configurationAttributes, customScript)</code></td>
-<td align="left">The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10</td>
+<td style="text-align: left;"><code>def getApiVersion(self, configurationAttributes, customScript)</code></td>
+<td style="text-align: left;">The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10</td>
 </tr>
 </tbody>
 </table>
@@ -8966,14 +8966,14 @@
 <table>
 <thead>
 <tr>
-<th align="left">Method header</th>
-<th align="left">Method description</th>
+<th style="text-align: left;">Method header</th>
+<th style="text-align: left;">Method description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left"><code>def authenticate(self, context)</code></td>
-<td align="left">This method is called after normal ROPC authentication. This method can cancel normal authentication if it returns false and sets <code>context.setUser(null)</code></td>
+<td style="text-align: left;"><code>def authenticate(self, context)</code></td>
+<td style="text-align: left;">This method is called after normal ROPC authentication. This method can cancel normal authentication if it returns false and sets <code>context.setUser(null)</code></td>
 </tr>
 </tbody>
 </table>
@@ -8981,26 +8981,26 @@
 <table>
 <thead>
 <tr>
-<th align="left">Object name</th>
-<th align="left">Object description</th>
+<th style="text-align: left;">Object name</th>
+<th style="text-align: left;">Object description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left"><code>customScript</code></td>
-<td align="left">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
+<td style="text-align: left;"><code>customScript</code></td>
+<td style="text-align: left;">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
 </tr>
 <tr>
-<td align="left"><code>configurationAttributes</code></td>
-<td align="left"><code>configurationProperties</code> passed in when adding custom script. <code>Map&lt;String, SimpleCustomProperty&gt; configurationAttributes</code></td>
+<td style="text-align: left;"><code>configurationAttributes</code></td>
+<td style="text-align: left;"><code>configurationProperties</code> passed in when adding custom script. <code>Map&lt;String, SimpleCustomProperty&gt; configurationAttributes</code></td>
 </tr>
 <tr>
-<td align="left"><code>SimpleCustomProperty</code></td>
-<td align="left">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/nightly/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
+<td style="text-align: left;"><code>SimpleCustomProperty</code></td>
+<td style="text-align: left;">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
 </tr>
 <tr>
-<td align="left"><code>context</code></td>
-<td align="left"><a href="https://github.com/JanssenProject/jans/blob/nightly/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java">Reference</a></td>
+<td style="text-align: left;"><code>context</code></td>
+<td style="text-align: left;"><a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java">Reference</a></td>
 </tr>
 </tbody>
 </table>

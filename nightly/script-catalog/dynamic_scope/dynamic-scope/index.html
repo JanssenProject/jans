@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://jans.io/docs/nightly/script-catalog/dynamic_scope/dynamic-scope/">
       
       <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
-      <meta name="generator" content="mkdocs-1.4.1, mkdocs-material-8.5.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.5.7">
     
     
       
@@ -8942,22 +8942,22 @@
 <table>
 <thead>
 <tr>
-<th align="left">Method header</th>
-<th align="left">Method description</th>
+<th style="text-align: left;">Method header</th>
+<th style="text-align: left;">Method description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left"><code>def init(self, customScript, configurationAttributes)</code></td>
-<td align="left">This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc</td>
+<td style="text-align: left;"><code>def init(self, customScript, configurationAttributes)</code></td>
+<td style="text-align: left;">This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc</td>
 </tr>
 <tr>
-<td align="left"><code>def destroy(self, configurationAttributes)</code></td>
-<td align="left">This method is called once to destroy events. It can be used to free resource and objects created in the <code>init()</code> method</td>
+<td style="text-align: left;"><code>def destroy(self, configurationAttributes)</code></td>
+<td style="text-align: left;">This method is called once to destroy events. It can be used to free resource and objects created in the <code>init()</code> method</td>
 </tr>
 <tr>
-<td align="left"><code>def getApiVersion(self, configurationAttributes, customScript)</code></td>
-<td align="left">The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10</td>
+<td style="text-align: left;"><code>def getApiVersion(self, configurationAttributes, customScript)</code></td>
+<td style="text-align: left;">The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10</td>
 </tr>
 </tbody>
 </table>
@@ -8965,18 +8965,18 @@
 <table>
 <thead>
 <tr>
-<th align="left">Method header</th>
-<th align="left">Method description</th>
+<th style="text-align: left;">Method header</th>
+<th style="text-align: left;">Method description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left"><code>def update(self, dynamicScopeContext, configurationAttributes)</code></td>
-<td align="left">Main dynamic scope method. Peforms any needed logic, updates JSON Web Token and returns True if dynamic scope was added successfully, false otherwise.</td>
+<td style="text-align: left;"><code>def update(self, dynamicScopeContext, configurationAttributes)</code></td>
+<td style="text-align: left;">Main dynamic scope method. Peforms any needed logic, updates JSON Web Token and returns True if dynamic scope was added successfully, false otherwise.</td>
 </tr>
 <tr>
-<td align="left"><code>def getSupportedClaims(self, configurationAttributes)</code></td>
-<td align="left">Returns an array of claims that are allowed to be added by the custom script</td>
+<td style="text-align: left;"><code>def getSupportedClaims(self, configurationAttributes)</code></td>
+<td style="text-align: left;">Returns an array of claims that are allowed to be added by the custom script</td>
 </tr>
 </tbody>
 </table>
@@ -8984,26 +8984,26 @@
 <table>
 <thead>
 <tr>
-<th align="left">Object name</th>
-<th align="left">Object description</th>
+<th style="text-align: left;">Object name</th>
+<th style="text-align: left;">Object description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left"><code>customScript</code></td>
-<td align="left">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
+<td style="text-align: left;"><code>customScript</code></td>
+<td style="text-align: left;">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
 </tr>
 <tr>
-<td align="left"><code>configurationAttributes</code></td>
-<td align="left"><code>configurationProperties</code> passed in when adding custom script. <code>Map&lt;String, SimpleCustomProperty&gt; configurationAttributes</code></td>
+<td style="text-align: left;"><code>configurationAttributes</code></td>
+<td style="text-align: left;"><code>configurationProperties</code> passed in when adding custom script. <code>Map&lt;String, SimpleCustomProperty&gt; configurationAttributes</code></td>
 </tr>
 <tr>
-<td align="left"><code>SimpleCustomProperty</code></td>
-<td align="left">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
+<td style="text-align: left;"><code>SimpleCustomProperty</code></td>
+<td style="text-align: left;">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
 </tr>
 <tr>
-<td align="left"><code>dynamicScopeContext</code></td>
-<td align="left"><a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/DynamicScopeExternalContext.java">Reference</a></td>
+<td style="text-align: left;"><code>dynamicScopeContext</code></td>
+<td style="text-align: left;"><a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/DynamicScopeExternalContext.java">Reference</a></td>
 </tr>
 </tbody>
 </table>
