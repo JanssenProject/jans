@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://jans.io/docs/head/script-catalog/person_authentication/person-authentication-interface/">
       
       <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
-      <meta name="generator" content="mkdocs-1.4.1, mkdocs-material-8.5.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.5.7">
     
     
       
@@ -8822,22 +8822,22 @@
 <table>
 <thead>
 <tr>
-<th align="left">Method header</th>
-<th align="left">Method description</th>
+<th style="text-align: left;">Method header</th>
+<th style="text-align: left;">Method description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left"><code>def init(self, customScript, configurationAttributes)</code></td>
-<td align="left">This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc</td>
+<td style="text-align: left;"><code>def init(self, customScript, configurationAttributes)</code></td>
+<td style="text-align: left;">This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc</td>
 </tr>
 <tr>
-<td align="left"><code>def destroy(self, configurationAttributes)</code></td>
-<td align="left">This method is called once to destroy events. It can be used to free resource and objects created in the <code>init()</code> method</td>
+<td style="text-align: left;"><code>def destroy(self, configurationAttributes)</code></td>
+<td style="text-align: left;">This method is called once to destroy events. It can be used to free resource and objects created in the <code>init()</code> method</td>
 </tr>
 <tr>
-<td align="left"><code>def getApiVersion(self, configurationAttributes, customScript)</code></td>
-<td align="left">The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10</td>
+<td style="text-align: left;"><code>def getApiVersion(self, configurationAttributes, customScript)</code></td>
+<td style="text-align: left;">The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10</td>
 </tr>
 </tbody>
 </table>
@@ -8845,22 +8845,22 @@
 <table>
 <thead>
 <tr>
-<th align="left">Object name</th>
-<th align="left">Object description</th>
+<th style="text-align: left;">Object name</th>
+<th style="text-align: left;">Object description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left"><code>customScript</code></td>
-<td align="left">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
+<td style="text-align: left;"><code>customScript</code></td>
+<td style="text-align: left;">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
 </tr>
 <tr>
-<td align="left"><code>configurationAttributes</code></td>
-<td align="left"><code>configurationProperties</code> passed in when adding custom script. <code>Map&lt;String, SimpleCustomProperty&gt; configurationAttributes</code></td>
+<td style="text-align: left;"><code>configurationAttributes</code></td>
+<td style="text-align: left;"><code>configurationProperties</code> passed in when adding custom script. <code>Map&lt;String, SimpleCustomProperty&gt; configurationAttributes</code></td>
 </tr>
 <tr>
-<td align="left"><code>SimpleCustomProperty</code></td>
-<td align="left">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
+<td style="text-align: left;"><code>SimpleCustomProperty</code></td>
+<td style="text-align: left;">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
 </tr>
 </tbody>
 </table>
@@ -8883,66 +8883,66 @@
 <table>
 <thead>
 <tr>
-<th align="left"></th>
-<th align="left">Method header</th>
-<th align="left">Method description</th>
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Method header</th>
+<th style="text-align: left;">Method description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left">1.</td>
-<td align="left"><code>prepareForStep(self, configurationAttributes, requestParameters, step)</code></td>
-<td align="left">This method can be used to prepare variables needed to render the UI page and store them in a suitable context.</td>
+<td style="text-align: left;">1.</td>
+<td style="text-align: left;"><code>prepareForStep(self, configurationAttributes, requestParameters, step)</code></td>
+<td style="text-align: left;">This method can be used to prepare variables needed to render the UI page and store them in a suitable context.</td>
 </tr>
 <tr>
-<td align="left">2.</td>
-<td align="left"><code>authenticate(self, configurationAttributes, requestParameters, step)</code></td>
-<td align="left">The most important method which will encapsulate the logic for user credential verification / validation</td>
+<td style="text-align: left;">2.</td>
+<td style="text-align: left;"><code>authenticate(self, configurationAttributes, requestParameters, step)</code></td>
+<td style="text-align: left;">The most important method which will encapsulate the logic for user credential verification / validation</td>
 </tr>
 <tr>
-<td align="left">3.</td>
-<td align="left"><code>getExtraParametersForStep</code></td>
-<td align="left">Used to save session variables between steps.  The Jans-auth Server persists these variables to support stateless, two-step authentications even in a clustered environment.</td>
+<td style="text-align: left;">3.</td>
+<td style="text-align: left;"><code>getExtraParametersForStep</code></td>
+<td style="text-align: left;">Used to save session variables between steps.  The Jans-auth Server persists these variables to support stateless, two-step authentications even in a clustered environment.</td>
 </tr>
 <tr>
-<td align="left">4.</td>
-<td align="left"><code>getCountAuthenticationSteps</code></td>
-<td align="left">This method normally just returns 1, 2, or 3. In some cases, depending on the context like based on the user's country or department, you can decide to go for multistep or single step authentication.</td>
+<td style="text-align: left;">4.</td>
+<td style="text-align: left;"><code>getCountAuthenticationSteps</code></td>
+<td style="text-align: left;">This method normally just returns 1, 2, or 3. In some cases, depending on the context like based on the user's country or department, you can decide to go for multistep or single step authentication.</td>
 </tr>
 <tr>
-<td align="left">5.</td>
-<td align="left"><code>getPageForStep</code></td>
-<td align="left">Used to specify the UI page you want to show for a given step.</td>
+<td style="text-align: left;">5.</td>
+<td style="text-align: left;"><code>getPageForStep</code></td>
+<td style="text-align: left;">Used to specify the UI page you want to show for a given step.</td>
 </tr>
 <tr>
-<td align="left">6.</td>
-<td align="left"><code>getNextStep</code></td>
-<td align="left">Steps usually go incrementally as 1, 2, 3... unless you specify a case where it can be reset to a previous step, or skip a particular step based on business case.</td>
+<td style="text-align: left;">6.</td>
+<td style="text-align: left;"><code>getNextStep</code></td>
+<td style="text-align: left;">Steps usually go incrementally as 1, 2, 3... unless you specify a case where it can be reset to a previous step, or skip a particular step based on business case.</td>
 </tr>
 <tr>
-<td align="left">7.</td>
-<td align="left"><code>getAuthenticationMethodClaims</code></td>
-<td align="left">Array of strings that are identifiers for authentication methods used in the authentication. In OpenID Connect, if the identity provider supplies an "amr" claim in the ID Token resulting from a successful authentication, the relying party can inspect the values returned and thereby learn details about how the authentication was performed.</td>
+<td style="text-align: left;">7.</td>
+<td style="text-align: left;"><code>getAuthenticationMethodClaims</code></td>
+<td style="text-align: left;">Array of strings that are identifiers for authentication methods used in the authentication. In OpenID Connect, if the identity provider supplies an "amr" claim in the ID Token resulting from a successful authentication, the relying party can inspect the values returned and thereby learn details about how the authentication was performed.</td>
 </tr>
 <tr>
-<td align="left">8.</td>
-<td align="left"><code>isValidAuthenticationMethod</code></td>
-<td align="left">This method is used to check if the authentication method is in a valid state. For example we can check there if a 3rd party mechanism is available to authenticate users. As a result it should either return True or False.</td>
+<td style="text-align: left;">8.</td>
+<td style="text-align: left;"><code>isValidAuthenticationMethod</code></td>
+<td style="text-align: left;">This method is used to check if the authentication method is in a valid state. For example we can check there if a 3rd party mechanism is available to authenticate users. As a result it should either return True or False.</td>
 </tr>
 <tr>
-<td align="left">9.</td>
-<td align="left"><code>getAlternativeAuthenticationMethod</code></td>
-<td align="left">This method is called only if the current authentication method is in an invalid state. Hence authenticator calls it only if isValidAuthenticationMethod returns False. As a result it should return the reserved authentication method name.</td>
+<td style="text-align: left;">9.</td>
+<td style="text-align: left;"><code>getAlternativeAuthenticationMethod</code></td>
+<td style="text-align: left;">This method is called only if the current authentication method is in an invalid state. Hence authenticator calls it only if isValidAuthenticationMethod returns False. As a result it should return the reserved authentication method name.</td>
 </tr>
 <tr>
-<td align="left">10.</td>
-<td align="left"><code>getLogoutExternalUrl</code></td>
-<td align="left">Returns the 3rd-party URL that is used to end session routines. The control from this Third party URL should re-direct user back to /oxauth/logout.htm again with empty URL query string. Jans-Auth server will then continue of the extended logout flow, restore the original URL query string, and send user to <code>/jans-auth/end_session</code> to complete it.</td>
+<td style="text-align: left;">10.</td>
+<td style="text-align: left;"><code>getLogoutExternalUrl</code></td>
+<td style="text-align: left;">Returns the 3rd-party URL that is used to end session routines. The control from this Third party URL should re-direct user back to /oxauth/logout.htm again with empty URL query string. Jans-Auth server will then continue of the extended logout flow, restore the original URL query string, and send user to <code>/jans-auth/end_session</code> to complete it.</td>
 </tr>
 <tr>
-<td align="left">11.</td>
-<td align="left"><code>logout</code></td>
-<td align="left">This method is not mandatory. It can be used in cases when you need to execute specific logout logic in the authentication script when jans-auth receives an end session request to the /oxauth/logout.htm endpoint (which receives the same set of parameters than the usual end_session endpoint). This method should return True or False; when False jans-auth stops processing the end session request workflow.</td>
+<td style="text-align: left;">11.</td>
+<td style="text-align: left;"><code>logout</code></td>
+<td style="text-align: left;">This method is not mandatory. It can be used in cases when you need to execute specific logout logic in the authentication script when jans-auth receives an end session request to the /oxauth/logout.htm endpoint (which receives the same set of parameters than the usual end_session endpoint). This method should return True or False; when False jans-auth stops processing the end session request workflow.</td>
 </tr>
 </tbody>
 </table>
@@ -8950,30 +8950,30 @@
 <table>
 <thead>
 <tr>
-<th align="left">Object name</th>
-<th align="left">Object description</th>
+<th style="text-align: left;">Object name</th>
+<th style="text-align: left;">Object description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left"><code>configurationAttributes</code></td>
-<td align="left"><code>configurationProperties</code> passed in when adding custom script. <code>Map&lt;String, SimpleCustomProperty&gt; configurationAttributes</code></td>
+<td style="text-align: left;"><code>configurationAttributes</code></td>
+<td style="text-align: left;"><code>configurationProperties</code> passed in when adding custom script. <code>Map&lt;String, SimpleCustomProperty&gt; configurationAttributes</code></td>
 </tr>
 <tr>
-<td align="left"><code>SimpleCustomProperty</code></td>
-<td align="left">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
+<td style="text-align: left;"><code>SimpleCustomProperty</code></td>
+<td style="text-align: left;">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
 </tr>
 <tr>
-<td align="left">usageType</td>
-<td align="left"><a href="https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/AuthenticationScriptUsageType.java">AuthenticationScriptUsageType</a></td>
+<td style="text-align: left;">usageType</td>
+<td style="text-align: left;"><a href="https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/AuthenticationScriptUsageType.java">AuthenticationScriptUsageType</a></td>
 </tr>
 <tr>
-<td align="left">step</td>
-<td align="left">Integer indicating step number</td>
+<td style="text-align: left;">step</td>
+<td style="text-align: left;">Integer indicating step number</td>
 </tr>
 <tr>
-<td align="left">requestParameters</td>
-<td align="left">Request parameters stored as Map<String, String[]></td>
+<td style="text-align: left;">requestParameters</td>
+<td style="text-align: left;">Request parameters stored as Map<String, String[]></td>
 </tr>
 </tbody>
 </table>

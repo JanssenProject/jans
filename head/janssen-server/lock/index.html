@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://jans.io/docs/head/janssen-server/lock/">
       
       <link rel="icon" href="../../assets/janssen_project_favicon_transparent_50px_50px.ico">
-      <meta name="generator" content="mkdocs-1.4.1, mkdocs-material-8.5.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.5.7">
     
     
       
@@ -8840,34 +8840,34 @@ which describe several common roles:</p>
 <thead>
 <tr>
 <th>Role</th>
-<th align="center">Acronym</th>
+<th style="text-align: center;">Acronym</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Policy Decision Point</td>
-<td align="center">PDP</td>
+<td style="text-align: center;">PDP</td>
 <td>Service which evaluates access requests against authorization policies before issuing access decisions</td>
 </tr>
 <tr>
 <td>Policy Information Point</td>
-<td align="center">PIP</td>
+<td style="text-align: center;">PIP</td>
 <td>The source of "data", e.g. about people, clients, and resources</td>
 </tr>
 <tr>
 <td>Policy Enforcement Point</td>
-<td align="center">PEP</td>
+<td style="text-align: center;">PEP</td>
 <td>Service, website, or API that queries the PDP for authorization</td>
 </tr>
 <tr>
 <td>Policy Administration Point</td>
-<td align="center">PAP</td>
+<td style="text-align: center;">PAP</td>
 <td>Where admins manage the authorization infrastructure</td>
 </tr>
 <tr>
 <td>Policy Retrieval Point</td>
-<td align="center">PRP</td>
+<td style="text-align: center;">PRP</td>
 <td>Repository where policies are stored</td>
 </tr>
 </tbody>
@@ -8877,34 +8877,34 @@ which describe several common roles:</p>
 <thead>
 <tr>
 <th>Role</th>
-<th align="center">Lock</th>
+<th style="text-align: center;">Lock</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>PDP</td>
-<td align="center">Cedarling</td>
+<td style="text-align: center;">Cedarling</td>
 <td>Evaluates policies versus input data</td>
 </tr>
 <tr>
 <td>PIP</td>
-<td align="center">JWT tokens</td>
+<td style="text-align: center;">JWT tokens</td>
 <td>Contain data to instantiate entities</td>
 </tr>
 <tr>
 <td>PEP</td>
-<td align="center">Application</td>
+<td style="text-align: center;">Application</td>
 <td>Must rely on Cedarling for decision</td>
 </tr>
 <tr>
 <td>PAP</td>
-<td align="center">Jans Config API</td>
+<td style="text-align: center;">Jans Config API</td>
 <td>Endpoints for Lock admin configuration</td>
 </tr>
 <tr>
 <td>PRP</td>
-<td align="center">Lock Server</td>
+<td style="text-align: center;">Lock Server</td>
 <td>Endpoints to publish Policy Store and other PDP configuration</td>
 </tr>
 </tbody>

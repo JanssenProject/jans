@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://jans.io/docs/head/script-catalog/client_registration/client-registration/">
       
       <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
-      <meta name="generator" content="mkdocs-1.4.1, mkdocs-material-8.5.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.5.7">
     
     
       
@@ -8993,22 +8993,22 @@ Jans AS-&gt;&gt;RP: return client credentials</code></pre>
 <table>
 <thead>
 <tr>
-<th align="left">Method header</th>
-<th align="left">Method description</th>
+<th style="text-align: left;">Method header</th>
+<th style="text-align: left;">Method description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left"><code>def init(self, customScript, configurationAttributes)</code></td>
-<td align="left">This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc</td>
+<td style="text-align: left;"><code>def init(self, customScript, configurationAttributes)</code></td>
+<td style="text-align: left;">This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc</td>
 </tr>
 <tr>
-<td align="left"><code>def destroy(self, configurationAttributes)</code></td>
-<td align="left">This method is called once to destroy events. It can be used to free resource and objects created in the <code>init()</code> method</td>
+<td style="text-align: left;"><code>def destroy(self, configurationAttributes)</code></td>
+<td style="text-align: left;">This method is called once to destroy events. It can be used to free resource and objects created in the <code>init()</code> method</td>
 </tr>
 <tr>
-<td align="left"><code>def getApiVersion(self, configurationAttributes, customScript)</code></td>
-<td align="left">The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10</td>
+<td style="text-align: left;"><code>def getApiVersion(self, configurationAttributes, customScript)</code></td>
+<td style="text-align: left;">The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10</td>
 </tr>
 </tbody>
 </table>
@@ -9016,38 +9016,38 @@ Jans AS-&gt;&gt;RP: return client credentials</code></pre>
 <table>
 <thead>
 <tr>
-<th align="left">Method header</th>
-<th align="left">Method description</th>
+<th style="text-align: left;">Method header</th>
+<th style="text-align: left;">Method description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left"><code>def createClient(self, context)</code></td>
-<td align="left">Called when the dynamic client registration request is received.</td>
+<td style="text-align: left;"><code>def createClient(self, context)</code></td>
+<td style="text-align: left;">Called when the dynamic client registration request is received.</td>
 </tr>
 <tr>
-<td align="left"><code>def updateClient(self, context)</code></td>
-<td align="left">Called when the PUT method is called on registration endpoint to update client details.</td>
+<td style="text-align: left;"><code>def updateClient(self, context)</code></td>
+<td style="text-align: left;">Called when the PUT method is called on registration endpoint to update client details.</td>
 </tr>
 <tr>
-<td align="left"><code>def getSoftwareStatementHmacSecret(self, context)</code></td>
-<td align="left">Returns secret key which will be used to validate Software Statement if HMAC algorithm is used (e.g. HS256, HS512)</td>
+<td style="text-align: left;"><code>def getSoftwareStatementHmacSecret(self, context)</code></td>
+<td style="text-align: left;">Returns secret key which will be used to validate Software Statement if HMAC algorithm is used (e.g. HS256, HS512)</td>
 </tr>
 <tr>
-<td align="left"><code>def getSoftwareStatementJwks(self, context)</code></td>
-<td align="left">Returns JWKS which will be used to validate Software Statement if keys are used (e.g. RS256)</td>
+<td style="text-align: left;"><code>def getSoftwareStatementJwks(self, context)</code></td>
+<td style="text-align: left;">Returns JWKS which will be used to validate Software Statement if keys are used (e.g. RS256)</td>
 </tr>
 <tr>
-<td align="left"><code>def modifyPutResponse(self, responseAsJsonObject, executionContext)</code></td>
-<td align="left">Modifies the response from the PUT request to registration endpoint</td>
+<td style="text-align: left;"><code>def modifyPutResponse(self, responseAsJsonObject, executionContext)</code></td>
+<td style="text-align: left;">Modifies the response from the PUT request to registration endpoint</td>
 </tr>
 <tr>
-<td align="left"><code>def modifyReadResponse(self, responseAsJsonObject, executionContext)</code></td>
-<td align="left">Modifies the response from the GET request to registration endpoint</td>
+<td style="text-align: left;"><code>def modifyReadResponse(self, responseAsJsonObject, executionContext)</code></td>
+<td style="text-align: left;">Modifies the response from the GET request to registration endpoint</td>
 </tr>
 <tr>
-<td align="left"><code>def modifyPostResponse(self, responseAsJsonObject, executionContext)</code></td>
-<td align="left">Modifies the response from the POST request to registration endpoint</td>
+<td style="text-align: left;"><code>def modifyPostResponse(self, responseAsJsonObject, executionContext)</code></td>
+<td style="text-align: left;">Modifies the response from the POST request to registration endpoint</td>
 </tr>
 </tbody>
 </table>
@@ -9055,34 +9055,34 @@ Jans AS-&gt;&gt;RP: return client credentials</code></pre>
 <table>
 <thead>
 <tr>
-<th align="left">Object name</th>
-<th align="left">Object description</th>
+<th style="text-align: left;">Object name</th>
+<th style="text-align: left;">Object description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left"><code>customScript</code></td>
-<td align="left">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
+<td style="text-align: left;"><code>customScript</code></td>
+<td style="text-align: left;">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
 </tr>
 <tr>
-<td align="left"><code>configurationAttributes</code></td>
-<td align="left"><code>configurationProperties</code> passed in when adding custom script. <code>Map&lt;String, SimpleCustomProperty&gt; configurationAttributes</code></td>
+<td style="text-align: left;"><code>configurationAttributes</code></td>
+<td style="text-align: left;"><code>configurationProperties</code> passed in when adding custom script. <code>Map&lt;String, SimpleCustomProperty&gt; configurationAttributes</code></td>
 </tr>
 <tr>
-<td align="left"><code>SimpleCustomProperty</code></td>
-<td align="left">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
+<td style="text-align: left;"><code>SimpleCustomProperty</code></td>
+<td style="text-align: left;">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
 </tr>
 <tr>
-<td align="left"><code>context</code></td>
-<td align="left"><a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java">Reference</a></td>
+<td style="text-align: left;"><code>context</code></td>
+<td style="text-align: left;"><a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java">Reference</a></td>
 </tr>
 <tr>
-<td align="left"><code>responseAsJsonObject</code></td>
-<td align="left">Java JSONObject. <a href="https://docs.oracle.com/javaee/7/api/javax/json/JsonObject.html">Reference</a></td>
+<td style="text-align: left;"><code>responseAsJsonObject</code></td>
+<td style="text-align: left;">Java JSONObject. <a href="https://docs.oracle.com/javaee/7/api/javax/json/JsonObject.html">Reference</a></td>
 </tr>
 <tr>
-<td align="left"><code>executionContext</code></td>
-<td align="left"><a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/model/common/ExecutionContext.java">Reference</a></td>
+<td style="text-align: left;"><code>executionContext</code></td>
+<td style="text-align: left;"><a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/model/common/ExecutionContext.java">Reference</a></td>
 </tr>
 </tbody>
 </table>
