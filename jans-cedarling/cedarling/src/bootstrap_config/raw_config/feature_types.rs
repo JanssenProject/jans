@@ -122,41 +122,6 @@ impl From<bool> for FeatureToggle {
     }
 }
 
-#[derive(Default, Clone, Copy, Debug, PartialEq, Deserialize, Serialize)]
-#[serde(rename_all = "UPPERCASE")]
-/// Operator that define boolean operator `AND` or `OR`.
-pub enum WorkloadBoolOp {
-    #[default]
-    /// Variant boolean `AND` operator.
-    And,
-    /// Variant boolean `OR` operator.
-    Or,
-}
-
-impl FromStr for WorkloadBoolOp {
-    type Err = ParseWorkloadBoolOpError;
-
-    /// Parse [`WorkloadBoolOp`] from string.
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let s = s.to_uppercase();
-        Ok(match s.as_str() {
-            "AND" => Self::And,
-            "OR" => Self::Or,
-            _ => return Err(ParseWorkloadBoolOpError { payload: s }),
-        })
-    }
-}
-
-impl WorkloadBoolOp {
-    /// execute boolean operator for boolean parameters
-    pub(crate) fn calc(&self, rhd: bool, lhd: bool) -> bool {
-        match self {
-            WorkloadBoolOp::And => rhd && lhd,
-            WorkloadBoolOp::Or => rhd || lhd,
-        }
-    }
-}
-
 #[derive(Default, Debug, derive_more::Display, derive_more::Error)]
 #[display("Could not parce `WorkloadBoolOp` with payload {payload}, should be `AND` or `OR`")]
 pub struct ParseWorkloadBoolOpError {

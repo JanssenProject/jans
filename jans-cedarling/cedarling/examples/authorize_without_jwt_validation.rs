@@ -4,9 +4,9 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LogConfig,
-    LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
-    TokenValidationConfig, WorkloadBoolOp,
+    AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JsonRule, JwtConfig,
+    LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request,
+    ResourceData, TokenValidationConfig,
 };
 use std::collections::{HashMap, HashSet};
 
@@ -29,7 +29,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::new(),
             token_validation_settings: HashMap::from_iter(
-                ["access_token", "id_token", "userinfo_token", "custom_token"]
+                ["access_token", "id_token", "userinfo_token"]
                     .iter()
                     .map(|tkn| (tkn.to_string(), TokenValidationConfig::default())),
             ),
@@ -38,18 +38,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::And,
+
             decision_log_default_jwt_id: "jti".to_string(),
             decision_log_user_claims: vec!["client_id".to_string(), "username".to_string()],
             decision_log_workload_claims: vec!["org_id".to_string()],
             id_token_trust_mode: IdTokenTrustMode::None,
             mapping_tokens: HashMap::from([
-                ("access_token".to_string(), "Access_token".to_string()),
-                ("id_token".to_string(), "id_token".to_string()),
-                ("userinfo_token".to_string(), "Userinfo_token".to_string()),
-                ("custom_token".to_string(), "Custom_token".to_string()),
+                ("access_token".to_string(), "Jans::Access_token".to_string()),
+                ("id_token".to_string(), "Jans::id_token".to_string()),
+                (
+                    "userinfo_token".to_string(),
+                    "Jans::Userinfo_token".to_string(),
+                ),
             ])
             .into(),
+            principal_bool_operator: JsonRule::new(serde_json::json!({
+                "and" : [
+                    {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+                    {"===": [{"var": "Jans::User"}, "ALLOW"]}
+                ]
+            }))
+            .unwrap(),
             ..Default::default()
         },
     })

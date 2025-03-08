@@ -5,8 +5,8 @@
 
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, InitCedarlingError,
-    JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, Request,
-    TokenValidationConfig, WorkloadBoolOp,
+    JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, Request,
+    TokenValidationConfig,
 };
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use jsonwebtoken::Algorithm;
@@ -77,7 +77,7 @@ async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCed
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::And,
+            principal_bool_operator: JsonRule::default(),
             mapping_user: Some("Jans::User".to_string()),
             mapping_workload: Some("Jans::Workload".to_string()),
             mapping_role: Some("Jans::Role".to_string()),
@@ -128,7 +128,7 @@ async fn prepare_cedarling_with_jwt_validation() -> Result<Cedarling, InitCedarl
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::And,
+            principal_bool_operator: JsonRule::default(),
             mapping_user: Some("Jans::User".to_string()),
             mapping_workload: Some("Jans::Workload".to_string()),
             mapping_role: Some("Jans::Role".to_string()),

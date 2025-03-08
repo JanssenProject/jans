@@ -12,9 +12,9 @@ use std::hash::Hash;
 
 use super::LogLevel;
 use super::interface::{Indexed, Loggable};
-use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::policy_store::PoliciesContainer;
 use crate::jwt::Token;
+use smol_str::SmolStr;
 use uuid7::Uuid;
 
 /// ISO-8601 time format for [`chrono`]
@@ -324,7 +324,7 @@ pub struct DecisionLogEntry<'a> {
     /// version of policy store
     pub policystore_version: &'a str,
     /// describe what principal was active on authorization request
-    pub principal: PrincipalLogEntry,
+    pub principal: Vec<SmolStr>,
     /// A list of claims, specified by the CEDARLING_DECISION_LOG_USER_CLAIMS property, that must be present in the Cedar User entity
     #[serde(rename = "User")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -348,6 +348,18 @@ pub struct DecisionLogEntry<'a> {
     pub tokens: LogTokensInfo<'a>,
     /// time in micro-seconds spent for decision
     pub decision_time_micro_sec: i64,
+}
+impl DecisionLogEntry<'_> {
+    pub fn principal(user: bool, workload: bool) -> Vec<SmolStr> {
+        let mut tags = Vec::with_capacity(2);
+        if user {
+            tags.push("User".into());
+        }
+        if workload {
+            tags.push("Workload".into());
+        }
+        tags
+    }
 }
 
 impl Indexed for &DecisionLogEntry<'_> {
@@ -476,58 +488,6 @@ impl Indexed for BaseLogEntry {
 impl Loggable for BaseLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.level
-    }
-}
-
-/// Describes what principal is was executed
-// is used only for logging
-#[derive(Debug, Clone, PartialEq)]
-pub enum PrincipalLogEntry {
-    User,
-    Workload,
-    UserAndWorkload,
-    UserORWorkload,
-    // corner case, should never happen
-    None,
-}
-
-impl PrincipalLogEntry {
-    pub(crate) fn new(conf: &AuthorizationConfig) -> Self {
-        match (
-            conf.use_user_principal,
-            conf.use_workload_principal,
-            conf.user_workload_operator,
-        ) {
-            (true, true, crate::WorkloadBoolOp::And) => Self::UserAndWorkload,
-            (true, true, crate::WorkloadBoolOp::Or) => Self::UserORWorkload,
-            (true, false, _) => Self::User,
-            (false, true, _) => Self::Workload,
-            (false, false, _) => Self::None,
-        }
-    }
-}
-
-impl Display for PrincipalLogEntry {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let str_val = match self {
-            Self::User => "User",
-            Self::Workload => "Workload",
-            Self::UserAndWorkload => "User & Workload",
-            Self::UserORWorkload => "User | Workload",
-            Self::None => "none",
-        };
-
-        f.write_str(str_val)
-    }
-}
-
-// implement Serialize for PrincipalLogEntry to use Display trait
-impl serde::Serialize for PrincipalLogEntry {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_str(self.to_string().as_str())
     }
 }
 
