@@ -4,9 +4,9 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LogConfig,
-    LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
-    WorkloadBoolOp,
+    AuthorizationConfig, BootstrapConfig, Cedarling, EntityBuilderConfig, IdTokenTrustMode,
+    JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request,
+    ResourceData, WorkloadBoolOp,
 };
 use std::collections::{HashMap, HashSet};
 
@@ -40,6 +40,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        entity_builder_config: EntityBuilderConfig::default().build_user().build_workload(),
     })
     .await?;
 

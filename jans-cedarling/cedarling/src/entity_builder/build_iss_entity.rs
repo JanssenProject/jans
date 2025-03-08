@@ -52,8 +52,8 @@ impl TrustedIssuer {
 
 #[cfg(test)]
 mod test {
-    use crate::authz::entity_builder::build_iss_entity::build_iss_entity;
-    use crate::authz::entity_builder::test::cedarling_schema;
+    use super::super::build_iss_entity::build_iss_entity;
+    use super::super::test::cedarling_schema;
     use crate::common::policy_store::TrustedIssuer;
     use cedar_policy::Entities;
     use serde_json::json;

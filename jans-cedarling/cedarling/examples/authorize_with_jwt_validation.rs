@@ -4,8 +4,9 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource, Request, ResourceData, WorkloadBoolOp,
+    AuthorizationConfig, BootstrapConfig, Cedarling, EntityBuilderConfig, JwtConfig, LogConfig,
+    LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
+    WorkloadBoolOp,
 };
 use jsonwebtoken::Algorithm;
 use std::collections::{HashMap, HashSet};
@@ -49,6 +50,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             user_workload_operator: WorkloadBoolOp::And,
             ..Default::default()
         },
+        entity_builder_config: EntityBuilderConfig::default().build_user().build_workload(),
     })
     .await?;
 

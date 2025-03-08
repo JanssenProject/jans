@@ -20,9 +20,9 @@ static POLICY_STORE_RAW_YAML: &str =
 async fn test_namespace_jans2() {
     let policy_src = PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string());
     let mut bs_config = get_config(policy_src);
-    bs_config.authorization_config.mapping_user = Some("Jans2::User".to_string());
-    bs_config.authorization_config.mapping_workload = Some("Jans2::Workload".to_string());
-    bs_config.authorization_config.mapping_role = Some("Jans2::Role".to_string());
+    bs_config.entity_builder_config.entity_names.user = "Jans2::User".to_string();
+    bs_config.entity_builder_config.entity_names.workload = "Jans2::Workload".to_string();
+    bs_config.entity_builder_config.entity_names.role = "Jans2::Role".to_string();
     let cedarling = Cedarling::new(&bs_config)
         .await
         .expect("bootstrap config should initialize correctly");

@@ -4,8 +4,9 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, InitCedarlingError,
-    JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, Request, WorkloadBoolOp,
+    AuthorizationConfig, BootstrapConfig, Cedarling, EntityBuilderConfig, IdTokenTrustMode,
+    InitCedarlingError, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, Request,
+    WorkloadBoolOp,
 };
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use jsonwebtoken::Algorithm;
@@ -77,12 +78,10 @@ async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCed
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::And,
-            mapping_user: Some("Jans::User".to_string()),
-            mapping_workload: Some("Jans::Workload".to_string()),
-            mapping_role: Some("Jans::Role".to_string()),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        entity_builder_config: EntityBuilderConfig::default().build_workload().build_user(),
     };
 
     Cedarling::new(&bootstrap_config).await
@@ -108,12 +107,10 @@ async fn prepare_cedarling_with_jwt_validation() -> Result<Cedarling, InitCedarl
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::And,
-            mapping_user: Some("Jans::User".to_string()),
-            mapping_workload: Some("Jans::Workload".to_string()),
-            mapping_role: Some("Jans::Role".to_string()),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        entity_builder_config: EntityBuilderConfig::default().build_workload().build_user(),
     };
 
     Cedarling::new(&bootstrap_config).await

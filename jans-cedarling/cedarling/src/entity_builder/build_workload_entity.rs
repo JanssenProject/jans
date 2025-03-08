@@ -19,7 +19,7 @@ impl EntityBuilder {
         tokens: &HashMap<String, Token>,
         tkn_principal_mappings: &TokenPrincipalMappings,
     ) -> Result<(Entity, Option<Entity>), BuildEntityError> {
-        let workload_type_name = self.entity_names.workload.as_ref();
+        let workload_type_name = self.config.entity_names.workload.as_ref();
 
         // Get Workload Entity ID
         let workload_id_srcs = WorkloadIdSrcs::resolve(tokens);
@@ -115,9 +115,9 @@ impl<'a> WorkloadIdSrcs<'a> {
 
 #[cfg(test)]
 mod test {
+    use super::super::test::*;
     use super::super::*;
     use super::*;
-    use crate::authz::entity_builder::test::cedarling_schema;
     use crate::common::policy_store::TrustedIssuer;
     use cedar_policy::Entities;
     use serde_json::json;
@@ -127,7 +127,7 @@ mod test {
     fn can_build_using_access_tkn_aud() {
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityNames::default(), true, false, &issuers)
+        let builder = EntityBuilder::new(EntityBuilderConfig::default().build_workload(), &issuers)
             .expect("should init entity builder");
         let access_token = Token::new(
             "access_token",
@@ -194,7 +194,7 @@ mod test {
     fn can_build_using_access_tkn_client_id() {
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityNames::default(), true, false, &issuers)
+        let builder = EntityBuilder::new(EntityBuilderConfig::default().build_workload(), &issuers)
             .expect("should init entity builder");
         let access_token = Token::new(
             "access_token",

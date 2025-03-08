@@ -3,9 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::{AuthorizeEntitiesData, AuthzConfig, entity_builder::BuiltEntities};
-use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
+use super::{AuthorizeEntitiesData, AuthzConfig};
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
+use crate::{common::cedar_schema::cedar_json::CedarSchemaJson, entity_builder::BuiltEntities};
 use cedar_policy::{ContextJsonError, EntityTypeName, ParseErrors};
 use serde_json::{Value, json, map::Entry};
 

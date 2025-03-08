@@ -372,7 +372,7 @@ impl KeyedJsonTypeError {
 
 #[cfg(test)]
 mod test {
-    use crate::authz::entity_builder::built_entities::BuiltEntities;
+    use super::super::built_entities::BuiltEntities;
     use crate::common::cedar_schema::cedar_json::{CedarSchemaJson, attribute::Attribute};
     use serde_json::json;
     use std::collections::HashMap;

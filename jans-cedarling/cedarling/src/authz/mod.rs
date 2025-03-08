@@ -10,7 +10,8 @@
 
 use crate::authorization_config::IdTokenTrustMode;
 use crate::bootstrap_config::AuthorizationConfig;
-use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuer};
+use crate::common::policy_store::PolicyStoreWithID;
+use crate::entity_builder::*;
 use crate::jwt::{self, Token};
 use crate::log::interface::LogWriter;
 use crate::log::{
@@ -21,7 +22,6 @@ use crate::log::{
 use build_ctx::*;
 use cedar_policy::{Entities, Entity, EntityUid};
 use chrono::Utc;
-use entity_builder::*;
 use request::Request;
 use smol_str::{SmolStr, ToSmolStr};
 use std::collections::{HashMap, HashSet};
@@ -34,7 +34,6 @@ mod authorize_result;
 mod build_ctx;
 mod trust_mode;
 
-pub(crate) mod entity_builder;
 pub(crate) mod request;
 
 pub use authorize_result::AuthorizeResult;
@@ -44,8 +43,8 @@ pub(crate) struct AuthzConfig {
     pub log_service: Logger,
     pub policy_store: PolicyStoreWithID,
     pub jwt_service: Arc<jwt::JwtService>,
+    pub entity_builder: Arc<EntityBuilder>,
     pub authorization: AuthorizationConfig,
-    pub trusted_issuers: HashMap<String, TrustedIssuer>,
 }
 
 /// Authorization Service
@@ -54,24 +53,11 @@ pub(crate) struct AuthzConfig {
 pub struct Authz {
     config: AuthzConfig,
     authorizer: cedar_policy::Authorizer,
-    entity_builder: EntityBuilder,
 }
 
 impl Authz {
     /// Create a new Authorization Service
     pub(crate) fn new(config: AuthzConfig) -> Result<Self, AuthzServiceInitError> {
-        let entity_names = EntityNames::from(&config.authorization);
-        let build_workload = config.authorization.use_workload_principal;
-        let build_user = config.authorization.use_user_principal;
-        // TODO: we should move entity builder to it's own module then initialize
-        // it in the service factory
-        let entity_builder = entity_builder::EntityBuilder::new(
-            entity_names,
-            build_workload,
-            build_user,
-            &config.trusted_issuers,
-        )?;
-
         config.log_service.log_any(
             LogEntry::new_with_data(LogType::System, None)
                 .set_cedar_version()
@@ -82,7 +68,6 @@ impl Authz {
         Ok(Self {
             config,
             authorizer: cedar_policy::Authorizer::new(),
-            entity_builder,
         })
     }
 
@@ -125,6 +110,7 @@ impl Authz {
 
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
         let entities_data = self
+            .config
             .entity_builder
             .build_entities(&tokens, &request.resource)?;
 
@@ -341,6 +327,7 @@ impl Authz {
         tokens: &HashMap<String, Token>,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         Ok(self
+            .config
             .entity_builder
             .build_entities(tokens, &request.resource)?)
     }

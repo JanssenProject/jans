@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use crate::authorization_config::IdTokenTrustMode;
-use crate::{AuthorizationConfig, JwtConfig, WorkloadBoolOp};
+use crate::{AuthorizationConfig, EntityBuilderConfig, JwtConfig, WorkloadBoolOp};
 pub use crate::{
     BootstrapConfig, Cedarling, LogConfig, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
 };
@@ -25,12 +25,10 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::And,
-            mapping_user: Some("Jans::User".to_string()),
-            mapping_workload: Some("Jans::Workload".to_string()),
-            mapping_role: Some("Jans::Role".to_string()),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        entity_builder_config: EntityBuilderConfig::default().build_user().build_workload(),
     }
 }
 
@@ -45,6 +43,7 @@ pub async fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
 pub async fn get_cedarling_with_authorization_conf(
     policy_source: PolicyStoreSource,
     auth_conf: AuthorizationConfig,
+    entity_builder_conf: EntityBuilderConfig,
 ) -> Cedarling {
     Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
@@ -57,6 +56,7 @@ pub async fn get_cedarling_with_authorization_conf(
         },
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: auth_conf,
+        entity_builder_config: entity_builder_conf,
     })
     .await
     .expect("bootstrap config should initialize correctly")

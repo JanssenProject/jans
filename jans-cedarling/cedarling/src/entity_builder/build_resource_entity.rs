@@ -41,7 +41,7 @@ mod test {
 
     #[test]
     fn can_build_entity() {
-        let builder = EntityBuilder::new(EntityNames::default(), false, false, &HashMap::new())
+        let builder = EntityBuilder::new(EntityBuilderConfig::default(), &HashMap::new())
             .expect("should init entity builder");
         let resource_data = ResourceData {
             resource_type: "Jans::HTTP_Request".to_string(),
@@ -80,7 +80,7 @@ mod test {
 
     #[test]
     fn can_build_entity_with_optional_attr() {
-        let builder = EntityBuilder::new(EntityNames::default(), false, false, &HashMap::new())
+        let builder = EntityBuilder::new(EntityBuilderConfig::default(), &HashMap::new())
             .expect("should init entity builder");
         let resource_data = ResourceData {
             resource_type: "Jans::HTTP_Request".to_string(),

@@ -9,6 +9,7 @@
 mod decode;
 
 pub(crate) mod authorization_config;
+pub(crate) mod entity_builder_config;
 pub(crate) mod jwt_config;
 pub(crate) mod log_config;
 pub(crate) mod policy_store_config;
@@ -18,6 +19,7 @@ pub(crate) mod raw_config;
 use std::{fs, io, path::Path};
 
 pub use authorization_config::{AuthorizationConfig, IdTokenTrustMode};
+pub use entity_builder_config::*;
 pub use jwt_config::*;
 pub use log_config::*;
 pub use policy_store_config::*;
@@ -38,6 +40,8 @@ pub struct BootstrapConfig {
     pub jwt_config: JwtConfig,
     /// A set of properties used to configure authorization workflow in the `Cedarling` application.
     pub authorization_config: AuthorizationConfig,
+    /// A set of properties used to configure the JWTs to Cedar Entity mappings
+    pub entity_builder_config: EntityBuilderConfig,
 }
 
 impl BootstrapConfig {
@@ -198,6 +202,7 @@ mod test {
                 decision_log_default_jwt_id: "jti".to_string(),
                 ..Default::default()
             },
+            entity_builder_config: EntityBuilderConfig::default().build_user().build_workload(),
         };
 
         assert_eq!(deserialized, expected);
@@ -238,6 +243,7 @@ mod test {
                 decision_log_default_jwt_id: "jti".to_string(),
                 ..Default::default()
             },
+            entity_builder_config: EntityBuilderConfig::default().build_user().build_workload(),
         };
 
         assert_eq!(deserialized, expected);

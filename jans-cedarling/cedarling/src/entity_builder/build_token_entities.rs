@@ -113,8 +113,8 @@ pub struct BuildTokenEntityError {
 
 #[cfg(test)]
 mod test {
+    use super::super::test::*;
     use super::super::*;
-    use crate::authz::entity_builder::test::{assert_entity_eq, cedarling_schema};
     use crate::common::policy_store::TrustedIssuer;
     use cedar_policy::Entities;
     use serde_json::json;
@@ -124,7 +124,7 @@ mod test {
     fn can_build_access_tkn_entity() {
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityNames::default(), false, false, &issuers)
+        let builder = EntityBuilder::new(EntityBuilderConfig::default(), &issuers)
             .expect("should init entity builder");
         let access_token = Token::new(
             "access_token",
@@ -174,7 +174,7 @@ mod test {
     fn can_build_id_tkn_entity() {
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityNames::default(), false, false, &issuers)
+        let builder = EntityBuilder::new(EntityBuilderConfig::default(), &issuers)
             .expect("should init entity builder");
         let access_token = Token::new(
             "access_token",
@@ -217,7 +217,7 @@ mod test {
     fn can_build_userinfo_tkn_entity() {
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityNames::default(), false, false, &issuers)
+        let builder = EntityBuilder::new(EntityBuilderConfig::default(), &issuers)
             .expect("should init entity builder");
         let access_token = Token::new(
             "userinfo_token",
@@ -278,7 +278,7 @@ mod test {
 
     #[test]
     fn builds_str_iss_if_entity_is_unavailable() {
-        let builder = EntityBuilder::new(EntityNames::default(), false, false, &HashMap::new())
+        let builder = EntityBuilder::new(EntityBuilderConfig::default(), &HashMap::new())
             .expect("should init entity builder");
         let access_token = Token::new(
             "userinfo_token",

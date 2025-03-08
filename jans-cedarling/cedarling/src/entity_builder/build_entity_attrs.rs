@@ -128,8 +128,8 @@ impl<'a> From<&'a HashMap<String, Value>> for EntityAttrsSrc<'a> {
 
 #[cfg(test)]
 mod test {
+    use super::super::test::assert_entity_eq;
     use super::*;
-    use crate::authz::entity_builder::test::assert_entity_eq;
     use crate::common::policy_store::ClaimMappings;
     use cedar_policy::{Entity, EntityUid};
     use serde_json::json;

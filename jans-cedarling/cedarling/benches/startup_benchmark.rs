@@ -44,11 +44,11 @@ lazy_static! {
             use_user_principal: true,
             use_workload_principal: true,
             user_workload_operator: WorkloadBoolOp::And,
-            mapping_user: Some("Jans::User".to_string()),
-            mapping_workload: Some("Jans::Workload".to_string()),
-            mapping_role: Some("Jans::Role".to_string()),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        entity_builder_config: cedarling::EntityBuilderConfig::default()
+            .build_user()
+            .build_workload(),
     };
 }

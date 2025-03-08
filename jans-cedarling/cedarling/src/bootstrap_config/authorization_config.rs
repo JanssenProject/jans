@@ -42,18 +42,6 @@ pub struct AuthorizationConfig {
     /// `CEDARLING_DECISION_LOG_DEFAULT_JWT_ID` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     pub decision_log_default_jwt_id: String,
 
-    /// Type Name of the TrustedIssuer entity
-    pub mapping_iss: Option<String>,
-
-    /// Type Name of the User entity
-    pub mapping_user: Option<String>,
-
-    /// Type Name of the Workload entity
-    pub mapping_workload: Option<String>,
-
-    /// Type Name of the Role entity
-    pub mapping_role: Option<String>,
-
     /// Sets the validation level for ID tokens.
     ///
     /// The available levels are [`None`] and [`Strict`].

@@ -108,6 +108,7 @@ async fn success_test_for_principal_workload() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default().build_workload(),
     )
     .await;
 
@@ -147,6 +148,7 @@ async fn success_test_for_principal_user() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default().build_user(),
     )
     .await;
 
@@ -190,6 +192,7 @@ async fn success_test_for_principal_person_role() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default().build_user(),
     )
     .await;
 
@@ -233,6 +236,9 @@ async fn success_test_for_principal_workload_role() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default()
+            .build_workload()
+            .build_user(),
     )
     .await;
 
@@ -282,6 +288,9 @@ async fn success_test_for_principal_workload_true_or_user_false() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default()
+            .build_user()
+            .build_workload(),
     )
     .await;
 
@@ -331,6 +340,9 @@ async fn success_test_for_principal_workload_false_or_user_true() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default()
+            .build_user()
+            .build_workload(),
     )
     .await;
 
@@ -380,6 +392,9 @@ async fn success_test_for_principal_workload_false_or_user_false() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default()
+            .build_user()
+            .build_workload(),
     )
     .await;
 
@@ -428,6 +443,9 @@ async fn test_where_principal_workload_cant_be_applied() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default()
+            .build_user()
+            .build_workload(),
     )
     .await;
 
@@ -457,6 +475,7 @@ async fn test_where_principal_user_cant_be_applied() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default().build_user(),
     )
     .await;
 

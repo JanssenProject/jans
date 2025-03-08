@@ -125,10 +125,6 @@ impl BootstrapConfig {
             decision_log_user_claims: raw.decision_log_user_claims.clone(),
             decision_log_workload_claims: raw.decision_log_workload_claims.clone(),
             decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
-            mapping_iss: raw.mapping_iss.clone(),
-            mapping_user: raw.mapping_user.clone(),
-            mapping_workload: raw.mapping_workload.clone(),
-            mapping_role: raw.mapping_role.clone(),
             id_token_trust_mode: raw.id_token_trust_mode,
         };
 
@@ -138,6 +134,7 @@ impl BootstrapConfig {
             policy_store_config,
             jwt_config,
             authorization_config,
+            entity_builder_config: raw.into(),
         })
     }
 }

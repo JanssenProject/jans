@@ -26,7 +26,7 @@ impl EntityBuilder {
         tokens: &HashMap<String, Token>,
         tkn_principal_mappings: &TokenPrincipalMappings,
     ) -> Result<(Entity, Vec<Entity>), BuildEntityError> {
-        let user_type_name: &str = self.entity_names.user.as_ref();
+        let user_type_name: &str = self.config.entity_names.user.as_ref();
 
         // Get User Entity ID
         let user_id_srcs = UserIdSrcs::resolve(tokens);
@@ -40,7 +40,7 @@ impl EntityBuilder {
         let role_ids = collect_all_valid_entity_ids(&role_id_srcs);
         for id in role_ids {
             let role_entity =
-                build_cedar_entity(&self.entity_names.role, &id, HashMap::new(), HashSet::new())?;
+                build_cedar_entity(&self.config.entity_names.role, &id, HashMap::new(), HashSet::new())?;
             user_parents.insert(role_entity.uid());
             role_entities.push(role_entity);
         }
@@ -153,9 +153,9 @@ impl<'a> RoleIdSrcs<'a> {
 
 #[cfg(test)]
 mod test {
+    use super::super::test::*;
     use super::super::*;
     use super::*;
-    use crate::authz::entity_builder::test::{assert_entity_eq, cedarling_schema};
     use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
     use serde_json::json;
     use std::collections::HashMap;
@@ -172,7 +172,7 @@ mod test {
             metadata.claim_mapping = claim_mappings.clone();
         }
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityNames::default(), true, false, &issuers)
+        let builder = EntityBuilder::new(EntityBuilderConfig::default().build_user(), &issuers)
             .expect("should init entity builder");
         let id_token = Token::new(
             "id_token",
@@ -272,7 +272,7 @@ mod test {
             metadata.claim_mapping = claim_mappings.clone();
         }
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityNames::default(), true, false, &issuers)
+        let builder = EntityBuilder::new(EntityBuilderConfig::default().build_user(), &issuers)
             .expect("should init entity builder");
         let id_token = Token::new(
             "id_token",
