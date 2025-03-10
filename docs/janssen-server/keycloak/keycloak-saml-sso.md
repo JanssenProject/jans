@@ -57,15 +57,6 @@ be used on the SP side. The metadata can be found at
 `<server-hostname>` is the hostname of the Janssen server specified during
 installation.
 
-## IDP Initiated Flows
-
-_This content is a work in progress_
-
-## IDP Key Management
-
-_This content is a work in progress_
-
-
 ## Testing Jans SAML SSO with sptest
 
 ### Configure IDP [Janssen Server]
@@ -102,11 +93,3 @@ Copy that link and open it in a browser. You can open it in incognito mode to av
 * Check KC scheduler log for any TR issue `/opt/kc-scheduler/logs/scheduler.log`
 * Also check file directory inside `/opt/idp/configs/keycloak/sp/metadata`
 
-
-## Have questions in the meantime?
-
-You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
-
-## Want to contribute?
-
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
