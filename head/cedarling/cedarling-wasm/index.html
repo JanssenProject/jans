@@ -8899,7 +8899,12 @@
 <span class="w">                </span><span class="s2">&quot;CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS &quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;aud&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;client_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;rp_id&quot;</span><span class="p">],</span>
 <span class="w">                </span><span class="s2">&quot;CEDARLING_USER_AUTHZ&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span>
 <span class="w">                </span><span class="s2">&quot;CEDARLING_WORKLOAD_AUTHZ&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="s2">&quot;CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;AND&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">&quot;CEDARLING_PRINCIPAL_BOOLEAN_OPERATION&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="s2">&quot;and&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                        </span><span class="p">{</span><span class="s2">&quot;===&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="s2">&quot;var&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Workload&quot;</span><span class="p">},</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">]},</span>
+<span class="w">                        </span><span class="p">{</span><span class="s2">&quot;===&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="s2">&quot;var&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">},</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">]}</span>
+<span class="w">                    </span><span class="p">]</span>
+<span class="w">                </span><span class="p">},</span>
 <span class="w">            </span><span class="p">});</span>
 <span class="w">            </span><span class="c1">// make authorize request</span>
 <span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">instance</span><span class="p">.</span><span class="nx">authorize</span><span class="p">({</span>
@@ -9072,7 +9077,7 @@ You can find usage examples in the following locations:</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-01-13T22:12:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-01-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-10T21:17:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-10</span>
       
         <br>
         Created:

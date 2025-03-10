@@ -7369,9 +7369,70 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#available-operations" class="md-nav__link">
-    Available Operations
+  <a href="#variables-in-the-jsonlogic-rule" class="md-nav__link">
+    Variables in the jsonlogic rule
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-configuration" class="md-nav__link">
+    Default configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparison-operators" class="md-nav__link">
+    Comparison Operators
+  </a>
+  
+    <nav class="md-nav" aria-label="Comparison Operators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#operation-types" class="md-nav__link">
+    Operation Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Operation Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#and-operation" class="md-nav__link">
+    AND Operation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#or-operation" class="md-nav__link">
+    OR Operation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    Best Practices
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-scenarios" class="md-nav__link">
+    Error Scenarios
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -8870,9 +8931,70 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#available-operations" class="md-nav__link">
-    Available Operations
+  <a href="#variables-in-the-jsonlogic-rule" class="md-nav__link">
+    Variables in the jsonlogic rule
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-configuration" class="md-nav__link">
+    Default configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparison-operators" class="md-nav__link">
+    Comparison Operators
+  </a>
+  
+    <nav class="md-nav" aria-label="Comparison Operators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#operation-types" class="md-nav__link">
+    Operation Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Operation Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#and-operation" class="md-nav__link">
+    AND Operation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#or-operation" class="md-nav__link">
+    OR Operation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    Best Practices
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-scenarios" class="md-nav__link">
+    Error Scenarios
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -9034,7 +9156,7 @@
 <li><strong><code>CEDARLING_POLICY_STORE_ID</code></strong> : The identifier of the policy store in case there is more then one policy_store_id in the policy store.</li>
 <li><strong><code>CEDARLING_USER_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a User principal.</li>
 <li><strong><code>CEDARLING_WORKLOAD_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a Workload principal.</li>
-<li><strong><code>CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION</code></strong> :  <code>AND</code>, <code>OR</code></li>
+<li><strong><code>CEDARLING_PRINCIPAL_BOOLEAN_OPERATION</code></strong> : property specifies what boolean operation to use for the <code>USER</code> and <code>WORKLOAD</code> when making authz (authorization) decisions. <a href="#user-workload-boolean-operation">See here</a>.</li>
 <li><strong><code>CEDARLING_MAPPING_USER</code></strong> : Name of Cedar User schema entity if we don't want to use default. When specified cedarling try build defined entity (from schema) as user instead of default <code>User</code> entity defined in <code>cedar</code> schema. Works in namespace defined in the policy store.</li>
 <li><strong><code>CEDARLING_MAPPING_WORKLOAD</code></strong> : Name of Cedar Workload schema entity</li>
 <li><strong><code>CEDARLING_MAPPING_ROLE</code></strong> : Name of Cedar Role schema entity</li>
@@ -9092,12 +9214,118 @@
 </ul>
 <p>All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.</p>
 <h2 id="user-workload-boolean-operation">User-Workload Boolean Operation<a class="headerlink" href="#user-workload-boolean-operation" title="Permanent link">#</a></h2>
-<p>The <code>CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION</code> property specifies what boolean operation to use for the <code>USER</code> and <code>WORKLOAD</code> when making authz (authorization) decisions.</p>
-<h3 id="available-operations">Available Operations<a class="headerlink" href="#available-operations" title="Permanent link">#</a></h3>
+<p>The <code>CEDARLING_PRINCIPAL_BOOLEAN_OPERATION</code> property specifies what boolean operation to use when combining authorization decisions for <code>USER</code> and <code>WORKLOAD</code> principals. This JSON Logic rule determines the final authorization outcome based on individual principal decisions.</p>
+<p>We use <a href="https://jsonlogic.com/">JsonLogic</a> to define the boolean operation. The rule is evaluated against each principal decision, and the final result is determined based on the specified operation.</p>
+<h3 id="variables-in-the-jsonlogic-rule">Variables in the jsonlogic rule<a class="headerlink" href="#variables-in-the-jsonlogic-rule" title="Permanent link">#</a></h3>
+<p>Make sure that you use correct <code>var</code> name for <code>principal</code> types.</p>
+<p>When referencing principals in your JSON logic rules, you must use the full Cedar principal type identifier that includes both namespace and entity name. This matches exactly how principals are defined in your Cedar policies.</p>
+<p><strong>Correct Format</strong>: <code>&lt;Namespace&gt;::&lt;EntityType&gt;</code><br />
+Example: <code>Jans::User</code>, <code>Jans::Workload</code>, <code>Acme::Service</code>.</p>
+<p><strong>Why This Matters</strong></p>
 <ul>
-<li><strong>AND</strong>: authz will be successful if <code>USER</code> <strong>AND</strong> <code>WORKLOAD</code> is valid.</li>
-<li><strong>OR</strong>: authz will be successful if <code>USER</code> <strong>OR</strong> <code>WORKLOAD</code> is valid.</li>
+<li>Matches Cedar's type system requirements</li>
+<li>Ensures proper variable resolution</li>
+<li>Maintains consistency with policy definitions</li>
 </ul>
+<p><strong>Example Configuration</strong></p>
+<div class="highlight"><pre><span></span><code>// CORRECT - Full type with namespace
+{
+    &quot;or&quot;: [
+        {&quot;===&quot;: [{&quot;var&quot;: &quot;Jans::Workload&quot;}, &quot;ALLOW&quot;]},
+        {&quot;===&quot;: [{&quot;var&quot;: &quot;Jans::User&quot;}, &quot;ALLOW&quot;]}
+    ]
+}
+
+// INCORRECT - Missing namespace
+{
+    &quot;or&quot;: [
+        {&quot;===&quot;: [{&quot;var&quot;: &quot;Workload&quot;}, &quot;ALLOW&quot;]}, // Will not resolve
+        {&quot;===&quot;: [{&quot;var&quot;: &quot;User&quot;}, &quot;ALLOW&quot;]}      // Will not resolve
+    ]
+}
+</code></pre></div>
+<p><strong>Consequences of Incorrect Format</strong><br />
+❌ Authorization will fail with DENY<br />
+❌ Potential evaluation errors in JSON logic<br />
+❌ Mismatches with actual Cedar policy definitions  </p>
+<h3 id="default-configuration">Default configuration<a class="headerlink" href="#default-configuration" title="Permanent link">#</a></h3>
+<p>Default value:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;and&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">&quot;===&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Workload&quot;</span><span class="p">},</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">]},</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">&quot;===&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">},</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">]}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Explanation:  </p>
+<ul>
+<li>The rule uses and to require both principals to be authorized</li>
+<li><code>{"var": "Jans::Workload"}</code> checks the workload principal's decision</li>
+<li><code>{"var": "Jans::User"}</code> checks the user principal's decision</li>
+<li><code>"==="</code> performs strict equality comparison against "ALLOW"</li>
+<li>both conditions must be true for final authorization to be granted</li>
+</ul>
+<h3 id="comparison-operators">Comparison Operators<a class="headerlink" href="#comparison-operators" title="Permanent link">#</a></h3>
+<ul>
+<li>=== (Recommended): Strict equality check (type and value must match)</li>
+<li>==: Loose equality check (may cause type coercion errors if variables are missing)</li>
+</ul>
+<p>Note: For comparison better to use <code>===</code> instead of <code>==</code>. To avoid casting result to <code>Nan</code> if something goes wrong.</p>
+<h4 id="operation-types">Operation Types<a class="headerlink" href="#operation-types" title="Permanent link">#</a></h4>
+<h5 id="and-operation"><strong>AND Operation</strong><a class="headerlink" href="#and-operation" title="Permanent link">#</a></h5>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="s2">&quot;and&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">condition1</span><span class="p">,</span><span class="w"> </span><span class="nx">condition2</span><span class="p">]}</span>
+</code></pre></div>
+<ul>
+<li>Authorization succeeds only if ALL conditions are true</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;and&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">&quot;===&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Workload&quot;</span><span class="p">},</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">]},</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">&quot;===&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">},</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">]}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<h5 id="or-operation"><strong>OR Operation</strong><a class="headerlink" href="#or-operation" title="Permanent link">#</a></h5>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="s2">&quot;or&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">condition1</span><span class="p">,</span><span class="w"> </span><span class="nx">condition2</span><span class="p">]}</span>
+</code></pre></div>
+<ul>
+<li>Authorization succeeds if ANY condition is true</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;or&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">&quot;===&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Workload&quot;</span><span class="p">},</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">]},</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">&quot;===&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">},</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">]}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">#</a></h4>
+<ol>
+<li>Use Strict Comparison (===)</li>
+<li>Prevents unexpected type conversions</li>
+<li>Returns DENY instead of errors when variables are missing</li>
+<li>
+<p>Explicit Principal References</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Good - explicit principal type</span>
+<span class="p">{</span><span class="nt">&quot;===&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Workload&quot;</span><span class="p">},</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">]}</span>
+
+<span class="c1">// Bad - incorrect principal type</span>
+<span class="p">{</span><span class="nt">&quot;===&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Workload&quot;</span><span class="p">},</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">]}</span>
+</code></pre></div>
+</li>
+</ol>
+<h4 id="error-scenarios">Error Scenarios<a class="headerlink" href="#error-scenarios" title="Permanent link">#</a></h4>
+<ul>
+<li>Using == with missing principals:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">&quot;==&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MissingPrincipal&quot;</span><span class="p">},</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">]}</span><span class="w">  </span><span class="c1">// Throws error</span>
+</code></pre></div>
+<ul>
+<li>Type mismatches:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">&quot;===&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Workload&quot;</span><span class="p">},</span><span class="w"> </span><span class="kc">true</span><span class="p">]}</span><span class="w">  </span><span class="c1">// Always false</span>
+</code></pre></div>
 <h2 id="token-configs">Token Configs<a class="headerlink" href="#token-configs" title="Permanent link">#</a></h2>
 <p>The token configs property sets the entity type name of a token and it's validation settings. Below is an example of the <code>CEDARLING_TOKEN_CONFIGS</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="nx">CEDARLING_TOKEN_CONFIGS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
@@ -9247,7 +9475,12 @@
 <span class="w">    </span><span class="s2">&quot;client_id&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="s2">&quot;rp_id&quot;</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AND&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_PRINCIPAL_BOOLEAN_OPERATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;and&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="nt">&quot;===&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Workload&quot;</span><span class="p">},</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">]},</span>
+<span class="w">      </span><span class="p">{</span><span class="nt">&quot;===&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">},</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">]}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;CEDARLING_LOCAL_JWKS&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;CEDARLING_JWT_SIG_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;CEDARLING_JWT_STATUS_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
@@ -9303,7 +9536,14 @@
 <span class="nt">CEDARLING_LOG_TTL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
 <span class="nt">CEDARLING_DECISION_LOG_USER_CLAIMS</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;sub&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;email&quot;</span><span class="p p-Indicator">]</span>
 <span class="nt">CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;client_id&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;rp_id&quot;</span><span class="p p-Indicator">]</span>
-<span class="nt">CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AND</span>
+<span class="nt">CEDARLING_PRINCIPAL_BOOLEAN_OPERATION</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">and</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;===&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">var</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Workload&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;ALLOW&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;===&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">var</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::User&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;ALLOW&quot;</span>
 <span class="nt">CEDARLING_LOCAL_JWKS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
 <span class="nt">CEDARLING_JWT_SIG_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disabled</span>
 <span class="nt">CEDARLING_JWT_STATUS_VALIDATION</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disabled</span>
@@ -9328,7 +9568,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-24T14:16:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-24</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-10T21:17:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-10</span>
       
         <br>
         Created:
