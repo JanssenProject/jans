@@ -8,12 +8,11 @@ tags:
 
 ## Overview
 
-Container image to manage X.509 certificates and crypto keys in Janssen Server.
-The container is designed to run as a one-time command (or Job in Kubernetes world).
+Tools to run various helper commands for the Janssen cluster. See Usage section for available commands.
 
 ## Versions
 
-See [Packages](https://github.com/orgs/JanssenProject/packages/container/package/jans%2Fcertmanager) for available versions.
+See [Packages](https://github.com/orgs/JanssenProject/packages/container/package/jans%2Fcloudtools) for available versions.
 
 ## Environment Variables
 
@@ -73,104 +72,128 @@ The following environment variables are supported by the container:
 - `AWS_CONFIG_FILE`: The location of the config file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
 - `AWS_PROFILE`: The default profile to use, if any.
 
-## Usage
+## cloudtools CLIs
 
-### Commands
+```
+Usage: cloudtools [OPTIONS] COMMAND [ARGS]...
 
-The following commands are supported by the container:
+Commands:
+  certmanager   Manage cert and crypto keys
+  cleanup       Cleanup expired entries in persistence
+  kc-sync       Sync config between jans-config-api and Keycloak
+```
 
-- `patch`
-- `prune`
+### certmanager
 
-#### patch
+The following sub-commands are supported by the certmanager command:
 
-Updates X.509 certificates and/or crypto keys related to the service.
+1.  **patch**
 
-```text
-Usage: certmanager patch [OPTIONS] SERVICE
+    Updates X.509 certificates and/or crypto keys related to the service.
 
-  Patch cert and/or crypto keys for the targeted service.
+    Global options:
+
+    - `--dry-run`
+    - `--opts`: service-dependent options, example: `--opts interval:48`
+
+    Supported services:
+
+    1.  `web` (nginx container or ingress)
+
+        Load from existing or re-generate:
+
+        - `/etc/certs/jans_https.crt`
+        - `/etc/certs/jans_https.key`.
+
+        Options via `--opts`:
+
+        - `source`: `from-files` or empty string
+        - `valid-to`: Validity length in days (default to `365`)
+
+        Example:
+
+        ```
+        cloudtools certmanager patch web --opts valid-to:365
+        ```
+
+    2.  `auth`
+
+        Re-generate:
+
+        - `/etc/certs/auth-keys.json`
+        - `/etc/certs/auth-keys.jks`
+
+        Options via `--opts`:
+
+        - `interval`: crypto keys expiration time (in hours)
+        - `push-to-container`: whether to _push_ `auth-keys.jks` and `auth-keys.json` to auth-server containers (default to `true`)
+        - `key-strategy`: key selection strategy (choose one of `OLDER`, `NEWER`, `FIRST`; default to `NEWER`)
+        - `privkey-push-delay`: delay time in seconds before pushing `auth-keys.jks` to auth containers (default to `0`)
+        - `privkey-push-strategy`: key selection strategy after `auth-keys.jks` is pushed to auth containers (choose one of `OLDER`, `NEWER`, `FIRST`; default to `NEWER`)
+        - `sig-keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
+        - `enc-keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
+
+        Example:
+
+        ```
+        cloudtools certmanager patch auth --opts interval:48
+        ```
+
+1.  **prune**
+
+    Delete expired crypto keys (if any) related to the service.
+
+    Global options:
+
+    - `--dry-run`
+    - `--opts`: service-dependent options, example: `--opts interval:48`
+
+    Supported services:
+
+    1.  `auth`
+
+        Delete expired keys (if any) from the following files:
+
+        - `/etc/certs/auth-keys.json`
+        - `/etc/certs/auth-keys.jks`
+
+        Options via `--opts`:
+
+        - `push-to-container`: whether to _push_ `auth-keys.jks` and `auth-keys.json` to auth containers (default to `true`)
+        - `sig-keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
+        - `enc-keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
+
+        Example:
+
+        ```
+        cloudtools certmanager prune auth
+        ```
+
+#### cleanup
+
+Cleanup expired entries in persistence.
 
 Options:
-  --dry-run         Enable dryrun mode.
-  --opts KEY:VALUE  Options for targeted service (can be set multiple times).
-  -h, --help        Show this message and exit.
-```
 
-Global options:
+- `--limit`: How many expired entries need to be removed per table (default to 1000)
 
-- `--dry-run`
-- `--opts`: service-dependent options, example: `--opts interval:48`
-
-Supported services:
-
-1. `web` (nginx container or ingress)
-
-    Load from existing or re-generate:
-
-    - `/etc/certs/jans_https.crt`
-    - `/etc/certs/jans_https.key`.
-
-    Options:
-
-    - `source`: `from-files` or empty string
-    - `valid-to`: Validity length in days (default to `365`)
-
-2. `auth`
-
-    Re-generate:
-
-    - `/etc/certs/auth-keys.json`
-    - `/etc/certs/auth-keys.jks`
-
-    Options:
-
-    - `interval`: crypto keys expiration time (in hours)
-    - `push-to-container`: whether to _push_ `auth-keys.jks` and `auth-keys.json` to auth-server containers (default to `true`)
-    - `key-strategy`: key selection strategy (choose one of `OLDER`, `NEWER`, `FIRST`; default to `NEWER`)
-    - `privkey-push-delay`: delay time in seconds before pushing `auth-keys.jks` to auth containers (default to `0`)
-    - `privkey-push-strategy`: key selection strategy after `auth-keys.jks` is pushed to auth containers (choose one of `OLDER`, `NEWER`, `FIRST`; default to `NEWER`)
-    - `sig-keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
-    - `enc-keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
-
-#### prune
-
-Delete expired crypto keys (if any) related to the service.
+Example:
 
 ```
-Usage: certmanager prune [OPTIONS] SERVICE
-
-  Cleanup expired crypto keys for the targeted service.
-
-Options:
-  --dry-run         Enable dryrun mode.
-  --opts KEY:VALUE  Options for targeted service (can be set multiple times).
-  -h, --help        Show this message and exit.
+cloudtools cleanup --limit 500
 ```
 
-Global options:
+#### kc-sync
 
-- `--dry-run`
-- `--opts`: service-dependent options, example: `--opts interval:48`
+Sync config between jans-config-api and Keycloak.
 
-Supported services:
+Example:
 
-1.  `auth`
+```
+cloudtools kc-sync
+```
 
-    Delete expired keys (if any) from the following files:
-
-    - `/etc/certs/auth-keys.json`
-    - `/etc/certs/auth-keys.jks`
-
-    Options:
-
-    - `push-to-container`: whether to _push_ `auth-keys.jks` and `auth-keys.json` to auth containers (default to `true`)
-    - `sig-keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
-    - `enc-keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
-
-### Examples
-
-Kubernetes CronJob example:
+### Kubernetes CronJob Example
 
 ```yaml
 kind: CronJob
@@ -186,7 +209,7 @@ spec:
         spec:
           containers:
             - name: auth-key-rotation
-              image: ghcr.io/janssenproject/jans/certmanager:0.0.0-nightly
+              image: ghcr.io/janssenproject/jans/cloudtools:$VERSION
               resources:
                 requests:
                   memory: "300Mi"
@@ -197,7 +220,7 @@ spec:
               envFrom:
                 - configMapRef:
                     name: jans-config-cm
-              args: ["patch", "auth", "--opts", "interval:48"]
+              args: ["certmanager", "patch", "auth", "--opts", "interval:48"]
           restartPolicy: Never
 ```
 
