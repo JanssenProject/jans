@@ -9,6 +9,7 @@
 
 pub(crate) mod app_types;
 pub(crate) mod cedar_schema;
+pub(crate) mod json_rules;
 
 pub mod policy_store;
 
