@@ -15,7 +15,7 @@ mod built_entities;
 use super::AuthorizeEntitiesData;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::jwt::{Token, TokenClaimTypeError};
-use crate::{AuthorizationConfig, ResourceData};
+use crate::{AuthorizationConfig, EntityData};
 use build_attrs::{BuildAttrError, ClaimAliasMap, build_entity_attrs_from_tkn};
 use build_expr::*;
 use build_resource_entity::{BuildResourceEntityError, JsonTypeError};
@@ -117,7 +117,7 @@ impl EntityBuilder {
     pub fn build_entities(
         &self,
         tokens: &HashMap<String, Token>,
-        resource: &ResourceData,
+        resource: &EntityData,
     ) -> Result<AuthorizeEntitiesData, BuildCedarlingEntityError> {
         let mut built_entities = BuiltEntities::default();
 
@@ -390,7 +390,7 @@ mod test {
             .collect::<HashMap<String, Token>>();
 
         let entities = entity_builder
-            .build_entities(&tokens, &ResourceData {
+            .build_entities(&tokens, &EntityData {
                 resource_type: "Jans::Resource".to_string(),
                 id: "res-123".to_string(),
                 payload: HashMap::new(),

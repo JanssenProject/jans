@@ -14,15 +14,15 @@ pub struct Request {
     /// cedar_policy action
     pub action: String,
     /// cedar_policy resource data
-    pub resource: ResourceData,
+    pub resource: EntityData,
     /// context to be used in cedar_policy
     pub context: serde_json::Value,
 }
 
-/// Cedar policy resource data
+/// Cedar policy entity data
 /// fields represent EntityUid
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
-pub struct ResourceData {
+pub struct EntityData {
     /// entity type name
     #[serde(rename = "type")]
     pub resource_type: String,

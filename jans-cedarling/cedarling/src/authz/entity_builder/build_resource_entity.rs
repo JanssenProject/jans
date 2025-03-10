@@ -8,12 +8,12 @@ use cedar_policy::{EntityAttrEvaluationError, ExpressionConstructionError, Parse
 use serde_json::Value;
 
 use super::*;
-use crate::ResourceData;
+use crate::EntityData;
 
 impl EntityBuilder {
     pub fn build_resource_entity(
         &self,
-        resource: &ResourceData,
+        resource: &EntityData,
     ) -> Result<Entity, BuildResourceEntityError> {
         let (entity_type_name, entity_type) = self
             .schema
@@ -129,7 +129,7 @@ mod test {
         }))
         .expect("should successfully create test schema");
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
-        let resource_data = ResourceData {
+        let resource_data = EntityData {
             resource_type: "Jans::HttpRequest".to_string(),
             id: "request-123".to_string(),
             payload: HashMap::from([
@@ -224,7 +224,7 @@ mod test {
         }))
         .expect("should successfully create test schema");
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
-        let resource_data = ResourceData {
+        let resource_data = EntityData {
             resource_type: "Jans::HttpRequest".to_string(),
             id: "request-123".to_string(),
             payload: HashMap::new(),
@@ -274,7 +274,7 @@ mod test {
         }))
         .expect("should successfully create test schema");
         let builder = EntityBuilder::new(schema, EntityNames::default(), false, false);
-        let resource_data = ResourceData {
+        let resource_data = EntityData {
             resource_type: "Jans::HttpRequest".to_string(),
             id: "request-123".to_string(),
             payload: HashMap::from([
