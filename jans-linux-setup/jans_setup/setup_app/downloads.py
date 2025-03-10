@@ -66,6 +66,16 @@ def download_pymysql():
         base.download(base.current_app.app_info['PYMYSQL'], pylib_dir_zip_file, verbose=True)
         base.extract_subdir(pylib_dir_zip_file, 'pymysql', pylib_dir)
 
+def download_pycontab():
+
+    if os.path.exists(os.path.join(base.pylib_dir, 'crontab.py')) and not base.argsp.force_download:
+        return
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        pylib_dir_zip_file = os.path.join(tmp_dir, os.path.basename(base.current_app.app_info['PYCRONTAB']))
+        base.download(base.current_app.app_info['PYCRONTAB'], pylib_dir_zip_file, verbose=True)
+        base.extract_file(pylib_dir_zip_file, 'crontab.py', base.pylib_dir)
+
 
 def download_all():
     download_files = []
@@ -93,3 +103,4 @@ def download_apps():
     download_cryptography()
     download_pyjwt()
     download_pymysql()
+    download_pycontab()

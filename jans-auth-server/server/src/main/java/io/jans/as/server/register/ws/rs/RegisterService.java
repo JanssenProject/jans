@@ -232,6 +232,9 @@ public class RegisterService {
         if (requestObject.getAccessTokenAsJwt() != null) {
             client.setAccessTokenAsJwt(requestObject.getAccessTokenAsJwt());
         }
+        if (requestObject.getRequirePkce() != null) {
+            client.getAttributes().setRequirePkce(requestObject.getRequirePkce());
+        }
         if (requestObject.getTlsClientAuthSubjectDn() != null) {
             client.getAttributes().setTlsClientAuthSubjectDn(requestObject.getTlsClientAuthSubjectDn());
         }
