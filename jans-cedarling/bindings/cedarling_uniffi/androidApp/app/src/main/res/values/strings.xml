@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">androidApp</string>
+    <string name="bootstrap_configuration">Bootstrap Configuration</string>
+    <string name="resources">Resources</string>
+    <string name="context">Context</string>
+    <string name="action">Action</string>
+    <string name="tokens">Tokens</string>
+</resources>
