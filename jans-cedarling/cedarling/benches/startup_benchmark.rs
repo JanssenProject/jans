@@ -4,8 +4,8 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LogConfig,
-    LogLevel, LogTypeConfig, PolicyStoreConfig, WorkloadBoolOp,
+    AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JsonRule, JwtConfig,
+    LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
 };
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use lazy_static::lazy_static;
@@ -44,7 +44,7 @@ lazy_static! {
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::And,
+            principal_bool_operator: JsonRule::default(),
             mapping_user: Some("Jans::User".to_string()),
             mapping_workload: Some("Jans::Workload".to_string()),
             mapping_role: Some("Jans::Role".to_string()),

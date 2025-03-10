@@ -19,20 +19,6 @@ pub struct Request {
     pub context: serde_json::Value,
 }
 
-/// Contains the JWTs that will be used for the AuthZ request
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct Tokens {
-    /// Access token raw value
-    #[serde(default)]
-    pub access_token: Option<String>,
-    /// Id Token raw value
-    #[serde(default)]
-    pub id_token: Option<String>,
-    /// Userinfo Token raw value
-    #[serde(default)]
-    pub userinfo_token: Option<String>,
-}
-
 /// Cedar policy resource data
 /// fields represent EntityUid
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]

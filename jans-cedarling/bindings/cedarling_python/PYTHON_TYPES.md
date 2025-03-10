@@ -255,6 +255,10 @@ ___
 Error encountered while parsing all entities to json for logging
 ___
 
+# authorize_errors.ExecuteRuleError
+Error encountered while executing the rule for principals
+___
+
 # authorize_errors.IdTokenTrustModeError
 Error encountered while running on strict id token trust mode
 ___

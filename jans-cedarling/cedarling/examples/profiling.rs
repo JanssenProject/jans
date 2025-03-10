@@ -3,10 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+#![allow(unused_imports)]
+#![allow(dead_code)]
+
 use cedarling::*;
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 
+#[cfg(not(any(target_arch = "wasm32", target_os = "windows")))]
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cedarling = init_cedarling().await;
@@ -67,7 +71,6 @@ async fn init_cedarling() -> Cedarling {
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::And,
             decision_log_default_jwt_id: "jti".to_string(),
             decision_log_user_claims: vec!["client_id".to_string(), "username".to_string()],
             decision_log_workload_claims: vec!["org_id".to_string()],
@@ -129,4 +132,11 @@ async fn call_authorize(
             },
         })
         .await;
+}
+
+/// just define a main function to satisfy the compiler.
+#[cfg(any(target_arch = "wasm32", target_os = "windows"))]
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    unimplemented!("Profiling is not supported on wasm32 or windows.")
 }

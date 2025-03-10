@@ -9,14 +9,42 @@
 //! all case scenario should have `result.decision == true`
 //! because we have checked different scenarios in `cases_authorize_without_check_jwt.rs`
 
+use std::sync::LazyLock;
+
 use lazy_static::lazy_static;
 use test_utils::assert_eq;
 use tokio::test;
 
 use super::utils::*;
-use crate::{WorkloadBoolOp, authorization_config::IdTokenTrustMode, cmp_decision, cmp_policy}; /* macros is defined in the cedarling\src\tests\utils\cedarling_util.rs */
+use crate::{JsonRule, authorization_config::IdTokenTrustMode, cmp_decision, cmp_policy}; /* macros is defined in the cedarling\src\tests\utils\cedarling_util.rs */
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/policy-store_ok_2.yaml");
+
+static OPERATOR_AND: LazyLock<JsonRule> = LazyLock::new(|| {
+    JsonRule::new(json!({
+        "and" : [
+            {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+            {"===": [{"var": "Jans::User"}, "ALLOW"]}
+        ]
+    }))
+    .unwrap()
+});
+
+static OPERATOR_OR: LazyLock<JsonRule> = LazyLock::new(|| {
+    JsonRule::new(json!({
+        "or" : [
+            {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+            {"===": [{"var": "Jans::User"}, "ALLOW"]}
+        ]
+    }))
+    .unwrap()
+});
+
+static OPERATOR_USER: LazyLock<JsonRule> =
+    LazyLock::new(|| JsonRule::new(json!({"===": [{"var": "Jans::User"}, "ALLOW"]})).unwrap());
+
+static OPERATOR_WORKLOAD: LazyLock<JsonRule> =
+    LazyLock::new(|| JsonRule::new(json!({"===": [{"var": "Jans::Workload"}, "ALLOW"]})).unwrap());
 
 lazy_static! {
     pub(crate) static ref AuthRequestBase: Request = Request::deserialize(serde_json::json!(
@@ -105,7 +133,7 @@ async fn success_test_for_principal_workload() {
         crate::AuthorizationConfig {
             use_user_principal: false,
             use_workload_principal: true,
-            user_workload_operator: Default::default(),
+            principal_bool_operator: OPERATOR_WORKLOAD.to_owned(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
@@ -144,7 +172,7 @@ async fn success_test_for_principal_user() {
         crate::AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: false,
-            user_workload_operator: Default::default(),
+            principal_bool_operator: OPERATOR_USER.to_owned(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
@@ -187,7 +215,7 @@ async fn success_test_for_principal_person_role() {
         crate::AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: false,
-            user_workload_operator: Default::default(),
+            principal_bool_operator: OPERATOR_USER.to_owned(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
@@ -230,7 +258,7 @@ async fn success_test_for_principal_workload_role() {
         crate::AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::And,
+            principal_bool_operator: OPERATOR_AND.to_owned(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
@@ -279,7 +307,7 @@ async fn success_test_for_principal_workload_true_or_user_false() {
         crate::AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::Or,
+            principal_bool_operator: OPERATOR_OR.to_owned(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
@@ -328,7 +356,7 @@ async fn success_test_for_principal_workload_false_or_user_true() {
         crate::AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::Or,
+            principal_bool_operator: OPERATOR_OR.to_owned(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
@@ -377,7 +405,7 @@ async fn success_test_for_principal_workload_false_or_user_false() {
         crate::AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::Or,
+            principal_bool_operator: OPERATOR_OR.to_owned(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
@@ -425,7 +453,7 @@ async fn test_where_principal_workload_cant_be_applied() {
         crate::AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: Default::default(),
+            principal_bool_operator: Default::default(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
@@ -454,7 +482,7 @@ async fn test_where_principal_user_cant_be_applied() {
         crate::AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: false,
-            user_workload_operator: Default::default(),
+            principal_bool_operator: JsonRule::default(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
