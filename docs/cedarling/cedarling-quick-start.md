@@ -108,7 +108,12 @@ To begin using Cedarling, you need to set up a policy store. We’ll use this [A
       "CEDARLING_LOG_TTL": null,
       "CEDARLING_USER_AUTHZ": "enabled",
       "CEDARLING_WORKLOAD_AUTHZ": "disabled",
-      "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
+      "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+          "or": [
+              {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+              {"===": [{"var": "Jans::User"}, "ALLOW"]}
+           ]
+      },
       "CEDARLING_LOCAL_JWKS": null,
       "CEDARLING_POLICY_STORE_LOCAL": null,
       "CEDARLING_POLICY_STORE_LOCAL_FN": null,
