@@ -114,7 +114,7 @@ impl EntityBuilder {
         }
     }
 
-    pub fn build_entities(
+    pub fn build_token_entities(
         &self,
         tokens: &HashMap<String, Token>,
         resource: &EntityData,
@@ -390,7 +390,7 @@ mod test {
             .collect::<HashMap<String, Token>>();
 
         let entities = entity_builder
-            .build_entities(&tokens, &EntityData {
+            .build_token_entities(&tokens, &EntityData {
                 resource_type: "Jans::Resource".to_string(),
                 id: "res-123".to_string(),
                 payload: HashMap::new(),

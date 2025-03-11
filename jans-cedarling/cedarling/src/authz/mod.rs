@@ -124,7 +124,7 @@ impl Authz {
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
         let entities_data = self
             .entity_builder
-            .build_entities(&tokens, &request.resource)?;
+            .build_token_entities(&tokens, &request.resource)?;
 
         // Get entity UIDs what we will be used on authorize check
         let resource_uid = entities_data.resource.uid();
@@ -352,7 +352,7 @@ impl Authz {
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         Ok(self
             .entity_builder
-            .build_entities(tokens, &request.resource)?)
+            .build_token_entities(tokens, &request.resource)?)
     }
 }
 
