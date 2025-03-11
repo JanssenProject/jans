@@ -10,7 +10,7 @@ use test_utils::assert_eq;
 use tokio::test;
 
 use super::utils::*;
-use crate::{Cedarling, cmp_decision, cmp_policy}; // macros is defined in the cedarling\src\tests\utils\cedarling_util.rs
+use crate::{Cedarling, JsonRule, cmp_decision, cmp_policy}; // macros is defined in the cedarling\src\tests\utils\cedarling_util.rs
 
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../../test_files/policy-store_ok_namespace_Jans2.yaml");
@@ -37,6 +37,14 @@ async fn test_namespace_jans2() {
         ),
     ])
     .into();
+    bs_config.authorization_config.principal_bool_operator = JsonRule::new(json!({
+        "and" : [
+            {"===": [{"var": "Jans2::Workload"}, "ALLOW"]},
+            {"===": [{"var": "Jans2::User"}, "ALLOW"]}
+        ]
+    }))
+    .unwrap();
+
     let cedarling = Cedarling::new(&bs_config)
         .await
         .expect("bootstrap config should initialize correctly");
