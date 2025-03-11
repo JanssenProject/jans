@@ -15,7 +15,7 @@ use serde::{Deserialize, Deserializer, de};
 use std::collections::HashMap;
 use url::Url;
 
-pub(crate) use claim_mapping::{ClaimMapping, ClaimMappings};
+pub(crate) use claim_mapping::ClaimMappings;
 pub use token_entity_metadata::TokenEntityMetadata;
 
 /// This is the top-level struct in compliance with the Agama Lab Policy Designer format.

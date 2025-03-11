@@ -10,51 +10,79 @@ use derive_more::derive::Deref;
 use std::collections::HashSet;
 
 const WORKLOAD_ATTR_SRC_TKNS: &[&str] = &["access_token"];
-const WORKLOAD_ATTR_SRC_CLAIMS: &[&str] =
-    &["iss", "aud", "client_id", "name", "rp_id", "spiffe_id"];
 
 impl EntityBuilder {
+    // TODO: we need to set spiffe_id to be either `aud` or `client_id`
     pub fn build_workload_entity(
         &self,
         tokens: &HashMap<String, Token>,
         tkn_principal_mappings: &TokenPrincipalMappings,
-    ) -> Result<(Entity, Option<Entity>), BuildEntityError> {
+        built_entities: &BuiltEntities,
+    ) -> Result<Entity, BuildEntityError> {
         let workload_type_name = self.config.entity_names.workload.as_ref();
+
+        let attrs_shape = self
+            .schema
+            .as_ref()
+            .and_then(|s| s.get_entity_shape(workload_type_name));
 
         // Get Workload Entity ID
         let workload_id_srcs = WorkloadIdSrcs::resolve(tokens);
         let workload_id = get_first_valid_entity_id(&workload_id_srcs)
             .map_err(|e| e.while_building(workload_type_name))?;
 
-        // Get Workload Entity attributes
-        let workload_attrs = build_entity_attrs(EntityAttrsSrc::new(
-            tokens,
-            WORKLOAD_ATTR_SRC_TKNS,
-            WORKLOAD_ATTR_SRC_CLAIMS,
-        ))
-        .map_err(|e| e.while_building(workload_type_name))?;
-
-        // Insert token references in the entity attributes
-        let mut workload_attrs =
-            add_token_references(workload_type_name, workload_attrs, tkn_principal_mappings);
-
-        let iss_entity = workload_id_srcs
+        // Collect the tokens and mappings to be used for this entity
+        let attrs_srcs: Vec<_> = WORKLOAD_ATTR_SRC_TKNS
             .iter()
-            .find_map(|src| {
-                self.replace_iss_with_entity(src.token, &mut workload_attrs)
-                    .transpose()
+            .filter_map(|name| {
+                tokens
+                    .get(*name)
+                    .map(|tkn| (tkn.claims_value(), tkn.claim_mappings()))
             })
-            .transpose()
-            .map_err(|e| e.while_building(workload_type_name))?;
+            .collect();
+        if attrs_srcs.is_empty() {
+            return Err(BuildEntityErrorKind::NoAvailableTokensToBuildEntity(
+                WORKLOAD_ATTR_SRC_TKNS
+                    .iter()
+                    .map(|s| s.to_string())
+                    .collect(),
+            )
+            .while_building(workload_type_name));
+        }
 
-        let workload_entity = build_cedar_entity(
-            workload_type_name,
-            &workload_id,
-            workload_attrs,
-            HashSet::new(),
-        )?;
+        // Extract attributes from sources
+        let (workload_attrs, errs): (Vec<_>, Vec<_>) = attrs_srcs
+            .into_iter()
+            .map(|(src, mappings)| build_entity_attrs(src, built_entities, attrs_shape, mappings))
+            .partition(Result::is_ok);
+        let mut workload_attrs: HashMap<String, RestrictedExpression> = if errs.is_empty() {
+            // what should happen if claims have the same name but different values?
+            workload_attrs
+                .into_iter()
+                .flatten()
+                .fold(HashMap::new(), |mut acc, attrs| {
+                    acc.extend(attrs);
+                    acc
+                })
+        } else {
+            let errs: Vec<_> = errs
+                .into_iter()
+                .flat_map(|e| e.unwrap_err().into_inner())
+                .collect();
+            return Err(BuildEntityErrorKind::from(errs).while_building(workload_type_name));
+        };
 
-        Ok((workload_entity, iss_entity))
+        // Apply token mappings if the schema/shape is not present since that's the only
+        // time it's really necessary
+        if attrs_shape.is_none() {
+            tkn_principal_mappings.apply(workload_type_name, &mut workload_attrs);
+        }
+
+        let parents = HashSet::default();
+        let workload_entity =
+            build_cedar_entity(workload_type_name, &workload_id, workload_attrs, parents)?;
+
+        Ok(workload_entity)
     }
 }
 
@@ -119,32 +147,56 @@ mod test {
     use super::super::*;
     use super::*;
     use crate::common::policy_store::TrustedIssuer;
-    use cedar_policy::Entities;
+    use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;
 
+    #[track_caller]
+    fn test_build_workload(
+        token: Token,
+        builder: &EntityBuilder,
+        tkn_principal_mappings: &TokenPrincipalMappings,
+        expected: Value,
+        schema: Option<&Schema>,
+    ) {
+        let tokens = HashMap::from([(token.name.clone(), token)]);
+        let mut built_entities = BuiltEntities::from(&builder.iss_entities);
+        built_entities.insert(
+            &EntityUid::from_str("Jans::Access_token::\"some_jti\"").expect("a valid EntityUid"),
+        );
+        let entity = builder
+            .build_workload_entity(&tokens, &tkn_principal_mappings, &built_entities)
+            .expect("should build workload entity");
+
+        assert_entity_eq(&entity, expected, schema);
+    }
+
     #[test]
-    fn can_build_using_access_tkn_aud() {
+    fn can_build_workload_with_aud_and_schema() {
+        let schema_src = r#"
+            namespace Jans {
+                entity TrustedIssuer;
+                entity Access_token;
+                entity Workload = {
+                    iss: TrustedIssuer,
+                    aud?: String,
+                    client_id?: String,
+                    access_token?: Access_token,
+                };
+            }
+        "#;
+        let schema = Schema::from_str(schema_src).expect("build cedar Schema");
+        let validator_schema =
+            ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityBuilderConfig::default().build_workload(), &issuers)
-            .expect("should init entity builder");
-        let access_token = Token::new(
-            "access_token",
-            HashMap::from([
-                ("iss".to_string(), json!("https://test.jans.org/")),
-                ("aud".to_string(), json!("some_aud")),
-                ("jti".to_string(), json!("some_jti")),
-                ("name".to_string(), json!("some_name")),
-                ("rp_id".to_string(), json!("some_rp_id")),
-                ("spiffe_id".to_string(), json!("some_spiffe_id")),
-                ("exp".to_string(), json!(123)),
-            ])
-            .into(),
-            Some(&iss),
-        );
-        let tokens = HashMap::from([("access_token".to_string(), access_token)]);
-        let token_principal_mappings = TokenPrincipalMappings::from(
+        let builder = EntityBuilder::new(
+            EntityBuilderConfig::default().build_workload(),
+            &issuers,
+            Some(&validator_schema),
+        )
+        .expect("should init entity builder");
+        let tkn_principal_mappings = TokenPrincipalMappings::from(
             [TokenPrincipalMapping {
                 principal: "Jans::Workload".into(),
                 attr_name: "access_token".into(),
@@ -155,16 +207,22 @@ mod test {
             }]
             .to_vec(),
         );
-        let (entity, _) = builder
-            .build_workload_entity(&tokens, &token_principal_mappings)
-            .expect("should build workload entity");
 
-        // Check if the entity has the correct attributes
-        assert_eq!(
-            entity
-                .clone()
-                .to_json_value()
-                .expect("should serialize entity to JSON"),
+        let access_token = Token::new(
+            "access_token",
+            HashMap::from([
+                ("iss".to_string(), json!("https://test.jans.org/")),
+                ("aud".to_string(), json!("some_aud")),
+                ("jti".to_string(), json!("some_jti")),
+            ])
+            .into(),
+            Some(&iss),
+        );
+
+        test_build_workload(
+            access_token,
+            &builder,
+            &tkn_principal_mappings,
             json!({
                 "uid": {"type": "Jans::Workload", "id": "some_aud"},
                 "attrs": {
@@ -173,9 +231,6 @@ mod test {
                         "id": "some_iss",
                     }},
                     "aud": "some_aud",
-                    "name": "some_name",
-                    "rp_id": "some_rp_id",
-                    "spiffe_id": "some_spiffe_id",
                     "access_token": {"__entity": {
                         "type": "Jans::Access_token",
                         "id": "some_jti",
@@ -183,35 +238,36 @@ mod test {
                 },
                 "parents": [],
             }),
-            "workload entity should have the correct attrs"
+            Some(&schema),
         );
-
-        Entities::from_entities([entity], Some(cedarling_schema()))
-            .expect("workload entity should conform to the schema");
     }
 
     #[test]
-    fn can_build_using_access_tkn_client_id() {
+    fn can_build_workload_with_client_id_and_schema() {
+        let schema_src = r#"
+            namespace Jans {
+                entity TrustedIssuer;
+                entity Access_token;
+                entity Workload = {
+                    iss: TrustedIssuer,
+                    aud?: String,
+                    client_id?: String,
+                    access_token?: Access_token,
+                };
+            }
+        "#;
+        let schema = Schema::from_str(schema_src).expect("build cedar Schema");
+        let validator_schema =
+            ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityBuilderConfig::default().build_workload(), &issuers)
-            .expect("should init entity builder");
-        let access_token = Token::new(
-            "access_token",
-            HashMap::from([
-                ("iss".to_string(), json!("https://test.jans.org/")),
-                ("jti".to_string(), json!("some_jti")),
-                ("client_id".to_string(), json!("some_client_id")),
-                ("name".to_string(), json!("some_name")),
-                ("rp_id".to_string(), json!("some_rp_id")),
-                ("spiffe_id".to_string(), json!("some_spiffe_id")),
-                ("exp".to_string(), json!(123)),
-            ])
-            .into(),
-            Some(&iss),
-        );
-        let tokens = HashMap::from([("access_token".to_string(), access_token)]);
-        let token_principal_mappings = TokenPrincipalMappings::from(
+        let builder = EntityBuilder::new(
+            EntityBuilderConfig::default().build_workload(),
+            &issuers,
+            Some(&validator_schema),
+        )
+        .expect("should init entity builder");
+        let tkn_principal_mappings = TokenPrincipalMappings::from(
             [TokenPrincipalMapping {
                 principal: "Jans::Workload".into(),
                 attr_name: "access_token".into(),
@@ -222,14 +278,22 @@ mod test {
             }]
             .to_vec(),
         );
-        let (entity, _) = builder
-            .build_workload_entity(&tokens, &token_principal_mappings)
-            .expect("should build workload entity");
 
-        assert_eq!(
-            entity
-                .to_json_value()
-                .expect("should serialize entity to JSON"),
+        let access_token = Token::new(
+            "access_token",
+            HashMap::from([
+                ("iss".to_string(), json!("https://test.jans.org/")),
+                ("client_id".to_string(), json!("some_client_id")),
+                ("jti".to_string(), json!("some_jti")),
+            ])
+            .into(),
+            Some(&iss),
+        );
+
+        test_build_workload(
+            access_token,
+            &builder,
+            &tkn_principal_mappings,
             json!({
                 "uid": {"type": "Jans::Workload", "id": "some_client_id"},
                 "attrs": {
@@ -238,9 +302,6 @@ mod test {
                         "id": "some_iss",
                     }},
                     "client_id": "some_client_id",
-                    "name": "some_name",
-                    "rp_id": "some_rp_id",
-                    "spiffe_id": "some_spiffe_id",
                     "access_token": {"__entity": {
                         "type": "Jans::Access_token",
                         "id": "some_jti",
@@ -248,10 +309,59 @@ mod test {
                 },
                 "parents": [],
             }),
-            "workload entity should have the correct attrs"
+            Some(&schema),
+        );
+    }
+
+    #[test]
+    fn can_build_workload_without_schema() {
+        let iss = TrustedIssuer::default();
+        let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+        let builder = EntityBuilder::new(
+            EntityBuilderConfig::default().build_workload(),
+            &issuers,
+            None,
+        )
+        .expect("should init entity builder");
+        let tkn_principal_mappings = TokenPrincipalMappings::from(
+            [TokenPrincipalMapping {
+                principal: "Jans::Workload".into(),
+                attr_name: "access_token".into(),
+                expr: RestrictedExpression::new_entity_uid(
+                    EntityUid::from_str("Jans::Access_token::\"some_jti\"".into())
+                        .expect("should parse EntityUid"),
+                ),
+            }]
+            .to_vec(),
         );
 
-        Entities::from_entities([entity], Some(cedarling_schema()))
-            .expect("workload entity should conform to the schema");
+        let access_token = Token::new(
+            "access_token",
+            HashMap::from([
+                ("iss".to_string(), json!("https://test.jans.org/")),
+                ("aud".to_string(), json!("some_aud")),
+                ("jti".to_string(), json!("some_jti")),
+            ])
+            .into(),
+            Some(&iss),
+        );
+        test_build_workload(
+            access_token,
+            &builder,
+            &tkn_principal_mappings,
+            json!({
+                "uid": {"type": "Jans::Workload", "id": "some_aud"},
+                "attrs": {
+                    "iss": "https://test.jans.org/",
+                    "aud": "some_aud",
+                    "access_token": {"__entity": {
+                        "type": "Jans::Access_token",
+                        "id": "some_jti",
+                    }},
+                },
+                "parents": [],
+            }),
+            None,
+        );
     }
 }

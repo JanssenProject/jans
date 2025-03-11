@@ -385,7 +385,7 @@ impl AuthorizeEntitiesData {
     /// - **Role Entities**
     ///
     /// Only entities that have been built will be included
-    fn entities_for_context(&self) -> BuiltEntities {
+    fn entities_for_context(&self) -> OldBuiltEntities {
         let token_entities = self.tokens.values().map(get_name_and_id);
         let principal_entities = [self.workload.as_ref(), self.user.as_ref()]
             .into_iter()

@@ -13,22 +13,20 @@ impl EntityBuilder {
         tkn_type_name: &str,
         token: &Token,
         tkn_principal_mappings: &mut TokenPrincipalMappings,
-    ) -> Result<(Entity, Option<Entity>), BuildEntityError> {
-        // Build entity attributes
-        let mut attrs = build_entity_attrs(EntityAttrsSrc::from(token))
+        built_entities: &BuiltEntities,
+        parents: HashSet<EntityUid>,
+    ) -> Result<Entity, BuildEntityError> {
+        let id = get_first_valid_entity_id(&TokenIdSrcs::resolve(token))
             .map_err(|e| e.while_building(tkn_type_name))?;
 
-        let iss_entity = self
-            .replace_iss_with_entity(token, &mut attrs)
-            .map_err(|e| e.while_building(tkn_type_name))?;
-
-        let entity_id = get_first_valid_entity_id(&TokenIdSrcs::resolve(token))
-            .map_err(|e| e.while_building(tkn_type_name))?;
-
-        let uid = EntityUid::from_str(&format!("{}::\"{}\"", tkn_type_name, entity_id))
-            .map_err(|e| BuildEntityErrorKind::from(e).while_building(tkn_type_name))?;
-        let tkn_entity = Entity::new(uid, attrs, HashSet::new())
-            .map_err(|e| BuildEntityErrorKind::from(e).while_building(tkn_type_name))?;
+        let tkn_entity = self.build_entity(
+            tkn_type_name,
+            &id,
+            parents,
+            token.claims_value(),
+            built_entities,
+            token.claim_mappings(),
+        )?;
 
         // Record the principal mappings for later use
         if let Some(metadata) = token.get_metadata() {
@@ -42,7 +40,7 @@ impl EntityBuilder {
             }
         }
 
-        Ok((tkn_entity, iss_entity))
+        Ok(tkn_entity)
     }
 }
 
@@ -116,40 +114,59 @@ mod test {
     use super::super::test::*;
     use super::super::*;
     use crate::common::policy_store::TrustedIssuer;
-    use cedar_policy::Entities;
+    use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;
 
     #[test]
-    fn can_build_access_tkn_entity() {
+    fn can_build_tkn_entity_with_schema() {
+        let schema_src = r#"
+        namespace Jans {
+            entity TrustedIssuer;
+            entity Role;
+            entity Access_token in [Role] = {
+                iss: TrustedIssuer,
+                aud?: String,
+                jti: String,
+            };
+        }
+        "#;
+        let schema = Schema::from_str(schema_src).expect("build Schema");
+        let validator_schema =
+            ValidatorSchema::from_str(schema_src).expect("build ValidatorSchema");
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityBuilderConfig::default(), &issuers)
-            .expect("should init entity builder");
+        let builder = EntityBuilder::new(
+            EntityBuilderConfig::default(),
+            &issuers,
+            Some(&validator_schema),
+        )
+        .expect("should init entity builder");
         let access_token = Token::new(
             "access_token",
             HashMap::from([
                 ("iss".to_string(), json!("https://test.jans.org/")),
-                ("aud".to_string(), json!("some_aud")),
                 ("jti".to_string(), json!("some_jti")),
+                ("not_in_schema".to_string(), json!("not_in_schema")),
             ])
             .into(),
             Some(&iss),
         );
-        let (entity, _) = builder
+        let parents = HashSet::from(["Jans::Role::\"some_role\""
+            .parse()
+            .expect("a valid entity UID")]);
+        let entity = builder
             .build_tkn_entity(
                 "Jans::Access_token",
                 &access_token,
                 &mut TokenPrincipalMappings::default(),
+                &BuiltEntities::from(&builder.iss_entities),
+                parents,
             )
             .expect("should build access_token entity");
 
-        // Check if the entity has the correct attributes
-        assert_eq!(
-            entity
-                .clone()
-                .to_json_value()
-                .expect("should serialize entity to JSON"),
+        assert_entity_eq(
+            &entity,
             json!({
                 "uid": {"type": "Jans::Access_token", "id": "some_jti"},
                 "attrs": {
@@ -157,143 +174,40 @@ mod test {
                         "type": "Jans::TrustedIssuer",
                         "id": "some_iss",
                     }},
-                    "aud": "some_aud",
                     "jti": "some_jti",
                 },
-                "parents": [],
+                "parents": [{"type": "Jans::Role", "id": "some_role"}],
             }),
-            "Access_token entity should have the correct attrs"
+            Some(&schema),
         );
-
-        // Check if the entity conforms to the schema
-        Entities::from_entities([entity], Some(cedarling_schema()))
-            .expect("Access_token entity should conform to the schema");
     }
 
     #[test]
-    fn can_build_id_tkn_entity() {
+    fn can_build_tkn_entity_without_schema() {
         let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityBuilderConfig::default(), &issuers)
+        let builder = EntityBuilder::new(EntityBuilderConfig::default(), &issuers, None)
             .expect("should init entity builder");
         let access_token = Token::new(
             "access_token",
             HashMap::from([
                 ("iss".to_string(), json!("https://test.jans.org/")),
-                ("sub".to_string(), json!("some_sub")),
                 ("jti".to_string(), json!("some_jti")),
+                ("not_in_schema".to_string(), json!("not_in_schema")),
             ])
             .into(),
             Some(&iss),
         );
-        let (entity, _) = builder
-            .build_tkn_entity(
-                "Jans::Id_token",
-                &access_token,
-                &mut TokenPrincipalMappings::default(),
-            )
-            .expect("should build id_token entity");
-
-        // Check if the entity has the correct attributes
-        assert_entity_eq(
-            &entity,
-            json!({
-                "uid": {"type": "Jans::Id_token", "id": "some_jti"},
-                "attrs": {
-                    "iss": {"__entity": {
-                        "type": "Jans::TrustedIssuer",
-                        "id": "some_iss",
-                    }},
-                    "sub": "some_sub",
-                    "jti": "some_jti",
-                },
-                "parents": [],
-            }),
-            Some(cedarling_schema()),
-        );
-    }
-
-    #[test]
-    fn can_build_userinfo_tkn_entity() {
-        let iss = TrustedIssuer::default();
-        let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityBuilderConfig::default(), &issuers)
-            .expect("should init entity builder");
-        let access_token = Token::new(
-            "userinfo_token",
-            HashMap::from([
-                ("iss".to_string(), json!("https://test.jans.org/")),
-                ("sub".to_string(), json!("some_sub")),
-                ("jti".to_string(), json!("some_jti")),
-            ])
-            .into(),
-            Some(&iss),
-        );
-        let (entity, _) = builder
-            .build_tkn_entity(
-                "Jans::Userinfo_token",
-                &access_token,
-                &mut TokenPrincipalMappings::default(),
-            )
-            .expect("should build userinfo_token entity");
-
-        // Check if the entity has the correct attributes
-        assert_eq!(
-            entity
-                .clone()
-                .to_json_value()
-                .expect("should serialize entity to JSON"),
-            json!({
-                "uid": {"type": "Jans::Userinfo_token", "id": "some_jti"},
-                "attrs": {
-                    "iss": {"__entity": {
-                        "type": "Jans::TrustedIssuer",
-                        "id": "some_iss",
-                    }},
-                    "sub": "some_sub",
-                    "jti": "some_jti",
-                },
-                "parents": [],
-            }),
-            "Userinfo_token entity should have the correct attrs"
-        );
-
-        assert_entity_eq(
-            &entity,
-            json!({
-                "uid": {"type": "Jans::Userinfo_token", "id": "some_jti"},
-                "attrs": {
-                    "iss": {"__entity": {
-                        "type": "Jans::TrustedIssuer",
-                        "id": "some_iss",
-                    }},
-                    "sub": "some_sub",
-                    "jti": "some_jti",
-                },
-                "parents": [],
-            }),
-            Some(cedarling_schema()),
-        );
-    }
-
-    #[test]
-    fn builds_str_iss_if_entity_is_unavailable() {
-        let builder = EntityBuilder::new(EntityBuilderConfig::default(), &HashMap::new())
-            .expect("should init entity builder");
-        let access_token = Token::new(
-            "userinfo_token",
-            HashMap::from([
-                ("iss".to_string(), json!("https://test.jans.org/")),
-                ("jti".to_string(), json!("some_jti")),
-            ])
-            .into(),
-            None,
-        );
-        let (entity, _) = builder
+        let parents = HashSet::from(["Jans::Role::\"some_role\""
+            .parse()
+            .expect("a valid entity UID")]);
+        let entity = builder
             .build_tkn_entity(
                 "Jans::Access_token",
                 &access_token,
                 &mut TokenPrincipalMappings::default(),
+                &BuiltEntities::from(&builder.iss_entities),
+                parents,
             )
             .expect("should build access_token entity");
 
@@ -305,7 +219,7 @@ mod test {
                     "iss": "https://test.jans.org/",
                     "jti": "some_jti",
                 },
-                "parents": [],
+                "parents": [{"type": "Jans::Role", "id": "some_role"}],
             }),
             None,
         );

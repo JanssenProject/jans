@@ -74,18 +74,19 @@ impl<'a> ServiceFactory<'a> {
     pub fn entity_builder(&mut self) -> Result<Arc<EntityBuilder>, ServiceInitError> {
         if let Some(entity_builder) = &self.container.entity_builder_service {
             return Ok(entity_builder.clone());
-        } else {
-            let config = &self.bootstrap_config.entity_builder_config;
-            let trusted_issuers = self
-                .policy_store()
-                .trusted_issuers
-                .clone()
-                .unwrap_or_default();
-            let entity_builder = EntityBuilder::new(config.clone(), &trusted_issuers)?;
-            let service = Arc::new(entity_builder);
-            self.container.entity_builder_service = Some(service.clone());
-            Ok(service)
         }
+
+        let config = &self.bootstrap_config.entity_builder_config;
+        let trusted_issuers = self
+            .policy_store()
+            .trusted_issuers
+            .clone()
+            .unwrap_or_default();
+        let schema = &self.policy_store().schema.validator_schema;
+        let entity_builder = EntityBuilder::new(config.clone(), &trusted_issuers, Some(schema))?;
+        let service = Arc::new(entity_builder);
+        self.container.entity_builder_service = Some(service.clone());
+        Ok(service)
     }
 
     // get authz service

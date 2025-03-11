@@ -4,8 +4,9 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::{AuthorizeEntitiesData, AuthzConfig};
+use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
-use crate::{common::cedar_schema::cedar_json::CedarSchemaJson, entity_builder::BuiltEntities};
+use crate::entity_builder::OldBuiltEntities;
 use cedar_policy::{ContextJsonError, EntityTypeName, ParseErrors};
 use serde_json::{Value, json, map::Entry};
 
@@ -92,7 +93,7 @@ pub fn build_context(
 fn build_entity_refs_from_attr(
     namespace: &str,
     attr: &Attribute,
-    built_entities: &BuiltEntities,
+    built_entities: &OldBuiltEntities,
     schema: &CedarSchemaJson,
 ) -> Result<Option<Value>, BuildContextError> {
     match attr {
@@ -122,7 +123,7 @@ fn build_entity_refs_from_attr(
 /// Maps a known entity ID to the entity reference
 fn map_entity_id(
     name: &EntityTypeName,
-    built_entities: &BuiltEntities,
+    built_entities: &OldBuiltEntities,
 ) -> Result<Option<Value>, BuildContextError> {
     if let Some(type_id) = built_entities.get(name) {
         Ok(Some(json!({"type": name.to_string(), "id": type_id})))

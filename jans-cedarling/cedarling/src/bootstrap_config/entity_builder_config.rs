@@ -14,7 +14,7 @@ pub(crate) const DEFAULT_ACCESS_TKN_ENTITY_NAME: &str = "Jans::Access_token";
 pub(crate) const DEFAULT_ID_TKN_ENTITY_NAME: &str = "Jans::Id_token";
 pub(crate) const DEFAULT_USERINFO_TKN_ENTITY_NAME: &str = "Jans::Userinfo_token";
 
-/// Configuration for the JWT to Cedar entity mappings
+/// Bootstrap Configurations for the JWT to Cedar entity mappings
 #[derive(Debug, PartialEq, Clone, Default)]
 pub struct EntityBuilderConfig {
     /// The names of the buildable Cedar entity type names

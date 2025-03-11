@@ -3,15 +3,13 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::built_entities::BuiltEntities;
-use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
+use super::schema::{EntityRefAttrSrc, EntityRefSetSrc, ExpectedClaimType, TknClaimAttrSrc};
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
-use cedar_policy::{
-    EntityId, EntityTypeName, EntityUid, ExpressionConstructionError, ParseErrors,
-    RestrictedExpression,
-};
+use cedar_policy::{EntityUid, RestrictedExpression};
 use serde_json::Value;
-use std::collections::HashMap;
+use smol_str::SmolStr;
+use std::{collections::HashMap, fmt::Display, str::FromStr};
+use thiserror::Error;
 
 impl Attribute {
     pub fn kind_str(&self) -> &str {
@@ -26,308 +24,9 @@ impl Attribute {
             Attribute::EntityOrCommon { .. } => "EntityOrCommon",
         }
     }
-
-    /// Builds a [`RestrictedExpression`] while checking the schema
-    pub fn build_expr(
-        &self,
-        src_key: &str,
-        attr_claim_value: Option<&Value>,
-        default_namespace: Option<&str>,
-        schema: &CedarSchemaJson,
-        built_entities: &BuiltEntities,
-    ) -> Result<Option<RestrictedExpression>, BuildExprError> {
-        match self {
-            // Handle String attributes
-            Attribute::String { required } => {
-                let Some(attr_claim_value) = attr_claim_value else {
-                    if *required {
-                        return Err(BuildExprError::MissingSource(src_key.to_string()));
-                    } else {
-                        return Ok(None);
-                    }
-                };
-
-                let claim = attr_claim_value
-                    .as_str()
-                    .ok_or(KeyedJsonTypeError::type_mismatch(
-                        src_key,
-                        "string",
-                        attr_claim_value,
-                    ))?
-                    .to_string();
-                Ok(Some(RestrictedExpression::new_string(claim)))
-            },
-
-            // Handle Long attributes
-            Attribute::Long { required } => {
-                let Some(attr_claim_value) = attr_claim_value else {
-                    if *required {
-                        return Err(BuildExprError::MissingSource(src_key.to_string()));
-                    } else {
-                        return Ok(None);
-                    }
-                };
-
-                let claim = attr_claim_value
-                    .as_i64()
-                    .ok_or(KeyedJsonTypeError::type_mismatch(
-                        src_key,
-                        "number",
-                        attr_claim_value,
-                    ))?;
-                Ok(Some(RestrictedExpression::new_long(claim)))
-            },
-
-            // Handle Boolean attributes
-            Attribute::Boolean { required } => {
-                let Some(attr_claim_value) = attr_claim_value else {
-                    if *required {
-                        return Err(BuildExprError::MissingSource(src_key.to_string()));
-                    } else {
-                        return Ok(None);
-                    }
-                };
-
-                let claim = attr_claim_value
-                    .as_bool()
-                    .ok_or(KeyedJsonTypeError::type_mismatch(
-                        src_key,
-                        "bool",
-                        attr_claim_value,
-                    ))?;
-                Ok(Some(RestrictedExpression::new_bool(claim)))
-            },
-
-            // Handle Record attributes
-            Attribute::Record { attrs, required } => {
-                let Some(attr_claim_value) = attr_claim_value else {
-                    if *required {
-                        return Err(BuildExprError::MissingSource(src_key.to_string()));
-                    } else {
-                        return Ok(None);
-                    }
-                };
-
-                let attr_claim_object =
-                    attr_claim_value
-                        .as_object()
-                        .ok_or(KeyedJsonTypeError::type_mismatch(
-                            src_key,
-                            "object",
-                            attr_claim_value,
-                        ))?;
-
-                let mut fields = HashMap::new();
-                for (key, kind) in attrs.iter() {
-                    if let Some(obj_value) = attr_claim_object.get(key) {
-                        if let Some(expr) = kind.build_expr(
-                            key,
-                            Some(obj_value),
-                            default_namespace,
-                            schema,
-                            built_entities,
-                        )? {
-                            fields.insert(key.to_string(), expr);
-                        }
-                    };
-                }
-
-                if fields.is_empty() && !required {
-                    Ok(None)
-                } else {
-                    Ok(Some(RestrictedExpression::new_record(fields)?))
-                }
-            },
-
-            // Handle Set attributes
-            Attribute::Set { required, element } => {
-                let Some(attr_claim_value) = attr_claim_value else {
-                    if *required {
-                        return Err(BuildExprError::MissingSource(src_key.to_string()));
-                    } else {
-                        return Ok(None);
-                    }
-                };
-
-                let claim =
-                    attr_claim_value
-                        .as_array()
-                        .ok_or(KeyedJsonTypeError::type_mismatch(
-                            src_key,
-                            "array",
-                            attr_claim_value,
-                        ))?;
-
-                let mut values = Vec::new();
-                for (i, val) in claim.iter().enumerate() {
-                    let attr_claim_value = Some(val);
-
-                    let claim_name = i.to_string();
-                    if let Some(expr) = element.build_expr(
-                        &claim_name,
-                        attr_claim_value,
-                        default_namespace,
-                        schema,
-                        built_entities,
-                    )? {
-                        values.push(expr);
-                    }
-                }
-                Ok(Some(RestrictedExpression::new_set(values)))
-            },
-
-            // Handle Entity attributes
-            Attribute::Entity { required, name } => {
-                let type_name = if let Some((type_name, _)) = schema
-                    .get_entity_schema(name, default_namespace)
-                    .map_err(|e| BuildExprError::ParseTypeName(name.clone(), e))?
-                {
-                    type_name
-                } else if *required {
-                    return Err(BuildExprError::EntityNotInSchema(name.to_string()));
-                } else {
-                    return Ok(None);
-                };
-
-                let entity_id = if let Some(entity_id) = built_entities.get(&type_name) {
-                    entity_id
-                } else if let Some(entity_id) = attr_claim_value.and_then(|v| v.as_str()) {
-                    entity_id
-                } else if *required {
-                    return Err(BuildExprError::MissingEntityId(src_key.into()));
-                } else {
-                    return Ok(None);
-                };
-
-                build_entity(entity_id, type_name)
-            },
-
-            // Handle Extension attributes
-            Attribute::Extension { required, name } => {
-                let Some(attr_claim_value) = attr_claim_value else {
-                    if *required {
-                        return Err(BuildExprError::MissingSource(src_key.to_string()));
-                    } else {
-                        return Ok(None);
-                    }
-                };
-
-                let claim = attr_claim_value
-                    .as_str()
-                    .ok_or(KeyedJsonTypeError::type_mismatch(
-                        src_key,
-                        "string",
-                        attr_claim_value,
-                    ))?;
-                let expr = match name.as_str() {
-                    "ipaddr" => RestrictedExpression::new_ip(claim),
-                    "decimal" => RestrictedExpression::new_decimal(claim),
-                    name => RestrictedExpression::new_unknown(name),
-                };
-                Ok(Some(expr))
-            },
-
-            // Handle EntityOrCommon attributes
-            Attribute::EntityOrCommon { required, name } => {
-                // If the attribute is an entity, convert the attribute then call
-                // build_expr again
-                if schema
-                    .get_entity_schema(name, default_namespace)
-                    .map_err(|e| BuildExprError::ParseTypeName(name.clone(), e))?
-                    .is_some()
-                {
-                    let attr = Attribute::Entity {
-                        required: *required,
-                        name: name.clone(),
-                    };
-                    return attr.build_expr(
-                        src_key,
-                        attr_claim_value,
-                        default_namespace,
-                        schema,
-                        built_entities,
-                    );
-                };
-
-                // If the attribute is a Cedar primitive, e.g. String, Bool,
-                // etc., convert the attribute then call build_expr again
-                if let Some(attr) = str_to_primitive_type(*required, name) {
-                    return attr.build_expr(
-                        src_key,
-                        attr_claim_value,
-                        default_namespace,
-                        schema,
-                        built_entities,
-                    );
-                }
-
-                // Finally, check if it's a common type and build the expression
-                // accordingly.
-                if let Some((entity_type_name, attr)) = schema
-                    .get_common_type(name, default_namespace)
-                    .map_err(|e| BuildExprError::ParseTypeName(name.clone(), e))?
-                {
-                    return attr.build_expr(
-                        src_key,
-                        attr_claim_value,
-                        Some(entity_type_name.namespace().as_str()),
-                        schema,
-                        built_entities,
-                    );
-                }
-
-                if *required {
-                    Err(BuildExprError::UnkownType(name.to_string()))
-                } else {
-                    Ok(None)
-                }
-            },
-        }
-    }
 }
 
-fn build_entity(
-    entity_id: &str,
-    entity_type_name: EntityTypeName,
-) -> Result<Option<RestrictedExpression>, BuildExprError> {
-    let type_id = EntityId::new(entity_id);
-    let uid = EntityUid::from_type_name_and_id(entity_type_name, type_id);
-    let expr = RestrictedExpression::new_entity_uid(uid);
-    Ok(Some(expr))
-}
-
-fn str_to_primitive_type(required: bool, name: &str) -> Option<Attribute> {
-    let primitive_type = match name {
-        "String" => Attribute::String { required },
-        "Long" => Attribute::Long { required },
-        "Boolean" => Attribute::Boolean { required },
-        _ => return None,
-    };
-    Some(primitive_type)
-}
-
-/// Errors when building a [`RestrictedExpression`]
-#[derive(Debug, thiserror::Error)]
-pub enum BuildExprError {
-    #[error("the given attribute source data is missing the key: {0}")]
-    MissingSource(String),
-    #[error(
-        "failed to obtain type id. either the entity was not built beforehand or the token is missing the \"{0}\" claim"
-    )]
-    MissingEntityId(String),
-    #[error(transparent)]
-    TypeMismatch(#[from] KeyedJsonTypeError),
-    #[error(transparent)]
-    ConstructionError(#[from] ExpressionConstructionError),
-    #[error("the type of `{0}` could not be determined")]
-    UnkownType(String),
-    #[error("the entity type `{0}` is not in the schema")]
-    EntityNotInSchema(String),
-    #[error("failed to parse entity type name `{0}`: {1}")]
-    ParseTypeName(String, ParseErrors),
-}
-
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, Error)]
 #[error("type mismatch for key '{key}'. expected: '{expected_type}', but found: '{actual_type}'")]
 pub struct KeyedJsonTypeError {
     pub key: String,
@@ -335,360 +34,192 @@ pub struct KeyedJsonTypeError {
     pub actual_type: String,
 }
 
-impl KeyedJsonTypeError {
-    /// Returns the JSON type name of the given value.
-    pub fn value_type_name(value: Option<&Value>) -> &'static str {
-        match value {
-            Some(Value::Null) => "null",
-            Some(Value::Bool(_)) => "bool",
-            Some(Value::Number(_)) => "number",
-            Some(Value::String(_)) => "string",
-            Some(Value::Array(_)) => "array",
-            Some(Value::Object(_)) => "object",
-            None => "null",
-        }
-    }
-
-    /// Constructs a `TypeMismatch` error with detailed information about the expected and actual types.
-    pub fn type_mismatch(key: &str, expected_type_name: &str, got_value: &Value) -> Self {
-        Self::type_mismatch_optional(key, expected_type_name, Some(got_value))
-    }
-
-    /// Constructs a `TypeMismatch` error with detailed information about the expected and actual types.
-    pub fn type_mismatch_optional(
-        key: &str,
-        expected_type_name: &str,
-        got_value: Option<&Value>,
-    ) -> Self {
-        let got_value_type_name = Self::value_type_name(got_value).to_string();
-
-        Self {
-            key: key.to_string(),
-            expected_type: expected_type_name.to_string(),
-            actual_type: got_value_type_name,
-        }
+impl TknClaimAttrSrc {
+    pub fn build_expr(
+        &self,
+        src: &Value,
+    ) -> Result<Option<RestrictedExpression>, BuildExprErrorVec> {
+        build_expr_from_value(&self.expected_type, src)
     }
 }
 
-#[cfg(test)]
-mod test {
-    use super::super::built_entities::BuiltEntities;
-    use crate::common::cedar_schema::cedar_json::{CedarSchemaJson, attribute::Attribute};
-    use serde_json::json;
-    use std::collections::HashMap;
-
-    #[test]
-    fn can_build_string_expr() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Test": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "attr1": { "type": "String" },
-                    },
-                }
-            }}}
-        }))
-        .expect("should successfully build schema");
-        let attr = Attribute::string();
-        let src = HashMap::from([("src_key".to_string(), json!("attr-val"))]);
-        let srs_key = "src_key";
-
-        let expr = attr
-            .build_expr(
-                srs_key,
-                src.get(srs_key),
-                None,
-                &schema,
-                &BuiltEntities::default(),
-            )
-            .expect("should not error");
-        assert!(expr.is_some(), "a restricted expression should be built")
+impl EntityRefAttrSrc {
+    pub fn build_expr(&self, id: &str) -> Result<RestrictedExpression, BuildExprError> {
+        let uid = EntityUid::from_str(&format!("{}::\"{}\"", &self.0, id))?;
+        Ok(RestrictedExpression::new_entity_uid(uid))
     }
+}
 
-    #[test]
-    fn can_build_long_expr() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Test": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "attr1": { "type": "Long" },
-                    },
-                }
-            }}}
-        }))
-        .expect("should successfully build schema");
-        let attr = Attribute::long();
-        let src = HashMap::from([("src_key".to_string(), json!(123))]);
-        let srs_key = "src_key";
+impl EntityRefSetSrc {
+    pub fn build_expr(&self, ids: &[SmolStr]) -> Result<RestrictedExpression, BuildExprErrorVec> {
+        let (uids, errs): (Vec<_>, Vec<_>) = ids
+            .iter()
+            .map(|id| {
+                EntityUid::from_str(&format!("{}::\"{}\"", &self.0, id))
+                    .map(RestrictedExpression::new_entity_uid)
+            })
+            .partition(Result::is_ok);
 
-        let expr = attr
-            .build_expr(
-                srs_key,
-                src.get(srs_key),
-                None,
-                &schema,
-                &BuiltEntities::default(),
-            )
-            .expect("should not error");
-        assert!(expr.is_some(), "a restricted expression should be built")
+        let uids: Vec<_> = if errs.is_empty() {
+            uids.into_iter().flatten().collect()
+        } else {
+            return Err(BuildExprErrorVec::from(
+                errs.into_iter()
+                    .map(|e| BuildExprError::ParseUid(e.unwrap_err()))
+                    .collect::<Vec<_>>(),
+            ));
+        };
+
+        Ok(RestrictedExpression::new_set(uids))
     }
+}
 
-    #[test]
-    fn can_build_boolean_expr() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Test": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "attr1": { "type": "Boolean" },
-                    },
-                }
-            }}}
-        }))
-        .expect("should successfully build schema");
-        let attr = Attribute::boolean();
-        let src = HashMap::from([("src_key".to_string(), json!(true))]);
-        let srs_key = "src_key";
+fn build_expr_from_value(
+    claim_type: &ExpectedClaimType,
+    src: &Value,
+) -> Result<Option<RestrictedExpression>, BuildExprErrorVec> {
+    match claim_type {
+        ExpectedClaimType::Null => Ok(None),
+        ExpectedClaimType::Bool => {
+            let val = src.as_bool().ok_or_else(|| TypeMismatchError {
+                expected: "bool".to_string(),
+                actual: TypeMismatchError::value_type_name(src).to_string(),
+            })?;
+            Ok(Some(RestrictedExpression::new_bool(val)))
+        },
+        ExpectedClaimType::Number => {
+            let val = src.as_i64().ok_or_else(|| TypeMismatchError {
+                expected: "number".to_string(),
+                actual: TypeMismatchError::value_type_name(src).to_string(),
+            })?;
+            Ok(Some(RestrictedExpression::new_long(val)))
+        },
+        ExpectedClaimType::String => {
+            let val = src.as_str().ok_or_else(|| TypeMismatchError {
+                expected: "string".to_string(),
+                actual: TypeMismatchError::value_type_name(src).to_string(),
+            })?;
+            Ok(Some(RestrictedExpression::new_string(val.to_string())))
+        },
+        ExpectedClaimType::Array(expected_claim_type) => {
+            let src = src.as_array().ok_or_else(|| TypeMismatchError {
+                expected: "array".to_string(),
+                actual: TypeMismatchError::value_type_name(src).to_string(),
+            })?;
 
-        let expr = attr
-            .build_expr(
-                srs_key,
-                src.get(srs_key),
-                Some("Jans"),
-                &schema,
-                &BuiltEntities::default(),
-            )
-            .expect("should not error");
-        assert!(expr.is_some(), "a restricted expression should be built")
+            let (vals, errs): (Vec<_>, Vec<_>) = src
+                .iter()
+                .map(|src| build_expr_from_value(expected_claim_type, src))
+                .filter_map(|expr| expr.transpose())
+                .partition(Result::is_ok);
+
+            let vals: Vec<RestrictedExpression> = if errs.is_empty() {
+                vals.into_iter().flatten().collect()
+            } else {
+                let errs = errs.into_iter().flat_map(|e| e.unwrap_err().0).collect();
+                return Err(BuildExprErrorVec(errs))?;
+            };
+
+            Ok(Some(RestrictedExpression::new_set(vals)))
+        },
+        ExpectedClaimType::Object(expected_obj) => {
+            let src = src.as_object().ok_or_else(|| TypeMismatchError {
+                expected: "object".to_string(),
+                actual: TypeMismatchError::value_type_name(src).to_string(),
+            })?;
+
+            let (fields, errs): (Vec<_>, Vec<_>) = expected_obj
+                .iter()
+                .filter_map(|(name, ty)| {
+                    src.get(name.as_str()).and_then(|src| {
+                        build_expr_from_value(ty, src)
+                            .transpose()
+                            .map(|res| res.map(|res| (name.to_string(), res)))
+                    })
+                })
+                .partition(Result::is_ok);
+
+            let fields: HashMap<String, RestrictedExpression> = if errs.is_empty() {
+                fields.into_iter().flatten().collect()
+            } else {
+                let errs = errs.into_iter().flat_map(|e| e.unwrap_err().0).collect();
+                return Err(BuildExprErrorVec(errs))?;
+            };
+
+            Ok(Some(RestrictedExpression::new_record(fields)?))
+        },
+        ExpectedClaimType::Extension(name) => {
+            let val = src.as_str().unwrap();
+            let expr = match name.as_str() {
+                "decimal" => Some(RestrictedExpression::new_decimal(val)),
+                "ipaddr" => Some(RestrictedExpression::new_ip(val)),
+                _ => Some(RestrictedExpression::new_unknown(val)),
+            };
+            Ok(expr)
+        },
     }
+}
 
-    #[test]
-    fn can_build_record_expr() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Test": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "outer_attr": {
-                            "type": "Record",
-                            "attributes": {
-                                "inner_attr": { "type": "String" }
-                            },
-                        },
-                    },
-                }
-            }}}
-        }))
-        .expect("should successfully build schema");
-        let attr = Attribute::record(HashMap::from([(
-            "inner_attr".to_string(),
-            Attribute::string(),
-        )]));
-        let src = HashMap::from([("inner_attr".to_string(), json!("test"))]);
-        let srs_key = "inner_attr";
+#[derive(Debug, Error)]
+pub struct BuildExprErrorVec(Vec<BuildExprError>);
 
-        let expr = attr
-            .build_expr(
-                srs_key,
-                Some(&json!(src)),
-                Some("Jans"),
-                &schema,
-                &BuiltEntities::default(),
-            )
-            .expect("should not error");
-        assert!(expr.is_some(), "a restricted expression should be built")
+impl From<Vec<BuildExprError>> for BuildExprErrorVec {
+    fn from(errs: Vec<BuildExprError>) -> Self {
+        Self(errs)
     }
+}
 
-    #[test]
-    fn can_build_set_expr() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Test": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "attr1": {
-                            "type": "Set",
-                            "element": {
-                              "type": "String",
-                            }
-                        },
-                    },
-                }
-            }}}
-        }))
-        .expect("should successfully build schema");
-        let attr = Attribute::set(Attribute::string());
-        let src = HashMap::from([("attr1".to_string(), json!(["admin", "user"]))]);
-        let srs_key = "attr1";
+#[derive(Debug, Error)]
+pub enum BuildExprError {
+    #[error(transparent)]
+    TypeMismatch(#[from] TypeMismatchError),
+    #[error(transparent)]
+    ConstructExpr(#[from] cedar_policy::ExpressionConstructionError),
+    #[error("failed to parse uid: {0}")]
+    ParseUid(#[from] cedar_policy::ParseErrors),
+}
 
-        let expr = attr
-            .build_expr(
-                srs_key,
-                src.get(srs_key),
-                Some("Jans"),
-                &schema,
-                &BuiltEntities::default(),
-            )
-            .expect("should not error");
-        assert!(expr.is_some(), "a restricted expression should be built")
+#[derive(Debug, Error)]
+#[error("expected a {expected}, but found: '{actual}'")]
+pub struct TypeMismatchError {
+    pub expected: String,
+    pub actual: String,
+}
+
+impl Display for BuildExprErrorVec {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.0.iter().map(|e| e.to_string()))
     }
+}
 
-    #[test]
-    fn can_build_entity_expr() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": {
-                "OtherEntity": {},
-                "Test": {
-                    "shape": {
-                        "type": "Record",
-                        "attributes":  {
-                            "attr1": {
-                                "type": "Entity",
-                                "name": "OtherEntity",
-                            },
-                        },
-                    }
-                }
-            }}
-        }))
-        .expect("should successfully build schema");
-        let attr = Attribute::entity("OtherEntity");
-        let src = HashMap::from([("src_key".to_string(), json!("test"))]);
-        let srs_key = "src_key";
-
-        let expr = attr
-            .build_expr(
-                srs_key,
-                src.get(srs_key),
-                Some("Jans"),
-                &schema,
-                &BuiltEntities::default(),
-            )
-            .expect("should not error");
-        assert!(expr.is_some(), "a restricted expression should be built");
+impl From<BuildExprError> for BuildExprErrorVec {
+    fn from(err: BuildExprError) -> Self {
+        Self(Vec::from([err]))
     }
+}
 
-    #[test]
-    fn can_build_entity_expr_from_entity_or_common() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": {
-                "OtherEntity": {},
-                "Test": {
-                    "shape": {
-                        "type": "Record",
-                        "attributes":  {
-                            "attr1": {
-                                "type": "EntityOrCommon",
-                                "name": "OtherEntity",
-                            },
-                        },
-                    }
-                }
-            }}
-        }))
-        .expect("should successfully build schema");
-        let attr = Attribute::entity("OtherEntity");
-        let src = HashMap::from([("src_key".to_string(), json!("test"))]);
-        let srs_key = "src_key";
-
-        let expr = attr
-            .build_expr(
-                srs_key,
-                src.get(srs_key),
-                Some("Jans"),
-                &schema,
-                &BuiltEntities::default(),
-            )
-            .expect("should not error");
-        assert!(expr.is_some(), "a restricted expression should be built");
+impl From<TypeMismatchError> for BuildExprErrorVec {
+    fn from(err: TypeMismatchError) -> Self {
+        Self(Vec::from([BuildExprError::TypeMismatch(err)]))
     }
+}
 
-    #[test]
-    fn can_build_ip_addr_extension_expr() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Test": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "attr1": { "type": "Extension", "name": "ipaddr" },
-                    },
-                }
-            }}}
-        }))
-        .expect("should successfully build schema");
-        let attr = Attribute::string();
-        let src = HashMap::from([("src_key".to_string(), json!("0.0.0.0"))]);
-        let srs_key = "src_key";
-
-        let expr = attr
-            .build_expr(
-                srs_key,
-                src.get(srs_key),
-                Some("Jans"),
-                &schema,
-                &BuiltEntities::default(),
-            )
-            .expect("should not error");
-        assert!(expr.is_some(), "a restricted expression should be built")
+impl From<cedar_policy::ExpressionConstructionError> for BuildExprErrorVec {
+    fn from(err: cedar_policy::ExpressionConstructionError) -> Self {
+        Self(Vec::from([BuildExprError::ConstructExpr(err)]))
     }
+}
 
-    #[test]
-    fn can_build_decimal_extension_expr() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Test": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "attr1": { "type": "Extension", "name": "decimal" },
-                    },
-                }
-            }}}
-        }))
-        .expect("should successfully build schema");
-        let attr = Attribute::string();
-        let src = HashMap::from([("src_key".to_string(), json!("1.1"))]);
-        let srs_key = "src_key";
-
-        let expr = attr
-            .build_expr(
-                srs_key,
-                src.get(srs_key),
-                Some("Jans"),
-                &schema,
-                &BuiltEntities::default(),
-            )
-            .expect("should not error");
-        assert!(expr.is_some(), "a restricted expression should be built")
-    }
-
-    #[test]
-    fn can_skip_non_required_expr() {
-        let schema = serde_json::from_value::<CedarSchemaJson>(json!({
-            "Jans": { "entityTypes": { "Workload": {
-                "shape": {
-                    "type": "Record",
-                    "attributes":  {
-                        "client_id": { "type": "String" },
-                    },
-                }
-            }}}
-        }))
-        .expect("should successfully build schema");
-        let attr = Attribute::String { required: false };
-        let src: HashMap<String, serde_json::Value> = HashMap::new();
-        let srs_key = "client_id";
-
-        let expr = attr
-            .build_expr(
-                srs_key,
-                src.get(srs_key),
-                Some("Jans"),
-                &schema,
-                &BuiltEntities::default(),
-            )
-            .expect("should not error");
-        assert!(expr.is_none(), "a restricted expression shouldn't built")
+impl TypeMismatchError {
+    /// Returns the JSON type name of the given value.
+    pub fn value_type_name(value: &Value) -> &'static str {
+        match value {
+            Value::Null => "null",
+            Value::Bool(_) => "bool",
+            Value::Number(_) => "number",
+            Value::String(_) => "string",
+            Value::Array(_) => "array",
+            Value::Object(_) => "object",
+        }
     }
 }

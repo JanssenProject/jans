@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use regex;
 use regex::Regex;
 use serde::{Deserialize, de};
-use serde_json::{Value, json};
+use serde_json::Value;
 
 /// Structure for storing `claim mappings`
 ///
@@ -56,6 +56,7 @@ impl From<HashMap<String, ClaimMapping>> for ClaimMappings {
 #[cfg(test)]
 pub struct ClaimMappingsBuilder(HashMap<String, ClaimMapping>);
 
+/// Helper struct for building claim mappings in tests
 #[cfg(test)]
 impl ClaimMappingsBuilder {
     pub fn build(self) -> ClaimMappings {
@@ -65,7 +66,7 @@ impl ClaimMappingsBuilder {
     pub fn email(mut self, claim: &str) -> Self {
         self.0.insert(
             claim.to_string(),
-            serde_json::from_value(json!({
+            serde_json::from_value(serde_json::json!({
                 "parser": "regex",
                 "type": "Jans::email_address",
                 "regex_expression" : "^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$",
@@ -80,7 +81,7 @@ impl ClaimMappingsBuilder {
     pub fn url(mut self, claim: &str) -> Self {
         self.0.insert(
             claim.to_string(),
-            serde_json::from_value(json!({
+            serde_json::from_value(serde_json::json!({
                 "parser": "regex",
                 "type": "Jans::Url",
                 "regex_expression": r#"^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?P<DOMAIN>[^\/]+)(?P<PATH>\/.*)?$"#,
@@ -130,7 +131,8 @@ impl ClaimMapping {
     }
 
     pub fn apply_mapping_value(&self, value: &serde_json::Value) -> serde_json::Value {
-        json!(self.apply_mapping(value))
+        // this should always be a valid JSON since the input is a valid JSON
+        serde_json::to_value(self.apply_mapping(value)).expect("a valid JSON")
     }
 }
 

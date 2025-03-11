@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::common::policy_store::{ClaimMapping, TokenEntityMetadata, TrustedIssuer};
+use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer};
 use serde::Deserialize;
 use serde_json::Value;
 use std::collections::HashMap;
@@ -28,10 +28,8 @@ impl<'a> Token<'a> {
         self.iss.and_then(|iss| iss.get_token_metadata(&self.name))
     }
 
-    pub fn claim_mapping(&self, claim: &str) -> Option<&ClaimMapping> {
-        self.iss
-            .and_then(|iss| iss.get_claim_mapping(&self.name))
-            .and_then(|m| m.mapping(claim))
+    pub fn claim_mappings(&self) -> Option<&ClaimMappings> {
+        self.iss.and_then(|iss| iss.get_claim_mapping(&self.name))
     }
 
     pub fn get_claim(&self, name: &str) -> Option<TokenClaim> {

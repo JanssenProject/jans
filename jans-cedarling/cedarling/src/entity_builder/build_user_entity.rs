@@ -10,55 +10,74 @@ use derive_more::derive::Deref;
 use std::collections::HashSet;
 
 const USER_ATTR_SRC_TKNS: &[&str] = &["userinfo_token", "id_token"];
-const USER_ATTR_SRC_CLAIMS: &[&str] = &[
-    "sub",
-    "role",
-    "email",
-    "phone_number",
-    "username",
-    "birthdate",
-    "country",
-];
 
 impl EntityBuilder {
     pub fn build_user_entity(
         &self,
         tokens: &HashMap<String, Token>,
         tkn_principal_mappings: &TokenPrincipalMappings,
-    ) -> Result<(Entity, Vec<Entity>), BuildEntityError> {
+        built_entities: &BuiltEntities,
+        roles: HashSet<EntityUid>,
+    ) -> Result<Entity, BuildEntityError> {
         let user_type_name: &str = self.config.entity_names.user.as_ref();
+
+        let attrs_shape = self
+            .schema
+            .as_ref()
+            .and_then(|s| s.get_entity_shape(user_type_name));
 
         // Get User Entity ID
         let user_id_srcs = UserIdSrcs::resolve(tokens);
         let user_id = get_first_valid_entity_id(&user_id_srcs)
             .map_err(|e| e.while_building(user_type_name))?;
 
-        // Build Role entities
-        let role_id_srcs = RoleIdSrcs::resolve(tokens);
-        let mut user_parents = HashSet::new();
-        let mut role_entities = Vec::with_capacity(2);
-        let role_ids = collect_all_valid_entity_ids(&role_id_srcs);
-        for id in role_ids {
-            let role_entity =
-                build_cedar_entity(&self.config.entity_names.role, &id, HashMap::new(), HashSet::new())?;
-            user_parents.insert(role_entity.uid());
-            role_entities.push(role_entity);
+        // Collect the tokens and mappings to be used for this entity
+        let attrs_srcs: Vec<_> = USER_ATTR_SRC_TKNS
+            .iter()
+            .filter_map(|name| {
+                tokens
+                    .get(*name)
+                    .map(|tkn| (tkn.claims_value(), tkn.claim_mappings()))
+            })
+            .collect();
+        if attrs_srcs.is_empty() {
+            return Err(BuildEntityErrorKind::NoAvailableTokensToBuildEntity(
+                USER_ATTR_SRC_TKNS.iter().map(|s| s.to_string()).collect(),
+            )
+            .while_building(user_type_name));
         }
 
-        // Get User Entity attributes
-        let user_attrs = build_entity_attrs(EntityAttrsSrc::new(
-            tokens,
-            USER_ATTR_SRC_TKNS,
-            USER_ATTR_SRC_CLAIMS,
-        ))
-        .map_err(|e| e.while_building(user_type_name))?;
+        // Extract attributes from sources
+        let (user_attrs, errs): (Vec<_>, Vec<_>) = attrs_srcs
+            .into_iter()
+            .map(|(src, mappings)| build_entity_attrs(src, built_entities, attrs_shape, mappings))
+            .partition(Result::is_ok);
+        let mut user_attrs: HashMap<String, RestrictedExpression> = if errs.is_empty() {
+            // what should happen if claims have the same name but different values?
+            user_attrs
+                .into_iter()
+                .flatten()
+                .fold(HashMap::new(), |mut acc, attrs| {
+                    acc.extend(attrs);
+                    acc
+                })
+        } else {
+            let errs: Vec<_> = errs
+                .into_iter()
+                .flat_map(|e| e.unwrap_err().into_inner())
+                .collect();
+            return Err(BuildEntityErrorKind::from(errs).while_building(user_type_name));
+        };
 
-        // Insert token references in the entity attributes
-        let user_attrs = add_token_references(user_type_name, user_attrs, tkn_principal_mappings);
+        // Apply token mappings if the schema/shape is not present since that's the only
+        // time it's really necessary
+        if attrs_shape.is_none() {
+            tkn_principal_mappings.apply(user_type_name, &mut user_attrs);
+        }
 
-        let user_entity = build_cedar_entity(user_type_name, &user_id, user_attrs, user_parents)?;
+        let user_entity = build_cedar_entity(user_type_name, &user_id, user_attrs, roles)?;
 
-        Ok((user_entity, role_entities))
+        Ok(user_entity)
     }
 }
 
@@ -112,176 +131,235 @@ impl<'a> UserIdSrcs<'a> {
     }
 }
 
-#[derive(Deref)]
-struct RoleIdSrcs<'a>(Vec<EntityIdSrc<'a>>);
-
-#[derive(Clone, Copy)]
-struct RoleIdSrc<'a> {
-    token: &'a str,
-    claim: &'a str,
-}
-
-impl<'a> RoleIdSrcs<'a> {
-    fn resolve(tokens: &'a HashMap<String, Token>) -> Self {
-        const DEFAULT_ROLE_ID_SRCS: &[RoleIdSrc] = &[
-            RoleIdSrc {
-                token: "userinfo_token",
-                claim: "role",
-            },
-            RoleIdSrc {
-                token: "id_token",
-                claim: "role",
-            },
-        ];
-
-        Self(
-            DEFAULT_ROLE_ID_SRCS
-                .iter()
-                .filter_map(|src| {
-                    tokens.get(src.token).map(|token| {
-                        let claim = token
-                            .get_metadata()
-                            .and_then(|m| m.role_mapping.as_deref())
-                            .unwrap_or(src.claim);
-                        EntityIdSrc { token, claim }
-                    })
-                })
-                .collect::<Vec<_>>(),
-        )
-    }
-}
-
 #[cfg(test)]
 mod test {
     use super::super::test::*;
     use super::super::*;
     use super::*;
-    use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
+    use crate::common::policy_store::TrustedIssuer;
+    use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;
 
+    #[track_caller]
+    fn test_build_user(
+        tokens: &HashMap<String, Token>,
+        builder: &EntityBuilder,
+        tkn_principal_mappings: &TokenPrincipalMappings,
+        expected: Value,
+        roles: HashSet<EntityUid>,
+        schema: Option<&Schema>,
+    ) {
+        let mut built_entities = BuiltEntities::from(&builder.iss_entities);
+        built_entities.insert(
+            &EntityUid::from_str("Jans::Userinfo_token::\"some_jti\"").expect("a valid EntityUid"),
+        );
+        built_entities.insert(
+            &EntityUid::from_str("Jans::Id_token::\"some_jti\"").expect("a valid EntityUid"),
+        );
+        let entity = builder
+            .build_user_entity(&tokens, &tkn_principal_mappings, &built_entities, roles)
+            .expect("should build workload entity");
+
+        assert_entity_eq(&entity, expected, schema);
+    }
+
     #[test]
-    fn can_build_user_entity() {
-        let mut iss = TrustedIssuer::default();
-        let claim_mappings = ClaimMappings::builder().email("email").build();
-        for token in ["id_token", "userinfo_token"].iter() {
-            let metadata = iss
-                .tokens_metadata
-                .get_mut(*token)
-                .expect("should have token metadata");
-            metadata.claim_mapping = claim_mappings.clone();
-        }
+    fn can_build_user_with_id_tkn_and_schema() {
+        let schema_src = r#"
+            namespace Jans {
+                entity TrustedIssuer;
+                entity Role;
+                entity Id_token;
+                entity User in [Role] = {
+                    iss: TrustedIssuer,
+                    sub: String,
+                    id_token: Id_token,
+                };
+            }
+        "#;
+        let schema = Schema::from_str(schema_src).expect("build cedar Schema");
+        let validator_schema =
+            ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
+        let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityBuilderConfig::default().build_user(), &issuers)
-            .expect("should init entity builder");
+        let builder = EntityBuilder::new(
+            EntityBuilderConfig::default().build_workload(),
+            &issuers,
+            Some(&validator_schema),
+        )
+        .expect("should init entity builder");
+        let tkn_principal_mappings = TokenPrincipalMappings::from(
+            [TokenPrincipalMapping {
+                principal: "Jans::User".into(),
+                attr_name: "id_token".into(),
+                expr: RestrictedExpression::new_entity_uid(
+                    EntityUid::from_str("Jans::Id_token::\"some_jti\"".into())
+                        .expect("should parse EntityUid"),
+                ),
+            }]
+            .to_vec(),
+        );
+        let roles = HashSet::from(["Jans::Role::\"some_role\"".parse().expect("a valid uid")]);
+
         let id_token = Token::new(
             "id_token",
             HashMap::from([
                 ("iss".to_string(), json!("https://test.jans.org/")),
                 ("sub".to_string(), json!("some_sub")),
-                ("username".to_string(), json!("some_username")),
-                ("role".to_string(), json!("role1")),
-                ("email".to_string(), json!("email@email.com")),
-                ("exp".to_string(), json!(123)),
             ])
             .into(),
             Some(&iss),
         );
-        let userinfo_token = Token::new(
-            "userinfo_token",
-            HashMap::from([
-                ("iss".to_string(), json!("https://test.jans.org/")),
-                ("sub".to_string(), json!("some_sub")),
-                ("role".to_string(), json!(["role2", "role3"])),
-                ("phone_number".to_string(), json!("1234567890")),
-                ("exp".to_string(), json!(123)),
-            ])
-            .into(),
-            Some(&iss),
-        );
-        let tokens = HashMap::from([
-            ("id_token".to_string(), id_token),
-            ("userinfo_token".to_string(), userinfo_token),
-        ]);
-        let token_principal_mappings = TokenPrincipalMappings::from(
-            [
-                TokenPrincipalMapping {
-                    principal: "Jans::User".into(),
-                    attr_name: "id_token".into(),
-                    expr: RestrictedExpression::new_entity_uid(
-                        EntityUid::from_str("Jans::Id_token::\"some_jti\"".into())
-                            .expect("should parse id_token EntityUid"),
-                    ),
-                },
-                TokenPrincipalMapping {
-                    principal: "Jans::User".into(),
-                    attr_name: "userinfo_token".into(),
-                    expr: RestrictedExpression::new_entity_uid(
-                        EntityUid::from_str("Jans::Userinfo_token::\"some_jti\"".into())
-                            .expect("should parse Userinfo_token EntityUid"),
-                    ),
-                },
-            ]
-            .to_vec(),
-        );
-        let (entity, _) = builder
-            .build_user_entity(&tokens, &token_principal_mappings)
-            .expect("should build user entity");
 
-        assert_entity_eq(
-            &entity,
+        let tokens = HashMap::from([("id_token".into(), id_token)]);
+
+        test_build_user(
+            &tokens,
+            &builder,
+            &tkn_principal_mappings,
             json!({
                 "uid": {"type": "Jans::User", "id": "some_sub"},
                 "attrs": {
+                    "iss": {"__entity": {
+                        "type": "Jans::TrustedIssuer",
+                        "id": "some_iss",
+                    }},
                     "sub": "some_sub",
-                    "email": {
-                        "domain": "email.com",
-                        "uid": "email",
-                    },
-                    "phone_number": "1234567890",
-                    "role": ["role1", "role2", "role3"],
-                    "username": "some_username",
                     "id_token": {"__entity": {
                         "type": "Jans::Id_token",
                         "id": "some_jti",
                     }},
-                    "userinfo_token": {"__entity": {
-                        "type": "Jans::Userinfo_token",
-                        "id": "some_jti",
-                    }},
                 },
-                "parents": [
-                    {"type": "Jans::Role", "id": "role1"},
-                    {"type": "Jans::Role", "id": "role2"},
-                    {"type": "Jans::Role", "id": "role3"},
-                ],
+                "parents": [{"type": "Jans::Role", "id": "some_role"}],
             }),
-            Some(cedarling_schema()),
+            roles,
+            Some(&schema),
         );
     }
 
     #[test]
-    fn can_build_user_entity_without_role() {
-        let mut iss = TrustedIssuer::default();
-        let claim_mappings = ClaimMappings::builder().email("email").build();
-        for token in ["id_token", "userinfo_token"].iter() {
-            let metadata = iss
-                .tokens_metadata
-                .get_mut(*token)
-                .expect("should have token metadata");
-            metadata.claim_mapping = claim_mappings.clone();
-        }
+    fn can_build_user_with_userinfo_tkn_and_schema() {
+        let schema_src = r#"
+            namespace Jans {
+                entity TrustedIssuer;
+                entity Role;
+                entity Userinfo_token;
+                entity User in [Role] = {
+                    iss: TrustedIssuer,
+                    sub: String,
+                    userinfo_token: Userinfo_token,
+                };
+            }
+        "#;
+        let schema = Schema::from_str(schema_src).expect("build cedar Schema");
+        let validator_schema =
+            ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
+        let iss = TrustedIssuer::default();
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
-        let builder = EntityBuilder::new(EntityBuilderConfig::default().build_user(), &issuers)
-            .expect("should init entity builder");
+        let builder = EntityBuilder::new(
+            EntityBuilderConfig::default().build_workload(),
+            &issuers,
+            Some(&validator_schema),
+        )
+        .expect("should init entity builder");
+        let tkn_principal_mappings = TokenPrincipalMappings::from(
+            [TokenPrincipalMapping {
+                principal: "Jans::User".into(),
+                attr_name: "userinfo_token".into(),
+                expr: RestrictedExpression::new_entity_uid(
+                    EntityUid::from_str("Jans::Userinfo_token::\"some_jti\"".into())
+                        .expect("should parse EntityUid"),
+                ),
+            }]
+            .to_vec(),
+        );
+        let roles = HashSet::from(["Jans::Role::\"some_role\"".parse().expect("a valid uid")]);
+
+        let userinfo_token = Token::new(
+            "userinfo_token",
+            HashMap::from([
+                ("iss".to_string(), json!("https://test.jans.org/")),
+                ("sub".to_string(), json!("some_sub")),
+            ])
+            .into(),
+            Some(&iss),
+        );
+
+        let tokens = HashMap::from([("userinfo_token".into(), userinfo_token)]);
+
+        test_build_user(
+            &tokens,
+            &builder,
+            &tkn_principal_mappings,
+            json!({
+                "uid": {"type": "Jans::User", "id": "some_sub"},
+                "attrs": {
+                    "iss": {"__entity": {
+                        "type": "Jans::TrustedIssuer",
+                        "id": "some_iss",
+                    }},
+                    "sub": "some_sub",
+                    "userinfo_token": {"__entity": {
+                        "type": "Jans::Userinfo_token",
+                        "id": "some_jti",
+                    }},
+                },
+                "parents": [{"type": "Jans::Role", "id": "some_role"}],
+            }),
+            roles,
+            Some(&schema),
+        );
+    }
+
+    #[test]
+    fn can_build_user_from_joined_tkns_and_schema() {
+        let schema_src = r#"
+            namespace Jans {
+                entity TrustedIssuer;
+                entity Role;
+                entity Id_token;
+                entity Userinfo_token;
+                entity User in [Role] = {
+                    iss: TrustedIssuer,
+                    sub: String,
+                    from_id_tkn: String,
+                    from_userinfo_tkn: String,
+                    id_token: Id_token,
+                    userinfo_token: Userinfo_token,
+                };
+            }
+        "#;
+        let schema = Schema::from_str(schema_src).expect("build cedar Schema");
+        let validator_schema =
+            ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
+        let iss = TrustedIssuer::default();
+        let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+        let builder = EntityBuilder::new(
+            EntityBuilderConfig::default().build_workload(),
+            &issuers,
+            Some(&validator_schema),
+        )
+        .expect("should init entity builder");
+        let tkn_principal_mappings = TokenPrincipalMappings::from(
+            [TokenPrincipalMapping {
+                principal: "Jans::User".into(),
+                attr_name: "userinfo_token".into(),
+                expr: RestrictedExpression::new_entity_uid(
+                    EntityUid::from_str("Jans::Userinfo_token::\"some_jti\"".into())
+                        .expect("should parse EntityUid"),
+                ),
+            }]
+            .to_vec(),
+        );
+        let roles = HashSet::from(["Jans::Role::\"some_role\"".parse().expect("a valid uid")]);
+
         let id_token = Token::new(
             "id_token",
             HashMap::from([
                 ("iss".to_string(), json!("https://test.jans.org/")),
-                ("sub".to_string(), json!("some_sub")),
-                ("username".to_string(), json!("some_username")),
-                ("email".to_string(), json!("email@email.com")),
-                ("exp".to_string(), json!(123)),
+                ("sub".to_string(), json!("id_tkn_sub")),
+                ("from_id_tkn".to_string(), json!("from_id_tkn")),
             ])
             .into(),
             Some(&iss),
@@ -290,56 +368,34 @@ mod test {
             "userinfo_token",
             HashMap::from([
                 ("iss".to_string(), json!("https://test.jans.org/")),
-                ("sub".to_string(), json!("some_sub")),
-                ("phone_number".to_string(), json!("1234567890")),
-                ("exp".to_string(), json!(123)),
+                ("sub".to_string(), json!("userinfo_tkn_sub")),
+                ("from_userinfo_tkn".to_string(), json!("from_userinfo_tkn")),
             ])
             .into(),
             Some(&iss),
         );
-        let tokens = HashMap::from([
-            ("id_token".to_string(), id_token),
-            ("userinfo_token".to_string(), userinfo_token),
-        ]);
-        let token_principal_mappings = TokenPrincipalMappings::from(
-            [
-                TokenPrincipalMapping {
-                    principal: "Jans::User".into(),
-                    attr_name: "id_token".into(),
-                    expr: RestrictedExpression::new_entity_uid(
-                        EntityUid::from_str("Jans::Id_token::\"some_jti\"".into())
-                            .expect("should parse id_token EntityUid"),
-                    ),
-                },
-                TokenPrincipalMapping {
-                    principal: "Jans::User".into(),
-                    attr_name: "userinfo_token".into(),
-                    expr: RestrictedExpression::new_entity_uid(
-                        EntityUid::from_str("Jans::Userinfo_token::\"some_jti\"".into())
-                            .expect("should parse Userinfo_token EntityUid"),
-                    ),
-                },
-            ]
-            .to_vec(),
-        );
-        let (entity, _) = builder
-            .build_user_entity(&tokens, &token_principal_mappings)
-            .expect("should build user entity");
 
-        assert_entity_eq(
-            &entity,
+        let tokens = HashMap::from([
+            ("id_token".into(), id_token),
+            ("userinfo_token".into(), userinfo_token),
+        ]);
+
+        test_build_user(
+            &tokens,
+            &builder,
+            &tkn_principal_mappings,
             json!({
-                "uid": {"type": "Jans::User", "id": "some_sub"},
+                "uid": {"type": "Jans::User", "id": "userinfo_tkn_sub"},
                 "attrs": {
-                    "sub": "some_sub",
-                    "email": {
-                        "domain": "email.com",
-                        "uid": "email",
-                    },
-                    "phone_number": "1234567890",
-                    "username": "some_username",
-                    "id_token": {"__entity": {
-                        "type": "Jans::Id_token",
+                    "iss": {"__entity": {
+                        "type": "Jans::TrustedIssuer",
+                        "id": "some_iss",
+                    }},
+                    "sub": "id_tkn_sub",
+                    "from_id_tkn": "from_id_tkn",
+                    "from_userinfo_tkn": "from_userinfo_tkn",
+                    "userinfo_token": {"__entity": {
+                        "type": "Jans::Userinfo_token",
                         "id": "some_jti",
                     }},
                     "userinfo_token": {"__entity": {
@@ -347,9 +403,66 @@ mod test {
                         "id": "some_jti",
                     }},
                 },
-                "parents": [],
+                "parents": [{"type": "Jans::Role", "id": "some_role"}],
             }),
-            Some(cedarling_schema()),
+            roles,
+            Some(&schema),
+        );
+    }
+
+    #[test]
+    fn can_build_user_without_schema() {
+        let iss = TrustedIssuer::default();
+        let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
+        let builder = EntityBuilder::new(
+            EntityBuilderConfig::default().build_workload(),
+            &issuers,
+            None,
+        )
+        .expect("should init entity builder");
+        let tkn_principal_mappings = TokenPrincipalMappings::from(
+            [TokenPrincipalMapping {
+                principal: "Jans::User".into(),
+                attr_name: "id_token".into(),
+                expr: RestrictedExpression::new_entity_uid(
+                    EntityUid::from_str("Jans::Id_token::\"some_jti\"".into())
+                        .expect("should parse EntityUid"),
+                ),
+            }]
+            .to_vec(),
+        );
+        let roles = HashSet::from(["Jans::Role::\"some_role\"".parse().expect("a valid uid")]);
+
+        let id_token = Token::new(
+            "id_token",
+            HashMap::from([
+                ("iss".to_string(), json!("https://test.jans.org/")),
+                ("sub".to_string(), json!("some_sub")),
+            ])
+            .into(),
+            Some(&iss),
+        );
+
+        let tokens = HashMap::from([("id_token".into(), id_token)]);
+
+        test_build_user(
+            &tokens,
+            &builder,
+            &tkn_principal_mappings,
+            json!({
+                "uid": {"type": "Jans::User", "id": "some_sub"},
+                "attrs": {
+                    "iss": "https://test.jans.org/",
+                    "sub": "some_sub",
+                    "id_token": {"__entity": {
+                        "type": "Jans::Id_token",
+                        "id": "some_jti",
+                    }},
+                },
+                "parents": [{"type": "Jans::Role", "id": "some_role"}],
+            }),
+            roles,
+            None,
         );
     }
 }

@@ -13,13 +13,19 @@ impl EntityBuilder {
     ) -> Result<Entity, BuildEntityError> {
         let resource_type_name = &resource.resource_type;
 
-        let uid = EntityUid::from_str(&format!("{}::\"{}\"", resource_type_name, resource.id))
-            .map_err(|e| BuildEntityErrorKind::from(e).while_building(resource_type_name))?;
+        let attrs_shape = self
+            .schema
+            .as_ref()
+            .and_then(|s| s.get_entity_shape(resource_type_name));
+        let attrs = build_entity_attrs(
+            &resource.payload,
+            &BuiltEntities::default(),
+            attrs_shape,
+            None,
+        )
+        .map_err(|e| BuildEntityErrorKind::from(e).while_building(resource_type_name))?;
 
-        let attrs = build_entity_attrs((&resource.payload).into())
-            .map_err(|e| e.while_building(resource_type_name))?;
-        let resource = Entity::new(uid, attrs, HashSet::new())
-            .map_err(|e| BuildEntityErrorKind::from(e).while_building(resource_type_name))?;
+        let resource = build_cedar_entity(resource_type_name, &resource.id, attrs, HashSet::new())?;
 
         Ok(resource)
     }
@@ -41,8 +47,12 @@ mod test {
 
     #[test]
     fn can_build_entity() {
-        let builder = EntityBuilder::new(EntityBuilderConfig::default(), &HashMap::new())
-            .expect("should init entity builder");
+        let builder = EntityBuilder::new(
+            EntityBuilderConfig::default(),
+            &HashMap::new(),
+            Some(cedarling_validator_schema()),
+        )
+        .expect("should init entity builder");
         let resource_data = ResourceData {
             resource_type: "Jans::HTTP_Request".to_string(),
             id: "some_request".to_string(),
@@ -80,8 +90,12 @@ mod test {
 
     #[test]
     fn can_build_entity_with_optional_attr() {
-        let builder = EntityBuilder::new(EntityBuilderConfig::default(), &HashMap::new())
-            .expect("should init entity builder");
+        let builder = EntityBuilder::new(
+            EntityBuilderConfig::default(),
+            &HashMap::new(),
+            Some(cedarling_validator_schema()),
+        )
+        .expect("should init entity builder");
         let resource_data = ResourceData {
             resource_type: "Jans::HTTP_Request".to_string(),
             id: "some_request".to_string(),

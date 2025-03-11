@@ -3,30 +3,42 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::{BuildEntityError, BuildEntityErrorKind, build_entity_attrs};
+use super::build_entity_attrs::build_entity_attrs;
+use super::built_entities::BuiltEntities;
+use super::schema::MappingSchema;
+use super::{BuildEntityError, BuildEntityErrorKind, build_cedar_entity};
 use crate::common::policy_store::TrustedIssuer;
-use cedar_policy::{Entity, EntityUid};
+use cedar_policy::Entity;
 use serde_json::{Value, json};
 use smol_str::ToSmolStr;
 use std::collections::{HashMap, HashSet};
-use std::str::FromStr;
 use url::Origin;
 
 pub fn build_iss_entity(
     iss_type_name: &str,
     id: &str,
     iss: &TrustedIssuer,
+    schema: Option<&MappingSchema>,
 ) -> Result<(Origin, Entity), BuildEntityError> {
     let origin = iss.oidc_endpoint.origin();
 
-    let attrs = build_entity_attrs((&iss.entity_attr_srcs()).into())
-        .map_err(|e| e.while_building(iss_type_name))?;
+    let attrs_shape = schema
+        .as_ref()
+        .map(|s| {
+            s.get_entity_shape(iss_type_name)
+                .ok_or(BuildEntityErrorKind::EntityNotInSchema.while_building(iss_type_name))
+        })
+        .transpose()?;
 
-    let uid = EntityUid::from_str(&format!("{}::\"{}\"", iss_type_name, id))
-        .map_err(|e| BuildEntityErrorKind::from(e).while_building(iss_type_name))?;
+    let attrs = build_entity_attrs(
+        &iss.entity_attr_srcs(),
+        &BuiltEntities::default(),
+        attrs_shape,
+        None,
+    )
+    .map_err(|e| BuildEntityErrorKind::from(e).while_building(iss_type_name))?;
 
-    let entity = Entity::new(uid, attrs, HashSet::new())
-        .map_err(|e| BuildEntityErrorKind::from(e).while_building(iss_type_name))?;
+    let entity = build_cedar_entity(iss_type_name, id, attrs, HashSet::new())?;
 
     Ok((origin, entity))
 }
@@ -53,22 +65,31 @@ impl TrustedIssuer {
 #[cfg(test)]
 mod test {
     use super::super::build_iss_entity::build_iss_entity;
-    use super::super::test::cedarling_schema;
+    use super::super::test::*;
     use crate::common::policy_store::TrustedIssuer;
-    use cedar_policy::Entities;
+    use crate::entity_builder::schema::MappingSchema;
     use serde_json::json;
 
     #[test]
-    fn can_build_trusted_issuer_entity() {
-        let iss = TrustedIssuer::default();
-        let (origin, iss_entity) = build_iss_entity("Jans::TrustedIssuer", "some_iss", &iss)
-            .expect("should build TrustedIssuer entity");
+    fn can_build_trusted_issuer_entity_with_schema() {
+        let iss: TrustedIssuer = serde_json::from_value(json!({
+            "name": "some_iss",
+            "description": "some_desc",
+            "openid_configuration_endpoint": "https://test.jans.org",
+            "tokens_metadata": {},
+        }))
+        .expect("should be a valid trusted issuer");
+        let schema: MappingSchema = cedarling_validator_schema()
+            .try_into()
+            .expect("should initialize mapping schema");
+        let (origin, iss_entity) =
+            build_iss_entity("Jans::TrustedIssuer", "some_iss", &iss, Some(&schema))
+                .expect("should build TrustedIssuer entity");
 
         assert_eq!(origin.ascii_serialization(), "https://test.jans.org");
-        assert_eq!(
-            iss_entity
-                .to_json_value()
-                .expect("should serialize TrustedIssuer entity to JSON"),
+
+        assert_entity_eq(
+            &iss_entity,
             json!({
                 "uid": {"type": "Jans::TrustedIssuer", "id": "some_iss"},
                 "attrs": {
@@ -80,10 +101,42 @@ mod test {
                 },
                 "parents": [],
             }),
-            "TrustedIssuer entity should have the correct attrs"
+            Some(cedarling_schema()),
         );
+    }
 
-        Entities::from_entities([iss_entity], Some(cedarling_schema()))
-            .expect("TrustedIssuer entity should conform to schema");
+    #[test]
+    fn can_build_trusted_issuer_entity_without_schema() {
+        let iss: TrustedIssuer = serde_json::from_value(json!({
+            "name": "some_iss",
+            "description": "some_desc",
+            "openid_configuration_endpoint": "https://test.jans.org",
+            "tokens_metadata": {},
+        }))
+        .expect("should be a valid trusted issuer");
+        let schema: MappingSchema = cedarling_validator_schema()
+            .try_into()
+            .expect("should initialize mapping schema");
+        let (origin, iss_entity) =
+            build_iss_entity("Jans::TrustedIssuer", "some_iss", &iss, Some(&schema))
+                .expect("should build TrustedIssuer entity");
+
+        assert_eq!(origin.ascii_serialization(), "https://test.jans.org");
+
+        assert_entity_eq(
+            &iss_entity,
+            json!({
+                "uid": {"type": "Jans::TrustedIssuer", "id": "some_iss"},
+                "attrs": {
+                    "issuer_entity_id": {
+                        "protocol": "https",
+                        "host": "test.jans.org",
+                        "path": "/",
+                    }
+                },
+                "parents": [],
+            }),
+            None,
+        );
     }
 }
