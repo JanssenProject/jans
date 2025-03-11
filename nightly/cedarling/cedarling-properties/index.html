@@ -9176,7 +9176,7 @@
 <p><strong>The following bootstrap properties are needed to configure JWT and cryptographic behavior:</strong></p>
 <ul>
 <li><strong><code>CEDARLING_LOCAL_JWKS</code></strong> : JWKS file with public keys</li>
-<li><strong><code>CEDARLING_POLICY_STORE_LOCAL</code></strong> : JSON object with policy store</li>
+<li><strong><code>CEDARLING_POLICY_STORE_LOCAL</code></strong> : JSON object as string with policy store. You can use <a href="https://jsontostring.com/">this</a> converter.</li>
 <li><strong><code>CEDARLING_POLICY_STORE_LOCAL_FN</code></strong> : Local file with JSON object with policy store</li>
 <li><strong><code>CEDARLING_JWT_SIG_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the signature  of all JWT tokens. This requires an <code>iss</code> is present.</li>
 <li><strong><code>CEDARLING_JWT_STATUS_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retreive the latest Status List JWT from the <code>.well-known/openid-configuration</code> via the <code>status_list_endpoint</code> claim and cache it. See the <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">IETF Draft</a> for more info.</li>
@@ -9568,7 +9568,7 @@ Example: <code>Jans::User</code>, <code>Jans::Workload</code>, <code>Acme::Servi
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-10T21:17:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-11T05:35:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-11</span>
       
         <br>
         Created:
