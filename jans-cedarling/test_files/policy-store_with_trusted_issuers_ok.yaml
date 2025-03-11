@@ -52,7 +52,6 @@ trusted_issuers:
         claim_mapping:
           email:
             parser: 'regex'
-            type: 'Acme::Email'
             regex_expression: r'^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$'
             UID: 
               attr: 'uid'
@@ -62,7 +61,6 @@ trusted_issuers:
               type: 'string'
           profile:
             parser: 'regex'
-            type: 'Acme::URI'
             regex_expression: r'(?x) ^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/ (?P<HOST>[^\/:#?]+) (?::(?P<PORT>\d+))?  (?P<PATH>\/[^?#]*)? (?:\?(?P<QUERY>[^#]*))?  (?:#(?P<FRAGMENT>.*))?$'
             SCHEME: 
               attr: 'scheme'

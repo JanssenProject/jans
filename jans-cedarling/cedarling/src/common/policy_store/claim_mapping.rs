@@ -26,17 +26,6 @@ use serde_json::Value;
 pub struct ClaimMappings(HashMap<String, ClaimMapping>);
 
 impl ClaimMappings {
-    pub fn get_mapping(&self, claim: &str, cedar_policy_type: &str) -> Option<&ClaimMapping> {
-        self.0
-            .get(claim)
-            .filter(|claim_mapping| match claim_mapping {
-                ClaimMapping::Regex(regexp_mapping) => {
-                    regexp_mapping.cedar_policy_type == cedar_policy_type
-                },
-                ClaimMapping::Json { r#type } => r#type == cedar_policy_type,
-            })
-    }
-
     pub fn mapping(&self, claim: &str) -> Option<&ClaimMapping> {
         self.0.get(claim)
     }
@@ -104,12 +93,8 @@ impl ClaimMappingsBuilder {
 pub enum ClaimMapping {
     /// Represents a claim mapping using regular expressions.
     Regex(RegexMapping),
-
     /// Represents a claim mapping using a JSON parser.
-    ///
-    /// # Fields
-    /// - `type`: The type of the claim (e.g., "Acme::Dolphin").
-    Json { r#type: String },
+    Json,
 }
 
 impl ClaimMapping {
@@ -120,7 +105,7 @@ impl ClaimMapping {
     pub fn apply_mapping(&self, value: &serde_json::Value) -> HashMap<String, serde_json::Value> {
         match self {
             ClaimMapping::Regex(regexp_mapping) => regexp_mapping.apply_mapping(value),
-            ClaimMapping::Json { r#type: _ } => {
+            ClaimMapping::Json => {
                 // convert JSON object to HashMap or return empty HashMap
                 value
                     .as_object()
@@ -139,15 +124,12 @@ impl ClaimMapping {
 /// Represents a claim mapping using regular expressions.
 ///
 /// # Fields
-/// - `type`: The type of the claim (e.g., "Acme::Email").
 /// - `regex_expression`: The regular expression used to extract fields.
 /// - `fields`: A map of field names to `RegexField` values.
 #[derive(Debug, Clone)]
 pub struct RegexMapping {
-    cedar_policy_type: String,
     regex_expression: String,
     regex: Regex,
-
     // hashmap key is name of regex group
     // hashmap value describe how to map field found in group
     regex_group_mapping: HashMap<String, RegexFieldMapping>,
@@ -157,13 +139,11 @@ impl RegexMapping {
     // builder function, used in testing
     #[allow(dead_code)]
     fn new(
-        cedar_policy_type: String,
         regex_expression: String,
         fields: HashMap<String, RegexFieldMapping>,
     ) -> Result<Self, regex::Error> {
         Ok(Self {
             regex: Regex::new(regex_expression.as_str())?,
-            cedar_policy_type,
             regex_expression,
             regex_group_mapping: fields,
         })
@@ -206,8 +186,7 @@ impl PartialEq for RegexMapping {
     // impl operator "==" to compare struct in test cases
     // `regex` is ignored because it is result of `regex_expression` string and actually not comparable
     fn eq(&self, other: &Self) -> bool {
-        self.cedar_policy_type == other.cedar_policy_type
-            && self.regex_expression == other.regex_expression
+        self.regex_expression == other.regex_expression
             && self.regex_group_mapping == other.regex_group_mapping
     }
 }
@@ -242,12 +221,6 @@ impl<'de> Deserialize<'de> for ClaimMapping {
 
         match parser {
             "regex" => {
-                let r#type = value
-                    .get(TYPE_KEY)
-                    .and_then(|v| v.as_str())
-                    .ok_or(de::Error::missing_field(TYPE_KEY))?
-                    .to_string();
-
                 let regex_expression = value
                     .get(REGEX_EXPRESSION_KEY)
                     .and_then(|v| v.as_str())
@@ -270,20 +243,11 @@ impl<'de> Deserialize<'de> for ClaimMapping {
                             "could not parse field regex as regular expression:{err}"
                         ))
                     })?,
-                    cedar_policy_type: r#type,
                     regex_expression,
                     regex_group_mapping: fields,
                 }))
             },
-            "json" => {
-                let r#type = value
-                    .get(TYPE_KEY)
-                    .and_then(|v| v.as_str())
-                    .ok_or_else(|| de::Error::missing_field(TYPE_KEY))?
-                    .to_string();
-
-                Ok(ClaimMapping::Json { r#type })
-            },
+            "json" => Ok(ClaimMapping::Json),
             _ => Err(de::Error::custom("unknown parser type")),
         }
     }
@@ -347,7 +311,6 @@ mod test {
     #[test]
     fn can_parse_regex_from_json() {
         let re_mapping = RegexMapping::new(
-            "Acme::Email".to_string(),
             r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
             HashMap::from([
                 ("UID".to_string(), RegexFieldMapping {
@@ -393,9 +356,7 @@ mod test {
     #[test]
     fn can_parse_json_from_json() {
         // Setup expected output
-        let expected = ClaimMapping::Json {
-            r#type: "Acme::Dolphin".to_string(),
-        };
+        let expected = ClaimMapping::Json;
 
         // Setup JSON
         let claim_mapping_json = json!({
@@ -421,7 +382,6 @@ mod test {
     #[test]
     fn can_parse_regex_from_yaml() {
         let re_mapping = RegexMapping::new(
-            "Acme::Email".to_string(),
             r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
             HashMap::from([
                 ("UID".to_string(), RegexFieldMapping {
@@ -470,9 +430,7 @@ mod test {
     #[test]
     fn can_parse_json_from_yaml() {
         // Setup expected output
-        let expected = ClaimMapping::Json {
-            r#type: "Acme::Dolphin".to_string(),
-        };
+        let expected = ClaimMapping::Json;
 
         // Setup YAML
         let claim_mapping_yaml = "

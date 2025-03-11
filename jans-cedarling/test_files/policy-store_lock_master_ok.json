@@ -32,7 +32,6 @@
                         "claim_mapping": {
                             "email": {
                                 "parser": "regex",
-                                "type": "Jans::email_address",
                                 "regex_expression": "^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$",
                                 "UID": {
                                     "attr": "uid",
@@ -45,7 +44,6 @@
                             },
                             "profile": {
                                 "parser": "regex",
-                                "type": "Jans::Url",
                                 "regex_expression": "(?x) ^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\\/\\/(?P<HOST>[^\\/:\\#?]+)(?::(?<PORT>\\d+))?(?P<PATH>\\/[^?\\#]*)?(?:\\?(?P<QUERY>[^\\#]*))?(?:(?P<FRAGMENT>.*))?/gm",
                                 "SCHEME": {
                                     "attr": "scheme",
