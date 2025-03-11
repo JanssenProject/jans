@@ -58,12 +58,10 @@ impl BuiltEntities {
     }
 
     pub fn get_single(&self, type_name: &str) -> Option<&str> {
-        println!("singles: {:?}", self.singles.keys());
         self.singles.get(type_name).map(|v| &**v)
     }
 
     pub fn get_multiple(&self, type_name: &str) -> Option<&[SmolStr]> {
-        println!("multiples: {:?}", self.multiples.keys());
         self.multiples.get(type_name).map(|v| &**v)
     }
 }

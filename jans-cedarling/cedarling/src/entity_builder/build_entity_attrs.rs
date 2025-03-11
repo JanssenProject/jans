@@ -61,7 +61,6 @@ pub fn build_entity_attrs_with_shape(
                 }
 
                 let Some(mapping) = claim_mappings.and_then(|m| m.mapping(attr_name)) else {
-                    println!("without mapping for: {attr_name}");
                     // without claim mapping
                     match claim_src.build_expr(src) {
                         Ok(Some(expr)) => {
@@ -76,7 +75,6 @@ pub fn build_entity_attrs_with_shape(
                 };
 
                 // with claim mapping
-                println!("has mapping for: {attr_name}");
                 let mapped_src = mapping.apply_mapping_value(src);
                 match claim_src.build_expr(&mapped_src) {
                     Ok(Some(expr)) => {
