@@ -100,10 +100,6 @@ policy_stores:
           entity Userinfo_token  = {"iss": TrustedIssuer, "jti": String, "client_id": String};
           entity Empty;
           entity MappedUser in [Role] = {
-            "jti": String,
-            "iss": String,
-            "aud": String,
-            "sub": String,
             "role": String,
             "id_token": id_token,
             "userinfo_token": Userinfo_token,
@@ -111,29 +107,23 @@ policy_stores:
           entity MappedWorkload = {
             "iss": String,
             "aud": String,
-            "jti": String,
             "client_id": String,
             "org_id": String,
           };
-          entity MappedIdToken = {
-            "jti": String,
-            "iss": TrustedIssuer, 
-            "aud": String,
-            "sub": String,
-          };
           entity MappedAccess_token = {
-            "aud": String,
             "iss": TrustedIssuer, 
-            "jti": String, 
+            "aud": String,
+            "jti": String,
             "client_id": String,
-            "org_id": String
+          };
+          entity MappedIdToken = {
+            "iss": TrustedIssuer, 
+            "sub": String,
+            "aud": String,
           };
           entity MappedUserinfo_token  = {
-            "jti": String, 
-            "country": String,
-            "sub": String,
             "iss": TrustedIssuer, 
-            "role": String,
+            "jti": String, 
           };
           action "Update" appliesTo {
             principal: [Workload, User],

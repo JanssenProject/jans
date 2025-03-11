@@ -93,35 +93,20 @@ policy_stores:
             access_token: Access_token,
           };
           entity Access_token = {
-          iss: Jans::TrustedIssuer,
-            sub?: String,
-            aud?: String,
-            nbf?: Long,
-            exp?: Long,
-            iat?: Long,
-            jti?: String,
+            iss: Jans::TrustedIssuer,
+            aud: String,
             client_id: String,
             org_id: String,
           };
           entity Id_token = {
             iss: Jans::TrustedIssuer,
-            sub?: String,
-            aud?: String,
-            nbf?: Long,
-            exp?: Long,
-            iat?: Long,
-            jti?: String,
+            sub: String,
+            aud: String,
           };
           entity Userinfo_token  = {
             iss: Jans::TrustedIssuer,
-            sub?: String,
-            aud?: String,
-            nbf?: Long,
-            exp?: Long,
-            iat?: Long,
-            jti?: String,
-            country?: String,
-            role?: Set<String>,
+            jti: String,
+            role: Set<String>,
           };
           type Context = {
             user: User,

@@ -100,36 +100,19 @@ policy_stores:
         };
         entity Access_token = {
           iss: TrustedIssuer,
-          sub?: String,
-          aud?: String,
-          nbf?: Long,
-          exp?: Long,
-          iat?: Long,
-          jti?: String,
+          aud: String,
+          jti: String,
           client_id: String,
-          org_id: String
+          org_id: String,
         };
         entity Id_token = {
           iss: TrustedIssuer,
-          sub?: String,
-          aud?: String,
-          nbf?: Long,
-          exp?: Long,
-          iat?: Long,
-          jti?: String,
-          country?: String,
-          role?: Set<String>,
+          sub: String,
+          aud: String,
         };
         entity Userinfo_token  = {
           iss: TrustedIssuer,
-          sub?: String,
-          aud?: String,
-          nbf?: Long,
-          exp?: Long,
-          iat?: Long,
-          jti?: String,
-          country?: String,
-          role?: Set<String>,
+          jti: String,
         };
         entity Empty;
         type Context = {

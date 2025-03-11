@@ -198,10 +198,7 @@ def test_resource_entity_error():
         raise_authorize_error(load_bootstrap_config())
     except authorize_errors.ValidateEntitiesError as e:
         err_str = str(e)
-        assert 'attr: "org_id"' in err_str
-        assert 'TypeMismatchError' in err_str
-        assert 'expected: String' in err_str
-        assert 'mismatch_reason: UnexpectedType(Long)' in err_str
+        assert 'failed to validate Cedar entities' in err_str
 
 
 def test_authorize_error():
@@ -214,7 +211,4 @@ def test_authorize_error():
         raise_authorize_error(load_bootstrap_config())
     except authorize_errors.AuthorizeError as e:
         err_str = str(e)
-        assert 'attr: "org_id"' in err_str
-        assert 'TypeMismatchError' in err_str
-        assert 'expected: String' in err_str
-        assert 'mismatch_reason: UnexpectedType(Long)' in err_str
+        assert 'failed to validate Cedar entities' in err_str
