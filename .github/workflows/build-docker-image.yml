@@ -22,9 +22,9 @@ on:
   workflow_dispatch:
     inputs:
       services:
-        description: 'One or set of the docker images. Format as following: "docker-jans-auth-server docker-jans-cloudtools docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link docker-jans-cloudtools cedarling-flask-sidecar"'
+        description: 'One or set of the docker images. Format as following: "docker-jans-auth-server docker-jans-cloudtools docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link cedarling-flask-sidecar"'
         required: true
-        default: 'docker-jans-auth-server docker-jans-cloudtools docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link docker-jans-cloudtools cedarling-flask-sidecar'
+        default: 'docker-jans-auth-server docker-jans-cloudtools docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link cedarling-flask-sidecar'
       cn_version:
         description: 'The war version to build the image off'
         required: false
