@@ -167,7 +167,7 @@ jobs:
       # UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
       - name: Setup Python 3.10
         if: github.event_name == 'workflow_dispatch' && ${{ matrix.docker-images }} != 'loadtesting-jmeter'
-        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
         with:
           python-version: "3.10"
 
