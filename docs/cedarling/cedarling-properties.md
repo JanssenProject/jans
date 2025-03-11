@@ -37,7 +37,7 @@ These Bootstrap Properties control default application level behavior.
 **The following bootstrap properties are needed to configure JWT and cryptographic behavior:**
 
 * **`CEDARLING_LOCAL_JWKS`** : JWKS file with public keys
-* **`CEDARLING_POLICY_STORE_LOCAL`** : JSON object with policy store
+* **`CEDARLING_POLICY_STORE_LOCAL`** : JSON object as string with policy store. You can use [this](https://jsontostring.com/) converter.
 * **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Local file with JSON object with policy store
 * **`CEDARLING_JWT_SIG_VALIDATION`** : `enabled` | `disabled` -- Whether to check the signature  of all JWT tokens. This requires an `iss` is present.
 * **`CEDARLING_JWT_STATUS_VALIDATION`** : `enabled` | `disabled` -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retreive the latest Status List JWT from the `.well-known/openid-configuration` via the `status_list_endpoint` claim and cache it. See the [IETF Draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) for more info.
