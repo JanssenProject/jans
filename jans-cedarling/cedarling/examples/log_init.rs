@@ -10,8 +10,8 @@
 #![cfg(not(target_family = "wasm"))]
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogLevel, LogStorage,
-    LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, WorkloadBoolOp,
+    AuthorizationConfig, BootstrapConfig, Cedarling, JsonRule, JwtConfig, LogConfig, LogLevel,
+    LogStorage, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use std::env;
 
@@ -58,7 +58,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::And,
+            principal_bool_operator: JsonRule::default(),
             ..Default::default()
         },
     })

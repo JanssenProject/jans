@@ -29,6 +29,7 @@ bootstrap property:
 * `std_out` - write logs synchronously to std_out
 * `lock` - periodically POST logs to Jans Lock Server `/audit` endpoint for central archiving.
 
+
 ### System Log Levels
 
 Set with property `CEDARLING_LOG_LEVEL`
