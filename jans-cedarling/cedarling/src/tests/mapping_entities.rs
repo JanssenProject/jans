@@ -12,7 +12,7 @@ use super::utils::*;
 use crate::authz::entity_builder::{
     BuildCedarlingEntityError, BuildEntityError, BuildTokenEntityError,
 };
-use crate::{AuthorizeError, Cedarling, cmp_decision, cmp_policy};
+use crate::{AuthorizeError, Cedarling, JsonRule, cmp_decision, cmp_policy};
 use cedarling_util::get_raw_config;
 use std::collections::HashSet;
 use std::sync::LazyLock;
@@ -128,6 +128,13 @@ async fn test_custom_mapping() {
         },
     }))
     .expect("valid token configs");
+    raw_config.principal_bool_operation = JsonRule::new(json!({
+        "and" : [
+            {"===": [{"var": "Jans::MappedWorkload"}, "ALLOW"]},
+            {"===": [{"var": "Jans::MappedUser"}, "ALLOW"]}
+        ]
+    }))
+    .unwrap();
 
     let config = crate::BootstrapConfig::from_raw_config(&raw_config)
         .expect("raw config should parse without errors");

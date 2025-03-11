@@ -15,6 +15,7 @@
   "PYMYSQL": "https://github.com/PyMySQL/PyMySQL/archive/refs/tags/v1.1.1.zip",
   "REQUESTS_TOOLBELT": "https://github.com/requests/toolbelt/archive/refs/tags/1.0.0.zip",
   "CRYPTOGRAPHY": "https://files.pythonhosted.org/packages/20/8b/66600f5851ec7893ace9b74445d7eaf3499571b347e339d18c76c876b0f9/cryptography-37.0.4-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+  "PYCRONTAB": "https://gitlab.com/doctormo/python-crontab/-/archive/v3.2.0/python-crontab-v3.2.0.zip",
   "TWILIO_MAVEN": "https://repo1.maven.org/maven2/com/twilio/sdk/twilio/",
   "TWILIO_VERSION": "7.17.0",
   "KC_VERSION": "25.0.6",

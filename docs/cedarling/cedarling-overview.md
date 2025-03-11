@@ -15,10 +15,11 @@ complexity. The Cedarling provides a fast, embeddable, and self-contained soluti
 authorization, designed for both client-side and server-side enforcement. This makes it 
 particularly well-suited for latency-sensitive environments like mobile apps, API gateways, and 
 embedded devices. Cedarling is designed for maximum deployment flexibility:
-* Embedded in browsers or mobile apps for client-side authorization.
-* Integrated into backend services using Java or Python SDKs.
-* Deployed as a sidecar or serverless function in cloud-native environments.
-* Used within databases and API gateways to enforce fine-grained authorization at multiple layers.
+
+* Embedded in browsers or mobile apps for client-side authorization
+* Integrated into backend services using Java or Python SDKs
+* Deployed as a sidecar or serverless function in cloud-native environments
+* Used within databases and API gateways to enforce fine-grained authorization at multiple layers
 
 ![](../assets/lock-cedarling-diagram-1.jpg)
 
@@ -29,9 +30,16 @@ full-featured PDP that includes logging, JWT validation, and claims mapping, mak
 more adaptable for real-world applications. It also has optional features to connect 
 to enterprise plumbing.
 
-If you never heard of Cedar, you might want to start [here](./cedar-intro.md) with 
-a quick introduction and some links for further learning. These Cedarling docs assume 
-you have a basic understanding of Cedar policy syntax and language features. 
+!!! tip "About Cedar"
+
+      [Cedar](https://www.cedarpolicy.com/en) is a policy syntax invented by Amazon and used by their 
+      [Verified Permission](https://aws.amazon.com/verified-permissions/) service. Cedar policies
+      enable developers to implement fine-grain access control and externalize policies. To learn more
+      about why the design of Cedar is **intuitive**, **fast** and **safe**, read this 
+      [article](https://aws.amazon.com/blogs/security/how-we-designed-cedar-to-be-intuitive-to-use-fast-and-safe/) 
+      or watch this [video](https://www.youtube.com/watch?v=k6pPcnLuOXY&t=1779s)
+
+      These Cedarling docs assume you have a basic understanding of Cedar policy syntax and language features.
 
 The Cedarling is written in Rust with bindings to WASM, iOS, Android, Python and Java. 
 This means that web, mobile, and cloud developers can use the Cedarling  to load a 
@@ -46,13 +54,7 @@ applications can use the sidecar via a REST API, deploy the Cedarling in the clo
 serverless component (e.g. cloud WASM), or integrate directly via the Java or Python SDKs. 
 
 The Cedarling is optimized for speed, typically returning authorization decisions in sub-millisecond time. By 
-keeping all necessary data locally available, it avoids costly cloud round-trips, ensuring predictable 
-performance.
-
-The Cedarling ensures consistent security policies across different environments while minimizing 
-attack surfaces by keeping authorization decisions local. Its design aligns with Zero Trust 
-principles, and its ability to validate JWTs and logs enhances auditability for compliance-focused 
-applications.
+keeping all necessary data locally available, it avoids costly cloud round-trips, ensuring predictable performance.
 
 ## Token Based Access Control (TBAC)
 
@@ -111,44 +113,45 @@ above.
 
 ## Cedarling and Zero Trust
 
-Zero Trust is a modern security model that assumes **no implicit trust**—every request must be **explicitly authorized** based on policies, identity, and context. Cedarling enables **end-to-end Zero Trust enforcement** by embedding fine-grained authorization across the entire security stack, from **client devices** to **backend services and databases**.
+Zero Trust is a modern security model that assumes no implicit trust—every request must be explicitly authorized based on policies, identity, and context. The Cedarling enables end-to-end Zero Trust enforcement by embedding fine-grained authorization across the entire security stack, from client devices to backend services and databases.
 
 ### End-to-End Authorization Enforcement
-Cedarling can be deployed **at every layer** to ensure that access decisions are consistently enforced. The diagram below illustrates how Cedarling operates in a hypothetical **mobile application architecture**:
+The Cedarling can be deployed **at every layer** to ensure that access decisions are consistently enforced. The diagram below illustrates how the Cedarling operates in a hypothetical mobile application architecture:
 
 ![](../assets/lock-cedarling-mobile-generic.jpg)
 
 1. **Identity Provider (IDP) Enforcement**  
-   - The IDP can use Cedarling to determine if a **mobile application** should be allowed to register.  
-   - Example: An IDP policy might restrict registration to applications that present a **valid Software Statement Assertion (SSA)** or **Google Play Integrity Attestation**.
+  - The IDP can use the Cedarling to determine if a mobile application should be allowed to register.  
+  - Example: An IDP policy might restrict registration to applications that present a valid Software Statement Assertion (SSA) or Google Play Integrity Attestation.
   
 2. **Client-Side Authorization in Mobile and Web Apps**  
-   - A **mobile application** can embed Cedarling to enforce **real-time access control** before exposing UI components or calling APIs.  
-   - Example: A finance app may check if a user's token has **elevated risk signals** (e.g., logging in from a new device) before enabling high-risk transactions.
+  - A mobile application can embed the Cedarling to enforce real-time access control before exposing UI components or calling APIs.  
+  - Example: A finance app may check if a user's token has elevated risk signals (e.g., logging in from a new device) before enabling high-risk transactions.
 
 3. **API Gateway Enforcement**  
-   - API gateways can use Cedarling to **validate JWT claims and scope permissions** before forwarding requests to backend services.  
-   - Example: A gateway might block API requests missing a **valid "admin" scope** or **ensure an OAuth token has not expired**.
+  - API gateways can use the Cedarling to validate JWT claims and scope permissions before forwarding requests to backend services.  
+  - Example: A gateway might block API requests missing a valid `admin` scope or ensure an OAuth token is not revoked.
 
 4. **Backend Service Authorization**  
-   - The **backend server** can re-evaluate authorization decisions, ensuring **end-to-end security** rather than trusting the API gateway or mobile app.  
-   - Example: Even if a request passes through an API gateway, the backend can **recheck authorization policies** to prevent **privilege escalation**.
+  - The backend server can re-evaluate authorization decisions, ensuring end-to-end security rather than trusting the API gateway or mobile app.  
+  - Example: Even if a request passes through an API gateway, the backend can recheck authorization policies to prevent privilege escalation.
 
 5. **Database-Level Policy Enforcement**  
-   - Cedarling can be embedded within databases to **filter data at query time**, ensuring **only authorized records are returned**.  
-   - Example: A **multi-tenant SaaS** application may enforce **row-level security** so a user can only access their own organization's data.
+  - The Cedarling can be embedded within databases to filter data at query time, ensuring only authorized records are returned.  
+  - Example: A multi-tenant SaaS application may enforce row-level security so a user can only access their own organization's data.
 
-### Why Zero Trust Needs Cedarling
-Traditional access control models assume **network perimeters are secure**, leading to excessive trust in internal components. **Cedarling aligns with Zero Trust by:**
-- **Eliminating implicit trust**—each authorization decision is enforced based on real-time policies.
-- **Minimizing attack surfaces**—authorization happens **locally** within apps, APIs, and services, reducing the risk of **man-in-the-middle (MITM) attacks**.
-- **Ensuring consistent policies**—from **client devices** to **backend services and databases**, enforcing the **same security rules** everywhere.
+### Why Zero Trust Needs Cedarlings
+Traditional access control models assume network perimeters are secure, leading to excessive trust in internal components. The Cedarling aligns with Zero Trust by:
+
+- Eliminating implicit trust—each authorization decision is enforced based on real-time policies.
+- Improving re-usability of policies across applications to enable multi-layer security
+- Ensuring consistent policies—from client devices to backend services and databases, enforcing the same security rules everywhere.
 
 ### Cedarling and Threat Detection
-Beyond enforcing policies, Cedarling plays a role in **intrusion detection** by **logging every decision**. These logs can be **analyzed in a SIEM (Security Information and Event Management) system** to detect:
-- **Unusual access patterns** (e.g., a user requesting sensitive data from an unrecognized location).
-- **Token misuse** (e.g., an expired JWT being replayed).
-- **Privilege escalation attempts** (e.g., a non-admin trying to access admin-only APIs).
+Beyond enforcing policies, the Cedarling plays a role in intrusion detection by logging every decision. These logs can be analyzed in a SIEM (Security Information and Event Management) system to detect:
+- Unusual access patterns (e.g., a user requesting sensitive data from an unrecognized location).
+- Token misuse (e.g., an expired JWT being replayed).
+- Privilege escalation attempts (e.g., a non-admin trying to access admin-only APIs).
 
 ### Zero Trust Conclusion
-By embedding Cedarling across multiple layers of the application stack, organizations can **enforce Zero Trust security**, **reduce unauthorized access**, and **gain visibility into access patterns**. Whether it's **protecting frontend applications, securing API gateways, or enforcing access policies at the database level**, Cedarling ensures **every request is explicitly authorized**—everywhere.
+By embedding the Cedarling across multiple layers of the application stack, organizations can enforce Zero Trust security, reduce unauthorized access, and gain visibility into access patterns. Whether it's protecting frontend applications, securing API gateways, or enforcing access policies at the database level, the Cedarling ensures every request is explicitly authorized—-verywhere.
