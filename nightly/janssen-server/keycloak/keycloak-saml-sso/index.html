@@ -4847,30 +4847,43 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#idp-initiated-flows" class="md-nav__link">
-    IDP Initiated Flows
+  <a href="#testing-jans-saml-sso-with-sptest" class="md-nav__link">
+    Testing Jans SAML SSO with sptest
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing Jans SAML SSO with sptest">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configure-idp-janssen-server" class="md-nav__link">
+    Configure IDP [Janssen Server]
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#idp-key-management" class="md-nav__link">
-    IDP Key Management
+        
+          <li class="md-nav__item">
+  <a href="#configure-sp-iamshowcase" class="md-nav__link">
+    Configure SP [IAMShowcase]
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+        
+          <li class="md-nav__item">
+  <a href="#test-sso" class="md-nav__link">
+    Test SSO
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+        
+          <li class="md-nav__item">
+  <a href="#faq" class="md-nav__link">
+    FAQ
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8844,30 +8857,43 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#idp-initiated-flows" class="md-nav__link">
-    IDP Initiated Flows
+  <a href="#testing-jans-saml-sso-with-sptest" class="md-nav__link">
+    Testing Jans SAML SSO with sptest
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing Jans SAML SSO with sptest">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configure-idp-janssen-server" class="md-nav__link">
+    Configure IDP [Janssen Server]
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#idp-key-management" class="md-nav__link">
-    IDP Key Management
+        
+          <li class="md-nav__item">
+  <a href="#configure-sp-iamshowcase" class="md-nav__link">
+    Configure SP [IAMShowcase]
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+        
+          <li class="md-nav__item">
+  <a href="#test-sso" class="md-nav__link">
+    Test SSO
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+        
+          <li class="md-nav__item">
+  <a href="#faq" class="md-nav__link">
+    FAQ
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8962,21 +8988,43 @@ be used on the SP side. The metadata can be found at
 <code>https://&lt;server-hostname&gt;/kc/realms/jans/protocol/saml/descriptor</code>  where
 <code>&lt;server-hostname&gt;</code> is the hostname of the Janssen server specified during
 installation.</p>
-<h2 id="idp-initiated-flows">IDP Initiated Flows<a class="headerlink" href="#idp-initiated-flows" title="Permanent link">#</a></h2>
-<p><em>This content is a work in progress</em></p>
-<h2 id="idp-key-management">IDP Key Management<a class="headerlink" href="#idp-key-management" title="Permanent link">#</a></h2>
-<p><em>This content is a work in progress</em></p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>You can ask questions through <a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<h2 id="testing-jans-saml-sso-with-sptest">Testing Jans SAML SSO with sptest<a class="headerlink" href="#testing-jans-saml-sso-with-sptest" title="Permanent link">#</a></h2>
+<h3 id="configure-idp-janssen-server">Configure IDP [Janssen Server]<a class="headerlink" href="#configure-idp-janssen-server" title="Permanent link">#</a></h3>
+<p>In this tutorial, we are going to use <a href="https://sptest.iamshowcase.com">Iamshowcase</a> as a service provider. Lets create a TR, Apply following steps in Janssen Server:</p>
+<ul>
+<li>Download sp metadata: <code>wget https://sptest.iamshowcase.com/testsp_metadata.xml</code></li>
+<li>Open Jans TUI and navigate to <strong>Jans SAML &gt; Service Providers &gt; Add Service Provider</strong>:</li>
+</ul>
+<p><img src= "../../assets/SAML-Service-provider.png"></p>
+<ul>
+<li>Release some attributes, for example: <code>email</code>, <code>username</code></li>
+</ul>
+<p><img src= "../../assets/SAML-release-attribute.png"></p>
+<ul>
+<li>Finally Save it.</li>
+</ul>
+<h3 id="configure-sp-iamshowcase">Configure SP [IAMShowcase]<a class="headerlink" href="#configure-sp-iamshowcase" title="Permanent link">#</a></h3>
+<p>Since We are done at Janssen Server side, now let's connect SP with the IDP:</p>
+<ul>
+<li>browse and download IDP Metadata: <code>https://&lt;yoour-janssen-server&gt;/kc/realms/jans/protocol/saml/descriptor</code></li>
+<li>Go to: https://sptest.iamshowcase.com/instructions#spinit and upload the IDP metadata.</li>
+<li>It will give you an SP link to test the SAML SSO flow:</li>
+</ul>
+<p><img src ="../../assets/sp-url.png"></p>
+<h3 id="test-sso">Test SSO<a class="headerlink" href="#test-sso" title="Permanent link">#</a></h3>
+<p>Copy that link and open it in a browser. You can open it in incognito mode to avoid session issue. So, It will redirect you to janssen login page. Once you logged in with user credentials it will redirect back to the SP's protected page and show the user session details. </p>
+<h3 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">#</a></h3>
+<ul>
+<li>Check KC scheduler log for any TR issue <code>/opt/kc-scheduler/logs/scheduler.log</code></li>
+<li>Also check file directory inside <code>/opt/idp/configs/keycloak/sp/metadata</code></li>
+</ul>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-12T07:27:57+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-12</span>
       
         <br>
         Created:
