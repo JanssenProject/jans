@@ -19,6 +19,19 @@ pub struct Request {
     pub context: serde_json::Value,
 }
 
+/// Box to store authorization data, with any additional principals
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct RequestUnverified {
+    /// Contains the JWTs that will be used for the AuthZ request
+    pub principals: Vec<EntityData>,
+    /// cedar_policy action
+    pub action: String,
+    /// cedar_policy resource data
+    pub resource: EntityData,
+    /// context to be used in cedar_policy
+    pub context: serde_json::Value,
+}
+
 /// Cedar policy entity data
 /// fields represent EntityUid
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]

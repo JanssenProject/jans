@@ -11,15 +11,12 @@ use super::*;
 use crate::EntityData;
 
 impl EntityBuilder {
-    pub fn build_resource_entity(
-        &self,
-        resource: &EntityData,
-    ) -> Result<Entity, BuildResourceEntityError> {
+    pub fn build_cedar_entity(&self, entity_data: &EntityData) -> Result<Entity, BuildEntityError> {
         let (entity_type_name, entity_type) = self
             .schema
-            .get_entity_schema(&resource.resource_type, None)?
+            .get_entity_schema(&entity_data.resource_type, None)?
             .ok_or(BuildEntityError::EntityNotInSchema(
-                resource.resource_type.clone(),
+                entity_data.resource_type.clone(),
             ))?;
 
         let default_namespace = entity_type_name.namespace();
@@ -28,19 +25,19 @@ impl EntityBuilder {
             &self.schema,
             Some(default_namespace.as_str()),
             entity_type,
-            &resource.payload,
+            &entity_data.payload,
         )?;
 
         // Build cedar entity
         let entity_id =
-            EntityId::from_str(&resource.id).map_err(BuildEntityError::ParseEntityId)?;
+            EntityId::from_str(&entity_data.id).map_err(BuildEntityError::ParseEntityId)?;
         let entity_uid = EntityUid::from_type_name_and_id(entity_type_name, entity_id);
         Ok(Entity::new(entity_uid, entity_attrs, HashSet::new())?)
     }
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum BuildResourceEntityError {
+pub enum BuildCedarEntityError {
     #[error(transparent)]
     BuildEntity(#[from] BuildEntityError),
     #[error(transparent)]
@@ -141,7 +138,7 @@ mod test {
             ]),
         };
         let entity = builder
-            .build_resource_entity(&resource_data)
+            .build_cedar_entity(&resource_data)
             .expect("expected to build resource entity");
 
         let url = entity
@@ -230,7 +227,7 @@ mod test {
             payload: HashMap::new(),
         };
         let entity = builder
-            .build_resource_entity(&resource_data)
+            .build_cedar_entity(&resource_data)
             .expect("expected to build resource entity");
 
         assert!(
@@ -286,7 +283,7 @@ mod test {
             ]),
         };
         let entity = builder
-            .build_resource_entity(&resource_data)
+            .build_cedar_entity(&resource_data)
             .expect("expected to build resource entity");
 
         let url = entity

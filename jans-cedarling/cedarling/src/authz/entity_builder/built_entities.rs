@@ -21,4 +21,12 @@ impl BuiltEntities {
     pub fn get(&self, entity_type_name: &EntityTypeName) -> Option<&SmolStr> {
         self.0.get(&entity_type_name.to_smolstr())
     }
+
+    pub fn from_iter<'a>(iter: impl Iterator<Item = &'a Entity>) -> Self {
+        let mut built_entities = BuiltEntities::default();
+        for entity in iter {
+            built_entities.insert(&entity);
+        }
+        built_entities
+    }
 }

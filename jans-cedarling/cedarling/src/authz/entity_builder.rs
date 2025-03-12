@@ -18,7 +18,7 @@ use crate::jwt::{Token, TokenClaimTypeError};
 use crate::{AuthorizationConfig, EntityData};
 use build_attrs::{BuildAttrError, ClaimAliasMap, build_entity_attrs_from_tkn};
 use build_expr::*;
-use build_resource_entity::{BuildResourceEntityError, JsonTypeError};
+use build_resource_entity::{BuildCedarEntityError, JsonTypeError};
 use build_role_entity::BuildRoleEntityError;
 pub use build_token_entities::BuildTokenEntityError;
 use build_user_entity::BuildUserEntityError;
@@ -157,7 +157,9 @@ impl EntityBuilder {
             (None, vec![])
         };
 
-        let resource = self.build_resource_entity(resource)?;
+        let resource = self
+            .build_cedar_entity(resource)
+            .map_err(|err| BuildCedarEntityError::BuildEntity(err))?;
         built_entities.insert(&resource);
 
         Ok(AuthorizeEntitiesData {
@@ -220,10 +222,14 @@ pub enum BuildCedarlingEntityError {
     #[error(transparent)]
     Role(#[from] BuildRoleEntityError),
     #[error("failed to build resource entity: {0}")]
-    Resource(#[from] BuildResourceEntityError),
+    Resource(#[from] BuildCedarEntityError),
     #[error(transparent)]
     Token(#[from] BuildTokenEntityError),
+    #[error("failed to build unverified principal entity: {0}")]
+    UnverifiedPrincipal(BuildCedarEntityError),
 }
+
+
 
 #[derive(Debug, thiserror::Error)]
 pub enum BuildEntityError {

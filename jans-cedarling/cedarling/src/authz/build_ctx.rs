@@ -13,7 +13,7 @@ use serde_json::{Value, json, map::Entry};
 pub fn build_context(
     config: &AuthzConfig,
     request_context: Value,
-    entities_data: &AuthorizeEntitiesData,
+    entities_data: &BuiltEntities,
     schema: &cedar_policy::Schema,
     action: &cedar_policy::EntityUid,
 ) -> Result<cedar_policy::Context, BuildContextError> {
@@ -26,7 +26,7 @@ pub fn build_context(
 
     // Get the entities required for the context
     let mut ctx_entity_refs = json!({});
-    let build_entities = &entities_data.build_entities;
+    let build_entities = &entities_data;
 
     if let Some(ctx) = action_schema.applies_to.context.as_ref() {
         match ctx {
