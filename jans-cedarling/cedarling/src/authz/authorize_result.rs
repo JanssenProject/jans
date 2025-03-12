@@ -162,7 +162,8 @@ impl AuthorizeResult {
                 if typename == &principal_typename {
                     workload_result = Some(response.to_owned());
                 }
-            } else if let Some(typename) = &person_typename {
+            }
+            if let Some(typename) = &person_typename {
                 if typename == &principal_typename {
                     person_result = Some(response.to_owned());
                 }
