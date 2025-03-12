@@ -52,7 +52,7 @@ where
 {
     match value {
         None => serializer.serialize_none(),
-        Some(response) => CedarResponse(&response).serialize(serializer),
+        Some(response) => CedarResponse(response).serialize(serializer),
     }
 }
 
@@ -74,7 +74,7 @@ where
 
 struct CedarResponse<'a>(&'a cedar_policy::Response);
 
-impl<'a> Serialize for CedarResponse<'a> {
+impl Serialize for CedarResponse<'_> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,

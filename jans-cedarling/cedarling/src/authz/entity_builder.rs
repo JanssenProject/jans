@@ -159,7 +159,7 @@ impl EntityBuilder {
 
         let resource = self
             .build_cedar_entity(resource)
-            .map_err(|err| BuildCedarEntityError::BuildEntity(err))?;
+            .map_err(BuildCedarEntityError::BuildEntity)?;
         built_entities.insert(&resource);
 
         Ok(AuthorizeEntitiesData {
@@ -228,8 +228,6 @@ pub enum BuildCedarlingEntityError {
     #[error("failed to build unverified principal entity: {0}")]
     UnverifiedPrincipal(BuildCedarEntityError),
 }
-
-
 
 #[derive(Debug, thiserror::Error)]
 pub enum BuildEntityError {

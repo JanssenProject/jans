@@ -25,7 +25,7 @@ impl BuiltEntities {
     pub fn from_iter<'a>(iter: impl Iterator<Item = &'a Entity>) -> Self {
         let mut built_entities = BuiltEntities::default();
         for entity in iter {
-            built_entities.insert(&entity);
+            built_entities.insert(entity);
         }
         built_entities
     }
