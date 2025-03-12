@@ -23,7 +23,26 @@
     "CEDARLING_POLICY_STORE_LOCAL_FN": "../../bindings/cedarling_uniffi/test_files/policy-store.json",
     "CEDARLING_POLICY_STORE_URI": "",
     "CEDARLING_USER_AUTHZ": "enabled",
-    "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
+    "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+        "and": [
+            {
+                "===": [
+                    {
+                        "var": "Jans::Workload"
+                    },
+                    "ALLOW"
+                ]
+            },
+            {
+                "===": [
+                    {
+                        "var": "Jans::User"
+                    },
+                    "ALLOW"
+                ]
+            }
+        ]
+    },
     "CEDARLING_WORKLOAD_AUTHZ": "enabled",
     "id": "67d412fb-5dd9-4f85-9bd3-7b6471d90aa3"
 }

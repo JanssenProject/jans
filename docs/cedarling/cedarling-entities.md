@@ -80,7 +80,7 @@ The following entity Workload Entity could be created:
     "aud": "some_aud"
     "access_token": {"__entity": {"type": "Access_token", "id": "some_jti"}},
   },
-  parents: []
+  "parents": []
 }
 ```
 
@@ -143,7 +143,7 @@ The following entity Workload Entity could be created:
     "email": "email@email.com",
     "name": "bob"
   },
-  parents: [
+  "parents": [
     {"type": "Role", "id": "role1"},
     {"type": "Role", "id": "role2"},
     {"type": "Role", "id": "role3"}

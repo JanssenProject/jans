@@ -22,7 +22,6 @@ url = "2.5.2"
 lazy_static = "1.5.0"
 jsonwebtoken = { workspace = true }
 reqwest = { version = "0.12.8", features = ["json"] }
-bytes = "1.7.2"
 typed-builder = "0.20.0"
 semver = { version = "1.0.23", features = ["serde"] }
 derive_more = { version = "1.0.0", features = [
@@ -40,6 +39,7 @@ smol_str = "0.3.2"
 strum = { version = "0.26", features = ["derive"] }
 cedar-policy-validator = "4.3.3"
 cedar-policy-core = "4.3.3"
+datalogic-rs = "2.1.2"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { workspace = true, features = ["console"] }
@@ -53,6 +53,10 @@ jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
 mockito = "1.5.0"
 criterion = { version = "0.5.1", features = ["async_tokio"] }
 tokio = { version = "1.42.0", features = ["rt-multi-thread"] }
+
+[target.'cfg(not(any(target_arch = "wasm32", target_os = "windows")))'.dev-dependencies]
+pprof = { version = "0.14.0", features = ["flamegraph"] }
+
 
 [[bench]]
 name = "authz_benchmark"

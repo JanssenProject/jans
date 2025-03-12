@@ -93,6 +93,13 @@ create_exception!(
     "Error encountered while running on strict id token trust mode"
 );
 
+create_exception!(
+    authorize_errors,
+    ExecuteRuleError,
+    AuthorizeError,
+    "Error encountered while executing the rule for principals"
+);
+
 #[pyclass]
 #[derive()]
 pub struct ErrorPayload(CedarlingAuthorizeError);
@@ -140,7 +147,8 @@ errors_functions! {
     EntitiesToJson => EntitiesToJsonError,
     BuildContext => BuildContextError,
     IdTokenTrustMode => IdTokenTrustModeError,
-    BuildEntity => BuildEntityError
+    BuildEntity => BuildEntityError,
+    ExecuteRule => ExecuteRuleError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {

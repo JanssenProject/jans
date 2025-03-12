@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use crate::authorization_config::IdTokenTrustMode;
-use crate::{AuthorizationConfig, EntityBuilderConfig, JwtConfig, WorkloadBoolOp};
+use crate::{AuthorizationConfig, EntityBuilderConfig, JsonRule, JwtConfig};
 pub use crate::{
     BootstrapConfig, Cedarling, LogConfig, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
 };
@@ -24,7 +24,7 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::And,
+            principal_bool_operator: JsonRule::default(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },

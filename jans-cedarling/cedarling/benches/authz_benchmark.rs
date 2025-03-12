@@ -3,11 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, EntityBuilderConfig, IdTokenTrustMode,
-    InitCedarlingError, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, Request,
-    WorkloadBoolOp,
-};
+use cedarling::*;
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use jsonwebtoken::Algorithm;
 use serde::Deserialize;
@@ -77,7 +73,7 @@ async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCed
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::And,
+            principal_bool_operator: JsonRule::default(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
@@ -106,7 +102,7 @@ async fn prepare_cedarling_with_jwt_validation() -> Result<Cedarling, InitCedarl
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::And,
+            principal_bool_operator: JsonRule::default(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },

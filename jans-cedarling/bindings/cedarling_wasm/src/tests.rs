@@ -29,7 +29,26 @@ static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
         "CEDARLING_LOG_LEVEL": "INFO",
         "CEDARLING_USER_AUTHZ": "enabled",
         "CEDARLING_WORKLOAD_AUTHZ": "enabled",
-        "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
+        "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+            "and": [
+                {
+                    "===": [
+                        {
+                            "var": "Jans::Workload"
+                        },
+                        "ALLOW"
+                    ]
+                },
+                {
+                    "===": [
+                        {
+                            "var": "Jans::User"
+                        },
+                        "ALLOW"
+                    ]
+                }
+            ]
+        },
         "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
     })
@@ -263,7 +282,26 @@ async fn test_memory_log_interface() {
         "CEDARLING_LOG_LEVEL": "INFO",
         "CEDARLING_USER_AUTHZ": "enabled",
         "CEDARLING_WORKLOAD_AUTHZ": "enabled",
-        "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
+        "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+            "and": [
+                {
+                    "===": [
+                        {
+                            "var": "Jans::Workload"
+                        },
+                        "ALLOW"
+                    ]
+                },
+                {
+                    "===": [
+                        {
+                            "var": "Jans::User"
+                        },
+                        "ALLOW"
+                    ]
+                }
+            ]
+        },
         "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
     });
 

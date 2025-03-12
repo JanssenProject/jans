@@ -3,10 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JwtConfig, LogConfig,
-    LogLevel, LogTypeConfig, PolicyStoreConfig, WorkloadBoolOp,
-};
+use cedarling::*;
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use lazy_static::lazy_static;
 use tokio::runtime::Runtime;
@@ -43,7 +40,7 @@ lazy_static! {
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::And,
+            principal_bool_operator: JsonRule::default(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },

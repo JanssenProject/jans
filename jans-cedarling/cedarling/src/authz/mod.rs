@@ -10,14 +10,14 @@
 
 use crate::authorization_config::IdTokenTrustMode;
 use crate::bootstrap_config::AuthorizationConfig;
+use crate::common::json_rules::ApplyRuleError;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::entity_builder::*;
 use crate::jwt::{self, Token};
 use crate::log::interface::LogWriter;
 use crate::log::{
     AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, DiagnosticsRefs, LogEntry,
-    LogLevel, LogTokensInfo, LogType, Logger, PrincipalLogEntry, UserAuthorizeInfo,
-    WorkloadAuthorizeInfo, gen_uuid7,
+    LogLevel, LogTokensInfo, LogType, Logger, UserAuthorizeInfo, WorkloadAuthorizeInfo, gen_uuid7,
 };
 use build_ctx::*;
 use cedar_policy::{Entities, Entity, EntityUid};
@@ -126,7 +126,14 @@ impl Authz {
         )?;
 
         let workload_principal = entities_data.workload.as_ref().map(|e| e.uid()).to_owned();
-        let user_principal = entities_data.user.as_ref().map(|e| e.uid()).to_owned();
+        let person_principal = entities_data.user.as_ref().map(|e| e.uid()).to_owned();
+
+        let workload_typename = workload_principal
+            .as_ref()
+            .map(|e| e.type_name().to_smolstr());
+        let person_typename = person_principal
+            .as_ref()
+            .map(|e| e.type_name().to_smolstr());
 
         // Convert [`AuthorizeEntitiesData`] to  [`cedar_policy::Entities`] structure,
         // hold all entities that will be used on authorize check.
@@ -175,7 +182,7 @@ impl Authz {
 
         // Check authorize where principal is `"Jans::User"` from cedar-policy schema.
         let (user_authz_result, user_authz_info, user_entity_claims) =
-            if let Some(user) = user_principal {
+            if let Some(user) = person_principal {
                 let principal = user;
 
                 let authz_result = self
@@ -216,11 +223,13 @@ impl Authz {
             };
 
         let result = AuthorizeResult::new(
-            self.config.authorization.user_workload_operator,
+            &self.config.authorization.principal_bool_operator,
+            workload_typename,
+            person_typename,
             workload_authz_result,
             user_authz_result,
             request_id,
-        );
+        )?;
 
         // measure time how long request executes
         let since_start = Utc::now().signed_duration_since(start_time);
@@ -261,7 +270,10 @@ impl Authz {
             base: BaseLogEntry::new(LogType::Decision, request_id),
             policystore_id: self.config.policy_store.id.as_str(),
             policystore_version: self.config.policy_store.get_store_version(),
-            principal: PrincipalLogEntry::new(&self.config.authorization),
+            principal: DecisionLogEntry::principal(
+                result.person.is_some(),
+                result.workload.is_some(),
+            ),
             user: user_entity_claims,
             workload: workload_entity_claims,
             lock_client_id: None,
@@ -441,6 +453,9 @@ pub enum AuthorizeError {
     /// Error encountered while building Cedar Entities
     #[error(transparent)]
     BuildEntity(#[from] BuildEntityError),
+    /// Error encountered while executing the rule for principals
+    #[error(transparent)]
+    ExecuteRule(#[from] ApplyRuleError),
 }
 
 #[derive(Debug, derive_more::Error, derive_more::Display)]

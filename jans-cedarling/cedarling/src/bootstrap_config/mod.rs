@@ -23,7 +23,7 @@ pub use entity_builder_config::*;
 pub use jwt_config::*;
 pub use log_config::*;
 pub use policy_store_config::*;
-pub use raw_config::{BootstrapConfigRaw, FeatureToggle, LoggerType, WorkloadBoolOp};
+pub use raw_config::{BootstrapConfigRaw, FeatureToggle, LoggerType};
 
 /// Bootstrap configuration
 /// properties for configuration [`Cedarling`](crate::Cedarling) application.
@@ -165,7 +165,9 @@ pub enum BootstrapConfigLoadingError {
 mod test {
     use super::raw_config::BootstrapConfigRaw;
     use super::*;
-    use crate::{BootstrapConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig};
+    use crate::{
+        BootstrapConfig, JsonRule, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig,
+    };
     use jsonwebtoken::Algorithm;
     use std::collections::HashSet;
     use std::path::Path;
@@ -198,7 +200,7 @@ mod test {
             authorization_config: AuthorizationConfig {
                 use_user_principal: true,
                 use_workload_principal: true,
-                user_workload_operator: WorkloadBoolOp::And,
+                principal_bool_operator: JsonRule::default(),
                 decision_log_default_jwt_id: "jti".to_string(),
                 ..Default::default()
             },
@@ -239,7 +241,7 @@ mod test {
             authorization_config: AuthorizationConfig {
                 use_user_principal: true,
                 use_workload_principal: true,
-                user_workload_operator: WorkloadBoolOp::And,
+                principal_bool_operator: JsonRule::default(),
                 decision_log_default_jwt_id: "jti".to_string(),
                 ..Default::default()
             },

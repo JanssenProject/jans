@@ -3,11 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, EntityBuilderConfig, JwtConfig, LogConfig,
-    LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
-    WorkloadBoolOp,
-};
+use cedarling::*;
 use jsonwebtoken::Algorithm;
 use std::collections::{HashMap, HashSet};
 
@@ -47,7 +43,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            user_workload_operator: WorkloadBoolOp::And,
+            principal_bool_operator: JsonRule::new(serde_json::json!({
+                "and" : [
+                    {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+                    {"===": [{"var": "Jans::User"}, "ALLOW"]}
+                ]
+            }))
+            .unwrap(),
             ..Default::default()
         },
         entity_builder_config: EntityBuilderConfig::default().build_user().build_workload(),

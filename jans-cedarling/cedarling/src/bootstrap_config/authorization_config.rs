@@ -3,7 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::WorkloadBoolOp;
+use crate::common::json_rules::JsonRule;
+
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -21,13 +22,9 @@ pub struct AuthorizationConfig {
     /// bootstrap property: `CEDARLING_WORKLOAD_AUTHZ`
     pub use_workload_principal: bool,
 
-    /// Specifies what boolean operation to use for the `USER` and `WORKLOAD` when
+    /// Specifies what boolean operation to use for the `USER` and `WORKLOAD`  when
     /// making authz (authorization) decisions.
-    ///
-    /// # Available Operations
-    /// - **AND**: authz will be successful if `USER` **AND** `WORKLOAD` is valid.
-    /// - **OR**: authz will be successful if `USER` **OR** `WORKLOAD` is valid.
-    pub user_workload_operator: WorkloadBoolOp,
+    pub principal_bool_operator: JsonRule,
 
     /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
     /// `CEDARLING_DECISION_LOG_USER_CLAIMS` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
