@@ -53,7 +53,7 @@ public class RateLimitFilter implements Filter {
             chain.doFilter(httpRequest, httpResponse);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            sendInternalError(httpResponse);
+            sendResponse(httpResponse, Response.Status.INTERNAL_SERVER_ERROR, "");
         }
     }
 
@@ -85,31 +85,30 @@ public class RateLimitFilter implements Filter {
     }
 
     private void sendTooManyRequestsError(HttpServletResponse servletResponse) {
+        sendResponse(servletResponse, Response.Status.TOO_MANY_REQUESTS, TOO_MANY_REQUESTS_JSON_ERROR);
+    }
+
+    private void sendResponse(HttpServletResponse servletResponse, Response.Status status, String payloadAsJson) {
+        log.debug("send back response - status: {}, payload: {}", status.getStatusCode(), payloadAsJson);
+
         try (PrintWriter out = servletResponse.getWriter()) {
-            servletResponse.setStatus(Response.Status.TOO_MANY_REQUESTS.getStatusCode());
-            servletResponse.setContentType(Constants.CONTENT_TYPE_APPLICATION_JSON_UTF_8);
-            out.write(TOO_MANY_REQUESTS_JSON_ERROR);
+            servletResponse.setStatus(status.getStatusCode());
+            if (StringUtils.isNotBlank(payloadAsJson)) {
+                servletResponse.setContentType(Constants.CONTENT_TYPE_APPLICATION_JSON_UTF_8);
+                out.write(payloadAsJson);
+            }
         } catch (IOException ex) {
             log.error(ex.getMessage(), ex);
         }
     }
-
-    private void sendInternalError(HttpServletResponse servletResponse) {
-        try (PrintWriter out = servletResponse.getWriter()) {
-            servletResponse.setStatus(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-        } catch (IOException ex) {
-            log.error(ex.getMessage(), ex);
-        }
-    }
-
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        // nothing
+    public void init(FilterConfig filterConfig) {
+        log.info("Rate Limit Filter initialized.");
     }
 
     @Override
     public void destroy() {
-        // nothing
+        log.info("Rate Limit Filter destroyed.");
     }
 }
