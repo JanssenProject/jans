@@ -60,6 +60,13 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
+    UnverifiedPrincipalRequestValidationError,
+    AuthorizeError,
+    "Error encountered while creating cedar_policy::Request for unverified entity principal"
+);
+
+create_exception!(
+    authorize_errors,
     EntitiesError,
     AuthorizeError,
     "Error encountered while collecting all entities"
@@ -143,6 +150,7 @@ errors_functions! {
     CreateContext => CreateContextError,
     WorkloadRequestValidation => WorkloadRequestValidationError,
     UserRequestValidation => UserRequestValidationError,
+    UnverifiedPrincipalRequestValidation => UnverifiedPrincipalRequestValidationError,
     Entities => EntitiesError,
     EntitiesToJson => EntitiesToJsonError,
     BuildContext => BuildContextError,

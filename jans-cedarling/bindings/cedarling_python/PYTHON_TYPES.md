@@ -267,6 +267,10 @@ ___
 Error encountered while processing JWT token data
 ___
 
+# authorize_errors.UnverifiedPrincipalRequestValidationError
+Error encountered while creating cedar_policy::Request for unverified entity principal
+___
+
 # authorize_errors.UserRequestValidationError
 Error encountered while creating cedar_policy::Request for user entity principal
 ___
