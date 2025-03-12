@@ -117,8 +117,6 @@ impl AuthorizeResult {
     ) -> Result<Self, ApplyRuleError> {
         let mut principal_responses: HashMap<SmolStr, cedar_policy::Response> = HashMap::new();
 
-        // let mut principal_info = HashMap::new();
-
         workload_typename
             .iter()
             .zip(workload.iter())
