@@ -46,12 +46,11 @@ SIDECAR_DEBUG_RESPONSE=True
 CEDARLING_APPLICATION_NAME=MyApp
 CEDARLING_POLICY_STORE_ID=abcdef
 CEDARLING_POLICY_STORE_URI=https://gluu.org
-CEDARLING_USER_AUTHZ=disabled
-CEDARLING_WORKLOAD_AUTHZ=enabled
+CEDARLING_PRINCIPAL_BOOLEAN_OPERATION="{\"or\":[{\"===\":[{\"var\":\"Jans::Workload\"},\"ALLOW\"]},{\"===\":[{\"var\":\"Jans::User\"},\"ALLOW\"]}]}"
 CEDARLING_ID_TOKEN_TRUST_MODE=none
 ```
 
-In this case, please be aware of case sensitivity. Environment variables are directly parsed as strings, hence `none` is not the same as `None`.
+In this case, please be aware of case sensitivity. Environment variables are directly parsed as strings, hence `none` is not the same as `None`. In addition, JSON values such as `CEDARLING_PRINCIPAL_BOOLEAN_OPERATION` must be formatted as string.
 
 ## Tests
 
@@ -84,8 +83,7 @@ Not yet implemented
 		-e CEDARLING_APPLICATION_NAME=MyApp \
 		-e CEDARLING_POLICY_STORE_ID=abcdef \
 		-e CEDARLING_POLICY_STORE_URI=https://gluu.org \
-		-e CEDARLING_USER_AUTHZ=enabled \
-		-e CEDARLING_WORKLOAD_AUTHZ=enabled \
+		-e CEDARLING_PRINCIPAL_BOOLEAN_OPERATION="{\"or\":[{\"===\":[{\"var\":\"Jans::Workload\"},\"ALLOW\"]},{\"===\":[{\"var\":\"Jans::User\"},\"ALLOW\"]}]}"
 		-e CEDARLING_ID_TOKEN_TRUST_MODE=none \
 		-p 5000:5000 \
 		ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
@@ -135,8 +133,7 @@ SIDECAR_DEBUG_RESPONSE=True
 CEDARLING_APPLICATION_NAME=MyApp
 CEDARLING_POLICY_STORE_ID=abcdef
 CEDARLING_POLICY_STORE_URI=https://gluu.org
-CEDARLING_USER_AUTHZ=disabled
-CEDARLING_WORKLOAD_AUTHZ=enabled
+CEDARLING_PRINCIPAL_BOOLEAN_OPERATION="{\"or\":[{\"===\":[{\"var\":\"Jans::Workload\"},\"ALLOW\"]},{\"===\":[{\"var\":\"Jans::User\"},\"ALLOW\"]}]}"
 CEDARLING_ID_TOKEN_TRUST_MODE=none
 ...
 ```

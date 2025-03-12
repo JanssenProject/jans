@@ -89,7 +89,12 @@ later import the corresponding file from the browser.
                 "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS ": ["aud", "client_id", "rp_id"],
                 "CEDARLING_USER_AUTHZ": "enabled",
                 "CEDARLING_WORKLOAD_AUTHZ": "enabled",
-                "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
+                "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+                    "and" : [
+                        {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+                        {"===": [{"var": "Jans::User"}, "ALLOW"]}
+                    ]
+                },
             });
             // make authorize request
             let result = await instance.authorize({

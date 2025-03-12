@@ -24,7 +24,7 @@ echo "Copying docker-monolith main README.md to compose.md"
 cp "$MAIN_DIRECTORY_LOCATION"/docker-jans-monolith/README.md "$MAIN_DIRECTORY_LOCATION"/docs/janssen-server/install/docker-install/compose.md
 echo "Copying docker images Readme to respective image md"
 # cp docker files main README.md
-docker_images="docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-casa docker-jans-link docker-jans-all-in-one"
+docker_images="docker-jans-auth-server docker-jans-cloudtools docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-casa docker-jans-link docker-jans-all-in-one"
 for image in $docker_images;do
   cp "$MAIN_DIRECTORY_LOCATION"/"$image"/README.md "$MAIN_DIRECTORY_LOCATION"/docs/janssen-server/reference/kubernetes/"$image".md
 done
