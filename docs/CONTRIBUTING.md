@@ -158,7 +158,7 @@ has to start with the license header as shown below:
  * This software is available under the Apache-2.0 license. 
  * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
  *
- * Copyright (c) 2024, Gluu, Inc. 
+ * Copyright (c) 2025, Gluu, Inc. 
  */
 ```
 
@@ -173,14 +173,14 @@ contributor's GitHub username:
  * This software is available under the Apache-2.0 license. 
  * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
  *
- * Copyright (c) 2024, [github-username]. 
+ * Copyright (c) 2025, [github-username]. 
  */
 ```
 
 #### Signing the CLA
 
 The current version of CLA can be found 
-[here](https://github.com/JanssenProject/jans/blob/main/docs/governance/janssen-project-CLA-version-1.pdf). This is just for your reference.
+[here](governance/cla.md). This is just for your reference.
 This same CLA will be signed digitally by following the steps below:
 
 1. The contributor sends an e-mail expressing willingness to contribute and 
