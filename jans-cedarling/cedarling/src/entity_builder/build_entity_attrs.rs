@@ -210,6 +210,11 @@ mod test {
                 record_attr: {
                     inner_record_attr: Bool,
                 },
+                record_record_attr: {
+                    inner_record_attr: {
+                        inner_inner_record_attr: Bool,
+                    },
+                },
                 entity_ref_attr: AnotherEntity,
                 decimal_attr: decimal,
                 ip_attr: ipaddr,
@@ -230,6 +235,10 @@ mod test {
             ("set_bool_attr".into(), json!([true, true])),
             ("set_set_bool_attr".into(), json!([[true], [true]])),
             ("record_attr".into(), json!({"inner_record_attr": true})),
+            (
+                "record_record_attr".into(),
+                json!({"inner_record_attr": {"inner_inner_record_attr": true}}),
+            ),
             ("decimal_attr".into(), json!("0.0")),
             ("ip_attr".into(), json!("0.0.0.0")),
         ]);
@@ -267,6 +276,11 @@ mod test {
                     "set_set_bool_attr": [[true]],
                     "record_attr": {
                         "inner_record_attr": true,
+                    },
+                    "record_record_attr": {
+                        "inner_record_attr": {
+                            "inner_inner_record_attr": true,
+                        },
                     },
                     "entity_ref_attr": {"__entity": {
                         "type": "SomeNamespace::AnotherEntity", "id": "another_id",
