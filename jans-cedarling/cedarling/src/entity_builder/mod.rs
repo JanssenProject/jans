@@ -241,8 +241,9 @@ impl TokenPrincipalMappings {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::common::policy_store::TokenEntityMetadata;
     use cedar_policy::{Entities, Schema};
-    use serde_json::Value;
+    use serde_json::{Value, json};
     use std::{collections::HashMap, sync::OnceLock};
     use test_utils::assert_eq;
 
@@ -283,16 +284,23 @@ mod test {
             assert_eq!(
                 &entity_json["attrs"][name],
                 expected_val,
-                "the {}'s `{}` attribute does not match with the expected",
+                "the {}'s `{}` attribute does not match with the expected. other attrs available: {:?}",
                 entity.uid().to_string(),
-                name
+                name,
+                entity_json["attrs"]
+                    .as_object()
+                    .unwrap()
+                    .keys()
+                    .collect::<Vec<_>>()
             );
         }
 
         // Check if the entity has the correct parents
         assert_eq!(
-            serde_json::from_value::<HashSet<Value>>(entity_json["parents"].clone()).unwrap(),
-            serde_json::from_value::<HashSet<Value>>(expected["parents"].clone()).unwrap(),
+            serde_json::from_value::<HashSet<Value>>(entity_json["parents"].clone())
+                .expect("parents should be a valid Array"),
+            serde_json::from_value::<HashSet<Value>>(expected["parents"].clone())
+                .expect("parents should be a valid Array"),
             "the {} entity's parents does not match with the expected",
             entity.uid().to_string(),
         );
@@ -302,5 +310,98 @@ mod test {
             "{} entity should conform to the schema",
             entity.uid().to_string()
         ));
+    }
+
+    #[test]
+    fn can_build_principals_with_custom_types() {
+        let schema_src = r#"
+            namespace Jans {
+                entity TrustedIssuer;
+                entity Resource;
+                entity CustomWorkload {
+                    access_token: CustomAccessToken,
+                    custom_token: AnotherNamespace::CustomToken,
+                };
+                entity CustomAccessToken;
+            }
+            namespace AnotherNamespace {
+                entity CustomToken;
+            }
+        "#;
+        let schema = Schema::from_str(&schema_src).expect("parse schema");
+        let validator_schema =
+            ValidatorSchema::from_str(&schema_src).expect("parse validation schema");
+
+        // Set the custom workload name in the config
+        let mut config = EntityBuilderConfig::default().with_workload();
+        config.entity_names.workload = "Jans::CustomWorkload".into();
+
+        // Set the custom token names in the IDP metadata
+        let mut iss = TrustedIssuer::default();
+        iss.tokens_metadata = HashMap::from([
+            (
+                "access_token".to_string(),
+                TokenEntityMetadata::builder()
+                    .entity_type_name("Jans::CustomAccessToken".to_string())
+                    .principal_mapping(["Jans::CustomWorkload".to_string()].into_iter().collect())
+                    .build(),
+            ),
+            (
+                "custom_token".to_string(),
+                TokenEntityMetadata::builder()
+                    .entity_type_name("AnotherNamespace::CustomToken".to_string())
+                    .principal_mapping(["Jans::CustomWorkload".to_string()].into_iter().collect())
+                    .build(),
+            ),
+        ]);
+        let issuers = HashMap::from([("some_iss".into(), iss)]);
+        let tokens = HashMap::from([
+            (
+                "access_token".into(),
+                Token::new(
+                    "access_token",
+                    json!({"jti": "some_jti", "aud": "some_aud"}).into(),
+                    Some(&issuers.get("some_iss").unwrap()),
+                ),
+            ),
+            (
+                "custom_token".into(),
+                Token::new(
+                    "custom_token",
+                    json!({"jti": "some_jti"}).into(),
+                    Some(&issuers.get("some_iss").unwrap()),
+                ),
+            ),
+        ]);
+
+        let entity_builder = EntityBuilder::new(config, &issuers, Some(&validator_schema))
+            .expect("init entity builder");
+
+        let entities = entity_builder
+            .build_entities(&tokens, &ResourceData {
+                resource_type: "Jans::Resource".into(),
+                id: "some_id".into(),
+                payload: HashMap::new(),
+            })
+            .expect("build entities");
+
+        assert_entity_eq(
+            &entities.workload.expect("has workload entity"),
+            json!({
+                "uid": {"type": "Jans::CustomWorkload", "id": "some_aud"},
+                "attrs": {
+                    "access_token": {"__entity": {
+                        "type": "Jans::CustomAccessToken",
+                        "id": "some_jti"
+                    }},
+                    "custom_token": {"__entity": {
+                        "type": "AnotherNamespace::CustomToken",
+                        "id": "some_jti"
+                    }},
+                },
+                "parents": []
+            }),
+            Some(&schema),
+        );
     }
 }
