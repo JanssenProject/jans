@@ -27,13 +27,13 @@ pub struct EntityBuilderConfig {
 
 impl EntityBuilderConfig {
     /// Enables building the `Workload` entity
-    pub fn build_workload(mut self) -> Self {
+    pub fn with_workload(mut self) -> Self {
         self.build_workload = true;
         self
     }
 
     /// Enables building the `User` entity
-    pub fn build_user(mut self) -> Self {
+    pub fn with_user(mut self) -> Self {
         self.build_user = true;
         self
     }

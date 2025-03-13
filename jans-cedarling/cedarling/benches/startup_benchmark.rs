@@ -45,7 +45,7 @@ lazy_static! {
             ..Default::default()
         },
         entity_builder_config: cedarling::EntityBuilderConfig::default()
-            .build_user()
-            .build_workload(),
+            .with_user()
+            .with_workload(),
     };
 }

@@ -28,7 +28,7 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
-        entity_builder_config: EntityBuilderConfig::default().build_user().build_workload(),
+        entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
     }
 }
 

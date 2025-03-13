@@ -204,7 +204,7 @@ mod test {
                 decision_log_default_jwt_id: "jti".to_string(),
                 ..Default::default()
             },
-            entity_builder_config: EntityBuilderConfig::default().build_user().build_workload(),
+            entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
         };
 
         assert_eq!(deserialized, expected);
@@ -245,7 +245,7 @@ mod test {
                 decision_log_default_jwt_id: "jti".to_string(),
                 ..Default::default()
             },
-            entity_builder_config: EntityBuilderConfig::default().build_user().build_workload(),
+            entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
         };
 
         assert_eq!(deserialized, expected);

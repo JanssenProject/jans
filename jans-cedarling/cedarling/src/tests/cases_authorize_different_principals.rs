@@ -136,7 +136,7 @@ async fn success_test_for_principal_workload() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
-        crate::EntityBuilderConfig::default().build_workload(),
+        crate::EntityBuilderConfig::default().with_workload(),
     )
     .await;
 
@@ -176,7 +176,7 @@ async fn success_test_for_principal_user() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
-        crate::EntityBuilderConfig::default().build_user(),
+        crate::EntityBuilderConfig::default().with_user(),
     )
     .await;
 
@@ -220,7 +220,7 @@ async fn success_test_for_principal_person_role() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
-        crate::EntityBuilderConfig::default().build_user(),
+        crate::EntityBuilderConfig::default().with_user(),
     )
     .await;
 
@@ -265,8 +265,8 @@ async fn success_test_for_principal_workload_role() {
             ..Default::default()
         },
         crate::EntityBuilderConfig::default()
-            .build_workload()
-            .build_user(),
+            .with_workload()
+            .with_user(),
     )
     .await;
 
@@ -317,8 +317,8 @@ async fn success_test_for_principal_workload_true_or_user_false() {
             ..Default::default()
         },
         crate::EntityBuilderConfig::default()
-            .build_user()
-            .build_workload(),
+            .with_user()
+            .with_workload(),
     )
     .await;
 
@@ -369,8 +369,8 @@ async fn success_test_for_principal_workload_false_or_user_true() {
             ..Default::default()
         },
         crate::EntityBuilderConfig::default()
-            .build_user()
-            .build_workload(),
+            .with_user()
+            .with_workload(),
     )
     .await;
 
@@ -421,8 +421,8 @@ async fn success_test_for_principal_workload_false_or_user_false() {
             ..Default::default()
         },
         crate::EntityBuilderConfig::default()
-            .build_user()
-            .build_workload(),
+            .with_user()
+            .with_workload(),
     )
     .await;
 
@@ -472,8 +472,8 @@ async fn test_where_principal_workload_cant_be_applied() {
             ..Default::default()
         },
         crate::EntityBuilderConfig::default()
-            .build_user()
-            .build_workload(),
+            .with_user()
+            .with_workload(),
     )
     .await;
 
@@ -503,7 +503,7 @@ async fn test_where_principal_user_cant_be_applied() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
-        crate::EntityBuilderConfig::default().build_user(),
+        crate::EntityBuilderConfig::default().with_user(),
     )
     .await;
 

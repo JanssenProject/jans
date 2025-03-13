@@ -52,7 +52,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .unwrap(),
             ..Default::default()
         },
-        entity_builder_config: EntityBuilderConfig::default().build_user().build_workload(),
+        entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
     })
     .await?;
 

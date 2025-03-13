@@ -77,7 +77,7 @@ async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCed
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
-        entity_builder_config: EntityBuilderConfig::default().build_workload().build_user(),
+        entity_builder_config: EntityBuilderConfig::default().with_workload().with_user(),
     };
 
     Cedarling::new(&bootstrap_config).await
@@ -106,7 +106,7 @@ async fn prepare_cedarling_with_jwt_validation() -> Result<Cedarling, InitCedarl
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
-        entity_builder_config: EntityBuilderConfig::default().build_workload().build_user(),
+        entity_builder_config: EntityBuilderConfig::default().with_workload().with_user(),
     };
 
     Cedarling::new(&bootstrap_config).await

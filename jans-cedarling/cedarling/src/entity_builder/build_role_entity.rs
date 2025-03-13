@@ -93,7 +93,7 @@ mod test {
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = TrustedIssuer::default();
         let builder = EntityBuilder::new(
-            EntityBuilderConfig::default().build_workload(),
+            EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
             Some(&validator_schema),
         )
@@ -135,7 +135,7 @@ mod test {
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = TrustedIssuer::default();
         let builder = EntityBuilder::new(
-            EntityBuilderConfig::default().build_workload(),
+            EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
             Some(&validator_schema),
         )
@@ -187,7 +187,7 @@ mod test {
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = TrustedIssuer::default();
         let builder = EntityBuilder::new(
-            EntityBuilderConfig::default().build_workload(),
+            EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
             Some(&validator_schema),
         )
