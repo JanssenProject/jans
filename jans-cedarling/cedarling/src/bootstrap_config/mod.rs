@@ -21,7 +21,7 @@ pub use authorization_config::{AuthorizationConfig, IdTokenTrustMode};
 pub use jwt_config::*;
 pub use log_config::*;
 pub use policy_store_config::*;
-pub use raw_config::{BootstrapConfigRaw, FeatureToggle, LoggerType, WorkloadBoolOp};
+pub use raw_config::{BootstrapConfigRaw, FeatureToggle, LoggerType};
 
 /// Bootstrap configuration
 /// properties for configuration [`Cedarling`](crate::Cedarling) application.
@@ -161,7 +161,9 @@ pub enum BootstrapConfigLoadingError {
 mod test {
     use super::raw_config::BootstrapConfigRaw;
     use super::*;
-    use crate::{BootstrapConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig};
+    use crate::{
+        BootstrapConfig, JsonRule, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig,
+    };
     use jsonwebtoken::Algorithm;
     use std::collections::{HashMap, HashSet};
     use std::path::Path;
@@ -215,7 +217,7 @@ mod test {
             authorization_config: AuthorizationConfig {
                 use_user_principal: true,
                 use_workload_principal: true,
-                user_workload_operator: WorkloadBoolOp::And,
+                principal_bool_operator: JsonRule::default(),
                 mapping_tokens: HashMap::from([
                     ("access_token".to_string(), "Test::Access_token".to_string()),
                     ("id_token".to_string(), "Test::id_token".to_string()),
@@ -285,7 +287,7 @@ mod test {
             authorization_config: AuthorizationConfig {
                 use_user_principal: true,
                 use_workload_principal: true,
-                user_workload_operator: WorkloadBoolOp::And,
+                principal_bool_operator: JsonRule::default(),
                 mapping_tokens: HashMap::from([
                     ("access_token".to_string(), "Test::Access_token".to_string()),
                     ("id_token".to_string(), "Test::id_token".to_string()),

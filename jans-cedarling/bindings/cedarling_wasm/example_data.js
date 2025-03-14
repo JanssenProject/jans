@@ -8,7 +8,26 @@ const BOOTSTRAP_CONFIG = {
     "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS ": ["aud", "client_id", "rp_id"],
     "CEDARLING_USER_AUTHZ": "enabled",
     "CEDARLING_WORKLOAD_AUTHZ": "enabled",
-    "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
+    "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+        "and": [
+            {
+                "===": [
+                    {
+                        "var": "Jans::Workload"
+                    },
+                    "ALLOW"
+                ]
+            },
+            {
+                "===": [
+                    {
+                        "var": "Jans::User"
+                    },
+                    "ALLOW"
+                ]
+            }
+        ]
+    },
     "CEDARLING_LOCAL_JWKS": null,
     "CEDARLING_POLICY_STORE_LOCAL": null,
     "CEDARLING_POLICY_STORE_LOCAL_FN": null,
@@ -19,9 +38,9 @@ const BOOTSTRAP_CONFIG = {
         "RS256"
     ],
     "CEDARLING_TOKEN_CONFIGS": {
-        "access_token": { "entity_type_name": "Access_token" },
-        "id_token": { "entity_type_name": "id_token" },
-        "userinfo_token": { "entity_type_name": "Userinfo_token" },
+        "access_token": { "entity_type_name": "Jans::Access_token" },
+        "id_token": { "entity_type_name": "Jans::id_token" },
+        "userinfo_token": { "entity_type_name": "Jans::Userinfo_token" },
     },
     "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
     "CEDARLING_LOCK": "disabled",

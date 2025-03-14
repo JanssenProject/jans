@@ -6,38 +6,72 @@ tags:
 
 # WASM for Cedarling
 
-Cedarling provides a binding for JavaScript programs via the `wasm-pack` tool. This allows browser developers to use the cedarling crate in their code directly.
+Cedarling provides a binding for JavaScript programs via the `wasm-pack` tool. 
+This allows browser developers to use the cedarling crate in their code directly.
 
 ## Requirements
 
-- Rust 1.63 or greater
-- Installed `wasm-pack` via `cargo`
-- clang with `wasm` target support
+* Rust 1.63 or Greater. Ensure that you have `Rust` version 1.63 or higher installed. You can check your 
+  current version of Rust by running the following command in your terminal:
+```bash   
+rustc --version
+```
+
+* Installed `wasm-pack` via `Cargo`. 
+You can install it with the following command:
+```bash
+cargo install wasm-pack
+```
+
+* Ensure that Clang is installed with support for WebAssembly targets. 
+You can check the installation and available targets with:
+```bash 
+clang -print-targets
+```
+Check `clang` version
+```bash 
+clang --version
+```
 
 ## Building
 
-- Install `wasm-pack` by:
-
-  ```sh
-  cargo install wasm-pack
+  * Clone the Janssen server repository from the GitHub and change the directory 
+  to the `cedarling_wasm` directory:
+  ```bash title="Command"
+  cd /path/to/jans/jans-cedarling/bindings/cedarling_wasm
   ```
 
-- Build cedarling `wasm` in release:
+  * Build the WebAssembly package in release mode after you've reached 
+the `cedarling_wasm` directory. `wasm-pack` automatically optimizes the 
+WebAssembly binary file using `wasm-opt` for better performance.
+```bash title="Command"
+wasm-pack build --release --target web
+```
 
-  ```bash
-  wasm-pack build --release --target web
-  ```
-
-  `wasm-pack` automatically make optimization of `wasm` binary file, using `wasm-opt`.
-- Get result in the `pkg` folder.
+  * To view the WebAssembly project in action, you can run a local server. 
+One way to do this is by using the following command:
+```bash title="Command"
+python3 -m http.server
+```
 
 ## Including in projects
 
-For using result files in browser project you need make result `pkg` folder accessible for loading in the browser so that you can later import the corresponding file from the browser.
+!!! info "Sample Apps"
 
-Here is example of code snippet:
+    You can find usage examples in the following locations in the Janssen server
+    repository:
 
-```html
+    - `jans/jans-cedarling/bindings/cedarling_wasm/index.html`: A simple example demonstrating basic usage.
+    - `jans/jans-cedarling/bindings/cedarling_wasm/cedarling_app.html`: A fully featured `Cedarling` browser app where you can test and validate your configuration.
+
+
+
+
+For using result files in the browser project, you need to make the 
+result `pkg` directory accessible for loading in the browser so that you can 
+later import the corresponding file from the browser.
+
+```html title="Example code snippet"
    <script type="module">
         import initWasm, { init } from "/pkg/cedarling_wasm.js";
 
@@ -55,7 +89,12 @@ Here is example of code snippet:
                 "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS ": ["aud", "client_id", "rp_id"],
                 "CEDARLING_USER_AUTHZ": "enabled",
                 "CEDARLING_WORKLOAD_AUTHZ": "enabled",
-                "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
+                "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+                    "and" : [
+                        {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+                        {"===": [{"var": "Jans::User"}, "ALLOW"]}
+                    ]
+                },
             });
             // make authorize request
             let result = await instance.authorize({
@@ -91,17 +130,10 @@ Here is example of code snippet:
         }
         main().catch(console.error);
     </script>
+
 ```
 
-## Usage
-
-Before usage make sure that you have completed `Building` steps.
-You can find usage examples in the following locations:
-
-- `jans-cedarling/bindings/cedarling_wasm/index.html`: A simple example demonstrating basic usage.
-- `jans-cedarling/bindings/cedarling_wasm/cedarling_app.html`: A fully featured `Cedarling` browser app where you can test and validate your configuration.
-
-### Defined API
+## Defined API
 
 ```ts
 /**
