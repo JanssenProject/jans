@@ -308,7 +308,7 @@ impl Authz {
                     context: request.context.clone(),
                     resource: resource_uid.to_string(),
                     entities: entities_json,
-                    authorize_info: vec![user_authz_info, workload_authz_info]
+                    authorize_info: [user_authz_info, workload_authz_info]
                         .into_iter()
                         .flatten()
                         .collect(),
