@@ -509,6 +509,13 @@
 			<artifactId>jython-standalone</artifactId>
 		</dependency>
 
+        <!-- Bucket4j for rate limiting -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk11-core</artifactId>
+            <version>8.14.0</version>
+        </dependency>
+
 		<!-- JMS -->
 		<dependency>
 		    <groupId>jakarta.jms</groupId>

@@ -141,6 +141,7 @@ nav:
       - Agama Project Configuration: janssen-server/config-guide/auth-server-config/agama-project-configuration.md
       - Attribute: janssen-server/config-guide/auth-server-config/attribute-configuration.md
       - Cache Configuration: janssen-server/config-guide/auth-server-config/cache-configuration.md
+      - Rate Limit: janssen-server/config-guide/auth-server-config/rate-limit.md
       - UMA Management: janssen-server/config-guide/auth-server-config/oauth-umaresources-config.md
     - FIDO2 Configuration: janssen-server/config-guide/fido2-config/janssen-fido2-configuration.md
     - SCIM Configuration:

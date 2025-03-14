@@ -21,6 +21,7 @@
       "ssa",
       "global_token_revocation",
       "status_list",
+      "rate_limit",
       "access_evaluation"
     ],
     "issuer":"https://%(hostname)s",
