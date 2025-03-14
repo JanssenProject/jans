@@ -1,0 +1,13 @@
+Source: jans
+Section: java
+Priority: optional
+Maintainer: The Packaging Team <packaging@jans.io>
+Build-Depends: debhelper (>=11~)
+Standards-Version: 4.1.4
+Homepage: https://jans.io
+
+Package: jans
+Architecture: any
+Multi-Arch: foreign
+Depends: ${misc:Depends}, ${shlibs:Depends}, apache2, rsyslog, python3-urllib3, python3-certifi, postgresql, postgresql-contrib, python3-requests, python3-ruamel.yaml, python3-crypto, python3-psycopg2, curl, wget, xz-utils, unzip, rsyslog, bzip2
+Description: Janssen enables organizations to build a scalable centralized authentication and authorization service using free open source software.
