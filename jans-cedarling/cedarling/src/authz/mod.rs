@@ -163,7 +163,7 @@ impl Authz {
                         resource: resource_uid.clone(),
                         context: context.clone(),
                     })
-                    .map_err(AuthorizeError::WorkloadRequestValidation)?;
+                    .map_err(|err| InvalidPrincipalError::new(&principal, err))?;
 
                 let authz_info = AuthorizeInfo {
                     principal: principal.to_string(),
@@ -205,7 +205,7 @@ impl Authz {
                         resource: resource_uid.clone(),
                         context: context.clone(),
                     })
-                    .map_err(AuthorizeError::UserRequestValidation)?;
+                    .map_err(|err| InvalidPrincipalError::new(&principal, err))?;
 
                 let authz_info = AuthorizeInfo {
                     principal: principal.to_string(),
@@ -389,7 +389,7 @@ impl Authz {
                     resource: resource_uid.clone(),
                     context: context.clone(),
                 })
-                .map_err(|err| UnverifiedPrincipalRequestValidationError {
+                .map_err(|err| InvalidPrincipalError {
                     principal: principal_uid.to_string(),
                     err,
                 })?;
@@ -566,15 +566,9 @@ pub enum AuthorizeError {
     /// Error encountered while validating context according to the schema
     #[error("could not create context: {0}")]
     CreateContext(#[from] cedar_policy::ContextJsonError),
-    /// Error encountered while creating [`cedar_policy::Request`] for workload entity principal
-    #[error("The request for `Workload` does not conform to the schema: {0}")]
-    WorkloadRequestValidation(cedar_policy::RequestValidationError),
-    /// Error encountered while creating [`cedar_policy::Request`] for user entity principal
-    #[error("The request for `User` does not conform to the schema: {0}")]
-    UserRequestValidation(cedar_policy::RequestValidationError),
     /// Error encountered while creating [`cedar_policy::Request`] for unverified entity principal
     #[error(transparent)]
-    UnverifiedPrincipalRequestValidation(#[from] UnverifiedPrincipalRequestValidationError),
+    InvalidPrincipal(#[from] InvalidPrincipalError),
     /// Error encountered while collecting all entities
     #[error("could not collect all entities: {0}")]
     Entities(#[from] cedar_policy::entities_errors::EntitiesError),
@@ -606,11 +600,20 @@ pub struct CreateRequestRoleError {
 
 #[derive(Debug, derive_more::Error, derive_more::Display)]
 #[display("The request for `{principal}` does not conform to the schema: {err}")]
-pub struct UnverifiedPrincipalRequestValidationError {
+pub struct InvalidPrincipalError {
     /// Principal name
     principal: String,
     /// Error value
     err: cedar_policy::RequestValidationError,
+}
+
+impl InvalidPrincipalError {
+    fn new(principal: &EntityUid, err: cedar_policy::RequestValidationError) -> Self {
+        InvalidPrincipalError {
+            principal: principal.to_string(),
+            err,
+        }
+    }
 }
 
 /// Get entity claims from list in config

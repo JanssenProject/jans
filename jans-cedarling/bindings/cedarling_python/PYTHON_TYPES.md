@@ -263,19 +263,11 @@ ___
 Error encountered while running on strict id token trust mode
 ___
 
-# authorize_errors.ProcessTokens
-Error encountered while processing JWT token data
-___
-
-# authorize_errors.UnverifiedPrincipalRequestValidationError
+# authorize_errors.InvalidPrincipalError
 Error encountered while creating cedar_policy::Request for unverified entity principal
 ___
 
-# authorize_errors.UserRequestValidationError
-Error encountered while creating cedar_policy::Request for user entity principal
-___
-
-# authorize_errors.WorkloadRequestValidationError
-Error encountered while creating cedar_policy::Request for workload entity principal
+# authorize_errors.ProcessTokens
+Error encountered while processing JWT token data
 ___
 
