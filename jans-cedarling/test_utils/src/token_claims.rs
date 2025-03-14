@@ -129,7 +129,7 @@ pub fn generate_token_using_claims_and_keypair(
 
 /// Generates a JwkSet from the given keys
 #[track_caller]
-pub fn generate_jwks(keys: &Vec<KeyPair>) -> jwt::jwk::JwkSet {
+pub fn generate_jwks(keys: &[KeyPair]) -> jwt::jwk::JwkSet {
     let keys = keys
         .iter()
         .map(|key_pair| key_pair.decoding_key.clone())
