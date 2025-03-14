@@ -39,7 +39,7 @@ public class RateLimitService {
 
         Bucket bucket = buckets.computeIfAbsent(key, k -> newBucket(requestLimit, periodLimit));
         if (!bucket.tryConsume(1)) {
-            String msg = String.format("Rate limited /register, key %s. Exceeds limit %s requests per %s seconds", key, requestLimit, periodLimit);
+            String msg = String.format("Rate limited '/register', key %s. Exceeds limit %s requests per %s seconds.", key, requestLimit, periodLimit);
             log.debug(msg);
             throw new RateLimitedException(RateLimitType.REGISTRATION, msg);
         }
@@ -60,8 +60,12 @@ public class RateLimitService {
     }
 
     private Bucket newBucket(int requestLimit, int periodInSeconds) {
-        Bandwidth limit = Bandwidth.builder().capacity(requestLimit).refillGreedy(requestLimit, Duration.ofSeconds(periodInSeconds)).build();
-        return Bucket.builder().addLimit(limit).build();
+        return Bucket.builder()
+                .addLimit(Bandwidth.builder()
+                        .capacity(requestLimit)
+                        .refillGreedy(requestLimit, Duration.ofSeconds(periodInSeconds))
+                        .build())
+                .build();
     }
 
     public RegisterRequest parseRegisterRequest(String body) {
