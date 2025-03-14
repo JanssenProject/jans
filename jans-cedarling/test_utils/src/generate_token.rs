@@ -9,6 +9,7 @@ use josekit::jws::alg::{
 };
 use josekit::jwt::{JwtPayload, encode_with_signer};
 use std::error::Error;
+use std::sync::atomic::{AtomicU32, Ordering};
 
 #[derive(Eq, Hash, PartialEq, Clone, Copy)]
 pub enum Algorithm {
@@ -51,6 +52,8 @@ macro_rules! jwt {
 
 /// Creates a JWT from a [`serde_json::Value`].
 pub fn generate_token(payload: Value, algorithm: Algorithm) -> Result<SignedToken, Box<dyn Error>> {
+    static KEY_ID_COUNTER: AtomicU32 = AtomicU32::new(0);
+
     let Value::Object(payload) = payload else {
         return Err("value must be an object to be a JWT payload".into());
     };
@@ -62,9 +65,12 @@ pub fn generate_token(payload: Value, algorithm: Algorithm) -> Result<SignedToke
         Algorithm::ES256 => Jwk::generate_ec_key(EcCurve::P256),
         Algorithm::EdDSA => Jwk::generate_ed_key(EdCurve::Ed25519),
     }?;
+    let kid_num = KEY_ID_COUNTER.fetch_add(1, Ordering::AcqRel);
+    let kid_str = format!("key_{}", kid_num);
 
     let mut header = JwsHeader::new();
     header.set_token_type("JWT");
+    header.set_key_id(kid_str.clone());
 
     let token = match algorithm {
         Algorithm::HS256 => sign_token_hs256(&payload, &header, &jwk),
@@ -73,10 +79,11 @@ pub fn generate_token(payload: Value, algorithm: Algorithm) -> Result<SignedToke
         Algorithm::EdDSA => sign_token_eddsa(&payload, &header, &jwk),
     }?;
 
-    let jwk = match algorithm {
+    let mut jwk = match algorithm {
         Algorithm::HS256 => jwk,
         _ => jwk.to_public_key()?,
     };
+    jwk.set_key_id(kid_str);
     Ok(SignedToken { token, jwk })
 }
 
