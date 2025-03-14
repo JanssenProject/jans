@@ -8,6 +8,26 @@ policy_stores:
     cedar_version: v4.0.0
     name: Jans
     description: A test policy store where everything is fine.
+    trusted_issuers:
+      Jans123123:
+        name: "Jans"
+        description: "A Test IDP"
+        openid_configuration_endpoint: "https://test.jans.org/.well-known/openid-configuration"
+        tokens_metadata:
+          access_token:
+            entity_type_name: "Jans::Access_token"
+            workload_id: "client_id"
+            principal_mapping:
+              - "Jans::Workload"
+          id_token:
+            entity_type_name: "Jans::Id_token"
+            principal_mapping:
+              - "Jans::User"
+          userinfo_token:
+            entity_type_name: "Jans::Userinfo_token"
+            user_id: "sub"
+            principal_mapping:
+              - "Jans::User"
     policies:
       840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
         description: simple policy example for principal workload
@@ -21,8 +41,8 @@ policy_stores:
                 action in [Jans::Action::"Update"],
                 resource is Jans::Issue
             )when{
-                principal.org_id == resource.org_id &&
-                principal.access_token.aud == "5b4487c4-8db1-409d-a653-f907b8094039" 
+                principal.access_token.org_id == resource.org_id &&
+                principal.aud == "5b4487c4-8db1-409d-a653-f907b8094039" 
             };
       444da5d85403f35ea76519ed1a18a33989f855bf1cf8:
         cedar_version: v4.0.0
@@ -38,7 +58,7 @@ policy_stores:
                 resource is Jans::Issue
             )when{
                 principal.country == resource.country &&
-                principal.access_token.aud == "5b4487c4-8db1-409d-a653-f907b8094039" 
+                principal.id_token.aud == "5b4487c4-8db1-409d-a653-f907b8094039" 
             };
     schema:
       encoding: none
@@ -46,19 +66,45 @@ policy_stores:
       body: |-
         namespace Jans {
           type Url = {"host": String, "path": String, "protocol": String};
-          entity Access_token = {"aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String};
           entity Issue = {"country": String, "org_id": String};
           entity Role;
           entity TrustedIssuer = {"issuer_entity_id": Url};
-          entity User in [Role] = {"country": String, "email": String, "sub": String, "username": String, "access_token": Access_token};
-          entity Workload = {"client_id": String, "iss": TrustedIssuer, "name": String, "org_id": String, access_token: Access_token};
-          entity id_token = {"acr": String, "amr": String, "aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String, "sub": String};
-          entity Userinfo_token  = {"iss": String, "jti": String, "client_id": String};
+          entity User in [Role] = {
+            sub: String,
+            role: String,
+            email: String,
+            username: String,
+            country: String,
+            id_token: Id_token,
+            userinfo_token: Userinfo_token,
+          };
+          entity Workload = {
+            iss: Jans::TrustedIssuer,
+            aud?: String,
+            client_id?: String,
+            name: String,
+            access_token: Access_token,
+          };
+          entity Access_token = {
+            iss: Jans::TrustedIssuer,
+            jti: String,
+            client_id: String,
+            org_id: String,
+          };
+          entity Id_token = {
+            iss: Jans::TrustedIssuer,
+            sub: String,
+            aud: String,
+          };
+          entity Userinfo_token  = {
+            iss: Jans::TrustedIssuer,
+            jti: String,
+          };
           type Context = {
             user: User,
             workload: Workload,
             access_token: Access_token,
-            id_token: id_token,
+            id_token: Id_token,
             userinfo_token: Userinfo_token,
           };
           action "Update" appliesTo {

@@ -23,7 +23,7 @@
                     "openid_configuration_endpoint": "https://test-casa.gluu.info/.well-known/openid-configuration",
                     "access_tokens": {
                         "trusted": true,
-                        "principal_identifier": "aud",
+                        "token_id": "aud",
                         "role_mapping": {}
                     },
                     "id_tokens": {},

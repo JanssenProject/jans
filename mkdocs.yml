@@ -407,6 +407,10 @@ nav:
       - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
 - Cedarling:
   - Overview: 'cedarling/cedarling-overview.md'
+  - Quick Start Guide: 'cedarling/cedarling-quick-start.md'
+  - How To Use:
+    - Types Of Bindings: 'cedarling/cedarling-binding-types.md'
+    - Browser Apps: 'cedarling/cedarling-wasm.md'
   - Reference:
     - Policy Store: 'cedarling/cedarling-policy-store.md'
     - Properties: 'cedarling/cedarling-properties.md'
@@ -414,6 +418,7 @@ nav:
     - JWT Validation: 'cedarling/cedarling-jwt-validation.md'
     - JWT Mapping: 'cedarling/cedarling-jwt-mapping.md'
     - Lock Configuration: 'cedarling/cedarling-lock-server.md'
+    - Cedarling Entities: 'cedarling/cedarling-entities.md'
   - Developer:
     - WASM: 'cedarling/cedarling-wasm.md'
     - Python:

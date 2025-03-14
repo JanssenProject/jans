@@ -9,9 +9,6 @@
 //! CEDARLING_TOKEN_CONFIGS
 
 use super::utils::*;
-use crate::authz::entity_builder::{
-    BuildCedarlingEntityError, BuildEntityError, BuildTokenEntityError,
-};
 use crate::{AuthorizeError, Cedarling, JsonRule, cmp_decision, cmp_policy};
 use cedarling_util::get_raw_config;
 use std::collections::HashSet;

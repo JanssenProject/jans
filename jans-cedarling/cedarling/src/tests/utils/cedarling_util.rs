@@ -4,33 +4,10 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use crate::authorization_config::IdTokenTrustMode;
-use crate::raw_config::token_settings::TokenConfigs;
-use crate::{AuthorizationConfig, JsonRule, JwtConfig};
+use crate::{AuthorizationConfig, EntityBuilderConfig, JsonRule, JwtConfig};
 pub use crate::{
-    BootstrapConfig, BootstrapConfigRaw, Cedarling, FeatureToggle, LogConfig, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource,
+    BootstrapConfig, Cedarling, LogConfig, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
 };
-use std::collections::HashMap;
-
-/// fixture for [`BootstrapConfigRaw`]
-pub fn get_raw_config(local_policy_store: &str) -> BootstrapConfigRaw {
-    // field `local_policy_store` should get JSON field. So we map yaml to json
-    let local_policy_store_json: serde_json::Value =
-        serde_yml::from_str(local_policy_store).expect("yaml should be parsed without errors");
-
-    BootstrapConfigRaw {
-        application_name: "test_app".to_string(),
-        user_authz: FeatureToggle::Enabled,
-        workload_authz: FeatureToggle::Enabled,
-        principal_bool_operation: JsonRule::default(),
-        log_type: crate::LoggerType::StdOut,
-        local_policy_store: Some(local_policy_store_json.to_string()),
-        jwt_status_validation: FeatureToggle::Disabled,
-        token_configs: TokenConfigs::without_validation(),
-        id_token_trust_mode: IdTokenTrustMode::None,
-        ..Default::default()
-    }
-}
 
 /// fixture for [`BootstrapConfig`]
 pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
@@ -48,21 +25,10 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
             use_user_principal: true,
             use_workload_principal: true,
             principal_bool_operator: JsonRule::default(),
-            mapping_user: Some("Jans::User".to_string()),
-            mapping_workload: Some("Jans::Workload".to_string()),
-            mapping_role: Some("Jans::Role".to_string()),
-            mapping_tokens: HashMap::from([
-                ("access_token".to_string(), "Jans::Access_token".to_string()),
-                ("id_token".to_string(), "Jans::id_token".to_string()),
-                (
-                    "userinfo_token".to_string(),
-                    "Jans::Userinfo_token".to_string(),
-                ),
-            ])
-            .into(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
     }
 }
 
@@ -77,6 +43,7 @@ pub async fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
 pub async fn get_cedarling_with_authorization_conf(
     policy_source: PolicyStoreSource,
     auth_conf: AuthorizationConfig,
+    entity_builder_conf: EntityBuilderConfig,
 ) -> Cedarling {
     Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
@@ -89,6 +56,7 @@ pub async fn get_cedarling_with_authorization_conf(
         },
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: auth_conf,
+        entity_builder_config: entity_builder_conf,
     })
     .await
     .expect("bootstrap config should initialize correctly")
@@ -142,7 +110,10 @@ macro_rules! cmp_policy {
 
 /// util function for convenient conversion Decision
 pub fn get_decision(resp: &Option<cedar_policy::Response>) -> Option<cedar_policy::Decision> {
-    resp.as_ref().map(|v| v.decision())
+    resp.as_ref().map(|v| {
+        println!("diagnostics: {:?}\n", v.diagnostics());
+        v.decision()
+    })
 }
 
 /// This macro removes code duplication when comparing a decision in tests.

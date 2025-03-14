@@ -7,6 +7,8 @@
 
 use std::sync::LazyLock;
 
+use serde::Serialize;
+
 use {jsonwebkey as jwk, jsonwebtoken as jwt};
 
 // Represent meta information about entity from cedar-policy schema.
@@ -66,4 +68,71 @@ pub fn generate_token_using_claims(claims: impl serde::Serialize) -> String {
 
     // serialize token to a string
     jwt::encode(&header, &claims, encoding_key).expect("should generate token")
+}
+
+/// A pair of encoding and decoding keys.
+#[derive(Clone)]
+pub struct KeyPair {
+    kid: Option<String>,
+    encoding_key: jwt::EncodingKey,
+    decoding_key: jwt::jwk::Jwk,
+    alg: jwt::Algorithm,
+}
+
+/// Generates a HS256-signed token using the given claims.
+#[track_caller]
+pub fn generate_keypair_hs256(kid: Option<impl ToString>) -> KeyPair {
+    let mut jwk = jwk::JsonWebKey::new(jwk::Key::generate_symmetric(256));
+    jwk.set_algorithm(jwk::Algorithm::HS256)
+        .expect("should set encryption algorithm");
+    jwk.key_id = Some("some_id".to_string());
+
+    // since this is a symmetric key, the public key is the same as the private
+    let mut decoding_key = serde_json::to_value(jwk.key.clone()).expect("should serialize key");
+
+    // set the key parameters
+    if let Some(kid) = &kid {
+        decoding_key["kid"] = serde_json::Value::String(kid.to_string());
+    }
+    let mut decoding_key: jwt::jwk::Jwk =
+        serde_json::from_value(decoding_key).expect("shold generate decoding key");
+    decoding_key.common.key_algorithm = Some(jwt::jwk::KeyAlgorithm::HS256);
+
+    let encoding_key = match *jwk.key {
+        jsonwebkey::Key::Symmetric { key } => jwt::EncodingKey::from_secret(&key),
+        _ => panic!("key mismatch"),
+    };
+
+    KeyPair {
+        kid: kid.map(|s| s.to_string()),
+        encoding_key,
+        decoding_key,
+        alg: jwt::Algorithm::HS256,
+    }
+}
+
+/// Generates a token string in the given format: `"header.claim.signature"`
+#[track_caller]
+pub fn generate_token_using_claims_and_keypair(
+    claims: &impl Serialize,
+    keypair: &KeyPair,
+) -> String {
+    let header = jwt::Header {
+        alg: keypair.alg,
+        kid: keypair.kid.clone(),
+        ..Default::default()
+    };
+
+    // encode token to a string
+    jwt::encode(&header, &claims, &keypair.encoding_key).expect("should encode JWT")
+}
+
+/// Generates a JwkSet from the given keys
+#[track_caller]
+pub fn generate_jwks(keys: &[KeyPair]) -> jwt::jwk::JwkSet {
+    let keys = keys
+        .iter()
+        .map(|key_pair| key_pair.decoding_key.clone())
+        .collect::<Vec<jwt::jwk::Jwk>>();
+    jwt::jwk::JwkSet { keys }
 }

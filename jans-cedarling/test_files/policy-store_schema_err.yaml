@@ -22,7 +22,7 @@ policy_stores:
             )
             when
             {
-              Jans::Access_token::"abc".scope=="abc" && Jans::id_token::"idxxx".amr=="idxxx"
+              Jans::Access_token::"abc".scope=="abc" && Jans::Id_token::"idxxx".amr=="idxxx"
             };
       b6313811924c9e67f898257cbf017674e08203779ae9:
         description: manager access
@@ -40,7 +40,7 @@ policy_stores:
             )
             when
             {
-             Jans::Access_token::"xxx".scope=="xxx" || Jans::id_token::"idxxx".amr=="idxxx" && context.network.isInRange(ip("222.222.222.0/24"))
+             Jans::Access_token::"xxx".scope=="xxx" || Jans::Id_token::"idxxx".amr=="idxxx" && context.network.isInRange(ip("222.222.222.0/24"))
             };
       f2b38413cad977ab21616bd4a63c233548491cf25b72:
         description: manager access
@@ -58,7 +58,7 @@ policy_stores:
             )
             when
             {
-             Jans::Access_token::"xxx".scope=="xxx" || Jans::id_token::"idxxx".amr=="idxxx" && context.network.isInRange(ip("222.222.222.0/24"))
+             Jans::Access_token::"xxx".scope=="xxx" || Jans::Id_token::"idxxx".amr=="idxxx" && context.network.isInRange(ip("222.222.222.0/24"))
             };
       fa6a3f46ab5f741e806deff0f81d0f848af37604500f:
         description: without condition

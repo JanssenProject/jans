@@ -29,7 +29,6 @@ const BOOTSTRAP_CONFIG = {
         ]
     },
     "CEDARLING_LOCAL_JWKS": null,
-    "CEDARLING_POLICY_STORE_LOCAL": null,
     "CEDARLING_POLICY_STORE_LOCAL_FN": null,
     "CEDARLING_JWT_SIG_VALIDATION": "disabled",
     "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
@@ -37,11 +36,6 @@ const BOOTSTRAP_CONFIG = {
         "HS256",
         "RS256"
     ],
-    "CEDARLING_TOKEN_CONFIGS": {
-        "access_token": { "entity_type_name": "Jans::Access_token" },
-        "id_token": { "entity_type_name": "Jans::id_token" },
-        "userinfo_token": { "entity_type_name": "Jans::Userinfo_token" },
-    },
     "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
     "CEDARLING_LOCK": "disabled",
     "CEDARLING_LOCK_SERVER_CONFIGURATION_URI": null,

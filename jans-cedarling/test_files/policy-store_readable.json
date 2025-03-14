@@ -30,7 +30,7 @@
             "schema": {
                 "encoding": "none",
                 "content_type": "cedar",
-                "body": "namespace Jans {\ntype Url = {\"host\": String, \"path\": String, \"protocol\": String};\nentity Access_token = {\"aud\": String, \"exp\": Long, \"iat\": Long, \"iss\": TrustedIssuer, \"jti\": String};\nentity Issue = {\"country\": String, \"org_id\": String};\nentity TrustedIssuer = {\"issuer_entity_id\": Url};\nentity User = {\"country\": String, \"email\": String, \"sub\": String, \"username\": String};\nentity Workload = {\"client_id\": String, \"iss\": TrustedIssuer, \"name\": String, \"org_id\": String};\nentity id_token = {\"acr\": String, \"amr\": String, \"aud\": String, \"exp\": Long, \"iat\": Long, \"iss\": TrustedIssuer, \"jti\": String, \"sub\": String};\naction \"Update\" appliesTo {\n  principal: [Workload, User],\n  resource: [Issue],\n  context: {}\n};\n}\n"
+                "body": "namespace Jans {\ntype Url = {\"host\": String, \"path\": String, \"protocol\": String};\nentity Access_token = {\"aud\": String, \"exp\": Long, \"iat\": Long, \"iss\": TrustedIssuer, \"jti\": String};\nentity Issue = {\"country\": String, \"org_id\": String};\nentity TrustedIssuer = {\"issuer_entity_id\": Url};\nentity User = {\"country\": String, \"email\": String, \"sub\": String, \"username\": String};\nentity Workload = {\"client_id\": String, \"iss\": TrustedIssuer, \"name\": String, \"org_id\": String};\nentity Id_token = {\"acr\": String, \"amr\": String, \"aud\": String, \"exp\": Long, \"iat\": Long, \"iss\": TrustedIssuer, \"jti\": String, \"sub\": String};\naction \"Update\" appliesTo {\n  principal: [Workload, User],\n  resource: [Issue],\n  context: {}\n};\n}\n"
             }
         }
     }
