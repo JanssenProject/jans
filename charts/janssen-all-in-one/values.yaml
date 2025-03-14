@@ -590,7 +590,7 @@ istio:
   additionalAnnotations: { }
   # -- Override the gateway that can be created by default. This is used when istio ingress has already been setup and the gateway exists.
   gateways: [ ]
-  tlsSecretName: istio-tls-certificate
+  tlsSecretName: tls-certificate
 certManager:
   # Enable deploying a certificate that uses dns01 challenge instead of passing an annotation nginx-ingress.ingress.additionalAnnotations for nginx http01 challenge.
   certificate:

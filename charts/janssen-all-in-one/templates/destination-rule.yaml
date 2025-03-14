@@ -2,7 +2,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: {{ .Release.Name }}-isio-mtls
+  name: {{ .Release.Name }}-istio-mtls
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-aio

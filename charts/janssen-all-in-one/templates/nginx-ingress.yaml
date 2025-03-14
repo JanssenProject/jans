@@ -1,4 +1,5 @@
 {{ if index .Values "nginx-ingress" "enabled" -}}
+
 {{ if index .Values "auth-server" "ingress" "openidConfigEnabled" -}}
 {{ $fullName := include "janssen-all-in-one.fullname" . -}}
 {{- $ingressPath := index .Values "nginx-ingress" "ingress" "path" -}}
