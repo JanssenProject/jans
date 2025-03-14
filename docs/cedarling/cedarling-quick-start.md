@@ -74,7 +74,7 @@ To begin using Cedarling, you need to set up a policy store. We’ll use this [A
     )
     when {
       principal has userinfo_token.role &&
-      principal.userinfo_token.role.contains("manager")
+      principal.userinfo_token.role.contains("developer")
     };
     ```
 7. Click `Save`. Agama Lab will validate your policy. 
