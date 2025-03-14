@@ -14,6 +14,8 @@ use uuid7::Uuid;
 
 use crate::common::json_rules::{ApplyRuleError, JsonRule, RuleApplier};
 
+type TypeName = SmolStr;
+
 /// Result of authorization and evaluation cedar policy
 /// based on the [Request](crate::models::request::Request) and policy store
 #[derive(Debug, Clone, Serialize)]
@@ -143,8 +145,7 @@ impl AuthorizeResult {
     /// Builder function for AuthorizeResult
     pub(crate) fn new_for_many_principals(
         principal_bool_operator: &JsonRule,
-        // key is typename
-        principal_responses: HashMap<SmolStr, cedar_policy::Response>,
+        principal_responses: HashMap<TypeName, cedar_policy::Response>,
         workload_typename: Option<SmolStr>,
         person_typename: Option<SmolStr>,
         request_id: Uuid,
