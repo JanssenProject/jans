@@ -136,11 +136,11 @@ impl Cedarling {
 
     /// Authorize request with unverified data.
     /// makes authorization decision based on the [`RequestUnverified`]
-    pub async fn authorize_unverified(
+    pub async fn authorize_unsigned(
         &self,
         request: RequestUnverified,
     ) -> Result<AuthorizeResult, AuthorizeError> {
-        self.authz.authorize_unverified(request).await
+        self.authz.authorize_unsigned(request).await
     }
 
     /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.

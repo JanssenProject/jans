@@ -321,7 +321,7 @@ impl Authz {
     }
 
     /// Evaluate Authorization Request with unverified data.
-    pub async fn authorize_unverified(
+    pub async fn authorize_unsigned(
         &self,
         request: RequestUnverified,
     ) -> Result<AuthorizeResult, AuthorizeError> {
