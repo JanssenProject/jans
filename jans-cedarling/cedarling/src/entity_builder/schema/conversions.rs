@@ -11,6 +11,7 @@ use thiserror::Error;
 
 pub type EntityTypeName = SmolStr;
 
+/// Instructions on how to build a Cedar attribute
 #[derive(Debug, PartialEq)]
 pub enum AttrSrc {
     JwtClaim(TknClaimAttrSrc),
@@ -42,6 +43,7 @@ pub enum ExpectedClaimType {
 }
 
 impl AttrSrc {
+    /// Resolves [`AttrSrc`] from [`cedar_policy_validator::types::Type`]
     pub fn from_type(attr_name: &str, value: &Type) -> Result<Self, BuildAttrSrcError> {
         let attr_src: Self = match value {
             Type::Never => {
