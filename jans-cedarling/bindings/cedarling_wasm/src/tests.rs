@@ -7,7 +7,7 @@
 #![allow(dead_code)]
 
 use crate::*;
-use cedarling::ResourceData;
+use cedarling::EntityData;
 use serde::Deserialize;
 use serde_json::json;
 use std::{collections::HashMap, sync::LazyLock};
@@ -250,7 +250,7 @@ async fn test_run_cedarling() {
             "user_agent": "Linux"
         }),
         action: "Jans::Action::\"Read\"".to_string(),
-        resource: ResourceData::deserialize(json!({
+        resource: EntityData::deserialize(json!({
             "type": "Jans::Application",
             "id": "some_id",
             "app_id": "application_id",
@@ -422,7 +422,7 @@ async fn test_memory_log_interface() {
             "user_agent": "Linux"
         }),
         action: "Jans::Action::\"Read\"".to_string(),
-        resource: ResourceData::deserialize(json!({
+        resource: EntityData::deserialize(json!({
             "type": "Jans::Application",
             "id": "some_id",
             "app_id": "application_id",

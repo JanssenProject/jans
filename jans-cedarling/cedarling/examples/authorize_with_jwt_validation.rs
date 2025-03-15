@@ -5,7 +5,7 @@
 
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, JsonRule, JwtConfig, LogConfig, LogLevel,
-    LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
+    LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, EntityData,
     TokenValidationConfig,
 };
 use jsonwebtoken::Algorithm;
@@ -83,7 +83,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             ]),
             action: "Jans::Action::\"Update\"".to_string(),
             context: serde_json::json!({}),
-            resource: ResourceData {
+            resource: EntityData {
                 id: "random_id".to_string(),
                 resource_type: "Jans::Issue".to_string(),
                 payload: HashMap::from_iter([(

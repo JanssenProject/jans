@@ -15,10 +15,10 @@ mod built_entities;
 use super::AuthorizeEntitiesData;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::jwt::{Token, TokenClaimTypeError};
-use crate::{AuthorizationConfig, ResourceData};
+use crate::{AuthorizationConfig, EntityData};
 use build_attrs::{BuildAttrError, ClaimAliasMap, build_entity_attrs_from_tkn};
 use build_expr::*;
-use build_resource_entity::{BuildResourceEntityError, JsonTypeError};
+use build_resource_entity::{BuildCedarEntityError, JsonTypeError};
 use build_role_entity::BuildRoleEntityError;
 pub use build_token_entities::BuildTokenEntityError;
 use build_user_entity::BuildUserEntityError;
@@ -114,10 +114,10 @@ impl EntityBuilder {
         }
     }
 
-    pub fn build_entities(
+    pub fn build_token_entities(
         &self,
         tokens: &HashMap<String, Token>,
-        resource: &ResourceData,
+        resource: &EntityData,
     ) -> Result<AuthorizeEntitiesData, BuildCedarlingEntityError> {
         let mut built_entities = BuiltEntities::default();
 
@@ -157,7 +157,9 @@ impl EntityBuilder {
             (None, vec![])
         };
 
-        let resource = self.build_resource_entity(resource)?;
+        let resource = self
+            .build_cedar_entity(resource)
+            .map_err(BuildCedarEntityError::BuildEntity)?;
         built_entities.insert(&resource);
 
         Ok(AuthorizeEntitiesData {
@@ -220,9 +222,11 @@ pub enum BuildCedarlingEntityError {
     #[error(transparent)]
     Role(#[from] BuildRoleEntityError),
     #[error("failed to build resource entity: {0}")]
-    Resource(#[from] BuildResourceEntityError),
+    Resource(#[from] BuildCedarEntityError),
     #[error(transparent)]
     Token(#[from] BuildTokenEntityError),
+    #[error("failed to build unsigned principal entity: {0}")]
+    UnverifiedPrincipal(BuildCedarEntityError),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -390,7 +394,7 @@ mod test {
             .collect::<HashMap<String, Token>>();
 
         let entities = entity_builder
-            .build_entities(&tokens, &ResourceData {
+            .build_token_entities(&tokens, &EntityData {
                 resource_type: "Jans::Resource".to_string(),
                 id: "res-123".to_string(),
                 payload: HashMap::new(),

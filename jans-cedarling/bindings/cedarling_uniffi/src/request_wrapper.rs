@@ -53,7 +53,7 @@ impl RequestWrapper {
                 error_msg: format!("Invalid JSON for payload: {}", e),
             })?;
 
-        let resource: core::ResourceData = core::ResourceData {
+        let resource: core::EntityData = core::EntityData {
             resource_type,
             id: resource_id,
             payload: parsed_payload,
