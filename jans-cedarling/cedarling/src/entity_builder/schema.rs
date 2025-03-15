@@ -6,7 +6,6 @@
 mod conversions;
 
 use cedar_policy_validator::ValidatorSchema;
-use cedar_policy_validator::types::AttributeType;
 use conversions::BuildAttrSrcError;
 use smol_str::SmolStr;
 use std::{collections::HashMap, fmt::Display};
@@ -43,7 +42,7 @@ impl TryFrom<&ValidatorSchema> for MappingSchema {
                 .map(|(attr_name, attr_type)| {
                     AttrSrc::from_type(attr_name, &attr_type.attr_type).map(|attr_src| {
                         (attr_name.clone(), AttrsShape {
-                            attr_type: attr_type.clone(),
+                            is_required: attr_type.is_required(),
                             attr_src,
                         })
                     })
@@ -85,13 +84,13 @@ impl MappingSchema {
 /// Info on how to build the attributes
 #[derive(Debug)]
 pub struct AttrsShape {
-    attr_type: AttributeType,
+    is_required: bool,
     attr_src: AttrSrc,
 }
 
 impl AttrsShape {
     pub fn is_required(&self) -> bool {
-        self.attr_type.is_required
+        self.is_required
     }
 
     pub fn src(&self) -> &AttrSrc {

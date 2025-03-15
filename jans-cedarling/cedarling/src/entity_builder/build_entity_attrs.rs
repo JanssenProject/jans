@@ -41,14 +41,14 @@ pub fn build_entity_attrs_with_shape(
     let mut errs = Vec::new();
     let mut attrs = HashMap::new();
 
-    for (attr_name, attr_req) in attrs_shape.iter() {
-        match attr_req.src() {
+    for (attr_name, attr_shape) in attrs_shape.iter() {
+        match attr_shape.src() {
             AttrSrc::JwtClaim(claim_src) => {
                 let mut required_missing_claims: Vec<SmolStr> = Vec::new();
 
                 // skip if the source couldn't be found and was not required
                 let Some(src) = attrs_src.get(attr_name.as_str()) else {
-                    if attr_req.is_required() {
+                    if attr_shape.is_required() {
                         required_missing_claims.push(attr_name.to_smolstr());
                     }
 
@@ -91,7 +91,7 @@ pub fn build_entity_attrs_with_shape(
 
                 // skip if the source couldn't be found and was not required
                 let Some(id) = entities.get_single(entity_ref_src) else {
-                    if attr_req.is_required() {
+                    if attr_shape.is_required() {
                         missing_refs.push((*entity_ref_src).clone());
                     }
                     continue;
@@ -115,7 +115,7 @@ pub fn build_entity_attrs_with_shape(
                 let mut missing_refs: Vec<SmolStr> = Vec::new();
 
                 let Some(eids) = entities.get_multiple(entity_ref_set_src) else {
-                    if attr_req.is_required() {
+                    if attr_shape.is_required() {
                         missing_refs.push((*entity_ref_set_src).clone());
                     }
                     continue;
