@@ -54,21 +54,17 @@ impl EntityBuilder {
         let (workload_attrs, errs): (Vec<_>, Vec<_>) = attrs_srcs
             .into_iter()
             .map(|(src, mappings)| build_entity_attrs(src, built_entities, attrs_shape, mappings))
-            .partition(Result::is_ok);
+            .partition_result();
         let mut workload_attrs: HashMap<String, RestrictedExpression> = if errs.is_empty() {
             // what should happen if claims have the same name but different values?
             workload_attrs
                 .into_iter()
-                .flatten()
                 .fold(HashMap::new(), |mut acc, attrs| {
                     acc.extend(attrs);
                     acc
                 })
         } else {
-            let errs: Vec<_> = errs
-                .into_iter()
-                .flat_map(|e| e.unwrap_err().into_inner())
-                .collect();
+            let errs: Vec<_> = errs.into_iter().flat_map(|e| e.into_inner()).collect();
             return Err(BuildEntityErrorKind::from(errs).while_building(workload_type_name));
         };
 

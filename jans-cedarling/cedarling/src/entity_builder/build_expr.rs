@@ -3,7 +3,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::schema::{EntityRefAttrSrc, EntityRefSetSrc, ExpectedClaimType, TknClaimAttrSrc};
+use super::{
+    PartitionResult,
+    schema::{EntityRefAttrSrc, EntityRefSetSrc, ExpectedClaimType, TknClaimAttrSrc},
+};
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
 use cedar_policy::{EntityUid, RestrictedExpression};
 use serde_json::Value;
@@ -58,17 +61,15 @@ impl EntityRefSetSrc {
                 EntityUid::from_str(&format!("{}::\"{}\"", &self.0, id))
                     .map(RestrictedExpression::new_entity_uid)
             })
-            .partition(Result::is_ok);
+            .partition_result();
 
-        let uids: Vec<_> = if errs.is_empty() {
-            uids.into_iter().flatten().collect()
-        } else {
+        if !errs.is_empty() {
             return Err(BuildExprErrorVec::from(
                 errs.into_iter()
-                    .map(|e| BuildExprError::ParseUid(e.unwrap_err()))
+                    .map(|e| BuildExprError::ParseUid(e))
                     .collect::<Vec<_>>(),
             ));
-        };
+        }
 
         Ok(RestrictedExpression::new_set(uids))
     }
@@ -111,14 +112,13 @@ fn build_expr_from_value(
                 .iter()
                 .map(|src| build_expr_from_value(expected_claim_type, src))
                 .filter_map(|expr| expr.transpose())
-                .partition(Result::is_ok);
+                .partition_result();
 
-            let vals: Vec<RestrictedExpression> = if errs.is_empty() {
-                vals.into_iter().flatten().collect()
-            } else {
-                let errs = errs.into_iter().flat_map(|e| e.unwrap_err().0).collect();
-                return Err(BuildExprErrorVec(errs))?;
-            };
+            if !errs.is_empty() {
+                return Err(BuildExprErrorVec(
+                    errs.into_iter().map(|e| e.into_inner()).flatten().collect(),
+                ))?;
+            }
 
             Ok(Some(RestrictedExpression::new_set(vals)))
         },
@@ -137,13 +137,14 @@ fn build_expr_from_value(
                             .map(|res| res.map(|res| (name.to_string(), res)))
                     })
                 })
-                .partition(Result::is_ok);
+                .partition_result();
 
             let fields: HashMap<String, RestrictedExpression> = if errs.is_empty() {
-                fields.into_iter().flatten().collect()
+                fields.into_iter().collect()
             } else {
-                let errs = errs.into_iter().flat_map(|e| e.unwrap_err().0).collect();
-                return Err(BuildExprErrorVec(errs))?;
+                return Err(BuildExprErrorVec(
+                    errs.into_iter().map(|e| e.into_inner()).flatten().collect(),
+                ))?;
             };
 
             Ok(Some(RestrictedExpression::new_record(fields)?))
@@ -162,6 +163,12 @@ fn build_expr_from_value(
 
 #[derive(Debug, Error)]
 pub struct BuildExprErrorVec(Vec<BuildExprError>);
+
+impl BuildExprErrorVec {
+    pub fn into_inner(self) -> Vec<BuildExprError> {
+        self.0
+    }
+}
 
 impl From<Vec<BuildExprError>> for BuildExprErrorVec {
     fn from(errs: Vec<BuildExprError>) -> Self {

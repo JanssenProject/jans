@@ -9,6 +9,8 @@ use std::collections::HashMap;
 use std::net::IpAddr;
 use std::str::FromStr;
 
+use crate::common::PartitionResult;
+
 /// Converts a [`Value`] to a [`RestrictedExpression`]
 pub fn value_to_expr(
     value: &Value,
@@ -33,45 +35,29 @@ pub fn value_to_expr(
             }
         },
         Value::Array(values) => {
-            let (values, errors): (Vec<_>, Vec<_>) = values
-                .iter()
-                .map(value_to_expr)
-                .partition(Result::is_ok);
+            let (values, errors): (Vec<_>, Vec<_>) =
+                values.iter().map(value_to_expr).partition_result();
 
             if !errors.is_empty() {
-                let errors = errors
-                    .into_iter()
-                    .flat_map(|e| e.unwrap_err())
-                    .collect::<Vec<_>>();
-                return Err(errors);
+                return Err(errors.into_iter().flatten().collect());
             }
 
-            let values = values
-                .into_iter()
-                .filter_map(|v| v.unwrap())
-                .collect::<Vec<RestrictedExpression>>();
+            let values: Vec<_> = values.into_iter().flatten().collect();
             RestrictedExpression::new_set(values)
         },
         Value::Object(map) => {
-            let (fields, errors): (Vec<_>, Vec<_>) = map
+            let (fields, errs): (Vec<_>, Vec<_>) = map
                 .iter()
                 .map(|(key, val)| value_to_expr(val).map(|expr| (key.to_string(), expr)))
-                .partition(Result::is_ok);
+                .partition_result();
 
-            if !errors.is_empty() {
-                let errors = errors
-                    .into_iter()
-                    .flat_map(|e| e.unwrap_err())
-                    .collect::<Vec<_>>();
-                return Err(errors);
+            if !errs.is_empty() {
+                return Err(errs.into_iter().flatten().collect());
             }
 
             let fields = fields
                 .into_iter()
-                .filter_map(|val| {
-                    let (key, val) = val.unwrap();
-                    val.map(|val| (key, val))
-                })
+                .filter_map(|(key, val)| val.map(|val| (key, val)))
                 .collect::<HashMap<String, RestrictedExpression>>();
             RestrictedExpression::new_record(fields).map_err(|e| vec![e])?
         },

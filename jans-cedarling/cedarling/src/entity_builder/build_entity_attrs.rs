@@ -177,13 +177,13 @@ pub fn build_entity_attrs_without_schema(
         }
     }
 
-    if errs.is_empty() {
-        Ok(attrs)
-    } else {
-        Err(BuildAttrsErrorVec::from(
+    if !errs.is_empty() {
+        return Err(BuildAttrsErrorVec::from(
             errs.into_iter().flatten().collect::<Vec<_>>(),
-        ))
+        ));
     }
+
+    Ok(attrs)
 }
 
 #[cfg(test)]

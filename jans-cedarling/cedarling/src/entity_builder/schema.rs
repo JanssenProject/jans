@@ -15,6 +15,8 @@ pub use conversions::{
     AttrSrc, EntityRefAttrSrc, EntityRefSetSrc, ExpectedClaimType, TknClaimAttrSrc,
 };
 
+use super::PartitionResult;
+
 type EntityTypeName = String;
 type AttrName = SmolStr;
 
@@ -47,17 +49,13 @@ impl TryFrom<&ValidatorSchema> for MappingSchema {
                         })
                     })
                 })
-                .partition(Result::is_ok);
+                .partition_result();
 
-            let attrs = if errs.is_empty() {
-                attrs.into_iter().flatten().collect()
-            } else {
-                return Err(BuildMappingSchemaError(
-                    errs.into_iter().map(|e| e.unwrap_err()).collect(),
-                ));
-            };
+            if !errs.is_empty() {
+                return Err(BuildMappingSchemaError(errs));
+            }
 
-            entities.insert(type_name, attrs);
+            entities.insert(type_name, attrs.into_iter().collect());
         }
 
         Ok(Self { entities })

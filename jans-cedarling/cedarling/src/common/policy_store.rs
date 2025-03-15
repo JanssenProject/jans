@@ -8,8 +8,8 @@ mod claim_mapping;
 mod test;
 mod token_entity_metadata;
 
-use super::cedar_schema::CedarSchema;
-use cedar_policy::PolicyId;
+use super::{PartitionResult, cedar_schema::CedarSchema};
+use cedar_policy::{Policy, PolicyId};
 use semver::Version;
 use serde::{Deserialize, Deserializer, de};
 use std::collections::HashMap;
@@ -327,35 +327,28 @@ impl<'de> serde::Deserialize<'de> for PoliciesContainer {
         let policies =
             <HashMap<String, RawPolicy> as serde::Deserialize>::deserialize(deserializer)?;
 
-        let results: Vec<Result<cedar_policy::Policy, D::Error>> = policies
+        let (policy_vec, errs): (Vec<_>, Vec<_>) = policies
             .iter()
             .map(|(id, policy_raw)| {
-                parse_single_policy::<D>(id, policy_raw).map_err(|err| {
-                    serde::de::Error::custom(format!(
-                        "unable to decode policy with id: {id}, error: {err}"
-                    ))
-                })
+                let policy: Result<Policy, D::Error> = parse_single_policy::<D>(id, policy_raw)
+                    .map_err(|err| {
+                        de::Error::custom(format!(
+                            "unable to decode policy with id: {id}, error: {err}"
+                        ))
+                    });
+                policy
             })
-            .collect();
-
-        let (successful_policies, errors): (Vec<_>, Vec<_>) =
-            results.into_iter().partition(Result::is_ok);
+            .partition_result();
 
         // Collect all errors into a single error message or return them as a vector.
-        if !errors.is_empty() {
-            let error_messages: Vec<D::Error> =
-                errors.into_iter().filter_map(Result::err).collect();
+        if !errs.is_empty() {
+            let error_messages: Vec<D::Error> = errs.into_iter().collect();
 
             return Err(serde::de::Error::custom(format!(
                 "Errors encountered while parsing policies: {:?}",
                 error_messages
             )));
         }
-
-        let policy_vec = successful_policies
-            .into_iter()
-            .filter_map(Result::ok)
-            .collect::<Vec<_>>();
 
         let policy_set = cedar_policy::PolicySet::from_policies(policy_vec).map_err(|err| {
             serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))

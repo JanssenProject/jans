@@ -23,6 +23,7 @@ mod value_to_expr;
 
 use crate::ResourceData;
 use crate::authz::AuthorizeEntitiesData;
+use crate::common::PartitionResult;
 use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
 use crate::entity_builder_config::*;
 use crate::jwt::Token;
@@ -53,25 +54,18 @@ impl EntityBuilder {
     ) -> Result<Self, InitEntityBuilderError> {
         let schema = schema.map(MappingSchema::try_from).transpose()?;
 
-        let (ok, errs): (Vec<_>, Vec<_>) = trusted_issuers
+        let (ok, errs) = trusted_issuers
             .iter()
             .map(|(iss_id, iss)| {
                 build_iss_entity(&config.entity_names.iss, iss_id, iss, schema.as_ref())
             })
-            .partition(|result| result.is_ok());
+            .partition_result();
 
         if !errs.is_empty() {
-            let errs = errs
-                .into_iter()
-                .map(|e| e.unwrap_err())
-                .collect::<Vec<BuildEntityError>>();
             return Err(InitEntityBuilderError::BuildIssEntities(errs.into()));
         }
 
-        let iss_entities = ok
-            .into_iter()
-            .flatten()
-            .collect::<HashMap<Origin, Entity>>();
+        let iss_entities = ok.into_iter().collect::<HashMap<Origin, Entity>>();
 
         Ok(Self {
             config,
