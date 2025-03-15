@@ -134,7 +134,7 @@ impl Cedarling {
         self.authz.authorize(request).await
     }
 
-    /// Authorize request with unverified data.
+    /// Authorize request with unsigned data.
     /// makes authorization decision based on the [`RequestUnverified`]
     pub async fn authorize_unsigned(
         &self,

@@ -48,7 +48,7 @@ create_exception!(
     authorize_errors,
     InvalidPrincipalError,
     AuthorizeError,
-    "Error encountered while creating cedar_policy::Request for unverified entity principal"
+    "Error encountered while creating cedar_policy::Request for unsigned entity principal"
 );
 
 create_exception!(

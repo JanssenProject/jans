@@ -264,7 +264,7 @@ Error encountered while running on strict id token trust mode
 ___
 
 # authorize_errors.InvalidPrincipalError
-Error encountered while creating cedar_policy::Request for unverified entity principal
+Error encountered while creating cedar_policy::Request for unsigned entity principal
 ___
 
 # authorize_errors.ProcessTokens

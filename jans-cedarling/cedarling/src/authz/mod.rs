@@ -320,7 +320,7 @@ impl Authz {
         Ok(result)
     }
 
-    /// Evaluate Authorization Request with unverified data.
+    /// Evaluate Authorization Request with unsigned data.
     pub async fn authorize_unsigned(
         &self,
         request: RequestUnverified,
@@ -566,7 +566,7 @@ pub enum AuthorizeError {
     /// Error encountered while validating context according to the schema
     #[error("could not create context: {0}")]
     CreateContext(#[from] cedar_policy::ContextJsonError),
-    /// Error encountered while creating [`cedar_policy::Request`] for unverified entity principal
+    /// Error encountered while creating [`cedar_policy::Request`] for unsigned entity principal
     #[error(transparent)]
     InvalidPrincipal(#[from] InvalidPrincipalError),
     /// Error encountered while collecting all entities

@@ -28,7 +28,7 @@ pub struct AuthorizeResult {
     pub person: Option<cedar_policy::Response>,
 
     /// Result of authorization for all principals.
-    /// This field is useful when you want to get the authorization results for unverified authorization requests.
+    /// This field is useful when you want to get the authorization results for unsigned authorization requests.
     /// Because it can be more than workload and person principals.
     #[serde(serialize_with = "serialize_hashmap_response")]
     pub principals: HashMap<SmolStr, cedar_policy::Response>,

@@ -225,7 +225,7 @@ pub enum BuildCedarlingEntityError {
     Resource(#[from] BuildCedarEntityError),
     #[error(transparent)]
     Token(#[from] BuildTokenEntityError),
-    #[error("failed to build unverified principal entity: {0}")]
+    #[error("failed to build unsigned principal entity: {0}")]
     UnverifiedPrincipal(BuildCedarEntityError),
 }
 
