@@ -8,26 +8,22 @@ use smol_str::{SmolStr, ToSmolStr};
 use std::collections::{HashMap, hash_map::Entry};
 use url::Origin;
 
-/// Holds the entity ids of built entities
-#[derive(Default)]
-pub struct OldBuiltEntities(HashMap<SmolStr, SmolStr>);
-
-impl OldBuiltEntities {
-    pub fn get(&self, entity_type_name: &cedar_policy::EntityTypeName) -> Option<&SmolStr> {
-        self.0.get(&entity_type_name.to_smolstr())
-    }
-}
-
-impl From<HashMap<SmolStr, SmolStr>> for OldBuiltEntities {
-    fn from(value: HashMap<SmolStr, SmolStr>) -> Self {
-        Self(value)
-    }
-}
+type TypeName = SmolStr;
+type TypeId = SmolStr;
 
 #[derive(Default)]
 pub struct BuiltEntities {
-    singles: HashMap<SmolStr, SmolStr>,
-    multiples: HashMap<SmolStr, Vec<SmolStr>>,
+    singles: HashMap<TypeName, TypeId>,
+    multiples: HashMap<TypeName, Vec<TypeId>>,
+}
+
+impl FromIterator<EntityUid> for BuiltEntities {
+    fn from_iter<T: IntoIterator<Item = EntityUid>>(iter: T) -> Self {
+        iter.into_iter().fold(Self::default(), |mut acc, uid| {
+            acc.insert(&uid);
+            acc
+        })
+    }
 }
 
 impl From<&HashMap<Origin, Entity>> for BuiltEntities {

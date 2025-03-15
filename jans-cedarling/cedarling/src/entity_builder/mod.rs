@@ -28,7 +28,6 @@ use crate::entity_builder_config::*;
 use crate::jwt::Token;
 use build_entity_attrs::*;
 use build_iss_entity::build_iss_entity;
-use built_entities::BuiltEntities;
 use cedar_policy::{Entity, EntityUid, RestrictedExpression};
 use cedar_policy_validator::ValidatorSchema;
 use schema::MappingSchema;
@@ -37,7 +36,7 @@ use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 use url::Origin;
 
-pub(crate) use built_entities::OldBuiltEntities;
+pub(crate) use built_entities::BuiltEntities;
 pub use error::*;
 
 pub struct EntityBuilder {

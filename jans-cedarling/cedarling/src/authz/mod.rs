@@ -23,7 +23,7 @@ use build_ctx::*;
 use cedar_policy::{Entities, Entity, EntityUid};
 use chrono::Utc;
 use request::Request;
-use smol_str::{SmolStr, ToSmolStr};
+use smol_str::ToSmolStr;
 use std::collections::{HashMap, HashSet};
 use std::io::Cursor;
 use std::str::FromStr;
@@ -397,27 +397,20 @@ impl AuthorizeEntitiesData {
     /// - **Role Entities**
     ///
     /// Only entities that have been built will be included
-    fn entities_for_context(&self) -> OldBuiltEntities {
-        let token_entities = self.tokens.values().map(get_name_and_id);
+    fn entities_for_context(&self) -> BuiltEntities {
+        let token_entities = self.tokens.values();
         let principal_entities = [self.workload.as_ref(), self.user.as_ref()]
             .into_iter()
-            .flatten()
-            .map(get_name_and_id);
-        let role_entities = self.roles.iter().map(get_name_and_id);
+            .flatten();
+        let role_entities = self.roles.iter();
 
-        HashMap::from_iter(
+        BuiltEntities::from_iter(
             token_entities
                 .chain(principal_entities)
-                .chain(role_entities),
+                .chain(role_entities)
+                .map(|e| e.uid()),
         )
-        .into()
     }
-}
-
-fn get_name_and_id(entity: &Entity) -> (SmolStr, SmolStr) {
-    let name = entity.uid().type_name().to_smolstr();
-    let id = entity.uid().id().escaped();
-    (name, id)
 }
 
 /// Error type for Authorization Service

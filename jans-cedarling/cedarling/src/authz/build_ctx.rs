@@ -6,9 +6,10 @@
 use super::{AuthorizeEntitiesData, AuthzConfig};
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
-use crate::entity_builder::OldBuiltEntities;
+use crate::entity_builder::BuiltEntities;
 use cedar_policy::{ContextJsonError, EntityTypeName, ParseErrors};
 use serde_json::{Value, json, map::Entry};
+use smol_str::ToSmolStr;
 
 /// Constructs the authorization context by adding the built entities from the tokens
 pub fn build_context(
@@ -93,7 +94,7 @@ pub fn build_context(
 fn build_entity_refs_from_attr(
     namespace: &str,
     attr: &Attribute,
-    built_entities: &OldBuiltEntities,
+    built_entities: &BuiltEntities,
     schema: &CedarSchemaJson,
 ) -> Result<Option<Value>, BuildContextError> {
     match attr {
@@ -123,9 +124,9 @@ fn build_entity_refs_from_attr(
 /// Maps a known entity ID to the entity reference
 fn map_entity_id(
     name: &EntityTypeName,
-    built_entities: &OldBuiltEntities,
+    built_entities: &BuiltEntities,
 ) -> Result<Option<Value>, BuildContextError> {
-    if let Some(type_id) = built_entities.get(name) {
+    if let Some(type_id) = built_entities.get_single(&name.to_smolstr()) {
         Ok(Some(json!({"type": name.to_string(), "id": type_id})))
     } else {
         Err(BuildContextError::MissingEntityId(name.to_string()))
