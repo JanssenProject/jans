@@ -6,10 +6,10 @@
 //! This module contains tests for JSON logic functionality.  
 //! Specifically, we test the result of `AuthorizeResult::new`, which is based on the evaluation of JSON logic for principals.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use crate::common::json_rules::ApplyRuleError;
-use cedar_policy::Decision;
+use cedar_policy::{Decision, Response};
 use serde_json::json;
 use test_utils::assert_eq;
 use uuid7::uuid4;
@@ -73,12 +73,48 @@ fn test_json_rule_and() {
         result.decision, true,
         "Decision should be ALLOW for AND rule and both workload and user are ALLOW"
     );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::Workload")
+            .expect("expect principal Jans::Workload to be present")
+            .decision(),
+        Decision::Allow,
+        "Jans::Workload decision should be Allow"
+    );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::User")
+            .expect("expect principal Jans::User to be present")
+            .decision(),
+        Decision::Allow,
+        "Jans::User decision should be Allow"
+    );
 
     let result = get_result(Some(false), Some(false), &rule)
         .expect("should not fail when both workload and user are DENY");
     assert_eq!(
         result.decision, false,
         "Decision should be DENY for AND rule and both workload and user are DENY"
+    );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::Workload")
+            .expect("expect principal Jans::Workload to be present")
+            .decision(),
+        Decision::Deny,
+        "Jans::Workload decision should be Deny"
+    );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::User")
+            .expect("expect principal Jans::User to be present")
+            .decision(),
+        Decision::Deny,
+        "Jans::User decision should be Deny"
     );
 
     let result = get_result(Some(true), Some(false), &rule)
@@ -87,12 +123,48 @@ fn test_json_rule_and() {
         result.decision, false,
         "Decision should be DENY for AND rule when workload is ALLOW and user is DENY"
     );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::Workload")
+            .expect("expect principal Jans::Workload to be present")
+            .decision(),
+        Decision::Allow,
+        "Jans::Workload decision should be Allow"
+    );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::User")
+            .expect("expect principal Jans::User to be present")
+            .decision(),
+        Decision::Deny,
+        "Jans::User decision should be Deny"
+    );
 
     let result = get_result(Some(false), Some(true), &rule)
         .expect("should not fail when workload is DENY and user is ALLOW");
     assert_eq!(
         result.decision, false,
         "Decision should be DENY for AND rule when workload is DENY and user is ALLOW"
+    );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::Workload")
+            .expect("expect principal Jans::Workload to be present")
+            .decision(),
+        Decision::Deny,
+        "Jans::Workload decision should be Deny"
+    );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::User")
+            .expect("expect principal Jans::User to be present")
+            .decision(),
+        Decision::Allow,
+        "Jans::User decision should be Allow"
     );
 }
 
@@ -113,12 +185,48 @@ fn test_json_rule_or() {
         result.decision, true,
         "Decision should be ALLOW for OR rule and both workload and user are ALLOW"
     );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::Workload")
+            .expect("expect principal Jans::Workload to be present")
+            .decision(),
+        Decision::Allow,
+        "Jans::Workload decision should be Allow"
+    );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::User")
+            .expect("expect principal Jans::User to be present")
+            .decision(),
+        Decision::Allow,
+        "Jans::User decision should be Allow"
+    );
 
     let result = get_result(Some(false), Some(false), &rule)
         .expect("should not fail when both workload and user are DENY");
     assert_eq!(
         result.decision, false,
         "Decision should be DENY for OR rule when both workload and user are DENY"
+    );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::Workload")
+            .expect("expect principal Jans::Workload to be present")
+            .decision(),
+        Decision::Deny,
+        "Jans::Workload decision should be Deny"
+    );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::User")
+            .expect("expect principal Jans::User to be present")
+            .decision(),
+        Decision::Deny,
+        "Jans::User decision should be Deny"
     );
 
     let result = get_result(Some(true), Some(false), &rule)
@@ -127,12 +235,48 @@ fn test_json_rule_or() {
         result.decision, true,
         "Decision should be ALLOW for OR rule when workload is ALLOW and user is DENY"
     );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::Workload")
+            .expect("expect principal Jans::Workload to be present")
+            .decision(),
+        Decision::Allow,
+        "Jans::Workload decision should be Allow"
+    );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::User")
+            .expect("expect principal Jans::User to be present")
+            .decision(),
+        Decision::Deny,
+        "Jans::User decision should be Deny"
+    );
 
     let result = get_result(Some(false), Some(true), &rule)
         .expect("should not fail when workload is DENY and user is ALLOW");
     assert_eq!(
         result.decision, true,
         "Decision should be ALLOW for OR rule when workload is DENY and user is ALLOW"
+    );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::Workload")
+            .expect("expect principal Jans::Workload to be present")
+            .decision(),
+        Decision::Deny,
+        "Jans::Workload decision should be Deny"
+    );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::User")
+            .expect("expect principal Jans::User to be present")
+            .decision(),
+        Decision::Allow,
+        "Jans::User decision should be Allow"
     );
 }
 
@@ -152,6 +296,21 @@ fn test_json_rule_and_operator_with_empty_principal() {
         result.decision, false,
         "Decision should be DENY for AND rule when one of the principals is missing"
     );
+
+    assert_eq!(
+        result.principals.get("Jans::Workload").is_none(),
+        true,
+        "Jans::Workload principal should not be present"
+    );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::User")
+            .expect("Jans::User principal")
+            .decision(),
+        Decision::Allow,
+        "Jans::User principal value should be ALLOW"
+    );
 }
 
 #[test]
@@ -169,6 +328,21 @@ fn test_json_rule_or_operator_with_empty_principal() {
     assert_eq!(
         result.decision, true,
         "Decision should be ALLOW  for OR rule when one of the principals is missing"
+    );
+
+    assert_eq!(
+        result.principals.get("Jans::Workload").is_none(),
+        true,
+        "Jans::Workload principal should not be present"
+    );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::User")
+            .expect("Jans::User principal")
+            .decision(),
+        Decision::Allow,
+        "Jans::User principal value should be ALLOW"
     );
 }
 
@@ -193,7 +367,7 @@ fn test_using_eq_operator() {
 
 /// Test with only workload principal.
 #[test]
-fn test_with_only_person_principal() {
+fn test_with_only_workload_principal() {
     let rule = JsonRule::new(json!({
         "or" : [
             {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
@@ -207,6 +381,25 @@ fn test_with_only_person_principal() {
     assert_eq!(
         result.decision, true,
         "Decision should be ALLOW for OR rule and both workload and user are ALLOW"
+    );
+
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::Workload")
+            .expect("expect principal Jans::Workload to be present")
+            .decision(),
+        Decision::Allow,
+        "Jans::Workload decision should be Allow"
+    );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::User")
+            .expect("expect principal Jans::User to be present")
+            .decision(),
+        Decision::Allow,
+        "Jans::User decision should be Allow"
     );
 }
 
@@ -241,4 +434,68 @@ fn test_where_compare_op_eq_with_bool() {
 
     let _ = get_result(Some(true), Some(true), &rule)
         .expect_err("should fail when comparing using `==` operator with bool");
+}
+
+#[test]
+fn test_with_multiple_principals() {
+    let rule = JsonRule::new(json!({
+        "and": [
+            {"and" : [
+                {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+                {"===": [{"var": "Jans::User"}, "ALLOW"]},
+            ]},
+            {"===": [{"var": "Custom::Principal"}, "DENY"]},
+        ]
+    }))
+    .unwrap();
+
+    let principal_responses = HashMap::from([
+        (
+            "Jans::Workload".into(),
+            Response::new(Decision::Allow, HashSet::new(), Vec::new()),
+        ),
+        (
+            "Jans::User".into(),
+            Response::new(Decision::Allow, HashSet::new(), Vec::new()),
+        ),
+        (
+            "Custom::Principal".into(),
+            Response::new(Decision::Deny, HashSet::new(), Vec::new()),
+        ),
+    ]);
+
+    let result =
+        AuthorizeResult::new_for_many_principals(&rule, principal_responses, None, None, uuid4())
+            .expect("Shouldn't fail to create an AuthorizeResult with multiple principals.");
+
+    assert_eq!(result.decision, true, "Decision should be ALLOW");
+
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::Workload")
+            .expect("expect principal Jans::Workload to be present")
+            .decision(),
+        Decision::Allow,
+        "Jans::Workload decision should be Allow"
+    );
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::User")
+            .expect("expect principal Jans::User to be present")
+            .decision(),
+        Decision::Allow,
+        "Jans::User decision should be Allow"
+    );
+
+    assert_eq!(
+        result
+            .principals
+            .get("Custom::Principal")
+            .expect("expect principal Custom::Principal to be present")
+            .decision(),
+        Decision::Deny,
+        "Custom::Principal decision should be Deny"
+    );
 }
