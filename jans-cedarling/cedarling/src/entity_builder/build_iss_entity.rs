@@ -114,25 +114,21 @@ mod test {
             "tokens_metadata": {},
         }))
         .expect("should be a valid trusted issuer");
-        let schema: MappingSchema = cedarling_validator_schema()
-            .try_into()
-            .expect("should initialize mapping schema");
-        let (origin, iss_entity) =
-            build_iss_entity("Jans::TrustedIssuer", "some_iss", &iss, Some(&schema))
-                .expect("should build TrustedIssuer entity");
+        let (origin, iss_entity) = build_iss_entity("TrustedIssuer", "some_iss", &iss, None)
+            .expect("should build TrustedIssuer entity");
 
         assert_eq!(origin.ascii_serialization(), "https://test.jans.org");
 
         assert_entity_eq(
             &iss_entity,
             json!({
-                "uid": {"type": "Jans::TrustedIssuer", "id": "some_iss"},
+                "uid": {"type": "TrustedIssuer", "id": "some_iss"},
                 "attrs": {
                     "issuer_entity_id": {
                         "protocol": "https",
                         "host": "test.jans.org",
                         "path": "/",
-                    }
+                    },
                 },
                 "parents": [],
             }),
