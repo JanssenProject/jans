@@ -50,12 +50,11 @@ pub fn get_first_valid_entity_id(id_srcs: &[EntityIdSrc]) -> Result<SmolStr, Bui
 }
 
 pub fn collect_all_valid_entity_ids(id_srcs: &[EntityIdSrc]) -> Vec<SmolStr> {
-    id_srcs.iter().fold(Vec::new(), |mut acc, src| {
-        if let Some(claim) = src.token.get_claim_val(src.claim) {
-            acc.extend(claim_to_ids(claim));
-        }
-        acc
-    })
+    id_srcs
+        .iter()
+        .filter_map(|src| src.token.get_claim_val(src.claim))
+        .flat_map(claim_to_ids)
+        .collect()
 }
 
 fn claim_to_ids(claim: &Value) -> Vec<SmolStr> {

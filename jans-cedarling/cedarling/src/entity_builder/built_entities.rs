@@ -11,6 +11,11 @@ use url::Origin;
 type TypeName = SmolStr;
 type TypeId = SmolStr;
 
+/// Stores references to previously built entities.
+///
+/// Entities are categorized as either:
+/// - **Singles**: Unique entities with distinct types.
+/// - **Multiples**: Entities of the same type but with different IDs.
 #[derive(Default)]
 pub struct BuiltEntities {
     singles: HashMap<TypeName, TypeId>,
@@ -28,10 +33,13 @@ impl FromIterator<EntityUid> for BuiltEntities {
 
 impl From<&HashMap<Origin, Entity>> for BuiltEntities {
     fn from(src: &HashMap<Origin, Entity>) -> Self {
-        src.values().fold(Self::default(), |mut acc, e| {
-            acc.insert(&e.uid());
-            acc
-        })
+        let mut built_entities = BuiltEntities::default();
+
+        for entity in src.values() {
+            built_entities.insert(&entity.uid());
+        }
+
+        built_entities
     }
 }
 
