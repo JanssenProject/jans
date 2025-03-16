@@ -79,7 +79,7 @@ mod test {
             "tokens_metadata": {},
         }))
         .expect("should be a valid trusted issuer");
-        let schema: MappingSchema = cedarling_validator_schema()
+        let schema: MappingSchema = (&*CEDARLING_VALIDATOR_SCHEMA)
             .try_into()
             .expect("should initialize mapping schema");
         let (origin, iss_entity) =
@@ -101,7 +101,7 @@ mod test {
                 },
                 "parents": [],
             }),
-            Some(cedarling_schema()),
+            Some(&CEDARLING_API_SCHEMA),
         );
     }
 

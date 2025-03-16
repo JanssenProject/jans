@@ -50,7 +50,7 @@ mod test {
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default(),
             &HashMap::new(),
-            Some(cedarling_validator_schema()),
+            Some(&CEDARLING_VALIDATOR_SCHEMA),
         )
         .expect("should init entity builder");
         let resource_data = ResourceData {
@@ -84,7 +84,7 @@ mod test {
                 },
                 "parents": [],
             }),
-            Some(&cedarling_schema()),
+            Some(&CEDARLING_API_SCHEMA),
         );
     }
 
@@ -93,7 +93,7 @@ mod test {
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default(),
             &HashMap::new(),
-            Some(cedarling_validator_schema()),
+            Some(&CEDARLING_VALIDATOR_SCHEMA),
         )
         .expect("should init entity builder");
         let resource_data = ResourceData {

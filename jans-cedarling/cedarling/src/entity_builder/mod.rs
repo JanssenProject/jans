@@ -237,24 +237,19 @@ mod test {
     use crate::common::policy_store::TokenEntityMetadata;
     use cedar_policy::{Entities, Schema};
     use serde_json::{Value, json};
-    use std::{collections::HashMap, sync::OnceLock};
+    use std::collections::HashMap;
+    use std::sync::LazyLock;
     use test_utils::assert_eq;
 
-    pub fn cedarling_validator_schema<'a>() -> &'a ValidatorSchema {
-        static CEDARLING_VALIDATOR_SCHEMA: OnceLock<ValidatorSchema> = OnceLock::new();
-        CEDARLING_VALIDATOR_SCHEMA.get_or_init(|| {
-            ValidatorSchema::from_str(include_str!("../../../schema/cedarling_core.cedarschema"))
-                .expect("should be a valid Cedar validator schema")
-        })
-    }
+    pub static CEDARLING_VALIDATOR_SCHEMA: LazyLock<ValidatorSchema> = LazyLock::new(|| {
+        ValidatorSchema::from_str(include_str!("../../../schema/cedarling_core.cedarschema"))
+            .expect("should be a valid Cedar validator schema")
+    });
 
-    pub fn cedarling_schema<'a>() -> &'a Schema {
-        static CEDARLING_SCHEMA: OnceLock<Schema> = OnceLock::new();
-        CEDARLING_SCHEMA.get_or_init(|| {
-            Schema::from_str(include_str!("../../../schema/cedarling_core.cedarschema"))
-                .expect("should be a valid Cedar schema")
-        })
-    }
+    pub static CEDARLING_API_SCHEMA: LazyLock<Schema> = LazyLock::new(|| {
+        Schema::from_str(include_str!("../../../schema/cedarling_core.cedarschema"))
+            .expect("should be a valid Cedar schema")
+    });
 
     /// Helper function for asserting entities for better error readability
     #[track_caller]
