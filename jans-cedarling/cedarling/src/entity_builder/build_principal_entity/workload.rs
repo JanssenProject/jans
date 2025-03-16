@@ -3,35 +3,25 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::entity_id_getters::*;
 use super::*;
 use cedar_policy::Entity;
-use derive_more::derive::Deref;
 use std::collections::HashSet;
 
 const WORKLOAD_ATTR_SRC_TKNS: &[&str] = &["access_token"];
 
 impl EntityBuilder {
-    // TODO: we need to set spiffe_id to be either `aud` or `client_id`
+    // TODO: we might need to add support for setting the 'spiffe_id' attribute to be
+    // either the 'aud' or 'client_id' claim eventually
     pub fn build_workload_entity(
         &self,
         tokens: &HashMap<String, Token>,
         tkn_principal_mappings: &TokenPrincipalMappings,
         built_entities: &BuiltEntities,
     ) -> Result<Entity, BuildEntityError> {
-        let workload_type_name = self.config.entity_names.workload.as_ref();
+        let type_name: &str = self.config.entity_names.workload.as_ref();
 
-        let attrs_shape = self
-            .schema
-            .as_ref()
-            .and_then(|s| s.get_entity_shape(workload_type_name));
+        let id_srcs = WorkloadIdSrcResolver::resolve(tokens);
 
-        // Get Workload Entity ID
-        let workload_id_srcs = WorkloadIdSrcs::resolve(tokens);
-        let workload_id = get_first_valid_entity_id(&workload_id_srcs)
-            .map_err(|e| e.while_building(workload_type_name))?;
-
-        // Collect the tokens and mappings to be used for this entity
         let attrs_srcs: Vec<_> = WORKLOAD_ATTR_SRC_TKNS
             .iter()
             .filter_map(|name| {
@@ -47,62 +37,49 @@ impl EntityBuilder {
                     .map(|s| s.to_string())
                     .collect(),
             )
-            .while_building(workload_type_name));
+            .while_building(type_name));
         }
 
-        // Extract attributes from sources
-        let (workload_attrs, errs): (Vec<_>, Vec<_>) = attrs_srcs
-            .into_iter()
-            .map(|(src, mappings)| build_entity_attrs(src, built_entities, attrs_shape, mappings))
-            .partition_result();
-        let mut workload_attrs: HashMap<String, RestrictedExpression> = if errs.is_empty() {
-            // what should happen if claims have the same name but different values?
-            workload_attrs
-                .into_iter()
-                .fold(HashMap::new(), |mut acc, attrs| {
-                    acc.extend(attrs);
-                    acc
-                })
-        } else {
-            let errs: Vec<_> = errs.into_iter().flat_map(|e| e.into_inner()).collect();
-            return Err(BuildEntityErrorKind::from(errs).while_building(workload_type_name));
-        };
-
-        // Apply token mappings if the schema/shape is not present since that's the only
-        // time it's really necessary
-        if attrs_shape.is_none() {
-            tkn_principal_mappings.apply(workload_type_name, &mut workload_attrs);
-        }
-
-        let parents = HashSet::default();
-        let workload_entity =
-            build_cedar_entity(workload_type_name, &workload_id, workload_attrs, parents)?;
-
-        Ok(workload_entity)
+        self.build_principal_entity(
+            type_name,
+            id_srcs,
+            attrs_srcs,
+            tkn_principal_mappings,
+            built_entities,
+            HashSet::default(),
+        )
     }
 }
 
-#[derive(Deref)]
-struct WorkloadIdSrcs<'a>(Vec<EntityIdSrc<'a>>);
+/// Resolves workload entity IDs from authentication tokens.
+///
+/// This struct provides a method to extract workload-related entity IDs from a set of
+/// tokens. It looks for predefined claims within specific tokens to identify workloads.
+pub struct WorkloadIdSrcResolver;
 
-#[derive(Clone, Copy)]
-struct WorkloadIdSrc<'a> {
-    token: &'a str,
-    claim: &'a str,
-}
-
-impl<'a> WorkloadIdSrcs<'a> {
-    fn resolve(tokens: &'a HashMap<String, Token>) -> Self {
-        const DEFAULT_WORKLOAD_ID_SRCS: &[WorkloadIdSrc] = &[
-            WorkloadIdSrc {
+impl WorkloadIdSrcResolver {
+    /// Resolves workload entity IDs from the provided authentication tokens.
+    ///
+    /// This method scans the given `tokens` map and extracts entity IDs based on
+    /// predefined rules. It prioritizes extracting the `workload_id` from a token's
+    /// metadata when available and falls back to predefined claims if necessary.
+    ///
+    /// ## Token Sources:
+    /// The method checks the following tokens and claims in order:
+    /// - `access_token.aud`
+    /// - `access_token.client_id`
+    /// - `id_token.aud`
+    pub fn resolve<'a>(tokens: &'a HashMap<String, Token>) -> Vec<EntityIdSrc<'a>> {
+        const DEFAULT_WORKLOAD_ID_SRCS: &[PrincipalIdSrc] = &[
+            PrincipalIdSrc {
                 token: "access_token",
                 claim: "aud",
             },
-            WorkloadIdSrc {
+            PrincipalIdSrc {
                 token: "access_token",
                 claim: "client_id",
             },
-            WorkloadIdSrc {
+            PrincipalIdSrc {
                 token: "id_token",
                 claim: "aud",
             },
@@ -133,16 +110,15 @@ impl<'a> WorkloadIdSrcs<'a> {
             }
         }
 
-        Self(eid_srcs)
+        eid_srcs
     }
 }
 
 #[cfg(test)]
 mod test {
-    use super::super::test::*;
-    use super::super::*;
     use super::*;
     use crate::common::policy_store::TrustedIssuer;
+    use crate::entity_builder::test::*;
     use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;

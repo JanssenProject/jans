@@ -3,10 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::entity_id_getters::*;
 use super::*;
 use cedar_policy::Entity;
-use derive_more::derive::Deref;
 use std::collections::HashSet;
 
 const USER_ATTR_SRC_TKNS: &[&str] = &["userinfo_token", "id_token"];
@@ -19,19 +17,10 @@ impl EntityBuilder {
         built_entities: &BuiltEntities,
         roles: HashSet<EntityUid>,
     ) -> Result<Entity, BuildEntityError> {
-        let user_type_name: &str = self.config.entity_names.user.as_ref();
+        let type_name: &str = self.config.entity_names.user.as_ref();
 
-        let attrs_shape = self
-            .schema
-            .as_ref()
-            .and_then(|s| s.get_entity_shape(user_type_name));
+        let id_srcs = UserIdSrcResolver::resolve(tokens);
 
-        // Get User Entity ID
-        let user_id_srcs = UserIdSrcs::resolve(tokens);
-        let user_id = get_first_valid_entity_id(&user_id_srcs)
-            .map_err(|e| e.while_building(user_type_name))?;
-
-        // Collect the tokens and mappings to be used for this entity
         let attrs_srcs: Vec<_> = USER_ATTR_SRC_TKNS
             .iter()
             .filter_map(|name| {
@@ -44,57 +33,44 @@ impl EntityBuilder {
             return Err(BuildEntityErrorKind::NoAvailableTokensToBuildEntity(
                 USER_ATTR_SRC_TKNS.iter().map(|s| s.to_string()).collect(),
             )
-            .while_building(user_type_name));
+            .while_building(type_name));
         }
 
-        // Extract attributes from sources
-        let (user_attrs, errs): (Vec<_>, Vec<_>) = attrs_srcs
-            .into_iter()
-            .map(|(src, mappings)| build_entity_attrs(src, built_entities, attrs_shape, mappings))
-            .partition_result();
-
-        let mut user_attrs: HashMap<String, RestrictedExpression> = if errs.is_empty() {
-            // what should happen if claims have the same name but different values?
-            user_attrs
-                .into_iter()
-                .fold(HashMap::new(), |mut acc, attrs| {
-                    acc.extend(attrs);
-                    acc
-                })
-        } else {
-            let errs: Vec<_> = errs.into_iter().flat_map(|e| e.into_inner()).collect();
-            return Err(BuildEntityErrorKind::from(errs).while_building(user_type_name));
-        };
-
-        // Apply token mappings if the schema/shape is not present since that's the only
-        // time it's really necessary
-        if attrs_shape.is_none() {
-            tkn_principal_mappings.apply(user_type_name, &mut user_attrs);
-        }
-
-        let user_entity = build_cedar_entity(user_type_name, &user_id, user_attrs, roles)?;
-
-        Ok(user_entity)
+        self.build_principal_entity(
+            type_name,
+            id_srcs,
+            attrs_srcs,
+            tkn_principal_mappings,
+            built_entities,
+            roles,
+        )
     }
 }
 
-#[derive(Deref)]
-struct UserIdSrcs<'a>(Vec<EntityIdSrc<'a>>);
+/// Resolves workload entity IDs from authentication tokens.
+///
+/// This struct provides a method to extract workload-related entity IDs from a set of
+/// tokens. It looks for predefined claims within specific tokens to identify workloads.
+pub struct UserIdSrcResolver;
 
-#[derive(Clone, Copy)]
-struct UserIdSrc<'a> {
-    token: &'a str,
-    claim: &'a str,
-}
-
-impl<'a> UserIdSrcs<'a> {
-    fn resolve(tokens: &'a HashMap<String, Token>) -> Self {
-        const DEFAULT_USER_ID_SRCS: &[UserIdSrc] = &[
-            UserIdSrc {
+impl UserIdSrcResolver {
+    /// Resolves user entity IDs from the provided authentication tokens.
+    ///
+    /// This method scans the given `tokens` map and extracts entity IDs based on
+    /// predefined rules. It prioritizes extracting the `user_id` from a token's
+    /// metadata when available and falls back to predefined claims if necessary.
+    ///
+    /// ## Token Sources:
+    /// The method checks the following tokens and claims in order:
+    /// - `userinfo_token.sub`
+    /// - `id_token.sub`
+    pub fn resolve<'a>(tokens: &'a HashMap<String, Token>) -> Vec<EntityIdSrc<'a>> {
+        const DEFAULT_USER_ID_SRCS: &[PrincipalIdSrc] = &[
+            PrincipalIdSrc {
                 token: "userinfo_token",
                 claim: "sub",
             },
-            UserIdSrc {
+            PrincipalIdSrc {
                 token: "id_token",
                 claim: "sub",
             },
@@ -124,16 +100,15 @@ impl<'a> UserIdSrcs<'a> {
             }
         }
 
-        Self(eid_srcs)
+        eid_srcs
     }
 }
 
 #[cfg(test)]
 mod test {
-    use super::super::test::*;
-    use super::super::*;
     use super::*;
     use crate::common::policy_store::TrustedIssuer;
+    use crate::entity_builder::test::*;
     use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;

@@ -10,11 +10,10 @@
 mod build_entity_attrs;
 mod build_expr;
 mod build_iss_entity;
+mod build_principal_entity;
 mod build_resource_entity;
 mod build_role_entity;
 mod build_token_entities;
-mod build_user_entity;
-mod build_workload_entity;
 mod built_entities;
 mod entity_id_getters;
 mod error;

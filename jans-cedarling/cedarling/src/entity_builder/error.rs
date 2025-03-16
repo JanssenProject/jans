@@ -5,12 +5,9 @@
 
 use std::fmt::Display;
 
-use super::{
-    build_expr::{BuildExprError, BuildExprErrorVec},
-    entity_id_getters::GetEntityIdErrors,
-    schema::BuildMappingSchemaError,
-};
-use crate::jwt::TokenClaimTypeError;
+use super::entity_id_getters::GetEntityIdErrors;
+use super::schema::BuildMappingSchemaError;
+use super::build_expr::{BuildExprError, BuildExprErrorVec};
 use cedar_policy::ExpressionConstructionError;
 use smol_str::SmolStr;
 use thiserror::Error;
@@ -39,7 +36,7 @@ impl Display for BuildEntityErrors {
 }
 
 #[derive(Debug, Error)]
-#[error("failed to build `\"{entity_type_name}\"` entity: {error}")]
+#[error("failed to build \"{entity_type_name}\" entity: {error}")]
 pub struct BuildEntityError {
     pub entity_type_name: String,
     pub error: BuildEntityErrorKind,
@@ -49,24 +46,18 @@ pub struct BuildEntityError {
 pub enum BuildEntityErrorKind {
     #[error("unable to find a valid entity id, tried the following: {0}")]
     MissingEntityId(GetEntityIdErrors),
-    #[error(transparent)]
-    TokenClaimTypeMismatch(#[from] TokenClaimTypeError),
     #[error("failed to parse entity uid: {0}")]
     FailedToParseUid(#[from] cedar_policy::ParseErrors),
     #[error("failed to evaluate entity attribute or tag: {0}")]
     EntityAttrEval(#[from] cedar_policy::EntityAttrEvaluationError),
     #[error("invalid issuer URL: {0}")]
     InvalidIssUrl(#[from] url::ParseError),
-    #[error("missing required token: {0}")]
-    MissingRequiredToken(String),
     #[error("failed to build entity attributes: {0}")]
     BuildAttrs(#[from] BuildAttrsErrorVec),
     #[error("no available tokens to build the entity. missing one or more of the following: {0:?}")]
     NoAvailableTokensToBuildEntity(Vec<String>),
     #[error("the entity was not in the schema")]
     EntityNotInSchema,
-    #[error("failed to build restricted expression")]
-    BuildRestrictedExpressions(Vec<SmolStr>),
 }
 
 #[derive(Debug, Error)]
