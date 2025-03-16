@@ -3,13 +3,12 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use crate::common::PartitionResult;
 use cedar_policy::{ExpressionConstructionError, RestrictedExpression};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::net::IpAddr;
 use std::str::FromStr;
-
-use crate::common::PartitionResult;
 
 /// Converts a [`Value`] to a [`RestrictedExpression`]
 pub fn value_to_expr(

@@ -3,17 +3,15 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-mod conversions;
+mod attr_src;
 
+use attr_src::BuildAttrSrcError;
 use cedar_policy_validator::ValidatorSchema;
-use conversions::BuildAttrSrcError;
 use smol_str::SmolStr;
 use std::{collections::HashMap, fmt::Display};
 use thiserror::Error;
 
-pub use conversions::{
-    AttrSrc, EntityRefAttrSrc, EntityRefSetSrc, ExpectedClaimType, TknClaimAttrSrc,
-};
+pub use attr_src::*;
 
 use super::PartitionResult;
 
@@ -99,7 +97,7 @@ impl AttrsShape {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::entity_builder::schema::conversions::TknClaimAttrSrc;
+    use crate::entity_builder::schema::attr_src::TknClaimAttrSrc;
     use cedar_policy_validator::ValidatorSchema;
     use std::{collections::HashSet, str::FromStr};
     use test_utils::assert_eq;

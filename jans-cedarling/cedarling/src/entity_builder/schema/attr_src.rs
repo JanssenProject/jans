@@ -11,7 +11,13 @@ use thiserror::Error;
 
 pub type EntityTypeName = SmolStr;
 
-/// Instructions on how to build a Cedar attribute
+/// Represents different sources for building a Cedar attribute.
+///
+/// Each variant corresponds to a different type of attribute source.
+/// To construct a [`RestrictedExpression`], call `.build_expr()` on the variant's inner
+/// value.
+///
+/// [`RestrictedExpression`]: cedar_policy::RestrictedExpression
 #[derive(Debug, PartialEq)]
 pub enum AttrSrc {
     JwtClaim(TknClaimAttrSrc),
