@@ -15,10 +15,10 @@ type TokenClaims = HashMap<String, Value>;
 type AttrSrc<'a> = (&'a TokenClaims, Option<&'a ClaimMappings>);
 
 impl EntityBuilder {
-    fn build_principal_entity<'a>(
+    fn build_principal_entity(
         &self,
         type_name: &str,
-        id_srcs: Vec<EntityIdSrc<'a>>,
+        id_srcs: Vec<EntityIdSrc>,
         attrs_srcs: Vec<AttrSrc>,
         tkn_principal_mappings: &TokenPrincipalMappings,
         built_entities: &BuiltEntities,

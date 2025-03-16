@@ -66,7 +66,7 @@ impl EntityRefSetSrc {
         if !errs.is_empty() {
             return Err(BuildExprErrorVec::from(
                 errs.into_iter()
-                    .map(|e| BuildExprError::ParseUid(e))
+                    .map(BuildExprError::ParseUid)
                     .collect::<Vec<_>>(),
             ));
         }
@@ -116,7 +116,7 @@ fn build_expr_from_value(
 
             if !errs.is_empty() {
                 return Err(BuildExprErrorVec(
-                    errs.into_iter().map(|e| e.into_inner()).flatten().collect(),
+                    errs.into_iter().flat_map(|e| e.into_inner()).collect(),
                 ))?;
             }
 
@@ -143,7 +143,7 @@ fn build_expr_from_value(
                 fields.into_iter().collect()
             } else {
                 return Err(BuildExprErrorVec(
-                    errs.into_iter().map(|e| e.into_inner()).flatten().collect(),
+                    errs.into_iter().flat_map(|e| e.into_inner()).collect(),
                 ))?;
             };
 
