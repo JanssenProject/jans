@@ -100,7 +100,7 @@ impl<'a> UserIdSrcs<'a> {
             },
         ];
 
-        let mut eid_srcs = Vec::with_capacity(4);
+        let mut eid_srcs = Vec::with_capacity(DEFAULT_USER_ID_SRCS.len());
 
         for src in DEFAULT_USER_ID_SRCS.iter() {
             if let Some(token) = tokens.get(src.token) {

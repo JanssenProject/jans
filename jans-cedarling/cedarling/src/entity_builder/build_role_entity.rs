@@ -16,8 +16,8 @@ impl EntityBuilder {
     ) -> Result<Vec<Entity>, BuildEntityError> {
         // Build Role entities
         let role_id_srcs = RoleIdSrcs::resolve(tokens);
-        let mut role_entities = Vec::with_capacity(2);
         let role_ids = collect_all_valid_entity_ids(&role_id_srcs);
+        let mut role_entities = Vec::with_capacity(role_ids.len());
         for id in role_ids {
             let role_entity = build_cedar_entity(
                 &self.config.entity_names.role,

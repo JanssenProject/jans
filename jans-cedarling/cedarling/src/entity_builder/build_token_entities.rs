@@ -56,7 +56,7 @@ impl<'a> TokenIdSrcs<'a> {
     fn resolve(token: &'a Token) -> Self {
         const DEFAULT_TKN_ID_SRCS: &[TokenIdSrc] = &[TokenIdSrc { claim: "jti" }];
 
-        let mut eid_srcs = Vec::with_capacity(2);
+        let mut eid_srcs = Vec::with_capacity(DEFAULT_TKN_ID_SRCS.len());
 
         for src in DEFAULT_TKN_ID_SRCS.iter() {
             // if a `token_id` is availble in the token's entity metadata

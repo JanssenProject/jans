@@ -108,7 +108,7 @@ impl<'a> WorkloadIdSrcs<'a> {
             },
         ];
 
-        let mut eid_srcs = Vec::with_capacity(4);
+        let mut eid_srcs = Vec::with_capacity(DEFAULT_WORKLOAD_ID_SRCS.len());
 
         for src in DEFAULT_WORKLOAD_ID_SRCS.iter() {
             if let Some(token) = tokens.get(src.token) {
