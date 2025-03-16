@@ -14,8 +14,7 @@ tags:
 
 Cedarling is an authorization decision service that allows fine-grained access control using policies. 
 In this guide, we'll demonstrate how to use Cedarling as a sidecar for an API Gateway to authorize requests. 
-This setup involves configuring the Cedarling sidecar to evaluate policies and authorizing requests to a 
-protected resource based on those policies.
+This setup involves configuring the Cedarling to protect resources based on enterprise policies.
 
 ### Sequence diagram
 
@@ -53,7 +52,7 @@ Before you begin, make sure you have the following:
 
 ## Policy Store Setup (Agama Lab)
 
-To begin using Cedarling, you need to set up a policy store. We’ll use this [Agama Lab](https://cloud.gluu.org/agama-lab/login) for this purpose.
+To begin using Cedarling, you need to set up a policy store. We’ll use [Agama Lab](https://cloud.gluu.org/agama-lab/login) for this purpose.
 
 1. Sign in to [Agama Lab](https://cloud.gluu.org/agama-lab/login) using your GitHub account and click on Policy Designer.
    ![image](../assets/cedarling-policy-designer.png)
