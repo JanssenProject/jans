@@ -22,7 +22,7 @@ use build_ctx::*;
 use cedar_policy::{Entities, Entity, EntityUid};
 use chrono::Utc;
 use entity_builder::*;
-use request::{Request, RequestUnverified};
+use request::{Request, RequestUnsigned};
 use smol_str::ToSmolStr;
 use std::collections::HashMap;
 use std::io::Cursor;
@@ -323,7 +323,7 @@ impl Authz {
     /// Evaluate Authorization Request with unsigned data.
     pub async fn authorize_unsigned(
         &self,
-        request: RequestUnverified,
+        request: RequestUnsigned,
     ) -> Result<AuthorizeResult, AuthorizeError> {
         let start_time = Utc::now();
         // We use uuid v7 because it is generated based on the time and sortable.

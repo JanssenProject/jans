@@ -21,7 +21,7 @@ pub struct Request {
 
 /// Box to store authorization data, with any additional principals
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct RequestUnverified {
+pub struct RequestUnsigned {
     /// Contains the JWTs that will be used for the AuthZ request
     pub principals: Vec<EntityData>,
     /// cedar_policy action

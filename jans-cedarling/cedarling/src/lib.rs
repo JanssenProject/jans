@@ -35,7 +35,7 @@ pub use crate::common::json_rules::JsonRule;
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
 use authz::Authz;
-pub use authz::request::RequestUnverified;
+pub use authz::request::RequestUnsigned;
 pub use authz::request::{EntityData, Request};
 pub use authz::{AuthorizeError, AuthorizeResult};
 pub use bootstrap_config::*;
@@ -138,7 +138,7 @@ impl Cedarling {
     /// makes authorization decision based on the [`RequestUnverified`]
     pub async fn authorize_unsigned(
         &self,
-        request: RequestUnverified,
+        request: RequestUnsigned,
     ) -> Result<AuthorizeResult, AuthorizeError> {
         self.authz.authorize_unsigned(request).await
     }
