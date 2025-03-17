@@ -12,7 +12,6 @@ tags:
 
 ## Introduction
 
-Cedarling is an authorization decision service that allows fine-grained access control using policies. 
 In this guide, we'll demonstrate how to use Cedarling as a sidecar for an API Gateway to authorize requests. 
 This setup involves configuring the Cedarling to protect resources based on enterprise policies.
 
