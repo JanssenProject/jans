@@ -14,7 +14,6 @@ import io.jans.as.client.ssa.create.SsaCreateClient;
 import io.jans.as.client.ssa.create.SsaCreateResponse;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.ssa.SsaErrorResponseType;
 import io.jans.as.model.ssa.SsaScopeType;
 import io.jans.as.model.util.DateUtil;
 import org.apache.http.HttpStatus;
@@ -130,8 +129,8 @@ public class SsaCreateTest extends BaseTest {
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void create_ifLifetimeIsZero_badRequest(final String redirectUris, final String sectorIdentifierUri) {
-        showTitle("create_ifLifetimeIsZero_badRequest");
+    public void create_ifLifetimeIsZero_lifetimeIsFalledBackToServerConfiguration(final String redirectUris, final String sectorIdentifierUri) {
+        showTitle("create_ifLifetimeIsZero_lifetimeIsFalledBackToServerConfiguration");
         List<String> scopes = Collections.singletonList(SsaScopeType.SSA_ADMIN.getValue());
 
         // Register client
@@ -158,8 +157,6 @@ public class SsaCreateTest extends BaseTest {
         showClient(ssaCreateClient);
         System.out.println(ssaCreateClient);
         AssertBuilder.ssaCreate(ssaCreateClient.getRequest(), ssaCreateResponse)
-                .status(400)
-                .errorType(SsaErrorResponseType.INVALID_SSA_METADATA)
                 .check();
     }
 
