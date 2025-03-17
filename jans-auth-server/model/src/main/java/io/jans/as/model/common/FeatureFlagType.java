@@ -81,6 +81,9 @@ public enum FeatureFlagType {
     @DocFeatureFlag(description = "Enable/Disable Access Evaluation Endpoint",
             defaultValue = "Enabled")
     ACCESS_EVALUATION("access_evaluation"),
+    @DocFeatureFlag(description = "Enable/Disable Rate Limit",
+            defaultValue = "Enabled")
+    RATE_LIMIT("rate_limit"),
     @DocFeatureFlag(description = "Enable/Disable Software Statement Assertion(SSA) feature",
             defaultValue = "Enabled")
     SSA("ssa");
