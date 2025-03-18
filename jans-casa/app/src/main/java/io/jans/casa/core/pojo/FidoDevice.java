@@ -1,5 +1,6 @@
 package io.jans.casa.core.pojo;
 
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -93,5 +94,12 @@ public class FidoDevice extends RegisteredCredential implements Comparable<FidoD
             return true;
         return false;
     }
+
+	@Override
+	public String toString() {
+		return "FidoDevice [id=" + id + ", counter=" + counter + ", creationDate=" + creationDate + ", lastAccessTime="
+				+ lastAccessTime + ", status=" + status + ", application=" + application + ", transports="
+				+ Arrays.toString(transports) + "]";
+	}
 
 }

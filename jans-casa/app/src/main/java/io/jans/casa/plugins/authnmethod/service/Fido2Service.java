@@ -110,6 +110,7 @@ public class Fido2Service extends BaseService {
             	device.setId(entry.getId());
             	device.setCreationDate(entry.getCreationDate());
             	device.setNickName(entry.getDisplayName());
+            	device.setTransports(transports.toArray(new String[0]));
                 devices.add(device);
                 
             	logger.trace("device name - "+device.getNickName());
