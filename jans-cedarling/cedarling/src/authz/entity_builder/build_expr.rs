@@ -309,7 +309,10 @@ fn str_to_primitive_type(required: bool, name: &str) -> Option<Attribute> {
     let primitive_type = match name {
         "String" => Attribute::String { required },
         "Long" => Attribute::Long { required },
-        "Boolean" => Attribute::Boolean { required },
+        // https://docs.cedarpolicy.com/schema/human-readable-schema-grammar.html
+        // Actually in `Cedar schema grammar` it is `Bool` but in the `JSON schema grammar` it is `Boolean`.
+        // and when we use raw cedar and convert it to json we get `Bool`.
+        "Boolean" | "Bool" => Attribute::Boolean { required },
         _ => return None,
     };
     Some(primitive_type)
