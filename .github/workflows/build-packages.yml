@@ -322,7 +322,7 @@ jobs:
       continue-on-error: true
       run: |
         sudo apt-get update
-        sudo apt-get install -y zip
+        sudo apt-get install -y zip jq
         cd demos
         VER=$(echo ${{ github.event.ref }} | cut -d '/' -f 3)
         for i in $(ls -d */); do zip -r demo-${i%/}-$VER-source.zip $i && sha256sum demo-${i%/}-$VER-source.zip > demo-${i%/}-$VER-source.zip.sha256sum; done
@@ -339,17 +339,29 @@ jobs:
         rm cedarling_wasm.tar.gz
         ls wasm
         # END Get the latest cedarling wasm package
+        # Sign Firefox extension, publish if not nightly
+        npm install --global web-ext
         npm install
         npm run build
+        cd ./dist/firefox
+        if [ "${TAG}" == "0.0.0" ]; then
+          web-ext sign --api-key="${{ secrets.MOZILLA_API_KEY }}" --api-secret="${{ secrets.MOZILLA_API_SECRET }}" --channel="unlisted"
+        else
+          mv manifest.json tmp.json
+          jq '.version = "${VER}"' tmp.json > manifest.json
+          rm tmp.json
+          web-ext sign --api-key="${{ secrets.MOZILLA_API_KEY }}" --api-secret="${{ secrets.MOZILLA_API_SECRET }}" --channel="listed"
+        fi
+        cd ../..
         npm run pack
         mv ./release/jans-tarp-chrome-*.zip ../demo-jans-tarp-chrome-$VER.zip
-        mv ./release/jans-tarp-firefox-*.zip ../demo-jans-tarp-firefox-$VER.zip
+        mv ./dist/firefox/web-ext-artifacts/*.xpi ../demo-jans-tarp-firefox-$VER.xpi
         sha256sum ../demo-jans-tarp-chrome-$VER.zip > ../demo-jans-tarp-chrome-$VER.zip.sha256sum
-        sha256sum ../demo-jans-tarp-firefox-$VER.zip > ../demo-jans-tarp-firefox-$VER.zip.sha256sum
+        sha256sum ../demo-jans-tarp-firefox-$VER.xpi > ../demo-jans-tarp-firefox-$VER.xpi.sha256sum
         cd ..
         
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload $VER *.zip *.sha256sum --clobber
+        gh release upload $VER *.zip *.xpi *.sha256sum --clobber
   build_cedarling_python:
     if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-20.04
