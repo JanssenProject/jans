@@ -1,7 +1,9 @@
 package io.jans.as.server.rate;
 
 import io.jans.as.client.RegisterRequest;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
+import io.jans.as.model.error.ErrorResponseFactory;
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
 import jakarta.servlet.*;
@@ -10,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -37,6 +40,8 @@ public class RateLimitFilter implements Filter {
     private Logger log;
     @Inject
     private RateLimitService rateLimitService;
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -58,6 +63,11 @@ public class RateLimitFilter implements Filter {
     }
 
     private HttpServletRequest validateRateLimit(HttpServletRequest httpRequest) throws RateLimitedException, IOException {
+        // if rate_limit flag is disabled immediately return
+        if (!errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.RATE_LIMIT)){
+            return httpRequest;
+        }
+
         final String requestUrl = httpRequest.getRequestURL().toString();
 
         boolean isRegisterEndpoint = requestUrl.endsWith("/register");
@@ -71,7 +81,8 @@ public class RateLimitFilter implements Filter {
                 final List<String> redirectUris = registerRequest.getRedirectUris();
 
                 if (StringUtils.isNotBlank(ssa)) {
-                    key = ssa;
+                    // hash ssa to save memory
+                    key = DigestUtils.sha256Hex(ssa);
                 } else if (CollectionUtils.isNotEmpty(redirectUris) && StringUtils.isNotBlank(redirectUris.get(0))) {
                     key = redirectUris.get(0);
                 }
