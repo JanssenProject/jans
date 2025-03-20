@@ -23,66 +23,64 @@ namespace Jans {
     // ******  Entities  ******
     entity Role;
     entity User in [Role] = {
-        sub?: String,
         email?: email_address,
         phone_number?: String,
-        role?: Set<String>,
-        username?: String,
-        id_token?: Id_token,
-        userinfo_token?: Userinfo_token,
+        role: Set<String>,
+        sub: String,
+        "username"?: String,
+        id_token?: id_token,
+        userinfo_token?: Userinfo_token,     
     };
     entity Workload = {
+        client_id: String,
         iss: TrustedIssuer,
-        client_id?: String,
-        aud?: String,
         name?: String,
         rp_id?: String,
         spiffe_id?: String,
         access_token?: Access_token,
     };
     entity Access_token = {
+        aud: String,
+        exp: Long,
+        iat: Long,
         iss: TrustedIssuer,
-        sub?: String,
-        aud?: String,
-        exp?: Long,
-        nbf?: Long,
-        iat?: Long,
         jti?: String,
+        nbf?: Long,
         scope?: Set<String>
     };
-    entity Id_token = {
-        iss: TrustedIssuer,
-        sub?: String,
-        aud?: String,
-        exp?: Long,
-        nbf?: Long,
-        iat?: Long,
-        jti?: String,
+    entity id_token = {
         acr?: String,
         amr?: Set<String>,
+        aud: String,
         azp?: String,
         birthdate?: String,
         email?: email_address,
+        exp: Long,
+        iat: Long,
+        iss: TrustedIssuer,
+        jti?: String,
         name?: String,
         phone_number?: String,
         role?: Set<String>,
+        sub: String
     };
     entity Userinfo_token = {
-        iss: TrustedIssuer,
-        sub?: String,
-        aud?: String,
-        exp?: Long,
-        nbf?: Long,
-        iat?: Long,
-        jti?: String,
+        aud: String,
         birthdate?: String,
         email?: email_address,
+        exp?: Long,
+        iat?: Long,
+        iss: TrustedIssuer,
+        jti?: String,
         name?: String,
         phone_number?: String,
         role?: Set<String>,
+        sub: String
     };
     entity HTTP_Request = {
-        "header": { "Accept"?: String },
+        "header": {
+        "Accept"?: String
+        }, 
         "url": Url
     };
     entity TrustedIssuer = {
