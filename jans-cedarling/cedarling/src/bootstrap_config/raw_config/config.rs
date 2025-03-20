@@ -9,7 +9,6 @@ use super::super::authorization_config::IdTokenTrustMode;
 use super::default_values::*;
 use super::feature_types::*;
 use super::json_util::*;
-use super::token_settings::TokenConfigs;
 use crate::common::json_rules::JsonRule;
 use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
@@ -114,6 +113,11 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub principal_bool_operation: JsonRule,
 
+    /// Mapping name of cedar schema TrustedIssuer entity
+    #[serde(rename = "CEDARLING_MAPPING_TRUSTED_ISSUER", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub mapping_iss: Option<String>,
+
     /// Mapping name of cedar schema User entity
     #[serde(rename = "CEDARLING_MAPPING_USER", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
@@ -171,12 +175,6 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_signature_algorithms_supported: HashSet<Algorithm>,
-
-    /// Configuration for token-based entities, mapping token names to their
-    /// respective settings.
-    #[serde(rename = "CEDARLING_TOKEN_CONFIGS", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub token_configs: TokenConfigs,
 
     /// Varying levels of validations based on the preference of the developer.
     ///

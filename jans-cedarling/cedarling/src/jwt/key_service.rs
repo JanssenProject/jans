@@ -125,13 +125,12 @@ pub enum KeyServiceError {
 
 #[cfg(test)]
 mod test {
-    use std::collections::HashMap;
-
-    use mockito::Server;
-    use serde_json::json;
-
     use crate::common::policy_store::TrustedIssuer;
     use crate::jwt::key_service::KeyService;
+    use mockito::Server;
+    use serde_json::json;
+    use std::collections::HashMap;
+    use url::Url;
 
     #[test]
     fn can_load_from_str() {
@@ -250,19 +249,21 @@ mod test {
             ("first".to_string(), TrustedIssuer {
                 name: "First IDP".to_string(),
                 description: "".to_string(),
-                openid_configuration_endpoint: format!(
+                oidc_endpoint: Url::parse(&format!(
                     "{}/first/.well-known/openid-configuration",
                     mock_server.url()
-                ),
+                ))
+                .expect("should be a valid URL"),
                 ..Default::default()
             }),
             ("second".to_string(), TrustedIssuer {
                 name: "Second IDP".to_string(),
                 description: "".to_string(),
-                openid_configuration_endpoint: format!(
+                oidc_endpoint: Url::parse(&format!(
                     "{}/second/.well-known/openid-configuration",
                     mock_server.url()
-                ),
+                ))
+                .expect("should be a valid URL"),
                 ..Default::default()
             }),
         ]))

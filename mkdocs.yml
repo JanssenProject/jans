@@ -412,6 +412,7 @@ nav:
     - JWT Validation: 'cedarling/cedarling-jwt-validation.md'
     - JWT Mapping: 'cedarling/cedarling-jwt-mapping.md'
     - Lock Configuration: 'cedarling/cedarling-lock-server.md'
+    - Cedarling Entities: 'cedarling/cedarling-entities.md'
   - Developer:
     - WASM: 'cedarling/cedarling-wasm.md'
     - Python:

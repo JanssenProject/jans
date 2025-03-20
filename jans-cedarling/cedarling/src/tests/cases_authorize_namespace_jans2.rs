@@ -3,8 +3,6 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::HashMap;
-
 use cedarling_util::get_config;
 use test_utils::assert_eq;
 use tokio::test;
@@ -22,21 +20,9 @@ static POLICY_STORE_RAW_YAML: &str =
 async fn test_namespace_jans2() {
     let policy_src = PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string());
     let mut bs_config = get_config(policy_src);
-    bs_config.authorization_config.mapping_user = Some("Jans2::User".to_string());
-    bs_config.authorization_config.mapping_workload = Some("Jans2::Workload".to_string());
-    bs_config.authorization_config.mapping_role = Some("Jans2::Role".to_string());
-    bs_config.authorization_config.mapping_tokens = HashMap::from([
-        (
-            "access_token".to_string(),
-            "Jans2::Access_token".to_string(),
-        ),
-        ("id_token".to_string(), "Jans2::id_token".to_string()),
-        (
-            "userinfo_token".to_string(),
-            "Jans2::Userinfo_token".to_string(),
-        ),
-    ])
-    .into();
+    bs_config.entity_builder_config.entity_names.user = "Jans2::User".to_string();
+    bs_config.entity_builder_config.entity_names.workload = "Jans2::Workload".to_string();
+    bs_config.entity_builder_config.entity_names.role = "Jans2::Role".to_string();
     bs_config.authorization_config.principal_bool_operator = JsonRule::new(json!({
         "and" : [
             {"===": [{"var": "Jans2::Workload"}, "ALLOW"]},
@@ -57,21 +43,20 @@ async fn test_namespace_jans2() {
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                 })),
                 "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                     "sub": "some_sub",
                 })),
                 "userinfo_token":  generate_token_using_claims(json!({
                     "country": "US",
                     "sub": "some_sub",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "jti": "some_jti",
-                    "client_id": "some_client_id",
                     "role": ["Admin"],
                 })),
             },
