@@ -7,9 +7,10 @@
 //! Specifically, we test the result of `AuthorizeResult::new`, which is based on the evaluation of JSON logic for principals.
 
 use std::collections::{HashMap, HashSet};
+use std::str::FromStr;
 
 use crate::common::json_rules::ApplyRuleError;
-use cedar_policy::{Decision, Response};
+use cedar_policy::{Decision, EntityUid, Response};
 use serde_json::json;
 use test_utils::assert_eq;
 use uuid7::uuid4;
@@ -47,8 +48,12 @@ fn get_result(
 
     AuthorizeResult::new(
         rule,
-        workload.is_some().then_some("Jans::Workload".into()),
-        person.is_some().then_some("Jans::User".into()),
+        workload
+            .is_some()
+            .then_some(EntityUid::from_str("Jans::Workload::\"TestWorkloadPrincipal\"").unwrap()),
+        person
+            .is_some()
+            .then_some(EntityUid::from_str("Jans::User::\"TestUserPrincipal\"").unwrap()),
         workload_response,
         person_response,
         // just randomly generated UUID
@@ -451,15 +456,15 @@ fn test_with_multiple_principals() {
 
     let principal_responses = HashMap::from([
         (
-            "Jans::Workload".into(),
+            EntityUid::from_str("Jans::Workload::\"TestWorkloadPrincipal\"").unwrap(),
             Response::new(Decision::Allow, HashSet::new(), Vec::new()),
         ),
         (
-            "Jans::User".into(),
+            EntityUid::from_str("Jans::User::\"TestUserPrincipal\"").unwrap(),
             Response::new(Decision::Allow, HashSet::new(), Vec::new()),
         ),
         (
-            "Custom::Principal".into(),
+            EntityUid::from_str("Custom::Principal::\"TestCustomPrincipal\"").unwrap(),
             Response::new(Decision::Deny, HashSet::new(), Vec::new()),
         ),
     ]);
@@ -479,6 +484,17 @@ fn test_with_multiple_principals() {
         Decision::Allow,
         "Jans::Workload decision should be Allow"
     );
+
+    assert_eq!(
+        result
+            .principals
+            .get("Jans::Workload::\"TestWorkloadPrincipal\"")
+            .expect("expect principal Jans::Workload::\"TestWorkloadPrincipal\" to be present")
+            .decision(),
+        Decision::Allow,
+        "Jans::Workload::\"TestWorkloadPrincipal\" decision should be Allow"
+    );
+
     assert_eq!(
         result
             .principals
@@ -492,10 +508,20 @@ fn test_with_multiple_principals() {
     assert_eq!(
         result
             .principals
-            .get("Custom::Principal")
-            .expect("expect principal Custom::Principal to be present")
+            .get("Jans::User::\"TestUserPrincipal\"")
+            .expect("expect principal Jans::User::\"TestUserPrincipal\" to be present")
+            .decision(),
+        Decision::Allow,
+        "Jans::User::\"TestUserPrincipal\" decision should be Allow"
+    );
+
+    assert_eq!(
+        result
+            .principals
+            .get("Custom::Principal::\"TestCustomPrincipal\"")
+            .expect("expect principal Custom::Principal::\"TestCustomPrincipal\" to be present")
             .decision(),
         Decision::Deny,
-        "Custom::Principal decision should be Deny"
+        "Custom::Principal::\"TestCustomPrincipal\" decision should be Deny"
     );
 }

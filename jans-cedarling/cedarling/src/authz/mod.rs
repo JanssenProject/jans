@@ -23,7 +23,6 @@ use cedar_policy::{Entities, Entity, EntityUid};
 use chrono::Utc;
 use entity_builder::*;
 use request::{Request, RequestUnsigned};
-use smol_str::ToSmolStr;
 use std::collections::HashMap;
 use std::io::Cursor;
 use std::str::FromStr;
@@ -140,19 +139,12 @@ impl Authz {
         let workload_principal = entities_data.workload.as_ref().map(|e| e.uid()).to_owned();
         let person_principal = entities_data.user.as_ref().map(|e| e.uid()).to_owned();
 
-        let workload_typename = workload_principal
-            .as_ref()
-            .map(|e| e.type_name().to_smolstr());
-        let person_typename = person_principal
-            .as_ref()
-            .map(|e| e.type_name().to_smolstr());
-
         // Convert [`AuthorizeEntitiesData`] to  [`cedar_policy::Entities`] structure,
         // hold all entities that will be used on authorize check.
         let entities = entities_data.entities(Some(&schema.schema))?;
 
         let (workload_authz_result, workload_authz_info, workload_entity_claims) =
-            if let Some(workload) = workload_principal {
+            if let Some(workload) = workload_principal.clone() {
                 let principal = workload;
 
                 let authz_result = self
@@ -194,7 +186,7 @@ impl Authz {
 
         // Check authorize where principal is `"Jans::User"` from cedar-policy schema.
         let (user_authz_result, user_authz_info, user_entity_claims) =
-            if let Some(user) = person_principal {
+            if let Some(user) = person_principal.clone() {
                 let principal = user;
 
                 let authz_result = self
@@ -236,8 +228,8 @@ impl Authz {
 
         let result = AuthorizeResult::new(
             &self.config.authorization.principal_bool_operator,
-            workload_typename,
-            person_typename,
+            workload_principal,
+            person_principal,
             workload_authz_result,
             user_authz_result,
             request_id,
@@ -380,7 +372,7 @@ impl Authz {
 
         let mut principal_responses = HashMap::new();
 
-        for principal_uid in principal_uids.iter() {
+        for principal_uid in principal_uids.into_iter() {
             let auth_result = self
                 .execute_authorize(ExecuteAuthorizeParameters {
                     entities: &entities,
@@ -394,7 +386,7 @@ impl Authz {
                     err,
                 })?;
 
-            principal_responses.insert(principal_uid.type_name().to_smolstr(), auth_result);
+            principal_responses.insert(principal_uid, auth_result);
         }
 
         let result = AuthorizeResult::new_for_many_principals(

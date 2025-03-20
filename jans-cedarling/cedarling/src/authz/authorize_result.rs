@@ -5,16 +5,14 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use cedar_policy::{Decision, Response};
+use cedar_policy::{Decision, EntityUid, Response};
 use serde::ser::{SerializeMap, SerializeStruct};
 use serde::{Serialize, Serializer};
-use smol_str::SmolStr;
+use smol_str::{SmolStr, ToSmolStr};
 use std::collections::{HashMap, HashSet};
 use uuid7::Uuid;
 
 use crate::common::json_rules::{ApplyRuleError, JsonRule, RuleApplier};
-
-type TypeName = SmolStr;
 
 /// Result of authorization and evaluation cedar policy
 /// based on the [Request](crate::models::request::Request) and policy store
@@ -110,25 +108,27 @@ impl AuthorizeResult {
     pub(crate) fn new(
         principal_bool_operator: &JsonRule,
 
-        workload_typename: Option<SmolStr>,
-        person_typename: Option<SmolStr>,
+        workload_uid: Option<EntityUid>,
+        person_uid: Option<EntityUid>,
 
         workload: Option<cedar_policy::Response>,
         person: Option<cedar_policy::Response>,
         request_id: Uuid,
     ) -> Result<Self, ApplyRuleError> {
-        let mut principal_responses: HashMap<SmolStr, cedar_policy::Response> = HashMap::new();
+        let mut principal_responses: HashMap<EntityUid, cedar_policy::Response> = HashMap::new();
 
-        workload_typename
-            .iter()
-            .zip(workload.iter())
+        workload_uid
+            .clone()
+            .into_iter()
+            .zip(workload.into_iter())
             .for_each(|(typename, response)| {
                 principal_responses.insert(typename.to_owned(), response.to_owned());
             });
 
-        person_typename
-            .iter()
-            .zip(person.iter())
+        person_uid
+            .clone()
+            .into_iter()
+            .zip(person.into_iter())
             .for_each(|(typename, response)| {
                 principal_responses.insert(typename.to_owned(), response.to_owned());
             });
@@ -136,8 +136,8 @@ impl AuthorizeResult {
         Self::new_for_many_principals(
             principal_bool_operator,
             principal_responses,
-            workload_typename,
-            person_typename,
+            workload_uid,
+            person_uid,
             request_id,
         )
     }
@@ -145,31 +145,38 @@ impl AuthorizeResult {
     /// Builder function for AuthorizeResult
     pub(crate) fn new_for_many_principals(
         principal_bool_operator: &JsonRule,
-        principal_responses: HashMap<TypeName, cedar_policy::Response>,
-        workload_typename: Option<SmolStr>,
-        person_typename: Option<SmolStr>,
+        principal_responses: HashMap<EntityUid, cedar_policy::Response>,
+        workload_uid: Option<EntityUid>,
+        person_uid: Option<EntityUid>,
         request_id: Uuid,
     ) -> Result<Self, ApplyRuleError> {
         let mut principals_decision_info = HashMap::new();
-        let mut principals_response = HashMap::new();
+        let mut principals_response: HashMap<SmolStr, cedar_policy::Response> = HashMap::new();
 
         let mut workload_result: Option<Response> = None;
         let mut person_result: Option<Response> = None;
 
-        for (principal_typename, response) in principal_responses.into_iter() {
-            if let Some(typename) = &workload_typename {
-                if typename == &principal_typename {
+        for (principal_uid, response) in principal_responses.into_iter() {
+            if let Some(uid) = &workload_uid {
+                if uid == &principal_uid {
                     workload_result = Some(response.to_owned());
                 }
             }
-            if let Some(typename) = &person_typename {
-                if typename == &principal_typename {
+            if let Some(uid) = &person_uid {
+                if uid == &principal_uid {
                     person_result = Some(response.to_owned());
                 }
             }
 
+            let principal_typename = principal_uid.type_name().to_smolstr();
+            let principal_id = principal_uid.to_smolstr();
+            // Insert typename and principal id into hashmap.
+            // This allows us to easily access the decision for a given principal by type name and and uid.
             principals_decision_info.insert(principal_typename.clone(), response.decision().into());
-            principals_response.insert(principal_typename, response);
+            principals_decision_info.insert(principal_id.clone(), response.decision().into());
+
+            principals_response.insert(principal_typename.clone(), response.clone());
+            principals_response.insert(principal_id, response);
         }
 
         let decision =
