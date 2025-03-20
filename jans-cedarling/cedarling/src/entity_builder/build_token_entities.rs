@@ -77,28 +77,7 @@ impl<'a> TokenIdSrcs<'a> {
             });
         }
 
-        Self(
-            DEFAULT_TKN_ID_SRCS
-                .iter()
-                .fold(Vec::new(), |mut acc, &src| {
-                    if let Some(claim) = token.get_metadata().map(|m| &m.token_id) {
-                        acc.push(EntityIdSrc { token, claim });
-                        if claim != src.claim {
-                            acc.push(EntityIdSrc {
-                                token,
-                                claim: src.claim,
-                            });
-                        }
-                    } else {
-                        acc.push(EntityIdSrc {
-                            token,
-                            claim: src.claim,
-                        });
-                    };
-
-                    acc
-                }),
-        )
+        Self(eid_srcs)
     }
 }
 
