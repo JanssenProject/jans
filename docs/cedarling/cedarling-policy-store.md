@@ -16,11 +16,13 @@ The Policy Store provides:
 2. **Cedar Policies**: The Cedar policies encoded in Base64.
 3. **Trusted Issuers**: Details about the trusted issuers (see [below](#trusted-issuers-schema) for syntax).
 
+For a comprehensive JSON schema defining the structure of the policy store, see: [policy_store_schema.json](https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/schema/policy_store_schema.json). You test the validity of your policy store with this schema at [https://www.jsonschemavalidator.net/].
+
 **Note:** The `cedarling_store.json` file is only needed if the bootstrap properties: `CEDARLING_LOCK`; `CEDARLING_POLICY_STORE_URI`; and `CEDARLING_POLICY_STORE_ID` are not set to a local location. If you're fetching the policies remotely, you don't need a `cedarling_store.json` file.
 
 ## JSON Schema
 
-The JSON Schema accepted by cedarling is defined as follows:
+The JSON Schema accepted by Cedarling is defined as follows:
 
 ```json
 {
@@ -196,6 +198,7 @@ The Token Entity Metadata Schema defines how tokens are mapped, parsed, and tran
   "token_id": "jti",
   "workload_id": "aud | client_id",
   "user_id": "sub | uid | email",
+  "principal_mapping": ["Jans::Workload"],
   "role_mapping": "role | group | memberOf",
   "required_claims": ["iss", "exp", "some_custom_claim", ...],
   "claim_mapping": {
@@ -207,6 +210,16 @@ The Token Entity Metadata Schema defines how tokens are mapped, parsed, and tran
   },
 }
 ```
+
+- `"trusted"` (bool, Default: true): Allows to toggling configuration without deleting the object.
+- `"entity_type_name"` (string, required): The type name of the Cedar Entity that will be created from the token; for example: "Jans::Access_token".
+- `"principal_mapping"` (array[string], Default: []): Describes where references of the created token entity should be included.
+- `"token_id"` (string, Default: "jti"): The JWT claim that will be used as the ID for the Token Entity.
+- `"user_id"` (string, Default: "sub"): The JWT claim that will be used as the ID for the User Entity.
+- `"role_mapping"` (string, Default: "role"): The JWT claim that will be used as the ID for any Role Entities. For more info, see: [role mapping](#role-mapping).
+- `"workload_id"` (string, Default: "aud"): The JWT claim that will be used as the ID for the Workload Entity.
+- `"required_claims"` (array[string], Default: []): A list of claims that must be present within the JWT to be considered valid. Additionally, if a required claim is a registered claim name under RFC 7519 Section 4.1, the claim will also be validated.
+- `"claim_mapping"` (object, Default: {}): Applies a transformation on a JWT's claim to types defined in the Cedar schema before creating the Token Entity's attribute. This enables creating a Cedar Type that has multiple attributes from a single JWT claim. For more info, see [claim mapping](#claim-mapping).
 
 #### Role mapping
 
@@ -302,23 +315,25 @@ Here is a non-normative example of a `cedarling_store.json` file:
             "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
             "access_tokens": {
               "trusted": true,
-              "principal_identifier": "",
-              "role_mapping": "",
+              "entity_type_name": "Jans::Access_token",
+              "token_id": "jti",
             },
             "id_tokens": {
               "trusted": true,
-              "principal_identifier": "sub",
-              "role_mapping": "",
+              "entity_type_name": "Jans::Id_token",
+              "token_id": "jti",
+              "role_mapping": "role",
             },
             "userinfo_tokens": {
               "trusted": true,
-              "principal_identifier": "",
+              "entity_type_name": "Jans::Userinfo_token",
+              "token_id": "jti",
               "role_mapping": "role",
             },
             "tx_tokens": {
               "trusted": true,
-              "principal_identifier": "",
-              "role_mapping": "",
+              "entity_type_name": "Jans::Tx_token",
+              "token_id": "jti",
             },
         }
     }
