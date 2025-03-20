@@ -60,6 +60,20 @@ policy_stores:
                 action in [Jans::Action::"Update",Jans::Action::"UpdateForRole",Jans::Action::"UpdateForUserAndRole",Jans::Action::"UpdateForWorkloadAndRole"],
                 resource is Jans::Issue
             );
+      5:
+        description: simple policy for principal TestPrincipal-s
+        creation_date: '2025-03-18T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal,
+                action in [Jans::Action::"UpdateForTestPrincipals"],
+                resource
+            )when{
+              principal.is_ok
+            };
     schema:
       encoding: none
       content_type: cedar
@@ -75,6 +89,9 @@ policy_stores:
         entity Workload = {"org_id": String};
         entity Access_token = {"aud": String,"iss": String, "jti": String, "client_id": String,"org_id": String};
         entity Userinfo_token  = {"iss": String, "jti": String, "client_id": String};
+        entity TestPrincipal1  = {"is_ok": Bool};
+        entity TestPrincipal2  = {"is_ok": Bool};
+        entity TestPrincipal3  = {"is_ok": Bool};
         entity Empty;
         type Context = {
           user: User,
@@ -132,6 +149,11 @@ policy_stores:
         };
         action "AlwaysDeny" appliesTo {
           principal:  [Workload, User],
+          resource: [Issue],
+          context: {}
+        };
+        action "UpdateForTestPrincipals" appliesTo {
+          principal: [TestPrincipal1, TestPrincipal2, TestPrincipal3],
           resource: [Issue],
           context: {}
         };

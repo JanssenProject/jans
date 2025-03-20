@@ -146,7 +146,6 @@ pub struct AuthorizeInfo {
     /// cedar-policy diagnostics information
     pub diagnostics: Diagnostics,
     /// cedar-policy decision
-    #[serde(rename = "workload_decision")]
     pub decision: Decision,
 }
 
