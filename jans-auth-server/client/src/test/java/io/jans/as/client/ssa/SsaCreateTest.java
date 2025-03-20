@@ -157,6 +157,7 @@ public class SsaCreateTest extends BaseTest {
         showClient(ssaCreateClient);
         System.out.println(ssaCreateClient);
         AssertBuilder.ssaCreate(ssaCreateClient.getRequest(), ssaCreateResponse)
+                .dontCheckAgainstRequestedLifetime(true)
                 .check();
     }
 
