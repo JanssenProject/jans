@@ -1096,7 +1096,7 @@ paths:
                   : \"Config api pligin\",\n    \"document\":\"\",\n    \"jansModuleProperty\"\
                   : [\n\t\t\"config-api\",\n\t\t\"jar\",\n\t\t\"/opt/jans/jetty/jans-config-api/custom/lib\"\
                   \n\t],\t\n    \"jansLevel\": \"1\",\n    \"jansRevision\": \"1\"\
-                  ,\n    \"jansEnabled\": true,\n    \"jansAlias\": \"\"\n}\n"
+                  ,\n    \"jansEnabled\": true\n}\n"
       responses:
         "201":
           description: Newly created Asset
@@ -1112,7 +1112,7 @@ paths:
                     \    \"jansModuleProperty\": [\n\t\t\"config-api\",\n\t\t\"jar\"\
                     ,\n\t\t\"/opt/jans/jetty/jans-config-api/custom/lib\"\n\t],\t\n\
                     \    \"jansLevel\": \"1\",\n    \"jansRevision\": \"1\",\n   \
-                    \ \"jansEnabled\": true,\n    \"jansAlias\": \"\"\n}\n"
+                    \ \"jansEnabled\": true\n}\n"
         "400":
           description: Bad Request
           content:
@@ -4451,7 +4451,7 @@ paths:
                         "moduleProperties": [
                             {
                                 "value1": "location_type",
-                                "value2": "ldap"
+                                "value2": "db"
                             }
                         ],
                         "level": 800,
@@ -4576,7 +4576,7 @@ paths:
                         "moduleProperties": [
                             {
                                 "value1": "location_type",
-                                "value2": "ldap"
+                                "value2": "db"
                             }
                         ],
                         "level": 1,
@@ -4632,7 +4632,7 @@ paths:
                         "moduleProperties": [
                             {
                                 "value1": "location_type",
-                                "value2": "ldap"
+                                "value2": "db"
                             }
                         ],
                         "level": 1,
@@ -4640,7 +4640,7 @@ paths:
                         "enabled": true,
                         "modified": false,
                         "internal": false,
-                        "locationType": "ldap",
+                        "locationType": "db",
                         "baseDn": "inum=0300-BA90,ou=scripts,o=jans"
                     }
         "401":
@@ -4682,6 +4682,7 @@ paths:
                   - uma_claims_gathering
                   - access_evaluation
                   - access_evaluation_discovery
+                  - token_exchange
                   - consent_gathering
                   - dynamic_scope
                   - spontaneous_scope
@@ -4873,7 +4874,7 @@ paths:
                                 "moduleProperties": [
                                     {
                                         "value1": "location_type",
-                                        "value2": "ldap"
+                                        "value2": "db"
                                     }
                                 ],
                                 "level": 1,
@@ -4881,7 +4882,7 @@ paths:
                                 "enabled": true,
                                 "modified": false,
                                 "internal": false,
-                                "locationType": "ldap",
+                                "locationType": "db",
                                 "baseDn": "inum=0300-BA90,ou=scripts,o=jans"
                             }
                         ]
@@ -9173,8 +9174,6 @@ components:
           format: int32
         enabled:
           type: boolean
-        alias:
-          type: string
         baseDn:
           type: string
     DocumentPagedResult:
@@ -9335,21 +9334,21 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
+        selected:
+          type: boolean
+        whitePagesCanView:
+          type: boolean
         adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        adminCanView:
+        adminCanAccess:
           type: boolean
         userCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        selected:
-          type: boolean
-        whitePagesCanView:
+        adminCanView:
           type: boolean
         baseDn:
           type: string
@@ -9801,6 +9800,14 @@ components:
           type: object
           additionalProperties:
             type: string
+        acrToConsentScriptNameMapping:
+          type: object
+          additionalProperties:
+            type: string
+        acrToAgamaConsentFlowMapping:
+          type: object
+          additionalProperties:
+            type: string
         authenticationFiltersEnabled:
           type: boolean
         clientAuthenticationFiltersEnabled:
@@ -9990,6 +9997,12 @@ components:
         authorizationChallengeSessionLifetimeInSeconds:
           type: integer
           format: int32
+        rateLimitRegistrationRequestCount:
+          type: integer
+          format: int32
+        rateLimitRegistrationPeriodInSeconds:
+          type: integer
+          format: int32
         rotateDeviceSecret:
           type: boolean
         returnDeviceSecretFromAuthzEndpoint:
@@ -10177,6 +10190,7 @@ components:
             - STAT
             - PAR
             - ACCESS_EVALUATION
+            - RATE_LIMIT
             - SSA
         httpLoggingEnabled:
           type: boolean
@@ -10211,6 +10225,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10220,8 +10236,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10898,6 +10912,10 @@ components:
           type: array
           items:
             type: string
+        tokenExchangeScripts:
+          type: array
+          items:
+            type: string
         consentGatheringScripts:
           type: array
           items:
@@ -10944,6 +10962,8 @@ components:
           type: integer
           format: int32
         allowOfflineAccessWithoutConsent:
+          type: boolean
+        requirePkce:
           type: boolean
         minimumAcrLevel:
           type: integer
@@ -11285,6 +11305,7 @@ components:
           - uma_claims_gathering
           - access_evaluation
           - access_evaluation_discovery
+          - token_exchange
           - consent_gathering
           - dynamic_scope
           - spontaneous_scope
@@ -11935,6 +11956,8 @@ components:
           $ref: '#/components/schemas/TokenAttributes'
         dpop:
           type: string
+        accessToken:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
