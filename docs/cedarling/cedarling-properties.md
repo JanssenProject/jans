@@ -58,18 +58,18 @@ These Bootstrap Properties control default application level behavior.
 
 ## Required keys for startup
 
-* **`CEDARLING_APPLICATION_NAME`
+* **`CEDARLING_APPLICATION_NAME`**
 
 To enable usage of principals at least one of the following keys must be provided:
 
-* **`CEDARLING_WORKLOAD_AUTHZ`
-* **`CEDARLING_USER_AUTHZ`
+* **`CEDARLING_WORKLOAD_AUTHZ`**
+* **`CEDARLING_USER_AUTHZ`**
 
 To load policy store one of the following keys must be provided:
 
-* **`CEDARLING_POLICY_STORE_LOCAL`
-* **`CEDARLING_POLICY_STORE_URI`
-* **`CEDARLING_POLICY_STORE_LOCAL_FN`
+* **`CEDARLING_POLICY_STORE_LOCAL`**
+* **`CEDARLING_POLICY_STORE_URI`**
+* **`CEDARLING_POLICY_STORE_LOCAL_FN`**
 
 All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.
 

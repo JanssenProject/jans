@@ -20,6 +20,7 @@ Cedarling automatically creates the following entities:
 The entity type names of the Workload and User entities can be customized via the `CEDARLING_MAPPING_USER` and `CEDARLING_MAPPING_WORKLOAD` [properties](./cedarling-properties.md) respectively.
 
 >  ***Notes***
+>
 > - All entity creation and attribute population logic is configurable via the [Token Metadata Schema (TEMS)](./cedarling-policy-store.md#token-metadata-schema) and [Cedarling bootstrap properties](./cedarling-properties.md).
 > - Attribute presence depends on token contents and policy store configuration.
 > - Role inheritance simplifies **user-role mapping** for RBAC policy enforcement.
