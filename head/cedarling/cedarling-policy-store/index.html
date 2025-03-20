@@ -9077,9 +9077,10 @@
 <li><strong>Cedar Policies</strong>: The Cedar policies encoded in Base64.</li>
 <li><strong>Trusted Issuers</strong>: Details about the trusted issuers (see <a href="#trusted-issuers-schema">below</a> for syntax).</li>
 </ol>
+<p>For a comprehensive JSON schema defining the structure of the policy store, see: <a href="https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/schema/policy_store_schema.json">policy_store_schema.json</a>. You test the validity of your policy store with this schema at [https://www.jsonschemavalidator.net/].</p>
 <p><strong>Note:</strong> The <code>cedarling_store.json</code> file is only needed if the bootstrap properties: <code>CEDARLING_LOCK</code>; <code>CEDARLING_POLICY_STORE_URI</code>; and <code>CEDARLING_POLICY_STORE_ID</code> are not set to a local location. If you're fetching the policies remotely, you don't need a <code>cedarling_store.json</code> file.</p>
 <h2 id="json-schema">JSON Schema<a class="headerlink" href="#json-schema" title="Permanent link">#</a></h2>
-<p>The JSON Schema accepted by cedarling is defined as follows:</p>
+<p>The JSON Schema accepted by Cedarling is defined as follows:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v4.0.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;policy_stores&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -9224,6 +9225,7 @@
 <span class="w">  </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;workload_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aud | client_id&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sub | uid | email&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;principal_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Jans::Workload&quot;</span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role | group | memberOf&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;iss&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;exp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;some_custom_claim&quot;</span><span class="p">,</span><span class="w"> </span><span class="err">...</span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;claim_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -9235,6 +9237,17 @@
 <span class="w">  </span><span class="p">},</span>
 <span class="p">}</span>
 </code></pre></div>
+<ul>
+<li><code>"trusted"</code> (bool, Default: true): Allows to toggling configuration without deleting the object.</li>
+<li><code>"entity_type_name"</code> (string, required): The type name of the Cedar Entity that will be created from the token; for example: "Jans::Access_token".</li>
+<li><code>"principal_mapping"</code> (array[string], Default: []): Describes where references of the created token entity should be included.</li>
+<li><code>"token_id"</code> (string, Default: "jti"): The JWT claim that will be used as the ID for the Token Entity.</li>
+<li><code>"user_id"</code> (string, Default: "sub"): The JWT claim that will be used as the ID for the User Entity.</li>
+<li><code>"role_mapping"</code> (string, Default: "role"): The JWT claim that will be used as the ID for any Role Entities. For more info, see: <a href="#role-mapping">role mapping</a>.</li>
+<li><code>"workload_id"</code> (string, Default: "aud"): The JWT claim that will be used as the ID for the Workload Entity.</li>
+<li><code>"required_claims"</code> (array[string], Default: []): A list of claims that must be present within the JWT to be considered valid. Additionally, if a required claim is a registered claim name under RFC 7519 Section 4.1, the claim will also be validated.</li>
+<li><code>"claim_mapping"</code> (object, Default: {}): Applies a transformation on a JWT's claim to types defined in the Cedar schema before creating the Token Entity's attribute. This enables creating a Cedar Type that has multiple attributes from a single JWT claim. For more info, see <a href="#claim-mapping">claim mapping</a>.</li>
+</ul>
 <h4 id="role-mapping">Role mapping<a class="headerlink" href="#role-mapping" title="Permanent link">#</a></h4>
 <ul>
 <li><strong>role_mapping</strong>: (String OR Array of String, <em>Optional</em>) Indicates which field in the token should be used for role-based access control. If not needed, set to an empty string (<code>""</code>).</li>
@@ -9320,23 +9333,25 @@ If none <code>role_mapping</code> defined the <code>Cedarling</code> will try to
 <span class="w">            </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://accounts.google.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="nt">&quot;access_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">              </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_token&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="p">},</span>
 <span class="w">            </span><span class="nt">&quot;id_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">              </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sub&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Id_token&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="p">},</span>
 <span class="w">            </span><span class="nt">&quot;userinfo_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">              </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Userinfo_token&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
 <span class="w">              </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="p">},</span>
 <span class="w">            </span><span class="nt">&quot;tx_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">              </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Tx_token&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="p">},</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
@@ -9411,7 +9426,7 @@ trusted IDPs and to publish a policy store to a Github repository.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-20T17:44:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-20</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-20T20:31:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-20</span>
       
         <br>
         Created:
