@@ -4,6 +4,20 @@ policy_stores:
     cedar_version: v4.0.0
     name: Jans
     description: A test policy store where everything is fine.
+    trusted_issuers:
+      Jans123123:
+        name: "Jans"
+        description: "A Test IDP"
+        openid_configuration_endpoint: "https://account.gluu.org/.well-known/openid-configuration"
+        tokens_metadata:
+          access_token:
+            entity_type_name: "Jans::Access_token"
+            workload_id: "client_id"
+          id_token:
+            entity_type_name: "Jans::Id_token"
+          userinfo_token:
+            entity_type_name: "Jans::Userinfo_token"
+            user_id: "sub"
     policies:
       1:
         description: simple policy example for principal workload
@@ -52,7 +66,7 @@ policy_stores:
             "iss": TrustedIssuer,
             "jti": String
           };
-          entity id_token = {
+          entity Id_token = {
             "acr": String, 
             "amr": String,
             "aud": String,
@@ -71,7 +85,7 @@ policy_stores:
             user: User,
             workload: Workload,
             access_token: Access_token,
-            id_token: id_token,
+            id_token: Id_token,
             userinfo_token: Userinfo_token,
           };
           action "Update" appliesTo {
