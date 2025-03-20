@@ -79,7 +79,6 @@ pub struct ResourceData {
     pub resource_type: String,
     /// entity id
     pub id: String,
-
     /// entity attributes
     #[serde(flatten)]
     pub payload: HashMap<String, Value>,
