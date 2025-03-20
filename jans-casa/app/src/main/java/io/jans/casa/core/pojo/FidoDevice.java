@@ -2,6 +2,9 @@ package io.jans.casa.core.pojo;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+
+import io.jans.entry.Transports;
 
 /**
  * Represents a fido registered credential
@@ -80,17 +83,20 @@ public class FidoDevice extends RegisteredCredential implements Comparable<FidoD
     }
     
     public static boolean isPlatformAuthenticator(FidoDevice device) {
-        if (device instanceof PlatformAuthenticator)
+        List<String> transports = Arrays.asList(device.getTransports());
+        if(transports.contains(Transports.INTERNAL.getValue()) && transports.size() == 1)
             return true;
         return false;
     }
     public static boolean isMultideviceAuthenticator(FidoDevice device) {
-        if (device instanceof MultideviceAuthenticator)
+    	List<String> transports = Arrays.asList(device.getTransports());
+    	if(transports.contains(Transports.INTERNAL.getValue()) && transports.contains(Transports.HYBRID.getValue()))
             return true;
         return false;
     }
     public static boolean isSecurityKey(FidoDevice device) {
-        if (device instanceof SecurityKey)
+    	List<String> transports = Arrays.asList(device.getTransports());
+    	if(transports.contains(Transports.USB.getValue()) || transports.contains(Transports.NFC.getValue()) || transports.contains(Transports.BLE.getValue()) )
             return true;
         return false;
     }
