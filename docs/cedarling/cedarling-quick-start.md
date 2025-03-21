@@ -67,7 +67,7 @@ To begin using Cedarling, you need to set up a policy store. We’ll use [Agama 
     @id("allow_one")
     permit(
       principal is Jans::User,
-      action is Jans::Action::"Read",
+      action in [Jans::Action::"Read"],
       resource
     )
     when {
