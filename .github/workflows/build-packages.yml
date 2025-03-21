@@ -22,7 +22,7 @@ jobs:
             build_files: deb/noble
             asset_prefix: '_'
             asset_path: jans
-            sign_cmd: debsigs --sign=origin -k DE92BEF14A1A4E542F678B64DC3C790386C73900
+            sign_cmd: cosign sign-blob --yes --identity-token ${{ secrets.GITHUB_TOKEN }}
             python_version: 3.11
           - name: ubuntu22
             os: ubuntu-20.04
@@ -452,8 +452,9 @@ jobs:
           echo "Replaced  $NEW_NPM_VERSION in Cargo.toml"
         fi
         wasm-pack build --release --target web --scope janssenproject
-        wasm-pack logout && wasm-pack login || echo "Failed to login"
         cd pkg
+        echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+        npm login --registry https://registry.npmjs.org --scope=janssenproject --access=public --always-auth
         npm publish --access=public --tag "${NPM_TAG}" || cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1)
 
     - name: Archive and sign pkg contents
