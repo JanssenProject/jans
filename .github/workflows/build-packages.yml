@@ -22,7 +22,7 @@ jobs:
             build_files: deb/noble
             asset_prefix: '_'
             asset_path: jans
-            sign_cmd: cosign sign-blob --yes --identity-token ${{ secrets.GITHUB_TOKEN }}
+            sign_cmd: cosign sign-blob --yes
             python_version: 3.11
           - name: ubuntu22
             os: ubuntu-20.04
