@@ -23,7 +23,7 @@ jobs:
             asset_prefix: '_'
             asset_path: jans
             sign_cmd: dpkg-sig -s builder -k DE92BEF14A1A4E542F678B64DC3C790386C73900
-            python_version: 3.8
+            python_version: 3.11
           - name: ubuntu22
             asset_suffix: ~ubuntu22.04_amd64.deb
             build_files: deb/jammy
@@ -449,9 +449,8 @@ jobs:
         wasm-pack build --release --target web --scope janssenproject
         ls pkg
         cat pkg/package.json
-        cd pkg
-        npm publish --tag "${NPM_TAG}" || echo "failed to publish to NPM"
-        cd ..
+        wasm-pack publish --tag "${NPM_TAG}"  || echo "failed to publish to NPM"
+
     - name: Archive and sign pkg contents
       id: archive_pkg
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
