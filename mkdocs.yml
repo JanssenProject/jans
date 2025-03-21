@@ -367,12 +367,9 @@ nav:
     - janssen-server/fido/README.md
     - Configuration: janssen-server/fido/config.md
     - Vendor Metadata Management: janssen-server/fido/vendor-metadata.md
-    - Key Management/Rotation: janssen-server/fido/key-mgt.md
     - Logs: janssen-server/fido/logs.md
-    - Monitoring: janssen-server/fido/monitoring.md
-    - USB Authenticator Support: janssen-server/fido/usb-authn.md
-    - Platform Authenticator Support: janssen-server/fido/platform-authn.md
-    - Bluetooth Authenticator Support: janssen-server/fido/bluetooth-authn.md
+    - Passwordless / Usernameless Login: janssen-server/fido/passwordlessLoginExperience.md
+    - Types of credentials: janssen-server/fido/types-of-creds.md
   - SCIM Admin Guide:
     - janssen-server/scim/README.md
     - Configuration: janssen-server/scim/config.md
