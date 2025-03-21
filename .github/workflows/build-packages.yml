@@ -404,6 +404,8 @@ jobs:
   build_cedarling_wasm:
     if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
@@ -434,23 +436,32 @@ jobs:
       run: |
         rustup update stable && rustup default stable
         cargo install wasm-pack
+        TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+        NPM_TAG=latest
+        if [ "${TAG}" == "nightly" ]; then
+          NPM_TAG=nightly
+          TAG="0.0.0"
+          LAST_NIGHTLY_NPM_VERSION=$(npm dist-tag ls @janssenproject/cedarling_wasm | grep nightly | awk '{print $2}' | sort -V | tail -n 1)
+          NEW_NPM_VERSION=$(echo $LAST_NIGHTLY_NPM_VERSION | awk -F. '{print $1"."$2"."$3+1}')
+          sed -i "s/^version = \".*\"/version = \"${NEW_NPM_VERSION}\"/" Cargo.toml
+          echo "Replaced  $NEW_NPM_VERSION in Cargo.toml"
+        fi
         wasm-pack build --release --target web --scope janssenproject
         ls pkg
+        cat pkg/package.json
+        cd pkg
+        npm publish --tag "${NPM_TAG}" || echo "failed to publish to NPM"
+        cd ..
     - name: Archive and sign pkg contents
       id: archive_pkg
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
       run: |
         TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
         VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
-        cd pkg
         if [ "${TAG}" == "nightly" ]; then
           VERSION=nightly
           TAG="0.0.0"
-          # remove, do not publish on nightly or random nightly build versions to be published
-          #npm unpublish cedarling_wasm@0.0.0
         fi
-        npm publish --access public --tag "${VERSION}" || echo "failed to piblish to NPM"
-        cd ..
         rm -rf pkg/.gitignore || echo "Failed to remove gitignore"
         tar -czvf cedarling_wasm_"${TAG}"_pkg.tar.gz -C pkg .
         sha256sum cedarling_wasm_"${TAG}"_pkg.tar.gz > cedarling_wasm_"${TAG}"_pkg.tar.gz.sha256sum
