@@ -122,6 +122,10 @@ jobs:
          sed -i "s/%VERSION%/${{ steps.previoustag.outputs.version }}/g" run-build.sh
          cat run-build.sh
          sudo ./run-build.sh
+
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # v3.5.0
+
     - name: Sign package
       id: sign_package
       run : |
