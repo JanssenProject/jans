@@ -17,7 +17,7 @@ These Bootstrap Properties control default application level behavior.
 * **`CEDARLING_POLICY_STORE_ID`** : The identifier of the policy store in case there is more then one policy_store_id in the policy store.
 * **`CEDARLING_USER_AUTHZ`** : When `enabled`, Cedar engine authorization is queried for a User principal.
 * **`CEDARLING_WORKLOAD_AUTHZ`** : When `enabled`, Cedar engine authorization is queried for a Workload principal.
-* **`CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION`** :  `AND`, `OR`
+* **`CEDARLING_PRINCIPAL_BOOLEAN_OPERATION`** : property specifies what boolean operation to use for the `USER` and `WORKLOAD` when making authz (authorization) decisions. [See here](#user-workload-boolean-operation).
 * **`CEDARLING_MAPPING_USER`** : Name of Cedar User schema entity if we don't want to use default. When specified cedarling try build defined entity (from schema) as user instead of default `User` entity defined in `cedar` schema. Works in namespace defined in the policy store.
 * **`CEDARLING_MAPPING_WORKLOAD`** : Name of Cedar Workload schema entity
 * **`CEDARLING_MAPPING_ROLE`** : Name of Cedar Role schema entity
@@ -37,12 +37,11 @@ These Bootstrap Properties control default application level behavior.
 **The following bootstrap properties are needed to configure JWT and cryptographic behavior:**
 
 * **`CEDARLING_LOCAL_JWKS`** : JWKS file with public keys
-* **`CEDARLING_POLICY_STORE_LOCAL`** : JSON object with policy store
+* **`CEDARLING_POLICY_STORE_LOCAL`** : JSON object as string with policy store. You can use [this](https://jsontostring.com/) converter.
 * **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Local file with JSON object with policy store
 * **`CEDARLING_JWT_SIG_VALIDATION`** : `enabled` | `disabled` -- Whether to check the signature  of all JWT tokens. This requires an `iss` is present.
 * **`CEDARLING_JWT_STATUS_VALIDATION`** : `enabled` | `disabled` -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retreive the latest Status List JWT from the `.well-known/openid-configuration` via the `status_list_endpoint` claim and cache it. See the [IETF Draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) for more info.
 * **`CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED`** : Only tokens signed with these algorithms are acceptable to the Cedarling.
-* **`CEDARLING_TOKEN_CONFIGS`** : JSON object containing token specific configs. See: [Token Configs](#token-configs).
 * **`CEDARLING_ID_TOKEN_TRUST_MODE`** :  `Strict` | `None`. Varying levels of validations based on the preference of the developer.
 `Strict` mode requires (1) id_token `aud` matches the access_token `client_id`; (2) if a Userinfo token is present, the `sub` matches the id_token, and that the `aud` matches the access token client_id.
 
@@ -59,114 +58,162 @@ These Bootstrap Properties control default application level behavior.
 
 ## Required keys for startup
 
-* **`CEDARLING_APPLICATION_NAME`
-* **`CEDARLING_TOKEN_CONFIGS` - check if default implementation of Token Config is suitable for you.
+* **`CEDARLING_APPLICATION_NAME`**
 
 To enable usage of principals at least one of the following keys must be provided:
 
-* **`CEDARLING_WORKLOAD_AUTHZ`
-* **`CEDARLING_USER_AUTHZ`
+* **`CEDARLING_WORKLOAD_AUTHZ`**
+* **`CEDARLING_USER_AUTHZ`**
 
 To load policy store one of the following keys must be provided:
 
-* **`CEDARLING_POLICY_STORE_LOCAL`
-* **`CEDARLING_POLICY_STORE_URI`
-* **`CEDARLING_POLICY_STORE_LOCAL_FN`
+* **`CEDARLING_POLICY_STORE_LOCAL`**
+* **`CEDARLING_POLICY_STORE_URI`**
+* **`CEDARLING_POLICY_STORE_LOCAL_FN`**
 
 All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.
 
 ## User-Workload Boolean Operation
 
-The `CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION` property specifies what boolean operation to use for the `USER` and `WORKLOAD` when making authz (authorization) decisions.
+The `CEDARLING_PRINCIPAL_BOOLEAN_OPERATION` property specifies what boolean operation to use when combining authorization decisions for `USER` and `WORKLOAD` principals. This JSON Logic rule determines the final authorization outcome based on individual principal decisions.
 
-### Available Operations
+We use [JsonLogic](https://jsonlogic.com/) to define the boolean operation. The rule is evaluated against each principal decision, and the final result is determined based on the specified operation.
 
-* **AND**: authz will be successful if `USER` **AND** `WORKLOAD` is valid.
-* **OR**: authz will be successful if `USER` **OR** `WORKLOAD` is valid.
+### Variables in the jsonlogic rule
 
-## Token Configs
+Make sure that you use correct `var` name for `principal` types.
 
-The token configs property sets the entity type name of a token and it's validation settings. Below is an example of the `CEDARLING_TOKEN_CONFIGS`:
+When referencing principals in your JSON logic rules, you must use the full Cedar principal type identifier that includes both namespace and entity name. This matches exactly how principals are defined in your Cedar policies.
 
-```js
-CEDARLING_TOKEN_CONFIGS = {
-  "access_token": {
-    "entity_type_name": "Jans::Access_token",
-    "iss": "enabled",
-    "aud": "enabled",
-    "sub": "enabled",
-    "jti": "enabled",
-    "nbf": "enabled",
-    "iat": "enabled",
-    "exp": "enabled",
-  },
-  "id_token": {
-    "entity_type_name": "Jans::id_token",
-    "exp": "enabled",
-  },
-  "userinfo_token": {
-    "entity_type_name": "Jans::Userinfo_token",
-    "exp": "enabled",
-  },
-  "custom_token1": {
-    "entity_type_name": "Jans::SomeCustom_token",
-    "exp": "enabled",
-  },
-  "custom_token2": {
-    "entity_type_name": "Jans::AnotherCustom_token",
-    "exp": "enabled",
-  },
-  // more custom tokens can be added here
+**Correct Format**: `<Namespace>::<EntityType>`  
+Example: `Jans::User`, `Jans::Workload`, `Acme::Service`.
+
+**Why This Matters**
+
+* Matches Cedar's type system requirements
+* Ensures proper variable resolution
+* Maintains consistency with policy definitions
+
+**Example Configuration**
+
+```
+// CORRECT - Full type with namespace
+{
+    "or": [
+        {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+        {"===": [{"var": "Jans::User"}, "ALLOW"]}
+    ]
+}
+
+// INCORRECT - Missing namespace
+{
+    "or": [
+        {"===": [{"var": "Workload"}, "ALLOW"]}, // Will not resolve
+        {"===": [{"var": "User"}, "ALLOW"]}      // Will not resolve
+    ]
 }
 ```
 
-## Default implementation of Token Config
+**Consequences of Incorrect Format**  
+❌ Authorization will fail with DENY  
+❌ Potential evaluation errors in JSON logic  
+❌ Mismatches with actual Cedar policy definitions  
 
-Here is rust code default implementation of Token Configs (`CEDARLING_TOKEN_CONFIGS`). This is used when no custom token config is provided.
+### Default configuration
 
-```rust
-impl Default for TokenConfigs {
-    fn default() -> Self {
-        Self(HashMap::from([
-            ("access_token".to_string(), TokenConfig {
-                entity_type_name: "Jans::Access_token".to_string(),
-                claims: ClaimsValidationConfig {
-                    iss: FeatureToggle::Enabled,
-                    sub: FeatureToggle::Disabled,
-                    aud: FeatureToggle::Disabled,
-                    exp: FeatureToggle::Enabled,
-                    nbf: FeatureToggle::Disabled,
-                    iat: FeatureToggle::Disabled,
-                    jti: FeatureToggle::Enabled,
-                },
-            }),
-            ("id_token".to_string(), TokenConfig {
-                entity_type_name: "Jans::id_token".to_string(),
-                claims: ClaimsValidationConfig {
-                    iss: FeatureToggle::Enabled,
-                    sub: FeatureToggle::Enabled,
-                    aud: FeatureToggle::Enabled,
-                    exp: FeatureToggle::Enabled,
-                    nbf: FeatureToggle::Disabled,
-                    iat: FeatureToggle::Disabled,
-                    jti: FeatureToggle::Disabled,
-                },
-            }),
-            ("userinfo_token".to_string(), TokenConfig {
-                entity_type_name: "Jans::Userinfo_token".to_string(),
-                claims: ClaimsValidationConfig {
-                    iss: FeatureToggle::Enabled,
-                    sub: FeatureToggle::Enabled,
-                    aud: FeatureToggle::Enabled,
-                    exp: FeatureToggle::Enabled,
-                    nbf: FeatureToggle::Disabled,
-                    iat: FeatureToggle::Disabled,
-                    jti: FeatureToggle::Disabled,
-                },
-            }),
-        ]))
-    }
+Default value:
+
+```json
+{
+    "and" : [
+        {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+        {"===": [{"var": "Jans::User"}, "ALLOW"]}
+    ]
 }
+```
+
+Explanation:  
+
+* The rule uses and to require both principals to be authorized
+* `{"var": "Jans::Workload"}` checks the workload principal's decision
+* `{"var": "Jans::User"}` checks the user principal's decision
+* `"==="` performs strict equality comparison against "ALLOW"
+* both conditions must be true for final authorization to be granted
+
+### Comparison Operators
+
+* === (Recommended): Strict equality check (type and value must match)
+* ==: Loose equality check (may cause type coercion errors if variables are missing)
+
+Note: For comparison better to use `===` instead of `==`. To avoid casting result to `Nan` if something goes wrong.
+
+#### Operation Types
+
+##### **AND Operation**
+
+```js
+{"and": [condition1, condition2]}
+```
+
+* Authorization succeeds only if ALL conditions are true
+
+Example:
+
+```json
+{
+    "and" : [
+        {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+        {"===": [{"var": "Jans::User"}, "ALLOW"]}
+    ]
+}
+```
+
+##### **OR Operation**
+
+```js
+{"or": [condition1, condition2]}
+```
+
+* Authorization succeeds if ANY condition is true
+
+Example:
+
+```json
+{
+    "or" : [
+        {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+        {"===": [{"var": "Jans::User"}, "ALLOW"]}
+    ]
+}
+```
+
+#### Best Practices
+
+1. Use Strict Comparison (===)
+   * Prevents unexpected type conversions
+   * Returns DENY instead of errors when variables are missing
+1. Explicit Principal References
+
+    ```json
+    // Good - explicit principal type
+    {"===": [{"var": "Jans::Workload"}, "ALLOW"]}
+
+    // Bad - incorrect principal type
+    {"===": [{"var": "Workload"}, "ALLOW"]}
+    ```
+
+#### Error Scenarios
+
+* Using == with missing principals:
+
+```json
+{"==": [{"var": "MissingPrincipal"}, "ALLOW"]}  // Throws error
+```
+
+* Type mismatches:
+
+```json
+{"===": [{"var": "Jans::Workload"}, true]}  // Always false
 ```
 
 ## ID Token Trust Mode
@@ -233,17 +280,6 @@ Below is an example of a bootstrap config in JSON format. Not all fields should 
   "CEDARLING_POLICY_STORE_URI": null,
   "CEDARLING_POLICY_STORE_LOCAL": null,
   "CEDARLING_POLICY_STORE_LOCAL_FN": "./example_files/policy-store.json",
-  "CEDARLING_TOKEN_CONFIGS": {
-    "access_token": {
-      "entity_type_name": "Jans::Access_token"
-    },
-    "id_token": {
-      "entity_type_name": "Jans::id_token"
-    },
-    "userinfo_token": {
-      "entity_type_name": "Jans::Userinfo_token"
-    }
-  },
   "CEDARLING_POLICY_STORE_ID": "gICAgcHJpbmNpcGFsIGlz",
   "CEDARLING_LOG_TYPE": "std_out",
   "CEDARLING_LOG_LEVEL": "INFO",
@@ -256,7 +292,12 @@ Below is an example of a bootstrap config in JSON format. Not all fields should 
     "client_id",
     "rp_id"
   ],
-  "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
+  "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+    "and" : [
+      {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+      {"===": [{"var": "Jans::User"}, "ALLOW"]}
+    ]
+  },
   "CEDARLING_LOCAL_JWKS": null,
   "CEDARLING_JWT_SIG_VALIDATION": "disabled",
   "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
@@ -304,25 +345,26 @@ CEDARLING_WORKLOAD_AUTHZ: enabled
 CEDARLING_POLICY_STORE_URI: null
 CEDARLING_POLICY_STORE_LOCAL: null
 CEDARLING_POLICY_STORE_LOCAL_FN: ./example_files/policy-store.json
-CEDARLING_TOKEN_CONFIGS:
-    access_token: { entity_type_name: "Jans::Access_token" }
-    id_token: { entity_type_name: "Jans::id_token" }
-    userinfo_token: { entity_type_name: "Jans::Userinfo_token" }
-
 CEDARLING_POLICY_STORE_ID: gICAgcHJpbmNpcGFsIGlz
 CEDARLING_LOG_TYPE: std_out
 CEDARLING_LOG_LEVEL: INFO
 CEDARLING_LOG_TTL: null
 CEDARLING_DECISION_LOG_USER_CLAIMS: ["sub","email"]
 CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS: ["client_id", "rp_id"]
-CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION: AND
+CEDARLING_PRINCIPAL_BOOLEAN_OPERATION:
+    and:
+        - "===":
+            - var: "Jans::Workload"
+            - "ALLOW"
+        - "===":
+            - var: "Jans::User"
+            - "ALLOW"
 CEDARLING_LOCAL_JWKS: null
 CEDARLING_JWT_SIG_VALIDATION: disabled
 CEDARLING_JWT_STATUS_VALIDATION: disabled
 CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED:
     - HS256
     - RS256
-
 CEDARLING_ID_TOKEN_TRUST_MODE: strict
 CEDARLING_LOCK: disabled
 CEDARLING_LOCK_SERVER_CONFIGURATION_URI: null

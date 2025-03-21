@@ -671,4 +671,3 @@ tags:
 | jansLevel          | integer                     | None                     | YES  | None    | Level                                                         |
 | jansRevision       | integer                     | None                     | YES  | None    | Revision                                                      |
 | jansEnabled        | boolean                     | None                     | YES  | None    | Status of the entry, used by many objectclasses               |
-| jansAlias          | jsonb                       | None                     | YES  | None    | jansAlias                                                     |

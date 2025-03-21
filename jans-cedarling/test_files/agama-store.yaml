@@ -30,19 +30,19 @@ policy_stores:
         openid_configuration_endpoint: https://test-casa.gluu.info/.well-known/openid-configuration
         access_tokens:
           trusted: true
-          principal_identifier: ''
+          token_id: ''
           role_mapping: ''
         id_tokens:
           trusted: true
-          principal_identifier: sub
+          token_id: sub
           role_mapping: ''
         userinfo_tokens:
           trusted: true
-          principal_identifier: ''
+          token_id: ''
           role_mapping: role
         tx_tokens:
           trusted: true
-          principal_identifier: ''
+          token_id: ''
           role_mapping: ''
     schema:
       encoding: none

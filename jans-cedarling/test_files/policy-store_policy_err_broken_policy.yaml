@@ -25,7 +25,7 @@ policy_stores:
             )
             when
             {
-             Jans::Access_token::"abc".scope=="abc" && Jans::id_token::"idxxx".amr=="idxxx"
+             Jans::Access_token::"abc".scope=="abc" && Jans::Id_token::"idxxx".amr=="idxxx"
             };
     cedar_schema:
       encoding: none
