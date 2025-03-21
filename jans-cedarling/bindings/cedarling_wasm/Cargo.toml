@@ -10,7 +10,7 @@ repository = "git+https://github.com/JanssenProject/jans.git"
 registry = "https://registry.npmjs.org/"
 access = "public"
 provenance = true
-name = "cedarling_wasm"
+name = "@janssenproject/cedarling_wasm"
 
 [lib]
 crate-type = ["cdylib"] # Required for WASM output
