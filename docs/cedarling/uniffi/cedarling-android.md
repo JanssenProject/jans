@@ -14,7 +14,7 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
     ```bash
     cargo build --release
     ```
-   In `target/debug`, you should find the `libmobile.dylib`, `libmobile.so`, or `libmobile.dll` file, depending on the operating system you are using.
+   In `target/release`, you should find the `libmobile.dylib`, `libmobile.so`, or `libmobile.dll` file, depending on the operating system you are using.
 
    - **.so** (Shared Object) – This is the shared library format used in Linux and other Unix-based operating systems.
    - **.dylib** (Dynamic Library) – This is the shared library format for macOS.
