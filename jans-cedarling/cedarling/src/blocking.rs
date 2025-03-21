@@ -53,7 +53,7 @@ impl Cedarling {
 
     /// Authorize request with unsigned data.
     /// makes authorization decision based on the [`RequestUnverified`]
-    pub async fn authorize_unsigned(
+    pub fn authorize_unsigned(
         &self,
         request: RequestUnsigned,
     ) -> Result<AuthorizeResult, AuthorizeError> {
