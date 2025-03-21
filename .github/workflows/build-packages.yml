@@ -453,6 +453,7 @@ jobs:
         wasm-pack build --release --target web --scope janssenproject
         ls pkg
         cat pkg/package.json
+        jq empty pkg/package.json
         wasm-pack publish --tag "${NPM_TAG}"  || echo "failed to publish to NPM"
 
     - name: Archive and sign pkg contents
