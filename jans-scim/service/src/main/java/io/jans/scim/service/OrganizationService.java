@@ -18,7 +18,7 @@ import io.jans.config.oxtrust.LdapOxAuthConfiguration;
 import io.jans.model.ApplicationType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
-import io.jans.scim.model.GluuOrganization;
+import io.jans.scim.model.JansOrganization;
 import io.jans.service.BaseCacheService;
 import io.jans.service.CacheService;
 import io.jans.service.LocalCacheService;
@@ -55,12 +55,12 @@ public class OrganizationService extends io.jans.service.OrganizationService {
 	 * 
 	 * @return Organization
 	 */
-	public GluuOrganization getOrganization() {
+	public JansOrganization getOrganization() {
 		BaseCacheService usedCacheService = getCacheService();
 		String key = getDnForOrganization();
-		GluuOrganization organization = (GluuOrganization) usedCacheService.get(key);
+		JansOrganization organization = (JansOrganization) usedCacheService.get(key);
 		if (organization == null) {
-			organization = persistenceEntryManager.find(GluuOrganization.class, key);
+			organization = persistenceEntryManager.find(JansOrganization.class, key);
 			usedCacheService.put(key, organization);
 		}
 

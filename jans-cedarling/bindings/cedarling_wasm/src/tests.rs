@@ -29,13 +29,28 @@ static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
         "CEDARLING_LOG_LEVEL": "INFO",
         "CEDARLING_USER_AUTHZ": "enabled",
         "CEDARLING_WORKLOAD_AUTHZ": "enabled",
-        "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
-        "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
-        "CEDARLING_TOKEN_CONFIGS": {
-            "access_token": {"entity_type_name": "Jans::Access_token"},
-            "id_token": {"entity_type_name": "Jans::id_token"},
-            "userinfo_token": {"entity_type_name": "Jans::Userinfo_token"},
+        "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+            "and": [
+                {
+                    "===": [
+                        {
+                            "var": "Jans::Workload"
+                        },
+                        "ALLOW"
+                    ]
+                },
+                {
+                    "===": [
+                        {
+                            "var": "Jans::User"
+                        },
+                        "ALLOW"
+                    ]
+                }
+            ]
         },
+        "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
+        "CEDARLING_JWT_SIG_VALIDATION": "disabled",
     })
 });
 
@@ -139,12 +154,15 @@ async fn test_run_cedarling() {
             (
                 "access_token".to_string(),
                 generate_token_using_claims(json!({
-                  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-                  "code": "3e2a2012-099c-464f-890b-448160c2ab25",
                   "iss": "https://account.gluu.org",
+                  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+                  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
+                  "exp": 1732121460,
+                  "iat": 1731953030,
+                  "jti": "uZUh1hDUQo6PFkBPnwpGzg",
+                  "code": "3e2a2012-099c-464f-890b-448160c2ab25",
                   "token_type": "Bearer",
                   "client_id": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
                   "acr": "simple_password_auth",
                   "x5t#S256": "",
                   "nbf": 1731953030,
@@ -155,9 +173,6 @@ async fn test_run_cedarling() {
                     "email"
                   ],
                   "auth_time": 1731953027,
-                  "exp": 1732121460,
-                  "iat": 1731953030,
-                  "jti": "uZUh1hDUQo6PFkBPnwpGzg",
                   "username": "Default Admin User",
                   "status": {
                     "status_list": {
@@ -170,22 +185,22 @@ async fn test_run_cedarling() {
             (
                 "id_token".to_string(),
                 generate_token_using_claims(json!({
-                  "at_hash": "bxaCT0ZQXbv4sbzjSDrNiA",
-                  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-                  "amr": [],
                   "iss": "https://account.gluu.org",
+                  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+                  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
+                  "exp": 1731956630,
+                  "nbf": 1731953030,
+                  "iat": 1731953030,
+                  "jti": "ijLZO1ooRyWrgIn7cIdNyA",
+                  "at_hash": "bxaCT0ZQXbv4sbzjSDrNiA",
+                  "amr": [],
                   "nonce": "25b2b16b-32a2-42d6-8a8e-e5fa9ab888c0",
                   "sid": "6d443734-b7a2-4ed8-9d3a-1606d2f99244",
                   "jansOpenIDConnectVersion": "openidconnect-1.0",
-                  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
                   "acr": "simple_password_auth",
                   "c_hash": "V8h4sO9NzuLKawPO-3DNLA",
-                  "nbf": 1731953030,
                   "auth_time": 1731953027,
-                  "exp": 1731956630,
                   "grant": "authorization_code",
-                  "iat": 1731953030,
-                  "jti": "ijLZO1ooRyWrgIn7cIdNyA",
                   "status": {
                     "status_list": {
                       "idx": 307,
@@ -197,22 +212,21 @@ async fn test_run_cedarling() {
             (
                 "userinfo_token".to_string(),
                 generate_token_using_claims(json!({
+                  "iss": "https://account.gluu.org",
                   "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+                  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
+                  "jti": "OIn3g1SPSDSKAYDzENVoug",
                   "email_verified": true,
                   "role": [
                     "CasaAdmin"
                   ],
-                  "iss": "https://account.gluu.org",
                   "given_name": "Admin",
                   "middle_name": "Admin",
                   "inum": "a6a70301-af49-4901-9687-0bcdcf4e34fa",
-                  "client_id": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
                   "updated_at": 1731698135,
                   "name": "Default Admin User",
                   "nickname": "Admin",
                   "family_name": "User",
-                  "jti": "OIn3g1SPSDSKAYDzENVoug",
                   "email": "admin@jans.test",
                   "jansAdminUIRole": [
                     "api-admin"
@@ -268,13 +282,27 @@ async fn test_memory_log_interface() {
         "CEDARLING_LOG_LEVEL": "INFO",
         "CEDARLING_USER_AUTHZ": "enabled",
         "CEDARLING_WORKLOAD_AUTHZ": "enabled",
-        "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
-        "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
-        "CEDARLING_TOKEN_CONFIGS": {
-            "access_token": {"entity_type_name": "Access_token"},
-            "id_token": {"entity_type_name": "id_token"},
-            "userinfo_token": {"entity_type_name": "Userinfo_token"},
+        "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+            "and": [
+                {
+                    "===": [
+                        {
+                            "var": "Jans::Workload"
+                        },
+                        "ALLOW"
+                    ]
+                },
+                {
+                    "===": [
+                        {
+                            "var": "Jans::User"
+                        },
+                        "ALLOW"
+                    ]
+                }
+            ]
         },
+        "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
     });
 
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
@@ -359,7 +387,6 @@ async fn test_memory_log_interface() {
                   "given_name": "Admin",
                   "middle_name": "Admin",
                   "inum": "a6a70301-af49-4901-9687-0bcdcf4e34fa",
-                  "client_id": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
                   "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
                   "updated_at": 1731698135,
                   "name": "Default Admin User",

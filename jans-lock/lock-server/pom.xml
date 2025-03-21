@@ -37,6 +37,9 @@
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
 		<sonar.organization>janssenproject</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+
+		<swagger.version>2.2.28</swagger.version>
+		<swagger-maven-plugin-jakarta>2.2.28</swagger-maven-plugin-jakarta>
 	</properties>
 
 	<prerequisites>
@@ -98,6 +101,26 @@
 				<groupId>io.jans</groupId>
 				<artifactId>jans-lock-service</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+
+			<!-- Swagger -->
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-annotations</artifactId>
+				<version>${swagger.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-core-jakarta</artifactId>
+				<version>${swagger.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-jaxrs2</artifactId>
+				<version>${swagger.version}</version>
+				<scope>provided</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -206,6 +229,13 @@
 					<configuration>
 						<additionalJOption>-Xdoclint:none</additionalJOption>
 					</configuration>
+				</plugin>
+
+				<!-- Swagger -->
+				<plugin>
+					<groupId>io.swagger.core.v3</groupId>
+					<artifactId>swagger-maven-plugin-jakarta</artifactId>
+					<version>${swagger-maven-plugin-jakarta}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

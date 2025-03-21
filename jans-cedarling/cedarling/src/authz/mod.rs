@@ -10,21 +10,21 @@
 
 use crate::authorization_config::IdTokenTrustMode;
 use crate::bootstrap_config::AuthorizationConfig;
-use crate::common::app_types;
+use crate::common::json_rules::ApplyRuleError;
 use crate::common::policy_store::PolicyStoreWithID;
+use crate::entity_builder::*;
 use crate::jwt::{self, Token};
 use crate::log::interface::LogWriter;
 use crate::log::{
     AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, DiagnosticsRefs, LogEntry,
-    LogLevel, LogTokensInfo, LogType, Logger, PrincipalLogEntry, UserAuthorizeInfo,
-    WorkloadAuthorizeInfo, gen_uuid7,
+    LogLevel, LogTokensInfo, LogType, Logger, UserAuthorizeInfo, WorkloadAuthorizeInfo, gen_uuid7,
 };
 use build_ctx::*;
 use cedar_policy::{Entities, Entity, EntityUid};
 use chrono::Utc;
-use entity_builder::*;
 use request::Request;
-use std::collections::HashMap;
+use smol_str::ToSmolStr;
+use std::collections::{HashMap, HashSet};
 use std::io::Cursor;
 use std::str::FromStr;
 use std::sync::Arc;
@@ -34,7 +34,6 @@ mod authorize_result;
 mod build_ctx;
 mod trust_mode;
 
-pub(crate) mod entity_builder;
 pub(crate) mod request;
 
 pub use authorize_result::AuthorizeResult;
@@ -42,10 +41,9 @@ pub use authorize_result::AuthorizeResult;
 /// Configuration to Authz to initialize service without errors
 pub(crate) struct AuthzConfig {
     pub log_service: Logger,
-    pub pdp_id: app_types::PdpID,
-    pub application_name: app_types::ApplicationName,
     pub policy_store: PolicyStoreWithID,
     pub jwt_service: Arc<jwt::JwtService>,
+    pub entity_builder: Arc<EntityBuilder>,
     pub authorization: AuthorizationConfig,
 }
 
@@ -55,40 +53,22 @@ pub(crate) struct AuthzConfig {
 pub struct Authz {
     config: AuthzConfig,
     authorizer: cedar_policy::Authorizer,
-    entity_builder: EntityBuilder,
 }
 
 impl Authz {
     /// Create a new Authorization Service
-    pub(crate) fn new(config: AuthzConfig) -> Self {
-        let json_schema = config.policy_store.schema.json.clone();
-        let entity_names = EntityNames::from(&config.authorization);
-        let build_workload = config.authorization.use_workload_principal;
-        let build_user = config.authorization.use_user_principal;
-        let entity_builder = entity_builder::EntityBuilder::new(
-            json_schema,
-            entity_names,
-            build_workload,
-            build_user,
-        );
-
+    pub(crate) fn new(config: AuthzConfig) -> Result<Self, AuthzServiceInitError> {
         config.log_service.log_any(
-            LogEntry::new_with_data(
-                config.pdp_id,
-                Some(config.application_name.clone()),
-                LogType::System,
-                None,
-            )
-            .set_cedar_version()
-            .set_level(LogLevel::INFO)
-            .set_message("Cedarling Authz initialized successfully".to_string()),
+            LogEntry::new_with_data(LogType::System, None)
+                .set_cedar_version()
+                .set_level(LogLevel::INFO)
+                .set_message("Cedarling Authz initialized successfully".to_string()),
         );
 
-        Self {
+        Ok(Self {
             config,
             authorizer: cedar_policy::Authorizer::new(),
-            entity_builder,
-        }
+        })
     }
 
     // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
@@ -130,6 +110,7 @@ impl Authz {
 
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
         let entities_data = self
+            .config
             .entity_builder
             .build_entities(&tokens, &request.resource)?;
 
@@ -145,7 +126,14 @@ impl Authz {
         )?;
 
         let workload_principal = entities_data.workload.as_ref().map(|e| e.uid()).to_owned();
-        let user_principal = entities_data.user.as_ref().map(|e| e.uid()).to_owned();
+        let person_principal = entities_data.user.as_ref().map(|e| e.uid()).to_owned();
+
+        let workload_typename = workload_principal
+            .as_ref()
+            .map(|e| e.type_name().to_smolstr());
+        let person_typename = person_principal
+            .as_ref()
+            .map(|e| e.type_name().to_smolstr());
 
         // Convert [`AuthorizeEntitiesData`] to  [`cedar_policy::Entities`] structure,
         // hold all entities that will be used on authorize check.
@@ -194,7 +182,7 @@ impl Authz {
 
         // Check authorize where principal is `"Jans::User"` from cedar-policy schema.
         let (user_authz_result, user_authz_info, user_entity_claims) =
-            if let Some(user) = user_principal {
+            if let Some(user) = person_principal {
                 let principal = user;
 
                 let authz_result = self
@@ -235,16 +223,20 @@ impl Authz {
             };
 
         let result = AuthorizeResult::new(
-            self.config.authorization.user_workload_operator,
+            &self.config.authorization.principal_bool_operator,
+            workload_typename,
+            person_typename,
             workload_authz_result,
             user_authz_result,
             request_id,
-        );
+        )?;
 
         // measure time how long request executes
-        let elapsed_ms = Utc::now()
-            .signed_duration_since(start_time)
-            .num_milliseconds();
+        let since_start = Utc::now().signed_duration_since(start_time);
+        let decision_time_micro_sec = since_start.num_microseconds().unwrap_or({
+            //overflow (exceeding 2^63 microseconds in either direction)
+            i64::MAX
+        });
 
         // FROM THIS POINT WE ONLY MAKE LOGS
 
@@ -260,7 +252,7 @@ impl Authz {
             .as_ref()
             .map(|auth_info| &auth_info.diagnostics);
 
-        let workload_authz_diagnostic = user_authz_info
+        let workload_authz_diagnostic = workload_authz_info
             .as_ref()
             .map(|auth_info| &auth_info.diagnostics);
 
@@ -275,10 +267,13 @@ impl Authz {
         // Decision log
         // we log decision log before debug log, to avoid cloning diagnostic info
         self.config.log_service.as_ref().log_any(&DecisionLogEntry {
-            base: BaseLogEntry::new(self.config.pdp_id, LogType::Decision, request_id),
+            base: BaseLogEntry::new(LogType::Decision, request_id),
             policystore_id: self.config.policy_store.id.as_str(),
             policystore_version: self.config.policy_store.get_store_version(),
-            principal: PrincipalLogEntry::new(&self.config.authorization),
+            principal: DecisionLogEntry::principal(
+                result.person.is_some(),
+                result.workload.is_some(),
+            ),
             user: user_entity_claims,
             workload: workload_entity_claims,
             lock_client_id: None,
@@ -286,7 +281,7 @@ impl Authz {
             resource: resource_uid.to_string(),
             decision: result.decision.into(),
             tokens: tokens_logging_info,
-            decision_time_ms: elapsed_ms,
+            decision_time_micro_sec,
             diagnostics: DiagnosticsRefs::new(&[
                 &user_authz_diagnostic,
                 &workload_authz_diagnostic,
@@ -297,23 +292,18 @@ impl Authz {
         // Log all result information about both authorize checks.
         // Where principal is `"Jans::Workload"` and where principal is `"Jans::User"`.
         self.config.log_service.as_ref().log_any(
-            LogEntry::new_with_data(
-                self.config.pdp_id,
-                Some(self.config.application_name.clone()),
-                LogType::System,
-                Some(request_id),
-            )
-            .set_level(LogLevel::DEBUG)
-            .set_auth_info(AuthorizationLogInfo {
-                action: request.action.clone(),
-                context: request.context.clone(),
-                resource: resource_uid.to_string(),
-                entities: entities_json,
-                person_authorize_info: user_authz_info,
-                workload_authorize_info: workload_authz_info,
-                authorized: result.decision,
-            })
-            .set_message("Result of authorize.".to_string()),
+            LogEntry::new_with_data(LogType::System, Some(request_id))
+                .set_level(LogLevel::DEBUG)
+                .set_auth_info(AuthorizationLogInfo {
+                    action: request.action.clone(),
+                    context: request.context.clone(),
+                    resource: resource_uid.to_string(),
+                    entities: entities_json,
+                    person_authorize_info: user_authz_info,
+                    workload_authorize_info: workload_authz_info,
+                    authorized: result.decision,
+                })
+                .set_message("Result of authorize.".to_string()),
         );
 
         Ok(result)
@@ -349,9 +339,16 @@ impl Authz {
         tokens: &HashMap<String, Token>,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         Ok(self
+            .config
             .entity_builder
             .build_entities(tokens, &request.resource)?)
     }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum AuthzServiceInitError {
+    #[error(transparent)]
+    InitEntityBuilder(#[from] InitEntityBuilderError),
 }
 
 /// Helper struct to hold named parameters for [`Authz::execute_authorize`] method.
@@ -364,47 +361,24 @@ struct ExecuteAuthorizeParameters<'a> {
 }
 
 /// Structure to hold entites created from tokens
-#[derive(Clone)]
 pub struct AuthorizeEntitiesData {
+    pub issuers: HashSet<Entity>,
+    pub tokens: HashMap<String, Entity>,
     pub workload: Option<Entity>,
     pub user: Option<Entity>,
-    pub resource: Entity,
     pub roles: Vec<Entity>,
-    pub tokens: HashMap<String, Entity>,
+    pub resource: Entity,
 }
 
 impl AuthorizeEntitiesData {
-    // NOTE: the type ids created from these does not include the namespace
-    fn type_ids(&self) -> HashMap<String, String> {
-        self.iter()
-            .map(|entity| {
-                let type_name = entity.uid().type_name().basename().to_string();
-                let type_id = entity.uid().id().escaped().to_string();
-                (type_name, type_id)
-            })
-            .collect::<HashMap<String, String>>()
-    }
-
     /// Create iterator to get all entities
     fn into_iter(self) -> impl Iterator<Item = Entity> {
         vec![self.resource]
             .into_iter()
+            .chain(self.issuers)
             .chain(self.roles)
             .chain(self.tokens.into_values())
             .chain(vec![self.user, self.workload].into_iter().flatten())
-    }
-
-    /// Create iterator to get all entities
-    fn iter(&self) -> impl Iterator<Item = &Entity> {
-        vec![&self.resource]
-            .into_iter()
-            .chain(self.roles.iter())
-            .chain(self.tokens.values())
-            .chain(
-                vec![self.user.as_ref(), self.workload.as_ref()]
-                    .into_iter()
-                    .flatten(),
-            )
     }
 
     /// Collect all entities to [`cedar_policy::Entities`]
@@ -413,6 +387,29 @@ impl AuthorizeEntitiesData {
         schema: Option<&cedar_policy::Schema>,
     ) -> Result<cedar_policy::Entities, cedar_policy::entities_errors::EntitiesError> {
         Entities::from_entities(self.into_iter(), schema)
+    }
+
+    /// Returns the names and IDs of built entities for inclusion in the context.
+    ///
+    /// This includes:
+    /// - **Token Entities**: e.g., `access_token`, `id_token`, etc.
+    /// - **Principal Entities**: e.g., `Workload`, `User`, etc.
+    /// - **Role Entities**
+    ///
+    /// Only entities that have been built will be included
+    fn built_entities(&self) -> BuiltEntities {
+        let token_entities = self.tokens.values();
+        let principal_entities = [self.workload.as_ref(), self.user.as_ref()]
+            .into_iter()
+            .flatten();
+        let role_entities = self.roles.iter();
+
+        BuiltEntities::from_iter(
+            token_entities
+                .chain(principal_entities)
+                .chain(role_entities)
+                .map(|e| e.uid()),
+        )
     }
 }
 
@@ -434,9 +431,9 @@ pub enum AuthorizeError {
     /// Error encountered while creating [`cedar_policy::Request`] for user entity principal
     #[error("The request for `User` does not conform to the schema: {0}")]
     UserRequestValidation(cedar_policy::RequestValidationError),
-    /// Error encountered while collecting all entities
-    #[error("could not collect all entities: {0}")]
-    Entities(#[from] cedar_policy::entities_errors::EntitiesError),
+    /// Error encountered while checking if the Entities adhere to the schema
+    #[error("failed to validate Cedar entities: {0:?}")]
+    ValidateEntities(#[from] cedar_policy::entities_errors::EntitiesError),
     /// Error encountered while parsing all entities to json for logging
     #[error("could convert entities to json: {0}")]
     EntitiesToJson(serde_json::Error),
@@ -448,7 +445,10 @@ pub enum AuthorizeError {
     IdTokenTrustMode(#[from] IdTokenTrustModeError),
     /// Error encountered while building Cedar Entities
     #[error(transparent)]
-    BuildEntity(#[from] BuildCedarlingEntityError),
+    BuildEntity(#[from] BuildEntityError),
+    /// Error encountered while executing the rule for principals
+    #[error(transparent)]
+    ExecuteRule(#[from] ApplyRuleError),
 }
 
 #[derive(Debug, derive_more::Error, derive_more::Display)]

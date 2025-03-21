@@ -281,7 +281,7 @@ import io.jans.as.server.util.AgamaConsentUtil;
 import io.jans.service.cdi.util.CdiUtil;
 ...
 AgamaConsentUtil acu = CdiUtil.bean(AgamaConsentUtil.class);
-String name = acu.getClient().getClientName();        //retrieves the client's display name
+String name = acu.getClient().getClientName(); //retrieves the client's display name
 ```
 
 Agama DSL example:

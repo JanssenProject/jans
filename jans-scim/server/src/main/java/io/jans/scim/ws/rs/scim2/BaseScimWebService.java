@@ -32,7 +32,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.orm.model.SortOrder;
-import io.jans.scim.model.GluuCustomPerson;
+import io.jans.scim.model.JansCustomPerson;
 import io.jans.scim.model.exception.SCIMException;
 import io.jans.scim.model.scim2.BaseScimResource;
 import io.jans.scim.model.scim2.ErrorResponse;
@@ -131,7 +131,7 @@ public class BaseScimWebService {
 
         Response response = null;
         if (StringUtils.isNotEmpty(id)) {
-            GluuCustomPerson person = personService.getPersonByInum(id);
+            JansCustomPerson person = personService.getPersonByInum(id);
 
             if (person == null) {
                 log.info("Person with inum {} not found", id);

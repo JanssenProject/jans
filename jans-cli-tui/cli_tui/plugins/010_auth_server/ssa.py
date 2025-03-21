@@ -8,8 +8,9 @@ from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import HSplit, VSplit
 from prompt_toolkit.layout.containers import DynamicContainer, Window
-from prompt_toolkit.widgets import Button, Label, Checkbox, Dialog
+from prompt_toolkit.widgets import Button, Label, Checkbox, RadioList, Dialog
 from prompt_toolkit.buffer import Buffer
+from prompt_toolkit.formatted_text import HTML
 
 from cli import config_cli
 from utils.multi_lang import _
@@ -29,6 +30,7 @@ class SSA(DialogUtils):
 
         self.app = self.myparent = app
         self.data = []
+
         self.working_container = JansVerticalNav(
                 myparent=app,
                 headers=[_("Software ID"), _("Organization"), _("Software Roles"), _("Status"), _("Exp.")],
@@ -125,6 +127,9 @@ class SSA(DialogUtils):
 
         new_data['software_roles'] = new_data['software_roles'].splitlines()
 
+        for custom_attrib_name, custom_attrib_value in self.custom_attributes_container.all_data:
+            new_data[custom_attrib_name] = custom_attrib_value
+
         if self.check_required_fields(dialog.body, data=new_data):
 
             async def coroutine():
@@ -144,54 +149,101 @@ class SSA(DialogUtils):
             asyncio.ensure_future(coroutine())
 
 
-    def edit_custom_claim(self, **kwargs: Any) -> None:
+    def edit_custom_attribute(self, *args: Any,  **kwargs: Any) -> None:
 
-        """Method for editing the custom claim 
-        """
+        if args:
+            dialog_title = _("Add Custom Attribute")
+            attrib_name = args[0].dialog.body.current_value
+            attrib_value = ''
+            
+        else:
+            dialog_title = _("Edit Custom Attribute")
+            attrib_name, attrib_value = kwargs.get('data', ('',''))
 
-        key, val = kwargs.get('data', ('',''))
 
-        key_widget = self.app.getTitledText(_("Key"), name='claim_key', value=key, style=cli_style.edit_text, jans_help=_("Custom claim Key"))
-        val_widget = self.app.getTitledText(_("Value"), name='claim_val', value=val, style=cli_style.edit_text, jans_help=_("Custom claim value"))
+        key_widget = self.app.getTitledText(_("Attribute name"), name='attribute_name', value=attrib_name, style=cli_style.read_only, read_only=True)
+        val_widget = self.app.getTitledText(_("Attribute Value"), name='attribute_value', value=attrib_value, style=cli_style.edit_text)
 
-        def add_claim(dialog: Dialog) -> None:
-            key_ = key_widget.me.text
-            val_ = val_widget.me.text
-            cur_data = [key_, val_]
+        def add_attribute(dialog: Dialog) -> None:
+            cur_data = [attrib_name, val_widget.me.text]
 
-            if not kwargs.get('data'):
-                self.custom_claims_container.add_item(cur_data)
-                self.custom_claims_container.all_data.append(cur_data)
+            if args:
+                self.custom_attributes_container.add_item(cur_data)
+                self.custom_attributes_container.all_data.append(cur_data)
             else:
-                self.custom_claims_container.replace_item(kwargs['selected'], cur_data)
-                self.custom_claims_container.all_data[kwargs['selected']] = cur_data
+                self.custom_attributes_container.replace_item(kwargs['selected'], cur_data)
+                self.custom_attributes_container.all_data[kwargs['selected']] = cur_data
 
         body_widgets = [key_widget, val_widget]
         body = HSplit(body_widgets)
-        buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_claim)]
-        dialog = JansGDialog(self.app, title=_("Edit Custom Claim"), body=body, buttons=buttons, width=self.app.dialog_width-20)
+        buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_attribute)]
+        dialog = JansGDialog(self.app, title=dialog_title, body=body, buttons=buttons, width=self.app.dialog_width-20)
         self.app.show_jans_dialog(dialog)
 
 
-    def delete_custom_claim(self, **kwargs: Any) -> None:
-        """This method for deleting custom claim
-        """
+    def add_custom_attribute(self, **kwargs: Any) -> None:
 
-        dialog = self.app.get_confirm_dialog(_("Are you sure want to delete custom claim with Key:")+"\n {} ?".format(kwargs['selected'][0]))
+        if not self.ssa_custom_attributes:
+            msg = HTML(_("Custom attributes for SSA was not defined. Please go <b>Auth Server</b> / <b>Properties</b> and edit <b>ssaConfiguration</b> for <b>ssaCustomAttributes</b>"))
+            self.app.show_message(
+                _("No Custom Attributes"),
+                msg,
+                tobefocused=self.edit_ssa_dialog_container
+                )
+            return
 
-        async def coroutine():
-            focused_before = self.app.layout.current_window
-            result = await self.myparent.show_dialog_as_float(dialog)
-            try:
-                self.myparent.layout.focus(focused_before)
-            except Exception:
-                self.myparent.app.focus(self.myparent.center_frame)
 
-            if result.lower() == 'yes':
-                self.custom_claims_container.remove_item(kwargs['selected'])
+        buttons = [
+                Button(_("Cancel")),
+                Button(_("OK"), handler=self.edit_custom_attribute)
+                ]
 
-        asyncio.ensure_future(coroutine())
+        attributes_list = []
+        current_attributes = [data[0] for data in self.custom_attributes_container.all_data]
+        for attr in self.ssa_custom_attributes:
+            if not attr in current_attributes:
+                attributes_list.append((attr, attr))
 
+
+        if not attributes_list:
+            msg = _("All custom attributes were added")
+            self.app.show_message(
+                _("Nothing Left to Add"),
+                msg,
+                tobefocused=self.edit_ssa_dialog_container
+                )
+            return
+
+        dialog_title = _("Select attribute to add")
+
+        self.addAttributeDialog = JansGDialog(
+            self.app,
+            title=dialog_title,
+            body=RadioList(values=attributes_list),
+            buttons=buttons,
+            width = max(len(dialog_title),self.attributes_max_len) + 12
+            )
+
+        self.app.show_jans_dialog(self.addAttributeDialog)
+
+
+
+
+    def delete_custom_attribute(self, **kwargs: Any) -> None:
+
+        def do_delete_custom_attribute(result):
+            self.custom_attributes_container.remove_item(kwargs['selected'])
+            for data in self.custom_attributes_container.all_data:
+                if data == kwargs['selected']:
+                    self.custom_attributes_container.all_data.remove(data)
+                    break
+
+        dialog = self.app.get_confirm_dialog(
+            HTML(_("Are you sure want to delete custom attribute <b>{}</b>").format(kwargs['selected'][0])),
+            confirm_handler=do_delete_custom_attribute
+            )
+
+        self.app.show_jans_dialog(dialog)
 
     def edit_ssa_dialog(self, data=None):
         if data:
@@ -199,6 +251,13 @@ class SSA(DialogUtils):
         else:
             data = {}
             title = _("Add new SSA")
+
+        self.ssa_custom_attributes = self.app.app_configuration.get('ssaConfiguration', {}).get('ssaCustomAttributes', [])
+
+        self.attributes_max_len = 0
+        for attr in self.ssa_custom_attributes:
+            if len(attr) > self.attributes_max_len:
+                self.attributes_max_len = len(attr)
 
         expiration_label = _("Expiration")
         never_expire_label = _("Never")
@@ -216,14 +275,15 @@ class SSA(DialogUtils):
 
         hide_show_expire_widget()
 
-        custom_claims_title = _("Custom Claims: ")
-        add_custom_claim_title = _("Add Claim")
-        self.custom_claims_container = JansVerticalNav(
+        custom_attribute_len = self.attributes_max_len or 20
+        custom_attributes_title = _("Custom Attributes")
+        add_custom_attribute_title = _("Add Attribute")
+        self.custom_attributes_container =  JansVerticalNav(
                 myparent=self.app,
-                headers=['Key', 'Value'],
-                preferred_size=[15, 20],
-                on_enter=self.edit_custom_claim,
-                on_delete=self.delete_custom_claim,
+                headers=[_('Name'), _('Value')],
+                preferred_size=[custom_attribute_len+2, 20],
+                on_enter=self.edit_custom_attribute,
+                on_delete=self.delete_custom_attribute,
                 on_display=self.myparent.data_display_dialog,
                 selectes=0,
                 all_data=[],
@@ -231,7 +291,7 @@ class SSA(DialogUtils):
                 entriesColor=cli_style.navbar_entriescolor,
                 underline_headings=False,
                 max_width=52,
-                jans_name='customClaims',
+                jans_name='customAttributes',
                 max_height=3
                 )
 
@@ -241,21 +301,21 @@ class SSA(DialogUtils):
                     title=_("Software ID"),
                     name='software_id',
                     value=data.get('software_id',''),
-                    style=cli_style.edit_text_required
+                    style=cli_style.edit_text
                 ),
 
                 self.app.getTitledText(
                     title=_("Organization"),
                     name='org_id',
                     value=data.get('org_id',''),
-                    style=cli_style.edit_text_required
+                    style=cli_style.edit_text
                 ),
 
                 self.app.getTitledText(
                     title=_("Description"),
                     name='description',
                     value=data.get('description',''),
-                    style=cli_style.edit_text_required
+                    style=cli_style.edit_text
                 ),
 
                 self.app.getTitledCheckBoxList(
@@ -271,17 +331,17 @@ class SSA(DialogUtils):
                     name='software_roles',
                     value='\n'.join(data.get('software_roles', [])),
                     height=3,
-                    style=cli_style.edit_text_required
+                    style=cli_style.edit_text
                 ),
 
-                #VSplit([
-                #            HSplit([Label(text=custom_claims_title, style=cli_style.titled_text, width=len(custom_claims_title)+1)], height=1),
-                #            self.custom_claims_container,
-                #            Window(width=2),
-                #            HSplit([Button(text=add_custom_claim_title, width=len(add_custom_claim_title)+ 2, handler=self.edit_custom_claim)], height=1),
-                #            ],
-                #            height=5, width=D(),
-                #            ),
+                VSplit([
+                            HSplit([Label(text=custom_attributes_title, style=cli_style.titled_text, width=len(custom_attributes_title)+1)], height=1),
+                            self.custom_attributes_container,
+                            Window(width=2),
+                            HSplit([Button(text=add_custom_attribute_title, width=len(add_custom_attribute_title)+ 2, handler=self.add_custom_attribute)], height=1),
+                            ],
+                            height=5, width=D(),
+                            ),
 
                 self.app.getTitledCheckBox(
                             _("One Time Use"), 
@@ -309,8 +369,8 @@ class SSA(DialogUtils):
         save_button.keep_dialog = True
         canncel_button = Button(_("Cancel"))
         buttons = [save_button, canncel_button]
-        dialog = JansGDialog(self.app, title=title, body=body, buttons=buttons)
-        self.app.show_jans_dialog(dialog)
+        self.edit_ssa_dialog_container = JansGDialog(self.app, title=title, body=body, buttons=buttons)
+        self.app.show_jans_dialog(self.edit_ssa_dialog_container)
 
     def search_ssa(self, tbuffer:Buffer) -> None:
         if self.data:

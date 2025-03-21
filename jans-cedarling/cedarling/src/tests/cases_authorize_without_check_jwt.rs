@@ -10,86 +10,6 @@ use super::utils::*;
 use crate::{cmp_decision, cmp_policy}; // macros is defined in the cedarling\src\tests\utils\cedarling_util.rs
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/policy-store_ok_2.yaml");
-static POLICY_STORE_ABAC_YAML: &str = include_str!("../../../test_files/policy-store_ok_abac.yaml");
-
-/// Success test case where all check a successful
-/// role field in the `userinfo_token` because we search here by default
-/// role field is string.
-///
-/// we check here that field are parsed from JWT tokens
-/// and correctly executed using correct cedar-policy id
-#[test]
-async fn success_test_role_string() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
-
-    // deserialize `Request` from json
-    let request = Request::deserialize(serde_json::json!(
-        {
-            "tokens": {
-                "access_token": generate_token_using_claims(json!({
-                    "org_id": "some_long_id",
-                    "jti": "some_jti",
-                    "client_id": "some_client_id",
-                    "iss": "some_iss",
-                    "aud": "some_aud",
-                })),
-                "id_token": generate_token_using_claims(json!({
-                    "jti": "some_jti",
-                    "iss": "some_iss",
-                    "aud": "some_aud",
-                    "sub": "some_sub",
-                })),
-                "userinfo_token":  generate_token_using_claims(json!({
-                    "jti": "some_jti",
-                    "country": "US",
-                    "sub": "some_sub",
-                    "iss": "some_iss",
-                    "client_id": "some_client_id",
-                    "role": "Admin",
-                })),
-            },
-            "action": "Jans::Action::\"Update\"",
-            "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
-                "org_id": "some_long_id",
-                "country": "US"
-            },
-            "context": {},
-        }
-    ))
-    .expect("Request should be deserialized from json");
-
-    let result = cedarling
-        .authorize(request)
-        .await
-        .expect("request should be parsed without errors");
-
-    cmp_decision!(
-        result.workload,
-        Decision::Allow,
-        "request result should be allowed for workload"
-    );
-    cmp_policy!(
-        result.workload,
-        vec!["1"],
-        "reason of permit workload should be '1'"
-    );
-
-    cmp_decision!(
-        result.person,
-        Decision::Allow,
-        "request result should be allowed for person"
-    );
-
-    cmp_policy!(
-        result.person,
-        vec!["2", "3"],
-        "reason of permit person should be '2','3'"
-    );
-
-    assert!(result.decision, "request result should be allowed");
-}
 
 /// forbid test case where all check of role is forbid
 /// role field in the `userinfo_token` because we search here by default
@@ -109,12 +29,12 @@ async fn forbid_test_role_guest() {
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                 })),
                 "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                     "sub": "some_sub",
                 })),
@@ -122,9 +42,8 @@ async fn forbid_test_role_guest() {
                     "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
-                    "iss": "some_iss",
-                    "client_id": "some_client_id",
-                    "role": "Guest",
+                    "iss": "https://account.gluu.org",
+                    "role": ["Guest"],
                 })),
             },
             "action": "Jans::Action::\"Update\"",
@@ -188,12 +107,12 @@ async fn success_test_role_array() {
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                 })),
                 "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                     "sub": "some_sub",
                 })),
@@ -201,8 +120,7 @@ async fn success_test_role_array() {
                     "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
-                    "iss": "some_iss",
-                    "client_id": "some_client_id",
+                    "iss": "https://account.gluu.org",
                     "role": ["Admin"],
                 })),
             },
@@ -268,12 +186,12 @@ async fn success_test_no_role() {
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                 })),
                 "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                     "sub": "some_sub",
                 })),
@@ -281,8 +199,7 @@ async fn success_test_no_role() {
                     "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
-                    "iss": "some_iss",
-                    "client_id": "some_client_id",
+                    "iss": "https://account.gluu.org",
                     // comment role field (removed)
                     // "role": ["Admin"],
                 })),
@@ -350,22 +267,21 @@ async fn success_test_user_data_in_id_token() {
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                 })),
                 "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                     "sub": "some_sub",
+                    "role": ["Admin"],
                     "country": "US",
                 })),
                 "userinfo_token":  generate_token_using_claims(json!({
                     "jti": "some_jti",
                     "sub": "some_sub",
-                    "iss": "some_iss",
-                    "client_id": "some_client_id",
-                    "role": ["Admin"],
+                    "iss": "https://account.gluu.org",
                     "country": "US",
                 })),
             },
@@ -427,12 +343,12 @@ async fn all_forbid() {
                     "org_id": "some_long_id_2",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                 })),
                 "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                     "sub": "some_sub",
                 })),
@@ -441,9 +357,8 @@ async fn all_forbid() {
                   // country different from resource
                     "country": "UK",
                     "sub": "some_sub",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "jti": "some_jti",
-                    "client_id": "some_client_id",
                     // role not Admin
                     "role": ["Guest"],
                 })),
@@ -505,12 +420,12 @@ async fn only_workload_permit() {
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                 })),
                 "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                     "sub": "some_sub",
                 })),
@@ -519,8 +434,7 @@ async fn only_workload_permit() {
                   // country different from resource
                     "country": "UK",
                     "sub": "some_sub",
-                    "iss": "some_iss",
-                    "client_id": "some_client_id",
+                    "iss": "https://account.gluu.org",
                     // role not Admin
                     "role": ["Guest"],
                 })),
@@ -589,12 +503,12 @@ async fn only_person_permit() {
                     "org_id": "some_long_id_2",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                 })),
                 "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                     "sub": "some_sub",
                 })),
@@ -603,8 +517,7 @@ async fn only_person_permit() {
                   // country different from resource
                     "country": "US",
                     "sub": "some_sub",
-                    "iss": "some_iss",
-                    "client_id": "some_client_id",
+                    "iss": "https://account.gluu.org",
                     // role not present, commented line
                     // "role": ["Guest"],
                 })),
@@ -667,12 +580,12 @@ async fn only_user_role_permit() {
                     "org_id": "some_long_id_2",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                 })),
                 "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                     "sub": "some_sub",
                 })),
@@ -681,8 +594,7 @@ async fn only_user_role_permit() {
                   // country different from resource
                     "country": "UK",
                     "sub": "some_sub",
-                    "iss": "some_iss",
-                    "client_id": "some_client_id",
+                    "iss": "https://account.gluu.org",
                     "role": ["Admin"],
                 })),
             },
@@ -743,12 +655,12 @@ async fn only_workload_and_person_permit() {
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                 })),
                 "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                     "sub": "some_sub",
                 })),
@@ -756,8 +668,7 @@ async fn only_workload_and_person_permit() {
                     "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
-                    "iss": "some_iss",
-                    "client_id": "some_client_id",
+                    "iss": "https://account.gluu.org",
                     // role vector is empty
                     "role": [],
                 })),
@@ -819,12 +730,12 @@ async fn only_workload_and_role_permit() {
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                 })),
                 "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                     "sub": "some_sub",
                 })),
@@ -833,8 +744,7 @@ async fn only_workload_and_role_permit() {
                     // country different from resource
                     "country": "UK",
                     "sub": "some_sub",
-                    "iss": "some_iss",
-                    "client_id": "some_client_id",
+                    "iss": "https://account.gluu.org",
                     "role": ["Admin"],
                 })),
             },
@@ -880,75 +790,4 @@ async fn only_workload_and_role_permit() {
     );
 
     assert!(result.decision, "request result should be allowed");
-}
-
-#[test]
-async fn success_test_role_string_with_abac() {
-    let cedarling =
-        get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_ABAC_YAML.to_string())).await;
-
-    // deserialize `Request` from json
-    let request = Request::deserialize(serde_json::json!(
-        {
-            "tokens": {
-                "access_token": generate_token_using_claims(json!({
-                    "org_id": "some_long_id",
-                    "jti": "token1",
-                    "client_id": "some_client_id",
-                    "iss": "https://account.gluu.org",
-                    "aud": "client123",
-                    "exp": i64::MAX,
-                    "iat": 0,
-                    "name": "Worker123",
-                })),
-                "id_token": generate_token_using_claims(json!({
-                    "jti": "token2",
-                    "iss": "https://account.gluu.org",
-                    "aud": "client123",
-                    "sub": "some_sub",
-                    "exp": i64::MAX,
-                    "iat": 0,
-                    "amr": "some_amr",
-                    "acr": "some_acr",
-                })),
-                "userinfo_token":  generate_token_using_claims(json!({
-                    "jti": "token3",
-                    "iss": "https://account.gluu.org",
-                    "sub": "some_sub",
-                    "country": "US",
-                    "role": "Worker",
-                    "email": "some_email@gluu.org",
-                    "client_id": "some_client_id",
-                    "username": "worker123",
-                    "exp": i64::MAX,
-                    "iat": 0,
-                })),
-            },
-            "action": "Jans::Action::\"Update\"",
-            "resource": {
-                "id": "random_id",
-                "type": "Jans::Issue",
-                "org_id": "some_long_id",
-                "country": "US"
-            },
-            "context": {},
-        }
-    ))
-    .expect("Request should be deserialized from json");
-
-    let result = cedarling
-        .authorize(request)
-        .await
-        .expect("request should be parsed without errors");
-
-    cmp_decision!(
-        result.workload,
-        Decision::Allow,
-        "request result should be allowed for workload"
-    );
-    cmp_policy!(
-        result.workload,
-        vec!["1"],
-        "reason of permit workload should be '1'"
-    );
 }

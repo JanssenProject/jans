@@ -14,25 +14,35 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import __wbg_init, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
+import { jwtDecode } from "jwt-decode";
+import { IJWT } from './IJWT';
 
 const UserDetails = ({ data, notifyOnDataChange }) => {
     const [loading, setLoading] = useState(false);
-    const [showMoreIdToken, setShowMoreIdToken] = useState(false);
-    const [showMoreAT, setShowMoreAT] = useState(false);
-    const [showMoreUI, setShowMoreUI] = useState(false);
+    const [showPayloadIdToken, setShowPayloadIdToken] = useState(false);
+    const [showPayloadAT, setShowPayloadAT] = useState(false);
+    const [showPayloadUI, setShowPayloadUI] = useState(false);
     const [context, setContext] = React.useState({});
     const [action, setAction] = React.useState("");
-    const [accessToken, setAccessToken] = React.useState(false);
-    const [userInfoToken, setUserInfoToken] = React.useState(false);
-    const [idToken, setIdToken] = React.useState(false);
+    const [tokenSelection, setTokenSelection] = useState({ accessToken: false, userInfo: false, idToken: false });
+    const [decodedTokens, setDecodedTokens] = React.useState<{
+    accessToken: IJWT;
+    userInfoToken: IJWT;
+    idToken: IJWT;
+    }>({
+        accessToken: { header: {}, payload: {} },
+        userInfoToken: { header: {}, payload: {} },
+        idToken: { header: {}, payload: {} },
+    });
+
     const [resource, setResource] = React.useState({});
     const [cedarlingBootstrapPresent, setCedarlingBootstrapPresent] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState("")
     const [authzResult, setAuthzResult] = React.useState("")
     const [authzLogs, setAuthzLogs] = React.useState("")
-
+    const [logType, setLogType] = React.useState('Decision');
 
     React.useEffect(() => {
         chrome.storage.local.get(["authzRequest"], (authzRequest) => {
@@ -48,8 +58,27 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                 setCedarlingBootstrapPresent(true);
             }
         });
-    }, [])
+        if (data) {
+            setDecodedTokens({
+                accessToken: decodeJWT(data.access_token),
+                userInfoToken: decodeJWT(data.userDetails),
+                idToken: decodeJWT(data.id_token),
+            });
+        }
+    }, [data])
 
+    const decodeJWT = (token: string | undefined): IJWT => {
+        try {
+            if (!token) return { header: {}, payload: {} }; // Handle undefined token
+            const payload = jwtDecode(token);
+            const header = jwtDecode(token, { header: true });
+            return { header, payload };
+        } catch (error) {
+            console.error("Error decoding JWT:", error);
+            return { header: {}, payload: {} }; // Return empty object on error
+        }
+    };
+    
     const triggerCedarlingAuthzRequest = async () => {
         setAuthzResult("");
         setAuthzLogs("");
@@ -61,10 +90,8 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                     await __wbg_init();
                     instance = await init(!isEmpty(cedarlingConfig?.cedarlingConfig) ? cedarlingConfig?.cedarlingConfig[0] : undefined);
                     let result: AuthorizeResult = await instance.authorize(reqObj);
-                    let logs = await instance.pop_logs();
+                    let logs = await instance.get_logs_by_request_id_and_tag(result.request_id, logType);
                     setAuthzResult(result.json_string())
-                    console.log("result:", result);
-                    logs.push(await instance.pop_logs());
                     if (logs.length != 0) {
                         let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
                         setAuthzLogs(pretty_logs.toString());
@@ -72,7 +99,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
 
                 }
             } catch (err) {
-                setAuthzResult(err);
+                setAuthzResult(err.toString());
                 console.log("err:", err);
                 let logs = await instance.pop_logs();
                 if (logs.length != 0) {
@@ -86,30 +113,20 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
     }
 
     const createCedarlingAuthzRequestObj = async () => {
-        let reqObj = { tokens: { access_token: '', id_token: '', userinfo_token: '' }, action: "", resource: {}, context: {} };
-        if (accessToken) {
-            reqObj.tokens.access_token = (!!data ? data?.access_token : '');
-        }
-    
-        if (idToken) {
-            reqObj.tokens.id_token = (!!data ? data?.id_token : '');
-        }
-        
-        if (userInfoToken) {
-            reqObj.tokens.userinfo_token = (!!data ? data?.userDetails : '');
-        }
-        
-        //reqObj.tokens.access_token = 'eyJraWQiOiJjb25uZWN0X2Y5YTAwN2EyLTZkMGItNDkyYS05MGNkLWYwYzliMWMyYjVkYl9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJxenhuMVNjcmI5bFd0R3hWZWRNQ2t5LVFsX0lMc3BaYVFBNmZ5dVlrdHcwIiwiY29kZSI6IjNlMmEyMDEyLTA5OWMtNDY0Zi04OTBiLTQ0ODE2MGMyYWIyNSIsImlzcyI6Imh0dHBzOi8vYWNjb3VudC5nbHV1Lm9yZyIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJjbGllbnRfaWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhdWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhY3IiOiJzaW1wbGVfcGFzc3dvcmRfYXV0aCIsIng1dCNTMjU2IjoiIiwibmJmIjoxNzMxOTUzMDMwLCJzY29wZSI6WyJyb2xlIiwib3BlbmlkIiwicHJvZmlsZSIsImVtYWlsIl0sImF1dGhfdGltZSI6MTczMTk1MzAyNywiZXhwIjoxNzMyMTIxNDYwLCJpYXQiOjE3MzE5NTMwMzAsImp0aSI6InVaVWgxaERVUW82UEZrQlBud3BHemciLCJ1c2VybmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjMwNiwidXJpIjoiaHR0cHM6Ly9qYW5zLnRlc3QvamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0.Pt-Y7F-hfde_WP7ZYwyvvSS11rKYQWGZXTzjH_aJKC5VPxzOjAXqI3Igr6gJLsP1aOd9WJvOPchflZYArctopXMWClbX_TxpmADqyCMsz78r4P450TaMKj-WKEa9cL5KtgnFa0fmhZ1ZWolkDTQ_M00Xr4EIvv4zf-92Wu5fOrdjmsIGFot0jt-12WxQlJFfs5qVZ9P-cDjxvQSrO1wbyKfHQ_txkl1GDATXsw5SIpC5wct92vjAVm5CJNuv_PE8dHAY-KfPTxOuDYBuWI5uA2Yjd1WUFyicbJgcmYzUSVt03xZ0kQX9dxKExwU2YnpDorfwebaAPO7G114Bkw208g';
-        //reqObj.tokens.id_token = 'eyJraWQiOiJjb25uZWN0X2Y5YTAwN2EyLTZkMGItNDkyYS05MGNkLWYwYzliMWMyYjVkYl9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiYnhhQ1QwWlFYYnY0c2J6alNEck5pQSIsInN1YiI6InF6eG4xU2NyYjlsV3RHeFZlZE1Da3ktUWxfSUxzcFphUUE2Znl1WWt0dzAiLCJhbXIiOltdLCJpc3MiOiJodHRwczovL2FjY291bnQuZ2x1dS5vcmciLCJub25jZSI6IjI1YjJiMTZiLTMyYTItNDJkNi04YThlLWU1ZmE5YWI4ODhjMCIsInNpZCI6IjZkNDQzNzM0LWI3YTItNGVkOC05ZDNhLTE2MDZkMmY5OTI0NCIsImphbnNPcGVuSURDb25uZWN0VmVyc2lvbiI6Im9wZW5pZGNvbm5lY3QtMS4wIiwiYXVkIjoiZDdmNzFiZWEtYzM4ZC00Y2FmLWExYmEtZTQzYzc0YTExYTYyIiwiYWNyIjoic2ltcGxlX3Bhc3N3b3JkX2F1dGgiLCJjX2hhc2giOiJWOGg0c085Tnp1TEthd1BPLTNETkxBIiwibmJmIjoxNzMxOTUzMDMwLCJhdXRoX3RpbWUiOjE3MzE5NTMwMjcsImV4cCI6MTczMTk1NjYzMCwiZ3JhbnQiOiJhdXRob3JpemF0aW9uX2NvZGUiLCJpYXQiOjE3MzE5NTMwMzAsImp0aSI6ImlqTFpPMW9vUnlXcmdJbjdjSWROeUEiLCJzdGF0dXMiOnsic3RhdHVzX2xpc3QiOnsiaWR4IjozMDcsInVyaSI6Imh0dHBzOi8vamFucy50ZXN0L2phbnMtYXV0aC9yZXN0djEvc3RhdHVzX2xpc3QifX19.Nw7MRaJ5LtDak_LdEjrICgVOxDwd1p1I8WxD7IYw0_mKlIJ-J_78rGPski9p3L5ZNCpXiHtVbnhc4lJdmbh-y6mrD3_EY_AmjK50xpuf6YuUuNVtFENCSkj_irPLkIDG65HeZherWsvH0hUn4FVGv8Sw9fjny9Doi-HGHnKg9Qvphqre1U8hCphCVLQlzXAXmBkbPOC8tDwId5yigBKXP50cdqDcT-bjXf9leIdGgq0jxb57kYaFSElprLN9nUygM4RNCn9mtmo1l4IsdTlvvUb3OMAMQkRLfMkiKBjjeSF3819mYRLb3AUBaFH16ZdHFBzTSB6oA22TYpUqOLihMg';
-        //reqObj.tokens.userinfo_token = 'eyJraWQiOiJjb25uZWN0X2Y5YTAwN2EyLTZkMGItNDkyYS05MGNkLWYwYzliMWMyYjVkYl9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJxenhuMVNjcmI5bFd0R3hWZWRNQ2t5LVFsX0lMc3BaYVFBNmZ5dVlrdHcwIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInJvbGUiOlsiQ2FzYUFkbWluIl0sImlzcyI6Imh0dHBzOi8vYWNjb3VudC5nbHV1Lm9yZyIsImdpdmVuX25hbWUiOiJBZG1pbiIsIm1pZGRsZV9uYW1lIjoiQWRtaW4iLCJpbnVtIjoiYTZhNzAzMDEtYWY0OS00OTAxLTk2ODctMGJjZGNmNGUzNGZhIiwiY2xpZW50X2lkIjoiZDdmNzFiZWEtYzM4ZC00Y2FmLWExYmEtZTQzYzc0YTExYTYyIiwiYXVkIjoiZDdmNzFiZWEtYzM4ZC00Y2FmLWExYmEtZTQzYzc0YTExYTYyIiwidXBkYXRlZF9hdCI6MTczMTY5ODEzNSwibmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsIm5pY2tuYW1lIjoiQWRtaW4iLCJmYW1pbHlfbmFtZSI6IlVzZXIiLCJqdGkiOiJPSW4zZzFTUFNEU0tBWUR6RU5Wb3VnIiwiZW1haWwiOiJhZG1pbkBqYW5zLnRlc3QiLCJqYW5zQWRtaW5VSVJvbGUiOlsiYXBpLWFkbWluIl19.CIahQtRpoTkIQx8KttLPIKH7gvGG8OmYCMzz7wch6k792DVYQG1R7q3sS9Ema1rO5Fm_GgjOsR0yTTMKsyhHDLBwkDd3cnMLgsh2AwVFZvxtpafTlUAPfjvMAy9YTtkPcY6rNUhsYLSSOA83kt6pHdIv5nI-G6ybqgg-bLBRpwZDoOV0TulRhmuukdiuugTXHT6Bb-K3ZeYs8CwewztnxoFTSDghSzq7VZIraV8SLTBLx5_xswn9mefamyB2XNN3o6vXuMyf4BEbYSCuJ3pu6YtNgfyWwt9cF8PYe4PVLoXZuJKN-cy4qrtgy43QXPCg96jSQUJqgLb5ZL5_3udm2Q';
+        const reqObj = {
+            tokens: {
+                ...(tokenSelection.accessToken && { access_token: data?.access_token}),
+                ...(tokenSelection.idToken && { id_token: data?.id_token}),
+                ...(tokenSelection.userInfo && { userinfo_token: data?.userDetails}),
+            },
+            action,
+            context,
+            resource,
+        };
 
-        reqObj.action = action;
-        reqObj.context = context;
-        reqObj.resource = resource;
-        
         chrome.storage.local.set({ authzRequest: reqObj });
         return reqObj;
-    }
+    };
 
     async function logout() {
         setLoading(true);
@@ -159,6 +176,12 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
     function isEmpty(value) {
         return (value == null || value.length === 0);
     }
+    const handleLogTypeChange = (
+        event: React.MouseEvent<HTMLElement>,
+        newLogType: string,
+      ) => {
+        setLogType(newLogType);
+      };
 
     return (
         <div className="box">
@@ -179,10 +202,14 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                             <Typography component="span"><strong>Access Token</strong></Typography>
                         </AccordionSummary>
                         <AccordionDetails>
-
                             <div className="alert alert-success alert-dismissable fade in">
-                                <p>{showMoreAT ? (!!data ? data?.access_token : '') : (!!data ? data?.access_token.substring(0, 250).concat(' ...') : '')}</p>
-                                <a href="#" onClick={() => setShowMoreAT(!showMoreAT)}>{showMoreAT ? "Show less" : "Show more"}</a>
+                                <p>{showPayloadAT ? (!!data ? 
+                                    <>
+                                        <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.accessToken.header} rootName="header" />
+                                        <JsonEditor data={decodedTokens.accessToken.payload} collapse={true} viewOnly={true} rootName="payload" />
+                                    </> 
+                                : '') : (!!data ? data?.access_token : '')}</p>
+                                <a href="#!" onClick={() => setShowPayloadAT(!showPayloadAT)}>{showPayloadAT ? "Show JWT" : "Show Payload"}</a>
                             </div>
                         </AccordionDetails>
                     </Accordion>
@@ -197,8 +224,13 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                         <AccordionDetails>
 
                             <div className="alert alert-success alert-dismissable fade in">
-                                <p>{showMoreIdToken ? (!!data ? data?.id_token : '') : (!!data ? data?.id_token.substring(0, 250).concat(' ...') : '')}</p>
-                                <a href="#" onClick={() => setShowMoreIdToken(!showMoreIdToken)}>{showMoreIdToken ? "Show less" : "Show more"}</a>
+                                <p>{showPayloadIdToken ? (!!data ? 
+                                    <>
+                                        <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.idToken.header} rootName="header" />
+                                        <JsonEditor data={decodedTokens.idToken.payload} collapse={true} viewOnly={true} rootName="payload" />
+                                    </>
+                                    : '') : (!!data ? data?.id_token : '')}</p>
+                                <a href="#!" onClick={() => setShowPayloadIdToken(!showPayloadIdToken)}>{showPayloadIdToken ? "Show JWT" : "Show Payload"}</a>
                             </div>
                         </AccordionDetails>
                     </Accordion>
@@ -214,9 +246,13 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                 </AccordionSummary>
                 <AccordionDetails>
                     <div className="alert alert-success alert-dismissable fade in">
-                        <strong>User Details</strong>
-                        <p>{showMoreUI ? (!!data ? data?.userDetails : '') : (!!data ? data?.userDetails.substring(0, 250).concat(' ...') : '')}</p>
-                        <a href="#" onClick={() => setShowMoreUI(!showMoreUI)}>{showMoreUI ? "Show less" : "Show more"}</a>
+                        <p>{showPayloadUI ? (!!data ? 
+                            <>
+                                <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.userInfoToken.header} rootName="header" />
+                                <JsonEditor data={decodedTokens.userInfoToken.payload} collapse={true} viewOnly={true} rootName="payload" />
+                            </>
+                            : '') : (!!data ? data?.userDetails : '')}</p>
+                        <a href="#!" onClick={() => setShowPayloadUI(!showPayloadUI)}>{showPayloadUI ? "Show JWT" : "Show Payload"}</a>
                     </div>
                 </AccordionDetails>
             </Accordion>
@@ -230,14 +266,13 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                     <Typography component="span"><strong>Cedarling Authz Request Form</strong></Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                    <div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                         <InputLabel id="principal-value-label">Principal</InputLabel>
-                        <FormControlLabel control={<Checkbox color="success" onChange={() => setAccessToken(!accessToken)} />} label="Access Token" />
-                        <FormControlLabel control={<Checkbox color="success" onChange={() => setUserInfoToken(!userInfoToken)} />} label="Userinfo Token" />
-                        <FormControlLabel control={<Checkbox color="success" onChange={() => setIdToken(!idToken)} />} label="Id Token" />
+                        <FormControlLabel control={<Checkbox color="success" onChange={() => setTokenSelection((prev) => ({ ...prev, accessToken: !prev.accessToken }))} />} label="Access Token" />
+                        <FormControlLabel control={<Checkbox color="success" onChange={() => setTokenSelection((prev) => ({ ...prev, userInfo: !prev.userInfo }))} />} label="Userinfo Token" />
+                        <FormControlLabel control={<Checkbox color="success" onChange={() => setTokenSelection((prev) => ({ ...prev, idToken: !prev.idToken }))} />} label="Id Token" />
 
                         <TextField
-                            error={errorMessage.length !== 0}
                             autoFocus
                             required
                             margin="dense"
@@ -247,7 +282,6 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                             type="text"
                             fullWidth
                             variant="outlined"
-                            helperText={errorMessage}
                             value={action}
                             onChange={(e) => {
                                 setAction(e.target.value);
@@ -257,6 +291,19 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                         <JsonEditor data={resource} setData={setResource} rootName="resource" />
                         <InputLabel id="context-value-label">Context</InputLabel>
                         <JsonEditor data={context} setData={setContext} rootName="context" />
+
+                        <InputLabel id="principal-value-label">Log Type</InputLabel>
+                        <ToggleButtonGroup
+                            color="primary"
+                            value={logType}
+                            exclusive
+                            onChange={handleLogTypeChange}
+                            aria-label="Platform"
+                            >
+                            <ToggleButton value="Decision">Decision</ToggleButton>
+                            <ToggleButton value="System">System</ToggleButton>
+                            <ToggleButton value="Metric">Metric</ToggleButton>
+                        </ToggleButtonGroup>
                         <hr />
                         <Button variant="outlined" color="success" onClick={triggerCedarlingAuthzRequest}>Cedarling Authz Request</Button>
                     </div>

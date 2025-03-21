@@ -28,7 +28,7 @@ from jakarta.faces.context import FacesContext
 from jakarta.faces.application import FacesMessage
 from com.fasterxml.jackson.databind import ObjectMapper
 from jakarta.servlet.http import Cookie
-
+from io.jans.as.model.util import Base64Util
 
 import java
 import sys
@@ -210,7 +210,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Fido2. Prepare for step 1. Call Fido2 endpoint in order to start assertion flow"
                 
                 assertionRequest = AssertionOptions()
-                assertionRequest.setOrigin(domain)
+                assertionRequest.setRpId(domain)
                 assertionRequest.setAllowCredentials(Arrays.asList(allowList))
                 assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
                 
@@ -247,7 +247,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     
                     assertionRequest = AssertionOptions()
                     assertionRequest.setUsername(userName)
-                    assertionRequest.setOrigin(domain)
+                    assertionRequest.setRpId(domain)
                     assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
                     print "assertionResponse %s " % assertionResponse
                     
@@ -365,7 +365,7 @@ class PersonAuthentication(PersonAuthenticationType):
             
             try:
                 now = System.currentTimeMillis()
-                value = URLDecoder.decode(coo.getValue(), "utf-8")
+                value = Base64Util.base64urldecodeToString(coo.getValue())
                 # value is an array of objects with properties: id, type, transports
                 value = json.loads(value)
                 
@@ -380,7 +380,7 @@ class PersonAuthentication(PersonAuthenticationType):
             now = System.currentTimeMillis()
             allowList = self.add_credential_if_not_exists( credential)
             value = json.dumps(allowList, separators=(',',':'))
-            value = URLEncoder.encode(value, "utf-8")
+            value = Base64Util.base64urlencode(value)
             coo = Cookie("allowList", value)
             coo.setSecure(True)
             coo.setHttpOnly(True)

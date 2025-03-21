@@ -8,9 +8,27 @@ const BOOTSTRAP_CONFIG = {
     "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS ": ["aud", "client_id", "rp_id"],
     "CEDARLING_USER_AUTHZ": "enabled",
     "CEDARLING_WORKLOAD_AUTHZ": "enabled",
-    "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "AND",
+    "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+        "and": [
+            {
+                "===": [
+                    {
+                        "var": "Jans::Workload"
+                    },
+                    "ALLOW"
+                ]
+            },
+            {
+                "===": [
+                    {
+                        "var": "Jans::User"
+                    },
+                    "ALLOW"
+                ]
+            }
+        ]
+    },
     "CEDARLING_LOCAL_JWKS": null,
-    "CEDARLING_POLICY_STORE_LOCAL": null,
     "CEDARLING_POLICY_STORE_LOCAL_FN": null,
     "CEDARLING_JWT_SIG_VALIDATION": "disabled",
     "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
@@ -18,14 +36,9 @@ const BOOTSTRAP_CONFIG = {
         "HS256",
         "RS256"
     ],
-    "CEDARLING_TOKEN_CONFIGS": {
-        "access_token": { "entity_type_name": "Access_token" },
-        "id_token": { "entity_type_name": "id_token" },
-        "userinfo_token": { "entity_type_name": "Userinfo_token" },
-    },
     "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
     "CEDARLING_LOCK": "disabled",
-    "CEDARLING_LOCK_MASTER_CONFIGURATION_URI": null,
+    "CEDARLING_LOCK_SERVER_CONFIGURATION_URI": null,
     "CEDARLING_LOCK_DYNAMIC_CONFIGURATION": "disabled",
     "CEDARLING_LOCK_SSA_JWT": "",
     "CEDARLING_LOCK_HEALTH_INTERVAL": 0,

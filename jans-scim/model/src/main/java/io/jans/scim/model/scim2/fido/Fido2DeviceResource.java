@@ -39,7 +39,7 @@ public class Fido2DeviceResource extends BaseScimResource {
     private int counter;
 
     @Attribute(isRequired = true,
-            canonicalValues = {"registered", "pending"})
+            canonicalValues = {"registered", "pending", "compromised", "canceled"})
     @StoreReference(ref = "jansStatus")
     private String status;
 

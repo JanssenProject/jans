@@ -1,0 +1,37 @@
+
+{
+    "cedar_version": "v4.0.0",
+    "policy_stores": {
+      "a1bf93115de86de760ee0bea1d529b521489e5a11747": {
+        "cedar_version": "v4.0.0",
+        "name": "Jans",
+        "description": "A test policy store where everything is fine.",
+        "policies": {
+          "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+            "description": "simple policy example for principal workload",
+            "creation_date": "2024-09-20T17:22:39.996050",
+            "policy_content": {
+              "encoding": "none",
+              "content_type": "cedar",
+              "body": "permit(\n    principal is Jans::Workload,\n    action in [Jans::Action::\"Update\"],\n    resource is Jans::Issue\n)when{\n    principal.sub == resource.sub\n};"
+            }
+          },
+          "444da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+            "cedar_version": "v4.0.0",
+            "description": "simple policy example for principal user",
+            "creation_date": "2024-09-20T17:22:39.996050",
+            "policy_content": {
+              "encoding": "none",
+              "content_type": "cedar",
+              "body": "permit(\n    principal is Jans::User,\n    action in [Jans::Action::\"Update\"],\n    resource is Jans::Issue\n)when{\n    principal.sub == resource.sub\n};"
+            }
+          }
+        },
+        "schema": {
+          "encoding": "none",
+          "content_type": "cedar",
+          "body": "namespace Jans {\n  type Url = {\"host\": String, \"path\": String, \"protocol\": String};\n  entity Access_token = {\"aud\": String, \"exp\": Long, \"iat\": Long, \"iss\": TrustedIssuer, \"jti\": String};\n  entity Issue = {\"sub\": String};\n  entity Role;\n  entity TrustedIssuer = {\"issuer_entity_id\": Url};\n  entity User in [Role] = {\"email\": String, \"sub\": String, \"user_name\": String};\n  entity Workload = {\"client_id\": String, \"iss\": TrustedIssuer, \"username\": String, \"sub\": String};\n  entity Id_token = {\"acr\": String, \"amr\": Set<String>, \"aud\": String, \"exp\": Long, \"iat\": Long, \"iss\": TrustedIssuer, \"jti\": String, \"sub\": String};\n  entity Userinfo_token  = {\"sub\": String, \"iss\": String, \"jti\": String, \"client_id\": String};\n  type Context = {\n    user: User,\n    workload: Workload,\n    access_token: Access_token,\n    id_token: Id_token,\n    userinfo_token: Userinfo_token,\n  };\n  action \"Update\" appliesTo {\n    principal: [Workload, User],\n    resource: [Issue],\n    context: Context\n  };\n}"
+        }
+      }
+    }
+  }

@@ -13,7 +13,7 @@ from setup_app import paths
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.utils import base
-from setup_app.static import InstallTypes
+from setup_app.static import InstallTypes, BackendTypes
 from setup_app.installers.base import BaseInstaller
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.utils.package_utils import packageUtils
@@ -45,18 +45,15 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             self.reset_rdbm_db()
 
         self.prepare_jans_attributes()
-        self.create_tables(self.jans_schema_files)
+        self.create_tables(Config.schema_files)
         self.import_ldif()
         self.create_indexes()
         self.create_unique_indexes()
         self.rdbmProperties()
 
     def prepare_jans_attributes(self):
-        self.jans_schema_files = []
         self.jans_attributes = []
-        for jans_schema_fn in ('jans_schema.json', 'custom_schema.json'):
-            schema_full_path = os.path.join(Config.install_dir, 'schema', jans_schema_fn)
-            self.jans_schema_files.append(schema_full_path)
+        for schema_full_path in Config.schema_files:
             schema_ = base.readJsonFile(schema_full_path)
             self.jans_attributes += schema_.get('attributeTypes', [])
 

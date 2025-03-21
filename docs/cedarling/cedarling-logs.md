@@ -14,8 +14,13 @@ tags:
 
 ## Cedarling Audit Logs
 
-The Cedarling logs contains a record of all a Cedarling's decisions and token validations.
-Cedarling has four logging options, which are configurable via the `CEDARLING_LOG_TYPE`
+There are three different log records produced by the Cedarling:
+
+* `Decision` - The result and diagnostics of an authz decision
+* `System` - Startup, debug and other Cedarling messages not related to authz
+* `Metric`- Performance and usage data
+
+The Cedarling has four logging options, which are configurable via the `CEDARLING_LOG_TYPE`
 bootstrap property:
 
 * `off` - no logging
@@ -24,15 +29,10 @@ bootstrap property:
 * `std_out` - write logs synchronously to std_out
 * `lock` - periodically POST logs to Jans Lock Server `/audit` endpoint for central archiving.
 
-There are three different log records produced by the Cedarling:
-
-* `Decision` - The result and diagnostics of an authz decision
-* `System` - Startup, debug and other Cedarling messages not related to authz
-* `Metric`- Performance and usage data
 
 ### System Log Levels
 
-This is set by `CEDARLING_LOG_LEVEL`
+Set with property `CEDARLING_LOG_LEVEL`
 
 * `FATAL`: Indicates very severe error events that will likely lead the application to abort. These are the most critical issues.
 * `ERROR`: Designates error events that might still allow the application to continue running but indicate a significant problem.
@@ -43,8 +43,7 @@ This is set by `CEDARLING_LOG_LEVEL`
 
 ## Memory Log interface
 
-This interface is used to interact with the memory log storage. It provides methods for getting logs and removing them from the storage.
-Same interface is translated to other languages through bindings.
+This interface is used to interact with the memory log storage. It provides methods for getting logs and removing them from the storage. This interface is made available to other languages through bindings.
 
 Tags are used to filter logs. It can be `log_kind` and `log_level` values from log entry data.
 
@@ -157,7 +156,7 @@ Example of decision log.
             "jti": "access_tkn_jti"
         }
     },
-    "decision_time_ms": 3
+    "decision_time_micro_sec": 3
 }
 ```
 
@@ -176,7 +175,7 @@ Example of decision log.
 * `resource`: From the Request
 * `decision`: `ALLOW` or `DENY`
 * `tokens`: Dictionary with the token type and claims which should be included in the log
-* `decision_time_ms`: how long the decision took
+* `decision_time_micro_sec`: how long the decision took
 
 ### Debug Log Sample
 
