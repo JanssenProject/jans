@@ -4,7 +4,13 @@ version = "0.0.0"
 edition = "2021"
 description = "The Cedarling is a performant local authorization service that runs the Rust Cedar Engine"
 license = "Apache-2.0"
-repository = "https://github.com/JanssenProject/jans"
+repository = "git+https://github.com/JanssenProject/jans.git"
+
+[package.metadata.publishConfig]
+registry = "https://registry.npmjs.org/"
+access = "public"
+provenance = true
+name = "@janssenproject/cedarling_wasm"
 
 [lib]
 crate-type = ["cdylib"] # Required for WASM output
