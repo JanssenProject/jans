@@ -48,14 +48,14 @@ create_exception!(
     authorize_errors,
     InvalidPrincipalError,
     AuthorizeError,
-    "Error encountered while creating cedar_policy::Request for unsigned entity principal"
+    "Error encountered while creating cedar_policy::Request for principal"
 );
 
 create_exception!(
     authorize_errors,
-    EntitiesError,
+    ValidateEntitiesError,
     AuthorizeError,
-    "Error encountered while collecting all entities"
+    "Error encountered while validating the entities to the schema"
 );
 
 create_exception!(
@@ -135,7 +135,7 @@ errors_functions! {
     Action => ActionError,
     CreateContext => CreateContextError,
     InvalidPrincipal => InvalidPrincipalError,
-    Entities => EntitiesError,
+    ValidateEntities => ValidateEntitiesError,
     EntitiesToJson => EntitiesToJsonError,
     BuildContext => BuildContextError,
     IdTokenTrustMode => IdTokenTrustModeError,

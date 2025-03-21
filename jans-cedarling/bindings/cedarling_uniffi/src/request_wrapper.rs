@@ -54,7 +54,7 @@ impl RequestWrapper {
             })?;
 
         let resource: core::EntityData = core::EntityData {
-            resource_type,
+            entity_type: resource_type,
             id: resource_id,
             payload: parsed_payload,
         };

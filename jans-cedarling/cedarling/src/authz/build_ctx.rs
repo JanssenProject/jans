@@ -3,37 +3,42 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::{AuthzConfig, entity_builder::BuiltEntities};
+use super::AuthzConfig;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
+use crate::entity_builder::BuiltEntities;
 use cedar_policy::{ContextJsonError, EntityTypeName, ParseErrors};
 use serde_json::{Value, json, map::Entry};
+use smol_str::ToSmolStr;
 
 /// Constructs the authorization context by adding the built entities from the tokens
 pub fn build_context(
     config: &AuthzConfig,
     request_context: Value,
-    entities_data: &BuiltEntities,
+    build_entities: &BuiltEntities,
     schema: &cedar_policy::Schema,
     action: &cedar_policy::EntityUid,
 ) -> Result<cedar_policy::Context, BuildContextError> {
-    let namespace = config.policy_store.namespace();
+    // NOTE: we use the context namespace to
+    let namespace = action.type_name().namespace();
     let action_name = &action.id().escaped();
     let json_schema = &config.policy_store.schema.json;
+
+    // TODO: we would to implement a way for the user to decide which entities
+    // should be added to the context that doesn't use the Cedar schema.
     let action_schema = json_schema
-        .get_action(namespace, action_name)
+        .get_action(&namespace, action_name)
         .ok_or(BuildContextError::UnknownAction(action_name.to_string()))?;
 
     // Get the entities required for the context
     let mut ctx_entity_refs = json!({});
-    let build_entities = &entities_data;
 
     if let Some(ctx) = action_schema.applies_to.context.as_ref() {
         match ctx {
             Attribute::Record { attrs, .. } => {
                 for (key, attr) in attrs.iter() {
                     if let Some(entity_ref) =
-                        build_entity_refs_from_attr(namespace, attr, build_entities, json_schema)?
+                        build_entity_refs_from_attr(&namespace, attr, build_entities, json_schema)?
                     {
                         ctx_entity_refs[key] = entity_ref;
                     }
@@ -41,14 +46,14 @@ pub fn build_context(
             },
             Attribute::EntityOrCommon { name, .. } => {
                 if let Some((_entity_type_name, attr)) = json_schema
-                    .get_common_type(name, Some(namespace))
+                    .get_common_type(name, Some(&namespace))
                     .map_err(|err| BuildContextError::ParseEntityName(name.clone(), err))?
                 {
                     match attr {
                         Attribute::Record { attrs, .. } => {
                             for (key, attr) in attrs.iter() {
                                 if let Some(entity_ref) = build_entity_refs_from_attr(
-                                    namespace,
+                                    &namespace,
                                     attr,
                                     build_entities,
                                     json_schema,
@@ -120,7 +125,7 @@ fn map_entity_id(
     name: &EntityTypeName,
     built_entities: &BuiltEntities,
 ) -> Result<Option<Value>, BuildContextError> {
-    if let Some(type_id) = built_entities.get(name) {
+    if let Some(type_id) = built_entities.get_single(&name.to_smolstr()) {
         Ok(Some(json!({"type": name.to_string(), "id": type_id})))
     } else {
         Err(BuildContextError::MissingEntityId(name.to_string()))

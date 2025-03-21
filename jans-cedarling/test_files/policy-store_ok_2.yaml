@@ -7,6 +7,23 @@ policy_stores:
   a1bf93115de86de760ee0bea1d529b521489e5a11747:
     cedar_version: v4.0.0
     name: "Jans"
+    trusted_issuers:
+      Jans123123:
+        name: "Jans"
+        description: "A Test IDP"
+        openid_configuration_endpoint: "https://account.gluu.org/.well-known/openid-configuration"
+        tokens_metadata:
+          access_token:
+            entity_type_name: "Jans::Access_token"
+            workload_id: "client_id"
+            principal_mapping:
+              - "Jans::Workload"
+          id_token:
+            entity_type_name: "Jans::Id_token"
+          userinfo_token:
+            entity_type_name: "Jans::Userinfo_token"
+            user_id: "sub"
+            role_mapping: "role"
     policies:
       1:
         description: simple policy example for principal workload, permit when workload org_id same with resource
@@ -20,7 +37,7 @@ policy_stores:
                 action in [Jans::Action::"Update",Jans::Action::"UpdateForWorkload",Jans::Action::"UpdateForWorkloadAndRole"],
                 resource is Jans::Issue
             )when{
-                principal.org_id == resource.org_id
+                principal.access_token.org_id == resource.org_id
             };
       2:
         description: simple policy example for principal user, permit if user country same with the issue
@@ -83,12 +100,34 @@ policy_stores:
         type Url = {"host": String, "path": String, "protocol": String};
         entity TrustedIssuer = {"issuer_entity_id": Url};
         entity Issue = {"country": String, "org_id": String};
-        entity id_token = {"aud": String,"iss": String, "sub": String};
         entity Role;
-        entity User in [Role] = {"country": String};
-        entity Workload = {"org_id": String};
-        entity Access_token = {"aud": String,"iss": String, "jti": String, "client_id": String,"org_id": String};
-        entity Userinfo_token  = {"iss": String, "jti": String, "client_id": String};
+        entity User in [Role] = {
+          sub: String,
+          role?: Set<String>,
+          country: String,
+        };
+        entity Workload = {
+          iss: TrustedIssuer,
+          aud?: String,
+          client_id?: String,
+          access_token: Access_token,
+        };
+        entity Access_token = {
+          iss: TrustedIssuer,
+          aud: String,
+          jti: String,
+          client_id: String,
+          org_id: String,
+        };
+        entity Id_token = {
+          iss: TrustedIssuer,
+          sub: String,
+          aud: String,
+        };
+        entity Userinfo_token  = {
+          iss: TrustedIssuer,
+          jti: String,
+        };
         entity TestPrincipal1  = {"is_ok": Bool};
         entity TestPrincipal2  = {"is_ok": Bool};
         entity TestPrincipal3  = {"is_ok": Bool};
@@ -97,19 +136,19 @@ policy_stores:
           user: User,
           workload: Workload,
           access_token: Access_token,
-          id_token: id_token,
+          id_token: Id_token,
           userinfo_token: Userinfo_token,
         };
         type ContextWithoutWorkload = {
           user: User,
           access_token: Access_token,
-          id_token: id_token,
+          id_token: Id_token,
           userinfo_token: Userinfo_token,
         };
         type ContextWithoutUser = {
           workload: Workload,
           access_token: Access_token,
-          id_token: id_token,
+          id_token: Id_token,
           userinfo_token: Userinfo_token,
         };
         action "Update" appliesTo {

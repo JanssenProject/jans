@@ -93,7 +93,7 @@ impl ResourceData {
 impl From<ResourceData> for cedarling::EntityData {
     fn from(value: ResourceData) -> Self {
         Self {
-            resource_type: value.resource_type,
+            entity_type: value.resource_type,
             id: value.id,
             payload: value.payload,
         }

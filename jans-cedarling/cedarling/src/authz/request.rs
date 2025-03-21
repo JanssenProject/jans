@@ -89,10 +89,9 @@ pub struct RequestUnsigned {
 pub struct EntityData {
     /// entity type name
     #[serde(rename = "type")]
-    pub resource_type: String,
+    pub entity_type: String,
     /// entity id
     pub id: String,
-
     /// entity attributes
     #[serde(flatten)]
     pub payload: HashMap<String, Value>,
