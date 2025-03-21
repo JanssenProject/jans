@@ -459,7 +459,7 @@ jobs:
         cd pkg
         echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
         npm login --registry https://registry.npmjs.org --scope=janssenproject --access=public --always-auth
-        npm publish --access=public --tag "${NPM_TAG}" || cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1)
+        npm publish --provenance --access=public --tag "${NPM_TAG}"   || cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1)
 
     - name: Archive and sign pkg contents
       id: archive_pkg
