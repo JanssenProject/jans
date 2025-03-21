@@ -16,7 +16,7 @@ Read [this article](https://medium.com/@arnab.bdutta/janssen-cedarling-uniffi-bi
 1. Build the library:
 
 ```bash
-cargo build
+cargo build --release
 ```
 
 In `target/debug`, you should find the `libmobile.dylib`, `libmobile.so`, or `libmobile.dll` file, depending on the operating system you are using.
@@ -25,10 +25,10 @@ In `target/debug`, you should find the `libmobile.dylib`, `libmobile.so`, or `li
 - **.dylib** (Dynamic Library) – This is the shared library format for macOS.
 - **.dll** (Dynamic Link Library) - The shared library format used in Windows.
 
-2. Generate the bindings for Swift by running the command below. Replace `{build_file}` with `libmobile.dylib`, `libmobile.so`, or `libmobile.dll`, depending on which file is generated in `target/debug`.
+2. Generate the bindings for Swift by running the command below. Replace `{build_file}` with `libmobile.dylib`, `libmobile.so`, or `libmobile.dll`, depending on which file is generated in `target/release`.
 
 ```bash
-cargo run --bin uniffi-bindgen generate --library ./target/debug/{build_file} --language swift --out-dir ./bindings/cedarling_uniffi/output
+cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language swift --out-dir ./bindings/cedarling_uniffi/output
 ```
 
 3. Building the iOS binaries and adding these targets to Rust.
@@ -73,7 +73,7 @@ xcodebuild -create-xcframework \
 1. Build the library:
 
 ```bash
-cargo build
+cargo build --release
 ```
 
 In `target/debug`, you should find the `libmobile.dylib`, `libmobile.so`, or `libmobile.dll` file, depending on the operating system you are using.
@@ -112,11 +112,11 @@ cargo ndk -o ./bindings/cedarling_uniffi/androidApp/app/src/main/jniLibs \
         -p cedarling_uniffi --release
 ```
 
-5. Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libmobile.dylib`, `libmobile.so`, or `libmobile.dll`, depending on which file is generated in `target/debug`.
+5. Generate the bindings for Kotlin by running the command below. Replace `{build_file}` with `libmobile.dylib`, `libmobile.so`, or `libmobile.dll`, depending on which file is generated in `target/release`.
 
 
 ```
-cargo run --bin uniffi-bindgen generate --library ./target/debug/{build_file} --language kotlin --out-dir ./bindings/cedarling_uniffi/androidApp/app/src/main/java/com/example/androidapp/cedarling/uniffi
+cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language kotlin --out-dir ./bindings/cedarling_uniffi/androidApp/app/src/main/java/com/example/androidapp/cedarling/uniffi
 
 ```
 

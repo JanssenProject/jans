@@ -17,7 +17,7 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
 
 2. Build the library:
    ```bash
-   cargo build
+   cargo build --release
    ```
    In `target/debug`, you should find the `libmobile.dylib`, `libmobile.so`, or `libmobile.dll` file, depending on the operating system you are using.
 
@@ -25,9 +25,9 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
    - **.dylib** (Dynamic Library) – This is the shared library format for macOS.
    - **.dll** (Dynamic Link Library) - The shared library format used in Windows.
 
-3. Generate the bindings for Swift by running the command below. Replace `{build_file}` with `libmobile.dylib`, `libmobile.so`, or `libmobile.dll`, depending on which file is generated in `target/debug`.
+3. Generate the bindings for Swift by running the command below. Replace `{build_file}` with `libmobile.dylib`, `libmobile.so`, or `libmobile.dll`, depending on which file is generated in `target/release`.
    ```bash
-   cargo run --bin uniffi-bindgen generate --library ./target/debug/{build_file} --language swift --out-dir ./bindings/cedarling_uniffi/output
+   cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language swift --out-dir ./bindings/cedarling_uniffi/output
    ```
 
 4. Building the iOS binaries and adding these targets to Rust.
