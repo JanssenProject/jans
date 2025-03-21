@@ -571,15 +571,11 @@ components:
       properties:
         authenticatorCertsFolder:
           type: string
-        mdsAccessToken:
-          type: string
         mdsCertsFolder:
           type: string
         mdsTocsFolder:
           type: string
-        checkU2fAttestations:
-          type: boolean
-        debugUserAutoEnrollment:
+        userAutoEnrollment:
           type: boolean
         unfinishedRequestExpiration:
           type: integer

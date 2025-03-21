@@ -42,7 +42,6 @@ These Bootstrap Properties control default application level behavior.
 * **`CEDARLING_JWT_SIG_VALIDATION`** : `enabled` | `disabled` -- Whether to check the signature  of all JWT tokens. This requires an `iss` is present.
 * **`CEDARLING_JWT_STATUS_VALIDATION`** : `enabled` | `disabled` -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retreive the latest Status List JWT from the `.well-known/openid-configuration` via the `status_list_endpoint` claim and cache it. See the [IETF Draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) for more info.
 * **`CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED`** : Only tokens signed with these algorithms are acceptable to the Cedarling.
-* **`CEDARLING_TOKEN_CONFIGS`** : JSON object containing token specific configs. See: [Token Configs](#token-configs).
 * **`CEDARLING_ID_TOKEN_TRUST_MODE`** :  `Strict` | `None`. Varying levels of validations based on the preference of the developer.
 `Strict` mode requires (1) id_token `aud` matches the access_token `client_id`; (2) if a Userinfo token is present, the `sub` matches the id_token, and that the `aud` matches the access token client_id.
 
@@ -59,19 +58,18 @@ These Bootstrap Properties control default application level behavior.
 
 ## Required keys for startup
 
-* **`CEDARLING_APPLICATION_NAME`
-* **`CEDARLING_TOKEN_CONFIGS` - check if default implementation of Token Config is suitable for you.
+* **`CEDARLING_APPLICATION_NAME`**
 
 To enable usage of principals at least one of the following keys must be provided:
 
-* **`CEDARLING_WORKLOAD_AUTHZ`
-* **`CEDARLING_USER_AUTHZ`
+* **`CEDARLING_WORKLOAD_AUTHZ`**
+* **`CEDARLING_USER_AUTHZ`**
 
 To load policy store one of the following keys must be provided:
 
-* **`CEDARLING_POLICY_STORE_LOCAL`
-* **`CEDARLING_POLICY_STORE_URI`
-* **`CEDARLING_POLICY_STORE_LOCAL_FN`
+* **`CEDARLING_POLICY_STORE_LOCAL`**
+* **`CEDARLING_POLICY_STORE_URI`**
+* **`CEDARLING_POLICY_STORE_LOCAL_FN`**
 
 All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.
 
@@ -218,91 +216,6 @@ Example:
 {"===": [{"var": "Jans::Workload"}, true]}  // Always false
 ```
 
-## Token Configs
-
-The token configs property sets the entity type name of a token and it's validation settings. Below is an example of the `CEDARLING_TOKEN_CONFIGS`:
-
-```js
-CEDARLING_TOKEN_CONFIGS = {
-  "access_token": {
-    "entity_type_name": "Jans::Access_token",
-    "iss": "enabled",
-    "aud": "enabled",
-    "sub": "enabled",
-    "jti": "enabled",
-    "nbf": "enabled",
-    "iat": "enabled",
-    "exp": "enabled",
-  },
-  "id_token": {
-    "entity_type_name": "Jans::id_token",
-    "exp": "enabled",
-  },
-  "userinfo_token": {
-    "entity_type_name": "Jans::Userinfo_token",
-    "exp": "enabled",
-  },
-  "custom_token1": {
-    "entity_type_name": "Jans::SomeCustom_token",
-    "exp": "enabled",
-  },
-  "custom_token2": {
-    "entity_type_name": "Jans::AnotherCustom_token",
-    "exp": "enabled",
-  },
-  // more custom tokens can be added here
-}
-```
-
-## Default implementation of Token Config
-
-Here is rust code default implementation of Token Configs (`CEDARLING_TOKEN_CONFIGS`). This is used when no custom token config is provided.
-
-```rust
-impl Default for TokenConfigs {
-    fn default() -> Self {
-        Self(HashMap::from([
-            ("access_token".to_string(), TokenConfig {
-                entity_type_name: "Jans::Access_token".to_string(),
-                claims: ClaimsValidationConfig {
-                    iss: FeatureToggle::Enabled,
-                    sub: FeatureToggle::Disabled,
-                    aud: FeatureToggle::Disabled,
-                    exp: FeatureToggle::Enabled,
-                    nbf: FeatureToggle::Disabled,
-                    iat: FeatureToggle::Disabled,
-                    jti: FeatureToggle::Enabled,
-                },
-            }),
-            ("id_token".to_string(), TokenConfig {
-                entity_type_name: "Jans::id_token".to_string(),
-                claims: ClaimsValidationConfig {
-                    iss: FeatureToggle::Enabled,
-                    sub: FeatureToggle::Enabled,
-                    aud: FeatureToggle::Enabled,
-                    exp: FeatureToggle::Enabled,
-                    nbf: FeatureToggle::Disabled,
-                    iat: FeatureToggle::Disabled,
-                    jti: FeatureToggle::Disabled,
-                },
-            }),
-            ("userinfo_token".to_string(), TokenConfig {
-                entity_type_name: "Jans::Userinfo_token".to_string(),
-                claims: ClaimsValidationConfig {
-                    iss: FeatureToggle::Enabled,
-                    sub: FeatureToggle::Enabled,
-                    aud: FeatureToggle::Enabled,
-                    exp: FeatureToggle::Enabled,
-                    nbf: FeatureToggle::Disabled,
-                    iat: FeatureToggle::Disabled,
-                    jti: FeatureToggle::Disabled,
-                },
-            }),
-        ]))
-    }
-}
-```
-
 ## ID Token Trust Mode
 
 The level of validation for the ID Token JWT can be set to either `None` or `Strict`.
@@ -367,17 +280,6 @@ Below is an example of a bootstrap config in JSON format. Not all fields should 
   "CEDARLING_POLICY_STORE_URI": null,
   "CEDARLING_POLICY_STORE_LOCAL": null,
   "CEDARLING_POLICY_STORE_LOCAL_FN": "./example_files/policy-store.json",
-  "CEDARLING_TOKEN_CONFIGS": {
-    "access_token": {
-      "entity_type_name": "Jans::Access_token"
-    },
-    "id_token": {
-      "entity_type_name": "Jans::id_token"
-    },
-    "userinfo_token": {
-      "entity_type_name": "Jans::Userinfo_token"
-    }
-  },
   "CEDARLING_POLICY_STORE_ID": "gICAgcHJpbmNpcGFsIGlz",
   "CEDARLING_LOG_TYPE": "std_out",
   "CEDARLING_LOG_LEVEL": "INFO",
@@ -443,11 +345,6 @@ CEDARLING_WORKLOAD_AUTHZ: enabled
 CEDARLING_POLICY_STORE_URI: null
 CEDARLING_POLICY_STORE_LOCAL: null
 CEDARLING_POLICY_STORE_LOCAL_FN: ./example_files/policy-store.json
-CEDARLING_TOKEN_CONFIGS:
-    access_token: { entity_type_name: "Jans::Access_token" }
-    id_token: { entity_type_name: "Jans::id_token" }
-    userinfo_token: { entity_type_name: "Jans::Userinfo_token" }
-
 CEDARLING_POLICY_STORE_ID: gICAgcHJpbmNpcGFsIGlz
 CEDARLING_LOG_TYPE: std_out
 CEDARLING_LOG_LEVEL: INFO
@@ -468,7 +365,6 @@ CEDARLING_JWT_STATUS_VALIDATION: disabled
 CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED:
     - HS256
     - RS256
-
 CEDARLING_ID_TOKEN_TRUST_MODE: strict
 CEDARLING_LOCK: disabled
 CEDARLING_LOCK_SERVER_CONFIGURATION_URI: null

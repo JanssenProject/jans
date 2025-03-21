@@ -1628,6 +1628,9 @@ components:
           type: string
         customerLastName:
           type: string
+        licenseMAUThreshold:
+          type: integer
+          format: int64
         licenseExpired:
           type: boolean
     SSARequest:
