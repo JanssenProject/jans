@@ -877,15 +877,7 @@
          <lastmod>2025-03-21</lastmod>
     </url>
     <url>
-         <loc>https://jans.io/docs/nightly/janssen-server/fido/bluetooth-authn/</loc>
-         <lastmod>2025-03-21</lastmod>
-    </url>
-    <url>
          <loc>https://jans.io/docs/nightly/janssen-server/fido/config/</loc>
-         <lastmod>2025-03-21</lastmod>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/nightly/janssen-server/fido/key-mgt/</loc>
          <lastmod>2025-03-21</lastmod>
     </url>
     <url>
@@ -893,15 +885,11 @@
          <lastmod>2025-03-21</lastmod>
     </url>
     <url>
-         <loc>https://jans.io/docs/nightly/janssen-server/fido/monitoring/</loc>
+         <loc>https://jans.io/docs/nightly/janssen-server/fido/passwordlessLoginExperience/</loc>
          <lastmod>2025-03-21</lastmod>
     </url>
     <url>
-         <loc>https://jans.io/docs/nightly/janssen-server/fido/platform-authn/</loc>
-         <lastmod>2025-03-21</lastmod>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/nightly/janssen-server/fido/usb-authn/</loc>
+         <loc>https://jans.io/docs/nightly/janssen-server/fido/types-of-creds/</loc>
          <lastmod>2025-03-21</lastmod>
     </url>
     <url>

@@ -6462,12 +6462,6 @@
         
           
         
-          
-        
-          
-        
-          
-        
       
       
         
@@ -6524,20 +6518,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../janssen-server/fido/key-mgt/" class="md-nav__link">
-        Key Management/Rotation
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../janssen-server/fido/logs/" class="md-nav__link">
         Logs
       </a>
@@ -6552,8 +6532,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../janssen-server/fido/monitoring/" class="md-nav__link">
-        Monitoring
+      <a href="../../../janssen-server/fido/passwordlessLoginExperience/" class="md-nav__link">
+        Passwordless / Usernameless Login
       </a>
     </li>
   
@@ -6566,36 +6546,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../janssen-server/fido/usb-authn/" class="md-nav__link">
-        USB Authenticator Support
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../janssen-server/fido/platform-authn/" class="md-nav__link">
-        Platform Authenticator Support
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../janssen-server/fido/bluetooth-authn/" class="md-nav__link">
-        Bluetooth Authenticator Support
+      <a href="../../../janssen-server/fido/types-of-creds/" class="md-nav__link">
+        Types of credentials
       </a>
     </li>
   
@@ -8994,7 +8946,7 @@
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="c1"># Update attributes before releasing them</span>
-    <span class="c1">#   context is io.jans.idp.consent.processor.PostProcessAttributesContext (https://github.com/JanssenProject/shib-oxauth-authn3/blob/nightly/src/main/java/io.jans.idp/consent/processor/PostProcessAttributesContext.java)</span>
+    <span class="c1">#   context is io.jans.idp.consent.processor.PostProcessAttributesContext (https://github.com/JanssenProject/shib-oxauth-authn3/blob/vreplace-janssen-version/src/main/java/io.jans.idp/consent/processor/PostProcessAttributesContext.java)</span>
     <span class="c1">#   configurationAttributes is java.util.Map&lt;String, SimpleCustomProperty&gt;</span>
     <span class="k">def</span> <span class="nf">updateAttributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
         <span class="nb">print</span> <span class="s2">&quot;Idp extension. Method: updateAttributes&quot;</span>

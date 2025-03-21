@@ -6471,12 +6471,6 @@
         
           
         
-          
-        
-          
-        
-          
-        
       
       
         
@@ -6533,20 +6527,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fido/key-mgt/" class="md-nav__link">
-        Key Management/Rotation
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../fido/logs/" class="md-nav__link">
         Logs
       </a>
@@ -6561,8 +6541,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fido/monitoring/" class="md-nav__link">
-        Monitoring
+      <a href="../../fido/passwordlessLoginExperience/" class="md-nav__link">
+        Passwordless / Usernameless Login
       </a>
     </li>
   
@@ -6575,36 +6555,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fido/usb-authn/" class="md-nav__link">
-        USB Authenticator Support
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../fido/platform-authn/" class="md-nav__link">
-        Platform Authenticator Support
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../fido/bluetooth-authn/" class="md-nav__link">
-        Bluetooth Authenticator Support
+      <a href="../../fido/types-of-creds/" class="md-nav__link">
+        Types of credentials
       </a>
     </li>
   
@@ -8787,26 +8739,26 @@ Uninstalling and re-installing with newer binaries is the only option that requi
 Though this is made easy using <a href="../../terraform/">Terraform</a>. 
 We recommend using Kubernetes installations over VM, to avail smooth upgrades and better HA support.</p>
 </div>
-<p>Let's assume we are upgrading Jans VM installation from <code>current version</code> to <code>nightly</code></p>
+<p>Let's assume we are upgrading Jans VM installation from <code>current version</code> to <code>vreplace-janssen-version</code></p>
 <ol>
 <li>
 <p>Keep the old VM installation running.</p>
 </li>
 <li>
-<p><a href="../../install/vm-install/">Install</a> on a separate VM the target new Jans installation, i.e. <code>nightly</code>.</p>
+<p><a href="../../install/vm-install/">Install</a> on a separate VM the target new Jans installation, i.e. <code>vreplace-janssen-version</code>.</p>
 <p>You can install with a test client. For example:</p>
 <p><code>sudo python3 /opt/jans/jans-setup/setup.py -test-client-id 6382c9da-f25d-435f-ac63-6acde36f4859 -test-client-pw secret1172023</code></p>
 <p>This <code>client-id</code> and <code>client-pw</code> will then be used to import Terraform configurations</p>
 </li>
 <li>
-<p>Use our Terraform <a href="../../terraform/">docs</a> on the new installation, i.e. <code>nightly</code> to:</p>
+<p>Use our Terraform <a href="../../terraform/">docs</a> on the new installation, i.e. <code>vreplace-janssen-version</code> to:</p>
 <ul>
 <li>import all the global configurations from the new installation using <code>terraform import</code></li>
 <li>define all the custom IDP configurations and apply them using <code>terraform apply</code></li>
 </ul>
 </li>
 <li>
-<p>At this point there should be two versions up, <code>old version</code> and <code>nightly</code>.</p>
+<p>At this point there should be two versions up, <code>old version</code> and <code>vreplace-janssen-version</code>.</p>
 </li>
 <li>
 <p>Traffic should be switched gradually from the old setup to the new setup.

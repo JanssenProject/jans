@@ -6464,12 +6464,6 @@
         
           
         
-          
-        
-          
-        
-          
-        
       
       
         
@@ -6526,20 +6520,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../janssen-server/fido/key-mgt/" class="md-nav__link">
-        Key Management/Rotation
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../../janssen-server/fido/logs/" class="md-nav__link">
         Logs
       </a>
@@ -6554,8 +6534,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../janssen-server/fido/monitoring/" class="md-nav__link">
-        Monitoring
+      <a href="../../../../janssen-server/fido/passwordlessLoginExperience/" class="md-nav__link">
+        Passwordless / Usernameless Login
       </a>
     </li>
   
@@ -6568,36 +6548,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../janssen-server/fido/usb-authn/" class="md-nav__link">
-        USB Authenticator Support
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../janssen-server/fido/platform-authn/" class="md-nav__link">
-        Platform Authenticator Support
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../janssen-server/fido/bluetooth-authn/" class="md-nav__link">
-        Bluetooth Authenticator Support
+      <a href="../../../../janssen-server/fido/types-of-creds/" class="md-nav__link">
+        Types of credentials
       </a>
     </li>
   
@@ -8887,7 +8839,7 @@
 }
 </code></pre></div>
 <p>In this case, we are populating the configuration of an OAuth-based provider called "Goooogle". </p>
-<p>The tables shown in <a href="https://github.com/JanssenProject/jans/blob/nightly/docs/agama-catalog/jans/inboundID/README.md#supply-configurations">this</a> page list all possible properties to configure a provider. Particularly, two properties deserve the most detail:</p>
+<p>The tables shown in <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/agama-catalog/jans/inboundID/README.md#supply-configurations">this</a> page list all possible properties to configure a provider. Particularly, two properties deserve the most detail:</p>
 <ol>
 <li>
 <p><code>flowQname</code>. Agama projects are made up of flows - think of small "web journeys". This property must contain the name of an existing flow capable of interfacing with the identity provider of interest. Often, there is no need to write such "interfacing" flow. The below are ready-to-use and cover most of real-world cases, specifically  OpenId/OAuth providers that support the <strong>authorization code grant</strong> (see section 1.3 of <a href="https://www.ietf.org/rfc/rfc6749">rfc6749</a>):</p>

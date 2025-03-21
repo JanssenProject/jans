@@ -12,14 +12,14 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://jans.io/docs/nightly/janssen-server/fido/bluetooth-authn/">
+        <link rel="canonical" href="https://jans.io/docs/nightly/janssen-server/fido/types-of-creds/">
       
       <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.5.7">
     
     
       
-        <title>Bluetooth Authenticator Support - Janssen Documentation</title>
+        <title>Types of credentials - Janssen Documentation</title>
       
     
     
@@ -77,11 +77,6 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
-        
-        <a href="#troubleshooting-notes" class="md-skip">
-          Skip to content
-        </a>
-      
     </div>
     <div data-md-component="announce">
       
@@ -128,7 +123,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Bluetooth Authenticator Support
+              Types of credentials
             
           </span>
         </div>
@@ -6468,12 +6463,6 @@
         
           
         
-          
-        
-          
-        
-          
-        
       
       
         
@@ -6530,20 +6519,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../key-mgt/" class="md-nav__link">
-        Key Management/Rotation
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../logs/" class="md-nav__link">
         Logs
       </a>
@@ -6558,36 +6533,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../monitoring/" class="md-nav__link">
-        Monitoring
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../usb-authn/" class="md-nav__link">
-        USB Authenticator Support
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../platform-authn/" class="md-nav__link">
-        Platform Authenticator Support
+      <a href="../passwordlessLoginExperience/" class="md-nav__link">
+        Passwordless / Usernameless Login
       </a>
     </li>
   
@@ -6607,38 +6554,9 @@
       
       
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Bluetooth Authenticator Support
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
       <a href="./" class="md-nav__link md-nav__link--active">
-        Bluetooth Authenticator Support
+        Types of credentials
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting-notes" class="md-nav__link">
-    Troubleshooting notes:
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -8766,21 +8684,6 @@
   
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting-notes" class="md-nav__link">
-    Troubleshooting notes:
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -8794,46 +8697,44 @@
                   
   
 
-  <nav class="md-tags" >
-    
-      
-      
-        <span class="md-tag">administration</span>
-      
-    
-      
-      
-        <span class="md-tag">fido</span>
-      
-    
-  </nav>
 
 
-
-  <a href="https://github.com/JanssenProject/jans/edit/main/docs/janssen-server/fido/bluetooth-authn.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/JanssenProject/jans/edit/main/docs/janssen-server/fido/types-of-creds.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-  <h1>Bluetooth Authenticator Support</h1>
+  <h1>Types of credentials</h1>
 
-<h2 id="troubleshooting-notes">Troubleshooting notes:<a class="headerlink" href="#troubleshooting-notes" title="Permanent link">#</a></h2>
-<ol>
-<li>Enable the Bluetooth Device Permissions in Chrome Settings
-https://support.google.com/accounts/answer/9289445?hl=en&amp;co=GENIE.Platform%3DAndroid</li>
-</ol>
+<p><em>Types of credentials</em></p>
+<p>Passkeys introduce a fresh identity with a new name, icon, and features, redefining authentication methods. They serve as a broad term encompassing various credential types, including:</p>
+<ul>
+<li>Discoverable Credentials</li>
+<li>FIDO Credentials</li>
+<li>WebAuthn Discoverable Credentials</li>
+<li>FIDO2 Credentials</li>
+<li>Synced Passkeys</li>
+<li>Device-Bound Passkeys</li>
+</ul>
+<p><em>WebAuthn Hints</em></p>
+<p>WebAuthn hints, defined in the server configuration, guide the authentication process by indicating the preferred type of authenticator. The three primary values are:</p>
+<ul>
+<li>Security-Key: Suggests the use of a physical security key, often employed in high-security environments.</li>
+<li>Client-Device: Indicates a preference for the platform authenticator integrated into the user's current device.</li>
+<li>Hybrid: Recommends using a general-purpose authenticator, such as a smartphone, especially when dedicated security keys are less common among users.</li>
+</ul>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-21T11:19:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-21</span>
       
         <br>
         Created:
-        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-07-07T15:32:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-07-07</span>
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-21T11:19:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-21</span>
       
     
   </small>
@@ -8858,7 +8759,7 @@ https://support.google.com/accounts/answer/9289445?hl=en&amp;co=GENIE.Platform%3
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../platform-authn/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Platform Authenticator Support" rel="prev">
+        <a href="../passwordlessLoginExperience/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Passwordless / Usernameless Login" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -8867,7 +8768,7 @@ https://support.google.com/accounts/answer/9289445?hl=en&amp;co=GENIE.Platform%3
               <span class="md-footer__direction">
                 Previous
               </span>
-              Platform Authenticator Support
+              Passwordless / Usernameless Login
             </div>
           </div>
         </a>
