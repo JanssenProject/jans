@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::{AuthorizeEntitiesData, AuthzConfig};
+use super::AuthzConfig;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
 use crate::entity_builder::BuiltEntities;
@@ -15,7 +15,7 @@ use smol_str::ToSmolStr;
 pub fn build_context(
     config: &AuthzConfig,
     request_context: Value,
-    entities_data: &AuthorizeEntitiesData,
+    build_entities: &BuiltEntities,
     schema: &cedar_policy::Schema,
     action: &cedar_policy::EntityUid,
 ) -> Result<cedar_policy::Context, BuildContextError> {
@@ -32,7 +32,6 @@ pub fn build_context(
 
     // Get the entities required for the context
     let mut ctx_entity_refs = json!({});
-    let build_entities = &entities_data.built_entities();
 
     if let Some(ctx) = action_schema.applies_to.context.as_ref() {
         match ctx {

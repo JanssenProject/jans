@@ -7,6 +7,7 @@
 
 mod utils;
 
+mod authorize_unsigned;
 mod cases_authorize_different_principals;
 mod cases_authorize_namespace_jans2;
 mod cases_authorize_without_check_jwt;

@@ -4,14 +4,11 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::*;
-use crate::ResourceData;
+use crate::EntityData;
 
 impl EntityBuilder {
-    pub fn build_resource_entity(
-        &self,
-        resource: &ResourceData,
-    ) -> Result<Entity, BuildEntityError> {
-        let resource_type_name = &resource.resource_type;
+    pub fn build_cedar_entity(&self, resource: &EntityData) -> Result<Entity, BuildEntityError> {
+        let resource_type_name = &resource.entity_type;
 
         let attrs_shape = self
             .schema
@@ -53,8 +50,8 @@ mod test {
             Some(&CEDARLING_VALIDATOR_SCHEMA),
         )
         .expect("should init entity builder");
-        let resource_data = ResourceData {
-            resource_type: "Jans::HTTP_Request".to_string(),
+        let resource_data = EntityData {
+            entity_type: "Jans::HTTP_Request".to_string(),
             id: "some_request".to_string(),
             payload: HashMap::from([
                 ("header".to_string(), json!({"Accept": "test"})),
@@ -65,7 +62,7 @@ mod test {
             ]),
         };
         let entity = builder
-            .build_resource_entity(&resource_data)
+            .build_cedar_entity(&resource_data)
             .expect("expected to build resource entity");
 
         assert_entity_eq(
@@ -96,13 +93,13 @@ mod test {
             Some(&CEDARLING_VALIDATOR_SCHEMA),
         )
         .expect("should init entity builder");
-        let resource_data = ResourceData {
-            resource_type: "Jans::HTTP_Request".to_string(),
+        let resource_data = EntityData {
+            entity_type: "Jans::HTTP_Request".to_string(),
             id: "some_request".to_string(),
             payload: HashMap::new(),
         };
         let entity = builder
-            .build_resource_entity(&resource_data)
+            .build_cedar_entity(&resource_data)
             .expect("expected to build resource entity");
 
         assert!(
