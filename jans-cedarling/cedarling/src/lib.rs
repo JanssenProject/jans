@@ -13,9 +13,9 @@
 //! The Cedarling is a more productive and flexible way to handle authorization.
 
 mod authz;
-mod entity_builder;
 mod bootstrap_config;
 mod common;
+mod entity_builder;
 mod http;
 mod init;
 mod jwt;
@@ -56,6 +56,8 @@ pub mod bindings {
         AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
     };
     pub use crate::common::policy_store::PolicyStore;
+
+    pub use serde_yml;
 }
 
 /// Errors that can occur during initialization Cedarling.

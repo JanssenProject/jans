@@ -8,6 +8,7 @@
 
 use crate::*;
 use cedarling::EntityData;
+use cedarling::bindings::serde_yml;
 use serde::Deserialize;
 use serde_json::json;
 use std::{collections::HashMap, sync::LazyLock};
@@ -458,5 +459,125 @@ async fn test_memory_log_interface() {
         pop_logs_result2.length(),
         0,
         "logs should be removed from storage, storage should be empty"
+    );
+}
+
+/// Test authorize_unsigned function with unsigned request.
+#[wasm_bindgen_test]
+async fn test_authorize_unsigned() {
+    let mut bootstrap_config = BOOTSTRAP_CONFIG.clone();
+    bootstrap_config["CEDARLING_PRINCIPAL_BOOLEAN_OPERATION"] = json!({
+        "and": [
+            {"===": [{"var": "Jans::TestPrincipal1"}, "ALLOW"]},
+            {"===": [{"var": "Jans::TestPrincipal2"}, "ALLOW"]},
+            {"===": [{"var": "Jans::TestPrincipal3"}, "DENY"]}
+        ]
+    });
+    static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/policy-store_ok_2.yaml");
+    let policy_store_yaml: serde_yml::Value =
+        serde_yml::from_str(POLICY_STORE_RAW_YAML).expect("policy store raw yaml should be valid");
+
+    bootstrap_config["CEDARLING_POLICY_STORE_LOCAL"] = json!(json!(policy_store_yaml).to_string());
+
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let request_json = json!({
+        "principals": [
+            {
+                "id": "1",
+                "type": "Jans::TestPrincipal1",
+                "is_ok": true
+            },
+            {
+                "id": "2",
+                "type": "Jans::TestPrincipal2",
+                "is_ok": true
+            },
+            {
+                "id": "3",
+                "type": "Jans::TestPrincipal3",
+                "is_ok": false
+            }
+        ],
+        "action": "Jans::Action::\"UpdateForTestPrincipals\"",
+        "resource": {
+            "type": "Jans::Issue",
+            "id": "random_id",
+            "org_id": "some_long_id",
+            "country": "US"
+        },
+        "context": json!({})
+    });
+
+    let result = instance
+        .authorize_unsigned(
+            serde_wasm_bindgen::to_value(&request_json).expect("Failed to convert JSON to JsValue"),
+        )
+        .await
+        .expect("authorize_unsigned should be executed successfully");
+
+    assert!(result.decision, "Decision should be Allow");
+
+    assert!(
+        result.workload.is_none(),
+        "Workload should not be present for unsigned request"
+    );
+    assert!(
+        result.person.is_none(),
+        "Person should not be present for unsigned request"
+    );
+
+    // check by principal type
+    assert!(
+        result
+            .principal("Jans::TestPrincipal1")
+            .expect("Should get principal decision")
+            .decision(),
+        "Decision for Jans::TestPrincipal1 should be Allow"
+    );
+    assert!(
+        result
+            .principal("Jans::TestPrincipal2")
+            .expect("Should get principal decision")
+            .decision(),
+        "Decision for Jans::TestPrincipal2 should be Allow"
+    );
+    assert!(
+        !result
+            .principal("Jans::TestPrincipal3")
+            .expect("Should get principal decision")
+            .decision(),
+        "Decision for Jans::TestPrincipal3 should be Deny"
+    );
+
+    // check by principal uid (type + id)
+    assert!(
+        result
+            .principal("Jans::TestPrincipal1::\"1\"")
+            .expect("Should get principal decision")
+            .decision(),
+        "Decision for Jans::TestPrincipal1::\"1\" should be Allow"
+    );
+    assert!(
+        result
+            .principal("Jans::TestPrincipal2::\"2\"")
+            .expect("Should get principal decision")
+            .decision(),
+        "Decision for Jans::TestPrincipal2::\"2\" should be Allow"
+    );
+    assert!(
+        !result
+            .principal("Jans::TestPrincipal3::\"3\"")
+            .expect("Should get principal decision")
+            .decision(),
+        "Decision for Jans::TestPrincipal3::\"3\" should be Deny"
     );
 }
