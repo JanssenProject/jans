@@ -39,18 +39,6 @@ pub struct AuthorizationConfig {
     /// `CEDARLING_DECISION_LOG_DEFAULT_JWT_ID` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     pub decision_log_default_jwt_id: String,
 
-    /// Type Name of the User entity
-    pub mapping_user: Option<String>,
-
-    /// Type Name of the Workload entity
-    pub mapping_workload: Option<String>,
-
-    /// Type Name of the Role entity
-    pub mapping_role: Option<String>,
-
-    /// Name of Cedar token schema entities
-    pub mapping_tokens: TokenEntityNames,
-
     /// Sets the validation level for ID tokens.
     ///
     /// The available levels are [`None`] and [`Strict`].
@@ -77,7 +65,7 @@ impl Default for TokenEntityNames {
     fn default() -> Self {
         Self(HashMap::from([
             ("access_token".to_string(), "Jans::Access_token".to_string()),
-            ("id_token".to_string(), "Jans::id_token".to_string()),
+            ("id_token".to_string(), "Jans::Id_token".to_string()),
             (
                 "userinfo_token".to_string(),
                 "Jans::Userinfo_token".to_string(),

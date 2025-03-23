@@ -7,8 +7,9 @@ use cedarling::*;
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use jsonwebtoken::Algorithm;
 use jsonwebtoken::jwk::JwkSet;
+use mockito::{Server, ServerGuard};
 use serde::Deserialize;
-use std::collections::HashMap;
+use serde_json::json;
 use std::error::Error;
 use test_utils::generate_token;
 use tokio::runtime::Runtime;
@@ -16,13 +17,18 @@ use tokio::runtime::Runtime;
 const POLICY_STORE: &str = include_str!("../../test_files/policy-store_ok.yaml");
 
 fn without_jwt_validation_benchmark(c: &mut Criterion) {
+    let mut mock_server = Server::new();
     let runtime = Runtime::new().expect("init tokio runtime");
 
-    let (request, _jwk_set) = prepare_cedarling_request(generate_token::Algorithm::HS256)
-        .expect("should prepare r:equest");
+    let request = prepare_request(generate_token::Algorithm::HS256, &mut mock_server)
+        .expect("should prepare request");
 
     let cedarling = runtime
-        .block_on(prepare_cedarling_config(false, &[Algorithm::HS256], None))
+        .block_on(prepare_cedarling_config(
+            false,
+            &[Algorithm::HS256],
+            &mock_server.url(),
+        ))
         .expect("should initialize Cedarling");
 
     c.bench_with_input(
@@ -39,16 +45,17 @@ fn without_jwt_validation_benchmark(c: &mut Criterion) {
 }
 
 fn with_jwt_validation_benchmark_hs256(c: &mut Criterion) {
+    let mut mock_server = Server::new();
     let runtime = Runtime::new().expect("init tokio runtime");
 
-    let (request, jwk_set) = prepare_cedarling_request(generate_token::Algorithm::HS256)
+    let request = prepare_request(generate_token::Algorithm::HS256, &mut mock_server)
         .expect("should prepare request");
 
     let cedarling = runtime
         .block_on(prepare_cedarling_config(
             true,
             &[Algorithm::HS256],
-            Some(jwk_set),
+            &mock_server.url(),
         ))
         .expect("should initialize Cedarling");
 
@@ -66,16 +73,17 @@ fn with_jwt_validation_benchmark_hs256(c: &mut Criterion) {
 }
 
 fn with_jwt_validation_benchmark_rs256(c: &mut Criterion) {
+    let mut mock_server = Server::new();
     let runtime = Runtime::new().expect("init tokio runtime");
 
-    let (request, jwk_set) = prepare_cedarling_request(generate_token::Algorithm::RS256)
+    let request = prepare_request(generate_token::Algorithm::RS256, &mut mock_server)
         .expect("should prepare request");
 
     let cedarling = runtime
         .block_on(prepare_cedarling_config(
             true,
             &[Algorithm::RS256],
-            Some(jwk_set),
+            &mock_server.url(),
         ))
         .expect("should initialize Cedarling");
 
@@ -93,16 +101,17 @@ fn with_jwt_validation_benchmark_rs256(c: &mut Criterion) {
 }
 
 fn with_jwt_validation_benchmark_es256(c: &mut Criterion) {
+    let mut mock_server = Server::new();
     let runtime = Runtime::new().expect("init tokio runtime");
 
-    let (request, jwk_set) = prepare_cedarling_request(generate_token::Algorithm::ES256)
+    let request = prepare_request(generate_token::Algorithm::ES256, &mut mock_server)
         .expect("should prepare request");
 
     let cedarling = runtime
         .block_on(prepare_cedarling_config(
             true,
             &[Algorithm::ES256],
-            Some(jwk_set),
+            &mock_server.url(),
         ))
         .expect("should initialize Cedarling");
 
@@ -120,16 +129,17 @@ fn with_jwt_validation_benchmark_es256(c: &mut Criterion) {
 }
 
 fn with_jwt_validation_benchmark_eddsa(c: &mut Criterion) {
+    let mut mock_server = Server::new();
     let runtime = Runtime::new().expect("init tokio runtime");
 
-    let (request, jwk_set) = prepare_cedarling_request(generate_token::Algorithm::EdDSA)
+    let request = prepare_request(generate_token::Algorithm::EdDSA, &mut mock_server)
         .expect("should prepare request");
 
     let cedarling = runtime
         .block_on(prepare_cedarling_config(
             true,
             &[Algorithm::EdDSA],
-            Some(jwk_set),
+            &mock_server.url(),
         ))
         .expect("should initialize Cedarling");
 
@@ -159,16 +169,21 @@ criterion_main!(authz_benchmark);
 async fn prepare_cedarling_config(
     sig_validation: bool,
     algs_supported: &[Algorithm],
-    jwk_set: Option<JwkSet>,
+    server_url: &str,
 ) -> Result<Cedarling, Box<dyn Error>> {
     // Edit JWT validation configs
     let mut jwt_config = JwtConfig::new_without_validation();
     jwt_config.jwt_sig_validation = sig_validation;
     jwt_config.signature_algorithms_supported = algs_supported.iter().copied().collect();
-    jwt_config.jwks = jwk_set
-        .map(|jwk_set| serde_json::to_string(&jwk_set))
-        .transpose()
-        .map_err(|e| format!("failed to parse jwk set: {e}"))?;
+
+    // Point the policy store openid config endpoint to the mock server
+    let mut policy_store_src =
+        serde_yml::from_str::<serde_yml::Value>(POLICY_STORE).expect("parse policy store YAML");
+    policy_store_src["policy_stores"]["a1bf93115de86de760ee0bea1d529b521489e5a11747"]["trusted_issuers"]
+        ["Jans123123"]["openid_configuration_endpoint"] =
+        format!("{server_url}/.well-known/openid-configuration").into();
+    let policy_store_src = serde_yml::to_string(&policy_store_src)
+        .expect("convert edited yaml policy store to string");
 
     let bootstrap_config = BootstrapConfig {
         application_name: "test_app".to_string(),
@@ -177,28 +192,17 @@ async fn prepare_cedarling_config(
             log_level: LogLevel::DEBUG,
         },
         policy_store_config: PolicyStoreConfig {
-            source: cedarling::PolicyStoreSource::Yaml(POLICY_STORE.to_string()),
+            source: cedarling::PolicyStoreSource::Yaml(policy_store_src),
         },
         jwt_config,
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
             principal_bool_operator: JsonRule::default(),
-            mapping_user: Some("Jans::User".to_string()),
-            mapping_workload: Some("Jans::Workload".to_string()),
-            mapping_role: Some("Jans::Role".to_string()),
-            mapping_tokens: HashMap::from([
-                ("access_token".to_string(), "Jans::Access_token".to_string()),
-                ("id_token".to_string(), "Jans::id_token".to_string()),
-                (
-                    "userinfo_token".to_string(),
-                    "Jans::Userinfo_token".to_string(),
-                ),
-            ])
-            .into(),
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        entity_builder_config: EntityBuilderConfig::default().with_workload().with_user(),
     };
 
     let cedarling = Cedarling::new(&bootstrap_config).await?;
@@ -206,15 +210,18 @@ async fn prepare_cedarling_config(
     Ok(cedarling)
 }
 
-pub fn prepare_cedarling_request(
+fn prepare_request(
     jwt_algorithm: generate_token::Algorithm,
-) -> Result<(Request, JwkSet), Box<dyn Error>> {
+    mock_server: &mut ServerGuard,
+) -> Result<Request, Box<dyn Error>> {
+    let jwt_iss = mock_server.url();
+
     let access_token = test_utils::jwt!(
         jwt_algorithm,
         {
             "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
             "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
-            "iss": "https://admin-ui-test.gluu.org",
+            "iss": jwt_iss,
             "token_type": "Bearer",
             "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
             "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
@@ -248,7 +255,7 @@ pub fn prepare_cedarling_request(
             "exp": 1724835859,
             "iat": 1724832259,
             "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
-            "iss": "https://admin-ui-test.gluu.org",
+            "iss": jwt_iss,
             "jti": "sk3T40NYSYuk5saHZNpkZw",
             "nonce": "c3872af9-a0f5-4c3f-a1af-f9d0e8846e81",
             "sid": "6a7fe50a-d810-454d-be5d-549d29595a09",
@@ -273,7 +280,7 @@ pub fn prepare_cedarling_request(
             "email": "user@example.com",
             "username": "UserNameExample",
             "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
-            "iss": "https://admin-ui-test.gluu.org",
+            "iss": jwt_iss,
             "given_name": "Admin",
             "middle_name": "Admin",
             "inum": "8d1cde6a-1447-4766-b3c8-16663e13b458",
@@ -291,7 +298,7 @@ pub fn prepare_cedarling_request(
         }
     )?;
 
-    let jwks = JwkSet {
+    let jwk_set = JwkSet {
         keys: [access_token.jwk, id_token.jwk, userinfo_token.jwk]
             .iter()
             // transfromation from `josekit::jwk:Jwk` to `jsonwebtoken::jwk::Jwk`
@@ -299,6 +306,29 @@ pub fn prepare_cedarling_request(
             .map(|k| serde_json::from_value::<jsonwebtoken::jwk::Jwk>(k).unwrap())
             .collect(),
     };
+
+    // Setup OpenId config endpoint
+    let oidc = json!({
+        "issuer": mock_server.url(),
+        "jwks_uri": &format!("{}/jwks", mock_server.url()),
+    });
+    let _oidc_endpoint = mock_server
+        .mock("GET", "/.well-known/openid-configuration")
+        .with_status(200)
+        .with_header("content-type", "application/json")
+        .with_body(oidc.to_string())
+        .expect_at_least(1)
+        .create();
+
+    // Setup JWKS endpoint
+    let jwk_set = serde_json::to_string(&jwk_set).expect("serialize jwk set");
+    let _jwks_endpoint = mock_server
+        .mock("GET", "/jwks")
+        .with_status(200)
+        .with_header("content-type", "application/json")
+        .with_body(jwk_set)
+        .expect_at_least(1)
+        .create();
 
     let request = Request::deserialize(serde_json::json!(
         {
@@ -318,5 +348,5 @@ pub fn prepare_cedarling_request(
         }
     ))?;
 
-    Ok((request, jwks))
+    Ok(request)
 }

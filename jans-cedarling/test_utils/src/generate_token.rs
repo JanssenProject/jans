@@ -92,8 +92,8 @@ fn sign_token_hs256(
     header: &JwsHeader,
     jwk: &Jwk,
 ) -> Result<String, Box<dyn Error>> {
-    let signer = Hs256.signer_from_jwk(&jwk)?;
-    let token = encode_with_signer(&payload, &header, &signer)?;
+    let signer = Hs256.signer_from_jwk(jwk)?;
+    let token = encode_with_signer(payload, header, &signer)?;
     Ok(token)
 }
 
@@ -102,8 +102,8 @@ fn sign_token_rs256(
     header: &JwsHeader,
     jwk: &Jwk,
 ) -> Result<String, Box<dyn Error>> {
-    let signer = Rs256.signer_from_jwk(&jwk)?;
-    let token = encode_with_signer(&payload, &header, &signer)?;
+    let signer = Rs256.signer_from_jwk(jwk)?;
+    let token = encode_with_signer(payload, header, &signer)?;
     Ok(token)
 }
 
@@ -112,8 +112,8 @@ fn sign_token_es256(
     header: &JwsHeader,
     jwk: &Jwk,
 ) -> Result<String, Box<dyn Error>> {
-    let signer = Es256.signer_from_jwk(&jwk)?;
-    let token = encode_with_signer(&payload, &header, &signer)?;
+    let signer = Es256.signer_from_jwk(jwk)?;
+    let token = encode_with_signer(payload, header, &signer)?;
     Ok(token)
 }
 
@@ -122,7 +122,7 @@ fn sign_token_eddsa(
     header: &JwsHeader,
     jwk: &Jwk,
 ) -> Result<String, Box<dyn Error>> {
-    let signer = Eddsa.signer_from_jwk(&jwk)?;
-    let token = encode_with_signer(&payload, &header, &signer)?;
+    let signer = Eddsa.signer_from_jwk(jwk)?;
+    let token = encode_with_signer(payload, header, &signer)?;
     Ok(token)
 }
