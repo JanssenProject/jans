@@ -1,13 +1,13 @@
-{{ if and (index .Values "global" "kc-scheduler" "enabled") (.Values.global.saml.enabled) -}}
+{{ if and (index .Values "global" "cleanup" "enabled") (.Values.global.saml.enabled) -}}
 kind: CronJob
 apiVersion: batch/v1
 metadata:
-  name: {{ include "kc-scheduler.fullname" . }}
+  name: {{ include "cleanup.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    APP_NAME: kc-scheduler
+    APP_NAME: cleanup
     release: {{ .Release.Name }}
-{{ include "kc-scheduler.labels" . | indent 4 }}
+{{ include "cleanup.labels" . | indent 4 }}
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
@@ -35,7 +35,7 @@ spec:
 {{ toYaml . | indent 12 }}
         {{- end }}
           containers:
-            - name: {{ include "kc-scheduler.name" . }}
+            - name: {{ include "cleanup.name" . }}
               {{- if or (.Values.customScripts) (.Values.customCommand) }}
               command:
                 {{- if .Values.customCommand }}
@@ -52,8 +52,8 @@ spec:
               {{- end}}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               env:
-                {{- include "kc-scheduler.usr-envs" . | indent 16 }}
-                {{- include "kc-scheduler.usr-secret-envs" . | indent 16 }}
+                {{- include "cleanup.usr-envs" . | indent 16 }}
+                {{- include "cleanup.usr-secret-envs" . | indent 16 }}
               imagePullPolicy: {{ .Values.image.pullPolicy }}
               lifecycle:
 {{- toYaml .Values.lifecycle | nindent 16 }}
@@ -81,7 +81,7 @@ spec:
               resources:
 {{- toYaml .Values.resources | nindent 16 }}
               {{- end }}
-              args: ["kc-sync"]
+              args: ["cleanup", "--limit", "{{ .Values.limit }}"]
           volumes:
           {{- with .Values.volumes }}
 {{- toYaml . | nindent 12 }}

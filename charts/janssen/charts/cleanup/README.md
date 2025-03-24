@@ -1,8 +1,8 @@
-# kc-scheduler
+# cleanup
 
 ![Version: 0.0.0-nightly](https://img.shields.io/badge/Version-0.0.0--nightly-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.0-nightly](https://img.shields.io/badge/AppVersion-0.0.0--nightly-informational?style=flat-square)
 
-Responsible for synchronizing Keycloak SAML clients
+Cleanup expired entries in persistence
 
 **Homepage:** <https://jans.io>
 
@@ -34,8 +34,9 @@ Kubernetes: `>=v1.22.0-0`
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
 | image.repository | string | `"ghcr.io/janssenproject/jans/cloudtools"` | Image  to use for deploying. |
 | image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
-| interval | int | `10` | Interval of running the scheduler (in minutes) |
+| interval | int | `60` | Interval of running the cleanup process (in minutes) |
 | lifecycle | object | `{}` |  |
+| limit | int | `1000` | Max. numbers of entries to cleanup |
 | resources | object | `{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}}` | Resource specs. |
 | resources.limits.cpu | string | `"300m"` | CPU limit. |
 | resources.limits.memory | string | `"300Mi"` | Memory limit. |

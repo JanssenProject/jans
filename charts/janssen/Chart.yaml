@@ -5,7 +5,7 @@ annotations:
     - name: auth-server
       image: ghcr.io/janssenproject/jans/auth-server:0.0.0-nightly
     - name: auth-server-key-rotation
-      image: ghcr.io/janssenproject/jans/certmanager:0.0.0-nightly
+      image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly
     - name: configuration-manager
       image: ghcr.io/janssenproject/jans/configurator:0.0.0-nightly
     - name:  config-api
@@ -23,7 +23,9 @@ annotations:
     - name: saml
       image: ghcr.io/janssenproject/jans/saml:0.0.0-nightly
     - name: kc-scheduler
-      image: ghcr.io/janssenproject/jans/kc-scheduler:0.0.0-nightly
+      image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly
+    - name: cleanup
+      image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: 'true'
   catalog.cattle.io/certified: partner
@@ -94,4 +96,8 @@ dependencies:
 
     - name: kc-scheduler
       condition: global.kc-scheduler.enabled
+      version: 0.0.0-nightly
+
+    - name: cleanup
+      condition: global.cleanup.enabled
       version: 0.0.0-nightly
