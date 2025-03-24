@@ -408,12 +408,6 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "The lifetime of the User Info", defaultValue = "3600")
     private int userInfoLifetime;
 
-    @DocProperty(description = "Time interval for the Clean Service in seconds")
-    private int cleanServiceInterval;
-
-    @DocProperty(description = "Clean service chunk size which is used during clean up", defaultValue = "100")
-    private int cleanServiceBatchChunkSize = 100;
-
     @DocProperty(description = "Boolean value specifying whether to regenerate keys")
     private Boolean keyRegenerationEnabled;
 
@@ -2551,22 +2545,6 @@ public class AppConfiguration implements Configuration {
 
     public void setStatusListIndexAllocationBlockSize(int statusListIndexAllocationBlockSize) {
         this.statusListIndexAllocationBlockSize = statusListIndexAllocationBlockSize;
-    }
-
-    public int getCleanServiceInterval() {
-        return cleanServiceInterval;
-    }
-
-    public void setCleanServiceInterval(int cleanServiceInterval) {
-        this.cleanServiceInterval = cleanServiceInterval;
-    }
-
-    public int getCleanServiceBatchChunkSize() {
-        return cleanServiceBatchChunkSize;
-    }
-
-    public void setCleanServiceBatchChunkSize(int cleanServiceBatchChunkSize) {
-        this.cleanServiceBatchChunkSize = cleanServiceBatchChunkSize;
     }
 
     public Boolean getKeyRegenerationEnabled() {
