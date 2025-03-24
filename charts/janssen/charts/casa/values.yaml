@@ -84,7 +84,8 @@ volumeMounts: []
 #     exec:
 #       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
 lifecycle: {}
-
+# -- Add tolerations for the pods
+tolerations: []
 nameOverride: ""
 fullnameOverride: ""
 

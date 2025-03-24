@@ -200,6 +200,99 @@ volumeMounts:
 {{- end }}
 
 {{/*
+Create JAVA_OPTIONS ENV for passing custom work and detailed logs
+*/}}
+{{- define "auth-server.customJavaOptions"}}
+{{ $custom := "" }}
+{{- $cnCustomJavaOptions := index .Values "auth-server" "cnCustomJavaOptions" }}
+{{- $custom := printf "%s" $cnCustomJavaOptions }}
+{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
+{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.25) 1 ) -}}
+{{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.7)) -}}
+{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
+{{ $customJavaOptions | trim | quote }}
+{{- end }}
+
+{{/*
+Create JAVA_OPTIONS ENV for passing custom work and detailed logs
+*/}}
+{{- define "casa.customJavaOptions"}}
+{{ $custom := "" }}
+{{ $custom = printf "%s" .Values.casa.cnCustomJavaOptions }}
+{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
+{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.10) 1 ) -}}
+{{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.7)) -}}
+{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
+{{ $customJavaOptions | trim | quote }}
+{{- end }}
+
+{{/*
+Create JAVA_OPTIONS ENV for passing custom work and detailed logs
+*/}}
+{{- define "config-api.customJavaOptions"}}
+{{ $custom := "" }}
+{{- $cnCustomJavaOptions := index .Values "config-api" "cnCustomJavaOptions" }}
+{{- $custom := printf "%s" $cnCustomJavaOptions }}
+{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
+{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.10) 1 ) -}}
+{{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.7)) -}}
+{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
+{{ $customJavaOptions | trim | quote }}
+{{- end }}
+
+{{/*
+Create JAVA_OPTIONS ENV for passing custom work and detailed logs
+*/}}
+{{- define "fido2.customJavaOptions"}}
+{{ $custom := "" }}
+{{ $custom = printf "%s" .Values.fido2.cnCustomJavaOptions }}
+{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
+{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.08) 1 ) -}}
+{{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.7)) -}}
+{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
+{{ $customJavaOptions | trim | quote }}
+{{- end }}
+
+{{/*
+Create JAVA_OPTIONS ENV for passing custom work and detailed logs
+*/}}
+{{- define "scim.customJavaOptions"}}
+{{ $custom := "" }}
+{{ $custom = printf "%s" .Values.scim.cnCustomJavaOptions }}
+{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
+{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.15) 1 ) -}}
+{{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.7)) -}}
+{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
+{{ $customJavaOptions | trim | quote }}
+{{- end }}
+
+{{/*
+Create JAVA_OPTIONS ENV for passing custom work and detailed logs
+*/}}
+{{- define "link.customJavaOptions"}}
+{{ $custom := "" }}
+{{ $custom = printf "%s" .Values.link.cnCustomJavaOptions }}
+{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
+{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.08) 1 ) -}}
+{{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.7)) -}}
+{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
+{{ $customJavaOptions | trim | quote }}
+{{- end }}
+
+{{/*
+Create JAVA_OPTIONS ENV for passing custom work and detailed logs
+*/}}
+{{- define "saml.customJavaOptions"}}
+{{ $custom := "" }}
+{{ $custom = printf "%s" .Values.saml.cnCustomJavaOptions }}
+{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
+{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.10) 1 ) -}}
+{{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.7)) -}}
+{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
+{{ $customJavaOptions | trim | quote }}
+{{- end }}
+
+{{/*
 Obfuscate configuration schema (only if configuration key is available)
 */}}
 {{- define "janssen-all-in-one.config.prepareSchema" }}
