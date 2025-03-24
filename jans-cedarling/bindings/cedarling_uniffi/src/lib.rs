@@ -52,7 +52,12 @@ pub struct AuthorizeResult {
 
 impl AuthorizeResult {
     // Constructor to create a new AuthorizeResult instance
-    pub fn new(json_workload: &Value, json_person: &Value, decision: bool, request_id: String) -> Self {
+    pub fn new(
+        json_workload: &Value,
+        json_person: &Value,
+        decision: bool,
+        request_id: String,
+    ) -> Self {
         let json_workload_string =
             serde_json::to_string(&json_workload).unwrap_or_else(|_| "null".to_string());
         let json_person_string =
@@ -61,7 +66,7 @@ impl AuthorizeResult {
             json_workload: json_workload_string,
             json_person: json_person_string,
             decision,
-            request_id
+            request_id,
         }
     }
     // Convert workload string back to JSON Value
@@ -108,7 +113,7 @@ impl Cedarling {
         let config: BootstrapConfig =
             cedarling::BootstrapConfig::load_from_file(&path).map_err(|e| {
                 CedarlingError::InitializationFailed {
-                    error_msg: format!("Failed to read the file: {}", e)
+                    error_msg: format!("Failed to read the file: {}", e),
                 }
             })?;
 
@@ -137,9 +142,11 @@ impl Cedarling {
             RequestWrapper::new(tokens, action, resource_type, resource_id, payload, context);
 
         let core_request: core::Request = request
-            .map_err(|e: request_wrapper::RequestError| AuthorizeError::AuthorizationFailed {
-                error_msg: e.to_string(),
-            })?
+            .map_err(
+                |e: request_wrapper::RequestError| AuthorizeError::AuthorizationFailed {
+                    error_msg: e.to_string(),
+                },
+            )?
             .inner;
         let result: cedarling::AuthorizeResult =
             self.inner.authorize(core_request).map_err(|e| {
@@ -152,7 +159,7 @@ impl Cedarling {
             res_val.get("workload").unwrap(),
             res_val.get("person").unwrap(),
             result.decision,
-            result.request_id
+            result.request_id,
         ))
     }
 
@@ -172,12 +179,10 @@ impl Cedarling {
     //Get log by id
     #[uniffi::method]
     pub fn get_log_by_id(&self, id: &str) -> Result<String, LogError> {
-
         if let Some(log_json_value) = self.inner.get_log_by_id(id) {
-            serde_json::to_string(&log_json_value)
-                .map_err(|e| LogError::LoggingFailed {
-                    error_msg: e.to_string(),
-                })
+            serde_json::to_string(&log_json_value).map_err(|e| LogError::LoggingFailed {
+                error_msg: e.to_string(),
+            })
         } else {
             Err(LogError::LoggingFailed {
                 error_msg: "Log not found".to_string(),
@@ -189,11 +194,11 @@ impl Cedarling {
     pub fn get_log_ids(&self) -> Vec<String> {
         let log_ids = self.inner.get_log_ids();
         let mut result = Vec::with_capacity(log_ids.len());
-        
+
         for log_id in log_ids {
             result.push(log_id.clone());
         }
-        
+
         result
     }
 
@@ -203,14 +208,14 @@ impl Cedarling {
     pub fn get_logs_by_tag(&self, tag: &str) -> Result<Vec<String>, LogError> {
         let logs = self.inner.get_logs_by_tag(tag);
         let mut result = Vec::with_capacity(logs.len());
-    
+
         for log in logs {
             let log_str = serde_json::to_string(&log).map_err(|e| LogError::LoggingFailed {
                 error_msg: e.to_string(),
             })?;
             result.push(log_str);
         }
-    
+
         Ok(result)
     }
 
@@ -241,15 +246,14 @@ impl Cedarling {
     ) -> Result<Vec<String>, LogError> {
         let logs = self.inner.get_logs_by_request_id_and_tag(request_id, tag);
         let mut result = Vec::with_capacity(logs.len());
-    
+
         for log in logs {
             let log_str = serde_json::to_string(&log).map_err(|e| LogError::LoggingFailed {
                 error_msg: e.to_string(),
             })?;
             result.push(log_str);
         }
-    
+
         Ok(result)
     }
-
 }
