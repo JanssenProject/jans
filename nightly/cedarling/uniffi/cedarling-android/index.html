@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#android-apps" class="md-skip">
+        <a href="#using-uniffi-binding-android-app" class="md-skip">
           Skip to content
         </a>
       
@@ -7580,22 +7580,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#building" class="md-nav__link">
+    Building
   </a>
   
 </li>
@@ -8747,22 +8740,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#building" class="md-nav__link">
+    Building
   </a>
   
 </li>
@@ -8790,20 +8776,71 @@
   </a>
 
 
-<h1 id="android-apps">Android Apps<a class="headerlink" href="#android-apps" title="Permanent link">#</a></h1>
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<h1 id="using-uniffi-binding-android-app">Using UniFFI binding Android App<a class="headerlink" href="#using-uniffi-binding-android-app" title="Permanent link">#</a></h1>
+<p>Cedarling UniFFI binding exposes its <code>init</code>, <code>authz</code> and <code>log</code> interfaces to different languages and on all the different platforms, including Kotlin for Android. This section covers how to build and use Cedarling UniFFI binding in an Android app.</p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
+<ul>
+<li>Rust: Install it from <a href="https://www.rust-lang.org/tools/install">the official Rust website</a>.</li>
+<li>Android Studio: Download from <a href="https://developer.android.com/studio">the official site</a>.</li>
+</ul>
+<h2 id="building">Building<a class="headerlink" href="#building" title="Permanent link">#</a></h2>
+<ol>
+<li>
+<p>Build the library:
+    <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>--release
+</code></pre></div>
+   In <code>target/release</code>, you should find the <code>libmobile.dylib</code>, <code>libmobile.so</code>, or <code>libmobile.dll</code> file, depending on the operating system you are using.</p>
+</li>
+<li>
+<p><strong>.so</strong> (Shared Object) – This is the shared library format used in Linux and other Unix-based operating systems.</p>
+</li>
+<li><strong>.dylib</strong> (Dynamic Library) – This is the shared library format for macOS.</li>
+<li>
+<p><strong>.dll</strong> (Dynamic Link Library) - The shared library format used in Windows.</p>
+</li>
+<li>
+<p>Set up cargo-ndk for cross-compiling:
+    <div class="highlight"><pre><span></span><code>cargo install cargo-ndk
+</code></pre></div></p>
+</li>
+<li>
+<p>Add targets for Android:
+    <div class="highlight"><pre><span></span><code>rustup target add \
+        aarch64-linux-android \
+        armv7-linux-androideabi \
+        i686-linux-android \
+        x86_64-linux-android
+</code></pre></div></p>
+</li>
+<li>
+<p>Compile the dynamic libraries in ./app/src/main/jniLibs (next to java and res directories) in the sample <code>androidApp</code> project.
+    <div class="highlight"><pre><span></span><code>cargo ndk -o ./bindings/cedarling_uniffi/androidApp/app/src/main/jniLibs \
+        --manifest-path ./Cargo.toml \
+        -t armeabi-v7a \
+        -t arm64-v8a \
+        -t x86 \
+        -t x86_64 \
+        build \
+        -p cedarling_uniffi --release
+</code></pre></div></p>
+</li>
+<li>
+<p>Generate the bindings for Kotlin by running the command below. Replace <code>{build_file}</code> with <code>libmobile.dylib</code>, <code>libmobile.so</code>, or <code>libmobile.dll</code>, depending on which file is generated in <code>target/release</code>.
+    <div class="highlight"><pre><span></span><code>cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language kotlin --out-dir ./bindings/cedarling_uniffi/androidApp/app/src/main/java/com/example/androidapp/cedarling/uniffi
+</code></pre></div></p>
+</li>
+<li>
+<p>We have included a sample android app using Cedarling UniFFI binding for making authorisation decisions. Open the <code>androidApp</code> project on Android Studio and run the project on simulator.</p>
+</li>
+</ol>
+<div style="position: relative; padding-bottom: 104.75728155339806%; height: 0;"><iframe src="https://www.loom.com/embed/463de78bd3174f2ca7d2b2f2fb2915cd?sid=01bd3481-857f-4981-9414-e81852fa3079" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-06T12:50:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-06</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-24T05:53:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-24</span>
       
         <br>
         Created:
