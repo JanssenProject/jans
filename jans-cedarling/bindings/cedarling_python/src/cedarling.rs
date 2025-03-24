@@ -15,74 +15,11 @@ use crate::authorize::request::Request;
 use crate::config::bootstrap_config::BootstrapConfig;
 use serde_pyobject::to_pyobject;
 
-/// Cedarling
-/// =========
-///
 /// A Python wrapper for the Rust `cedarling::Cedarling` struct.
 /// Represents an instance of the Cedarling application, a local authorization service
 /// that answers authorization questions based on JWT tokens.
-///
-/// Attributes
-/// ----------
-/// :param config: A `BootstrapConfig` object for initializing the Cedarling instance.
-///
-/// Methods
-/// -------
-/// .. method:: __init__(self, config)
-///
-///     Initializes the Cedarling instance with the provided configuration.
-///
-///     :param config: A `BootstrapConfig` object with startup settings.
-///
-/// .. method:: authorize(self, request: Request) -> AuthorizeResult
-///
-///     Execute authorize request
-///     :param request: Request struct for authorize.
-///
-/// .. method:: pop_logs(self) -> List[dict]
-///
-///     Retrieves and removes all logs from storage.
-///
-///     :returns: A list of log entries as Python objects.
-///
-/// .. method:: get_log_by_id(self, id: str) -> dict|None
-///
-///     Gets a log entry by its ID.
-///
-///     :param id: The log entry ID.
-///
-/// .. method:: get_log_ids(self) -> List[str]
-///
-///     Retrieves all stored log IDs.
-///
-/// .. method:: get_logs_by_tag(self, tag: str) -> List[dict]
-///
-///     Retrieves all logs matching a specific tag. Tags can be 'log_kind', 'log_level' params from log entries.
-///
-///     :param tag: A string specifying the tag type.
-///
-///     :returns: A list of log entries filtered by the tag, each converted to a Python dictionary.
-///
-/// .. method:: get_logs_by_request_id(self, id: str) -> List[dict]
-///
-///     Retrieves log entries associated with a specific request ID. Each log entry is converted to a Python dictionary containing fields like 'id', 'timestamp', and 'message'.
-///
-///     :param id: The unique identifier for the request.
-///
-///     :returns: A list of dictionaries, each representing a log entry related to the specified request ID.
-///
-/// .. method:: get_logs_by_request_id_and_tag(self, id: str, tag: str) -> List[dict]
-///
-///     Retrieves all logs associated with a specific request ID and tag. The tag can be 'log_kind', 'log_level' params from log entries.
-///
-///     :param id: The request ID as a string.
-///
-///     :param tag: The tag type as a string.
-///
-///     :returns: A list of log entries matching both the request ID and tag, each converted to a Python dictionary.
-///
 #[derive(Clone)]
-#[pyclass]
+#[pyclass(module = "cedarling_python._cedarling_python")]
 pub struct Cedarling {
     inner: cedarling::blocking::Cedarling,
 }

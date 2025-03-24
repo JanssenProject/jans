@@ -7,23 +7,9 @@
 use cedarling::bindings::cedar_policy;
 use pyo3::prelude::*;
 
-/// Decision
-/// ========
-///
 /// Represents the decision result of a Cedar policy authorization.
-///
-/// Methods
-/// -------
-/// value() -> str
-///     Returns the string value of the decision.
-/// __str__() -> str
-///     Returns the string representation of the decision.
-/// __repr__() -> str
-///     Returns the detailed type representation of the decision.
-/// __eq__(other: Decision) -> bool
-///     Compares two `Decision` objects for equality.
 #[derive(Debug, Clone)]
-#[pyclass]
+#[pyclass(module = "cedarling_python._cedarling_python")]
 pub struct Decision {
     inner: cedarling::bindings::Decision,
 }

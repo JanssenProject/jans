@@ -11,19 +11,9 @@ use std::collections::HashSet;
 
 use pyo3::prelude::*;
 
-/// Diagnostics
-/// ===========
-///
 /// Provides detailed information about how a policy decision was made, including policies that contributed to the decision and any errors encountered during evaluation.
-///
-/// Attributes
-/// ----------
-/// reason : set of str
-///     A set of `PolicyId`s for the policies that contributed to the decision. If no policies applied, this set is empty.
-/// errors : list of PolicyEvaluationError
-///     A list of errors that occurred during the authorization process. These are unordered as policies may be evaluated in any order.
 #[derive(Debug, Clone)]
-#[pyclass(get_all)]
+#[pyclass(get_all, module = "cedarling_python._cedarling_python")]
 pub struct Diagnostics {
     /// `PolicyId`s of the policies that contributed to the decision.
     /// If no policies applied to the request, this set will be empty.
