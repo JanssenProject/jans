@@ -418,7 +418,6 @@ nav:
     - Python:
       - cedarling/python/README.md
       - How to use: cedarling/python/usage.md
-      - Reference: cedarling/python/cedarling_python.html
       - Pydocs: cedarling/python/pydoc.md
     - Mobile Apps:
       - UniFFI interface: 'cedarling/uniffi/cedarling-uniffi.md'
@@ -494,12 +493,6 @@ plugins:
       python:
         inventories:
         - https://docs.python.org/3/objects.inv
-        #        - https://installer.readthedocs.io/en/stable/objects.inv  # demonstration purpose in the docs
-        #        - https://mkdocstrings.github.io/autorefs/objects.inv
-        #        - https://www.mkdocs.org/objects.inv
-        #        - https://python-markdown.github.io/objects.inv
-        #        - https://jinja.palletsprojects.com/en/stable/objects.inv
-        #        - https://markupsafe.palletsprojects.com/en/stable/objects.inv
         paths: [./jans-cedarling/bindings/cedarling_python]
         options:
           filters: ["!^_"]
