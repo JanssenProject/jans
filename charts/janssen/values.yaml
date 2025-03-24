@@ -1681,7 +1681,7 @@ kc-scheduler:
   customCommand: []
 
 # -- Cleanup expired entries in persistence
-kc-scheduler:
+cleanup:
   # -- Add custom normal and secret envs to the service
   usrEnvs:
     # -- Add custom normal envs to the service
