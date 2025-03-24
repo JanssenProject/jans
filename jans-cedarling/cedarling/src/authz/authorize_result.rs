@@ -120,7 +120,7 @@ impl AuthorizeResult {
         workload_uid
             .clone()
             .into_iter()
-            .zip(workload.into_iter())
+            .zip(workload)
             .for_each(|(typename, response)| {
                 principal_responses.insert(typename.to_owned(), response.to_owned());
             });
@@ -128,7 +128,7 @@ impl AuthorizeResult {
         person_uid
             .clone()
             .into_iter()
-            .zip(person.into_iter())
+            .zip(person)
             .for_each(|(typename, response)| {
                 principal_responses.insert(typename.to_owned(), response.to_owned());
             });

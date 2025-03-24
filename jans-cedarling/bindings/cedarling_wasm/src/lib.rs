@@ -247,7 +247,7 @@ impl AuthorizeResult {
     }
 
     pub fn principal(&self, principal: &str) -> Option<AuthorizeResultResponse> {
-        self.principals.get(principal).cloned().map(|v| v.into())
+        self.principals.get(principal).cloned()
     }
 }
 
