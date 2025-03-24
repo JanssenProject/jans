@@ -30,7 +30,7 @@ Kubernetes: `>=v1.22.0-0`
 | adminPassword | string | `"Test1234#"` | Admin password to log in to the UI. |
 | alb.ingress | bool | `false` | switches the service to Nodeport for ALB ingress |
 | auth-server | object | `{"appLoggers":{"auditStatsLogLevel":"INFO","auditStatsLogTarget":"FILE","authLogLevel":"INFO","authLogTarget":"STDOUT","enableStdoutLogPrefix":"true","httpLogLevel":"INFO","httpLogTarget":"FILE","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"authEncKeys":"RSA1_5 RSA-OAEP","authSigKeys":"RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512","enabled":true,"ingress":{"authServerAdditionalAnnotations":{},"authServerEnabled":true,"authServerLabels":{},"authzenAdditionalAnnotations":{},"authzenConfigEnabled":true,"authzenConfigLabels":{},"deviceCodeAdditionalAnnotations":{},"deviceCodeEnabled":true,"deviceCodeLabels":{},"firebaseMessagingAdditionalAnnotations":{},"firebaseMessagingEnabled":true,"firebaseMessagingLabels":{},"lockAdditionalAnnotations":{},"lockConfigAdditionalAnnotations":{},"lockConfigEnabled":false,"lockConfigLabels":{},"lockEnabled":false,"lockLabels":{},"openidAdditionalAnnotations":{},"openidConfigEnabled":true,"openidConfigLabels":{},"u2fAdditionalAnnotations":{},"u2fConfigEnabled":true,"u2fConfigLabels":{},"uma2AdditionalAnnotations":{},"uma2ConfigEnabled":true,"uma2ConfigLabels":{},"webdiscoveryAdditionalAnnotations":{},"webdiscoveryEnabled":true,"webdiscoveryLabels":{},"webfingerAdditionalAnnotations":{},"webfingerEnabled":true,"webfingerLabels":{}},"lockEnabled":false}` | Parameters used globally across all services helm charts. |
-| auth-server-key-rotation | object | `{"additionalAnnotations":{},"additionalLabels":{},"customCommand":[],"customScripts":[],"dnsConfig":{},"dnsPolicy":"","enabled":true,"image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/certmanager","tag":"0.0.0-nightly"},"initKeysLife":48,"keysLife":48,"keysPushDelay":0,"keysPushStrategy":"NEWER","keysStrategy":"NEWER","lifecycle":{},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Responsible for regenerating auth-keys per x hours |
+| auth-server-key-rotation | object | `{"additionalAnnotations":{},"additionalLabels":{},"customCommand":[],"customScripts":[],"dnsConfig":{},"dnsPolicy":"","enabled":true,"image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/cloudtools","tag":"0.0.0-nightly"},"initKeysLife":48,"keysLife":48,"keysPushDelay":0,"keysPushStrategy":"NEWER","keysStrategy":"NEWER","lifecycle":{},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Responsible for regenerating auth-keys per x hours |
 | auth-server-key-rotation.additionalAnnotations | object | `{}` | Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"} |
 | auth-server-key-rotation.additionalLabels | object | `{}` | Additional labels that will be added across the gateway in the format of {mylabel: "myapp"} |
 | auth-server-key-rotation.customCommand | list | `[]` | Add custom jobs's command. If passed, it will override the default conditional command. |
@@ -40,7 +40,7 @@ Kubernetes: `>=v1.22.0-0`
 | auth-server-key-rotation.enabled | bool | `true` | Boolean flag to enable/disable the auth-server-key rotation cronjob. |
 | auth-server-key-rotation.image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
 | auth-server-key-rotation.image.pullSecrets | list | `[]` | Image Pull Secrets |
-| auth-server-key-rotation.image.repository | string | `"ghcr.io/janssenproject/jans/certmanager"` | Image  to use for deploying. |
+| auth-server-key-rotation.image.repository | string | `"ghcr.io/janssenproject/jans/cloudtools"` | Image  to use for deploying. |
 | auth-server-key-rotation.image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
 | auth-server-key-rotation.initKeysLife | int | `48` | The initial auth server key rotation keys life in hours |
 | auth-server-key-rotation.keysLife | int | `48` | Auth server key rotation keys life in hours |
@@ -127,6 +127,30 @@ Kubernetes: `>=v1.22.0-0`
 | certManager.certificate.issuerName | string | `""` |  |
 | certManager.certificate.tlsSecretName | string | `"tls-certificate"` |  |
 | city | string | `"Austin"` | City. Used for certificate creation. |
+| cleanup | object | `{"additionalAnnotations":{},"additionalLabels":{},"customCommand":[],"customScripts":[],"dnsConfig":{},"dnsPolicy":"","enabled":true,"image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/cloudtools","tag":"0.0.0-nightly"},"interval":60,"lifecycle":{},"limit":1000,"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Cleanup expired entries in persistence |
+| cleanup.additionalAnnotations | object | `{}` | Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"} |
+| cleanup.additionalLabels | object | `{}` | Additional labels that will be added across the gateway in the format of {mylabel: "myapp"} |
+| cleanup.customCommand | list | `[]` | Add custom job's command. If passed, it will override the default conditional command. |
+| cleanup.customScripts | list | `[]` | Add custom scripts that have been mounted to run before the entrypoint. - /tmp/custom.sh - /tmp/custom2.sh |
+| cleanup.dnsConfig | object | `{}` | Add custom dns config |
+| cleanup.dnsPolicy | string | `""` | Add custom dns policy |
+| cleanup.enabled | bool | `true` | Boolean flag to enable/disable the cleanup cronjob chart. |
+| cleanup.image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
+| cleanup.image.pullSecrets | list | `[]` | Image Pull Secrets |
+| cleanup.image.repository | string | `"ghcr.io/janssenproject/jans/cloudtools"` | Image  to use for deploying. |
+| cleanup.image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
+| cleanup.interval | int | `60` | Interval of running the cleanup process (in minutes) |
+| cleanup.limit | int | `1000` | Max. numbers of entries to cleanup |
+| cleanup.resources | object | `{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}}` | Resource specs. |
+| cleanup.resources.limits.cpu | string | `"300m"` | CPU limit. |
+| cleanup.resources.limits.memory | string | `"300Mi"` | Memory limit. |
+| cleanup.resources.requests.cpu | string | `"300m"` | CPU request. |
+| cleanup.resources.requests.memory | string | `"300Mi"` | Memory request. |
+| cleanup.usrEnvs | object | `{"normal":{},"secret":{}}` | Add custom normal and secret envs to the service |
+| cleanup.usrEnvs.normal | object | `{}` | Add custom normal envs to the service variable1: value1 |
+| cleanup.usrEnvs.secret | object | `{}` | Add custom secret envs to the service variable1: value1 |
+| cleanup.volumeMounts | list | `[]` | Configure any additional volumesMounts that need to be attached to the containers |
+| cleanup.volumes | list | `[]` | Configure any additional volumes that need to be attached to the pod |
 | cnAwsConfigFile | string | `"/etc/jans/conf/aws_config_file"` |  |
 | cnAwsSecretsReplicaRegionsFile | string | `"/etc/jans/conf/aws_secrets_replica_regions"` |  |
 | cnAwsSharedCredentialsFile | string | `"/etc/jans/conf/aws_shared_credential_file"` |  |
@@ -272,7 +296,7 @@ Kubernetes: `>=v1.22.0-0`
 | istio.ingress | bool | `false` | Boolean flag that enables using istio gateway for Janssen. This assumes istio ingress is installed and hence the LB is available. |
 | istio.namespace | string | `"istio-system"` | The namespace istio is deployed in. The is normally istio-system. |
 | istio.tlsSecretName | string | `"tls-certificate"` |  |
-| kc-scheduler | object | `{"additionalAnnotations":{},"additionalLabels":{},"customCommand":[],"customScripts":[],"dnsConfig":{},"dnsPolicy":"","enabled":false,"image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/kc-scheduler","tag":"0.0.0-nightly"},"interval":10,"lifecycle":{},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Responsible for synchronizing Keycloak SAML clients |
+| kc-scheduler | object | `{"additionalAnnotations":{},"additionalLabels":{},"customCommand":[],"customScripts":[],"dnsConfig":{},"dnsPolicy":"","enabled":false,"image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/cloudtools","tag":"0.0.0-nightly"},"interval":10,"lifecycle":{},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Responsible for synchronizing Keycloak SAML clients |
 | kc-scheduler.additionalAnnotations | object | `{}` | Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"} |
 | kc-scheduler.additionalLabels | object | `{}` | Additional labels that will be added across the gateway in the format of {mylabel: "myapp"} |
 | kc-scheduler.customCommand | list | `[]` | Add custom job's command. If passed, it will override the default conditional command. |
@@ -282,7 +306,7 @@ Kubernetes: `>=v1.22.0-0`
 | kc-scheduler.enabled | bool | `false` | Boolean flag to enable/disable the kc-scheduler cronjob chart. |
 | kc-scheduler.image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
 | kc-scheduler.image.pullSecrets | list | `[]` | Image Pull Secrets |
-| kc-scheduler.image.repository | string | `"ghcr.io/janssenproject/jans/kc-scheduler"` | Image  to use for deploying. |
+| kc-scheduler.image.repository | string | `"ghcr.io/janssenproject/jans/cloudtools"` | Image  to use for deploying. |
 | kc-scheduler.image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
 | kc-scheduler.interval | int | `10` | Interval of running the scheduler (in minutes) |
 | kc-scheduler.resources | object | `{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}}` | Resource specs. |
