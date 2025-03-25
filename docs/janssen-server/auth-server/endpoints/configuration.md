@@ -7,6 +7,8 @@ tags:
   - endpoint
 ---
 
+# OpenID Configuration Endpoint
+
 ## OpenID Configuration Endpoint aka `.well-known/openid-configuration`
 
 The Configuration Endpoint returns both the OP server metadata, and OAuth
