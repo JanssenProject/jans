@@ -5,7 +5,7 @@ tags:
   - database
 ---
 
-# Overview
+# Database Guide
 
 Modern systems can work with different DB. Jans is also not exception from this rule. Currently it can work with different DB types and also can work in hybrid environment where application can use the strong power of each DB. This part is based on [jans-orm](https://github.com/JanssenProject/jans/tree/main/jans-orm) layer. It has pluggable architecture which allows to add support for more DB in future.
 

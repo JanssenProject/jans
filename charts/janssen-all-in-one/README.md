@@ -73,6 +73,7 @@ Kubernetes: `>=v1.22.0-0`
 | auth-server.appLoggers.scriptLogTarget | string | `"FILE"` | jans-auth_script.log target |
 | auth-server.authEncKeys | string | `"RSA1_5 RSA-OAEP"` | space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`) |
 | auth-server.authSigKeys | string | `"RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512"` | space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`) |
+| auth-server.cnCustomJavaOptions | string | `""` | passing custom java options to auth-server. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs. |
 | auth-server.enabled | bool | `true` | Boolean flag to enable/disable auth-server chart. You should never set this to false. |
 | auth-server.ingress | object | `{"authServerAdditionalAnnotations":{},"authServerEnabled":true,"authServerLabels":{},"authzenAdditionalAnnotations":{},"authzenConfigEnabled":true,"authzenConfigLabels":{},"deviceCodeAdditionalAnnotations":{},"deviceCodeEnabled":true,"deviceCodeLabels":{},"firebaseMessagingAdditionalAnnotations":{},"firebaseMessagingEnabled":true,"firebaseMessagingLabels":{},"lockAdditionalAnnotations":{},"lockConfigAdditionalAnnotations":{},"lockConfigEnabled":false,"lockConfigLabels":{},"lockEnabled":false,"lockLabels":{},"openidAdditionalAnnotations":{},"openidConfigEnabled":true,"openidConfigLabels":{},"u2fAdditionalAnnotations":{},"u2fConfigEnabled":true,"u2fConfigLabels":{},"uma2AdditionalAnnotations":{},"uma2ConfigEnabled":true,"uma2ConfigLabels":{},"webdiscoveryAdditionalAnnotations":{},"webdiscoveryEnabled":true,"webdiscoveryLabels":{},"webfingerAdditionalAnnotations":{},"webfingerEnabled":true,"webfingerLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
 | auth-server.ingress.authServerAdditionalAnnotations | object | `{}` | Auth server ingress resource additional annotations. |
@@ -116,6 +117,7 @@ Kubernetes: `>=v1.22.0-0`
 | casa.appLoggers.timerLogLevel | string | `"INFO"` | casa timer log level |
 | casa.appLoggers.timerLogTarget | string | `"FILE"` | casa timer log target |
 | casa.casaServiceName | string | `"casa"` | Name of the casa service. Please keep it as default. |
+| casa.cnCustomJavaOptions | string | `""` | passing custom java options to casa. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs. |
 | casa.enabled | bool | `true` | Boolean flag to enable/disable the casa chart. |
 | casa.ingress | object | `{"casaAdditionalAnnotations":{},"casaEnabled":false,"casaLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
 | casa.ingress.casaAdditionalAnnotations | object | `{}` | Casa ingress resource additional annotations. |
@@ -175,6 +177,7 @@ Kubernetes: `>=v1.22.0-0`
 | config-api.appLoggers.persistenceLogTarget | string | `"FILE"` | config-api_persistence.log target |
 | config-api.appLoggers.scriptLogLevel | string | `"INFO"` | config-api_script.log level |
 | config-api.appLoggers.scriptLogTarget | string | `"FILE"` | config-api_script.log target |
+| config-api.cnCustomJavaOptions | string | `""` | passing custom java options to config-api. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs. |
 | config-api.configApiServerServiceName | string | `"config-api"` | Name of the config-api service. Please keep it as default. |
 | config-api.enabled | bool | `true` | Boolean flag to enable/disable the config-api chart. |
 | config-api.ingress | object | `{"configApiAdditionalAnnotations":{},"configApiEnabled":true,"configApiLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
@@ -267,6 +270,7 @@ Kubernetes: `>=v1.22.0-0`
 | fido2.appLoggers.persistenceLogTarget | string | `"FILE"` | fido2_persistence.log target |
 | fido2.appLoggers.scriptLogLevel | string | `"INFO"` | fido2_script.log level |
 | fido2.appLoggers.scriptLogTarget | string | `"FILE"` | fido2_script.log target |
+| fido2.cnCustomJavaOptions | string | `""` | passing custom java options to fido2. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs. |
 | fido2.enabled | bool | `true` | Boolean flag to enable/disable the fido2 chart. |
 | fido2.fido2ServiceName | string | `"fido2"` | Name of the fido2 service. Please keep it as default. |
 | fido2.ingress | object | `{"fido2AdditionalAnnotations":{},"fido2ConfigAdditionalAnnotations":{},"fido2ConfigEnabled":false,"fido2ConfigLabels":{},"fido2Enabled":false,"fido2Labels":{},"fido2WebauthnAdditionalAnnotations":{},"fido2WebauthnEnabled":false,"fido2WebauthnLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
@@ -331,6 +335,7 @@ Kubernetes: `>=v1.22.0-0`
 | link.appLoggers.persistenceLogTarget | string | `"FILE"` | cacherefresh_persistence.log target |
 | link.appLoggers.scriptLogLevel | string | `"INFO"` | cacherefresh_script.log level |
 | link.appLoggers.scriptLogTarget | string | `"FILE"` | cacherefresh_script.log target |
+| link.cnCustomJavaOptions | string | `""` | passing custom java options to link. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs. |
 | link.enabled | bool | `false` | Boolean flag to enable/disable the link chart. |
 | link.ingress | object | `{"linkAdditionalAnnotations":{},"linkEnabled":true,"linkLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
 | link.ingress.linkAdditionalAnnotations | object | `{}` | link ingress resource additional annotations. |
@@ -357,6 +362,7 @@ Kubernetes: `>=v1.22.0-0`
 | resources.requests.cpu | string | `"2500m"` | CPU request. |
 | resources.requests.memory | string | `"2500Mi"` | Memory request. |
 | salt | string | `""` | Salt. Used for encoding/decoding sensitive data. If omitted or set to empty string, the value will be self-generated. Otherwise, a 24 alphanumeric characters are allowed as its value. |
+| saml.cnCustomJavaOptions | string | `""` | passing custom java options to saml. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs. |
 | saml.enabled | bool | `false` | Boolean flag to enable/disable the saml chart. |
 | saml.ingress | object | `{"samlAdditionalAnnotations":{},"samlEnabled":false,"samlLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
 | saml.ingress.samlAdditionalAnnotations | object | `{}` | SAML ingress resource additional annotations. |
@@ -372,6 +378,7 @@ Kubernetes: `>=v1.22.0-0`
 | scim.appLoggers.scimLogTarget | string | `"STDOUT"` | jans-scim.log target |
 | scim.appLoggers.scriptLogLevel | string | `"INFO"` | jans-scim_script.log level |
 | scim.appLoggers.scriptLogTarget | string | `"FILE"` | jans-scim_script.log target |
+| scim.cnCustomJavaOptions | string | `""` | passing custom java options to scim. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs. |
 | scim.enabled | bool | `true` | Boolean flag to enable/disable the SCIM chart. |
 | scim.ingress | object | `{"scimAdditionalAnnotations":{},"scimConfigAdditionalAnnotations":{},"scimConfigEnabled":false,"scimConfigLabels":{},"scimEnabled":false,"scimLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
 | scim.ingress.scimAdditionalAnnotations | object | `{}` | SCIM ingress resource additional annotations. |
@@ -388,6 +395,7 @@ Kubernetes: `>=v1.22.0-0`
 | serviceAccountName | string | `"default"` | service account used by Kubernetes resources |
 | state | string | `"TX"` | State code. Used for certificate creation. |
 | testEnviroment | bool | `false` | Boolean flag if enabled will strip resources requests and limits from all services. |
+| tolerations | list | `[]` | Add tolerations for the pods |
 | topologySpreadConstraints | object | `{}` | Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/ |
 | usrEnvs | object | `{"normal":{},"secret":{}}` | Add custom normal and secret envs to the service |
 | usrEnvs.normal | object | `{}` | Add custom normal envs to the service variable1: value1 |
