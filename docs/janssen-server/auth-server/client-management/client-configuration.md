@@ -165,8 +165,6 @@ Client expiration is set based on `dynamicRegistrationExpirationTime` AS configu
 if `dcrForbidExpirationTimeInRequest` is `false` then it is set with Dynamic Client Registration Request via `lifetime` parameter 
 which expected value in seconds.
 
-Client also can be cleaned up by inactivity period which is set via `cleanUpInactiveClientAfterHoursOfInactivity` AS configuration property.
-By default it has `0` value (which means it is off). 
 Client activity time is tracked/recorded each time client is used for authentication or authorization (date is written in `jansLastAccessTime` client attribute).
 
 
