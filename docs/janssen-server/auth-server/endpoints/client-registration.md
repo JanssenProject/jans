@@ -7,6 +7,7 @@ tags:
   - dynamic client registration
 ---
 
+# Client Registration
 
 ### Dynamic Client Registration (DCR)
 

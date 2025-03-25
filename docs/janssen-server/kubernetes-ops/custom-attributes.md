@@ -8,6 +8,7 @@ tags:
   - claim
 ---
 
+# Custom Attributes
 
 ## Overview
 Making changes in the schema to add custom columns/attributes

@@ -6,7 +6,8 @@ tags:
 - endpoint
 ---
 
-# Overview
+# End Session
+## Overview
 
 Janssen Server's `/end_session` endpoint supports logout using 
 [OpenId Connect RP-initiated Logout](https://openid.net/specs/openid-connect-rpinitiated-1_0.html) mechanism.

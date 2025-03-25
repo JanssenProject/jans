@@ -6,13 +6,15 @@ tags:
   - refresh-token
 ---
 
+# OAuth Refresh Tokens
+
 ## Background
 
 Refresh tokens are an optimization that allows a client to renew an access token
 without having to re-authenticate. You should not issue a refresh token to
 untrusted clients, i.e. public clients.
 
-# Server properties.
+## Server properties.
 
 `refreshTokenLifetime`
 : *Default: 14400 minutes* - With this property, you can specify a longer lifetime
