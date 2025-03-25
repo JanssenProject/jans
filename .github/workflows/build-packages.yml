@@ -208,7 +208,7 @@ jobs:
           mv jans-cli-tui.pyz jans-cli-tui-linux-suse-X86-64.pyz
           sha256sum jans-cli-tui-linux-suse-X86-64.pyz > jans-cli-tui-linux-suse-X86-64.pyz.sha256sum
     - name: Set up Python 3.6
-      uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+      uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5.5.0
       with:
         python-version: 3.6
     - name: Build with Ubuntu
@@ -389,7 +389,7 @@ jobs:
         git_user_signingkey: true
         git_commit_gpgsign: true
 
-    - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+    - uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5.5.0
     - uses: PyO3/maturin-action@ea5bac0f1ccd0ab11c805e2b804bfcb65dac2eab # v1.45.0
       with:
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_python
