@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#overview" class="md-skip">
+        <a href="#certificate-management" class="md-skip">
           Skip to content
         </a>
       
@@ -1454,6 +1454,8 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           Certificate Management
@@ -1469,6 +1471,8 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+  
+    
   
   
     <label class="md-nav__title" for="__toc">
@@ -8751,6 +8755,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -8851,8 +8857,7 @@
   </a>
 
 
-  <h1>Certificate Management</h1>
-
+<h1 id="certificate-management">Certificate Management<a class="headerlink" href="#certificate-management" title="Permanent link">#</a></h1>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
 <p>Rotating Certificates and Keys in Kubernetes setup</p>
 <div class="admonition note">
@@ -8898,7 +8903,7 @@ If no mounted or downloaded files are found, it generates self-signed SSL certif
 <span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Never</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web-key-rotation</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/certmanager:0.0.0-nightly-1</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/certmanager:replace-janssen-version-1</span>
 <span class="w">          </span><span class="nt">envFrom</span><span class="p">:</span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">configMapRef</span><span class="p">:</span>
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen-config-cm</span><span class="w"> </span><span class="c1"># This may be differnet in Helm</span>
@@ -8950,7 +8955,7 @@ If no mounted or downloaded files are found, it generates self-signed SSL certif
 <span class="w">              </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web_https.key</span><span class="w">                              </span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">load-web-key-rotation</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/certmanager:0.0.0-nightly-1</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/certmanager:replace-janssen-version-1</span>
 <span class="w">          </span><span class="nt">envFrom</span><span class="p">:</span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">configMapRef</span><span class="p">:</span>
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen-config-cm</span><span class="w">  </span><span class="c1">#This may be differnet in Helm</span>
@@ -9010,7 +9015,7 @@ If no mounted or downloaded files are found, it generates self-signed SSL certif
 <span class="w">        </span><span class="nt">spec</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-key-rotation</span>
-<span class="w">              </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/certmanager:0.0.0-nightly-1</span>
+<span class="w">              </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/certmanager:replace-janssen-version-1</span>
 <span class="w">              </span><span class="nt">resources</span><span class="p">:</span>
 <span class="w">                </span><span class="nt">requests</span><span class="p">:</span>
 <span class="w">                  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;300Mi&quot;</span>
@@ -9037,7 +9042,7 @@ If no mounted or downloaded files are found, it generates self-signed SSL certif
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-15T10:12:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-15</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-25T11:50:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-25</span>
       
         <br>
         Created:
