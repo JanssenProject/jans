@@ -14,7 +14,8 @@ use super::LogLevel;
 use super::interface::{Indexed, Loggable};
 use crate::common::policy_store::PoliciesContainer;
 use crate::jwt::Token;
-use smol_str::SmolStr;
+use cedar_policy::EntityUid;
+use smol_str::{SmolStr, ToSmolStr};
 use uuid7::Uuid;
 
 /// ISO-8601 time format for [`chrono`]
@@ -336,6 +337,13 @@ impl DecisionLogEntry<'_> {
             tags.push("Workload".into());
         }
         tags
+    }
+
+    pub fn all_principals(principals: &[EntityUid]) -> Vec<SmolStr> {
+        principals
+            .iter()
+            .map(|uid| uid.type_name().to_smolstr())
+            .collect()
     }
 }
 

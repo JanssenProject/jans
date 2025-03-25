@@ -360,7 +360,7 @@ impl Authz {
 
         let mut principal_responses = HashMap::new();
 
-        for principal_uid in principal_uids.into_iter() {
+        for principal_uid in principal_uids.iter() {
             let auth_result = self
                 .execute_authorize(ExecuteAuthorizeParameters {
                     entities: &entities,
@@ -369,9 +369,9 @@ impl Authz {
                     resource: resource_uid.clone(),
                     context: context.clone(),
                 })
-                .map_err(|err| InvalidPrincipalError::new(&principal_uid, err))?;
+                .map_err(|err| InvalidPrincipalError::new(principal_uid, err))?;
 
-            principal_responses.insert(principal_uid, auth_result);
+            principal_responses.insert(principal_uid.clone(), auth_result);
         }
 
         let result = AuthorizeResult::new_for_many_principals(
@@ -423,10 +423,7 @@ impl Authz {
             base: BaseLogEntry::new(LogType::Decision, request_id),
             policystore_id: self.config.policy_store.id.as_str(),
             policystore_version: self.config.policy_store.get_store_version(),
-            principal: DecisionLogEntry::principal(
-                result.person.is_some(),
-                result.workload.is_some(),
-            ),
+            principal: DecisionLogEntry::all_principals(principal_uids.as_slice()),
             user: None,
             workload: None,
             lock_client_id: None,
