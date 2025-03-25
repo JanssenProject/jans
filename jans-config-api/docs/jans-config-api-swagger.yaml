@@ -9698,9 +9698,6 @@ components:
           type: string
         opTosUri:
           type: string
-        cleanUpInactiveClientAfterHoursOfInactivity:
-          type: integer
-          format: int32
         clientPeriodicUpdateTimerInterval:
           type: integer
           format: int32
