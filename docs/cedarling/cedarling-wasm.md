@@ -64,9 +64,6 @@ python3 -m http.server
     - `jans/jans-cedarling/bindings/cedarling_wasm/index.html`: A simple example demonstrating basic usage.
     - `jans/jans-cedarling/bindings/cedarling_wasm/cedarling_app.html`: A fully featured `Cedarling` browser app where you can test and validate your configuration.
 
-
-
-
 For using result files in the browser project, you need to make the 
 result `pkg` directory accessible for loading in the browser so that you can 
 later import the corresponding file from the browser.
