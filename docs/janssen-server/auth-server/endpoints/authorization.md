@@ -5,8 +5,8 @@ tags:
   - authorization
   - endpoint
 ---
-# Authorization
-## Overview
+# Authorization Endpoint
+
 
 Janssen Server exposes authorization endpoint compliant with [OAuth2 framework](https://www.rfc-editor.org/rfc/rfc6749#section-3.1).
 A client uses authorization endpoint to obtain an authorization grant. Based on response type requested by the client, 

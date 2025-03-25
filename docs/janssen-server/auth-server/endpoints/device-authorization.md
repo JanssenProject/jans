@@ -7,7 +7,7 @@ tags:
   - RFC 8628
 
 ---
-# Device Authorization
+# Device Authorization Endpoint
 
 ### Device Authorization endpoint
 The URI to invoke the Device Authorization Endpoint in Janssen Auth Server can be found by checking the introspection_endpoint claim of the OpenID Connect configuration response, typically deployed at `https://<my.jans.server>/.well-known/openid-configuration`

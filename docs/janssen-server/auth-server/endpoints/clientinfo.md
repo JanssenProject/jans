@@ -6,9 +6,9 @@ tags:
 - endpoint
 ---
 
-# Clientinfo
+# Clientinfo Endpoint
 
-## Overview
+
 
 `/clientinfo` endpoint is an OAuth2 protected endpoint that is used to retrieve claims about registered client.
 

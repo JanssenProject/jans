@@ -5,8 +5,8 @@ tags:
 - authorization-challenge
 - endpoint
 ---
-# Authorization Challenge
-## Overview
+# Authorization Challenge Endpoint
+
 
 Authorization Challenge Endpoint allows first-party native client obtain authorization code which later can be exchanged on access token.
 This can provide an entirely browserless OAuth 2.0 experience suited for native applications.

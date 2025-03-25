@@ -7,7 +7,7 @@ tags:
   - endpoint
 ---
 
-# OpenID Configuration
+# OpenID Configuration Endpoint
 
 ## OpenID Configuration Endpoint aka `.well-known/openid-configuration`
 

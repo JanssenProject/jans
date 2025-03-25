@@ -6,7 +6,7 @@ tags:
   - refresh-token
 ---
 
-# OAuth Refresh Tokens
+# OAuth Refresh Token
 
 ## Background
 

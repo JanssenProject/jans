@@ -8,7 +8,7 @@ tags:
   
 ---
 
-# OAuth Transaction Tokens
+# OAuth Transaction Token
 
 ### Background
 

@@ -7,7 +7,7 @@ tags:
   - dynamic client registration
 ---
 
-# Client Registration
+# Client Registration Endpoint
 
 ### Dynamic Client Registration (DCR)
 
