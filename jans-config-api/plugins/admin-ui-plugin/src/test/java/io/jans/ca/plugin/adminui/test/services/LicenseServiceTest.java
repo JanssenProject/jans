@@ -127,6 +127,28 @@ public class LicenseServiceTest {
     }
 
     @Test
+    public void testCheckLicense_MAUIsNull() throws Exception {
+        // Mock the admin config and license config
+        lenient().when(auiConfigurationService.getAUIConfiguration()).thenReturn(auiConfiguration);
+        lenient().when(auiConfiguration.getLicenseConfiguration()).thenReturn(licenseConfiguration);
+        lenient().when(licenseConfiguration.getHardwareId()).thenReturn("hardware-key-123");
+        lenient().when(licenseConfiguration.getLicenseKey()).thenReturn("valid-license-key");//License key missing
+        lenient().when(licenseConfiguration.getScanApiHostname()).thenReturn("https://scan.api.hostname");
+        lenient().when(licenseConfiguration.getLicenseValidUpto()).thenReturn(LocalDate.now().plusDays(30).toString());
+        lenient().when(licenseConfiguration.getLicenseDetailsLastUpdatedOn()).thenReturn(LocalDate.now().minusDays(5).toString());
+        lenient().when(licenseConfiguration.getIntervalForSyncLicenseDetailsInDays()).thenReturn(10L);
+        lenient().when(licenseConfiguration.getLicenseMAUThreshold()).thenReturn(null);
+
+        // Call the method under test
+        GenericResponse response = licenseDetailsService.checkLicense();
+
+        // Verify behavior and assert expected response
+        assertNotNull(response);
+        assertEquals(response.getResponseCode(), 500);
+        assertEquals(response.getResponseMessage(), ErrorResponse.MAU_IS_NULL.getDescription());
+    }
+
+    @Test
     public void testCheckLicense_NoLicenseKey() throws Exception {
         // Mock missing license key
         lenient().when(auiConfigurationService.getAUIConfiguration()).thenReturn(auiConfiguration);

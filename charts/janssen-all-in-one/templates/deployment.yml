@@ -43,6 +43,10 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
       dnsPolicy: {{ .Values.dnsPolicy | quote }}
     {{- with .Values.dnsConfig }}
       dnsConfig:
@@ -58,6 +62,20 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
         env:
+          - name: CN_AUTH_JAVA_OPTIONS
+            value: {{ include "auth-server.customJavaOptions" . | trim }}
+          - name: CN_FIDO2_JAVA_OPTIONS
+            value: {{ include "fido2.customJavaOptions" . | trim }}
+          - name: CN_CASA_JAVA_OPTIONS
+            value: {{ include "casa.customJavaOptions" . | trim }}
+          - name: CN_CONFIG_API_JAVA_OPTIONS
+            value: {{ include "config-api.customJavaOptions" . | trim }}
+          - name: CN_SAML_JAVA_OPTIONS
+            value: {{ include "saml.customJavaOptions" . | trim }}
+          - name: CN_SCIM_JAVA_OPTIONS
+            value: {{ include "scim.customJavaOptions" . | trim }}
+          - name: CN_LINK_JAVA_OPTIONS
+            value: {{ include "link.customJavaOptions" . | trim }}
           {{- include "janssen-all-in-one.usr-envs" . | indent 12 }}
           {{- include "janssen-all-in-one.usr-secret-envs" . | indent 12 }}
         securityContext:

@@ -6,11 +6,10 @@ tags:
   - keys
 ---
 
-# Overview
+# Keys
  
 Janssen uses keys for signing and encryption, primarily concerning JSON documents. Janssen supports several signing and encryption algorithms in salted and unsalted, to fit a variety of business needs. If other algorithms are necessary, Janssen supports them via interception scripts.
    
-# Keys
 
 A key is a piece of information, usually a string of numbers or letters that are stored in a file, which, when processed through a cryptographic algorithm, can encode or decode cryptographic data. In Janssen we use keys for creating token like `id_token`,`access_token`.
 

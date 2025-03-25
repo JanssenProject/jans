@@ -53,8 +53,6 @@ tags:
 | claimsLocalesSupported | This list details the languages and scripts supported for values in the claims being returned | [Details](#claimslocalessupported) |
 | claimsParameterSupported | Specifies whether the OP supports use of the claims parameter | [Details](#claimsparametersupported) |
 | claimTypesSupported | A list of the Claim Types that the OpenID Provider supports | [Details](#claimtypessupported) |
-| cleanServiceBatchChunkSize | Clean service chunk size which is used during clean up | [Details](#cleanservicebatchchunksize) |
-| cleanServiceInterval | Time interval for the Clean Service in seconds | [Details](#cleanserviceinterval) |
 | clientAuthenticationFilters | This list details filters for client authentication | [Details](#clientauthenticationfilters) |
 | clientAuthenticationFiltersEnabled | Boolean value specifying whether to enable client authentication filters | [Details](#clientauthenticationfiltersenabled) |
 | clientBlackList | This list specified which client redirection URIs are black-listed | [Details](#clientblacklist) |
@@ -656,24 +654,6 @@ tags:
 ### claimTypesSupported
 
 - Description: A list of the Claim Types that the OpenID Provider supports
-
-- Required: No
-
-- Default value: None
-
-
-### cleanServiceBatchChunkSize
-
-- Description: Clean service chunk size which is used during clean up
-
-- Required: No
-
-- Default value: 100
-
-
-### cleanServiceInterval
-
-- Description: Time interval for the Clean Service in seconds
 
 - Required: No
 

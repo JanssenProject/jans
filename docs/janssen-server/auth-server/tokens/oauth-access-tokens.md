@@ -7,7 +7,7 @@ tags:
   
 ---
 
-## OAuth Access Tokens
+## OAuth Access Token
 
 ### Background
 

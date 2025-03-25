@@ -391,8 +391,6 @@
     "umaRestrictResourceToAssociatedClient":false,
     "umaKeepClientDuringResourceSetRegistration":true,
     "umaRptAsJwt":false,
-    "cleanServiceInterval":60,
-    "cleanServiceBatchChunkSize": 10000,
     "keyRegenerationEnabled":true,
     "keyRegenerationInterval":48,
     "defaultSignatureAlgorithm":"RS256",

@@ -6,6 +6,8 @@ tags:
   - logs
 ---
 
+# Logs
+
 ## Overview
 The Janssen logs can be viewed using the following command:
 

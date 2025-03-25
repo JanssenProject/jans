@@ -192,7 +192,8 @@ migration:
 
 nameOverride: ""
 fullNameOverride: ""
-
+# -- Add tolerations for the pods
+tolerations: []
 # -- Additional labels that will be added across all resources definitions in the format of {mylabel: "myapp"}
 additionalLabels: { }
 # -- Additional annotations that will be added across all resources  in the format of {cert-manager.io/issuer: "letsencrypt-prod"}. key app is taken
