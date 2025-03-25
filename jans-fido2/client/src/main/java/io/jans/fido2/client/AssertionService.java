@@ -29,12 +29,7 @@ public interface AssertionService {
     @Path("/options")
     public Response authenticate(AssertionOptions assertionOptions);
 
-    @POST
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @Path("/options/generate")
-    public Response generateAuthenticate(AssertionOptionsGenerate assertionOptionsGenerate);
-
+  
     @POST
     @Consumes({ "application/json" })
     @Produces({ "application/json" })

@@ -135,7 +135,7 @@ public class AssertionService {
 		log.debug("Put challenge {}", challenge);
 
 		// Put RP
-		String origin = commonVerifiers.verifyRpDomain(assertionOptions.getOrigin(), appConfiguration.getIssuer(),
+		String origin = commonVerifiers.verifyRpDomain(assertionOptions.getRpId(), appConfiguration.getIssuer(),
 				appConfiguration.getFido2Configuration().getRequestedParties());
 		assertionOptionsResponse.setRpId(origin);
 		log.debug("Put rpId {}", origin);

@@ -358,40 +358,51 @@ public class AttestationService {
 		// set hints - client-device, security key, hybrid
 		List<String> hints = appConfiguration.getFido2Configuration().getHints();
 		log.debug("hints"+hints+":"+hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE.getValue()) );
-		//TODO: crosscheck this set hints, do we need to set this here?, i guess yes, cross check before discounting this
-		credentialCreationOptions.setHints(new HashSet<String>(hints));
+		
+		//credentialCreationOptions.setHints(new HashSet<String>(hints));
 		
 		credentialCreationOptions.setAuthenticatorSelection(new AuthenticatorSelection());
-		
-		
-		// only platform
-		if (hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE.getValue()) && hints.size() == 1) {
-			
-
-			log.debug("platform ");
-			credentialCreationOptions.getAuthenticatorSelection()
-					.setAuthenticatorAttachment(AuthenticatorAttachment.PLATFORM);
-			credentialCreationOptions.getAuthenticatorSelection().setUserVerification(UserVerification.preferred);
-			credentialCreationOptions.getAuthenticatorSelection().setRequireResidentKey(true);
-			credentialCreationOptions.getAuthenticatorSelection().setResidentKey(UserVerification.preferred);
-
-		} 
-		// only cross platform
-		else if (hints.size() > 0 && (hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE.getValue()) == false))
+		if (attestationOptions.getAuthenticatorSelection() != null)
 		{
-			log.debug("cross platform ");
-			credentialCreationOptions.getAuthenticatorSelection()
-					.setAuthenticatorAttachment(AuthenticatorAttachment.CROSS_PLATFORM);
-			credentialCreationOptions.getAuthenticatorSelection().setUserVerification(UserVerification.required);
-			credentialCreationOptions.getAuthenticatorSelection().setRequireResidentKey(false);
+			credentialCreationOptions.setAuthenticatorSelection(attestationOptions.getAuthenticatorSelection());
 		}
 		else
 		{
-			// both platform and cross platform are a possiblity
-			log.debug("both platform and cross platform are a possiblity");
-			
+			// only platform
+			if (hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE.getValue()) && hints.size() == 1) {
+				
+
+				log.debug("platform ");
+				credentialCreationOptions.getAuthenticatorSelection()
+						.setAuthenticatorAttachment(AuthenticatorAttachment.PLATFORM);
+				credentialCreationOptions.getAuthenticatorSelection().setUserVerification(UserVerification.preferred);
+				credentialCreationOptions.getAuthenticatorSelection().setRequireResidentKey(true);
+				credentialCreationOptions.getAuthenticatorSelection().setResidentKey(UserVerification.preferred);
+
+			} 
+			// only cross platform
+			else if (hints.size() > 0 && (hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE.getValue()) == false))
+			{
+				log.debug("cross platform ");
+				credentialCreationOptions.getAuthenticatorSelection()
+						.setAuthenticatorAttachment(AuthenticatorAttachment.CROSS_PLATFORM);
+				credentialCreationOptions.getAuthenticatorSelection().setUserVerification(UserVerification.required);
+				credentialCreationOptions.getAuthenticatorSelection().setRequireResidentKey(false);
+			}
+			else {
+				// both platform and cross platform are a possiblity
+				log.debug("both platform and cross platform are a possiblity");
+				// Set defaults allowing either platform or cross-platform attachment
+				// setting platform means, we show platform first
+				credentialCreationOptions.getAuthenticatorSelection()
+						.setAuthenticatorAttachment(AuthenticatorAttachment.CROSS_PLATFORM);
+				credentialCreationOptions.getAuthenticatorSelection().setUserVerification(UserVerification.preferred);
+				credentialCreationOptions.getAuthenticatorSelection().setRequireResidentKey(false);
+
+			}
+			log.debug("Put authenticatorSelection {}", credentialCreationOptions.getAuthenticatorSelection());
 		}
-		log.debug("Put authenticatorSelection {}", credentialCreationOptions.getAuthenticatorSelection());
+		
 	}
 
 	private void prepareAttestation(PublicKeyCredentialCreationOptions credentialCreationOptions) {
