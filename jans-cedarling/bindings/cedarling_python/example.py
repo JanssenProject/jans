@@ -5,7 +5,7 @@
 
 from cedarling_python import BootstrapConfig
 from cedarling_python import Cedarling
-from cedarling_python import ResourceData, Request
+from cedarling_python import EntityData, Request
 import time
 import yaml
 import os
@@ -47,19 +47,22 @@ instance = Cedarling(bootstrap_config)
 
 # field resource_type and id is mandatory
 # other fields are attributes of the resource.
-resource = ResourceData(resource_type="Jans::Application",
-                        id="random_id",
-                        app_id="application_id",
-                        name="Some Application",
-                        url={
-                            "host": "jans.test",
-                            "path": "/protected-endpoint",
-                            "protocol": "http"
-                        }
-                        )
+resource = EntityData(
+        entity_type="resource",
+        resource_type="Jans::Application",
+        id="random_id",
+        app_id="application_id",
+        name="Some Application",
+        url={
+            "host": "jans.test",
+            "path": "/protected-endpoint",
+            "protocol": "http"
+        }
+)
 
 # or we can init resource using dict
-resource = ResourceData.from_dict({
+resource = EntityData.from_dict({
+    "entity_type": "resource",
     "type": "Jans::Application",
     "id": "some_id",
     "app_id": "application_id",
