@@ -7,12 +7,67 @@ tags:
 
 # Python usage
 
-In this example, we will show an example Python script that calls the `cedarling_python` module and calls the `authorize()` function.
+Cedarling provides two main authorization methods:
 
+1. `authorize()` - Standard authorization using JWT tokens
+2. `authorize_unsigned()` - Authorization with direct principal definitions (no token validation)
+
+## Standard Token-Based Authorization
+
+This method uses JWT tokens (access_token, id_token, userinfo_token, or more) for authentication.
+
+### Prerequisites
 - Before beginning, ensure that you have completed the [building steps](./README.md#building) and are currently in a virtual Python environment that has the `cedarling_python` module installed. You can confirm this with `pip list`.
 - Run the script `jans/jans-cedarling/bindings/cedarling_python/example.py` from within the virtual environment.
 
-## Output
+### Example Usage
+```python
+# Create resource entity
+resource = EntityData.from_dict({
+    "type": "Jans::Application",
+    "id": "some_id",
+    "app_id": "application_id",
+    "name": "Some Application",
+    "url": {
+        "host": "jans.test",
+        "path": "/protected-endpoint",
+        "protocol": "http"
+    }
+})
+
+# Define context
+context = {
+    "current_time": int(time.time()),
+    "device_health": ["Healthy"],
+    "fraud_indicators": ["Allowed"],
+    "geolocation": ["America"],
+    "network": "127.0.0.1",
+    "network_type": "Local",
+    "operating_system": "Linux",
+    "user_agent": "Linux"
+}
+
+# Create request with JWT tokens
+request = Request(
+    tokens={
+        "access_token": "eyJhbGciOiJIUzI1NiIs...",
+        "id_token": "eyJraWQiOiJYTAwN2EyLTZkM...",
+        "userinfo_token": "eyJraWQiOiJjb25uZW..."
+    },
+    action='Jans::Action::"Read"',
+    resource=resource,
+    context=context
+)
+
+# Authorize call
+result = instance.authorize(request)
+
+# Check results
+print(f"Workload decision: {result.workload().decision}")
+print(f"User decision: {result.person().decision}")
+```
+
+### Output
 
 ```bash
 (venv) $ python example.py
@@ -64,7 +119,7 @@ In the script, the action, resource and context entities are used to create the 
 
 action = 'Jans::Action::"Read"'
 
-resource = ResourceData.from_dict({
+resource = EntityData.from_dict({
     "type": "Jans::Application",
     "id": "some_id",
     "app_id": "application_id",
@@ -98,6 +153,67 @@ assert authorize_result.is_allowed()
 
 Cedarling will return `is_allowed()` as `True` only if the authorization queries set in the bootstrap return `True`. In case of the example, both `CEDARLING_USER_AUTHZ` and `CEDARLING_WORKLOAD_AUTHZ` were set to `enabled`, so cedarling will only return True if both user and workload evaluations are true. 
 
+## Unsigned Authorization (direct principals)
+
+```python
+# Create resource entity
+resource = EntityData.from_dict({
+    "type": "Jans::Application",
+    "id": "some_id",
+    "app_id": "application_id",
+    "name": "Some Application",
+    "url": {
+        "host": "jans.test",
+        "path": "/protected-endpoint",
+        "protocol": "http"
+    }
+})
+
+# Define principals directly (no tokens)
+principals = [
+    EntityData.from_dict({
+        "type": "Jans::TestPrincipal1",
+        "id": "test_user1",
+        "is_ok": True
+    }),
+    EntityData.from_dict({
+        "type": "Jans::TestPrincipal2",
+        "id": "test_user2",
+        "is_ok": True
+    })
+]
+
+# Create request
+request = RequestUnsigned(
+    principals=principals,
+    action='Jans::Action::"UpdateTestPrincipal"',
+    resource=resource,
+    context={}
+)
+
+# Authorize call
+result = instance.authorize_unsigned(request)
+
+# Check results per principal type
+principal1_result = result.principal("Jans::TestPrincipal1")
+print(f"Principal1 decision: {principal1_result.decision}")
+
+principal2_result = result.principal("Jans::TestPrincipal2")
+print(f"Principal2 decision: {principal2_result.decision}")
+```
+
+Key differences from standard authorization:
+
+- No token validation performed
+- Principals defined directly in code
+- Results checked per principal type rather than user/workload
+- Faster since it skips token parsing/validation
+
 ## Exposed functions
 
-The `pyo3` binding for cedarling exposes a number of cedarling functions for you to use. The documentation on this can be found [here](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/PYTHON_TYPES.md).
+The `pyo3` binding exposes these main authorization functions:
+
+- `authorize(request: Request) -> AuthorizationResult`
+- `authorize_unsigned(request: RequestUnsigned) -> AuthorizationResult`
+
+Full documentation can be found [here](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/PYTHON_TYPES.md).
