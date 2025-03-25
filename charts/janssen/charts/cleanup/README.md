@@ -42,6 +42,7 @@ Kubernetes: `>=v1.22.0-0`
 | resources.limits.memory | string | `"300Mi"` | Memory limit. |
 | resources.requests.cpu | string | `"300m"` | CPU request. |
 | resources.requests.memory | string | `"300Mi"` | Memory request. |
+| tolerations | list | `[]` | Add tolerations for the pods |
 | usrEnvs | object | `{"normal":{},"secret":{}}` | Add custom normal and secret envs to the service |
 | usrEnvs.normal | object | `{}` | Add custom normal envs to the service variable1: value1 |
 | usrEnvs.secret | object | `{}` | Add custom secret envs to the service variable1: value1 |

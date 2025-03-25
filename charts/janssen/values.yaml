@@ -1704,6 +1704,8 @@ kc-scheduler:
 
 # -- Cleanup expired entries in persistence
 cleanup:
+  # -- Add tolerations for the pods
+  tolerations: [ ]
   # -- Add custom normal and secret envs to the service
   usrEnvs:
     # -- Add custom normal envs to the service
