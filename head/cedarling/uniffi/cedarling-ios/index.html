@@ -6464,12 +6464,6 @@
         
           
         
-          
-        
-          
-        
-          
-        
       
       
         
@@ -6526,20 +6520,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../janssen-server/fido/key-mgt/" class="md-nav__link">
-        Key Management/Rotation
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../janssen-server/fido/logs/" class="md-nav__link">
         Logs
       </a>
@@ -6554,8 +6534,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../janssen-server/fido/monitoring/" class="md-nav__link">
-        Monitoring
+      <a href="../../../janssen-server/fido/passwordlessLoginExperience/" class="md-nav__link">
+        Passwordless / Usernameless Login
       </a>
     </li>
   
@@ -6568,36 +6548,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../janssen-server/fido/usb-authn/" class="md-nav__link">
-        USB Authenticator Support
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../janssen-server/fido/platform-authn/" class="md-nav__link">
-        Platform Authenticator Support
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../janssen-server/fido/bluetooth-authn/" class="md-nav__link">
-        Bluetooth Authenticator Support
+      <a href="../../../janssen-server/fido/types-of-creds/" class="md-nav__link">
+        Types of credentials
       </a>
     </li>
   
@@ -8841,13 +8793,20 @@
 </li>
 <li>
 <p>Build the library:
-   <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build
+   <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>--release
 </code></pre></div>
-   In target/debug, you should find the libmobile.dylib file.</p>
+   In <code>target/release</code>, you should find the <code>libmobile.dylib</code>, <code>libmobile.so</code>, or <code>libmobile.dll</code> file, depending on the operating system you are using.</p>
 </li>
 <li>
-<p>Generate the bindings:
-   <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>run<span class="w"> </span>--bin<span class="w"> </span>uniffi-bindgen<span class="w"> </span>generate<span class="w"> </span>--library<span class="w"> </span>./target/debug/libmobile.dylib<span class="w"> </span>--language<span class="w"> </span>swift<span class="w"> </span>--out-dir<span class="w"> </span>./bindings/cedarling_uniffi/output
+<p><strong>.so</strong> (Shared Object) – This is the shared library format used in Linux and other Unix-based operating systems.</p>
+</li>
+<li><strong>.dylib</strong> (Dynamic Library) – This is the shared library format for macOS.</li>
+<li>
+<p><strong>.dll</strong> (Dynamic Link Library) - The shared library format used in Windows.</p>
+</li>
+<li>
+<p>Generate the bindings for Swift by running the command below. Replace <code>{build_file}</code> with <code>libmobile.dylib</code>, <code>libmobile.so</code>, or <code>libmobile.dll</code>, depending on which file is generated in <code>target/release</code>.
+   <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>run<span class="w"> </span>--bin<span class="w"> </span>uniffi-bindgen<span class="w"> </span>generate<span class="w"> </span>--library<span class="w"> </span>./target/release/<span class="o">{</span>build_file<span class="o">}</span><span class="w"> </span>--language<span class="w"> </span>swift<span class="w"> </span>--out-dir<span class="w"> </span>./bindings/cedarling_uniffi/output
 </code></pre></div></p>
 </li>
 <li>
@@ -8885,7 +8844,7 @@ cargo<span class="w"> </span>build<span class="w"> </span>--release<span class="
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-19T17:09:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-19</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-24T05:53:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-24</span>
       
         <br>
         Created:

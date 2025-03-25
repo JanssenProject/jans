@@ -6466,12 +6466,6 @@
         
           
         
-          
-        
-          
-        
-          
-        
       
       
         
@@ -6528,20 +6522,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fido/key-mgt/" class="md-nav__link">
-        Key Management/Rotation
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../fido/logs/" class="md-nav__link">
         Logs
       </a>
@@ -6556,8 +6536,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fido/monitoring/" class="md-nav__link">
-        Monitoring
+      <a href="../../fido/passwordlessLoginExperience/" class="md-nav__link">
+        Passwordless / Usernameless Login
       </a>
     </li>
   
@@ -6570,36 +6550,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fido/usb-authn/" class="md-nav__link">
-        USB Authenticator Support
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../fido/platform-authn/" class="md-nav__link">
-        Platform Authenticator Support
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../fido/bluetooth-authn/" class="md-nav__link">
-        Bluetooth Authenticator Support
+      <a href="../../fido/types-of-creds/" class="md-nav__link">
+        Types of credentials
       </a>
     </li>
   
@@ -9237,9 +9189,9 @@ The SCIM API endpoints are by default protected by (Bearer) OAuth 2.0 tokens. De
 <h2 id="how-is-scim-data-stored">How is SCIM data stored?<a class="headerlink" href="#how-is-scim-data-stored" title="Permanent link">#</a></h2>
 <p>You can refer to <a href="../../scim/monitoring/#how-is-scim-data-stored">here</a> for this topic</p>
 <h2 id="fido-devices">FIDO Devices<a class="headerlink" href="#fido-devices" title="Permanent link">#</a></h2>
-<p>You can refer to <a href="../../fido/monitoring/#fido-devices">here</a> for this topic.</p>
+<p>You can refer to <a href="../../janssen-server/fido/monitoring.md#fido-devices">here</a> for this topic.</p>
 <h2 id="fido-2-devices">FIDO 2 devices<a class="headerlink" href="#fido-2-devices" title="Permanent link">#</a></h2>
-<p>You can refer to <a href="../../fido/monitoring/#fido2-devices">here</a> for this topic.</p>
+<p>You can refer to <a href="../../janssen-server/fido/monitoring.md#fido2-devices">here</a> for this topic.</p>
 <h2 id="potential-performance-issues-with-group-endpoints">Potential performance issues with Group endpoints<a class="headerlink" href="#potential-performance-issues-with-group-endpoints" title="Permanent link">#</a></h2>
 <p>In SCIM a group resource basically consists of an identifier, a display name, and a collection of members associated to it. Also, every member is made up of a user identifier, his display name, and other attributes. As a consequence, retrieving group information requires making a correlation with existing user data. Since Gluu database model does not follow a relational database pattern this may entail a considerable amount of user queries when groups contain thousands of members.</p>
 <p>While this could have been workarounded by storing members' display names inside group entries, this brings additional problems to deal with.</p>
