@@ -57,6 +57,7 @@ pub mod bindings {
     };
     pub use crate::common::policy_store::PolicyStore;
 
+    pub use serde_json;
     pub use serde_yml;
 }
 
