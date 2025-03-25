@@ -221,6 +221,10 @@ public class LicenseDetailsService extends BaseService {
             if (daysDiffOfLicenseValidity < 0) {
                 return syncLicenseDetailsFromAgamaLab(auiConfiguration);
             }
+            if(licenseConfiguration.getLicenseMAUThreshold() == null) {
+                log.error(ErrorResponse.MAU_IS_NULL.getDescription());
+                return CommonUtils.createGenericResponse(false, 500, ErrorResponse.MAU_IS_NULL.getDescription());
+            }
             ObjectMapper mapper = new ObjectMapper();
             JsonArray customAttributes = Json.createArrayBuilder()
                     .add(Json.createObjectBuilder()
