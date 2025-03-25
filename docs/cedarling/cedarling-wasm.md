@@ -133,6 +133,56 @@ later import the corresponding file from the browser.
 
 ```
 
+Example of calling method `authorize_unsigned` for the custom principals:
+
+```js
+            let result = await instance.authorize_unsigned({
+                "principals": [
+                    {
+                        "type": "Jans::User",
+                        "id": "some_principal_id",
+                        "app_id": "application_id",
+                        "name": "John Doe",
+                        "email": "john.doe@example.com"
+                    },
+                    {
+                        "type": "Jans::Role",
+                        "id": "Admin",
+                    },
+                    {
+                        "type": "Jans::Group",
+                        "id": "some_group_id",
+                        "app_id": "group_app_id",
+                        "name": "Some Group",
+                        "country": "US"
+                    
+                    }
+                ]
+                "action": 'Jans::Action::"Read"',
+                "resource": {
+                    "type": "Jans::Application",
+                    "id": "some_id",
+                    "app_id": "application_id",
+                    "name": "Some Application",
+                    "url": {
+                        "host": "jans.test",
+                        "path": "/protected-endpoint",
+                        "protocol": "http"
+                    }
+                },
+                "context": {
+                    "current_time": Math.floor(Date.now() / 1000),
+                    "device_health": ["Healthy"],
+                    "fraud_indicators": ["Allowed"],
+                    "geolocation": ["America"],
+                    "network": "127.0.0.1",
+                    "network_type": "Local",
+                    "operating_system": "Linux",
+                    "user_agent": "Linux"
+                },
+            });
+```
+
 ## Defined API
 
 ```ts
