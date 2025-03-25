@@ -6,7 +6,7 @@ tags:
   - metric
 ---
 
-# Overview
+# Reporting and Metric
 
 Authorization Server (AS) supports different metric data:
 - Monthly Active Users (MAU)

@@ -6,7 +6,7 @@ tags:
   - DynamicScope
 ---
 
-## Overview
+# Dynamic Scope
 The dynamic scope custom script allows the authorization server to generate a list of claims (and their values) on the fly, depending on circumstances such as the ID of the client requesting it, authenticated user's session parameters, values of other users' attributes, results of some calculations implementing specific business logic and/or requests to remote APIs or databases. Claims are then returned the usual way in a response to a call to the `/userinfo` endpoint. 
 
 ## Interface
