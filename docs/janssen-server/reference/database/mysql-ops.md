@@ -7,6 +7,8 @@ tags:
   - jansPerson
 ---
 
+# MySQL Operation
+
 Below operations require to log into mysql workspace first with command: `mysql`
 
 ### **Change password for user `jans`** :

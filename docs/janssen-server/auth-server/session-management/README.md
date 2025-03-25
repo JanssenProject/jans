@@ -5,7 +5,7 @@ tags:
   - session
 ---
 
-# Overview
+# Session Management
 
 A session is a reference identifier on the Jans Auth Server that connects to a
 person's authentication state. During an authentication workflow, Auth Server writes a cookie with the `session_id` in the person's browser. OpenID Native
