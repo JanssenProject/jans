@@ -104,7 +104,7 @@ mod test {
         assert!(matches!(
             entity.attr("test_bool").expect("entity should have a `test_bool` attribute").expect("should be a valid value"),
             EvalResult::Bool(ref val)
-                if *val == true,
+                if *val,
         ));
 
         assert!(matches!(

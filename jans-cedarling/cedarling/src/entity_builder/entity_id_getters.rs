@@ -136,7 +136,7 @@ mod test {
         );
 
         // Using the token's aud
-        let id = get_first_valid_entity_id(&vec![EntityIdSrc {
+        let id = get_first_valid_entity_id(&[EntityIdSrc {
             token: &token,
             claim: "aud",
         }])
@@ -144,7 +144,7 @@ mod test {
         assert_eq!(id, expected_aud);
 
         // Using the token's aud if the client_id is not present
-        let id = get_first_valid_entity_id(&vec![
+        let id = get_first_valid_entity_id(&[
             EntityIdSrc {
                 token: &token,
                 claim: "client_id",
@@ -168,7 +168,7 @@ mod test {
         );
 
         // Using the first valid id even if others are also valid
-        let id = get_first_valid_entity_id(&vec![
+        let id = get_first_valid_entity_id(&[
             EntityIdSrc {
                 token: &token,
                 claim: "client_id",
@@ -188,7 +188,7 @@ mod test {
         );
 
         // Errors when no valid ids found
-        let err = get_first_valid_entity_id(&vec![
+        let err = get_first_valid_entity_id(&[
             EntityIdSrc {
                 token: &token,
                 claim: "empty",
@@ -232,14 +232,14 @@ mod test {
         );
 
         // Collecting one valid id
-        let ids = collect_all_valid_entity_ids(&vec![EntityIdSrc {
+        let ids = collect_all_valid_entity_ids(&[EntityIdSrc {
             token: &token1,
             claim: "role",
         }]);
         assert_eq!(ids, vec!["role1"]);
 
         // Collecting multiple valid ids
-        let ids = collect_all_valid_entity_ids(&vec![
+        let ids = collect_all_valid_entity_ids(&[
             EntityIdSrc {
                 token: &token1,
                 claim: "role",
@@ -252,7 +252,7 @@ mod test {
         assert_eq!(ids, vec!["role1", "role2"]);
 
         // Ignore invalid ids
-        let ids = collect_all_valid_entity_ids(&vec![
+        let ids = collect_all_valid_entity_ids(&[
             EntityIdSrc {
                 token: &token1,
                 claim: "role",
