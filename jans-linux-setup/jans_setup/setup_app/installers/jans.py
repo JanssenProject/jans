@@ -267,7 +267,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_chmod, '+x', script])
 
         # scripts that can be executed by user jetty
-        jetty_user_scripts = (Config.jansScriptFiles[3],)
+        jetty_user_scripts = (Config.jansScriptFiles[2], Config.jansScriptFiles[3])
         for script in jetty_user_scripts:
             script_fn = os.path.join(Config.jansOptBinFolder, os.path.basename(script))
             self.chown(script_fn, user=Config.root_user, group=Config.jetty_user)
