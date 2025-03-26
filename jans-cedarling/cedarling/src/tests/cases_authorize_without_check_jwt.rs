@@ -70,7 +70,7 @@ async fn forbid_test_role_guest() {
     );
     cmp_policy!(
         result.workload,
-        vec!["1"],
+        ["1"],
         "reason of permit workload should be '1'"
     );
 
@@ -82,7 +82,7 @@ async fn forbid_test_role_guest() {
 
     cmp_policy!(
         result.person,
-        vec!["4"],
+        ["4"],
         "reason of permit person should be '2' and '4'"
     );
 
@@ -149,7 +149,7 @@ async fn success_test_role_array() {
 
     cmp_policy!(
         result.workload,
-        vec!["1"],
+        ["1"],
         "reason of permit workload should be '1'"
     );
 
@@ -161,7 +161,7 @@ async fn success_test_role_array() {
 
     cmp_policy!(
         result.person,
-        vec!["2", "3"],
+        ["2", "3"],
         "reason of permit person should be '2','3'"
     );
 
@@ -229,7 +229,7 @@ async fn success_test_no_role() {
 
     cmp_policy!(
         result.workload,
-        vec!["1"],
+        ["1"],
         "reason of permit workload should be '1'"
     );
 
@@ -241,7 +241,7 @@ async fn success_test_no_role() {
 
     cmp_policy!(
         result.person,
-        vec!["2"],
+        ["2"],
         "reason of permit person should be '2'"
     );
 
@@ -310,7 +310,7 @@ async fn success_test_user_data_in_id_token() {
 
     cmp_policy!(
         result.workload,
-        vec!["1"],
+        ["1"],
         "reason of permit workload should be '1'"
     );
 
@@ -322,7 +322,7 @@ async fn success_test_user_data_in_id_token() {
 
     cmp_policy!(
         result.person,
-        vec!["2", "3"],
+        ["2", "3"],
         "reason of permit person should be '2','3'"
     );
 
@@ -400,7 +400,7 @@ async fn all_forbid() {
 
     cmp_policy!(
         result.person,
-        vec!["4"],
+        ["4"],
         "reason of forbid person should empty, no forbid rule"
     );
 
@@ -464,7 +464,7 @@ async fn only_workload_permit() {
 
     cmp_policy!(
         result.workload,
-        vec!["1"],
+        ["1"],
         "reason of permit workload should be '1'"
     );
 
@@ -482,7 +482,7 @@ async fn only_workload_permit() {
 
     cmp_policy!(
         result.person,
-        vec!["4"],
+        ["4"],
         "reason of forbid person should empty, no forbid rule"
     );
 
@@ -559,7 +559,7 @@ async fn only_person_permit() {
 
     cmp_policy!(
         result.person,
-        vec!["2"],
+        ["2"],
         "reason of forbid person should '2'"
     );
 
@@ -635,7 +635,7 @@ async fn only_user_role_permit() {
 
     cmp_policy!(
         result.person,
-        vec!["3"],
+        ["3"],
         "reason of forbid person '3', permit for role Admin"
     );
 
@@ -698,7 +698,7 @@ async fn only_workload_and_person_permit() {
 
     cmp_policy!(
         result.workload,
-        vec!["1"],
+        ["1"],
         "reason of permit workload should be '1'"
     );
 
@@ -710,7 +710,7 @@ async fn only_workload_and_person_permit() {
 
     cmp_policy!(
         result.person,
-        vec!["2"],
+        ["2"],
         "reason of permit person should '2'"
     );
 
@@ -773,7 +773,7 @@ async fn only_workload_and_role_permit() {
 
     cmp_policy!(
         result.workload,
-        vec!["1"],
+        ["1"],
         "reason of permit workload should be '1'"
     );
 
@@ -785,7 +785,7 @@ async fn only_workload_and_role_permit() {
 
     cmp_policy!(
         result.person,
-        vec!["3"],
+        ["3"],
         "reason of forbid person should be none, but we have permit for role"
     );
 

@@ -186,6 +186,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::approx_constant)]
     fn test_fallback_deserialize_complex_types() {
         let test_cases = vec![
             (

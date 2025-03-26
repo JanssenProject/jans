@@ -130,7 +130,7 @@ mod test {
             &EntityUid::from_str("Jans::Id_token::\"some_jti\"").expect("a valid EntityUid"),
         );
         let entity = builder
-            .build_user_entity(&tokens, &tkn_principal_mappings, &built_entities, roles)
+            .build_user_entity(tokens, tkn_principal_mappings, &built_entities, roles)
             .expect("should build workload entity");
 
         assert_entity_eq(&entity, expected, schema);
@@ -166,7 +166,7 @@ mod test {
                 principal: "Jans::User".into(),
                 attr_name: "id_token".into(),
                 expr: RestrictedExpression::new_entity_uid(
-                    EntityUid::from_str("Jans::Id_token::\"some_jti\"".into())
+                    EntityUid::from_str("Jans::Id_token::\"some_jti\"")
                         .expect("should parse EntityUid"),
                 ),
             }]
@@ -240,7 +240,7 @@ mod test {
                 principal: "Jans::User".into(),
                 attr_name: "userinfo_token".into(),
                 expr: RestrictedExpression::new_entity_uid(
-                    EntityUid::from_str("Jans::Userinfo_token::\"some_jti\"".into())
+                    EntityUid::from_str("Jans::Userinfo_token::\"some_jti\"")
                         .expect("should parse EntityUid"),
                 ),
             }]
@@ -318,7 +318,7 @@ mod test {
                 principal: "Jans::User".into(),
                 attr_name: "userinfo_token".into(),
                 expr: RestrictedExpression::new_entity_uid(
-                    EntityUid::from_str("Jans::Userinfo_token::\"some_jti\"".into())
+                    EntityUid::from_str("Jans::Userinfo_token::\"some_jti\"")
                         .expect("should parse EntityUid"),
                 ),
             }]
@@ -397,7 +397,7 @@ mod test {
                 principal: "Jans::User".into(),
                 attr_name: "id_token".into(),
                 expr: RestrictedExpression::new_entity_uid(
-                    EntityUid::from_str("Jans::Id_token::\"some_jti\"".into())
+                    EntityUid::from_str("Jans::Id_token::\"some_jti\"")
                         .expect("should parse EntityUid"),
                 ),
             }]
