@@ -6,7 +6,7 @@ tags:
 - docker image
 ---
 
-## Overview
+# Auth Server
 
 Docker image packaging for Janssen Authorization Server.
 

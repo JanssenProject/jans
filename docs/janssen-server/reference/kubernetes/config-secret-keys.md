@@ -7,7 +7,7 @@ tags:
   - secret
 ---
 
-## Overview
+# Configuration Keys
 
 The `config` job creates a set of configurations (contains `secrets` and `configmaps`) used by all Janssen services.
 

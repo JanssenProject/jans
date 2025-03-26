@@ -4,7 +4,7 @@ tags:
   - fido2
 
 ---
-
+# Configuration
 ### Configuration Parameters of Janssen's FIDO2 server:
 
 | Field named                 | Example                                                | Description                                                                                                                     |

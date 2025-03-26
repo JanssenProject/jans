@@ -6,6 +6,8 @@ tags:
   - attestation
 ---
 
+# Vendor Metadata Management
+
 ### Metadata Service:
 
 The metadata service is a centralized, trusted database of FIDO authenticators. It is used by the Relying Party to validate authenticators i.e. attest the genuine-ness of a device. If implemented in organizations like government, federal agencies, banking and healthcare organizations for example) and/or organizations handling sensitive data (media companies, R&D institutions, corporations, etc), this information can help protect organizations against security vulnerabilities.

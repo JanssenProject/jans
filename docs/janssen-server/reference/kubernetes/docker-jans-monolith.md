@@ -7,10 +7,13 @@ tags:
 - docker image
 ---
 
+# Monolith
+
 > **Warning**
 > This image is for testing and development purposes only. Use Janssen [helm charts](https://github.com/JanssenProject/jans/tree/main/charts/janssen) for production setups.
 
-## Overview
+
+
 
 Docker monolith image packaging for Janssen. This image packs janssen services including the auth-server, config-api, fido2, and scim.
 
