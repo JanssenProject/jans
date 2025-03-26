@@ -16,14 +16,13 @@ use crate::entity_builder::*;
 use crate::jwt::{self, Token};
 use crate::log::interface::LogWriter;
 use crate::log::{
-    AuthorizationLogInfo, BaseLogEntry, DecisionLogEntry, Diagnostics, DiagnosticsRefs, LogEntry,
-    LogLevel, LogTokensInfo, LogType, Logger, UserAuthorizeInfo, WorkloadAuthorizeInfo, gen_uuid7,
+    AuthorizationLogInfo, AuthorizeInfo, BaseLogEntry, DecisionLogEntry, Diagnostics,
+    DiagnosticsRefs, LogEntry, LogLevel, LogTokensInfo, LogType, Logger, gen_uuid7,
 };
 use build_ctx::*;
 use cedar_policy::{Entities, Entity, EntityUid};
 use chrono::Utc;
-use request::Request;
-use smol_str::ToSmolStr;
+use request::{Request, RequestUnsigned};
 use std::collections::{HashMap, HashSet};
 use std::io::Cursor;
 use std::str::FromStr;
@@ -120,7 +119,7 @@ impl Authz {
         let context = build_context(
             &self.config,
             request.context.clone(),
-            &entities_data,
+            &entities_data.built_entities(),
             &schema.schema,
             &action,
         )?;
@@ -128,19 +127,12 @@ impl Authz {
         let workload_principal = entities_data.workload.as_ref().map(|e| e.uid()).to_owned();
         let person_principal = entities_data.user.as_ref().map(|e| e.uid()).to_owned();
 
-        let workload_typename = workload_principal
-            .as_ref()
-            .map(|e| e.type_name().to_smolstr());
-        let person_typename = person_principal
-            .as_ref()
-            .map(|e| e.type_name().to_smolstr());
-
         // Convert [`AuthorizeEntitiesData`] to  [`cedar_policy::Entities`] structure,
         // hold all entities that will be used on authorize check.
         let entities = entities_data.entities(Some(&schema.schema))?;
 
         let (workload_authz_result, workload_authz_info, workload_entity_claims) =
-            if let Some(workload) = workload_principal {
+            if let Some(workload) = workload_principal.clone() {
                 let principal = workload;
 
                 let authz_result = self
@@ -151,9 +143,9 @@ impl Authz {
                         resource: resource_uid.clone(),
                         context: context.clone(),
                     })
-                    .map_err(AuthorizeError::WorkloadRequestValidation)?;
+                    .map_err(|err| InvalidPrincipalError::new(&principal, err))?;
 
-                let authz_info = WorkloadAuthorizeInfo {
+                let authz_info = AuthorizeInfo {
                     principal: principal.to_string(),
                     diagnostics: Diagnostics::new(
                         authz_result.diagnostics(),
@@ -182,7 +174,7 @@ impl Authz {
 
         // Check authorize where principal is `"Jans::User"` from cedar-policy schema.
         let (user_authz_result, user_authz_info, user_entity_claims) =
-            if let Some(user) = person_principal {
+            if let Some(user) = person_principal.clone() {
                 let principal = user;
 
                 let authz_result = self
@@ -193,9 +185,9 @@ impl Authz {
                         resource: resource_uid.clone(),
                         context: context.clone(),
                     })
-                    .map_err(AuthorizeError::UserRequestValidation)?;
+                    .map_err(|err| InvalidPrincipalError::new(&principal, err))?;
 
-                let authz_info = UserAuthorizeInfo {
+                let authz_info = AuthorizeInfo {
                     principal: principal.to_string(),
                     diagnostics: Diagnostics::new(
                         authz_result.diagnostics(),
@@ -224,8 +216,8 @@ impl Authz {
 
         let result = AuthorizeResult::new(
             &self.config.authorization.principal_bool_operator,
-            workload_typename,
-            person_typename,
+            workload_principal,
+            person_principal,
             workload_authz_result,
             user_authz_result,
             request_id,
@@ -282,10 +274,7 @@ impl Authz {
             decision: result.decision.into(),
             tokens: tokens_logging_info,
             decision_time_micro_sec,
-            diagnostics: DiagnosticsRefs::new(&[
-                &user_authz_diagnostic,
-                &workload_authz_diagnostic,
-            ]),
+            diagnostics: DiagnosticsRefs::new(&[user_authz_diagnostic, workload_authz_diagnostic]),
         });
 
         // DEBUG LOG
@@ -299,8 +288,165 @@ impl Authz {
                     context: request.context.clone(),
                     resource: resource_uid.to_string(),
                     entities: entities_json,
-                    person_authorize_info: user_authz_info,
-                    workload_authorize_info: workload_authz_info,
+                    authorize_info: [user_authz_info, workload_authz_info]
+                        .into_iter()
+                        .flatten()
+                        .collect(),
+                    authorized: result.decision,
+                })
+                .set_message("Result of authorize.".to_string()),
+        );
+
+        Ok(result)
+    }
+
+    /// Evaluate Authorization Request with unsigned data.
+    pub async fn authorize_unsigned(
+        &self,
+        request: RequestUnsigned,
+    ) -> Result<AuthorizeResult, AuthorizeError> {
+        let start_time = Utc::now();
+        // We use uuid v7 because it is generated based on the time and sortable.
+        // and we need sortable ids to use it in the sparkv database.
+        // Sparkv store data in BTree. So we need have correct order of ids.
+        //
+        // Request ID should be passed to each log entry for tracing in logs and to get log entities from memory logger
+        let request_id = gen_uuid7();
+
+        let schema = &self.config.policy_store.schema;
+
+        // Parse action UID.
+        let action = cedar_policy::EntityUid::from_str(request.action.as_str())
+            .map_err(AuthorizeError::Action)?;
+
+        let resource_entity = self
+            .config
+            .entity_builder
+            .build_cedar_entity(&request.resource)?;
+
+        let principal_entities = request
+            .principals
+            .into_iter()
+            .map(|entity_data| self.config.entity_builder.build_cedar_entity(&entity_data))
+            .collect::<Result<Vec<_>, _>>()?;
+
+        let built_entities = BuiltEntities::from_iter(
+            principal_entities
+                .iter()
+                .chain(vec![&resource_entity])
+                .map(|entity| entity.uid()),
+        );
+
+        // Get entity UIDs what we will be used on authorize check
+        let principal_uids = principal_entities
+            .iter()
+            .map(|entity| entity.uid())
+            .collect::<Vec<_>>();
+
+        let resource_uid = resource_entity.uid();
+
+        let context = build_context(
+            &self.config,
+            request.context.clone(),
+            &built_entities,
+            &schema.schema,
+            &action,
+        )?;
+
+        let entities = Entities::from_entities(
+            principal_entities.into_iter().chain(vec![resource_entity]),
+            Some(&schema.schema),
+        )?;
+
+        let mut principal_responses = HashMap::new();
+
+        for principal_uid in principal_uids.iter() {
+            let auth_result = self
+                .execute_authorize(ExecuteAuthorizeParameters {
+                    entities: &entities,
+                    principal: principal_uid.clone(),
+                    action: action.clone(),
+                    resource: resource_uid.clone(),
+                    context: context.clone(),
+                })
+                .map_err(|err| InvalidPrincipalError::new(principal_uid, err))?;
+
+            principal_responses.insert(principal_uid.clone(), auth_result);
+        }
+
+        let result = AuthorizeResult::new_for_many_principals(
+            &self.config.authorization.principal_bool_operator,
+            principal_responses,
+            None,
+            None,
+            request_id,
+        )?;
+
+        // measure time how long request executes
+        let since_start = Utc::now().signed_duration_since(start_time);
+        let decision_time_micro_sec = since_start.num_microseconds().unwrap_or({
+            //overflow (exceeding 2^63 microseconds in either direction)
+            i64::MAX
+        });
+
+        // FROM THIS POINT WE ONLY MAKE LOGS
+
+        // getting entities as json
+        let mut entities_raw_json = Vec::new();
+        let cursor = Cursor::new(&mut entities_raw_json);
+
+        entities.write_to_json(cursor)?;
+        let entities_json: serde_json::Value = serde_json::from_slice(entities_raw_json.as_slice())
+            .map_err(AuthorizeError::EntitiesToJson)?;
+
+        let debug_authorize_info = result
+            .principals
+            .iter()
+            .map(|(principal, response)| AuthorizeInfo {
+                principal: principal.to_string(),
+                diagnostics: Diagnostics::new(
+                    response.diagnostics(),
+                    &self.config.policy_store.policies,
+                ),
+                decision: response.decision().into(),
+            })
+            .collect::<Vec<_>>();
+
+        let diagnostics = debug_authorize_info
+            .iter()
+            .map(|info| Some(&info.diagnostics))
+            .collect::<Vec<_>>();
+
+        // Decision log
+        // we log decision log before debug log, to avoid cloning diagnostic info
+        self.config.log_service.as_ref().log_any(&DecisionLogEntry {
+            base: BaseLogEntry::new(LogType::Decision, request_id),
+            policystore_id: self.config.policy_store.id.as_str(),
+            policystore_version: self.config.policy_store.get_store_version(),
+            principal: DecisionLogEntry::all_principals(principal_uids.as_slice()),
+            user: None,
+            workload: None,
+            lock_client_id: None,
+            action: request.action.clone(),
+            resource: resource_uid.to_string(),
+            decision: result.decision.into(),
+            tokens: LogTokensInfo::empty(),
+            decision_time_micro_sec,
+            diagnostics: DiagnosticsRefs::new(diagnostics.as_slice()),
+        });
+
+        // DEBUG LOG
+        // Log all result information about both authorize checks.
+        // Where principal is `"Jans::Workload"` and where principal is `"Jans::User"`.
+        self.config.log_service.as_ref().log_any(
+            LogEntry::new_with_data(LogType::System, Some(request_id))
+                .set_level(LogLevel::DEBUG)
+                .set_auth_info(AuthorizationLogInfo {
+                    action: request.action.clone(),
+                    context: request.context.clone(),
+                    resource: resource_uid.to_string(),
+                    entities: entities_json,
+                    authorize_info: debug_authorize_info,
                     authorized: result.decision,
                 })
                 .set_message("Result of authorize.".to_string()),
@@ -425,12 +571,9 @@ pub enum AuthorizeError {
     /// Error encountered while validating context according to the schema
     #[error("could not create context: {0}")]
     CreateContext(#[from] cedar_policy::ContextJsonError),
-    /// Error encountered while creating [`cedar_policy::Request`] for workload entity principal
-    #[error("The request for `Workload` does not conform to the schema: {0}")]
-    WorkloadRequestValidation(cedar_policy::RequestValidationError),
-    /// Error encountered while creating [`cedar_policy::Request`] for user entity principal
-    #[error("The request for `User` does not conform to the schema: {0}")]
-    UserRequestValidation(cedar_policy::RequestValidationError),
+    /// Error encountered while creating [`cedar_policy::Request`] for entity principal
+    #[error(transparent)]
+    InvalidPrincipal(#[from] InvalidPrincipalError),
     /// Error encountered while checking if the Entities adhere to the schema
     #[error("failed to validate Cedar entities: {0:?}")]
     ValidateEntities(#[from] cedar_policy::entities_errors::EntitiesError),
@@ -458,6 +601,24 @@ pub struct CreateRequestRoleError {
     err: cedar_policy::RequestValidationError,
     /// Role ID [`EntityUid`] value used for authorization request
     uid: EntityUid,
+}
+
+#[derive(Debug, derive_more::Error, derive_more::Display)]
+#[display("The request for `{principal}` does not conform to the schema: {err}")]
+pub struct InvalidPrincipalError {
+    /// Principal name
+    principal: String,
+    /// Error value
+    err: cedar_policy::RequestValidationError,
+}
+
+impl InvalidPrincipalError {
+    fn new(principal: &EntityUid, err: cedar_policy::RequestValidationError) -> Self {
+        InvalidPrincipalError {
+            principal: principal.to_string(),
+            err,
+        }
+    }
 }
 
 /// Get entity claims from list in config
