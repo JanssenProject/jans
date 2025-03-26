@@ -30,7 +30,6 @@ public class DBDocumentService implements Serializable {
 	public static final String inum = "inum";
 	public static final String displayName = "displayName";
 	public static final String description = "description";
-	public static final String alias = "jansAlias";
 	public static final String jansFilePath = "jansFilePath";
 
 	@Inject
@@ -139,9 +138,7 @@ public class DBDocumentService implements Serializable {
 					null);
 			Filter descriptionFilter = Filter.createSubstringFilter(description, null, targetArray,
 					null);
-			 Filter aliasFilter = Filter.createSubstringFilter(alias, null, targetArray,
-	                    null);
-			searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, aliasFilter);
+			searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter);
 		}
 		List<Document> result = new ArrayList<>();
 		try {

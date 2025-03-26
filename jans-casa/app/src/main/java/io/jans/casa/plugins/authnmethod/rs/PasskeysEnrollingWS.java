@@ -1,30 +1,34 @@
 package io.jans.casa.plugins.authnmethod.rs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.jans.service.cache.CacheProvider;
-
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+
+import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.casa.core.PersistenceService;
 import io.jans.casa.core.model.Person;
 import io.jans.casa.core.pojo.FidoDevice;
-import io.jans.casa.core.pojo.SecurityKey;
 import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.authnmethod.rs.status.u2f.FinishCode;
 import io.jans.casa.plugins.authnmethod.rs.status.u2f.RegisterMessageCode;
 import io.jans.casa.plugins.authnmethod.rs.status.u2f.RegistrationCode;
 import io.jans.casa.plugins.authnmethod.service.Fido2Service;
 import io.jans.casa.rest.ProtectedApi;
-import org.slf4j.Logger;
+import io.jans.service.cache.CacheProvider;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
 @ProtectedApi(scopes = "https://jans.io/casa.enroll")
@@ -141,7 +145,7 @@ public class PasskeysEnrollingWS {
         } else if (!cacheProvider.hasKey(RECENT_DEVICES_PREFIX + deviceId)) {
             result = FinishCode.NO_MATCH_OR_EXPIRED;
         } else {
-            SecurityKey key = new SecurityKey();
+            FidoDevice key = new FidoDevice();
             key.setId(deviceId);
             key.setNickName(nickName);
 

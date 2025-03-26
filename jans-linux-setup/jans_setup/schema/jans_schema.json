@@ -5366,8 +5366,7 @@
         "jansService",
         "jansLevel",
         "jansRevision",
-        "jansEnabled",
-        "jansAlias"
+        "jansEnabled"
       ],
       "must": [
         "objectclass"
