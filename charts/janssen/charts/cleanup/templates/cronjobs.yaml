@@ -1,26 +1,22 @@
+{{ if and (index .Values "global" "cleanup" "enabled") (.Values.global.saml.enabled) -}}
 kind: CronJob
 apiVersion: batch/v1
 metadata:
-  name: {{ include "auth-server-key-rotation.fullname" . }}
+  name: {{ include "cleanup.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    APP_NAME: auth-server-key-rotation
+    APP_NAME: cleanup
     release: {{ .Release.Name }}
-{{ include "auth-server-key-rotation.labels" . | indent 4 }}
+{{ include "cleanup.labels" . | indent 4 }}
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if or (.Values.additionalAnnotations) (index .Values.global "auth-server-key-rotation" "customAnnotations" "cronjob") }}
-  annotations:
 {{- if .Values.additionalAnnotations }}
+  annotations:
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
 {{- end }}
-{{- if index .Values.global "auth-server-key-rotation" "customAnnotations" "cronjob" }}
-{{ toYaml (index .Values.global "auth-server-key-rotation" "customAnnotations" "cronjob") | indent 4 }}
-{{- end }}
-{{- end }}
 spec:
-  schedule: "@every {{ .Values.keysLife }}h"
+  schedule: "@every {{ .Values.interval }}m"
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
@@ -31,7 +27,7 @@ spec:
         spec:
         {{- with .Values.image.pullSecrets }}
           imagePullSecrets:
-            {{- toYaml . | nindent 10}}
+            {{- toYaml . | nindent 10 }}
         {{- end }}
           dnsPolicy: {{ .Values.dnsPolicy | quote }}
         {{- with .Values.tolerations }}
@@ -42,9 +38,8 @@ spec:
           dnsConfig:
 {{ toYaml . | indent 12 }}
         {{- end }}
-          serviceAccountName: {{ .Values.global.serviceAccountName }}
           containers:
-            - name: {{ include "auth-server-key-rotation.name" . }}
+            - name: {{ include "cleanup.name" . }}
               {{- if or (.Values.customScripts) (.Values.customCommand) }}
               command:
                 {{- if .Values.customCommand }}
@@ -61,8 +56,8 @@ spec:
               {{- end}}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               env:
-                {{- include "auth-server-key-rotation.usr-envs" . | indent 16 }}
-                {{- include "auth-server-key-rotation.usr-secret-envs" . | indent 16 }}
+                {{- include "cleanup.usr-envs" . | indent 16 }}
+                {{- include "cleanup.usr-secret-envs" . | indent 16 }}
               imagePullPolicy: {{ .Values.image.pullPolicy }}
               lifecycle:
 {{- toYaml .Values.lifecycle | nindent 16 }}
@@ -90,7 +85,7 @@ spec:
               resources:
 {{- toYaml .Values.resources | nindent 16 }}
               {{- end }}
-              args: ["certmanager", "patch", "auth", "--opts", "interval:{{ .Values.keysLife }}", "--opts", "key-strategy:{{ .Values.keysStrategy }}", "--opts", "privkey-push-delay:{{ .Values.keysPushDelay }}", "--opts", "privkey-push-strategy:{{ .Values.keysPushStrategy }}"]
+              args: ["cleanup", "--limit", "{{ .Values.limit }}"]
           volumes:
           {{- with .Values.volumes }}
 {{- toYaml . | nindent 12 }}
@@ -99,3 +94,10 @@ spec:
 {{- toYaml . | nindent 12 }}
           {{- end }}
           restartPolicy: Never
+          {{- if not .Values.global.isFqdnRegistered }}
+          hostAliases:
+            - ip: {{ .Values.global.lbIp }}
+              hostnames:
+                - {{ .Values.global.fqdn }}
+          {{- end }}
+{{- end }}

@@ -1,15 +1,15 @@
 
 apiVersion: v2
-name: auth-server-key-rotation
+name: cleanup
 version: 0.0.0-nightly
 kubeVersion: ">=v1.22.0-0"
-description: Responsible for regenerating auth-keys per x hours
+description: Cleanup expired entries in persistence
 type: application
 keywords:
-  - Auth keys Rotation
+  - Persistence
 home: https://jans.io
 sources:
-  - https://github.com/JanssenProject/docker-jans-cloudtools
+  - https://github.com/JanssenProject/jans/docker-jans-cloudtools
 maintainers:
   - name: Mohammad Abudayyeh
     email: support@jans.io

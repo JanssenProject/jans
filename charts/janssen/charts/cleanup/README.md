@@ -1,8 +1,8 @@
-# auth-server-key-rotation
+# cleanup
 
 ![Version: 0.0.0-nightly](https://img.shields.io/badge/Version-0.0.0--nightly-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.0-nightly](https://img.shields.io/badge/AppVersion-0.0.0--nightly-informational?style=flat-square)
 
-Responsible for regenerating auth-keys per x hours
+Cleanup expired entries in persistence
 
 **Homepage:** <https://jans.io>
 
@@ -14,7 +14,7 @@ Responsible for regenerating auth-keys per x hours
 
 ## Source Code
 
-* <https://github.com/JanssenProject/docker-jans-cloudtools>
+* <https://github.com/JanssenProject/jans/docker-jans-cloudtools>
 
 ## Requirements
 
@@ -24,25 +24,25 @@ Kubernetes: `>=v1.22.0-0`
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| additionalAnnotations | object | `{}` | Additional annotations that will be added across all resources  in the format of {cert-manager.io/issuer: "letsencrypt-prod"}. key app is taken |
-| additionalLabels | object | `{}` | Additional labels that will be added across all resources definitions in the format of {mylabel: "myapp"} |
-| affinity | object | `{}` |  |
+| additionalAnnotations | object | `{}` | Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"} |
+| additionalLabels | object | `{}` | Additional labels that will be added across the gateway in the format of {mylabel: "myapp"} |
 | customCommand | list | `[]` | Add custom job's command. If passed, it will override the default conditional command. |
-| customScripts | list | `[]` | Add custom scripts that have been mounted to run before the entrypoint. |
+| customScripts | list | `[]` | Add custom scripts that have been mounted to run before the entrypoint. - /tmp/custom.sh - /tmp/custom2.sh |
 | dnsConfig | object | `{}` | Add custom dns config |
 | dnsPolicy | string | `""` | Add custom dns policy |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
-| image.repository | string | `"janssenproject/cloudtools"` | Image  to use for deploying. |
+| image.repository | string | `"ghcr.io/janssenproject/jans/cloudtools"` | Image  to use for deploying. |
 | image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
-| keysLife | int | `48` | Auth server key rotation keys life in hours |
-| keysPushDelay | int | `0` | Delay (in seconds) before pushing private keys to Auth server |
-| keysPushStrategy | string | `"NEWER"` | Set key selection strategy after pushing private keys to Auth server (only takes effect when keysPushDelay value is greater than 0) |
-| keysStrategy | string | `"NEWER"` | Set key selection strategy used by Auth server |
+| interval | int | `60` | Interval of running the cleanup process (in minutes) |
 | lifecycle | object | `{}` |  |
-| nodeSelector | object | `{}` |  |
+| limit | int | `1000` | Max. numbers of entries to cleanup |
 | resources | object | `{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}}` | Resource specs. |
-| tolerations | list | `[]` |  |
+| resources.limits.cpu | string | `"300m"` | CPU limit. |
+| resources.limits.memory | string | `"300Mi"` | Memory limit. |
+| resources.requests.cpu | string | `"300m"` | CPU request. |
+| resources.requests.memory | string | `"300Mi"` | Memory request. |
+| tolerations | list | `[]` | Add tolerations for the pods |
 | usrEnvs | object | `{"normal":{},"secret":{}}` | Add custom normal and secret envs to the service |
 | usrEnvs.normal | object | `{}` | Add custom normal envs to the service variable1: value1 |
 | usrEnvs.secret | object | `{}` | Add custom secret envs to the service variable1: value1 |

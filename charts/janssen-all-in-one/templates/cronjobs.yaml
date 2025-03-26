@@ -86,7 +86,7 @@ spec:
               resources:
 {{- toYaml (index .Values "auth-server-key-rotation" "resources") | nindent 16 }}
               {{- end }}
-              args: ["patch", "auth", "--opts", "interval:{{ index .Values "auth-server-key-rotation" "keysLife" }}", "--opts", "key-strategy:{{ index .Values "auth-server-key-rotation" "keysStrategy" }}", "--opts", "privkey-push-delay:{{ index .Values "auth-server-key-rotation" "keysPushDelay" }}", "--opts", "privkey-push-strategy:{{ index .Values "auth-server-key-rotation" "keysPushStrategy" }}"]
+              args: ["certmanager", "patch", "auth", "--opts", "interval:{{ index .Values "auth-server-key-rotation" "keysLife" }}", "--opts", "key-strategy:{{ index .Values "auth-server-key-rotation" "keysStrategy" }}", "--opts", "privkey-push-delay:{{ index .Values "auth-server-key-rotation" "keysPushDelay" }}", "--opts", "privkey-push-strategy:{{ index .Values "auth-server-key-rotation" "keysPushStrategy" }}"]
           volumes:
           {{- with (index .Values "auth-server-key-rotation" "volumes") }}
 {{- toYaml . | nindent 12 }}
@@ -148,7 +148,7 @@ spec:
                     {{- toYaml . | replace "- " "" | nindent 20}}
                     {{- end }}
                     /app/bin/entrypoint.sh
-                {{- end}}    
+                {{- end}}
               {{- end}}
               image: "{{ index .Values "kc-scheduler" "image" "repository" }}:{{ index .Values "kc-scheduler" "image" "tag" }}"
               env:
@@ -181,8 +181,110 @@ spec:
               resources:
 {{- toYaml (index .Values "kc-scheduler" "resources") | nindent 16 }}
               {{- end }}
+              args: ["kc-sync"]
           volumes:
           {{- with (index .Values "kc-scheduler" "volumes") }}
+{{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with (include "janssen-all-in-one.config.schema" . | fromYaml).volumes }}
+{{- toYaml . | nindent 12 }}
+          {{- end }}
+          restartPolicy: Never
+          {{- if not .Values.isFqdnRegistered  }}
+          hostAliases:
+            - ip: {{ .Values.lbIp }}
+              hostnames:
+                - {{ .Values.fqdn }}
+          {{- end }}
+{{- end }}
+
+---
+
+{{ if .Values.cleanup.enabled -}}
+kind: CronJob
+apiVersion: batch/v1
+metadata:
+  name: {{ include "janssen-all-in-one.fullname" . }}-cleanup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-cleanup
+{{ include "janssen-all-in-one.labels" . | indent 4 }}
+{{- if (index .Values "cleanup" "additionalLabels") }}
+{{ toYaml (index .Values "cleanup" "additionalLabels") | indent 4 }}
+{{- end }}
+{{- if (index .Values "cleanup" "additionalAnnotations") }}
+  annotations:
+{{ toYaml (index .Values "cleanup" "additionalAnnotations") | indent 4 }}
+{{- end }}
+spec:
+  schedule: "@every {{ index .Values "cleanup" "interval" }}m"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+        {{- with (index .Values "cleanup" "image" "pullSecrets") }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 8 }}
+        {{- end }}
+          dnsPolicy: {{ index .Values "cleanup" "dnsPolicy" | quote }}
+        {{- with (index .Values "cleanup" "dnsConfig") }}
+          dnsConfig:
+{{ toYaml . | indent 12 }}
+        {{- end }}
+          containers:
+            - name: {{ include "janssen-all-in-one.name" . }}-cleanup
+              {{- if or (index .Values "cleanup" "customScripts") (index .Values "cleanup" "customCommand") }}
+              command:
+                {{- if index .Values "cleanup" "customCommand" }}
+                {{- toYaml (index .Values "cleanup" "customCommand") | nindent 18 }}
+                {{- else }}
+                - /bin/sh
+                - -c
+                - |
+                    {{- with (index .Values "cleanup" "customScripts") }}
+                    {{- toYaml . | replace "- " "" | nindent 20}}
+                    {{- end }}
+                    /app/bin/entrypoint.sh
+                {{- end}}
+              {{- end}}
+              image: "{{ index .Values "cleanup" "image" "repository" }}:{{ index .Values "cleanup" "image" "tag" }}"
+              env:
+                {{- include "janssen-all-in-one.usr-envs" . | indent 16 }}
+                {{- include "janssen-all-in-one.usr-secret-envs" . | indent 16 }}
+              imagePullPolicy: {{ index .Values "cleanup" "image" "pullPolicy" }}
+              lifecycle:
+{{- toYaml (index .Values "cleanup" "lifecycle") | nindent 16 }}
+              volumeMounts:
+              {{- with (index .Values "cleanup" "volumeMounts") }}
+{{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- with (include "janssen-all-in-one.config.schema" . | fromYaml).volumeMounts }}
+{{- toYaml . | nindent 16 }}
+              {{- end }}
+              envFrom:
+                - configMapRef:
+                    name: {{ .Release.Name }}-config-cm
+                {{ if .Values.usrEnvs.secret }}
+                - secretRef:
+                    name: {{ .Release.Name }}-global-user-custom-envs
+                {{- end }}
+                {{ if .Values.usrEnvs.normal }}
+                - configMapRef:
+                    name: {{ .Release.Name }}-global-user-custom-envs
+                {{- end }}
+              {{- if .Values.testEnviroment }}
+              resources: {}
+              {{- else }}
+              resources:
+{{- toYaml (index .Values "cleanup" "resources") | nindent 16 }}
+              {{- end }}
+              args: ["cleanup", "--limit", "{{ .Values.cleanup.limit }}"]
+          volumes:
+          {{- with (index .Values "cleanup" "volumes") }}
 {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with (include "janssen-all-in-one.config.schema" . | fromYaml).volumes }}
