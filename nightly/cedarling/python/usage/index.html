@@ -7511,15 +7511,49 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#standard-token-based-authorization" class="md-nav__link">
+    Standard Token-Based Authorization
+  </a>
+  
+    <nav class="md-nav" aria-label="Standard Token-Based Authorization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-usage" class="md-nav__link">
+    Example Usage
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#output" class="md-nav__link">
     Output
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#explanation" class="md-nav__link">
     Explanation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unsigned-authorization-direct-principals" class="md-nav__link">
+    Unsigned Authorization (direct principals)
   </a>
   
 </li>
@@ -8747,15 +8781,49 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#standard-token-based-authorization" class="md-nav__link">
+    Standard Token-Based Authorization
+  </a>
+  
+    <nav class="md-nav" aria-label="Standard Token-Based Authorization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-usage" class="md-nav__link">
+    Example Usage
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#output" class="md-nav__link">
     Output
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#explanation" class="md-nav__link">
     Explanation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unsigned-authorization-direct-principals" class="md-nav__link">
+    Unsigned Authorization (direct principals)
   </a>
   
 </li>
@@ -8810,24 +8878,76 @@
 
 
 <h1 id="python-usage">Python usage<a class="headerlink" href="#python-usage" title="Permanent link">#</a></h1>
-<p>In this example, we will show an example Python script that calls the <code>cedarling_python</code> module and calls the <code>authorize()</code> function.</p>
+<p>Cedarling provides two main authorization methods:</p>
+<ol>
+<li><code>authorize()</code> - Standard authorization using JWT tokens</li>
+<li><code>authorize_unsigned()</code> - Authorization with direct principal definitions (no token validation)</li>
+</ol>
+<h2 id="standard-token-based-authorization">Standard Token-Based Authorization<a class="headerlink" href="#standard-token-based-authorization" title="Permanent link">#</a></h2>
+<p>This method uses JWT tokens (access_token, id_token, userinfo_token, or more) for authentication.</p>
+<h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h3>
 <ul>
 <li>Before beginning, ensure that you have completed the <a href="../#building">building steps</a> and are currently in a virtual Python environment that has the <code>cedarling_python</code> module installed. You can confirm this with <code>pip list</code>.</li>
 <li>Run the script <code>jans/jans-cedarling/bindings/cedarling_python/example.py</code> from within the virtual environment.</li>
 </ul>
-<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code>(venv) $ python example.py
-{&quot;request_id&quot;:&quot;019474da-12ee-7315-bb12-35f46a9bc2b2&quot;,&quot;timestamp&quot;:&quot;2025-01-17T09:20:36.334Z&quot;,&quot;log_kind&quot;:&quot;System&quot;,&quot;pdp_id&quot;:&quot;4cf7864b-50d4-4492-8cd1-3ddb424e2711&quot;,&quot;level&quot;:&quot;INFO&quot;,&quot;msg&quot;:&quot;Cedarling Authz initialized successfully&quot;,&quot;application_id&quot;:&quot;My App&quot;,&quot;cedar_lang_version&quot;:&quot;4.1.0&quot;,&quot;cedar_sdk_version&quot;:&quot;4.2.2&quot;}
-{&quot;request_id&quot;:&quot;019474da-12f3-74f1-8f3e-da7624806135&quot;,&quot;timestamp&quot;:&quot;2025-01-17T09:20:36.339Z&quot;,&quot;log_kind&quot;:&quot;Decision&quot;,&quot;pdp_id&quot;:&quot;4cf7864b-50d4-4492-8cd1-3ddb424e2711&quot;,&quot;policystore_id&quot;:&quot;gICAgcHJpbmNpcGFsIGlz&quot;,&quot;policystore_version&quot;:&quot;undefined&quot;,&quot;principal&quot;:&quot;User &amp; Workload&quot;,&quot;User&quot;:{&quot;email&quot;:{&quot;domain&quot;:&quot;jans.test&quot;,&quot;uid&quot;:&quot;admin&quot;},&quot;sub&quot;:&quot;qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0&quot;},&quot;Workload&quot;:{&quot;client_id&quot;:&quot;d7f71bea-c38d-4caf-a1ba-e43c74a11a62&quot;},&quot;diagnostics&quot;:{&quot;reason&quot;:[{&quot;id&quot;:&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;,&quot;description&quot;:&quot;simple policy example for principal user&quot;}],&quot;errors&quot;:[]},&quot;action&quot;:&quot;Jans::Action::\&quot;Read\&quot;&quot;,&quot;resource&quot;:&quot;Jans::Application::\&quot;some_id\&quot;&quot;,&quot;decision&quot;:&quot;ALLOW&quot;,&quot;tokens&quot;:{&quot;id_token&quot;:{&quot;jti&quot;:&quot;ijLZO1ooRyWrgIn7cIdNyA&quot;},&quot;Userinfo&quot;:{&quot;jti&quot;:&quot;OIn3g1SPSDSKAYDzENVoug&quot;},&quot;access&quot;:{&quot;jti&quot;:&quot;uZUh1hDUQo6PFkBPnwpGzg&quot;}},&quot;decision_time_micro_sec&quot;:3}
-Result of workload authorization: ALLOW
-Policy ID used:
-444da5d85403f35ea76519ed1a18a33989f855bf1cf8
-Errors during authorization: 0
+<h3 id="example-usage">Example Usage<a class="headerlink" href="#example-usage" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Create resource entity</span>
+<span class="n">resource</span> <span class="o">=</span> <span class="n">EntityData</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
+    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;some_id&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;app_id&quot;</span><span class="p">:</span> <span class="s2">&quot;application_id&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Some Application&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;jans.test&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;/protected-endpoint&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;protocol&quot;</span><span class="p">:</span> <span class="s2">&quot;http&quot;</span>
+    <span class="p">}</span>
+<span class="p">})</span>
 
-Result of person authorization: ALLOW
-Policy ID used:
+<span class="c1"># Define context</span>
+<span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;current_time&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()),</span>
+    <span class="s2">&quot;device_health&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Healthy&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;fraud_indicators&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Allowed&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;geolocation&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;America&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;network_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Local&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;operating_system&quot;</span><span class="p">:</span> <span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;user_agent&quot;</span><span class="p">:</span> <span class="s2">&quot;Linux&quot;</span>
+<span class="p">}</span>
+
+<span class="c1"># Create request with JWT tokens</span>
+<span class="n">request</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span>
+    <span class="n">tokens</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;access_token&quot;</span><span class="p">:</span> <span class="s2">&quot;eyJhbGciOiJIUzI1NiIs...&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;id_token&quot;</span><span class="p">:</span> <span class="s2">&quot;eyJraWQiOiJYTAwN2EyLTZkM...&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;userinfo_token&quot;</span><span class="p">:</span> <span class="s2">&quot;eyJraWQiOiJjb25uZW...&quot;</span>
+    <span class="p">},</span>
+    <span class="n">action</span><span class="o">=</span><span class="s1">&#39;Jans::Action::&quot;Read&quot;&#39;</span><span class="p">,</span>
+    <span class="n">resource</span><span class="o">=</span><span class="n">resource</span><span class="p">,</span>
+    <span class="n">context</span><span class="o">=</span><span class="n">context</span>
+<span class="p">)</span>
+
+<span class="c1"># Authorize call</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+<span class="c1"># Check results</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Workload decision: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">workload</span><span class="p">()</span><span class="o">.</span><span class="n">decision</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;User decision: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">person</span><span class="p">()</span><span class="o">.</span><span class="n">decision</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="output">Output<a class="headerlink" href="#output" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="o">(</span>venv<span class="o">)</span><span class="w"> </span>$<span class="w"> </span>python<span class="w"> </span>example.py
+<span class="o">{</span><span class="s2">&quot;request_id&quot;</span>:<span class="s2">&quot;019474da-12ee-7315-bb12-35f46a9bc2b2&quot;</span>,<span class="s2">&quot;timestamp&quot;</span>:<span class="s2">&quot;2025-01-17T09:20:36.334Z&quot;</span>,<span class="s2">&quot;log_kind&quot;</span>:<span class="s2">&quot;System&quot;</span>,<span class="s2">&quot;pdp_id&quot;</span>:<span class="s2">&quot;4cf7864b-50d4-4492-8cd1-3ddb424e2711&quot;</span>,<span class="s2">&quot;level&quot;</span>:<span class="s2">&quot;INFO&quot;</span>,<span class="s2">&quot;msg&quot;</span>:<span class="s2">&quot;Cedarling Authz initialized successfully&quot;</span>,<span class="s2">&quot;application_id&quot;</span>:<span class="s2">&quot;My App&quot;</span>,<span class="s2">&quot;cedar_lang_version&quot;</span>:<span class="s2">&quot;4.1.0&quot;</span>,<span class="s2">&quot;cedar_sdk_version&quot;</span>:<span class="s2">&quot;4.2.2&quot;</span><span class="o">}</span>
+<span class="o">{</span><span class="s2">&quot;request_id&quot;</span>:<span class="s2">&quot;019474da-12f3-74f1-8f3e-da7624806135&quot;</span>,<span class="s2">&quot;timestamp&quot;</span>:<span class="s2">&quot;2025-01-17T09:20:36.339Z&quot;</span>,<span class="s2">&quot;log_kind&quot;</span>:<span class="s2">&quot;Decision&quot;</span>,<span class="s2">&quot;pdp_id&quot;</span>:<span class="s2">&quot;4cf7864b-50d4-4492-8cd1-3ddb424e2711&quot;</span>,<span class="s2">&quot;policystore_id&quot;</span>:<span class="s2">&quot;gICAgcHJpbmNpcGFsIGlz&quot;</span>,<span class="s2">&quot;policystore_version&quot;</span>:<span class="s2">&quot;undefined&quot;</span>,<span class="s2">&quot;principal&quot;</span>:<span class="s2">&quot;User &amp; Workload&quot;</span>,<span class="s2">&quot;User&quot;</span>:<span class="o">{</span><span class="s2">&quot;email&quot;</span>:<span class="o">{</span><span class="s2">&quot;domain&quot;</span>:<span class="s2">&quot;jans.test&quot;</span>,<span class="s2">&quot;uid&quot;</span>:<span class="s2">&quot;admin&quot;</span><span class="o">}</span>,<span class="s2">&quot;sub&quot;</span>:<span class="s2">&quot;qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0&quot;</span><span class="o">}</span>,<span class="s2">&quot;Workload&quot;</span>:<span class="o">{</span><span class="s2">&quot;client_id&quot;</span>:<span class="s2">&quot;d7f71bea-c38d-4caf-a1ba-e43c74a11a62&quot;</span><span class="o">}</span>,<span class="s2">&quot;diagnostics&quot;</span>:<span class="o">{</span><span class="s2">&quot;reason&quot;</span>:<span class="o">[{</span><span class="s2">&quot;id&quot;</span>:<span class="s2">&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;</span>,<span class="s2">&quot;description&quot;</span>:<span class="s2">&quot;simple policy example for principal user&quot;</span><span class="o">}]</span>,<span class="s2">&quot;errors&quot;</span>:<span class="o">[]}</span>,<span class="s2">&quot;action&quot;</span>:<span class="s2">&quot;Jans::Action::\&quot;Read\&quot;&quot;</span>,<span class="s2">&quot;resource&quot;</span>:<span class="s2">&quot;Jans::Application::\&quot;some_id\&quot;&quot;</span>,<span class="s2">&quot;decision&quot;</span>:<span class="s2">&quot;ALLOW&quot;</span>,<span class="s2">&quot;tokens&quot;</span>:<span class="o">{</span><span class="s2">&quot;id_token&quot;</span>:<span class="o">{</span><span class="s2">&quot;jti&quot;</span>:<span class="s2">&quot;ijLZO1ooRyWrgIn7cIdNyA&quot;</span><span class="o">}</span>,<span class="s2">&quot;Userinfo&quot;</span>:<span class="o">{</span><span class="s2">&quot;jti&quot;</span>:<span class="s2">&quot;OIn3g1SPSDSKAYDzENVoug&quot;</span><span class="o">}</span>,<span class="s2">&quot;access&quot;</span>:<span class="o">{</span><span class="s2">&quot;jti&quot;</span>:<span class="s2">&quot;uZUh1hDUQo6PFkBPnwpGzg&quot;</span><span class="o">}}</span>,<span class="s2">&quot;decision_time_micro_sec&quot;</span>:3<span class="o">}</span>
+Result<span class="w"> </span>of<span class="w"> </span>workload<span class="w"> </span>authorization:<span class="w"> </span>ALLOW
+Policy<span class="w"> </span>ID<span class="w"> </span>used:
+444da5d85403f35ea76519ed1a18a33989f855bf1cf8
+Errors<span class="w"> </span>during<span class="w"> </span>authorization:<span class="w"> </span><span class="m">0</span>
+
+Result<span class="w"> </span>of<span class="w"> </span>person<span class="w"> </span>authorization:<span class="w"> </span>ALLOW
+Policy<span class="w"> </span>ID<span class="w"> </span>used:
 840da5d85403f35ea76519ed1a18a33989f855bf1cf8
-Errors during authorization: 0
+Errors<span class="w"> </span>during<span class="w"> </span>authorization:<span class="w"> </span><span class="m">0</span>
 </code></pre></div>
 <h2 id="explanation">Explanation<a class="headerlink" href="#explanation" title="Permanent link">#</a></h2>
 <p>Cedarling creates principal entities from either the access, ID and userinfo tokens, or a combination of the three depending on bootstrap configurations. For example, to create a Workload entity only one token is sufficient. But to create a user entity at least ID or Userinfo tokens are needed. This is defined by <code>CEDARLING_USER_AUTHZ</code> and <code>CEDARLING_WORKLOAD_AUTHZ</code> in the <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/cedarling_python.pyi#L10">bootstrap configuration</a>. Cedarling will make a best attempt to create entities based on tokens provided; if it is unable to do so it will raise an <code>EntitiesError</code> exception.
@@ -8855,7 +8975,7 @@ permit(
 <p>In the script, the action, resource and context entities are used to create the request and execute the <code>authorize()</code> call:</p>
 <div class="highlight"><pre><span></span><code><span class="n">action</span> <span class="o">=</span> <span class="s1">&#39;Jans::Action::&quot;Read&quot;&#39;</span>
 
-<span class="n">resource</span> <span class="o">=</span> <span class="n">ResourceData</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
+<span class="n">resource</span> <span class="o">=</span> <span class="n">EntityData</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
     <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;some_id&quot;</span><span class="p">,</span>
     <span class="s2">&quot;app_id&quot;</span><span class="p">:</span> <span class="s2">&quot;application_id&quot;</span><span class="p">,</span>
@@ -8887,15 +9007,73 @@ permit(
 <span class="k">assert</span> <span class="n">authorize_result</span><span class="o">.</span><span class="n">is_allowed</span><span class="p">()</span>
 </code></pre></div>
 <p>Cedarling will return <code>is_allowed()</code> as <code>True</code> only if the authorization queries set in the bootstrap return <code>True</code>. In case of the example, both <code>CEDARLING_USER_AUTHZ</code> and <code>CEDARLING_WORKLOAD_AUTHZ</code> were set to <code>enabled</code>, so cedarling will only return True if both user and workload evaluations are true. </p>
+<h2 id="unsigned-authorization-direct-principals">Unsigned Authorization (direct principals)<a class="headerlink" href="#unsigned-authorization-direct-principals" title="Permanent link">#</a></h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># Create resource entity</span>
+<span class="n">resource</span> <span class="o">=</span> <span class="n">EntityData</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
+    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;some_id&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;app_id&quot;</span><span class="p">:</span> <span class="s2">&quot;application_id&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Some Application&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;jans.test&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;/protected-endpoint&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;protocol&quot;</span><span class="p">:</span> <span class="s2">&quot;http&quot;</span>
+    <span class="p">}</span>
+<span class="p">})</span>
+
+<span class="c1"># Define principals directly (no tokens)</span>
+<span class="n">principals</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">EntityData</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Jans::TestPrincipal1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;test_user1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_ok&quot;</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="p">}),</span>
+    <span class="n">EntityData</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Jans::TestPrincipal2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;test_user2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_ok&quot;</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="p">})</span>
+<span class="p">]</span>
+
+<span class="c1"># Create request</span>
+<span class="n">request</span> <span class="o">=</span> <span class="n">RequestUnsigned</span><span class="p">(</span>
+    <span class="n">principals</span><span class="o">=</span><span class="n">principals</span><span class="p">,</span>
+    <span class="n">action</span><span class="o">=</span><span class="s1">&#39;Jans::Action::&quot;UpdateTestPrincipal&quot;&#39;</span><span class="p">,</span>
+    <span class="n">resource</span><span class="o">=</span><span class="n">resource</span><span class="p">,</span>
+    <span class="n">context</span><span class="o">=</span><span class="p">{}</span>
+<span class="p">)</span>
+
+<span class="c1"># Authorize call</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">authorize_unsigned</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+<span class="c1"># Check results per principal type</span>
+<span class="n">principal1_result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">principal</span><span class="p">(</span><span class="s2">&quot;Jans::TestPrincipal1&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Principal1 decision: </span><span class="si">{</span><span class="n">principal1_result</span><span class="o">.</span><span class="n">decision</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">principal2_result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">principal</span><span class="p">(</span><span class="s2">&quot;Jans::TestPrincipal2&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Principal2 decision: </span><span class="si">{</span><span class="n">principal2_result</span><span class="o">.</span><span class="n">decision</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Key differences from standard authorization:</p>
+<ul>
+<li>No token validation performed</li>
+<li>Principals defined directly in code</li>
+<li>Results checked per principal type rather than user/workload</li>
+<li>Faster since it skips token parsing/validation</li>
+</ul>
 <h2 id="exposed-functions">Exposed functions<a class="headerlink" href="#exposed-functions" title="Permanent link">#</a></h2>
-<p>The <code>pyo3</code> binding for cedarling exposes a number of cedarling functions for you to use. The documentation on this can be found <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/PYTHON_TYPES.md">here</a>.</p>
+<p>The <code>pyo3</code> binding exposes these main authorization functions:</p>
+<ul>
+<li><code>authorize(request: Request) -&gt; AuthorizationResult</code></li>
+<li><code>authorize_unsigned(request: RequestUnsigned) -&gt; AuthorizationResult</code></li>
+</ul>
+<p>Full documentation can be found <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/PYTHON_TYPES.md">here</a>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-24T14:18:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-24</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-26T15:21:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-26</span>
       
         <br>
         Created:

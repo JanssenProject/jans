@@ -8992,31 +8992,31 @@ else DENY
 end
 </code></pre>
 <h3 id="sample-authzen-request">Sample Authzen request<a class="headerlink" href="#sample-authzen-request" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code>{
-    &quot;subject&quot;: {
-        &quot;type&quot;: &quot;token_bundle&quot;,
-        &quot;id&quot;: &quot;some_id&quot;,
-        &quot;properties&quot;: {
-            &quot;access_token&quot;: &quot;&quot;
-        }
-    },
-    &quot;resource&quot;: {
-        &quot;type&quot;: &quot;Jans::HTTP_Request&quot;,
-        &quot;id&quot;: &quot;some_id&quot;,
-        &quot;properties&quot;: {
-            &quot;header&quot;: {},
-            &quot;url&quot;: {
-                &quot;protocol&quot;: &quot;http&quot;,
-                &quot;host&quot;: &quot;www.acme.tld&quot;,
-                &quot;path&quot;: &quot;/protected&quot;
-            }
-        }
-    },
-    &quot;action&quot;: {
-        &quot;name&quot;: &quot;Jans::Action::\&quot;GET\&quot;&quot;
-    },
-    &quot;context&quot;: {}
-}
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_bundle&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::HTTP_Request&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;header&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">            </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;protocol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;www.acme.tld&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/protected&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Action::\&quot;GET\&quot;&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
 <p>Before you begin, make sure you have the following:</p>
@@ -9036,9 +9036,10 @@ end
    <img alt="image" src="../../assets/cedarling-policy-store-name.png" /></li>
 <li>Open the policy store and navigate to Policies.</li>
 <li>Click <code>Add Policy</code>, select <code>Text Editor</code>.
-   <img alt="image" src="../../assets/cedarling-add-policy.png" /> </li>
-<li>Paste the following Cedar policy:
-    <div class="highlight"><pre><span></span><code>@id<span class="o">(</span><span class="s2">&quot;allow_one&quot;</span><span class="o">)</span>
+   <img alt="image" src="../../assets/cedarling-add-policy.png" /></li>
+<li>
+<p>Paste the following Cedar policy:</p>
+<div class="highlight"><pre><span></span><code>@id<span class="o">(</span><span class="s2">&quot;allow_one&quot;</span><span class="o">)</span>
 permit<span class="o">(</span>
 <span class="w">  </span>principal<span class="w"> </span>is<span class="w"> </span>Jans::Workload,
 <span class="w">  </span><span class="nv">action</span><span class="w"> </span><span class="o">==</span><span class="w"> </span>Jans::Action::<span class="s2">&quot;GET&quot;</span>,
@@ -9048,8 +9049,11 @@ when<span class="w"> </span><span class="o">{</span>
 <span class="w">  </span>principal<span class="w"> </span>has<span class="w"> </span>access_token.scope<span class="w"> </span><span class="o">&amp;&amp;</span>
 <span class="w">  </span>principal.access_token.scope.contains<span class="o">(</span><span class="s2">&quot;openid&quot;</span><span class="o">)</span>
 <span class="o">}</span><span class="p">;</span>
-</code></pre></div></li>
-<li>Click <code>Save</code>. Agama Lab will validate your policy. </li>
+</code></pre></div>
+</li>
+<li>
+<p>Click <code>Save</code>. Agama Lab will validate your policy.</p>
+</li>
 <li>
 <p>Next, click on <code>Trusted Issuers</code> and add the following issuer:</p>
 <ul>
@@ -9119,12 +9123,16 @@ it is your Docker container ID.</p>
 <ul>
 <li>Clone the Janssen repository and navigate to <code>jans/jans-cedarling/flask-sidecar</code>.</li>
 <li>Run <code>poetry install</code> to install dependencies.</li>
-<li>Download and install the latest Cedarling nightly wheel:
+<li>Download and install the latest Cedarling nightly wheel:</li>
+</ul>
 <div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.whl
-</code></pre></div></li>
-<li>Install the nightly wheel: 
-<div class="highlight"><pre><span></span><code>poetry run pip install cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.whl
-</code></pre></div></li>
+</code></pre></div>
+<ul>
+<li>Install the nightly wheel:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.whl
+</code></pre></div>
+<ul>
 <li>
 <p>Modify <code>secrets/bootstrap.json</code> to your specifications.</p>
 </li>
@@ -9132,12 +9140,14 @@ it is your Docker container ID.</p>
 <p>Navigate to <code>jans/jans-cedarling/flask-sidecar/main</code></p>
 </li>
 <li>
-<p>Create a file called <code>.env</code> and paste in the following content. Alternatively, set the following environment variables:
+<p>Create a file called <code>.env</code> and paste in the following content. Alternatively, set the following environment variables:</p>
+</li>
+</ul>
 <div class="highlight"><pre><span></span><code>APP_MODE=development
 CEDARLING_BOOTSTRAP_CONFIG_FILE=../secrets/bootstrap.json
 SIDECAR_DEBUG_RESPONSE=False
-</code></pre></div></p>
-</li>
+</code></pre></div>
+<ul>
 <li>
 <p>Run the sidecar: <code>poetry run flask run</code></p>
 </li>
@@ -9232,7 +9242,7 @@ You should get a 403 Forbidden response.</p>
 </code></pre></div>
 <h2 id="check-logs">Check Logs<a class="headerlink" href="#check-logs" title="Permanent link">#</a></h2>
 <p>The cedarling decision log will be outputted by the Docker container or directly by the API to stdout. In the case of Docker, this can be retrieved like so:</p>
-<p><div class="highlight"><pre><span></span><code>$<span class="w"> </span>docker<span class="w"> </span>logs<span class="w"> </span>&lt;container<span class="w"> </span>ID&gt;
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>docker<span class="w"> </span>logs<span class="w"> </span>&lt;container<span class="w"> </span>ID&gt;
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;request_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0194cdbc-b8c7-798d-8cc8-fb483448e6fa&quot;</span><span class="p">,</span>
@@ -9257,7 +9267,7 @@ You should get a 403 Forbidden response.</p>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;decision_time_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="p">}</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="customizing-the-policy">Customizing the policy<a class="headerlink" href="#customizing-the-policy" title="Permanent link">#</a></h2>
 <p>Let's add one more check in the policy. This time we want to check if the <code>acr</code>
 in the access token matches a particular value, for example <code>simple_password_auth</code>. 
@@ -9341,7 +9351,7 @@ when {
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-04T15:22:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-04</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-26T15:21:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-26</span>
       
         <br>
         Created:

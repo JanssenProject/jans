@@ -8977,11 +8977,18 @@ list JWT.</p>
 <p>The <code>authz</code> interface provides the main functionality of the Cedarling: to authorize a request from the 
 application by mapping the data and JWTs sent in the request, and evaluating it against the policies using 
 the <a href="https://github.com/cedar-policy/cedar">Rust Cedar Engine</a>. </p>
-<p>The authz interface answers the question: "Is this action, on this resource, given this context, 
+<p>The authz interface has two variants:</p>
+<ol>
+<li><code>authorize</code> - Check signature of JWT tokens before making authorization decisions</li>
+<li><code>authorize_unsigned</code> - Makes authorization decisions by passing a set of principals directly.</li>
+</ol>
+<p>The standard <code>authorize</code> method answers the question: "Is this action, on this resource, given this context, 
 allowed with these JWTs?". The Cedarling returns the decision--<em>allow</em> or <em>deny</em>. If denied, the 
 Cedarling returns "diagnostics"--additional context to clarify why the decision was not allowed. 
 During <code>authz</code>, the Cedarling can perform two more important jobs: (1) validate JWT tokens; (2) log 
 the resulting decision. </p>
+<p>The <code>authorize_unsigned</code> variant is used when JWTs have already been validated or when working with 
+non-token based principals. It follows the same evaluation logic but skips JWT validation steps.</p>
 <p>The <code>log</code> interface enables developers to retrieve decision and system logs from the Cedarling's 
 in-memory cache. See the Cedarling <a href="./cedarling-logs">log</a> documentation for more information. </p>
 <h3 id="cedarling-components">Cedarling Components<a class="headerlink" href="#cedarling-components" title="Permanent link">#</a></h3>
@@ -9053,7 +9060,7 @@ above.</li>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-06T12:50:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-06</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-26T15:21:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-26</span>
       
         <br>
         Created:
