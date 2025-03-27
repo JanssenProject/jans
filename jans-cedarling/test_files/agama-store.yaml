@@ -60,7 +60,7 @@ policy_stores:
           entity User in [Role] = {"email": email_address, "phone_number": __cedar::String, "role": Set < __cedar::String >, "sub": __cedar::String, "username": __cedar::String};
           entity Userinfo_token = {"aud": __cedar::String, "birthdate": __cedar::String, "email": email_address, "exp": __cedar::Long, "iat": __cedar::Long, "iss": TrustedIssuer, "jti": __cedar::String, "name": __cedar::String, "phone_number": __cedar::String, "role": Set < __cedar::String >, "sub": __cedar::String};
           entity Workload = {"client_id": __cedar::String, "iss": TrustedIssuer, "name": __cedar::String, "rp_id": __cedar::String, "spiffe_id": __cedar::String};
-          entity id_token = {"acr": Set < __cedar::String >, "amr": __cedar::String, "aud": __cedar::String, "azp": __cedar::String, "birthdate": __cedar::String, "email": email_address, "exp": __cedar::Long, "iat": __cedar::Long, "iss": TrustedIssuer, "jti": __cedar::String, "name": __cedar::String, "phone_number": __cedar::String, "role": Set < __cedar::String >, "sub": __cedar::String};
+          entity Id_token = {"acr": Set < __cedar::String >, "amr": __cedar::String, "aud": __cedar::String, "azp": __cedar::String, "birthdate": __cedar::String, "email": email_address, "exp": __cedar::Long, "iat": __cedar::Long, "iss": TrustedIssuer, "jti": __cedar::String, "name": __cedar::String, "phone_number": __cedar::String, "role": Set < __cedar::String >, "sub": __cedar::String};
           action "Compare" appliesTo {
             principal: [User, Workload],
             resource: [Application],

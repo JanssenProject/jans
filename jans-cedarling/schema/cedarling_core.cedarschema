@@ -27,8 +27,8 @@ namespace Jans {
         phone_number?: String,
         role: Set<String>,
         sub: String,
-        "username"?: String,
-        id_token?: id_token,
+        username?: String,
+        Id_token?: Id_token,
         userinfo_token?: Userinfo_token,     
     };
     entity Workload = {
@@ -48,7 +48,7 @@ namespace Jans {
         nbf?: Long,
         scope?: Set<String>
     };
-    entity id_token = {
+    entity Id_token = {
         acr?: String,
         amr?: Set<String>,
         aud: String,

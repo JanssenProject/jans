@@ -168,6 +168,84 @@
                     }
                 }
             },
+            "Id_token": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "acr": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "amr": {
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            },
+                            "required": false
+                        },
+                        "aud": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "azp": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "birthdate": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "email": {
+                            "type": "EntityOrCommon",
+                            "name": "email_address",
+                            "required": false
+                        },
+                        "exp": {
+                            "type": "EntityOrCommon",
+                            "name": "Long"
+                        },
+                        "iat": {
+                            "type": "EntityOrCommon",
+                            "name": "Long"
+                        },
+                        "iss": {
+                            "type": "EntityOrCommon",
+                            "name": "TrustedIssuer"
+                        },
+                        "jti": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "name": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "phone_number": {
+                            "type": "EntityOrCommon",
+                            "name": "String",
+                            "required": false
+                        },
+                        "role": {
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            },
+                            "required": false
+                        },
+                        "sub": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        }
+                    }
+                }
+            },
             "Role": {},
             "TrustedIssuer": {
                 "shape": {
@@ -187,14 +265,14 @@
                 "shape": {
                     "type": "Record",
                     "attributes": {
+                        "Id_token": {
+                            "type": "EntityOrCommon",
+                            "name": "Id_token",
+                            "required": false
+                        },
                         "email": {
                             "type": "EntityOrCommon",
                             "name": "email_address",
-                            "required": false
-                        },
-                        "id_token": {
-                            "type": "EntityOrCommon",
-                            "name": "id_token",
                             "required": false
                         },
                         "phone_number": {
@@ -319,84 +397,6 @@
                             "type": "EntityOrCommon",
                             "name": "String",
                             "required": false
-                        }
-                    }
-                }
-            },
-            "id_token": {
-                "shape": {
-                    "type": "Record",
-                    "attributes": {
-                        "acr": {
-                            "type": "EntityOrCommon",
-                            "name": "String",
-                            "required": false
-                        },
-                        "amr": {
-                            "type": "Set",
-                            "element": {
-                                "type": "EntityOrCommon",
-                                "name": "String"
-                            },
-                            "required": false
-                        },
-                        "aud": {
-                            "type": "EntityOrCommon",
-                            "name": "String"
-                        },
-                        "azp": {
-                            "type": "EntityOrCommon",
-                            "name": "String",
-                            "required": false
-                        },
-                        "birthdate": {
-                            "type": "EntityOrCommon",
-                            "name": "String",
-                            "required": false
-                        },
-                        "email": {
-                            "type": "EntityOrCommon",
-                            "name": "email_address",
-                            "required": false
-                        },
-                        "exp": {
-                            "type": "EntityOrCommon",
-                            "name": "Long"
-                        },
-                        "iat": {
-                            "type": "EntityOrCommon",
-                            "name": "Long"
-                        },
-                        "iss": {
-                            "type": "EntityOrCommon",
-                            "name": "TrustedIssuer"
-                        },
-                        "jti": {
-                            "type": "EntityOrCommon",
-                            "name": "String",
-                            "required": false
-                        },
-                        "name": {
-                            "type": "EntityOrCommon",
-                            "name": "String",
-                            "required": false
-                        },
-                        "phone_number": {
-                            "type": "EntityOrCommon",
-                            "name": "String",
-                            "required": false
-                        },
-                        "role": {
-                            "type": "Set",
-                            "element": {
-                                "type": "EntityOrCommon",
-                                "name": "String"
-                            },
-                            "required": false
-                        },
-                        "sub": {
-                            "type": "EntityOrCommon",
-                            "name": "String"
                         }
                     }
                 }

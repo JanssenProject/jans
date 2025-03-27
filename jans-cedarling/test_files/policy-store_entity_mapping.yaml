@@ -92,7 +92,7 @@ policy_stores:
           type Url = {"host": String, "path": String, "protocol": String};
           entity TrustedIssuer = {"issuer_entity_id": Url};
           entity Issue = {"country": String, "org_id": String};
-          entity id_token = {"aud": String,"iss": TrustedIssuer, "sub": String};
+          entity Id_token = {"aud": String,"iss": TrustedIssuer, "sub": String};
           entity Role;
           entity User in [Role] = {"country": String};
           entity Workload = {"org_id": String};
@@ -101,7 +101,7 @@ policy_stores:
           entity Empty;
           entity MappedUser in [Role] = {
             "role": String,
-            "id_token": id_token,
+            "id_token": Id_token,
             "userinfo_token": Userinfo_token,
           };
           entity MappedWorkload = {
