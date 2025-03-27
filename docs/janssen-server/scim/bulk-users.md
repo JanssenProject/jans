@@ -4,7 +4,8 @@ tags:
   - scim
   - bulk-users
 ---
-# Bulk Adding User
+
+# Bulk Adding Users via SCIM
 
 ## Adding user in bulk
 

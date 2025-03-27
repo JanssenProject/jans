@@ -6,7 +6,7 @@ tags:
 - docker image
 ---
 
-# Auth Server
+# Auth Server Container Configuration
 
 Docker image packaging for Janssen Authorization Server.
 

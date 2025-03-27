@@ -6,7 +6,7 @@ tags:
 - docker image
 ---
 
-# Persistence
+# Persistence Container Configuration
 
 Persistence is a special container to load initial data for supported persistence.
 

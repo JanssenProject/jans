@@ -4,7 +4,7 @@ tags:
   - user management
   - jans-link
 ---
-# Using jans-link
+# Jans Link User Management
 
 ## This content is in progress
 

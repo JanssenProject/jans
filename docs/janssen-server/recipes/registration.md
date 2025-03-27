@@ -4,7 +4,7 @@ tags:
   - recipes
 ---
 
-# Registration
+# Registration Recipe
 
 ## This content is in progress
 

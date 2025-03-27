@@ -6,7 +6,7 @@ tags:
 - docker image
 ---
 
-# SCIM
+# SCIM Container Configuration
 
 Docker image packaging for SCIM.
 

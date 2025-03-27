@@ -6,8 +6,7 @@ tags:
 - docker image
 ---
 
-# Casa
-Docker assets for Casa
+# Casa Container Configuration
 
 ## Versions
 

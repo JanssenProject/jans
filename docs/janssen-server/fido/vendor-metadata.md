@@ -6,7 +6,8 @@ tags:
   - attestation
 ---
 
-# Vendor Metadata Management
+# FIDO Vendor Metadata Management
+
 
 ### Metadata Service:
 

@@ -6,9 +6,8 @@ tags:
   - tui
 ---
 
-# Using CLI/TUI
+# Jans CLI/TUI User Management
 
-## Local User Management
 
 In this document we will cover managing people in the Jans Server's Jans CLI and Jans TUI.
 

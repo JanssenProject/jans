@@ -6,8 +6,8 @@ tags:
  - Cedar
  - Cedarling
 ---
-# Lock Guide
-## Janssen Lock Overview
+
+# Janssen Lock Guide
 
 Janssen Lock (or just "Lock") provides a centralized control plane for domains 
 to use [Cedar](https://www.cedarpolicy.com/en) to secure a network of 

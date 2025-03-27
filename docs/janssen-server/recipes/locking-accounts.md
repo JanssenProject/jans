@@ -4,7 +4,7 @@ tags:
   - recipes
 ---
 
-# Locking or Disabling Accounts
+# Locking or Disabling Account Recipe
 
 ## This content is in progress
 

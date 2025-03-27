@@ -5,7 +5,7 @@ tags:
   - device flow
 ---
 
-# Authentication via Device Flow
+# Authentication via Device Flow Recipe
 
 ## This content is in progress
 

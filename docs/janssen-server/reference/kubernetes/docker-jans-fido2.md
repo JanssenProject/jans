@@ -6,7 +6,7 @@ tags:
 - docker image
 ---
 
-# FIDO2
+# FIDO2 Container Configuration
 
 Docker image packaging for Fido2.
 

@@ -4,7 +4,7 @@ tags:
   - recipes
 ---
 
-# Password Expirations
+# Password Expiration Recipe
 
 ## This content is in progress
 

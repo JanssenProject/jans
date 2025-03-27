@@ -4,7 +4,7 @@ tags:
   - agama
 ---
 
-# Language reference
+# Agama Language reference
 
 ## Agama DSL reference
 
