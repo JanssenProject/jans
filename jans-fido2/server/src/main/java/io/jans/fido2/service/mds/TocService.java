@@ -337,7 +337,7 @@ public class TocService {
 			String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
 
 			Document document = dbDocumentService.getDocumentsByFilePath(mdsTocFilesFolder).get(0);
-			return document.getDescription() == null ? null : stringToLocalDate(document.getDescription().toString());
+			return (document.getDescription() == null || "mdsTocsFolder".equals(document.getDescription())) ? null : stringToLocalDate(document.getDescription().toString());
 
 		} catch (Exception e) {
 			log.error("Failed to get nextUpdateDate of the MDS from jansDocument ", e);
