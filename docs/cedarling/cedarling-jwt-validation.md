@@ -31,7 +31,7 @@ If timestamps are provided in the context, the Cedaring always verifies:
 If the Cedarling property `CEDARLING_ID_TOKEN_TRUST_MODE` is `Strict`, the Cedarling will:
 
 - Discard `id_token` if the `aud` claim does not match the `client_id` of the access token
-- Discard Userinfo tokens that are not associated with a `sub` claim from the `id_token`
+- Discard Userinfo tokens that are not associated with a `sub` claim from the `Id_token`
 
 ### JWT Status Validation
 

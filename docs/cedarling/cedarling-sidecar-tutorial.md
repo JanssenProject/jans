@@ -136,7 +136,7 @@ Create a file named `bootstrap.json`. You may use the [sample](https://github.co
     "jti": "disabled"
    },
   "id_token": {
-    "entity_type_name": "Jans::id_token",
+    "entity_type_name": "Jans::Id_token",
     "iss": "disabled",
     "aud": "disabled",
     "sub": "disabled",

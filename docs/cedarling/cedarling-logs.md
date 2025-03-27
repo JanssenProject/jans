@@ -236,7 +236,7 @@ The result of the authorization is quite extensive because we log all `cedar-pol
         },
         {
             "uid": {
-                "type": "Jans::id_token",
+                "type": "Jans::Id_token",
                 "id": "ijLZO1ooRyWrgIn7cIdNyA"
             },
             "attrs": {

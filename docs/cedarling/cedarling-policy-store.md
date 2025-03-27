@@ -356,7 +356,7 @@ Here is example of a minimum supported `cedar-policy schema`:
 
 ```cedar-policy_schema
 namespace Jans {
-  entity id_token = {"aud": String,"iss": String, "sub": String};
+  entity Id_token = {"aud": String,"iss": String, "sub": String};
   entity Role;
   entity User in [Role] = {};
   entity Access_token = {"aud": String,"iss": String, "jti": String, "client_id": String};
@@ -371,14 +371,14 @@ namespace Jans {
 }
 ```
 
-You can extend all of this entites and add your own.
+You can extend all of this entities and add your own.
 
-Mandatory entities is: `id_token`, `Role`, `User`, `Access_token`, `Workload`.
-`Issue` entity and `Update` action are optinal. Is created for example, you can create others for your needs.
+Mandatory entities is: `Id_token`, `Role`, `User`, `Access_token`, `Workload`.
+`Issue` entity and `Update` action are optional. Is created for example, you can create others for your needs.
 
-`Context` and `Resource` entities you can pass during authorization request and next entites creating based on the JWT tokens:
+`Context` and `Resource` entities you can pass during authorization request and next entities creating based on the JWT tokens:
 
-- `id_token` - entity based on the `id` JWT token fields.
+- `Id_token` - entity based on the `id` JWT token fields.
   - ID for entity based in `jti` field.
 
 - `Role` - define role of user.
@@ -398,8 +398,8 @@ Mandatory entities is: `id_token`, `Role`, `User`, `Access_token`, `Workload`.
 
 ## Note on test fixtures
 
-You will notice that test fixtures in the cedarling code base are quite often in yaml rather than in json.
+You will notice that test fixtures in the Cedarling code base are quite often in yaml rather than in json.
 
-yaml is intended for **cedarling internal use only**.
+yaml is intended for **Cedarling internal use only**.
 
 The rationale is that yaml has excellent support for embedded, indented, multiline string values. That is far easier to read than base64 encoded json strings, and is beneficial for debugging and validation that test cases are correct.
