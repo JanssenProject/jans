@@ -316,6 +316,17 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 continue
             self.run([paths.cmd_chmod, '700', scr_path])
 
+        # link jans script to /usr/local/bin
+        self.run([
+                paths.cmd_ln, '-s',
+                os.path.join(
+                    Config.jansOptBinFolder,
+                    os.path.basename(Config.jansScriptFiles[1])
+                ),
+                '/usr/local/bin'
+                ])
+
+
     def update_hostname(self):
         self.logIt("Copying hosts and hostname to final destination")
 
