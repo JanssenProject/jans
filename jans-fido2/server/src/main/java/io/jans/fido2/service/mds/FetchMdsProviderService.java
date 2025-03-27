@@ -19,12 +19,6 @@ public class FetchMdsProviderService {
     @Inject
     private Logger log;
 
-    @Inject
-    private AppConfiguration appConfiguration;
-
-    @Inject
-    private DataMapperService dataMapperService;
-
     private final ClientBuilder clientBuilder = ResteasyClientBuilder.newBuilder();
 
     /**
