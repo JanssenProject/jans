@@ -24,21 +24,45 @@
     "CEDARLING_POLICY_STORE_URI": "",
     "CEDARLING_USER_AUTHZ": "enabled",
     "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
-        "and": [
+        "or": [
             {
-                "===": [
+                "and": [
                     {
-                        "var": "Jans::Workload"
+                        "===": [
+                            {
+                                "var": "Jans::Workload"
+                            },
+                            "ALLOW"
+                        ]
                     },
-                    "ALLOW"
+                    {
+                        "===": [
+                            {
+                                "var": "Jans::User"
+                            },
+                            "ALLOW"
+                        ]
+                    }
                 ]
             },
             {
-                "===": [
+                "and": [
                     {
-                        "var": "Jans::User"
+                        "===": [
+                            {
+                                "var": "Jans::TestPrincipal1"
+                            },
+                            "ALLOW"
+                        ]
                     },
-                    "ALLOW"
+                    {
+                        "===": [
+                            {
+                                "var": "Jans::TestPrincipal2"
+                            },
+                            "ALLOW"
+                        ]
+                    }
                 ]
             }
         ]

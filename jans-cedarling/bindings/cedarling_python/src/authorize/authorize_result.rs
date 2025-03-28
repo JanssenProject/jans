@@ -43,6 +43,16 @@ impl AuthorizeResult {
         self.inner.person.clone().map(|v| v.into())
     }
 
+    /// Get the decision value for a specific principal
+    fn principal(&self, principal: &str) -> Option<AuthorizeResultResponse> {
+        self.inner
+            .principals
+            .get(principal)
+            .cloned()
+            .map(|v| v.into())
+    }
+
+    /// Get the request ID associated with this result
     fn request_id(&self) -> String {
         self.inner.request_id.clone()
     }
