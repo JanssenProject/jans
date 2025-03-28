@@ -5,6 +5,8 @@ tags:
   - script-catalog
 ---
 
+# UMA Claims (JWT Transformation)
+
 ## Interface
 The UmaRptClaims script implements the [UmaRptClaimsType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/uma/UmaRptClaimsType.java) interface. This extends methods from the base script type in addition to adding new methods:
 

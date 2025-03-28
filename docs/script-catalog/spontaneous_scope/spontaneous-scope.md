@@ -4,7 +4,7 @@ tags:
   - developer
   - script-catalog
 ---
-
+# Spontaneous Scope
 ## Interface
 The Spontaneous scope script implements the [SpontaneousScopeType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/spontaneous/SpontaneousScopeType.java) interface. This extends methods from the base script type in addition to adding new methods:
 
