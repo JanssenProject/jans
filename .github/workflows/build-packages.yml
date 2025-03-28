@@ -25,7 +25,7 @@ jobs:
             asset_prefix: '_'
             asset_path: jans
             sign_cmd: cosign sign-blob --yes --output-certificate cert.pem --output-signature sig
-            python_version: 3.11
+            python_version: 3.8
           - name: ubuntu22
             os: ubuntu-20.04
             asset_suffix: ~ubuntu22.04_amd64.deb
@@ -410,10 +410,10 @@ jobs:
           TAG="0.0.0"
         fi
         cd ${{ github.workspace }}/jans-cedarling/target/wheels
-        sha256sum cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_31_x86_64.whl > cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_31_x86_64.whl.sha256sum
-        sha256sum cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_31_x86_64.whl > cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_31_x86_64.whl.sha256sum
-        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_31_x86_64.whl || echo "Failed to sign"
-        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_31_x86_64.whl || echo "Failed to sign"
+        sha256sum cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_38_x86_64.whl > cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_38_x86_64.whl.sha256sum
+        sha256sum cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_38_x86_64.whl > cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_38_x86_64.whl.sha256sum
+        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_38_x86_64.whl || echo "Failed to sign"
+        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_38_x86_64.whl || echo "Failed to sign"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${VERSION}" *.whl *.sha256sum *.asc
   build_cedarling_wasm:
