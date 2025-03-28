@@ -34,7 +34,7 @@
             ]
          }
       ],
-      "metadataServers":[{"url": "https://mds.fidoalliance.org/", rootCert: "http://secure.globalsign.com/cacert/root-r3.crt" }],
+      "metadataServers":[{"url": "https://mds.fidoalliance.org/", "rootCert": "http://secure.globalsign.com/cacert/root-r3.crt" }],
 	  
       "userAutoEnrollment":false,
       "unfinishedRequestExpiration":180,
