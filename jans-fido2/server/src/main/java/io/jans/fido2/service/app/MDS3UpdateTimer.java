@@ -6,9 +6,6 @@
 
 package io.jans.fido2.service.app;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-
 import org.slf4j.Logger;
 
 import io.jans.fido2.service.mds.TocService;

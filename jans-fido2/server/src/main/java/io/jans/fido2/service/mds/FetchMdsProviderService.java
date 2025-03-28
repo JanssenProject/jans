@@ -1,17 +1,16 @@
 package io.jans.fido2.service.mds;
 
+import org.apache.commons.lang3.StringUtils;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.slf4j.Logger;
+
 import io.jans.fido2.exception.mds.MdsClientException;
-import io.jans.fido2.model.conf.AppConfiguration;
-import io.jans.fido2.service.DataMapperService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
-import org.apache.commons.lang3.StringUtils;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.slf4j.Logger;
 
 @ApplicationScoped
 public class FetchMdsProviderService {

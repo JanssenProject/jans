@@ -22,7 +22,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -120,9 +119,9 @@ public class TocService {
 				log.debug("SkipDownloadMds is enabled");
 			} else {
 
-				LocalDate nextUpdate = getNextUpdateDate();
+				LocalDate nextUpdateOn = getNextUpdateDate();
 
-				if (nextUpdate == null || nextUpdate.equals(LocalDate.now()) || nextUpdate.isBefore(LocalDate.now())) {
+				if (nextUpdateOn == null || nextUpdateOn.equals(LocalDate.now()) || nextUpdateOn.isBefore(LocalDate.now())) {
 					log.info("Downloading the latest TOC from https://mds.fidoalliance.org/");
 					MetadataServer metaDataServer = (MetadataServer) (appConfiguration.getFido2Configuration()
 							.getMetadataServers().get(0));
@@ -147,11 +146,7 @@ public class TocService {
 	private Map<String, JsonNode> parseTOCs() {
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
 		List<Map<String, JsonNode>> maps = new ArrayList<>();
-		if (fido2Configuration == null) {
-			log.warn("Fido2 configuration not exists");
-			return new HashMap<String, JsonNode>();
-		}
-
+		
 		String mdsTocRootCertsFolder = fido2Configuration.getMdsCertsFolder();
 		if (StringHelper.isEmpty(mdsTocRootCertsFolder)) {
 			log.warn("Fido2 MDS cert and TOC properties should be set");
@@ -337,7 +332,7 @@ public class TocService {
 			String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
 
 			Document document = dbDocumentService.getDocumentsByFilePath(mdsTocFilesFolder).get(0);
-			return (document.getDescription() == null || "mdsTocsFolder".equals(document.getDescription())) ? null : stringToLocalDate(document.getDescription().toString());
+			return (document.getDescription() == null || "mdsTocsFolder".equals(document.getDescription())) ? null : stringToLocalDate(document.getDescription());
 
 		} catch (Exception e) {
 			log.error("Failed to get nextUpdateDate of the MDS from jansDocument ", e);
