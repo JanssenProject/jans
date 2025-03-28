@@ -73,6 +73,9 @@
             <class name="io.jans.as.server.ssa.ws.rs.SsaRestWebServiceImplTest" />
             <class name="io.jans.as.server.ssa.ws.rs.SsaJsonServiceTest" />
 
+            <!-- Rate Limit -->
+            <class name="io.jans.as.server.rate.RateLimitServiceTest" />
+
             <!-- UTIL -->
             <class name="io.jans.as.server.util.ServerUtilTest" />
         </classes>
@@ -321,12 +324,6 @@
 			<class name="io.jans.as.server.comp.LocaleTest" />
 		</classes>
 	</test>
-
-    <test name="Cleaner timer test" enabled="true">
-        <classes>
-            <class name="io.jans.as.server.comp.CleanerTimerTest" />
-        </classes>
-    </test>
 
 	<test name="Remove unused clients test" enabled="true">
 		<classes>

@@ -9,6 +9,7 @@
 
 pub(crate) mod app_types;
 pub(crate) mod cedar_schema;
+pub(crate) mod json_rules;
 
 pub mod policy_store;
 
@@ -34,4 +35,24 @@ enum ContentType {
     /// indicates that the related value is in the json representation of the cedar policy / schema language
     #[serde(rename = "cedar-json")]
     CedarJson,
+}
+
+// Implement the trait for all iterators over Result<T, E>
+impl<T, E, I> PartitionResult<T, E> for I where I: Iterator<Item = Result<T, E>> {}
+
+pub(crate) trait PartitionResult<T, E>: Iterator<Item = Result<T, E>> + Sized {
+    /// Splits an iterator of `Result<T, E>` into two separate `Vec`s:
+    /// one containing all `Ok(T)` values and the other containing all `Err(E)` values.
+    fn partition_result(self) -> (Vec<T>, Vec<E>) {
+        let mut ok = Vec::new();
+        let mut errs = Vec::new();
+
+        for r in self {
+            match r {
+                Ok(v) => ok.push(v),
+                Err(e) => errs.push(e),
+            }
+        }
+        (ok, errs)
+    }
 }

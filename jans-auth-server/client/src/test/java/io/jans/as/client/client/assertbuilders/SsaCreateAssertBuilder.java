@@ -17,6 +17,7 @@ public class SsaCreateAssertBuilder extends BaseAssertBuilder {
     private final SsaCreateRequest request;
     private final SsaCreateResponse response;
     private int status = HttpStatus.SC_CREATED;
+    private boolean dontCheckAgainstRequestedLifetime = false;
 
     private IErrorType errorType;
 
@@ -32,6 +33,11 @@ public class SsaCreateAssertBuilder extends BaseAssertBuilder {
 
     public SsaCreateAssertBuilder errorType(SsaErrorResponseType errorType) {
         this.errorType = errorType;
+        return this;
+    }
+
+    public SsaCreateAssertBuilder dontCheckAgainstRequestedLifetime(boolean dontCheckAgainstRequestedLifetime) {
+        this.dontCheckAgainstRequestedLifetime = dontCheckAgainstRequestedLifetime;
         return this;
     }
 
@@ -54,7 +60,7 @@ public class SsaCreateAssertBuilder extends BaseAssertBuilder {
             assertEquals(jwtClaims.getClaimAsStringList(SOFTWARE_ROLES.getName()), request.getSoftwareRoles());
             assertNotNull(jwtClaims.getClaim(GRANT_TYPES.getName()), "The grant_types in jwt is null");
             assertEquals(jwtClaims.getClaimAsStringList(GRANT_TYPES.getName()), request.getGrantTypes());
-            if (request.getLifetime() != null) {
+            if (request.getLifetime() != null && !dontCheckAgainstRequestedLifetime) {
                 assertNotNull(jwtClaims.getClaim(LIFETIME.getName()), "The lifetime in jwt is null");
                 assertEquals(jwtClaims.getClaimAsInteger(LIFETIME.getName()), request.getLifetime());
             }

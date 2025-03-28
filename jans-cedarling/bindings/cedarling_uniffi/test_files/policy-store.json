@@ -1,36 +1,82 @@
 {
-    "cedar_version": "v4.0.0",
-    "policy_stores": {
-      "a1bf93115de86de760ee0bea1d529b521489e5a11747": {
-        "cedar_version": "v4.0.0",
-        "name": "Jans",
-        "description": "A test policy store where everything is fine.",
-        "policies": {
-          "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
-            "description": "simple policy example for principal workload",
-            "creation_date": "2024-09-20T17:22:39.996050",
-            "policy_content": {
-              "encoding": "none",
-              "content_type": "cedar",
-              "body": "permit(\n    principal is Jans::Workload,\n    action in [Jans::Action::\"Update\"],\n    resource is Jans::Issue\n)when{\n    principal.sub == resource.sub\n};"
-            }
-          },
-          "444da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
-            "cedar_version": "v4.0.0",
-            "description": "simple policy example for principal user",
-            "creation_date": "2024-09-20T17:22:39.996050",
-            "policy_content": {
-              "encoding": "none",
-              "content_type": "cedar",
-              "body": "permit(\n    principal is Jans::User,\n    action in [Jans::Action::\"Update\"],\n    resource is Jans::Issue\n)when{\n    principal.sub == resource.sub\n};"
+  "cedar_version": "v4.0.0",
+  "policy_stores": {
+    "a1bf93115de86de760ee0bea1d529b521489e5a11747": {
+      "cedar_version": "v4.0.0",
+      "name": "Jans",
+      "description": "A test policy store where everything is fine.",
+      "trusted_issuers": {
+        "some_test_iss_id": {
+          "name": "TestIss",
+          "description": "Some Test Issuer",
+          "openid_configuration_endpoint": "https://account.gluu.org/.well-known/openid-configuration",
+          "tokens_metadata": {
+            "access_token": {
+              "entity_type_name": "Jans::Access_token",
+              "workload_id": "client_id",
+              "principal_mapping": [
+                "Jans::Workload"
+              ]
+            },
+            "id_token": {
+              "entity_type_name": "Jans::Id_token",
+              "user_id": "sub",
+              "principal_mapping": [
+                "Jans::User"
+              ]
+            },
+            "userinfo_token": {
+              "entity_type_name": "Jans::Userinfo_token",
+              "user_id": "sub",
+              "principal_mapping": [
+                "Jans::User"
+              ]
             }
           }
-        },
-        "schema": {
-          "encoding": "none",
-          "content_type": "cedar",
-          "body": "namespace Jans {\n  type Url = {\"host\": String, \"path\": String, \"protocol\": String};\n  entity Access_token = {\"aud\": String, \"exp\": Long, \"iat\": Long, \"iss\": TrustedIssuer, \"jti\": String};\n  entity Issue = {\"sub\": String};\n  entity Role;\n  entity TrustedIssuer = {\"issuer_entity_id\": Url};\n  entity User in [Role] = {\"email\": String, \"sub\": String, \"user_name\": String};\n  entity Workload = {\"client_id\": String, \"iss\": TrustedIssuer, \"username\": String, \"sub\": String};\n  entity id_token = {\"acr\": String, \"amr\": Set<String>, \"aud\": String, \"exp\": Long, \"iat\": Long, \"iss\": TrustedIssuer, \"jti\": String, \"sub\": String};\n  entity Userinfo_token  = {\"sub\": String, \"iss\": String, \"jti\": String, \"client_id\": String};\n  type Context = {\n    user: User,\n    workload: Workload,\n    access_token: Access_token,\n    id_token: id_token,\n    userinfo_token: Userinfo_token,\n  };\n  action \"Update\" appliesTo {\n    principal: [Workload, User],\n    resource: [Issue],\n    context: Context\n  };\n}"
         }
-      }
+      },
+      "policies": {
+        "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+          "description": "simple policy example for principal workload",
+          "creation_date": "2024-09-20T17:22:39.996050",
+          "policy_content": {
+            "encoding": "none",
+            "content_type": "cedar",
+            "body": "permit(\n    principal is Jans::Workload,\n    action in [Jans::Action::\"Update\"],\n    resource is Jans::Issue\n)when{\n    principal.sub == resource.sub\n};"
+          }
+        },
+        "444da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+          "cedar_version": "v4.0.0",
+          "description": "simple policy example for principal user",
+          "creation_date": "2024-09-20T17:22:39.996050",
+          "policy_content": {
+            "encoding": "none",
+            "content_type": "cedar",
+            "body": "permit(\n    principal is Jans::User,\n    action in [Jans::Action::\"Update\"],\n    resource is Jans::Issue\n)when{\n    principal.sub == resource.sub\n};"
+          }
+        },
+        "TestPrincipal1": {
+          "cedar_version": "v4.0.0",
+          "description": "simple policy example for TestPrincipal1",
+          "creation_date": "2024-09-20T17:22:39.996050",
+          "policy_content": {
+            "encoding": "none",
+            "content_type": "cedar",
+            "body": "permit(\n    principal is Jans::TestPrincipal1,\n    action,\n    resource\n)when{\n principal.is_ok\n};"
+          }
+        },
+        "TestPrincipal2": {
+          "cedar_version": "v4.0.0",
+          "description": "simple policy example for TestPrincipal2",
+          "creation_date": "2024-09-20T17:22:39.996050",
+          "policy_content": {
+            "encoding": "none",
+            "content_type": "cedar",
+            "body": "permit(\n    principal is Jans::TestPrincipal2,\n    action,\n    resource\n)when{\n principal.is_ok\n};"
+          }
+        }
+      },
+      "schema": "ewoiSmFucyI6IHsKImNvbW1vblR5cGVzIjogewoiQ29udGV4dCI6IHsKInR5cGUiOiAiUmVjb3JkIiwKImF0dHJpYnV0ZXMiOiB7CiJhY2Nlc3NfdG9rZW4iOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiQWNjZXNzX3Rva2VuIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImlkX3Rva2VuIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIklkX3Rva2VuIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKInVzZXIiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiVXNlciIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJ1c2VyaW5mb190b2tlbiI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJVc2VyaW5mb190b2tlbiIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJ3b3JrbG9hZCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJXb3JrbG9hZCIsCiJyZXF1aXJlZCI6IGZhbHNlCn0KfQp9LAoiVXJsIjogewoidHlwZSI6ICJSZWNvcmQiLAoiYXR0cmlidXRlcyI6IHsKImhvc3QiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIgp9LAoicGF0aCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciCn0sCiJwcm90b2NvbCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciCn0KfQp9Cn0sCiJlbnRpdHlUeXBlcyI6IHsKIkFjY2Vzc190b2tlbiI6IHsKInNoYXBlIjogewoidHlwZSI6ICJSZWNvcmQiLAoiYXR0cmlidXRlcyI6IHsKImFjciI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoiYXVkIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJhdXRoX3RpbWUiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiTG9uZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJjbGllbnRfaWQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImNvZGUiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImV4cCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJMb25nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImlhdCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJMb25nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImlzcyI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJUcnVzdGVkSXNzdWVyIgp9LAoianRpIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJuYmYiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiTG9uZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJzY29wZSI6IHsKInR5cGUiOiAiU2V0IiwKImVsZW1lbnQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIgp9LAoicmVxdWlyZWQiOiBmYWxzZQp9LAoic3RhdHVzIjogewoidHlwZSI6ICJSZWNvcmQiLAoiYXR0cmlidXRlcyI6IHsKInN0YXR1c19saXN0IjogewoidHlwZSI6ICJSZWNvcmQiLAoiYXR0cmlidXRlcyI6IHsKImlkeCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJMb25nIgp9LAoidXJpIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIKfQp9Cn0KfSwKInJlcXVpcmVkIjogZmFsc2UKfSwKInN1YiI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoidG9rZW5fdHlwZSI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoidXNlcm5hbWUiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKIng1dCNTMjU2IjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0KfQp9Cn0sCiJJc3N1ZSI6IHsKInNoYXBlIjogewoidHlwZSI6ICJSZWNvcmQiLAoiYXR0cmlidXRlcyI6IHsKImFwcF9pZCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoiaWQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKIm5hbWUiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKInBlcm1pc3Npb24iOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKInN1YiI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciCn0KfQp9Cn0sCiJSb2xlIjoge30sCiJUcnVzdGVkSXNzdWVyIjogewoic2hhcGUiOiB7CiJ0eXBlIjogIlJlY29yZCIsCiJhdHRyaWJ1dGVzIjogewoiaXNzdWVyX2VudGl0eV9pZCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJVcmwiCn0KfQp9Cn0sCiJVc2VyIjogewoibWVtYmVyT2ZUeXBlcyI6IFsKIlJvbGUiCl0sCiJzaGFwZSI6IHsKInR5cGUiOiAiUmVjb3JkIiwKImF0dHJpYnV0ZXMiOiB7CiJlbWFpbCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoiaWRfdG9rZW4iOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiSWRfdG9rZW4iLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoicm9sZSI6IHsKInR5cGUiOiAiU2V0IiwKImVsZW1lbnQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIgp9LAoicmVxdWlyZWQiOiBmYWxzZQp9LAoic3ViIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIKfSwKInVzZXJpbmZvX3Rva2VuIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlVzZXJpbmZvX3Rva2VuIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKInVzZXJuYW1lIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0KfQp9Cn0sCiJVc2VyaW5mb190b2tlbiI6IHsKInNoYXBlIjogewoidHlwZSI6ICJSZWNvcmQiLAoiYXR0cmlidXRlcyI6IHsKImFjciI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoiYW1yIjogewoidHlwZSI6ICJTZXQiLAoiZWxlbWVudCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciCn0sCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJhdWQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImVtYWlsIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJlbWFpbF92ZXJpZmllZCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJCb29sIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImV4cCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJMb25nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImZhbWlseV9uYW1lIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJnaXZlbl9uYW1lIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJpYXQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiTG9uZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJpbnVtIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJpc3MiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiVHJ1c3RlZElzc3VlciIKfSwKImphbnNBZG1pblVJUm9sZSI6IHsKInR5cGUiOiAiU2V0IiwKImVsZW1lbnQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIgp9LAoicmVxdWlyZWQiOiBmYWxzZQp9LAoianRpIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJtaWRkbGVfbmFtZSI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoibmFtZSI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoibmJmIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIkxvbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoibmlja25hbWUiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKInJvbGUiOiB7CiJ0eXBlIjogIlNldCIsCiJlbGVtZW50IjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIKfSwKInJlcXVpcmVkIjogZmFsc2UKfSwKInN1YiI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoidXBkYXRlZF9hdCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJMb25nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKInVzZXJuYW1lIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0KfQp9Cn0sCiJXb3JrbG9hZCI6IHsKInNoYXBlIjogewoidHlwZSI6ICJSZWNvcmQiLAoiYXR0cmlidXRlcyI6IHsKImFjY2Vzc190b2tlbiI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJBY2Nlc3NfdG9rZW4iLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoiYXVkIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJjbGllbnRfaWQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKInN1YiI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoiaXNzIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlRydXN0ZWRJc3N1ZXIiLAoicmVxdWlyZWQiOiBmYWxzZQp9Cn0KfQp9LAoiSWRfdG9rZW4iOiB7CiJzaGFwZSI6IHsKInR5cGUiOiAiUmVjb3JkIiwKImF0dHJpYnV0ZXMiOiB7CiJhY3IiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImFtciI6IHsKInR5cGUiOiAiU2V0IiwKImVsZW1lbnQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIgp9LAoicmVxdWlyZWQiOiBmYWxzZQp9LAoiYXRfaGFzaCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoiYXVkIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJhdXRoX3RpbWUiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiTG9uZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJjX2hhc2giOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImV4cCI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJMb25nIiwKInJlcXVpcmVkIjogZmFsc2UKfSwKImdyYW50IjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJpYXQiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiTG9uZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJpc3MiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiVHJ1c3RlZElzc3VlciIKfSwKImphbnNPcGVuSURDb25uZWN0VmVyc2lvbiI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoianRpIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJuYmYiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiTG9uZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJub25jZSI6IHsKInR5cGUiOiAiRW50aXR5T3JDb21tb24iLAoibmFtZSI6ICJTdHJpbmciLAoicmVxdWlyZWQiOiBmYWxzZQp9LAoic2lkIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0sCiJzdGF0dXMiOiB7CiJ0eXBlIjogIlJlY29yZCIsCiJhdHRyaWJ1dGVzIjogewoic3RhdHVzX2xpc3QiOiB7CiJ0eXBlIjogIlJlY29yZCIsCiJhdHRyaWJ1dGVzIjogewoiaWR4IjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIkxvbmciCn0sCiJ1cmkiOiB7CiJ0eXBlIjogIkVudGl0eU9yQ29tbW9uIiwKIm5hbWUiOiAiU3RyaW5nIgp9Cn0KfQp9LAoicmVxdWlyZWQiOiBmYWxzZQp9LAoic3ViIjogewoidHlwZSI6ICJFbnRpdHlPckNvbW1vbiIsCiJuYW1lIjogIlN0cmluZyIsCiJyZXF1aXJlZCI6IGZhbHNlCn0KfQp9Cn0sCiJUZXN0UHJpbmNpcGFsMSI6IHsKInNoYXBlIjogewoidHlwZSI6ICJSZWNvcmQiLAoiYXR0cmlidXRlcyI6IHsKImlzX29rIjogewoidHlwZSI6ICJCb29sIiwKInJlcXVpcmVkIjogdHJ1ZQp9Cn0KfQp9LAoiVGVzdFByaW5jaXBhbDIiOiB7CiJzaGFwZSI6IHsKInR5cGUiOiAiUmVjb3JkIiwKImF0dHJpYnV0ZXMiOiB7CiJpc19vayI6IHsKInR5cGUiOiAiQm9vbCIsCiJyZXF1aXJlZCI6IHRydWUKfQp9Cn0KfQp9LAoiYWN0aW9ucyI6IHsKIlVwZGF0ZSI6IHsKImFwcGxpZXNUbyI6IHsKInJlc291cmNlVHlwZXMiOiBbCiJJc3N1ZSIKXSwKInByaW5jaXBhbFR5cGVzIjogWwoiV29ya2xvYWQiLAoiVXNlciIKXSwKImNvbnRleHQiOiB7CiJ0eXBlIjogIkNvbnRleHQiCn0KfQp9LAoiVXBkYXRlVGVzdFByaW5jaXBhbCI6IHsKImFwcGxpZXNUbyI6IHsKInJlc291cmNlVHlwZXMiOiBbCiJJc3N1ZSIKXSwKInByaW5jaXBhbFR5cGVzIjogWwoiVGVzdFByaW5jaXBhbDEiLAoiVGVzdFByaW5jaXBhbDIiCl0sCiJjb250ZXh0IjogewoidHlwZSI6ICJSZWNvcmQiLAoiYXR0cmlidXRlcyI6IHt9Cn0KfQp9Cn0KfQp9"
     }
   }
+}

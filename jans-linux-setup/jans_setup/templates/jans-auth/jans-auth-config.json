@@ -21,6 +21,7 @@
       "ssa",
       "global_token_revocation",
       "status_list",
+      "rate_limit",
       "access_evaluation"
     ],
     "issuer":"https://%(hostname)s",
@@ -390,8 +391,6 @@
     "umaRestrictResourceToAssociatedClient":false,
     "umaKeepClientDuringResourceSetRegistration":true,
     "umaRptAsJwt":false,
-    "cleanServiceInterval":60,
-    "cleanServiceBatchChunkSize": 10000,
     "keyRegenerationEnabled":true,
     "keyRegenerationInterval":48,
     "defaultSignatureAlgorithm":"RS256",

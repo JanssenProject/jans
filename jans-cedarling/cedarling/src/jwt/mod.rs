@@ -21,6 +21,9 @@ mod validator;
 
 use crate::JwtConfig;
 use crate::common::policy_store::TrustedIssuer;
+use base64::DecodeError;
+use base64::Engine;
+use base64::prelude::*;
 use key_service::{KeyService, KeyServiceError};
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
@@ -39,34 +42,10 @@ type KeyId = Box<str>;
 pub enum JwtProcessingError {
     #[error("Invalid token `{0}`: {1}")]
     InvalidToken(String, JwtValidatorError),
-    #[error("Invalid Access token: {0}")]
-    InvalidAccessToken(#[source] JwtValidatorError),
-    #[error("Invalid ID token: {0}")]
-    InvalidIdToken(#[source] JwtValidatorError),
-    #[error("Invalid Userinfo token: {0}")]
-    InvalidUserinfoToken(#[source] JwtValidatorError),
-    #[error(
-        "Validation failed: id_token audience does not match the access_token client_id. \
-         id_token.aud: {0:?}, access_token.client_id: {1:?}"
-    )]
-    IdTokenAudienceMismatch(String, String),
-    #[error(
-        "Validation failed: Userinfo token subject does not match the id_token subject. \
-         userinfo_token.sub: {0:?}, id_token.sub: {1:?}"
-    )]
-    UserinfoSubMismatch(String, String),
-    #[error(
-        "Validation failed: Userinfo token audience ({0}) does not match the access_token \
-         client_id ({1})."
-    )]
-    UserinfoAudienceMismatch(String, String),
-    #[error(
-        "CEDARLING_ID_TOKEN_TRUST_MODE is set to 'Strict', but the {0} is missing a required \
-         claim: {1}"
-    )]
-    MissingClaimsInStrictMode(&'static str, &'static str),
     #[error("Failed to deserialize from Value to String: {0}")]
     StringDeserialization(#[from] serde_json::Error),
+    #[error("error while trying to parse issuer from token: {0}")]
+    GetIss(#[from] DecodeJwtError),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -87,10 +66,18 @@ pub enum JwtServiceInitError {
     UnsupportedAlgorithm(String),
     #[error("Failed to initialize JwtValidator: {0}")]
     InitJwtValidator(#[from] JwtValidatorError),
+    #[error("failed to parse the openid_configuration_endpoint for the trusted issuer `{0}`: {1}")]
+    ParseOidcUrl(String, url::ParseError),
 }
 
 pub struct JwtService {
-    validators: HashMap<String, JwtValidator>,
+    validators: HashMap<ValidatorId, JwtValidator>,
+}
+
+#[derive(Eq, Hash, PartialEq, Debug)]
+struct ValidatorId {
+    iss: Option<String>,
+    token_name: String,
 }
 
 impl JwtService {
@@ -127,22 +114,39 @@ impl JwtService {
             config.signature_algorithms_supported.clone().into();
 
         let mut validators = HashMap::new();
-        for (tkn_name, config) in config.token_validation_settings.iter() {
-            validators.insert(
-                tkn_name.to_string(),
-                JwtValidator::new(
-                    JwtValidatorConfig {
-                        sig_validation: sig_validation.clone(),
-                        status_validation: status_validation.clone(),
-                        trusted_issuers: trusted_issuers.clone(),
-                        algs_supported: algs_supported.clone(),
-                        required_claims: config.required_claims(),
-                        validate_exp: config.exp_validation,
-                        validate_nbf: config.nbf_validation,
-                    },
-                    key_service.clone(),
-                )?,
-            );
+        if let Some(issuers) = trusted_issuers.as_ref() {
+            for iss in issuers.values() {
+                let origin = iss.oidc_endpoint.origin().ascii_serialization();
+                for (tkn, metadata) in iss.tokens_metadata.iter() {
+                    if !metadata.trusted {
+                        continue;
+                    }
+
+                    let required_claims = metadata.required_claims.clone();
+                    let validate_exp = required_claims.contains("exp");
+                    let validate_nbf = required_claims.contains("nbf");
+                    let validator = JwtValidator::new(
+                        JwtValidatorConfig {
+                            sig_validation: sig_validation.clone(),
+                            status_validation: status_validation.clone(),
+                            trusted_issuers: trusted_issuers.clone(),
+                            algs_supported: algs_supported.clone(),
+                            required_claims: required_claims
+                                .into_iter()
+                                .map(|x| x.into_boxed_str())
+                                .collect(),
+                            validate_exp,
+                            validate_nbf,
+                        },
+                        key_service.clone(),
+                    )?;
+                    let id = ValidatorId {
+                        iss: Some(origin.clone()),
+                        token_name: tkn.clone(),
+                    };
+                    validators.insert(id, validator);
+                }
+            }
         }
 
         Ok(Self { validators })
@@ -153,8 +157,23 @@ impl JwtService {
         tokens: &'a HashMap<String, String>,
     ) -> Result<HashMap<String, Token<'a>>, JwtProcessingError> {
         let mut validated_tokens = HashMap::new();
-        for (tkn_name, jwt) in tokens.iter() {
-            let validator = if let Some(validator) = self.validators.get(tkn_name) {
+        for (token_name, jwt) in tokens.iter() {
+            // we do a deserialization here to get the issuer since we use
+            // it to store the validators but the validators do another
+            // deserialization so we are doing that operation twice,
+            //
+            // can't really easily fix this right now since the jsonwebtoken
+            // crate doesn't support validation without deserialization.
+            let claims = decode_without_validation(jwt)?;
+            let iss = claims
+                .get_claim("iss")
+                .and_then(|x| x.as_str().ok().map(|x| x.to_string()));
+
+            let validator_id = ValidatorId {
+                iss: iss.clone(),
+                token_name: token_name.clone(),
+            };
+            let validator = if let Some(validator) = self.validators.get(&validator_id) {
                 validator
             } else {
                 // we just ignore input tokens that are not defined
@@ -166,11 +185,12 @@ impl JwtService {
 
             let validated_jwt = validator
                 .process_jwt(jwt)
-                .map_err(|e| JwtProcessingError::InvalidToken(tkn_name.to_string(), e))?;
-            let claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)?;
+                .map_err(|e| JwtProcessingError::InvalidToken(token_name.to_string(), e))?;
+            let claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
+                .map_err(JwtProcessingError::StringDeserialization)?;
             validated_tokens.insert(
-                tkn_name.to_string(),
-                Token::new(tkn_name, claims, validated_jwt.trusted_iss),
+                token_name.to_string(),
+                Token::new(token_name, claims, validated_jwt.trusted_iss),
             );
         }
 
@@ -178,22 +198,59 @@ impl JwtService {
     }
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum DecodeJwtError {
+    #[error("invalid JWT. the JWT must be of form: header.body.signature")]
+    InvalidJwt,
+    #[error("failed to decode JWT from base64 encoding: {0}")]
+    DecodeFromB64(#[from] DecodeError),
+    #[error("failed to deserialize JWT from base64 encoding: {0}")]
+    DeserializeJwt(#[from] serde_json::Error),
+}
+
+fn decode_without_validation(jwt: &str) -> Result<TokenClaims, DecodeJwtError> {
+    let parts = jwt.split(".").collect::<Vec<&str>>();
+    if parts.len() != 3 {
+        return Err(DecodeJwtError::InvalidJwt);
+    }
+    let decoded = &BASE64_STANDARD_NO_PAD.decode(parts[1])?;
+    Ok(serde_json::from_slice::<TokenClaims>(decoded)?)
+}
+
 #[cfg(test)]
 mod test {
     use super::test_utils::*;
-    use super::{JwtService, Token, TokenClaims};
-    use crate::{JwtConfig, TokenValidationConfig};
+    use super::{JwtService, Token};
+    use crate::JwtConfig;
+    use crate::common::policy_store::TrustedIssuer;
     use jsonwebtoken::Algorithm;
-    use serde_json::json;
+    use mockito::Server;
+    use serde_json::{Value, json};
     use std::collections::{HashMap, HashSet};
     use tokio::test;
+    use url::Url;
 
     #[test]
     pub async fn can_validate_token() {
-        // Generate token
+        let mut server = Server::new_async().await;
+
+        let oidc_endpoint = server
+            .mock("GET", "/.well-known/openid-configuration")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(
+                json!({
+                    "issuer": server.url(),
+                    "jwks_uri": server.url() + "/jwks",
+                })
+                .to_string(),
+            )
+            .expect(1)
+            .create();
+
         let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
         let access_tkn_claims = json!({
-            "iss": "https://accounts.test.com",
+            "iss": server.url(),
             "sub": "some_sub",
             "jti": 1231231231,
             "exp": u64::MAX,
@@ -202,7 +259,7 @@ mod test {
         let access_tkn = generate_token_using_claims(&access_tkn_claims, &keys)
             .expect("Should generate access token");
         let id_tkn_claims = json!({
-            "iss": "https://accounts.test.com",
+            "iss": server.url(),
             "aud": "test123",
             "sub": "some_sub",
             "name": "John Doe",
@@ -211,7 +268,7 @@ mod test {
         let id_tkn =
             generate_token_using_claims(&id_tkn_claims, &keys).expect("Should generate id token");
         let userinfo_tkn_claims = json!({
-            "iss": "https://accounts.test.com",
+            "iss": server.url(),
             "aud": "test123",
             "sub": "some_sub",
             "name": "John Doe",
@@ -220,30 +277,34 @@ mod test {
         let userinfo_tkn = generate_token_using_claims(&userinfo_tkn_claims, &keys)
             .expect("Should generate userinfo token");
 
-        // Prepare JWKS
-        let local_jwks = json!({"test_idp": generate_jwks(&vec![keys]).keys}).to_string();
+        let jwks_endpoint = server
+            .mock("GET", "/jwks")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(json!({"keys": generate_jwks(&vec![keys]).keys}).to_string())
+            .expect(1)
+            .create();
+
+        let mut iss = TrustedIssuer::default();
+        iss.oidc_endpoint = Url::parse(&(server.url() + "/.well-known/openid-configuration"))
+            .expect("should be a valid url");
+        // we remove the `iss` claims since mockito can't really create https
+        // endpoints and the validation requires the `iss` to be https.
+        for (_name, metadata) in iss.tokens_metadata.iter_mut() {
+            metadata.required_claims.remove("iss");
+        }
 
         let jwt_service = JwtService::new(
             &JwtConfig {
-                jwks: Some(local_jwks),
+                jwks: None,
                 jwt_sig_validation: true,
                 jwt_status_validation: false,
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
-                token_validation_settings: HashMap::from([
-                    (
-                        "access_token".to_string(),
-                        TokenValidationConfig::access_token(),
-                    ),
-                    ("id_token".to_string(), TokenValidationConfig::id_token()),
-                    (
-                        "userinfo_token".to_string(),
-                        TokenValidationConfig::userinfo_token(),
-                    ),
-                ]),
             },
-            None,
+            Some(HashMap::from([("Jans".into(), iss.clone())])),
         )
         .await
+        .inspect_err(|e| eprintln!("error msg: {}", e))
         .expect("Should create JwtService");
 
         let tokens = HashMap::from([
@@ -257,37 +318,39 @@ mod test {
             .expect("should validate tokens");
 
         // Test access_token
-        let token = validated_tokens.get("access_token");
-        assert!(
-            token.is_some_and(|token| {
-                let expected_claims = serde_json::from_value::<TokenClaims>(access_tkn_claims)
-                    .expect("Should create expected access_token claims");
-                *token == Token::new("access_token", expected_claims.into(), None)
-            }),
-            "should validate correct access token: {:?}",
-            token
+        let token = validated_tokens
+            .get("access_token")
+            .expect("should have an access_token");
+        let expected_claims = serde_json::from_value::<HashMap<String, Value>>(access_tkn_claims)
+            .expect("Should create expected access_token claims");
+        assert_eq!(
+            token,
+            &Token::new("access_token", expected_claims.into(), Some(&iss))
         );
 
         // Test id_token
-        let token = validated_tokens.get("id_token");
-        assert!(
-            token.is_some_and(|token| {
-                let expected_claims = serde_json::from_value::<TokenClaims>(id_tkn_claims)
-                    .expect("Should create expected id_token claims");
-                *token == Token::new("id_token", expected_claims.into(), None)
-            }),
-            "should validate correct id token"
+        let token = validated_tokens
+            .get("id_token")
+            .expect("should have an id_token");
+        let expected_claims = serde_json::from_value::<HashMap<String, Value>>(id_tkn_claims)
+            .expect("Should create expected id_token claims");
+        assert_eq!(
+            token,
+            &Token::new("id_token", expected_claims.into(), Some(&iss))
         );
 
         // Test userinfo_token
-        let token = validated_tokens.get("userinfo_token");
-        assert!(
-            token.is_some_and(|token| {
-                let expected_claims = serde_json::from_value::<TokenClaims>(userinfo_tkn_claims)
-                    .expect("Should create expected userinfo_token claims");
-                *token == Token::new("userinfo_token", expected_claims.into(), None)
-            }),
-            "should validate correct userinfo token"
+        let token = validated_tokens
+            .get("userinfo_token")
+            .expect("should have an userinfo_token");
+        let expected_claims = serde_json::from_value::<HashMap<String, Value>>(userinfo_tkn_claims)
+            .expect("Should create expected userinfo_token claims");
+        assert_eq!(
+            token,
+            &Token::new("userinfo_token", expected_claims.into(), Some(&iss))
         );
+
+        oidc_endpoint.assert();
+        jwks_endpoint.assert();
     }
 }

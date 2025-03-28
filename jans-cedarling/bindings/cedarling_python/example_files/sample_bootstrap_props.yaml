@@ -8,25 +8,34 @@ CEDARLING_WORKLOAD_AUTHZ: enabled
 CEDARLING_POLICY_STORE_URI: null
 CEDARLING_POLICY_STORE_LOCAL: null
 CEDARLING_POLICY_STORE_LOCAL_FN: ./example_files/policy-store.json
-CEDARLING_TOKEN_CONFIGS:
-    access_token: { entity_type_name: "Jans::Access_token" }
-    id_token: { entity_type_name: "Jans::id_token" }
-    userinfo_token: { entity_type_name: "Jans::Userinfo_token" }
-
 CEDARLING_POLICY_STORE_ID: gICAgcHJpbmNpcGFsIGlz
 CEDARLING_LOG_TYPE: std_out
 CEDARLING_LOG_LEVEL: INFO
 CEDARLING_LOG_TTL: null
 CEDARLING_DECISION_LOG_USER_CLAIMS: ["sub","email"]
 CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS: ["client_id", "rp_id"]
-CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION: AND
+CEDARLING_PRINCIPAL_BOOLEAN_OPERATION:
+    or:
+        - and:
+            - "===":
+                - var: Jans::Workload
+                - ALLOW
+            - "===":
+                - var: Jans::User
+                - ALLOW
+        - and:
+            - "===":
+                - var: Jans::TestPrincipal1
+                - ALLOW
+            - "===":
+                - var: Jans::TestPrincipal2
+                - ALLOW
 CEDARLING_LOCAL_JWKS: null
 CEDARLING_JWT_SIG_VALIDATION: disabled
 CEDARLING_JWT_STATUS_VALIDATION: disabled
 CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED:
     - HS256
     - RS256
-
 CEDARLING_ID_TOKEN_TRUST_MODE: strict
 CEDARLING_LOCK: disabled
 CEDARLING_LOCK_SERVER_CONFIGURATION_URI: null

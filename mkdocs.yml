@@ -141,6 +141,7 @@ nav:
       - Agama Project Configuration: janssen-server/config-guide/auth-server-config/agama-project-configuration.md
       - Attribute: janssen-server/config-guide/auth-server-config/attribute-configuration.md
       - Cache Configuration: janssen-server/config-guide/auth-server-config/cache-configuration.md
+      - Rate Limit: janssen-server/config-guide/auth-server-config/rate-limit.md
       - UMA Management: janssen-server/config-guide/auth-server-config/oauth-umaresources-config.md
     - FIDO2 Configuration: janssen-server/config-guide/fido2-config/janssen-fido2-configuration.md
     - SCIM Configuration:
@@ -284,7 +285,6 @@ nav:
       - Engine and bridge configurations: janssen-server/developer/agama/engine-bridge-config.md
       - Agama flows in native applications: janssen-server/developer/agama/native-applications.md
       - FAQ: janssen-server/developer/agama/faq.md
-      - Quick Start Using Agama Lab: janssen-server/developer/agama/quick-start-using-agama-lab.md
     - External Libraries: janssen-server/developer/external-libraries.md
     - CORS: janssen-server/developer/cors.md
     - X-Frame-Options: janssen-server/developer/xframe.md
@@ -366,12 +366,9 @@ nav:
     - janssen-server/fido/README.md
     - Configuration: janssen-server/fido/config.md
     - Vendor Metadata Management: janssen-server/fido/vendor-metadata.md
-    - Key Management/Rotation: janssen-server/fido/key-mgt.md
     - Logs: janssen-server/fido/logs.md
-    - Monitoring: janssen-server/fido/monitoring.md
-    - USB Authenticator Support: janssen-server/fido/usb-authn.md
-    - Platform Authenticator Support: janssen-server/fido/platform-authn.md
-    - Bluetooth Authenticator Support: janssen-server/fido/bluetooth-authn.md
+    - Passwordless / Usernameless Login: janssen-server/fido/passwordlessLoginExperience.md
+    - Types of credentials: janssen-server/fido/types-of-creds.md
   - SCIM Admin Guide:
     - janssen-server/scim/README.md
     - Configuration: janssen-server/scim/config.md
@@ -407,32 +404,27 @@ nav:
       - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
 - Cedarling:
   - Overview: 'cedarling/cedarling-overview.md'
-  - Quick Start Guide: 'cedarling/cedarling-quick-start.md'
-  - How To Use:
-    - Types Of Bindings: 'cedarling/cedarling-binding-types.md'
-    - Browser Apps: 'cedarling/cedarling-wasm.md'
+  - Reference:
+    - Policy Store: 'cedarling/cedarling-policy-store.md'
+    - Properties: 'cedarling/cedarling-properties.md'
+    - Logs: 'cedarling/cedarling-logs.md'
+    - JWT Validation: 'cedarling/cedarling-jwt-validation.md'
+    - JWT Mapping: 'cedarling/cedarling-jwt-mapping.md'
+    - Lock Configuration: 'cedarling/cedarling-lock-server.md'
+    - Cedarling Entities: 'cedarling/cedarling-entities.md'
+  - Developer:
+    - WASM: 'cedarling/cedarling-wasm.md'
+    - Python:
+      - cedarling/python/README.md
+      - How to use: cedarling/python/usage.md
     - Mobile Apps:
       - UniFFI interface: 'cedarling/uniffi/cedarling-uniffi.md'
       - Android Apps: 'cedarling/uniffi/cedarling-android.md'
-      - iOS Apps: 'cedarling/uniffi/cedarling-ios.md'
-    - Web Server App: 
-      - Sidecar: 
-          - Sidecar Overview: 'cedarling/cedarling-sidecar-overview.md'
-          - Sidecar Tutorial: 'cedarling/cedarling-sidecar-tutorial.md'
-      - API Gateways: 'cedarling/cedarling-krakend.md'
-  - Administration:
-    - Authz: 'cedarling/cedarling-authz.md'
-    - Policy Store: 'cedarling/cedarling-policy-store.md'
-    - JWT Validation: 'cedarling/cedarling-jwt-validation.md'
-    - JWT Mapping: 'cedarling/cedarling-jwt-mapping.md'
-    - Logs: 'cedarling/cedarling-logs.md'
-    - Properties: 'cedarling/cedarling-properties.md'
-    - Lock Server Integration: 'cedarling/cedarling-lock-server.md'
-  - Developer:
-    - Python:
-        - cedarling/python/README.md
-        - How to use: cedarling/python/usage.md
-  
+      - iOS Apps: 'cedarling/uniffi/cedarling-ios.md'  
+    - Sidecar: 'cedarling/cedarling-sidecar-overview.md'
+    - Tutorial: 'cedarling/cedarling-sidecar-tutorial.md'
+  - Integrations:
+    - Krakend: 'cedarling/cedarling-krakend.md'
 - Agama:
   - Introduction: agama/introduction.md
   - Language reference: agama/language-reference.md

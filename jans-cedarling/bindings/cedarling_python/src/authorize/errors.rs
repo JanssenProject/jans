@@ -46,23 +46,16 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    WorkloadRequestValidationError,
+    InvalidPrincipalError,
     AuthorizeError,
-    "Error encountered while creating cedar_policy::Request for workload entity principal"
+    "Error encountered while creating cedar_policy::Request for principal"
 );
 
 create_exception!(
     authorize_errors,
-    UserRequestValidationError,
+    ValidateEntitiesError,
     AuthorizeError,
-    "Error encountered while creating cedar_policy::Request for user entity principal"
-);
-
-create_exception!(
-    authorize_errors,
-    EntitiesError,
-    AuthorizeError,
-    "Error encountered while collecting all entities"
+    "Error encountered while validating the entities to the schema"
 );
 
 create_exception!(
@@ -91,6 +84,13 @@ create_exception!(
     BuildEntityError,
     AuthorizeError,
     "Error encountered while running on strict id token trust mode"
+);
+
+create_exception!(
+    authorize_errors,
+    ExecuteRuleError,
+    AuthorizeError,
+    "Error encountered while executing the rule for principals"
 );
 
 #[pyclass]
@@ -134,13 +134,13 @@ errors_functions! {
     ProcessTokens => ProcessTokens,
     Action => ActionError,
     CreateContext => CreateContextError,
-    WorkloadRequestValidation => WorkloadRequestValidationError,
-    UserRequestValidation => UserRequestValidationError,
-    Entities => EntitiesError,
+    InvalidPrincipal => InvalidPrincipalError,
+    ValidateEntities => ValidateEntitiesError,
     EntitiesToJson => EntitiesToJsonError,
     BuildContext => BuildContextError,
     IdTokenTrustMode => IdTokenTrustModeError,
-    BuildEntity => BuildEntityError
+    BuildEntity => BuildEntityError,
+    ExecuteRule => ExecuteRuleError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {

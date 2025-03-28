@@ -18,8 +18,8 @@ from utils.multi_lang import _
 common_data = SimpleNamespace()
 common_data.background_tasks_feeds = {}
 
-class DialogUtils:
 
+class DialogUtils:
 
     def get_item_data(self, item):
         if hasattr(item, 'me'):

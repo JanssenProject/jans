@@ -3,7 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::WorkloadBoolOp;
+use crate::common::json_rules::JsonRule;
+
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -21,13 +22,9 @@ pub struct AuthorizationConfig {
     /// bootstrap property: `CEDARLING_WORKLOAD_AUTHZ`
     pub use_workload_principal: bool,
 
-    /// Specifies what boolean operation to use for the `USER` and `WORKLOAD` when
+    /// Specifies what boolean operation to use for the `USER` and `WORKLOAD`  when
     /// making authz (authorization) decisions.
-    ///
-    /// # Available Operations
-    /// - **AND**: authz will be successful if `USER` **AND** `WORKLOAD` is valid.
-    /// - **OR**: authz will be successful if `USER` **OR** `WORKLOAD` is valid.
-    pub user_workload_operator: WorkloadBoolOp,
+    pub principal_bool_operator: JsonRule,
 
     /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
     /// `CEDARLING_DECISION_LOG_USER_CLAIMS` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
@@ -41,18 +38,6 @@ pub struct AuthorizationConfig {
     /// Default is jti, but perhaps some other claim is needed.
     /// `CEDARLING_DECISION_LOG_DEFAULT_JWT_ID` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     pub decision_log_default_jwt_id: String,
-
-    /// Type Name of the User entity
-    pub mapping_user: Option<String>,
-
-    /// Type Name of the Workload entity
-    pub mapping_workload: Option<String>,
-
-    /// Type Name of the Role entity
-    pub mapping_role: Option<String>,
-
-    /// Name of Cedar token schema entities
-    pub mapping_tokens: TokenEntityNames,
 
     /// Sets the validation level for ID tokens.
     ///
@@ -80,7 +65,7 @@ impl Default for TokenEntityNames {
     fn default() -> Self {
         Self(HashMap::from([
             ("access_token".to_string(), "Jans::Access_token".to_string()),
-            ("id_token".to_string(), "Jans::id_token".to_string()),
+            ("id_token".to_string(), "Jans::Id_token".to_string()),
             (
                 "userinfo_token".to_string(),
                 "Jans::Userinfo_token".to_string(),

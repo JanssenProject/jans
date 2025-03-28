@@ -58,7 +58,7 @@ impl TokenConfigs {
                 claims: ClaimsValidationConfig::default(),
             }),
             ("id_token".to_string(), TokenConfig {
-                entity_type_name: "Jans::id_token".to_string(),
+                entity_type_name: "Jans::Id_token".to_string(),
                 claims: ClaimsValidationConfig::default(),
             }),
             ("userinfo_token".to_string(), TokenConfig {
@@ -87,7 +87,7 @@ impl Default for TokenConfigs {
                 },
             }),
             ("id_token".to_string(), TokenConfig {
-                entity_type_name: "Jans::id_token".to_string(),
+                entity_type_name: "Jans::Id_token".to_string(),
                 claims: ClaimsValidationConfig {
                     iss: FeatureToggle::Enabled,
                     sub: FeatureToggle::Enabled,

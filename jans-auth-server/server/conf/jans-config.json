@@ -356,7 +356,6 @@
     "umaPctLifetime":${config.uma.requester-permission-token-lifetime},
     "umaAddScopesAutomatically":false,
     "umaKeepClientDuringResourceRegistration":true,
-    "cleanServiceInterval":${config.client.clean-service-interval},
     "keyRegenerationEnabled":false,
     "keyRegenerationInterval":48,
     "defaultSignatureAlgorithm":"RS256",
