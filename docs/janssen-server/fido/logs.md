@@ -4,6 +4,8 @@ tags:
   - fido
 ---
 
+# FIDO Logs 
+
 ### Log level and Logging Layout Parameters of Janssen's FIDO2 server:
 
 | Field named | Example | Description|
