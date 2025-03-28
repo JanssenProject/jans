@@ -8,11 +8,11 @@ tags:
   - heap
 ---
 
-# Overview 
+# Memory Dump 
 
 This document will demonstrate how to generate a memory dump so that you can analyze your memory usage.
 
-# Services supported
+## Services supported
 
 This operation can be made in the following Java-based services:
 
@@ -27,7 +27,7 @@ This operation can be made in the following Java-based services:
 | scim        | CN_SCIM_JAVA_OPTIONS              |
 
 
-# Steps
+## Steps
 
 Let's go through the steps needed to generate a dump in `config-api`:
 

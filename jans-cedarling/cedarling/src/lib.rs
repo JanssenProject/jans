@@ -13,9 +13,9 @@
 //! The Cedarling is a more productive and flexible way to handle authorization.
 
 mod authz;
-mod entity_builder;
 mod bootstrap_config;
 mod common;
+mod entity_builder;
 mod http;
 mod init;
 mod jwt;
@@ -36,7 +36,8 @@ pub use crate::common::json_rules::JsonRule;
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
 use authz::Authz;
-pub use authz::request::{Request, ResourceData};
+pub use authz::request::RequestUnsigned;
+pub use authz::request::{EntityData, Request};
 pub use authz::{AuthorizeError, AuthorizeResult};
 pub use bootstrap_config::*;
 use common::app_types::{self, ApplicationName};
@@ -55,6 +56,9 @@ pub mod bindings {
         AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
     };
     pub use crate::common::policy_store::PolicyStore;
+
+    pub use serde_json;
+    pub use serde_yml;
 }
 
 /// Errors that can occur during initialization Cedarling.
@@ -132,6 +136,15 @@ impl Cedarling {
     /// makes authorization decision based on the [`Request`]
     pub async fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
         self.authz.authorize(request).await
+    }
+
+    /// Authorize request with unsigned data.
+    /// makes authorization decision based on the [`RequestUnverified`]
+    pub async fn authorize_unsigned(
+        &self,
+        request: RequestUnsigned,
+    ) -> Result<AuthorizeResult, AuthorizeError> {
+        self.authz.authorize_unsigned(request).await
     }
 
     /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.

@@ -33,14 +33,14 @@ def _transform_fido2_dynamic_config(conf):
 
     # add missing fido2Configuration config (if not exist)
     for k, v in [
-        ("metadataUrlsProvider", conf.pop("metadataUrlsProvider", "")),
-        ("skipDownloadMdsEnabled", conf.pop("skipDownloadMdsEnabled", False)),
         ("attestationMode", conf.pop("attestationMode", "monitor")),
         ("enabledFidoAlgorithms", conf["fido2Configuration"].pop("requestedCredentialTypes", ["RS256", "ES256"])),
         ("metadataServers", [{"url": "https://mds.fidoalliance.org/"}]),
         ("enterpriseAttestation", False),
         ("hints", ["security-key", "client-device", "hybrid"]),
         ("rp", conf["fido2Configuration"].pop("requestedParties", [])),
+        ("metadataRefreshInterval", 180),
+        ("disableMetadataService", conf["fido2Configuration"].pop("skipDownloadMdsEnabled", False)),
     ]:
         # update if key not exist
         if k not in conf["fido2Configuration"]:

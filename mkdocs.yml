@@ -285,7 +285,6 @@ nav:
       - Engine and bridge configurations: janssen-server/developer/agama/engine-bridge-config.md
       - Agama flows in native applications: janssen-server/developer/agama/native-applications.md
       - FAQ: janssen-server/developer/agama/faq.md
-      - Quick Start Using Agama Lab: janssen-server/developer/agama/quick-start-using-agama-lab.md
     - External Libraries: janssen-server/developer/external-libraries.md
     - CORS: janssen-server/developer/cors.md
     - X-Frame-Options: janssen-server/developer/xframe.md

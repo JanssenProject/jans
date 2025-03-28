@@ -8,11 +8,11 @@ tags:
 ---
 
 
-# Overview 
+# Jans SAML/Keycloak
 
 Jans-SAML/Keycloak has the flexibility to be deployed using either [MySQL](#mysql) or [PostgreSQL](#postgresql) as its backend.
 
-# MySQL
+## MySQL
 
 Make the following changes in your `values.yaml`:
 
@@ -45,7 +45,7 @@ WARNING - jans-saml - 2024-02-05 16:54:04,256 - Got insufficient permission, ple
 To resolve this issue, it's necessary to adhere to the guidance provided in the logs.
 
 
-# PostgreSQL
+## PostgreSQL
 
 Make the following changes in your `values.yaml`:
 
