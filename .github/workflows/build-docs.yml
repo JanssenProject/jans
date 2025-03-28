@@ -63,7 +63,7 @@ jobs:
           cp docs/pyproject.toml docs/poetry.lock ../
           poetry install --no-root
           curl -O https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_python-0.0.0-cp310-cp310-manylinux_2_38_x86_64.whl
-          poetry run pip install cedarling_python-0.0.0-cp310-cp310-manylinux_2_38_x86_64.whl
+          poetry add ./cedarling_python-0.0.0-cp310-cp310-manylinux_2_38_x86_64.whl
           cp mkdocs.yml ../
 
       - name: Checkout jans ${{ github.event.inputs.version }}
