@@ -1,4 +1,14 @@
-# User Journey
+---
+tags:
+  - recipes
+  - 2FA
+  - ACRouter
+---
+
+
+# ACRouter Script for 2FA
+
+## User Journey
 
 Janssen's authentication server can integrate with any number of authentication mechanisms from different vendors. Factoring the pros and cons of each method, organizations can offer a diverse set of options. A users can register multiple types of credentials and use any preferred credential to perform a login.
 

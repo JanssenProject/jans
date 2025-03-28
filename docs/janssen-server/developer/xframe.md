@@ -2,11 +2,11 @@
 tags:
   - administration
   - installation
+  - x-frame
+  - header
 ---
 
 # X-Frame-Options Header
-
-## Overview
 
 AS has `io.jans.as.server.filter.HeadersFilter` which is responsible for attaching headers to server responses.
 

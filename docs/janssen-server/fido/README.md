@@ -4,9 +4,9 @@ tags:
   - fido
 ---
 
-# FIDO Admin Guide
+# FIDO Administration Guide
 
-## Janssen's FIDO2 server
+## Janssen FIDO2 server
 
 FIDO2 as an open standard for authentication is based on public key cryptography.
 

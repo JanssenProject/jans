@@ -6,7 +6,8 @@ tags:
   - CdiUtil
 
 ---
-# Managed Bean
+# Managed Beans
+
 ## Ready-to-use code in Custom script:  
 Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans.
 The most useful functions are implemented through a set of beans which can be re-used in all custom scripts.

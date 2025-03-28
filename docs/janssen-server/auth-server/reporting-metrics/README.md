@@ -6,9 +6,10 @@ tags:
   - metric
 ---
 
-# Reporting and Metric
+# Reporting and Metrics
 
 Authorization Server (AS) supports different metric data:
+
 - Monthly Active Users (MAU)
 - Health Check
 - Token Issued
