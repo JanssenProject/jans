@@ -132,6 +132,7 @@ public class SsaCreateAction {
             ssa.setDescription(ssaCreateRequest.getDescription());
             ssa.getAttributes().setSoftwareId(ssaCreateRequest.getSoftwareId());
             ssa.getAttributes().setSoftwareRoles(ssaCreateRequest.getSoftwareRoles());
+            ssa.getAttributes().setScopes(getScopesForRoles(ssaCreateRequest.getSoftwareRoles()));
             ssa.getAttributes().setGrantTypes(ssaCreateRequest.getGrantTypes());
             ssa.getAttributes().setCustomAttributes(getCustomAttributes(jsonRequest));
             ssa.getAttributes().setClientDn(client.getDn());
@@ -169,6 +170,27 @@ public class SsaCreateAction {
         builder.header(Constants.PRAGMA, Constants.NO_CACHE);
         builder.type(MediaType.APPLICATION_JSON_TYPE);
         return builder.build();
+    }
+
+    private List<String> getScopesForRoles(List<String> softwareRoles) {
+        log.debug("scopesForRoles - softwareRoles: {}", softwareRoles);
+        final Map<String, List<String>> map = appConfiguration.getSsaConfiguration().getSsaMapSoftwareRolesToScopes();
+        if (map == null || map.isEmpty()) {
+            log.debug("scopesForRoles - no mappings in ssaConfiguration.ssaMapSoftwareRolesToScopes");
+            return new ArrayList<>();
+        }
+
+        List<String> scopes = new ArrayList<>();
+        for (String role : softwareRoles) {
+            final List<String> scopesFromMap = map.get(role);
+            if (scopesFromMap != null && scopes.size() < scopesFromMap.size()) {
+                scopes = scopesFromMap;
+                log.debug("scopesForRoles - set scopes: {} for role: {}", scopes, role);
+            }
+        }
+
+        log.debug("scopesForRoles - scopes: {}", scopes);
+        return scopes;
     }
 
     private void prepareCreateRequest(SsaCreateRequest request) {
