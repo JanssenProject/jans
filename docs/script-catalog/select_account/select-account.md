@@ -6,7 +6,7 @@ tags:
   - SelectAccount
 ---
 
-## Overview
+# Select Account
 
 A person may have several accounts on a single Jans Auth Server instance. For example, it is common to have several Gmail accounts. Jans Auth Server uses two cookies to track which accounts are associated with a browser: `session_id` and `current_sessions`.
 
