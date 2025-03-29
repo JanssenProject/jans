@@ -7,21 +7,9 @@
 use super::authorize_result_response::AuthorizeResultResponse;
 use pyo3::prelude::*;
 
-/// AuthorizeResult
-/// ===============
-///
 /// A Python wrapper for the Rust `cedarling::AuthorizeResult` struct.
 /// Represents the result of an authorization request.
-///
-/// Methods
-/// -------
-/// .. method:: is_allowed(self) -> bool
-///     Returns whether the request is allowed.
-///
-/// .. method:: workload(self) -> AuthorizeResultResponse
-///     Returns the detailed response as an `AuthorizeResultResponse` object.
-///
-#[pyclass]
+#[pyclass(module = "cedarling_python._cedarling_python")]
 pub struct AuthorizeResult {
     inner: cedarling::AuthorizeResult,
 }
