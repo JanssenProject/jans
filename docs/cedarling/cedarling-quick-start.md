@@ -53,6 +53,38 @@ To begin using Cedarling, we need to set up a policy store. We will use [Agama L
 
 ![agama-lab-policy-store](../assets/agama-lab-policy-store.mp4)
 
+For the trusted issuer token metadata, paste in the following content:
+```json
+{
+  "accessTokens": {
+    "trusted": true,
+    "entity_type_name": "Jans::Access_token",
+    "required_claims": [
+      "jti",
+      "iss",
+      "aud",
+      "sub",
+      "exp",
+      "nbf"
+    ],
+    "principal_mapping": [
+      "Jans::Workload"
+    ]
+  },
+  "idTokens": {
+    "trusted": true,
+    "entity_type_name": "Jans::id_token"
+  },
+  "userinfoTokens": {
+    "trusted": true,
+    "entity_type_name": "Jans::Userinfo_token",
+    "principal_mapping": [
+      "Jans::User"
+    ]
+  }
+}
+```
+
 After following the guide, the policy store URI will be copied to the clipboard. We will need this in the next step.
 
 ## Tarp Setup
@@ -94,42 +126,10 @@ After following the guide, the policy store URI will be copied to the clipboard.
           "HS256",
           "RS256"
       ],
-      "CEDARLING_TOKEN_CONFIGS": {
-          "access_token": {
-              "entity_type_name": "Jans::Access_token",
-              "iss": "disabled",
-              "aud": "disabled",
-              "sub": "disabled",
-              "nbf": "disabled",
-              "exp": "disabled",
-              "jti": "disabled"
-          },
-          "id_token": {
-              "entity_type_name": "Jans::id_token",
-              "iss": "disabled",
-              "aud": "disabled",
-              "sub": "disabled",
-              "nbf": "disabled",
-              "exp": "disabled",
-              "jti": "disabled"
-          },
-          "userinfo_token": {
-              "entity_type_name": "Jans::Userinfo_token",
-              "iss": "disabled",
-              "aud": "disabled",
-              "sub": "disabled",
-              "nbf": "disabled",
-              "exp": "disabled",
-              "jti": "disabled"
-          }
-      },
       "CEDARLING_ID_TOKEN_TRUST_MODE": "none",
       "CEDARLING_LOCK": "disabled",
       "CEDARLING_LOCK_SERVER_CONFIGURATION_URI": null,
       "CEDARLING_LOCK_DYNAMIC_CONFIGURATION": "disabled",
-      "CEDARLING_LOCK_SSA_JWT": "",
-      "CEDARLING_LOCK_HEALTH_INTERVAL": 0,
-      "CEDARLING_LOCK_TELEMETRY_INTERVAL": 0,
       "CEDARLING_LOCK_LISTEN_SSE": "disabled"
   }
   ```
@@ -149,8 +149,9 @@ After following the guide, the policy store URI will be copied to the clipboard.
     * Principal: Select all three tokens
     * Action: `Jans::Action::"Read"`
     * Resource:
-    ```
+    ```json
     {
+      "entity_type": "resource",
       "type": "Jans::Application",
       "id": "some_id",
       "app_id": "application_id",
