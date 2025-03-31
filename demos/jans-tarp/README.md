@@ -75,7 +75,9 @@ When you are testing Janssen IdP with self-signed cert then follow below steps b
 
 ![image](./docs/images/successful-tarp-auth-screen.png)
 
-* Add Cedarling bootstrap configuration on Cedarling tab.
+## Cedarling authorization
+
+* Add Cedarling bootstrap configuration on Cedarling tab (before authentication).
 
 ![image](./docs/images/add-bootstrap-config.png)
 
