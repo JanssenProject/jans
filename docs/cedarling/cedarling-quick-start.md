@@ -49,7 +49,7 @@ Further information on cedar can be found in the [official documentation](https:
 
 ## Cedarling Policy Store Setup
 
-To begin using Cedarling, we need to set up a policy store. We will use [Agama Lab](https://cloud.gluu.org/agama-lab) for this. Please follow this video guide to set up your policy store:
+To begin using the Cedarling, we need to set up a policy store. We will use [Agama Lab](https://cloud.gluu.org/agama-lab) for this. Please follow this video guide to set up your policy store:
 
 ![agama-lab-policy-store](../assets/agama-lab-policy-store.mp4)
 
