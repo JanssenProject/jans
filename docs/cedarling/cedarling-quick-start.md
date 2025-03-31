@@ -12,7 +12,7 @@ tags:
 
 ## Introduction
 
-[Jans Tarp](../../demos/jans-tarp) is a browser plugin that enables developers to test OpenID Connect flows. It embeds the Cedarling WASM PDP, and is one of the fastest ways to test out Cedar with real JSON web tokens. In this guide, we'll demonstrate how to use Tarp to register a client on an OAuth authorization server("AS"), and use the embedded Cedarling webassembly app to reach an authorization decision. This will be done in three steps:
+[Jans Tarp](../../demos/jans-tarp) is a browser plugin that enables developers to test OpenID Connect flows. It embeds the Cedarling WASM PDP, and is one of the fastest ways to test out Cedar with real JSON web tokens. In this guide, we'll demonstrate how to use Tarp to register a client on an OAuth authorization server("AS"), and use the embedded Cedarling WebAssembly app to reach an authorization decision. We will demonstrate Role Based Access Control (RBAC). This will be done in three steps:
 
 1. [Author Cedar Policy Store](#author-cedar-policy-store)
 2. [Configure Tarp Cedarling Component](#configure-tarp-cedarling-component)
