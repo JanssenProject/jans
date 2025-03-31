@@ -12,23 +12,23 @@ tags:
 
 ## Introduction
 
-In this guide, we'll demonstrate how to use [Jans Tarp](../../demos/jans-tarp) to register a client on an authorization server, and use the embedded cedarling webassembly app to reach an authorization decision. This will be done in three steps:
+[Jans Tarp](../../demos/jans-tarp) is a browser plugin that enables developers to test OpenID Connect flows. It embeds the Cedarling WASM PDP, and is one of the fastest ways to test out Cedar with real JSON web tokens. In this guide, we'll demonstrate how to use Tarp to register a client on an authorization server, and use the embedded cedarling webassembly app to reach an authorization decision. This will be done in three steps:
 
-1. [Setting up a policy store](#policy-store-setup)
-2. [Loading the policy store in Jans Tarp](#tarp-setup)
-3. [Using Tarp to launch an authorization flow and validate authorization against the policy](#authentication-flow)
+1. [Cedarling Policy Store Setup](#cedarling-policy-store-setup)
+2. [Tarp setup](#tarp-setup)
+3. [Authentication Flow](#authentication-flow)
 
 
 ## Prerequisites
 
 Before we begin, we need to meet the following requirements:
 
-* [Firefox](https://www.mozilla.org/en-US/firefox/windows/) or [Google Chrome](https://www.google.com/chrome/index.html)
+* [Firefox](https://www.mozilla.org/en-US/firefox/) or [Google Chrome](https://www.google.com/chrome/index.html)
 * The latest release of [Jans Tarp](https://github.com/JanssenProject/jans/releases/tag/nightly). Download the zip file for your browser and install it.
 
 ## Cedar Policy
 
-[Cedar](https://www.cedarpolicy.com/en) is a language for defining permissions as policies, and a specification for evaluating those policies. Cedarling expects policies to be written in Cedar. For this quickstart, we will use a policy where access is only granted if the authenticated user has the `SupremeRuler` role. In cedar, this is expressed like so:
+For this quickstart demo, we will use a policy where access is only granted if the authenticated user has the `SupremeRuler` role. In cedar, this is expressed like so:
 
 ```
 @id("allow_supreme_ruler")
@@ -47,7 +47,7 @@ This policy expects that the authorized entity is of type `Jans::User` (as defin
 
 Further information on cedar can be found in the [official documentation](https://docs.cedarpolicy.com/)
 
-## Policy Store Setup
+## Cedarling Policy Store Setup
 
 To begin using Cedarling, we need to set up a policy store. We will use [Agama Lab](https://cloud.gluu.org/agama-lab) for this. Please follow this video guide to set up your policy store:
 
@@ -56,7 +56,7 @@ To begin using Cedarling, we need to set up a policy store. We will use [Agama L
 For the trusted issuer token metadata, paste in the following content:
 ```json
 {
-  "accessTokens": {
+  "access_token": {
     "trusted": true,
     "entity_type_name": "Jans::Access_token",
     "required_claims": [
@@ -71,11 +71,11 @@ For the trusted issuer token metadata, paste in the following content:
       "Jans::Workload"
     ]
   },
-  "idTokens": {
+  "id_token": {
     "trusted": true,
     "entity_type_name": "Jans::id_token"
   },
-  "userinfoTokens": {
+  "userinfo_token": {
     "trusted": true,
     "entity_type_name": "Jans::Userinfo_token",
     "principal_mapping": [
@@ -93,7 +93,7 @@ After following the guide, the policy store URI will be copied to the clipboard.
    ![image](../assets/tarp-blank.png)
 2. Click on `Add Client` and fill in the following details:
 
-   * Issuer: `https://account.gluu.org`
+   * Issuer: `https://test-jans.gluu.info`.
    * Client Expiry Date: One day after your current date
    * Scopes: `openid`,`profile`, and `role`
 3. Click `Register`. 
@@ -141,7 +141,7 @@ After following the guide, the policy store URI will be copied to the clipboard.
 2. Use the following values for triggering the flow:
     * Acr Value: `basic`
     * Scopes: `openid`, `profile`, and `role`
-3. We will be redirected to the test IDP. Login using your credentials.
+3. We will be redirected to the test IDP. Login using a user that has the `SupremeRuler` role on this IDP.
 4. On the consent screen, click `Allow`
 5. After you are redirected back to Tarp, click on the `Cedarling Authz Request Form`
 6. Use the following input:
@@ -168,27 +168,4 @@ After following the guide, the policy store URI will be copied to the clipboard.
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-title Cedarling and Tarp
-
-participant Browser
-participant Tarp
-participant Auth Server
-
-Browser->Tarp: Enter Auth Server config
-Tarp->Auth Server: Dynamic Client Registration 
-Auth Server->Tarp: Client ID and Secret
-Browser->Tarp: Enter Cedarling bootstrap config
-Tarp->Auth Server: GET /jans-auth/restv1/jwks
-Auth Server->Tarp: JWKS
-Tarp->Tarp: Initialize Cedarling
-Browser->Tarp: Start authorization flow
-Tarp->Auth Server: GET /jans-auth/restv1/authorize?...
-Auth Server->Tarp: /callback?code=...
-Tarp->Auth Server: GET /jans-auth/restv1/token
-Auth Server->Tarp: {"access_token": <JWT>}
-
-Browser->Tarp: Cedarling Authz(principal, action, resource, context)
-Tarp->Browser: Cedarling Decision
-```
+A full sequence diagram of the mentioned steps can be found [here](https://sequencediagram.org/index.html#initialData=C4S2BsFMAIGFICYEMBO4QDsDm0kYdACqoAOAUGSaqAMYhUbDQBCKA9gO4DOkKl1IOgybEU5Kilr08TAIIBXYAAtoAZV4A3XhVaceKALQA+USQBc0AKKNe0BcrWbbNNhgBmILGVPH7K9ShaKBYAIgCeGEgAtoJw6JCM0ABKkFggXMAoSKCu0GR+joG8xqYWsPGJAJIhuPiONCiQwGS63MUmpBbWwLbwyGiYOABGbGzAGVkk0C7unt6kvor+TsHQAOKWhNAA9ABWeFwGSEvbjRkaAIx7HADWXPlLhUElndAAUgDqANKq82IvYgslQwYBASHQAC8YH1UOhsC12G1DB1AWpgNRcEs2CgQBDsiBcm5wJw-iRFg4AkELBstnsDkcTmdgJdtsdlNjcZAAPwAOj5DwpKwB5h2NHB4CGSBoNy5LgQkAAvHyeaTycsiqsaTt9hhDmylKdIOcrsA2DcEgL1c8USKAN4AIilNCNXAA+qbzRh7RYADyfQhGAC+OkR+mFZUQsMGdiWEIAFCQcRghOCADS4Gg5DDps5seQoZ3pmY9AAewAAlKqjK19BH+nCcCFIHQuASMEA)
