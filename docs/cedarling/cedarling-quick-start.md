@@ -12,11 +12,11 @@ tags:
 
 ## Introduction
 
-[Jans Tarp](../../demos/jans-tarp) is a browser plugin that enables developers to test OpenID Connect flows. It embeds the Cedarling WASM PDP, and is one of the fastest ways to test out Cedar with real JSON web tokens. In this guide, we'll demonstrate how to use Tarp to register a client on an authorization server, and use the embedded cedarling webassembly app to reach an authorization decision. This will be done in three steps:
+[Jans Tarp](../../demos/jans-tarp) is a browser plugin that enables developers to test OpenID Connect flows. It embeds the Cedarling WASM PDP, and is one of the fastest ways to test out Cedar with real JSON web tokens. In this guide, we'll demonstrate how to use Tarp to register a client on an OAuth authorization server("AS"), and use the embedded Cedarling webassembly app to reach an authorization decision. This will be done in three steps:
 
-1. [Cedarling Policy Store Setup](#cedarling-policy-store-setup)
-2. [Tarp setup](#tarp-setup)
-3. [Authentication Flow](#authentication-flow)
+1. [Author Cedar Policy Store](#author-cedar-policy-store)
+2. [Configure Tarp Cedarling Component](#configure-tarp-cedarling-component)
+3. [Test Policy](#test-policy)
 
 
 ## Prerequisites
@@ -28,7 +28,7 @@ Before we begin, we need to meet the following requirements:
 
 ## Cedar Policy
 
-For this quickstart demo, we will use a policy where access is only granted if the authenticated user has the `SupremeRuler` role. In cedar, this is expressed like so:
+For this QuickStart Demo, we will use a policy where access is only granted if the authenticated user has the `SupremeRuler` role. In Cedar, this is expressed like so:
 
 ```
 @id("allow_supreme_ruler")
@@ -43,51 +43,73 @@ when {
 };
 ```
 
-This policy expects that the authorized entity is of type `Jans::User` (as defined in the [default Janssen schema](../../jans-cedarling/schema/cedarling-core.cedarschema)). Then the policy tests whether the userinfo token obtained after authorization contains the `role` claim as well as whether the claim contains the value `SupremeRuler`. If all these conditions are met, Cedarling will allow access. This is also called Role Based Access Control (RBAC).
+Further information on Cedar can be found in the [official documentation](https://docs.cedarpolicy.com/)
 
-Further information on cedar can be found in the [official documentation](https://docs.cedarpolicy.com/)
-
-## Cedarling Policy Store Setup
+## Author Cedar Policy Store
 
 To begin using the Cedarling, we need to set up a policy store. We will use [Agama Lab](https://cloud.gluu.org/agama-lab) for this. Please follow this video guide to set up your policy store:
 
 ![agama-lab-policy-store](../assets/agama-lab-policy-store.mp4)
 
-For the trusted issuer token metadata, paste in the following content:
-```json
-{
-  "access_token": {
-    "trusted": true,
-    "entity_type_name": "Jans::Access_token",
-    "required_claims": [
-      "jti",
-      "iss",
-      "aud",
-      "sub",
-      "exp",
-      "nbf"
-    ],
-    "principal_mapping": [
-      "Jans::Workload"
-    ]
-  },
-  "id_token": {
-    "trusted": true,
-    "entity_type_name": "Jans::id_token"
-  },
-  "userinfo_token": {
-    "trusted": true,
-    "entity_type_name": "Jans::Userinfo_token",
-    "principal_mapping": [
-      "Jans::User"
-    ]
+The inputs for each section are as follows:
+
+1. Schema: The default schema provided by Agama Lab
+2. Policy:
+
+    ```
+    @id("allow_supreme_ruler")
+    permit(
+      principal is Jans::User,
+      action,
+      resource
+    )
+    when {
+      principal has userinfo_token.role &&
+      principal.userinfo_token.role.contains("SupremeRuler")
+    };
+    ```
+
+3. Trusted issuers:
+
+  - Trust Issuer Name: `testIdp`
+  - Trust Issuer Description: `Test IDP`
+  - OpenID Configuration Endpoint: `https://test-jans.gluu.info/.well-known/openid-configuration`
+  - Trusted issuers token metadata:
+
+  ```json
+  {
+    "access_token": {
+      "trusted": true,
+      "entity_type_name": "Jans::Access_token",
+      "required_claims": [
+        "jti",
+        "iss",
+        "aud",
+        "sub",
+        "exp",
+        "nbf"
+      ],
+      "principal_mapping": [
+        "Jans::Workload"
+      ]
+    },
+    "id_token": {
+      "trusted": true,
+      "entity_type_name": "Jans::id_token"
+    },
+    "userinfo_token": {
+      "trusted": true,
+      "entity_type_name": "Jans::Userinfo_token",
+      "principal_mapping": [
+        "Jans::User"
+      ]
+    }
   }
-}
-```
+  ```
 
 After following the guide, the policy store URI will be copied to the clipboard. We will need this in the next step.
 
-## Tarp Setup
+## Configure Tarp Cedarling Component 
 
 1. Open Tarp on your browser.
    ![image](../assets/tarp-blank.png)
@@ -103,7 +125,6 @@ After following the guide, the policy store URI will be copied to the clipboard.
   {
       "CEDARLING_APPLICATION_NAME": "My App",
       "CEDARLING_POLICY_STORE_URI": "<Policy Store URI>",
-      "CEDARLING_POLICY_STORE_ID": "gICAgcHJpbmNpcGFsIGlz",
       "CEDARLING_LOG_TYPE": "std_out",
       "CEDARLING_LOG_LEVEL": "INFO",
       "CEDARLING_LOG_TTL": null,
@@ -135,7 +156,7 @@ After following the guide, the policy store URI will be copied to the clipboard.
   ```
 6. Click `Save`. Tarp will validate your bootstrap and initialize Cedarling.
 
-## Authentication Flow
+## Test Policy 
 
 1. On the Authentication Flow screen, click on the lightning icon to trigger an authentication flow.
 2. Use the following values for triggering the flow:
