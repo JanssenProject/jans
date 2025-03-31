@@ -35,6 +35,19 @@ public class SsaAttributes {
     @JsonProperty("grantTypes")
     private List<String> grantTypes;
 
+    // it should be `scope` because this is how it's named in spec and in RegisterRequest
+    @JsonProperty("scope")
+    private List<String> scopes;
+
+    public List<String> getScopes() {
+        return scopes;
+    }
+
+    public SsaAttributes setScopes(List<String> scopes) {
+        this.scopes = scopes;
+        return this;
+    }
+
     public List<String> getSoftwareRoles() {
         return softwareRoles;
     }
@@ -109,6 +122,7 @@ public class SsaAttributes {
                 ", rotateSsa=" + rotateSsa +
                 ", clientDn='" + clientDn + '\'' +
                 ", lifetime=" + lifetime +
+                ", scopes=" + scopes +
                 ", customAttributes=" + customAttributes +
                 '}';
     }
