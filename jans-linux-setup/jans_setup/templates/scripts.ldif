@@ -78,14 +78,14 @@ jansEnabled: false
 jansProgLng: python
 
 dn: inum=13D3-E7AD,ou=scripts,o=jans
-description: Sample Cache Refresh script
-displayName: cache_refresh
+description: Sample Link Interception script
+displayName: link_interception
 inum: 13D3-E7AD
 jansLevel: 100
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
-jansScr::%(cache_refresh_samplescript)s
-jansScrTyp: cache_refresh
+jansScr::%(link_interception_samplescript)s
+jansScrTyp: link_interception
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false

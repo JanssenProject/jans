@@ -72,8 +72,8 @@ import io.jans.model.custom.script.type.token.DummyUpdateTokenType;
 import io.jans.model.custom.script.type.token.TokenExchangeType;
 import io.jans.model.custom.script.type.token.UpdateTokenType;
 import io.jans.model.custom.script.type.uma.*;
-import io.jans.model.custom.script.type.user.CacheRefreshType;
-import io.jans.model.custom.script.type.user.DummyCacheRefreshType;
+import io.jans.model.custom.script.type.user.LinkInterceptionType;
+import io.jans.model.custom.script.type.user.DummyLinkInterceptionType;
 import io.jans.orm.annotation.AttributeEnum;
 
 import java.util.HashMap;
@@ -93,8 +93,8 @@ public enum CustomScriptType implements AttributeEnum {
     RESOURCE_OWNER_PASSWORD_CREDENTIALS("resource_owner_password_credentials", "Resource Owner Password Credentials", ResourceOwnerPasswordCredentialsType.class, CustomScript.class, "ResourceOwnerPasswordCredentials", new DummyResourceOwnerPasswordCredentialsType()),
     APPLICATION_SESSION("application_session", "Application Session", ApplicationSessionType.class, CustomScript.class, "ApplicationSession",
             new DummyApplicationSessionType()),
-    CACHE_REFRESH("cache_refresh", "Cache Refresh", CacheRefreshType.class, CustomScript.class, "CacheRefresh",
-            new DummyCacheRefreshType()),
+    LINK_INTERCEPTION("link_interception", "Link Interception", LinkInterceptionType.class, CustomScript.class, "CacheRefresh",
+            new DummyLinkInterceptionType()),
     CLIENT_REGISTRATION("client_registration", "Client Registration", ClientRegistrationType.class, CustomScript.class, "ClientRegistration",
             new DummyClientRegistrationType()),
     ID_GENERATOR("id_generator", "Id Generator", IdGeneratorType.class, CustomScript.class, "IdGenerator",

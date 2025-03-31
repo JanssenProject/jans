@@ -18,6 +18,7 @@ import io.jans.orm.model.SortOrder;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.sql.impl.SqlEntryManager;
+import io.jans.orm.sql.model.Document;
 import io.jans.orm.sql.model.SimpleAttribute;
 import io.jans.orm.sql.model.SimpleGrant;
 import io.jans.orm.sql.model.SimpleSession;
@@ -41,7 +42,17 @@ public final class SqlSample {
 
         // Create SQL entry manager
         SqlEntryManager sqlEntryManager = sqlEntryManagerSample.createSqlEntryManager();
-
+		Filter filterScimSession2 = Filter.createORFilter(
+				Filter.createSubstringFilter("displayName", null, new String[] { "https://mds.fidoalliance.org/" },
+						null),
+				Filter.createSubstringFilter("jansAlias", null, new String[] { "https://mds.fidoalliance.org/" },
+						null).multiValued(),
+				Filter.createSubstringFilter("description  ", null, new String[] { "https://mds.fidoalliance.org/" },
+						null));
+        List<Document> docs = sqlEntryManager.findEntries("o=jans", Document.class, filterScimSession2, SearchScope.SUB, null, null, 0, 0, 0);
+        LOG.info("Found users: " + docs.size());
+        
+        
         SimpleUser newUser = new SimpleUser();
         newUser.setDn(String.format("inum=%s,ou=people,o=jans", System.currentTimeMillis()));
         newUser.setUserId("sample_user_" + System.currentTimeMillis());

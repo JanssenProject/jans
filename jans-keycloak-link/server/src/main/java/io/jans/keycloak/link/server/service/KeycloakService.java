@@ -1,6 +1,6 @@
 package io.jans.keycloak.link.server.service;
 
-import io.jans.keycloak.link.model.config.CacheRefreshConfiguration;
+import io.jans.keycloak.link.model.config.LinkConfiguration;
 import io.jans.keycloak.link.model.config.KeycloakConfiguration;
 import io.jans.keycloak.link.service.config.ConfigurationFactory;
 import io.jans.link.util.PropertyUtil;
@@ -34,7 +34,7 @@ public class KeycloakService implements Serializable{
     boolean isEncoded;
 
     public Keycloak getKeycloakInstance() {
-        CacheRefreshConfiguration cacheRefreshConfiguration = configurationFactory.getAppConfiguration();
+        LinkConfiguration cacheRefreshConfiguration = configurationFactory.getAppConfiguration();
 
         KeycloakConfiguration keycloakConfiguration = cacheRefreshConfiguration.getKeycloakConfiguration();
         String clientSecret = decryptString(keycloakConfiguration.getClientSecret());

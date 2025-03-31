@@ -9,16 +9,16 @@ package io.jans.keycloak.link.timer;
 import io.jans.keycloak.link.model.CacheCompoundKey;
 import io.jans.keycloak.link.model.JansInumMap;
 import io.jans.keycloak.link.model.config.AppConfiguration;
-import io.jans.keycloak.link.model.config.CacheRefreshConfiguration;
-import io.jans.keycloak.link.server.service.CacheRefreshConfigurationService;
+import io.jans.keycloak.link.model.config.LinkConfiguration;
+import io.jans.keycloak.link.server.service.LinkConfigurationService;
 import io.jans.keycloak.link.server.service.KeycloakService;
-import io.jans.keycloak.link.service.CacheRefreshService;
+import io.jans.keycloak.link.service.LinkInterceptionService;
 import io.jans.keycloak.link.service.PersonService;
 import io.jans.keycloak.link.service.config.ApplicationFactory;
 import io.jans.keycloak.link.service.config.ConfigurationFactory;
 import io.jans.link.constants.JansConstants;
-import io.jans.link.event.CacheRefreshEvent;
-import io.jans.link.external.ExternalCacheRefreshService;
+import io.jans.link.event.LinkEvent;
+import io.jans.link.external.ExternalLinkService;
 import io.jans.link.model.*;
 import io.jans.link.service.*;
 import io.jans.model.GluuStatus;
@@ -84,7 +84,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 	private ConfigurationFactory configurationFactory;
 
 	@Inject
-	private CacheRefreshService cacheRefreshService;
+	private LinkInterceptionService linkInterceptionService;
 
 	@Inject
 	private PersonService personService;
@@ -96,10 +96,10 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 	//private ConfigurationService configurationService;
 
 	@Inject
-	private CacheRefreshSnapshotFileService cacheRefreshSnapshotFileService;
+	private LinkSnapshotFileService linkSnapshotFileService;
 
 	@Inject
-	private ExternalCacheRefreshService externalCacheRefreshService;
+	private ExternalLinkService externalLinkService;
 
 	@Inject
 	private SchemaService schemaService;
@@ -111,7 +111,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 	private AppConfiguration appConfiguration;
 
 	@Inject
-	private CacheRefreshConfigurationService CacheRefrshConfigurationService;
+	private LinkConfigurationService linkConfigurationService;
 
 	@Inject
 	private EncryptionService encryptionService;
@@ -139,24 +139,24 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 		this.isActive = new AtomicBoolean(false);
 
 		// Clean up previous Inum cache
-		CacheRefreshConfiguration cacheRefreshConfiguration = getConfigurationFactory().getAppConfiguration();
-		if (cacheRefreshConfiguration != null) {
-			String snapshotFolder = cacheRefreshConfiguration.getSnapshotFolder();
+		LinkConfiguration linkConfiguration = getConfigurationFactory().getAppConfiguration();
+		if (linkConfiguration != null) {
+			String snapshotFolder = linkConfiguration.getSnapshotFolder();
 			if (StringHelper.isNotEmpty(snapshotFolder)) {
-				String inumCachePath = getInumCachePath(cacheRefreshConfiguration);
+				String inumCachePath = getInumCachePath(linkConfiguration);
 				objectSerializationService.cleanup(inumCachePath);
 			}
 		}
 
 		// Schedule to start cache refresh every 1 minute
-		timerEvent.fire(new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new CacheRefreshEvent(),
+		timerEvent.fire(new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new LinkEvent(),
 				Scheduled.Literal.INSTANCE));
 
 		this.lastFinishedTime = System.currentTimeMillis();
 	}
 
 	@Asynchronous
-	public void process(@Observes @Scheduled CacheRefreshEvent cacheRefreshEvent) {
+	public void process(@Observes @Scheduled LinkEvent cacheRefreshEvent) {
 		if (this.isActive.get()) {
 			log.info("Another process is active");
 			return;
@@ -223,7 +223,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 
 		String cacheRefreshServerIpAddress = currentConfiguration.getKeycloakLinkServerIpAddress();
 		// if (StringHelper.isEmpty(cacheRefreshServerIpAddress)) {
-		// log.debug("There is no master Cache Refresh server");
+		// log.debug("There is no master Link Interception server");
 		// return false;
 		// }
 
@@ -249,12 +249,12 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 		}
 
 		if (!cacheRefreshServer) {
-			cacheRefreshServer = externalCacheRefreshService.executeExternalIsStartProcessMethods();
+			cacheRefreshServer = externalLinkService.executeExternalIsStartProcessMethods();
 			cacheRefreshServer = true;
 		}
 
 		if (!cacheRefreshServer) {
-			log.info("This server isn't master Cache Refresh server");
+			log.info("This server isn't master Link Interception server");
 			return false;
 		}
 
@@ -271,7 +271,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 
 	private void processImpl(AppConfiguration currentConfiguration)
 			throws SearchException {
-		CacheRefreshUpdateMethod updateMethod = getUpdateMethod(currentConfiguration);
+		LinkUpdateMethod updateMethod = getUpdateMethod(currentConfiguration);
 
 		LdapServerConnection inumDbServerConnection;
 		if (currentConfiguration.isDefaultInumServer()) {
@@ -287,7 +287,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 					currentConfiguration.getInumConfig());
 		}
 
-		boolean isVdsUpdate = CacheRefreshUpdateMethod.VDS.equals(updateMethod);
+		boolean isVdsUpdate = LinkUpdateMethod.VDS.equals(updateMethod);
 		LdapServerConnection targetServerConnection = null;
 		if (isVdsUpdate) {
 			targetServerConnection = prepareLdapServerConnection(currentConfiguration,
@@ -327,8 +327,8 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 	@SuppressWarnings("unchecked")
 	private boolean detectChangedEntries( AppConfiguration currentConfiguration, LdapServerConnection[] sourceServerConnections,
 										  LdapServerConnection inumDbServerConnection, LdapServerConnection targetServerConnection,
-										  CacheRefreshUpdateMethod updateMethod) throws SearchException {
-		boolean isVDSMode = CacheRefreshUpdateMethod.VDS.equals(updateMethod);
+										  LinkUpdateMethod updateMethod) throws SearchException {
+		boolean isVDSMode = LinkUpdateMethod.VDS.equals(updateMethod);
 
 		// Load all entries from Source servers
 		log.info("Attempting to load entries from source server");
@@ -381,13 +381,13 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 		log.info("Count actual source entries '{}' after calculating hash code"+ currInumWithEntryHashCodeMap.size());
 
 		// Create snapshots cache folder if needed
-		boolean result = cacheRefreshSnapshotFileService.prepareSnapshotsFolder(currentConfiguration);
+		boolean result = linkSnapshotFileService.prepareSnapshotsFolder(currentConfiguration);
 		if (!result) {
 			return false;
 		}
 
 		// Load last snapshot into memory
-		Map<String, Integer> prevInumWithEntryHashCodeMap = cacheRefreshSnapshotFileService
+		Map<String, Integer> prevInumWithEntryHashCodeMap = linkSnapshotFileService
 				.readLastSnapshot(currentConfiguration);
 
 		// Compare 2 snapshot and invoke update if needed
@@ -396,7 +396,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 		log.info("Found '{}' changed entries"+ changedInums.size());
 
 		// Load problem list from disk and add to changedInums
-		List<String> problemInums = cacheRefreshSnapshotFileService.readProblemList(currentConfiguration);
+		List<String> problemInums = linkSnapshotFileService.readProblemList(currentConfiguration);
 		if (problemInums != null) {
 			log.info("Loaded '{}' problem entries from problem file"+ problemInums.size());
 			// Process inums from problem list too
@@ -417,19 +417,19 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 		log.info("Failed to update '{}' entries"+ changedInums.size());
 
 		// Persist snapshot to cache folder
-		result = cacheRefreshSnapshotFileService.createSnapshot(currentConfiguration,
+		result = linkSnapshotFileService.createSnapshot(currentConfiguration,
 				currInumWithEntryHashCodeMap);
 		if (!result) {
 			return false;
 		}
 
 		// Retain only specified number of snapshots
-		cacheRefreshSnapshotFileService.retainSnapshots(currentConfiguration,
+		linkSnapshotFileService.retainSnapshots(currentConfiguration,
 				currentConfiguration.getSnapshotMaxCount());
 
 		// Save changedInums as problem list to disk
 		currentConfiguration.setKeycloakLinkProblemCount(String.valueOf(changedInums.size()));
-		cacheRefreshSnapshotFileService.writeProblemList(currentConfiguration, changedInums);
+		linkSnapshotFileService.writeProblemList(currentConfiguration, changedInums);
 
 		// Prepare list of persons for removal
 		List<GluuSimplePerson> personsForRemoval = null;
@@ -576,7 +576,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 	}
 
 	private HashMap<CacheCompoundKey, JansInumMap> addNewInumServerEntries(
-			CacheRefreshConfiguration cacheRefreshConfiguration, LdapServerConnection inumDbServerConnection,
+			LinkConfiguration linkConfiguration, LdapServerConnection inumDbServerConnection,
 			Map<CacheCompoundKey, GluuSimplePerson> sourcePersonCacheCompoundKeyMap,
 			HashMap<CacheCompoundKey, JansInumMap> primaryKeyAttrValueInumMap) {
 		PersistenceEntryManager inumDbPersistenceEntryManager = inumDbServerConnection.getPersistenceEntryManager();
@@ -584,7 +584,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 
 		HashMap<CacheCompoundKey, JansInumMap> result = new HashMap<CacheCompoundKey, JansInumMap>();
 
-		String[] keyAttributesWithoutValues = getCompoundKeyAttributesWithoutValues(cacheRefreshConfiguration);
+		String[] keyAttributesWithoutValues = getCompoundKeyAttributesWithoutValues(linkConfiguration);
 		for (Entry<CacheCompoundKey, GluuSimplePerson> sourcePersonCacheCompoundKeyEntry : sourcePersonCacheCompoundKeyMap
 				.entrySet()) {
 			CacheCompoundKey cacheCompoundKey = sourcePersonCacheCompoundKeyEntry.getKey();
@@ -610,11 +610,11 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 	}
 
 	private Map<CacheCompoundKey, GluuSimplePerson> getSourcePersonCompoundKeyMap(
-			CacheRefreshConfiguration cacheRefreshConfiguration, List<GluuSimplePerson> sourcePersons) {
+			LinkConfiguration linkConfiguration, List<GluuSimplePerson> sourcePersons) {
 		Map<CacheCompoundKey, GluuSimplePerson> result = new HashMap<CacheCompoundKey, GluuSimplePerson>();
 		Set<CacheCompoundKey> duplicateKeys = new HashSet<CacheCompoundKey>();
 
-		String[] keyAttributesWithoutValues = getCompoundKeyAttributesWithoutValues(cacheRefreshConfiguration);
+		String[] keyAttributesWithoutValues = getCompoundKeyAttributesWithoutValues(linkConfiguration);
 		for (GluuSimplePerson sourcePerson : sourcePersons) {
 			String[] keyAttributesValues = getKeyAttributesValues(keyAttributesWithoutValues, sourcePerson);
 			CacheCompoundKey cacheCompoundKey = new CacheCompoundKey(keyAttributesValues);
@@ -635,11 +635,11 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 	}
 
 
-	private LdapServerConnection[] prepareLdapServerConnections(CacheRefreshConfiguration cacheRefreshConfiguration,
+	private LdapServerConnection[] prepareLdapServerConnections(LinkConfiguration linkConfiguration,
 																List<GluuLdapConfiguration> ldapConfigurations) {
 		LdapServerConnection[] ldapServerConnections = new LdapServerConnection[ldapConfigurations.size()];
 		for (int i = 0; i < ldapConfigurations.size(); i++) {
-			ldapServerConnections[i] = prepareLdapServerConnection(cacheRefreshConfiguration,
+			ldapServerConnections[i] = prepareLdapServerConnection(linkConfiguration,
 					ldapConfigurations.get(i));
 			if (ldapServerConnections[i] == null) {
 				return null;
@@ -649,12 +649,12 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 		return ldapServerConnections;
 	}
 
-	private LdapServerConnection prepareLdapServerConnection(CacheRefreshConfiguration cacheRefreshConfiguration,
+	private LdapServerConnection prepareLdapServerConnection(LinkConfiguration linkConfiguration,
 															 GluuLdapConfiguration ldapConfiguration) {
-		return prepareLdapServerConnection(cacheRefreshConfiguration, ldapConfiguration, false);
+		return prepareLdapServerConnection(linkConfiguration, ldapConfiguration, false);
 	}
 
-	private LdapServerConnection prepareLdapServerConnection(CacheRefreshConfiguration cacheRefreshConfiguration,
+	private LdapServerConnection prepareLdapServerConnection(LinkConfiguration linkConfiguration,
 															 GluuLdapConfiguration ldapConfiguration, boolean useLocalConnection) {
 		String ldapConfig = ldapConfiguration.getConfigId();
 
@@ -669,7 +669,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 		Properties ldapDecryptedProperties = encryptionService.decryptAllProperties(ldapProperties);
 
 		// Try to get updated password via script
-		BindCredentials bindCredentials = externalCacheRefreshService
+		BindCredentials bindCredentials = externalLinkService
 				.executeExternalGetBindCredentialsMethods(ldapConfig);
 		String bindPasswordPropertyKey = persistenceType + "#" + PropertiesDecrypter.BIND_PASSWORD;
 		if (bindCredentials != null) {
@@ -688,7 +688,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 		}
 		PersistenceEntryManager customPersistenceEntryManager = entryManagerFactory
 				.createEntryManager(ldapDecryptedProperties);
-		log.info("Created Cache Refresh PersistenceEntryManager: {}"+ customPersistenceEntryManager);
+		log.info("Created Link Interception PersistenceEntryManager: {}"+ customPersistenceEntryManager);
 
 		if (!customPersistenceEntryManager.getOperationService().isConnected()) {
 			log.error("Failed to connect to LDAP server using configuration {}"+ ldapConfig);
@@ -718,7 +718,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 		currentConfiguration.setKeycloakLinkLastUpdate(currentDateTime);
 		currentConfiguration.setKeycloakLinkLastUpdateCount(currentConfiguration.getKeycloakLinkLastUpdateCount());
 		currentConfiguration.setKeycloakLinkProblemCount(currentConfiguration.getKeycloakLinkProblemCount());
-		CacheRefrshConfigurationService.updateConfiguration(currentConfiguration);
+		linkConfigurationService.updateConfiguration(currentConfiguration);
 	}
 
 	public ConfigurationFactory getConfigurationFactory() {
@@ -730,15 +730,15 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 	}
 
 	private List<GluuSimplePerson> loadSourceServerKeycloakEntriesWithoutLimits(
-			CacheRefreshConfiguration cacheRefreshConfiguration, LdapServerConnection[] sourceServerConnections,
+			LinkConfiguration linkConfiguration, LdapServerConnection[] sourceServerConnections,
 			List<UserRepresentation> sourceUserRepresentations){
 		List<GluuSimplePerson> sourceJansSimplePerson = new ArrayList<GluuSimplePerson>();
 		try {
-			Filter customFilter = cacheRefreshService.createFilter(cacheRefreshConfiguration.getCustomLdapFilter());
-			String[] keyAttributes = getCompoundKeyAttributes(cacheRefreshConfiguration);
-			String[] keyAttributesWithoutValues = getCompoundKeyAttributesWithoutValues(cacheRefreshConfiguration);
-			String[] keyObjectClasses = getCompoundKeyObjectClasses(cacheRefreshConfiguration);
-			String[] sourceAttributes = getSourceAttributes(cacheRefreshConfiguration);
+			Filter customFilter = linkInterceptionService.createFilter(linkConfiguration.getCustomLdapFilter());
+			String[] keyAttributes = getCompoundKeyAttributes(linkConfiguration);
+			String[] keyAttributesWithoutValues = getCompoundKeyAttributesWithoutValues(linkConfiguration);
+			String[] keyObjectClasses = getCompoundKeyObjectClasses(linkConfiguration);
+			String[] sourceAttributes = getSourceAttributes(linkConfiguration);
 
 			String[] returnAttributes = ArrayHelper.arrayMerge(keyAttributesWithoutValues, sourceAttributes);
 
@@ -779,8 +779,8 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 	}
 	private JansInumMap addGluuInumMap(String inumbBaseDn, PersistenceEntryManager inumDbPersistenceEntryManager,
 									   String[] primaryKeyAttrName, String[] primaryKeyValues) {
-		String inum = cacheRefreshService.generateInumForNewInumMap(inumbBaseDn, inumDbPersistenceEntryManager);
-		String inumDn = cacheRefreshService.getDnForInum(inumbBaseDn, inum);
+		String inum = linkInterceptionService.generateInumForNewInumMap(inumbBaseDn, inumDbPersistenceEntryManager);
+		String inumDn = linkInterceptionService.getDnForInum(inumbBaseDn, inum);
 
 		JansInumMap inumMap = new JansInumMap();
 		inumMap.setDn(inumDn);
@@ -796,7 +796,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 			inumMap.setTertiaryKeyValues(primaryKeyValues[2]);
 		}
 		inumMap.setStatus(GluuStatus.ACTIVE);
-		cacheRefreshService.addInumMap(inumDbPersistenceEntryManager, inumMap);
+		linkInterceptionService.addInumMap(inumDbPersistenceEntryManager, inumMap);
 
 		return inumMap;
 	}
@@ -809,7 +809,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 		this.isActive = isActive;
 	}
 
-	public List<io.jans.keycloak.link.model.JansInumMap> loadInumServerEntries(io.jans.link.model.config.shared.CacheRefreshConfiguration cacheRefreshConfiguration,
+	public List<io.jans.keycloak.link.model.JansInumMap> loadInumServerEntries(io.jans.link.model.config.shared.LinkConfiguration linkConfiguration,
 																	  LdapServerConnection inumDbServerConnection) {
 		PersistenceEntryManager inumDbPersistenceEntryManager = inumDbServerConnection.getPersistenceEntryManager();
 		String inumbaseDn = inumDbServerConnection.getBaseDns()[0];
@@ -821,7 +821,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 		Filter filter = Filter.createANDFilter(filterObjectClass, filterStatus);
 
 		return inumDbPersistenceEntryManager.findEntries(inumbaseDn, io.jans.keycloak.link.model.JansInumMap.class, filter, SearchScope.SUB, null,
-				null, 0, 0, cacheRefreshConfiguration.getLdapSearchSizeLimit());
+				null, 0, 0, linkConfiguration.getLdapSearchSizeLimit());
 	}
 
 	private HashMap<io.jans.keycloak.link.model.CacheCompoundKey, io.jans.keycloak.link.model.JansInumMap> getAllInumServerEntries(
@@ -866,17 +866,17 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 		return result;
 	}
 
-	public List<String> updateTargetEntriesViaCopy(io.jans.link.model.config.shared.CacheRefreshConfiguration cacheRefreshConfiguration,
+	public List<String> updateTargetEntriesViaCopy(io.jans.link.model.config.shared.LinkConfiguration linkConfiguration,
 												   Map<io.jans.keycloak.link.model.CacheCompoundKey, GluuSimplePerson> sourcePersonCacheCompoundKeyMap,
 												   HashMap<io.jans.keycloak.link.model.CacheCompoundKey, io.jans.keycloak.link.model.JansInumMap> primaryKeyAttrValueInumMap, Set<String> changedInums) {
 		HashMap<String, io.jans.keycloak.link.model.CacheCompoundKey> inumCacheCompoundKeyMap = getInumCacheCompoundKeyMap(
 				primaryKeyAttrValueInumMap);
-		Map<String, String> targetServerAttributesMapping = getTargetServerAttributesMapping(cacheRefreshConfiguration);
+		Map<String, String> targetServerAttributesMapping = getTargetServerAttributesMapping(linkConfiguration);
 		String[] customObjectClasses = appConfiguration.getPersonObjectClassTypes();
 
 		List<String> result = new ArrayList<String>();
 
-		if (!validateTargetServerSchema(cacheRefreshConfiguration, targetServerAttributesMapping,
+		if (!validateTargetServerSchema(linkConfiguration, targetServerAttributesMapping,
 				customObjectClasses)) {
 			return result;
 		}

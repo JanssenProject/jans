@@ -157,7 +157,7 @@ Below are the optional arguments:
 | --install-jans-ldap-link | Install LDAP Link Server |
 | --with-casa | Install Gluu/Flex Casa Server |
 | --load-config-api-test | Load Config Api Test Data |
-| --install-cache-refresh | Install Cache Refresh Server |
+| --install-link-interception | Install Link Interception Server |
 | -config-patch-creds CONFIG_PATCH_CREDS | password:username for downloading auto test ciba password |
 | -test-client-id TEST_CLIENT_ID | ID of test client which has all available scopes. Must be in UUID format. |
 | -test-client-pw TEST_CLIENT_PW | Secret for test client |

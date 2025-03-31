@@ -1005,7 +1005,7 @@
     "internal": false,
     "level": 100,
     "programmingLanguage": "PYTHON",
-    "description": "Sample Cache Refresh script",
+    "description": "Sample Link Interception script",
     "locationType": "LDAP",
     "dn": "inum=13D3-E7AD,ou=scripts,o=gluu",
     "inum": "13D3-E7AD",
@@ -1019,7 +1019,7 @@
       }
     ],
     "scriptType": "CACHE_REFRESH",
-    "name": "cache_refresh",
+    "name": "link_interception",
     "modified": false,
     "baseDn": "inum=13D3-E7AD,ou=scripts,o=gluu"
   },

@@ -89,7 +89,7 @@
 ### Features
 
 * **jans-auth-server:** Support of Select Account interception script [#3452](https://github.com/JanssenProject/jans/issues/3452) ([#5149](https://github.com/JanssenProject/jans/issues/5149)) ([b062148](https://github.com/JanssenProject/jans/commit/b062148b7395e2828432061363058d7e1a9dd6db))
-* **jans-cache-refresh:** add cache refresh to Jans ([#5007](https://github.com/JanssenProject/jans/issues/5007)) ([878dd5e](https://github.com/JanssenProject/jans/commit/878dd5e414345aac8ba49490cd1aa8604e834533))
+* **jans-link-interception:** add cache refresh to Jans ([#5007](https://github.com/JanssenProject/jans/issues/5007)) ([878dd5e](https://github.com/JanssenProject/jans/commit/878dd5e414345aac8ba49490cd1aa8604e834533))
 
 
 ### Bug Fixes

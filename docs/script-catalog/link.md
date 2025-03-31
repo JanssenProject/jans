@@ -11,7 +11,7 @@ tags:
 In order to integrate your Jans instance with backend LDAP servers handling authentication in your existing network environment, Janssen provides a mechanism called Jans Link to copy user data to the Jans local LDAP server. During this process it is possible to specify key attribute(s) and specify attribute name transformations. There are also cases when it can be used to overwrite attribute values or to add new attributes based on other attribute values.
 
 ## Interface
-The Jans Link (Cache Refresh) script implements the [CacheRefreshType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/user/CacheRefreshType.java) interface. This extends methods from the base script type in addition to adding new methods:
+The Jans Link (Link Interception) script implements the [CacheRefreshType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/user/CacheRefreshType.java) interface. This extends methods from the base script type in addition to adding new methods:
 
 ### Inherited Methods
 
@@ -38,9 +38,9 @@ The Jans Link (Cache Refresh) script implements the [CacheRefreshType](https://g
 |`configId`| ConfigId is the source server.                                                                                                                                               |
 |`user`| [Reference](https://github.com/JanssenProject/jans/blob/main/jans-link/model/src/main/java/io/jans/link/model/GluuCustomPerson.java) |
 
-## Use case: Dummy Jans Link (Cache Refresh) script
+## Use case: Dummy Jans Link (Link Interception) script
 
-This was adapted from [Jans link (Cache Refresh) script example](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/cache_refresh/sample-script/SampleScript.py).
+This was adapted from [Jans link (Link Interception) script example](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/link_interception/sample-script/SampleScript.py).
 
 ### Script Type: Python
 
@@ -51,7 +51,7 @@ This was adapted from [Jans link (Cache Refresh) script example](https://github.
 # Author: Yuriy Movchan
 #
 
-from io.jans.model.custom.script.type.user import CacheRefreshType
+from io.jans.model.custom.script.type.user import LinkInterceptionType
 from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 from io.jans.oxtrust.model import JanssenCustomAttribute
@@ -59,26 +59,26 @@ from io.jans.model.custom.script.model.bind import BindCredentials
 
 import java
 
-class CacheRefresh(CacheRefreshType):
+class LinkInterception(LinkInterceptionType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, customScript, configurationAttributes):
-        print "Cache refresh. Initialization"
-        print "Cache refresh. Initialized successfully"
+        print "Link interception. Initialization"
+        print "Link interception. Initialized successfully"
 
         return True
 
     def destroy(self, configurationAttributes):
-        print "Cache refresh. Destroy"
-        print "Cache refresh. Destroyed successfully"
+        print "Link interception. Destroy"
+        print "Link interception. Destroyed successfully"
         return True
 
     # Check if this instance conform starting conditions 
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     #   return True/False
     def isStartProcess(self, configurationAttributes):
-        print "Cache refresh. Is start process method"
+        print "Link interception. Is start process method"
 
         return False
 
@@ -87,7 +87,7 @@ class CacheRefresh(CacheRefreshType):
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     #   return None (use password from configuration) or io.jans.model.custom.script.model.bind.BindCredentials
     def getBindCredentials(self, configId, configurationAttributes):
-        print "Cache refresh. GetBindCredentials method"
+        print "Link interception. GetBindCredentials method"
         #        if configId == "source":
         #            return BindCredentials("cn=Directory Manager", "password")
 
@@ -97,7 +97,7 @@ class CacheRefresh(CacheRefreshType):
     #   user is io.jans.oxtrust.model.JanssenCustomPerson
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateUser(self, user, configurationAttributes):
-        print "Cache refresh. UpdateUser method"
+        print "Link interception. UpdateUser method"
 
         attributes = user.getCustomAttributes()
 

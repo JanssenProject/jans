@@ -4674,7 +4674,7 @@ paths:
                   - introspection
                   - resource_owner_password_credentials
                   - application_session
-                  - cache_refresh
+                  - link_interception
                   - client_registration
                   - id_generator
                   - uma_rpt_policy
@@ -4716,7 +4716,7 @@ paths:
                         "idp",
                         "introspection",
                         "persistence_extension",
-                        "cache_refresh",
+                        "link_interception",
                         "uma_rpt_policy",
                         "update_token",
                         "scim",
@@ -4767,7 +4767,7 @@ paths:
                         "idp",
                         "introspection",
                         "persistence_extension",
-                        "cache_refresh",
+                        "link_interception",
                         "uma_rpt_policy",
                         "update_token",
                         "scim",
@@ -9334,21 +9334,21 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
+        whitePagesCanView:
+          type: boolean
         selected:
           type: boolean
-        whitePagesCanView:
+        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
+        userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
+        userCanView:
+          type: boolean
         userCanEdit:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanView:
           type: boolean
         baseDn:
           type: string
@@ -9723,12 +9723,6 @@ components:
           type: integer
           format: int32
         userInfoLifetime:
-          type: integer
-          format: int32
-        cleanServiceInterval:
-          type: integer
-          format: int32
-        cleanServiceBatchChunkSize:
           type: integer
           format: int32
         keyRegenerationEnabled:
@@ -11007,10 +11001,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -11294,7 +11288,7 @@ components:
           - introspection
           - resource_owner_password_credentials
           - application_session
-          - cache_refresh
+          - link_interception
           - client_registration
           - id_generator
           - uma_rpt_policy
@@ -11787,10 +11781,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:

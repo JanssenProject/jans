@@ -30,8 +30,7 @@ public final class LdapSample {
         // Create LDAP entry manager
         PersistenceEntryManager entryManager = entryManagerSample.createLdapEntryManager();
 
-        //gluucacherefresh
-        //GluuConfiguration GluuConfiguration = new GluuConfiguration();
+        //LinkConfiguration linkConfiguration = new LinkConfiguration();
         JansLinkTimer cacheRefreshTimer = new JansLinkTimer();
         cacheRefreshTimer.setLdapEntryManager(entryManager);
         ConfigurationFactory configurationFactory = new ConfigurationFactory();

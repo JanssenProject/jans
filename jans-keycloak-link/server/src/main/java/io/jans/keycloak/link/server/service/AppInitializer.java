@@ -122,7 +122,7 @@ public class AppInitializer {
 				.initPythonInterpreter(configurationFactory.getBaseConfiguration().getString("pythonModulesDir", null));
 		
 		// Initialize script manager
-		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.CACHE_REFRESH);
+		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.LINK_INTERCEPTION);
 
 		// There is no Fido2 scripts yet
 		//supportedCustomScriptTypes.clear();

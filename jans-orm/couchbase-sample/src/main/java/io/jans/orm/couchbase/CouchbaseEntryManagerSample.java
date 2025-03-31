@@ -34,7 +34,7 @@ public class CouchbaseEntryManagerSample {
 
         connectionProperties.put("couchbase#bucket.default", "jans");
         connectionProperties.put("couchbase#bucket.jans_user.mapping", "people, groups, authorizations");
-        connectionProperties.put("couchbase#bucket.jans_site.mapping", "cache-refresh");
+        connectionProperties.put("couchbase#bucket.jans_site.mapping", "link-interception");
         connectionProperties.put("couchbase#bucket.jans_cache.mapping", "cache");
         connectionProperties.put("couchbase#bucket.jans_token.mapping", "tokens");
         connectionProperties.put("couchbase#bucket.jans_session.mapping", "sessions");

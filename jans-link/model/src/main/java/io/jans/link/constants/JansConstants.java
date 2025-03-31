@@ -42,7 +42,7 @@ public final class JansConstants extends OxConstants {
 	public static final String CACHE_ATTRIBUTE_CUSTOM_KEY_LIST = "customAttributeList";
 	public static final String CACHE_ATTRIBUTE_ORIGIN_KEY_LIST = "attributeOriginList";
 	public static final String CACHE_ORGANIZATION_CUSTOM_MESSAGE_KEY = "organizationCustomMessage";
-	public static final String CACHE_REFRESH_DEFAULT_BASE_DN = "ou=link,o=site";
+	public static final String LINK_DEFAULT_BASE_DN = "ou=link,o=site";
 	public static final String JANS_KEYCLOAK_LINK_DEFAULT_BASE_DN = "ou=keycloak-link,o=site";
 
 	public static final String INUM_TYPE_PEOPLE_SLUG = "people";
