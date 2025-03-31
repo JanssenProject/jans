@@ -75,6 +75,10 @@ When you are testing Janssen IdP with self-signed cert then follow below steps b
 
 ![image](./docs/images/successful-tarp-auth-screen.png)
 
+* Add Cedarling bootstrap configuration on Cedarling tab.
+
+![image](./docs/images/add-bootstrap-config.png)
+
 * After authentication, test Cedarling Authorization decision using following request form.
 
 ![image](./docs/images/cedar-auth-form.png)
@@ -84,8 +88,6 @@ When you are testing Janssen IdP with self-signed cert then follow below steps b
 * The `authorize_unsigned` method allows making authorization decisions without JWT token verification.
 
 ![image](./docs/images/unsigned-cedar-authz.png)
-
-## Cedarln
 
 ## Testing with Keycloak (installed on localhost)
 
