@@ -7,6 +7,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Edit from '@mui/icons-material/Edit';
 import { pink, green } from '@mui/material/colors';
+import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
@@ -21,6 +22,16 @@ import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined
 import HelpDrawer from './helpDrawer'
 import Alert from '@mui/material/Alert';
 import { JsonEditor } from 'json-edit-react'
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import Typography from '@mui/material/Typography';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import TextField from '@mui/material/TextField';
+import InputLabel from '@mui/material/InputLabel';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import __wbg_init, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -90,15 +101,33 @@ function Row(props: { row: any, notifyOnDataChange }) {
     );
 }
 
-export default function Cedarling({ data, notifyOnDataChange, isOidcClientRegistered }) {
+export default function CedarlingMgmt({ data, notifyOnDataChange, isOidcClientRegistered }) {
     const [modelOpen, setModelOpen] = React.useState(false);
     const [drawerOpen, setDrawerOpen] = React.useState(false);
     const [oidcClientRegistered, setOidcClientRegistered] = React.useState(false);
-
+    const [context, setContext] = React.useState({});
+    const [resource, setResource] = React.useState({});
+    const [principals, setPrincipals] = React.useState([]);
+    const [action, setAction] = React.useState("");
+    const [logType, setLogType] = React.useState('Decision');
+    const [authzResult, setAuthzResult] = React.useState("");
+    const [authzLogs, setAuthzLogs] = React.useState("");
+    const [screenType, setScreenType] = React.useState("config");
 
     React.useEffect(() => {
         setOidcClientRegistered(isOidcClientRegistered)
     }, [isOidcClientRegistered]);
+
+    React.useEffect(() => {
+        chrome.storage.local.get(["authzRequest"], (authzRequest) => {
+            if (!isEmpty(authzRequest) && Object.keys(authzRequest).length !== 0) {
+                setContext(authzRequest.authzRequest.context);
+                setAction(authzRequest.authzRequest.action);
+                setResource(authzRequest.authzRequest.resource);
+                setPrincipals(authzRequest.authzRequest.principals);
+            }
+        });
+    }, [data])
 
     const handleDialog = (isOpen) => {
         setModelOpen(isOpen);
@@ -108,6 +137,68 @@ export default function Cedarling({ data, notifyOnDataChange, isOidcClientRegist
     const handleDrawer = (isOpen) => {
         setDrawerOpen(isOpen);
     };
+
+    const handleLogTypeChange = (
+        event: React.MouseEvent<HTMLElement>,
+        newLogType: string,
+    ) => {
+        setLogType(newLogType);
+    };
+
+    const handleScreenChange = (
+        event: React.MouseEvent<HTMLElement>,
+        newScreenType: string,
+    ) => {
+        setScreenType(newScreenType);
+    };
+
+    const triggerCedarlingAuthzRequest = async () => {
+        setAuthzResult("");
+        setAuthzLogs("");
+        let reqObj = await createCedarlingAuthzRequestObj();
+        chrome.storage.local.get(["cedarlingConfig"], async (cedarlingConfig) => {
+            let instance: Cedarling;
+            try {
+                if (Object.keys(cedarlingConfig).length !== 0) {
+                    await __wbg_init();
+                    instance = await init(!isEmpty(cedarlingConfig?.cedarlingConfig) ? cedarlingConfig?.cedarlingConfig[0] : undefined);
+                    let result: AuthorizeResult = await instance.authorize_unsigned(reqObj);
+                    let logs = await instance.get_logs_by_request_id_and_tag(result.request_id, logType);
+                    setAuthzResult(result.json_string())
+                    if (logs.length != 0) {
+                        let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
+                        setAuthzLogs(pretty_logs.toString());
+                    }
+                }
+            } catch (err) {
+                setAuthzResult(err.toString());
+                console.log("err:", err);
+                let logs = await instance.pop_logs();
+                if (logs.length != 0) {
+                    let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
+                    setAuthzLogs(pretty_logs.toString());
+                }
+            }
+
+        });
+
+    };
+
+    const createCedarlingAuthzRequestObj = async () => {
+        const reqObj = {
+            principals,
+            action,
+            context,
+            resource,
+        };
+
+        chrome.storage.local.set({ authzRequest: reqObj });
+        return reqObj;
+    };
+
+    function isEmpty(value) {
+        return (value == null || value.length === 0);
+    }
 
     return (
         <Container maxWidth="lg">
@@ -122,27 +213,153 @@ export default function Cedarling({ data, notifyOnDataChange, isOidcClientRegist
                                     Add Configurations
                                 </Button> : ''}
                         </Stack>
-                        <TableContainer component={Paper}>
-                            <Table aria-label="collapsible table">
-                                <TableHead>
-                                    <TableRow>
-                                        <StyledTableCell />
-                                        <StyledTableCell>Bootstrap Configuration</StyledTableCell>
-                                        <StyledTableCell align="right">Action</StyledTableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {(data === undefined || data?.length == 0) ?
-                                        <TableCell colSpan={6}><Alert severity="warning">No Records to show.</Alert></TableCell> :
-                                        data.map((row, index) => (<Row key={index} row={row} notifyOnDataChange={notifyOnDataChange} />))
-                                    }
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                        {(data === undefined || data?.length == 0) ? '' :
+                            <Box maxWidth="md">
+                                <ToggleButtonGroup
+                                    color="primary"
+                                    value={screenType}
+                                    exclusive
+                                    onChange={handleScreenChange}
+                                    aria-label="Platform"
+                                >
+                                    <ToggleButton value="config">Bootstrap Configuration</ToggleButton>
+                                    <ToggleButton value="authz">Cedarling Authz Form</ToggleButton>
+                                </ToggleButtonGroup>
+                            </Box>
+                        }
+                        {screenType === 'config' ?
+                            <TableContainer component={Paper}>
+                                <Table aria-label="collapsible table">
+                                    <TableHead>
+                                        <TableRow>
+                                            <StyledTableCell />
+                                            <StyledTableCell>Bootstrap Configuration</StyledTableCell>
+                                            <StyledTableCell align="right">Action</StyledTableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {(data === undefined || data?.length == 0) ?
+                                            <TableCell colSpan={6}><Alert severity="warning">No Records to show.</Alert></TableCell> :
+                                            data.map((row, index) => (<Row key={index} row={row} notifyOnDataChange={notifyOnDataChange} />))
+                                        }
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                            : <>
+                                {(data === undefined || data?.length == 0) ? '' :
+                                    <Box maxWidth="md">
+                                        <Accordion>
+                                            <AccordionSummary
+                                                expandIcon={<ExpandMoreIcon />}
+                                                aria-controls="panel1-content"
+                                                id="panel1-header"
+                                            >
+                                                <Typography component="span"><strong>Cedarling Authz Request Form</strong></Typography>
+                                            </AccordionSummary>
+                                            <AccordionDetails>
+                                                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                                                    <InputLabel id="principal-value-label">Principals</InputLabel>
+                                                    <JsonEditor data={principals} setData={setPrincipals} rootName="principals" />
+
+                                                    <TextField
+                                                        autoFocus
+                                                        required
+                                                        margin="dense"
+                                                        id="action"
+                                                        name="action"
+                                                        label="Action"
+                                                        type="text"
+                                                        fullWidth
+                                                        variant="outlined"
+                                                        value={action}
+                                                        onChange={(e) => {
+                                                            setAction(e.target.value);
+                                                        }}
+                                                    />
+                                                    <InputLabel id="resource-value-label">Resource</InputLabel>
+                                                    <JsonEditor data={resource} setData={setResource} rootName="resource" />
+                                                    <InputLabel id="context-value-label">Context</InputLabel>
+                                                    <JsonEditor data={context} setData={setContext} rootName="context" />
+
+                                                    <InputLabel id="principal-value-label">Log Type</InputLabel>
+                                                    <ToggleButtonGroup
+                                                        color="primary"
+                                                        value={logType}
+                                                        exclusive
+                                                        onChange={handleLogTypeChange}
+                                                        aria-label="Platform"
+                                                    >
+                                                        <ToggleButton value="Decision">Decision</ToggleButton>
+                                                        <ToggleButton value="System">System</ToggleButton>
+                                                        <ToggleButton value="Metric">Metric</ToggleButton>
+                                                    </ToggleButtonGroup>
+                                                    <hr />
+                                                    <Button variant="outlined" color="success" onClick={triggerCedarlingAuthzRequest}>Cedarling Authz Request</Button>
+                                                </div>
+                                            </AccordionDetails>
+                                        </Accordion>
+                                        {!!authzResult ?
+                                            <Accordion defaultExpanded>
+                                                <AccordionSummary
+                                                    expandIcon={<ExpandMoreIcon />}
+                                                    aria-controls="panel1-content"
+                                                    id="panel1-header"
+                                                >
+                                                    <Typography component="span">Cedarling Authz Result</Typography>
+                                                </AccordionSummary>
+                                                <AccordionDetails>
+                                                    <TextField
+                                                        autoFocus
+                                                        required
+                                                        margin="dense"
+                                                        id="authzResult"
+                                                        name="authzResult"
+                                                        label="Authz Result"
+                                                        rows={12}
+                                                        multiline
+                                                        type="text"
+                                                        fullWidth
+                                                        variant="outlined"
+                                                        value={authzResult}
+                                                    />
+                                                    <Button variant="text" color="success" onClick={() => setAuthzResult('')}>Reset</Button>
+                                                </AccordionDetails>
+                                            </Accordion> :
+                                            ''}
+                                        {!!authzLogs ?
+                                            <Accordion>
+                                                <AccordionSummary
+                                                    expandIcon={<ExpandMoreIcon />}
+                                                    aria-controls="panel2-content"
+                                                    id="panel2-header"
+                                                >
+                                                    <Typography component="span">Cedarling Authz Logs</Typography>
+                                                </AccordionSummary>
+                                                <AccordionDetails>
+                                                    <TextField
+                                                        autoFocus
+                                                        required
+                                                        margin="dense"
+                                                        id="authzLogs"
+                                                        name="authzLogs"
+                                                        label="Authz Logs"
+                                                        rows={12}
+                                                        multiline
+                                                        type="text"
+                                                        fullWidth
+                                                        variant="outlined"
+                                                        value={authzLogs}
+                                                    />
+                                                    <Button variant="text" color="success" onClick={() => setAuthzLogs('')}>Reset</Button>
+                                                </AccordionDetails>
+                                            </Accordion> : ''}
+                                    </Box>}
+                            </>}
                     </Stack>
                 </> :
                 <Alert severity="warning">At least one OIDC client must be registered in Jans-TARP to add Cedarling configuration.</Alert>
             }
+
         </Container>
     );
 }
