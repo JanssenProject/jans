@@ -196,10 +196,6 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isOidcClientRe
         return reqObj;
     };
 
-    const handleScroll = () => {
-        window.scrollBy({ top: 300, behavior: "smooth" });
-    };
-
     return (
         <Container maxWidth="lg">
             {oidcClientRegistered ?
