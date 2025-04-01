@@ -127,7 +127,6 @@ After following the guide, the policy store URI will be copied to the clipboard.
       "CEDARLING_POLICY_STORE_URI": "<Policy Store URI>",
       "CEDARLING_LOG_TYPE": "std_out",
       "CEDARLING_LOG_LEVEL": "INFO",
-      "CEDARLING_LOG_TTL": null,
       "CEDARLING_USER_AUTHZ": "enabled",
       "CEDARLING_WORKLOAD_AUTHZ": "disabled",
       "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
@@ -137,8 +136,6 @@ After following the guide, the policy store URI will be copied to the clipboard.
            ]
       },
       "CEDARLING_LOCAL_JWKS": null,
-      "CEDARLING_POLICY_STORE_LOCAL": null,
-      "CEDARLING_POLICY_STORE_LOCAL_FN": null,
       "CEDARLING_JWT_SIG_VALIDATION": "disabled",
       "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
       "CEDARLING_MAPPING_USER": "Jans::User",
@@ -149,7 +146,6 @@ After following the guide, the policy store URI will be copied to the clipboard.
       ],
       "CEDARLING_ID_TOKEN_TRUST_MODE": "none",
       "CEDARLING_LOCK": "disabled",
-      "CEDARLING_LOCK_SERVER_CONFIGURATION_URI": null,
       "CEDARLING_LOCK_DYNAMIC_CONFIGURATION": "disabled",
       "CEDARLING_LOCK_LISTEN_SSE": "disabled"
   }
