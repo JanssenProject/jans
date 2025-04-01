@@ -3,11 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, JsonRule, JwtConfig, LogConfig, LogLevel,
-    LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
-    TokenValidationConfig,
-};
+use cedarling::*;
 use jsonwebtoken::Algorithm;
 use std::collections::{HashMap, HashSet};
 
@@ -24,17 +20,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         jwt_sig_validation: true,
         jwt_status_validation: false,
         signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
-        token_validation_settings: HashMap::from([
-            (
-                "access_token".to_string(),
-                TokenValidationConfig::access_token(),
-            ),
-            ("id_token".to_string(), TokenValidationConfig::id_token()),
-            (
-                "userinfo_token".to_string(),
-                TokenValidationConfig::userinfo_token(),
-            ),
-        ]),
     };
 
     // You must change this with your own tokens
@@ -67,6 +52,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .unwrap(),
             ..Default::default()
         },
+        entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
     })
     .await?;
 
@@ -83,9 +69,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             ]),
             action: "Jans::Action::\"Update\"".to_string(),
             context: serde_json::json!({}),
-            resource: ResourceData {
+            resource: EntityData {
                 id: "random_id".to_string(),
-                resource_type: "Jans::Issue".to_string(),
+                entity_type: "Jans::Issue".to_string(),
                 payload: HashMap::from_iter([(
                     "org_id".to_string(),
                     serde_json::Value::String("some_long_id".to_string()),

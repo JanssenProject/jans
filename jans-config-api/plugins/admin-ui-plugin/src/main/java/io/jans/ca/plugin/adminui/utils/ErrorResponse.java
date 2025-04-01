@@ -6,6 +6,7 @@ public enum ErrorResponse {
     CHECK_LICENSE_ERROR("Error in checking license status. Check logs for further details."),
     ERROR_IN_LICENSE_CONFIGURATION_VALIDATION("Error in validating license configuration."),
     ACTIVATE_LICENSE_ERROR("Error in activating License. Check logs for further details."),
+    MAU_IS_NULL("The MAU threshold value of the license is null."),
     ERROR_IN_TRIAL_LICENSE("Error in generating trial license. Check logs for further details."),
     GET_LICENSE_DETAILS_ERROR("Error in fetching license details. Check logs for further details."),
     AUDIT_LOGGING_ERROR("Error in audit logging"),

@@ -8,20 +8,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.json.JSONObject;
 import org.slf4j.Logger;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
 import io.jans.casa.core.model.Fido2RegistrationEntry;
 import io.jans.casa.core.pojo.FidoDevice;
-import io.jans.casa.core.pojo.MultideviceAuthenticator;
-import io.jans.casa.core.pojo.PlatformAuthenticator;
-import io.jans.casa.core.pojo.SecurityKey;
 import io.jans.casa.misc.Utils;
 import io.jans.casa.rest.RSUtils;
-import io.jans.entry.Transports;
 import io.jans.fido2.client.AttestationService;
 import io.jans.fido2.model.attestation.AttestationOptions;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
@@ -90,26 +83,13 @@ public class Fido2Service extends BaseService {
 
             logger.trace(list.toString()+list.size());
             for (Fido2RegistrationEntry entry : list) {
-            	FidoDevice device = null;
+            	FidoDevice device = new FidoDevice();
             	Set<String> transports = new HashSet<>(Arrays.asList(entry.getRegistrationData().getTransports()));
             	
-            	// internal implies platform auth
-				if (transports.contains(Transports.INTERNAL.getValue()) && transports.size() == 1) {
-					device = new PlatformAuthenticator();
-				} 
-				// internal and hybrid implies multidev
-				else if (transports.contains(Transports.HYBRID.getValue())) {
-					device = new MultideviceAuthenticator();
-				} else if (transports.contains(Transports.USB.getValue())
-						|| transports.contains(Transports.NFC.getValue())
-						|| transports.contains(Transports.BLE.getValue())) {
-					device = new SecurityKey();
-				} else {
-					logger.trace("Transports was not set, ideally flow should never reach here");
-				}
             	device.setId(entry.getId());
             	device.setCreationDate(entry.getCreationDate());
             	device.setNickName(entry.getDisplayName());
+            	device.setTransports(transports.toArray(new String[0]));
                 devices.add(device);
                 
             	logger.trace("device name - "+device.getNickName());

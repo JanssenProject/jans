@@ -263,8 +263,7 @@ mod tests {
                 action: "test_action".to_string(),
                 resource: "test_resource".to_string(),
                 context: serde_json::json!({}),
-                person_authorize_info: Default::default(),
-                workload_authorize_info: Default::default(),
+                authorize_info: Default::default(),
                 authorized: true,
                 entities: serde_json::json!({}),
             });

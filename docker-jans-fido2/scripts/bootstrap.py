@@ -37,7 +37,7 @@ def main():
     render_base_properties("/app/templates/jans.properties", "/etc/jans/conf/jans.properties")
 
     mapper = PersistenceMapper()
-    persistence_groups = mapper.groups()
+    persistence_groups = mapper.groups().keys()
 
     if persistence_type == "hybrid":
         hybrid_prop = "/etc/jans/conf/jans-hybrid.properties"
@@ -46,11 +46,9 @@ def main():
 
     if "sql" in persistence_groups:
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-        render_sql_properties(
-            manager,
-            f"/app/templates/jans-{db_dialect}.properties",
-            "/etc/jans/conf/jans-sql.properties",
-        )
+        sql_prop = "/etc/jans/conf/jans-sql.properties"
+        if not os.path.exists(sql_prop):
+            render_sql_properties(manager, f"/app/templates/jans-{db_dialect}.properties", sql_prop)
 
     wait_for_persistence(manager)
     override_simple_json_property("/etc/jans/conf/jans-sql.properties")

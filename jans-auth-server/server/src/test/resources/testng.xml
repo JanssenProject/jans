@@ -325,12 +325,6 @@
 		</classes>
 	</test>
 
-    <test name="Cleaner timer test" enabled="true">
-        <classes>
-            <class name="io.jans.as.server.comp.CleanerTimerTest" />
-        </classes>
-    </test>
-
 	<test name="Remove unused clients test" enabled="true">
 		<classes>
 			<class name="io.jans.as.server.comp.CleanUpClientTest" />

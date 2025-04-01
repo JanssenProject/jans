@@ -1,6 +1,12 @@
-## Overview
+---
+tags:
+- administration
+- reference
+- kubernetes
+- docker image
+---
 
-Docker assets for Casa
+# Casa Container Configuration
 
 ## Versions
 

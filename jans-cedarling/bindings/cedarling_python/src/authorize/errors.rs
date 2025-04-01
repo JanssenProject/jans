@@ -46,23 +46,16 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    WorkloadRequestValidationError,
+    InvalidPrincipalError,
     AuthorizeError,
-    "Error encountered while creating cedar_policy::Request for workload entity principal"
+    "Error encountered while creating cedar_policy::Request for principal"
 );
 
 create_exception!(
     authorize_errors,
-    UserRequestValidationError,
+    ValidateEntitiesError,
     AuthorizeError,
-    "Error encountered while creating cedar_policy::Request for user entity principal"
-);
-
-create_exception!(
-    authorize_errors,
-    EntitiesError,
-    AuthorizeError,
-    "Error encountered while collecting all entities"
+    "Error encountered while validating the entities to the schema"
 );
 
 create_exception!(
@@ -141,9 +134,8 @@ errors_functions! {
     ProcessTokens => ProcessTokens,
     Action => ActionError,
     CreateContext => CreateContextError,
-    WorkloadRequestValidation => WorkloadRequestValidationError,
-    UserRequestValidation => UserRequestValidationError,
-    Entities => EntitiesError,
+    InvalidPrincipal => InvalidPrincipalError,
+    ValidateEntities => ValidateEntitiesError,
     EntitiesToJson => EntitiesToJsonError,
     BuildContext => BuildContextError,
     IdTokenTrustMode => IdTokenTrustModeError,

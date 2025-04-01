@@ -54,12 +54,12 @@ lazy_static! {
                     "org_id": "some_long_id",
                     "jti": "some_jti",
                     "client_id": "some_client_id",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                 })),
                 "id_token": generate_token_using_claims(json!({
                     "jti": "some_jti",
-                    "iss": "some_iss",
+                    "iss": "https://account.gluu.org",
                     "aud": "some_aud",
                     "sub": "some_sub",
                 })),
@@ -67,9 +67,8 @@ lazy_static! {
                     "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
-                    "iss": "some_iss",
-                    "client_id": "some_client_id",
-                    "role": "Admin",
+                    "iss": "https://account.gluu.org",
+                    "role": ["Admin"],
                 })),
             },
             // we need specify action name in each test case
@@ -137,6 +136,7 @@ async fn success_test_for_principal_workload() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default().with_workload(),
     )
     .await;
 
@@ -176,6 +176,7 @@ async fn success_test_for_principal_user() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default().with_user(),
     )
     .await;
 
@@ -219,6 +220,7 @@ async fn success_test_for_principal_person_role() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default().with_user(),
     )
     .await;
 
@@ -262,6 +264,9 @@ async fn success_test_for_principal_workload_role() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default()
+            .with_workload()
+            .with_user(),
     )
     .await;
 
@@ -311,6 +316,9 @@ async fn success_test_for_principal_workload_true_or_user_false() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default()
+            .with_user()
+            .with_workload(),
     )
     .await;
 
@@ -360,6 +368,9 @@ async fn success_test_for_principal_workload_false_or_user_true() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default()
+            .with_user()
+            .with_workload(),
     )
     .await;
 
@@ -409,6 +420,9 @@ async fn success_test_for_principal_workload_false_or_user_false() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default()
+            .with_user()
+            .with_workload(),
     )
     .await;
 
@@ -457,6 +471,9 @@ async fn test_where_principal_workload_cant_be_applied() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default()
+            .with_user()
+            .with_workload(),
     )
     .await;
 
@@ -468,10 +485,7 @@ async fn test_where_principal_workload_cant_be_applied() {
         .await
         .expect_err("request should be parsed with error");
 
-    assert!(matches!(
-        result,
-        crate::AuthorizeError::WorkloadRequestValidation(_)
-    ))
+    assert!(matches!(result, crate::AuthorizeError::InvalidPrincipal(_)))
 }
 
 /// Check if action executes when principal user can't be applied
@@ -486,6 +500,7 @@ async fn test_where_principal_user_cant_be_applied() {
             id_token_trust_mode: IdTokenTrustMode::None,
             ..Default::default()
         },
+        crate::EntityBuilderConfig::default().with_user(),
     )
     .await;
 
@@ -498,8 +513,8 @@ async fn test_where_principal_user_cant_be_applied() {
         .expect_err("request should be parsed with error");
 
     assert!(
-        matches!(result, crate::AuthorizeError::UserRequestValidation(_)),
-        "expected error UserRequestValidation, got: {}",
+        matches!(result, crate::AuthorizeError::InvalidPrincipal(_)),
+        "expected error InvalidPrincipal, got: {}",
         result
     )
 }

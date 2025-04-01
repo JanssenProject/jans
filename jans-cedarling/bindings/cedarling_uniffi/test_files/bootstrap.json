@@ -1,32 +1,5 @@
 {
     "CEDARLING_APPLICATION_NAME": "My App",
-    "CEDARLING_TOKEN_CONFIGS": {
-        "access_token": {
-            "entity_type_name": "Jans::Access_token",
-            "iss": "disabled",
-            "jti": "disabled",
-            "nbf": "disabled",
-            "exp": "disabled"
-        },
-        "id_token": {
-            "entity_type_name": "Jans::id_token",
-            "iss": "enabled",
-            "aud": "enabled",
-            "sub": "enabled",
-            "iat": "enabled",
-            "exp": "enabled"
-        },
-        "userinfo_token": {
-            "entity_type_name": "Jans::Userinfo_token",
-            "iss": "disabled",
-            "aud": "disabled",
-            "sub": "disabled",
-            "exp": "disabled",
-            "amr": "disabled",
-            "acr": "disabled",
-            "iat": "disabled"
-        }
-    },
     "CEDARLING_AUDIT_HEALTH_INTERVAL": 0,
     "CEDARLING_AUDIT_TELEMETRY_INTERVAL": 0,
     "CEDARLING_DYNAMIC_CONFIGURATION": "disabled",
@@ -51,21 +24,45 @@
     "CEDARLING_POLICY_STORE_URI": "",
     "CEDARLING_USER_AUTHZ": "enabled",
     "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
-        "and": [
+        "or": [
             {
-                "===": [
+                "and": [
                     {
-                        "var": "Jans::Workload"
+                        "===": [
+                            {
+                                "var": "Jans::Workload"
+                            },
+                            "ALLOW"
+                        ]
                     },
-                    "ALLOW"
+                    {
+                        "===": [
+                            {
+                                "var": "Jans::User"
+                            },
+                            "ALLOW"
+                        ]
+                    }
                 ]
             },
             {
-                "===": [
+                "and": [
                     {
-                        "var": "Jans::User"
+                        "===": [
+                            {
+                                "var": "Jans::TestPrincipal1"
+                            },
+                            "ALLOW"
+                        ]
                     },
-                    "ALLOW"
+                    {
+                        "===": [
+                            {
+                                "var": "Jans::TestPrincipal2"
+                            },
+                            "ALLOW"
+                        ]
+                    }
                 ]
             }
         ]

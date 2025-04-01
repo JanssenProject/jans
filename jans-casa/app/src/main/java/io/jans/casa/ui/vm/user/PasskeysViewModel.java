@@ -1,16 +1,9 @@
 package io.jans.casa.ui.vm.user;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
-
-import io.jans.casa.core.pojo.FidoDevice;
-import io.jans.casa.core.pojo.PlatformAuthenticator;
-import io.jans.casa.core.pojo.SecurityKey;
-import io.jans.casa.misc.Utils;
-import io.jans.casa.plugins.authnmethod.PasskeysExtension;
-import io.jans.casa.plugins.authnmethod.service.Fido2Service;
-import io.jans.casa.ui.UIUtils;
-
+import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zkoss.bind.BindUtils;
@@ -32,8 +25,16 @@ import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.WireVariable;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Messagebox;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jans.as.model.util.Base64Util;
+import io.jans.casa.core.pojo.FidoDevice;
+import io.jans.casa.misc.Utils;
+import io.jans.casa.plugins.authnmethod.PasskeysExtension;
+import io.jans.casa.plugins.authnmethod.service.Fido2Service;
+import io.jans.casa.ui.UIUtils;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * This is the ViewModel of page fido2-detail.zul. It controls the CRUD of
@@ -118,11 +119,11 @@ public class PasskeysViewModel extends UserViewModel {
 	@Listen("onData=#readyButton")
 	public void notified(Event event) throws Exception {
 		logger.debug("notified ready" + event.getTarget());
-		logger.debug("attestation response :"+event.getData());
-		logger.debug("attestation response :"+event.toString());
+		logger.debug("attestation response :" + event.getData());
+		logger.debug("attestation response :" + event.toString());
 		String errMessage = null;
 		try {
-			
+
 			if (fido2Service.verifyRegistration(mapper.writeValueAsString(event.getData()))) {
 
 				// pick the most suitable recent entry
@@ -134,6 +135,8 @@ public class PasskeysViewModel extends UserViewModel {
 
 					uiAwaiting = false;
 					BindUtils.postNotifyChange(this, "uiAwaiting");
+					
+					//addCookie(newDevice);
 				} else {
 					errMessage = Labels.getLabel("general.error.general");
 				}
@@ -191,6 +194,7 @@ public class PasskeysViewModel extends UserViewModel {
 				devices.add(dev);
 				UIUtils.showMessageUI(true, Labels.getLabel("usr.enroll.success"));
 				userService.notifyEnrollment(user, PasskeysExtension.ACR);
+				
 			} catch (Exception e) {
 				UIUtils.showMessageUI(false, Labels.getLabel("usr.error_updating"));
 				logger.error(e.getMessage(), e);
@@ -198,6 +202,57 @@ public class PasskeysViewModel extends UserViewModel {
 			resetAddSettings();
 		}
 
+	}
+
+	/**
+	 * @param request
+	 * @param response Allow list looks like this { "allowList": [ { "id":
+	 *                 "dXMtYXV0aG6DZmlyZXMyLjU3bDk3", "type": "public-key",
+	 *                 "transports": ["usb", "nfc", "ble"] }, { "id":
+	 *                 "bmJnbDduYWEwZmZ1cDkwbmVn", "type": "public-key",
+	 *                 "transports": ["usb"] } ] }
+	 */
+
+	private void addCookie( FidoDevice dev) {
+
+		HttpServletRequest request =  io.jans.casa.misc.WebUtils.getServletRequest();
+		HttpServletResponse response = io.jans.casa.misc.WebUtils.getServletResponse();
+		Cookie[] cookies = request.getCookies();
+		JSONArray allowList = new JSONArray();
+
+		if (cookies != null) {
+			for (Cookie cookie : cookies) {
+				if ("allowList".equals(cookie.getName())) {
+					// Retrieve the existing allowList stored as a string (JSON format) and parse it
+					try {
+						String cookieValue = Base64Util.base64urldecodeToString(cookie.getValue());
+						allowList = new JSONArray(cookieValue); // Parse the JSON string to JSONArray
+					} catch (Exception e) {
+						// In case of any parsing error, initialize an empty JSONArray
+						allowList = new JSONArray();
+					}
+					break;
+				}
+			}
+		}
+
+		JSONObject newCredential = new JSONObject();
+		newCredential.put("id", dev.getId()); // Replace with the actual new credential ID
+		newCredential.put("type", "public-key"); // "public-key" always
+		newCredential.put("transports",dev.getTransports());
+
+		// the check if this cred already exists is performed by the fido API
+		allowList.put(newCredential); // Add the new credential if it doesn't exist
+		logger.debug(allowList.toString());
+		logger.debug(newCredential.toJSONString());
+		String encodedValue = Base64Util.base64urlencode(newCredential.toJSONString().getBytes(StandardCharsets.UTF_8));
+
+		Cookie newCookie = new Cookie("allowList", encodedValue); // Convert the updated list to string
+		newCookie.setMaxAge(60 * 60 * 24 * 2); // Optional: Set cookie expiration (2 day)
+		newCookie.setPath("/"); // Optional: Set the path for which the cookie is valid
+
+		response.addCookie(newCookie);
+		logger.debug("Allow list cookie added for credential : "+ newCredential.toJSONString());
 	}
 
 	@NotifyChange({ "uiEnrolled", "newDevice" })

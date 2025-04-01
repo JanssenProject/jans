@@ -285,7 +285,6 @@ nav:
       - Engine and bridge configurations: janssen-server/developer/agama/engine-bridge-config.md
       - Agama flows in native applications: janssen-server/developer/agama/native-applications.md
       - FAQ: janssen-server/developer/agama/faq.md
-      - Quick Start Using Agama Lab: janssen-server/developer/agama/quick-start-using-agama-lab.md
     - External Libraries: janssen-server/developer/external-libraries.md
     - CORS: janssen-server/developer/cors.md
     - X-Frame-Options: janssen-server/developer/xframe.md
@@ -367,12 +366,9 @@ nav:
     - janssen-server/fido/README.md
     - Configuration: janssen-server/fido/config.md
     - Vendor Metadata Management: janssen-server/fido/vendor-metadata.md
-    - Key Management/Rotation: janssen-server/fido/key-mgt.md
     - Logs: janssen-server/fido/logs.md
-    - Monitoring: janssen-server/fido/monitoring.md
-    - USB Authenticator Support: janssen-server/fido/usb-authn.md
-    - Platform Authenticator Support: janssen-server/fido/platform-authn.md
-    - Bluetooth Authenticator Support: janssen-server/fido/bluetooth-authn.md
+    - Passwordless / Usernameless Login: janssen-server/fido/passwordlessLoginExperience.md
+    - Types of credentials: janssen-server/fido/types-of-creds.md
   - SCIM Admin Guide:
     - janssen-server/scim/README.md
     - Configuration: janssen-server/scim/config.md
@@ -415,6 +411,7 @@ nav:
     - JWT Validation: 'cedarling/cedarling-jwt-validation.md'
     - JWT Mapping: 'cedarling/cedarling-jwt-mapping.md'
     - Lock Configuration: 'cedarling/cedarling-lock-server.md'
+    - Cedarling Entities: 'cedarling/cedarling-entities.md'
   - Developer:
     - WASM: 'cedarling/cedarling-wasm.md'
     - Python:

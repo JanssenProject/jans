@@ -61,11 +61,6 @@ async fn init_cedarling() -> Cedarling {
             jwt_sig_validation: false,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::new(),
-            token_validation_settings: HashMap::from_iter(
-                ["access_token", "id_token", "userinfo_token", "custom_token"]
-                    .iter()
-                    .map(|tkn| (tkn.to_string(), TokenValidationConfig::default())),
-            ),
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
@@ -75,17 +70,9 @@ async fn init_cedarling() -> Cedarling {
             decision_log_user_claims: vec!["client_id".to_string(), "username".to_string()],
             decision_log_workload_claims: vec!["org_id".to_string()],
             id_token_trust_mode: IdTokenTrustMode::None,
-            mapping_tokens: HashMap::from([
-                ("access_token".to_string(), "Jans::Access_token".to_string()),
-                ("id_token".to_string(), "Jans::id_token".to_string()),
-                (
-                    "userinfo_token".to_string(),
-                    "Jans::Userinfo_token".to_string(),
-                ),
-            ])
-            .into(),
             ..Default::default()
         },
+        entity_builder_config: EntityBuilderConfig::default(),
     })
     .await
     .expect("should initialize cedarling");
@@ -116,9 +103,9 @@ async fn call_authorize(
             ]),
             action: "Jans::Action::\"Update\"".to_string(),
             context: serde_json::json!({}),
-            resource: ResourceData {
+            resource: EntityData {
                 id: "random_id".to_string(),
-                resource_type: "Jans::Issue".to_string(),
+                entity_type: "Jans::Issue".to_string(),
                 payload: HashMap::from_iter([
                     (
                         "org_id".to_string(),
