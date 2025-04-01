@@ -4,7 +4,7 @@ import Header from './header'
 import HomePage from './homePage'
 import UserDetails from './userDetails'
 import { ILooseObject } from './ILooseObject'
-
+import Utils from './Utils';
 const Options = () => {
 
   const [optionType, setOptionType] = useState("");
@@ -14,10 +14,10 @@ const Options = () => {
   useEffect(() => {
     chrome.storage.local.get(["oidcClients"], (oidcClientResults) => {
 
-      if (!isEmpty(oidcClientResults) && Object.keys(oidcClientResults).length !== 0) {
+      if (!Utils.isEmpty(oidcClientResults) && Object.keys(oidcClientResults).length !== 0) {
 
         chrome.storage.local.get(["loginDetails"], async (loginDetailsResult) => {
-          if (!isEmpty(loginDetailsResult) && Object.keys(loginDetailsResult).length !== 0) {
+          if (!Utils.isEmpty(loginDetailsResult) && Object.keys(loginDetailsResult).length !== 0) {
             setOptionType('loginPage');
             setdata(loginDetailsResult);
           } else {
@@ -27,7 +27,7 @@ const Options = () => {
 
             let cedarlingConfig: ILooseObject = await new Promise((resolve, reject) => { chrome.storage.local.get(["cedarlingConfig"], (result) => { resolve(result); }) });
 
-            if (!isEmpty(cedarlingConfig) && Object.keys(cedarlingConfig).length !== 0) {
+            if (!Utils.isEmpty(cedarlingConfig) && Object.keys(cedarlingConfig).length !== 0) {
               collectedData = { ...collectedData, ...cedarlingConfig };
             }
 
@@ -41,10 +41,6 @@ const Options = () => {
       setDataChanged(false);
     })
   }, [dataChanged]);
-
-  function isEmpty(value) {
-    return (value == null || value.length === 0);
-  }
 
   function handleDataChange() {
     setDataChanged(true);
