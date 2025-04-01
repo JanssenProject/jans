@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useRef } from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
@@ -31,8 +31,8 @@ import TextField from '@mui/material/TextField';
 import InputLabel from '@mui/material/InputLabel';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import __wbg_init, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
-
+import initWasm, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
+import Utils from './Utils';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
         backgroundColor: theme.palette.common.black,
@@ -120,7 +120,7 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isOidcClientRe
 
     React.useEffect(() => {
         chrome.storage.local.get(["authzRequest"], (authzRequest) => {
-            if (!isEmpty(authzRequest) && Object.keys(authzRequest).length !== 0) {
+            if (!Utils.isEmpty(authzRequest) && Object.keys(authzRequest).length !== 0) {
                 setContext(authzRequest.authzRequest.context);
                 setAction(authzRequest.authzRequest.action);
                 setResource(authzRequest.authzRequest.resource);
@@ -160,8 +160,8 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isOidcClientRe
             let instance: Cedarling;
             try {
                 if (Object.keys(cedarlingConfig).length !== 0) {
-                    await __wbg_init();
-                    instance = await init(!isEmpty(cedarlingConfig?.cedarlingConfig) ? cedarlingConfig?.cedarlingConfig[0] : undefined);
+                    await initWasm();
+                    instance = await init(!Utils.isEmpty(cedarlingConfig?.cedarlingConfig) ? cedarlingConfig?.cedarlingConfig[0] : undefined);
                     let result: AuthorizeResult = await instance.authorize_unsigned(reqObj);
                     let logs = await instance.get_logs_by_request_id_and_tag(result.request_id, logType);
                     setAuthzResult(result.json_string())
@@ -195,10 +195,6 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isOidcClientRe
         chrome.storage.local.set({ authzRequest: reqObj });
         return reqObj;
     };
-
-    function isEmpty(value) {
-        return (value == null || value.length === 0);
-    }
 
     return (
         <Container maxWidth="lg">
@@ -308,20 +304,24 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isOidcClientRe
                                                     <Typography component="span">Cedarling Authz Result</Typography>
                                                 </AccordionSummary>
                                                 <AccordionDetails>
-                                                    <TextField
-                                                        autoFocus
-                                                        required
-                                                        margin="dense"
-                                                        id="authzResult"
-                                                        name="authzResult"
-                                                        label="Authz Result"
-                                                        rows={12}
-                                                        multiline
-                                                        type="text"
-                                                        fullWidth
-                                                        variant="outlined"
-                                                        value={authzResult}
-                                                    />
+                                                    {Utils.isJSON(authzResult) ? 
+                                                    <Box>
+                                                        <JsonEditor data={principals} setData={setPrincipals} rootName="principals" />
+                                                    </Box> :
+                                                        <TextField
+                                                            autoFocus
+                                                            required
+                                                            margin="dense"
+                                                            id="authzResult"
+                                                            name="authzResult"
+                                                            label="Authz Result"
+                                                            rows={12}
+                                                            multiline
+                                                            type="text"
+                                                            fullWidth
+                                                            variant="outlined"
+                                                            value={authzResult}
+                                                        />}
                                                     <Button variant="text" color="success" onClick={() => setAuthzResult('')}>Reset</Button>
                                                 </AccordionDetails>
                                             </Accordion> :

@@ -16,10 +16,10 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import __wbg_init, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
+import initWasm, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
 import { jwtDecode } from "jwt-decode";
 import { IJWT } from './IJWT';
-
+import Utils from './Utils';
 const UserDetails = ({ data, notifyOnDataChange }) => {
     const [loading, setLoading] = useState(false);
     const [showPayloadIdToken, setShowPayloadIdToken] = useState(false);
@@ -46,7 +46,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
 
     React.useEffect(() => {
         chrome.storage.local.get(["authzRequest"], (authzRequest) => {
-            if (!isEmpty(authzRequest) && Object.keys(authzRequest).length !== 0) {
+            if (!Utils.isEmpty(authzRequest) && Object.keys(authzRequest).length !== 0) {
                 setContext(authzRequest.authzRequest.context);
                 setAction(authzRequest.authzRequest.action);
                 setResource(authzRequest.authzRequest.resource);
@@ -54,7 +54,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
         });
         chrome.storage.local.get(["cedarlingConfig"], async (cedarlingConfig) => {
             setCedarlingBootstrapPresent(false);
-            if (Object.keys(cedarlingConfig).length !== 0 && !isEmpty(cedarlingConfig?.cedarlingConfig)) {
+            if (Object.keys(cedarlingConfig).length !== 0 && !Utils.isEmpty(cedarlingConfig?.cedarlingConfig)) {
                 setCedarlingBootstrapPresent(true);
             }
         });
@@ -87,8 +87,8 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
             let instance: Cedarling;
             try {
                 if (Object.keys(cedarlingConfig).length !== 0) {
-                    await __wbg_init();
-                    instance = await init(!isEmpty(cedarlingConfig?.cedarlingConfig) ? cedarlingConfig?.cedarlingConfig[0] : undefined);
+                    await initWasm();
+                    instance = await init(!Utils.isEmpty(cedarlingConfig?.cedarlingConfig) ? cedarlingConfig?.cedarlingConfig[0] : undefined);
                     let result: AuthorizeResult = await instance.authorize(reqObj);
                     let logs = await instance.get_logs_by_request_id_and_tag(result.request_id, logType);
                     setAuthzResult(result.json_string())
@@ -173,9 +173,6 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
         notifyOnDataChange("true");
     }
 
-    function isEmpty(value) {
-        return (value == null || value.length === 0);
-    }
     const handleLogTypeChange = (
         event: React.MouseEvent<HTMLElement>,
         newLogType: string,
