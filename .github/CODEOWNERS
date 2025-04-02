@@ -26,8 +26,8 @@
 /jans-linux-setup/ @devrimyatar @yuriyz @yurem @yuriyzz
 /jans-linux-setup/jans_setup/setup_app/version.py @moabu @mo-auto
 /jans-linux-setup/static/scripts/admin_ui_plugin.py @devrimyatar @duttarnab
-/jans-cache-refresh/ @yurem @shekhar16
 /jans-link/ @yurem @yuriyz
+/jans-keycloak-link/ @yurem @yuriyz
 /agama/ @jgomer2001
 /jans-casa/ @jgomer2001 @maduvena
 /demos/jans-tarp/ @duttarnab
