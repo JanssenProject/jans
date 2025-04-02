@@ -65,20 +65,20 @@ class Attributes(DialogUtils):
             if getattr(cb, 'checked', False) or data.get('attributeValidation'):
                 self.custom_validation_container = HSplit([
                                 self.app.getTitledText(
-                                    title=_("    Regular Exprrssion"),
+                                    title=_("    Regular Expression"),
                                     name='regexp',
                                     value=data.get('attributeValidation',{}).get('regexp', ''),
                                     style=cli_style.edit_text
                                 ),
                                 self.app.getTitledText(
-                                    title=_("    Minumum Lenght"),
+                                    title=_("    Minimum Length"),
                                     name='minLength',
                                     value=data.get('attributeValidation',{}).get('minLength', 8),
                                     text_type='integer',
                                     style=cli_style.edit_text
                                 ),
                                 self.app.getTitledText(
-                                    title=_("    Maximum Lenght"),
+                                    title=_("    Maximum Length"),
                                     name='maxLength',
                                     value=data.get('attributeValidation',{}).get('maxLength', 10),
                                     text_type='integer',
