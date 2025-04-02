@@ -12,35 +12,30 @@ const Options = () => {
   const [dataChanged, setDataChanged] = useState(false);
 
   useEffect(() => {
-    chrome.storage.local.get(["oidcClients"], (oidcClientResults) => {
+    // Fetch cedarlingConfig first
+    chrome.storage.local.get(["cedarlingConfig"], (cedarlingConfigResult) => {
+      let cedarlingConfig = Utils.isEmpty(cedarlingConfigResult) ? {} : cedarlingConfigResult;
 
-      if (!Utils.isEmpty(oidcClientResults) && Object.keys(oidcClientResults).length !== 0) {
-
-        chrome.storage.local.get(["loginDetails"], async (loginDetailsResult) => {
-          if (!Utils.isEmpty(loginDetailsResult) && Object.keys(loginDetailsResult).length !== 0) {
-            setOptionType('loginPage');
-            setdata(loginDetailsResult);
-          } else {
-            let collectedData = {};
-            setOptionType('homePage');
-            collectedData = { ...data, ...oidcClientResults };
-
-            let cedarlingConfig: ILooseObject = await new Promise((resolve, reject) => { chrome.storage.local.get(["cedarlingConfig"], (result) => { resolve(result); }) });
-
-            if (!Utils.isEmpty(cedarlingConfig) && Object.keys(cedarlingConfig).length !== 0) {
-              collectedData = { ...collectedData, ...cedarlingConfig };
+      chrome.storage.local.get(["oidcClients"], (oidcClientResults) => {
+        if (!Utils.isEmpty(oidcClientResults) && Object.keys(oidcClientResults).length !== 0) {
+          chrome.storage.local.get(["loginDetails"], (loginDetailsResult) => {
+            if (!Utils.isEmpty(loginDetailsResult) && Object.keys(loginDetailsResult).length !== 0) {
+              setOptionType("loginPage");
+              setdata({ ...loginDetailsResult, ...cedarlingConfig });
+            } else {
+              setOptionType("homePage");
+              setdata({ ...oidcClientResults, ...cedarlingConfig });
             }
-
-            setdata(collectedData);
-          }
-        });
-      } else {
-        setOptionType('homePage');
-        setdata({});
-      }
-      setDataChanged(false);
-    })
+          });
+        } else {
+          setOptionType("homePage");
+          setdata({ ...cedarlingConfig });
+        }
+        setDataChanged(false);
+      });
+    });
   }, [dataChanged]);
+
 
   function handleDataChange() {
     setDataChanged(true);
