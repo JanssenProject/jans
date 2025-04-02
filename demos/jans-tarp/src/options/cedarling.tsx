@@ -127,7 +127,7 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isOidcClientRe
                 setPrincipals(authzRequest.authzRequest.principals);
             }
         });
-    }, [data])
+    }, [data]);
 
     const handleDialog = (isOpen) => {
         setModelOpen(isOpen);
@@ -243,8 +243,8 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isOidcClientRe
                             </TableContainer>
                             : <>
                                 {(data === undefined || data?.length == 0) ? '' :
-                                    <Box maxWidth="md">
-                                        <Accordion>
+                                    <Box sx={{ width: "60%" }}>
+                                        <Accordion defaultExpanded>
                                             <AccordionSummary
                                                 expandIcon={<ExpandMoreIcon />}
                                                 aria-controls="panel1-content"
@@ -304,10 +304,10 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isOidcClientRe
                                                     <Typography component="span">Cedarling Authz Result</Typography>
                                                 </AccordionSummary>
                                                 <AccordionDetails>
-                                                    {Utils.isJSON(authzResult) ? 
-                                                    <Box>
-                                                        <JsonEditor data={principals} setData={setPrincipals} rootName="principals" />
-                                                    </Box> :
+                                                    {Utils.isJSON(authzResult) ?
+                                                        <Box>
+                                                            <JsonEditor data={principals} setData={setPrincipals} rootName="principals" />
+                                                        </Box> :
                                                         <TextField
                                                             autoFocus
                                                             required
@@ -322,7 +322,9 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isOidcClientRe
                                                             variant="outlined"
                                                             value={authzResult}
                                                         />}
-                                                    <Button variant="text" color="success" onClick={() => setAuthzResult('')}>Reset</Button>
+                                                    <div>
+                                                        <Button variant="text" color="success" onClick={() => setAuthzResult('')}>Reset</Button>
+                                                    </div>
                                                 </AccordionDetails>
                                             </Accordion> :
                                             ''}
@@ -355,11 +357,11 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isOidcClientRe
                                             </Accordion> : ''}
                                     </Box>}
                             </>}
+                            <Box style={{textAlign: 'right', width: "60%"}}>© Gluu Inc. All Rights Reserved.</Box>
                     </Stack>
                 </> :
                 <Alert severity="warning">At least one OIDC client must be registered in Jans-TARP to add Cedarling configuration.</Alert>
             }
-
         </Container>
     );
 }
