@@ -5,7 +5,7 @@ tags:
   - script-catalog
 ---
 
-# CacheRefresh Detail Custom Script (CacheRefresh)
+# Link Interception Detail Custom Script (LinkInterception)
 
 ## Overview
 
@@ -15,7 +15,7 @@ This script is used to control/customize link interception.
 
 
 ## Interface
-The CachRefresh script implements the [CachRefreshType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/user/CacheRefreshType.java) interface. This extends methods from the base script type in addition to adding new methods:
+The CachRefresh script implements the [LinkInterceptionType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/user/LinkInterceptionType.java) interface. This extends methods from the base script type in addition to adding new methods:
 
 ### Inherited Methods
 | Method header | Method description |

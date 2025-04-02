@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Cache refresh update methods
+ * Link update methods
  * 
  * @author Yuriy Movchan Date: 06.27.2012
  */

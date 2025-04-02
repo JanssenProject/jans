@@ -11,7 +11,7 @@ tags:
 In order to integrate your Jans instance with backend LDAP servers handling authentication in your existing network environment, Janssen provides a mechanism called Jans Link to copy user data to the Jans local LDAP server. During this process it is possible to specify key attribute(s) and specify attribute name transformations. There are also cases when it can be used to overwrite attribute values or to add new attributes based on other attribute values.
 
 ## Interface
-The Jans Link (Link Interception) script implements the [CacheRefreshType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/user/CacheRefreshType.java) interface. This extends methods from the base script type in addition to adding new methods:
+The Jans Link (Link Interception) script implements the [LinkInterceptionType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/user/LinkInterceptionType.java) interface. This extends methods from the base script type in addition to adding new methods:
 
 ### Inherited Methods
 

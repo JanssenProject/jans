@@ -93,7 +93,7 @@ public enum CustomScriptType implements AttributeEnum {
     RESOURCE_OWNER_PASSWORD_CREDENTIALS("resource_owner_password_credentials", "Resource Owner Password Credentials", ResourceOwnerPasswordCredentialsType.class, CustomScript.class, "ResourceOwnerPasswordCredentials", new DummyResourceOwnerPasswordCredentialsType()),
     APPLICATION_SESSION("application_session", "Application Session", ApplicationSessionType.class, CustomScript.class, "ApplicationSession",
             new DummyApplicationSessionType()),
-    LINK_INTERCEPTION("link_interception", "Link Interception", LinkInterceptionType.class, CustomScript.class, "CacheRefresh",
+    LINK_INTERCEPTION("link_interception", "Link Interception", LinkInterceptionType.class, CustomScript.class, "LinkInterception",
             new DummyLinkInterceptionType()),
     CLIENT_REGISTRATION("client_registration", "Client Registration", ClientRegistrationType.class, CustomScript.class, "ClientRegistration",
             new DummyClientRegistrationType()),

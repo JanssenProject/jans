@@ -303,14 +303,14 @@ Kubernetes: `>=v1.22.0-0`
 | lifecycle | object | `{}` |  |
 | link.appLoggers | object | `{"enableStdoutLogPrefix":"true","linkLogLevel":"INFO","linkLogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
 | link.appLoggers.enableStdoutLogPrefix | string | `"true"` | Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e link-persistence ===> 2022-12-20 17:49:55,744 INFO |
-| link.appLoggers.linkLogLevel | string | `"INFO"` | cacherefresh.log level |
-| link.appLoggers.linkLogTarget | string | `"STDOUT"` | cacherefresh.log target |
-| link.appLoggers.persistenceDurationLogLevel | string | `"INFO"` | cacherefresh_persistence_duration.log level |
-| link.appLoggers.persistenceDurationLogTarget | string | `"FILE"` | cacherefresh_persistence_duration.log target |
-| link.appLoggers.persistenceLogLevel | string | `"INFO"` | cacherefresh_persistence.log level |
-| link.appLoggers.persistenceLogTarget | string | `"FILE"` | cacherefresh_persistence.log target |
-| link.appLoggers.scriptLogLevel | string | `"INFO"` | cacherefresh_script.log level |
-| link.appLoggers.scriptLogTarget | string | `"FILE"` | cacherefresh_script.log target |
+| link.appLoggers.linkLogLevel | string | `"INFO"` | jans-link.log level |
+| link.appLoggers.linkLogTarget | string | `"STDOUT"` | jans-link.log target |
+| link.appLoggers.persistenceDurationLogLevel | string | `"INFO"` | jans-link_persistence_duration.log level |
+| link.appLoggers.persistenceDurationLogTarget | string | `"FILE"` | jans-link_persistence_duration.log target |
+| link.appLoggers.persistenceLogLevel | string | `"INFO"` | jans-link_persistence.log level |
+| link.appLoggers.persistenceLogTarget | string | `"FILE"` | jans-link_persistence.log target |
+| link.appLoggers.scriptLogLevel | string | `"INFO"` | jans-link_script.log level |
+| link.appLoggers.scriptLogTarget | string | `"FILE"` | jans-link_script.log target |
 | link.cnCustomJavaOptions | string | `""` | passing custom java options to link. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs. |
 | link.enabled | bool | `false` | Boolean flag to enable/disable the link chart. |
 | link.ingress | object | `{"linkAdditionalAnnotations":{},"linkEnabled":true,"linkLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |

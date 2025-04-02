@@ -9,7 +9,7 @@ package io.jans.keycloak.link.model.config;
 import jakarta.enterprise.inject.Vetoed;
 
 /**
- * Cache refresh configuration
+ * Link configuration
  *
  * @author Yuriy Movchan Date: 07.13.2011
  */

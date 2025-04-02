@@ -34,9 +34,9 @@ public class KeycloakService implements Serializable{
     boolean isEncoded;
 
     public Keycloak getKeycloakInstance() {
-        LinkConfiguration cacheRefreshConfiguration = configurationFactory.getAppConfiguration();
+        LinkConfiguration linkConfiguration = configurationFactory.getAppConfiguration();
 
-        KeycloakConfiguration keycloakConfiguration = cacheRefreshConfiguration.getKeycloakConfiguration();
+        KeycloakConfiguration keycloakConfiguration = linkConfiguration.getKeycloakConfiguration();
         String clientSecret = decryptString(keycloakConfiguration.getClientSecret());
         if(clientSecret == null){
             log.info("clientSecret is null or not encrypted");

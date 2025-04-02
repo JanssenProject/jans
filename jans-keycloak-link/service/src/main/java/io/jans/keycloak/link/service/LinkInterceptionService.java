@@ -27,7 +27,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 /**
- * Provides cache refresh related operations
+ * Provides Link related operations
  *
  * @author Yuriy Movchan Date: 07.04.2011
  */

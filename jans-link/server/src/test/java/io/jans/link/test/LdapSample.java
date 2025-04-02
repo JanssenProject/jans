@@ -31,16 +31,16 @@ public final class LdapSample {
         PersistenceEntryManager entryManager = entryManagerSample.createLdapEntryManager();
 
         //LinkConfiguration linkConfiguration = new LinkConfiguration();
-        JansLinkTimer cacheRefreshTimer = new JansLinkTimer();
-        cacheRefreshTimer.setLdapEntryManager(entryManager);
+        JansLinkTimer linkTimer = new JansLinkTimer();
+        linkTimer.setLdapEntryManager(entryManager);
         ConfigurationFactory configurationFactory = new ConfigurationFactory();
         //configurationFactory.setPersistenceEntryManagerInstance(entryManager);
         configurationFactory.create();
-        cacheRefreshTimer.setConfigurationFactory(configurationFactory);
+        linkTimer.setConfigurationFactory(configurationFactory);
         /*ConfigurationService configurationService = new ConfigurationService();
         configurationService.setPersistenceEntryManager(entryManager);
-        cacheRefreshTimer.setConfigurationService(configurationService);
-        cacheRefreshTimer.processInt();*/
+        linkTimer.setConfigurationService(configurationService);
+        linkTimer.processInt();*/
 
 
     }

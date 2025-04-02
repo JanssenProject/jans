@@ -13,7 +13,7 @@ import jakarta.enterprise.inject.Vetoed;
 import java.util.List;
 
 /**
- * Cache refresh configuration
+ * Link configuration
  *
  * @author Yuriy Movchan Date: 07.13.2011
  */

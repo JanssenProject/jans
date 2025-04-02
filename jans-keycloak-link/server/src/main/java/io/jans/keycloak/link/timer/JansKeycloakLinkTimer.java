@@ -148,7 +148,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 			}
 		}
 
-		// Schedule to start cache refresh every 1 minute
+		// Schedule to start link every 1 minute
 		timerEvent.fire(new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new LinkEvent(),
 				Scheduled.Literal.INSTANCE));
 
@@ -156,7 +156,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 	}
 
 	@Asynchronous
-	public void process(@Observes @Scheduled LinkEvent cacheRefreshEvent) {
+	public void process(@Observes @Scheduled LinkEvent linkEvent) {
 		if (this.isActive.get()) {
 			log.info("Another process is active");
 			return;
@@ -182,9 +182,9 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 			//GluuConfiguration currentConfiguration = getConfigurationService().getConfiguration();
 			//GluuConfiguration currentConfiguration = new GluuConfiguration();
 			currentConfiguration.setKeycloakLinkEnabled(true);
-			//currentConfiguration.setVdsCacheRefreshPollingInterval();
+			//currentConfiguration.setVdsLinkPollingInterval();
 			currentConfiguration.setKeycloakLinkServerIpAddress("255.255.255.255");
-			if (!isStartCacheRefresh(currentConfiguration)) {
+			if (!isStartLink(currentConfiguration)) {
 				log.info("Starting conditions aren't reached");
 				return;
 			}
@@ -195,11 +195,11 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 			this.lastFinishedTime = System.currentTimeMillis();
 		} catch (Throwable ex) {
 			ex.printStackTrace();
-			log.error("Exception happened while executing cache refresh synchronization"+ ex);
+			log.error("Exception happened while executing link synchronization"+ ex);
 		}
 	}
 
-	private boolean isStartCacheRefresh(AppConfiguration currentConfiguration) {
+	private boolean isStartLink(AppConfiguration currentConfiguration) {
 		if (!currentConfiguration.isKeycloakLinkEnabled()) {
 			return false;
 		}
@@ -221,26 +221,26 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 			return false;
 		}
 
-		String cacheRefreshServerIpAddress = currentConfiguration.getKeycloakLinkServerIpAddress();
-		// if (StringHelper.isEmpty(cacheRefreshServerIpAddress)) {
+		String linkServerIpAddress = currentConfiguration.getKeycloakLinkServerIpAddress();
+		// if (StringHelper.isEmpty(linkServerIpAddress)) {
 		// log.debug("There is no master Link Interception server");
 		// return false;
 		// }
 
-		// Compare server IP address with cacheRefreshServerIp
-		boolean cacheRefreshServer = false;
+		// Compare server IP address with linkServerIp
+		boolean linkServer = false;
 		try {
 			Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
 			for (NetworkInterface networkInterface : Collections.list(nets)) {
 				Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
 				for (InetAddress inetAddress : Collections.list(inetAddresses)) {
-					if (StringHelper.equals(cacheRefreshServerIpAddress, inetAddress.getHostAddress())) {
-						cacheRefreshServer = true;
+					if (StringHelper.equals(linkServerIpAddress, inetAddress.getHostAddress())) {
+						linkServer = true;
 						break;
 					}
 				}
 
-				if (cacheRefreshServer) {
+				if (linkServer) {
 					break;
 				}
 			}
@@ -248,19 +248,19 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 			log.error("Failed to enumerate server IP addresses"+ ex);
 		}
 
-		if (!cacheRefreshServer) {
-			cacheRefreshServer = externalLinkService.executeExternalIsStartProcessMethods();
-			cacheRefreshServer = true;
+		if (!linkServer) {
+			linkServer = externalLinkService.executeExternalIsStartProcessMethods();
+			linkServer = true;
 		}
 
-		if (!cacheRefreshServer) {
+		if (!linkServer) {
 			log.info("This server isn't master Link Interception server");
 			return false;
 		}
 
-		// Check if cache refresh specific configuration was loaded
+		// Check if link specific configuration was loaded
 		if (currentConfiguration == null) {
-			log.info("Failed to start cache refresh. Can't loading configuration from oxTrustCacheRefresh.properties");
+			log.info("Failed to start link. Can't loading configuration from jans-link.properties");
 			return false;
 		}
 
@@ -296,7 +296,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 
 		try {
 			if ((currentConfiguration.getKeycloakConfiguration() == null) || (inumDbServerConnection == null)) {
-				log.error("Skipping cache refresh due to invalid server configuration");
+				log.error("Skipping link due to invalid server configuration");
 			} else {
 				detectChangedEntries(currentConfiguration, null,
 						inumDbServerConnection, targetServerConnection, updateMethod);

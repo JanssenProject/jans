@@ -50,7 +50,7 @@ import jakarta.inject.Named;
 
 /**
  * 
- * Cache refresh server initializer
+ * Link server initializer
  * @author Yuriy Movchan
  * @version May 12, 2020
  */
