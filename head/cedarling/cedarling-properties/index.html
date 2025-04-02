@@ -4901,8 +4901,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_1_11_2">
@@ -5023,20 +5021,6 @@
     <li class="md-nav__item">
       <a href="../../janssen-server/developer/agama/faq/" class="md-nav__link">
         FAQ
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../janssen-server/developer/agama/quick-start-using-agama-lab/" class="md-nav__link">
-        Quick Start Using Agama Lab
       </a>
     </li>
   
@@ -9172,9 +9156,14 @@
 <p>We use <a href="https://jsonlogic.com/">JsonLogic</a> to define the boolean operation. The rule is evaluated against each principal decision, and the final result is determined based on the specified operation.</p>
 <h3 id="variables-in-the-jsonlogic-rule">Variables in the jsonlogic rule<a class="headerlink" href="#variables-in-the-jsonlogic-rule" title="Permanent link">#</a></h3>
 <p>Make sure that you use correct <code>var</code> name for <code>principal</code> types.</p>
-<p>When referencing principals in your JSON logic rules, you must use the full Cedar principal type identifier that includes both namespace and entity name. This matches exactly how principals are defined in your Cedar policies.</p>
-<p><strong>Correct Format</strong>: <code>&lt;Namespace&gt;::&lt;EntityType&gt;</code><br />
-Example: <code>Jans::User</code>, <code>Jans::Workload</code>, <code>Acme::Service</code>.</p>
+<p>When referencing principals in your JSON logic rules, you must use the full Cedar principal type identifier that includes namespace, entity name and optionally the entity ID. This matches exactly how principals are defined in your Cedar policies.</p>
+<p><strong>Correct Format</strong>: <code>&lt;Namespace&gt;::&lt;EntityType&gt;</code> or <code>&lt;Namespace&gt;::&lt;EntityType&gt;::"&lt;EntityID&gt;"</code><br />
+Examples:  </p>
+<ul>
+<li>Without ID: <code>Jans::User</code>, <code>Jans::Workload</code>, <code>Acme::Service</code></li>
+<li>With ID: <code>Jans::User::"john_doe"</code>, <code>Jans::Device::"mobile_1234"</code>, <code>Acme::Service::"api_gateway"</code>.  </li>
+</ul>
+<p><em>Notice</em>: Make sure to correctly escape <code>"</code> in JSON strings. For example <code>"Acme::Service::\"api_gateway\""</code>.</p>
 <p><strong>Why This Matters</strong></p>
 <ul>
 <li>Matches Cedar's type system requirements</li>
@@ -9428,7 +9417,7 @@ Example: <code>Jans::User</code>, <code>Jans::Workload</code>, <code>Acme::Servi
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-20T17:44:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-20</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-26T15:21:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-26</span>
       
         <br>
         Created:

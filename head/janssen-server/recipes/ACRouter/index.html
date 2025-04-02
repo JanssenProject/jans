@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#authentication-flow" class="md-skip">
+        <a href="#acrouter-script-for-2fa" class="md-skip">
           Skip to content
         </a>
       
@@ -4903,8 +4903,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_1_11_2">
@@ -5025,20 +5023,6 @@
     <li class="md-nav__item">
       <a href="../../developer/agama/faq/" class="md-nav__link">
         FAQ
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../developer/agama/quick-start-using-agama-lab/" class="md-nav__link">
-        Quick Start Using Agama Lab
       </a>
     </li>
   
@@ -7038,6 +7022,8 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           User Journeys
@@ -7054,6 +7040,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -7062,27 +7050,35 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#user-journey" class="md-nav__link">
+    User Journey
+  </a>
+  
+    <nav class="md-nav" aria-label="User Journey">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#authentication-flow" class="md-nav__link">
     Authentication flow
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#an-acrouter-script" class="md-nav__link">
     An ACRouter script:
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#casa-app-for-enrollment-of-a-variety-of-credentials" class="md-nav__link">
     Casa App for enrollment of a variety of credentials:
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#adding-a-new-authentication-method-as-an-alternative-authentication-method" class="md-nav__link">
     Adding a new authentication method as an "alternative authentication method":
   </a>
@@ -7115,6 +7111,11 @@
   <a href="#step-4-enable-the-acrouter-script-ie-passwordless-or-casa-script" class="md-nav__link">
     Step 4: Enable the ACRouter script i.e. passwordless or casa script
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -8772,6 +8773,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -8780,27 +8783,35 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#user-journey" class="md-nav__link">
+    User Journey
+  </a>
+  
+    <nav class="md-nav" aria-label="User Journey">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#authentication-flow" class="md-nav__link">
     Authentication flow
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#an-acrouter-script" class="md-nav__link">
     An ACRouter script:
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#casa-app-for-enrollment-of-a-variety-of-credentials" class="md-nav__link">
     Casa App for enrollment of a variety of credentials:
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#adding-a-new-authentication-method-as-an-alternative-authentication-method" class="md-nav__link">
     Adding a new authentication method as an "alternative authentication method":
   </a>
@@ -8840,6 +8851,11 @@
     </nav>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
     </ul>
   
@@ -8856,6 +8872,25 @@
                   
   
 
+  <nav class="md-tags" >
+    
+      
+      
+        <span class="md-tag">recipes</span>
+      
+    
+      
+      
+        <span class="md-tag">2FA</span>
+      
+    
+      
+      
+        <span class="md-tag">ACRouter</span>
+      
+    
+  </nav>
+
 
 
   <a href="https://github.com/JanssenProject/jans/edit/main/docs/janssen-server/recipes/ACRouter.md" title="Edit this page" class="md-content__button md-icon">
@@ -8864,8 +8899,8 @@
   </a>
 
 
-  <h1>User Journeys</h1>
-
+<h1 id="acrouter-script-for-2fa">ACRouter Script for 2FA<a class="headerlink" href="#acrouter-script-for-2fa" title="Permanent link">#</a></h1>
+<h2 id="user-journey">User Journey<a class="headerlink" href="#user-journey" title="Permanent link">#</a></h2>
 <p>Janssen's authentication server can integrate with any number of authentication mechanisms from different vendors. Factoring the pros and cons of each method, organizations can offer a diverse set of options. A users can register multiple types of credentials and use any preferred credential to perform a login.</p>
 <p>An ACRouter Script is a <code>PersonAuthenticationType</code> script orchestrates a 2FA flow by delegating specific implementation details of authentication methods to other scripts. This allows the flow to present users with alternatives in case some credential is not working as expected or is lost.</p>
 <p><img alt="image" src="https://user-images.githubusercontent.com/12072533/210232644-5fa4526a-2804-4b5f-85fe-1a01895a7238.png" /></p>
@@ -8964,7 +8999,7 @@ Here <code>ELEMENT_ID</code> is the identifier for the HTML node that wraps all 
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-28T10:27:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-28</span>
       
         <br>
         Created:
