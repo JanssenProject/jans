@@ -366,7 +366,7 @@ jobs:
         cd ../..
         npm run pack
         mv ./release/jans-tarp-chrome-*.zip ../demo-jans-tarp-chrome-$VER.zip
-        mv ./dist/firefox/web-ext-artifacts/*.xpi ../demo-jans-tarp-firefox-$VER.xpi
+        mv ./dist/firefox/web-ext-artifacts/*.xpi ../demo-jans-tarp-firefox-$VER.xpi || touch demo-jans-tarp-firefox-$VER.xpi
         sha256sum ../demo-jans-tarp-chrome-$VER.zip > ../demo-jans-tarp-chrome-$VER.zip.sha256sum
         sha256sum ../demo-jans-tarp-firefox-$VER.xpi > ../demo-jans-tarp-firefox-$VER.xpi.sha256sum
         cd ..
