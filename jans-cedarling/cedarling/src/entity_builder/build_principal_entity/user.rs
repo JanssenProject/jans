@@ -131,8 +131,7 @@ mod test {
         );
         let entity = builder
             .build_user_entity(tokens, tkn_principal_mappings, &built_entities, roles)
-            .expect("should build workload entity");
-
+            .expect("should build user entity");
         assert_entity_eq(&entity, expected, schema);
     }
 
