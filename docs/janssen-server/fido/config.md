@@ -43,7 +43,7 @@ tags:
 | `disableMetadataService`      | Boolean             | Whether downloading MDS metadata should be skipped.                                                        | `false`                                              |
 | `hints`                       | Array of Strings    | Hints provided to the RP (e.g., security-key, client-device, hybrid).                                      | `["security-key", "client-device", "hybrid"]`        |
 | `enterpriseAttestation`       | Boolean             | Whether enterprise authenticators are enabled for use in a specific protected environment.                | `false`                                              |
-| `attestationMode`             | String              | Whether MDS validation should be omitted during attestation.                                              | `"monitor"`                                          |
+| `attestationMode`             | String              | "disabled" means attestation "none", "monitor" means attestation "direct" but still accept if none return, "enforced" means that credential creation will fail if attestation is not returned                                            | `"monitor"`                                          |
 
 
 ### Configuring the FIDO2 server:
