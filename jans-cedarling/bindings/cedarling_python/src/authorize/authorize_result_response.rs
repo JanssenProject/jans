@@ -9,17 +9,9 @@ use super::diagnostics::Diagnostics;
 use cedarling::bindings::cedar_policy;
 use pyo3::prelude::*;
 
-/// AuthorizeResultResponse
-/// =======================
-///
 /// A Python wrapper for the Rust `cedar_policy::Response` struct.
 /// Represents the result of an authorization request.
-///
-/// Attributes
-/// ----------
-/// :param decision: The authorization decision (wrapped `Decision` object).
-/// :param diagnostics: Additional information on the decision (wrapped `Diagnostics` object).
-#[pyclass]
+#[pyclass(module = "cedarling_python._cedarling_python")]
 pub struct AuthorizeResultResponse {
     inner: cedar_policy::Response,
 }

@@ -7,19 +7,9 @@
 
 use pyo3::prelude::*;
 
-/// PolicyEvaluationError
-/// =====================
-///
 /// Represents an error that occurred when evaluating a Cedar policy.
-///
-/// Attributes
-/// ----------
-/// id : str
-///     The ID of the policy that caused the error.
-/// error : str
-///     The error message describing the evaluation failure.
 #[derive(Debug, Clone)]
-#[pyclass(get_all)]
+#[pyclass(get_all, module = "cedarling_python._cedarling_python")]
 pub struct PolicyEvaluationError {
     /// Id of the policy with an error
     id: String,

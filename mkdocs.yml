@@ -417,6 +417,7 @@ nav:
     - Python:
       - cedarling/python/README.md
       - How to use: cedarling/python/usage.md
+      - Pydocs: cedarling/python/pydoc.md
     - Mobile Apps:
       - UniFFI interface: 'cedarling/uniffi/cedarling-uniffi.md'
       - Android Apps: 'cedarling/uniffi/cedarling-android.md'
@@ -486,6 +487,14 @@ plugins:
 - git-revision-date-localized:
     enable_creation_date: true
     type: timeago
+- mkdocstrings:
+    handlers:
+      python:
+        inventories:
+        - https://docs.python.org/3/objects.inv
+        paths: [./jans-cedarling/bindings/cedarling_python]
+        options:
+          filters: ["!^_"]
 repo_name: GitHub
 repo_url: https://github.com/JanssenProject/jans/
 site_author: Janssen, Inc.
