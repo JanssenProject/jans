@@ -2,7 +2,6 @@
 import contextlib
 import json
 import logging.config
-import os
 from collections import namedtuple
 
 from jans.pycloudlib import get_manager
@@ -35,7 +34,7 @@ def _transform_fido2_dynamic_config(conf):
     for k, v in [
         ("attestationMode", conf.pop("attestationMode", "monitor")),
         ("enabledFidoAlgorithms", conf["fido2Configuration"].pop("requestedCredentialTypes", ["RS256", "ES256"])),
-        ("metadataServers", [{"url": "https://mds.fidoalliance.org/"}]),
+        ("metadataServers", [{"url": "https://mds.fidoalliance.org/", "rootCert": "http://secure.globalsign.com/cacert/root-r3.crt"}]),
         ("enterpriseAttestation", False),
         ("hints", ["security-key", "client-device", "hybrid"]),
         ("rp", conf["fido2Configuration"].pop("requestedParties", [])),
@@ -52,6 +51,19 @@ def _transform_fido2_dynamic_config(conf):
         if not all(["id" in rp, "origins" in rp]):
             rp["id"] = rp.pop("name", "")
             rp["origins"] = rp.pop("domains", [])
+            should_update = True
+
+    for meta_srv in conf["fido2Configuration"]["metadataServers"]:
+        if "certificateDocumentInum" in meta_srv:
+            meta_srv.pop("certificateDocumentInum")
+            should_update = True
+
+        if all([
+            "url" in meta_srv,
+            meta_srv["url"] == "https://mds.fidoalliance.org/",
+            "rootCert" not in meta_srv,
+        ]):
+            meta_srv["rootCert"] = "http://secure.globalsign.com/cacert/root-r3.crt"
             should_update = True
 
     # return modified config (if any) and update flag

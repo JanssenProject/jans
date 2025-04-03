@@ -107,7 +107,7 @@ pub fn get_policy_id(resp: &Option<cedar_policy::Response>) -> Option<Vec<String
 macro_rules! cmp_policy {
     ($resp:expr, $vec_policy_id:expr, $msg:expr) => {
         let policy_ids_resp =
-            crate::tests::utils::cedarling_util::get_policy_id(&$resp).map(|mut v| {
+            $crate::tests::utils::cedarling_util::get_policy_id(&$resp).map(|mut v| {
                 v.sort();
                 v
             });
@@ -150,7 +150,7 @@ pub fn get_decision(resp: &Option<cedar_policy::Response>) -> Option<cedar_polic
 macro_rules! cmp_decision {
     ($resp:expr, $decision:expr, $msg:expr) => {
         assert_eq!(
-            crate::tests::utils::cedarling_util::get_decision(&$resp),
+            $crate::tests::utils::cedarling_util::get_decision(&$resp),
             Some($decision),
             $msg
         )
