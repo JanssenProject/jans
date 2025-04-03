@@ -5,7 +5,9 @@
 
 use serde::Serialize;
 
+use super::InitLockLoggerError;
 use super::interface::{Indexed, LogStorage, LogWriter, Loggable};
+use super::lock_logger::LockLogger;
 use super::memory_logger::MemoryLogger;
 use super::nop_logger::NopLogger;
 use super::stdout_logger::StdOutLogger;
@@ -24,28 +26,34 @@ pub(crate) enum LogStrategyLogger {
     Off(NopLogger),
     MemoryLogger(MemoryLogger),
     StdOut(StdOutLogger),
+    Lock(LockLogger),
 }
 
 impl LogStrategy {
     /// Creates a new `LogStrategy` based on the provided configuration.
     /// Initializes the corresponding logger accordingly.
-    pub fn new(config: &LogConfig, pdp_id: PdpID, app_name: Option<ApplicationName>) -> Self {
-        let logger = match config.log_type {
+    pub async fn new(
+        config: &LogConfig,
+        pdp_id: PdpID,
+        app_name: Option<ApplicationName>,
+    ) -> Result<Self, InitLockLoggerError> {
+        let logger = match &config.log_type {
             LogTypeConfig::Off => LogStrategyLogger::Off(NopLogger),
             LogTypeConfig::Memory(memory_config) => LogStrategyLogger::MemoryLogger(
-                MemoryLogger::new(memory_config, config.log_level, pdp_id, app_name.clone()),
+                MemoryLogger::new(*memory_config, config.log_level, pdp_id, app_name.clone()),
             ),
             LogTypeConfig::StdOut => LogStrategyLogger::StdOut(StdOutLogger::new(config.log_level)),
-            LogTypeConfig::Lock => todo!(),
+            LogTypeConfig::Lock(lock_bootstrap_config) => {
+                LogStrategyLogger::Lock(LockLogger::new(pdp_id, lock_bootstrap_config).await?)
+            },
         };
-        Self {
+        Ok(Self {
             logger,
             pdp_id,
             app_name,
-        }
+        })
     }
 
-    #[cfg(test)]
     pub fn new_with_logger(
         logger: LogStrategyLogger,
         pdp_id: PdpID,
@@ -102,6 +110,7 @@ impl LogWriter for LogStrategy {
             LogStrategyLogger::Off(log) => log.log_any(entry),
             LogStrategyLogger::MemoryLogger(memory_logger) => memory_logger.log_any(entry),
             LogStrategyLogger::StdOut(std_out_logger) => std_out_logger.log_any(entry),
+            LogStrategyLogger::Lock(lock_logger) => lock_logger.log_any(entry),
         }
     }
 }

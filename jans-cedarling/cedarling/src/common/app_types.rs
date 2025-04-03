@@ -5,13 +5,14 @@
 
 //! Module that contains structures used as configuration internally in the application
 //! It is usefull to use it with DI container
+use derive_more::derive::Display;
 use serde::Serialize;
 use uuid7::{Uuid, uuid4};
 
 /// Value is used as ID for application
 /// represents a unique ID for application
 /// generated one on startup
-#[derive(Debug, Clone, Copy, Serialize, PartialEq)]
+#[derive(Debug, Clone, Copy, Serialize, PartialEq, Display)]
 pub(crate) struct PdpID(pub Uuid);
 
 impl PdpID {

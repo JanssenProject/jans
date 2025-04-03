@@ -20,6 +20,7 @@ cedar-policy = { version = "4.3.2", features = ["partial-eval"] }
 base64 = "0.22.1"
 url = "2.5.2"
 lazy_static = "1.5.0"
+http_utils = { workspace = true }
 jsonwebtoken = { workspace = true }
 reqwest = { version = "0.12.8", features = ["json"] }
 typed-builder = "0.20.0"

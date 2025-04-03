@@ -33,7 +33,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let log_type = match log_type_arg.as_str() {
         "off" => LogTypeConfig::Off,
         "stdout" => LogTypeConfig::StdOut,
-        "lock" => LogTypeConfig::Lock,
+        "lock" => unimplemented!(),
         "memory" => extract_memory_config(args),
         _ => {
             eprintln!("Invalid log type, defaulting to StdOut.");
