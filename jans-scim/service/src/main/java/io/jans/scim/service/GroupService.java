@@ -9,7 +9,7 @@ package io.jans.scim.service;
 import io.jans.as.model.common.IdType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
-import io.jans.orm.exception.operation.DuplicateEntryException;
+import io.jans.orm.exception.operation.*;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.search.filter.Filter;
@@ -110,12 +110,16 @@ public class GroupService implements Serializable {
 		return isMemberOrOwner;
 	}
 
-	public JansGroup getGroupByInum(String inum) {
+	public JansGroup getGroupByInum(String inum) throws Exception {
 		JansGroup result = null;
 		try {
 			result = persistenceEntryManager.find(JansGroup.class, getDnForGroup(inum));
 		} catch (Exception e) {
-			log.error("Failed to find group by Inum " + inum, e);
+            if (!SearchException.class.isInstance(e.getCause())) {
+                log.error(e.getMessage(), e.getCause());
+                throw e;
+            }
+            log.debug("Failed to find group by Inum {}", inum);
 		}
 		return result;
 
