@@ -139,6 +139,7 @@ After following the guide, the policy store URI will be copied to the clipboard.
 
     * Principals: 
     ```
+    TBD
     ```
     * Action: `Jans::Action::"Read"`
     * Resource: 

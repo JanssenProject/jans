@@ -404,6 +404,9 @@ nav:
       - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
 - Cedarling:
   - Overview: 'cedarling/cedarling-overview.md'
+  - Quick Start:
+    - Quick Start Part 1: 'cedarling/cedarling-quick-start-unsigned.md'
+    - Quick Start Part 2: 'cedarling/cedarling-quick-start-signed.md'
   - Reference:
     - Policy Store: 'cedarling/cedarling-policy-store.md'
     - Properties: 'cedarling/cedarling-properties.md'
