@@ -11,7 +11,7 @@ mod build_entity_attrs;
 mod build_expr;
 mod build_iss_entity;
 mod build_principal_entity;
-mod build_cedar_entity;
+mod build_resource_entity;
 mod build_role_entity;
 mod build_token_entities;
 mod built_entities;
@@ -20,12 +20,13 @@ mod error;
 mod schema;
 mod value_to_expr;
 
-use crate::EntityData;
 use crate::authz::AuthorizeEntitiesData;
+use crate::authz::request::EntityData;
 use crate::common::PartitionResult;
 use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
-use crate::entity_builder_config::*;
+use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
 use crate::jwt::Token;
+use crate::{RequestUnsigned, entity_builder_config::*};
 use build_entity_attrs::*;
 use build_iss_entity::build_iss_entity;
 use cedar_policy::{Entity, EntityUid, RestrictedExpression};
@@ -126,7 +127,7 @@ impl EntityBuilder {
             (None, Vec::new())
         };
 
-        let resource = self.build_cedar_entity(resource)?;
+        let resource = self.build_resource_entity(resource)?;
 
         let issuers = self.iss_entities.values().cloned().collect();
         Ok(AuthorizeEntitiesData {
@@ -136,6 +137,31 @@ impl EntityBuilder {
             resource,
             roles,
             tokens: token_entities,
+        })
+    }
+
+    /// Builds the entities using the unsigned interface
+    pub fn build_entities_unsigned(
+        &self,
+        request: &RequestUnsigned,
+    ) -> Result<BuiltEntitiesUnsigned, BuildUnsignedEntityError> {
+        let built_entities = BuiltEntities::default();
+
+        let mut principals = Vec::with_capacity(request.principals.len());
+        let mut roles = Vec::new();
+        for principal in request.principals.iter() {
+            let BuiltPrincipalUnsigned { principal, parents } =
+                self.build_principal_unsigned(principal, &built_entities)?;
+            principals.push(principal);
+            roles.extend(parents);
+        }
+
+        let resource = self.build_resource_entity(&request.resource)?;
+
+        Ok(BuiltEntitiesUnsigned {
+            principals,
+            roles,
+            resource,
         })
     }
 
@@ -157,6 +183,12 @@ impl EntityBuilder {
 
         build_cedar_entity(type_name, id, attrs, parents)
     }
+}
+
+pub struct BuiltEntitiesUnsigned {
+    pub principals: Vec<Entity>,
+    pub roles: Vec<Entity>,
+    pub resource: Entity,
 }
 
 pub fn build_cedar_entity(
@@ -372,7 +404,7 @@ mod test {
             .build_entities(&tokens, &EntityData {
                 entity_type: "Jans::Resource".into(),
                 id: "some_id".into(),
-                payload: HashMap::new(),
+                attributes: HashMap::new(),
             })
             .expect("build entities");
 

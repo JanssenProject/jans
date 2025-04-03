@@ -136,7 +136,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             resource: EntityData {
                 id: "random_id".to_string(),
                 entity_type: "Jans::Issue".to_string(),
-                payload: HashMap::from_iter([
+                attributes: HashMap::from_iter([
                     (
                         "org_id".to_string(),
                         serde_json::Value::String("some_long_id".to_string()),

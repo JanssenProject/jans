@@ -128,7 +128,7 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub mapping_workload: Option<String>,
 
-    /// Mapping name of cedar schema Workload entity.
+    /// Mapping name of cedar schema Role entity.
     #[serde(rename = "CEDARLING_MAPPING_ROLE", default)]
     pub mapping_role: Option<String>,
 
