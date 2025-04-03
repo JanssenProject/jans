@@ -168,6 +168,7 @@
                     }
                 }
             },
+            "Object": {},
             "Role": {},
             "TrustedIssuer": {
                 "shape": {
@@ -406,7 +407,8 @@
             "Compare": {
                 "appliesTo": {
                     "resourceTypes": [
-                        "Application"
+                        "Application",
+                        "Object"
                     ],
                     "principalTypes": [
                         "User",
@@ -433,7 +435,8 @@
             "Execute": {
                 "appliesTo": {
                     "resourceTypes": [
-                        "Application"
+                        "Application",
+                        "Object"
                     ],
                     "principalTypes": [
                         "User",
@@ -473,7 +476,8 @@
             "Monitor": {
                 "appliesTo": {
                     "resourceTypes": [
-                        "Application"
+                        "Application",
+                        "Object"
                     ],
                     "principalTypes": [
                         "User",
@@ -513,7 +517,8 @@
             "Read": {
                 "appliesTo": {
                     "resourceTypes": [
-                        "Application"
+                        "Application",
+                        "Object"
                     ],
                     "principalTypes": [
                         "User",
@@ -527,7 +532,8 @@
             "Search": {
                 "appliesTo": {
                     "resourceTypes": [
-                        "Application"
+                        "Application",
+                        "Object"
                     ],
                     "principalTypes": [
                         "User",
@@ -541,7 +547,8 @@
             "Share": {
                 "appliesTo": {
                     "resourceTypes": [
-                        "Application"
+                        "Application",
+                        "Object"
                     ],
                     "principalTypes": [
                         "User",
@@ -555,7 +562,8 @@
             "Tag": {
                 "appliesTo": {
                     "resourceTypes": [
-                        "Application"
+                        "Application",
+                        "Object"
                     ],
                     "principalTypes": [
                         "User",
@@ -569,7 +577,8 @@
             "Write": {
                 "appliesTo": {
                     "resourceTypes": [
-                        "Application"
+                        "Application",
+                        "Object"
                     ],
                     "principalTypes": [
                         "User",

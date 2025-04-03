@@ -91,46 +91,47 @@ namespace Jans {
         name: String,
         url: Url
     };
+    entity Object;
 
     // ******  Actions  ******
     action Compare appliesTo {
       principal: [User, Workload],
-      resource: [Application],
+      resource: [Application, Object],
       context: Context
     };
     action Execute appliesTo {
       principal: [User, Workload],
-      resource: [Application],
+      resource: [Application, Object],
       context: Context
     };
     action Monitor appliesTo {
       principal: [User, Workload],
-      resource: [Application],
+      resource: [Application, Object],
       context: Context
     };
     action Read appliesTo {
       principal: [User, Workload],
-      resource: [Application],
+      resource: [Application, Object],
       context: Context
     };
     action Search appliesTo {
       principal: [User, Workload],
-      resource: [Application],
+      resource: [Application, Object],
       context: Context
     };
     action Share appliesTo {
       principal: [User, Workload],
-      resource: [Application],
+      resource: [Application, Object],
       context: Context
     };
     action Tag appliesTo {
       principal: [User, Workload],
-      resource: [Application],
+      resource: [Application, Object],
       context: Context
     };
     action Write appliesTo {
       principal: [User, Workload],
-      resource: [Application],
+      resource: [Application, Object],
       context: Context
     };
     action GET appliesTo {
