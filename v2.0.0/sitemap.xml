@@ -1777,10 +1777,6 @@
          <lastmod>2025-04-03</lastmod>
     </url>
     <url>
-         <loc>https://jans.io/docs/v2.0.0/script-catalog/cache_refresh/cacherefresh/</loc>
-         <lastmod>2025-04-03</lastmod>
-    </url>
-    <url>
          <loc>https://jans.io/docs/v2.0.0/script-catalog/ciba/ciba/</loc>
          <lastmod>2025-04-03</lastmod>
     </url>
@@ -1886,6 +1882,10 @@
     </url>
     <url>
          <loc>https://jans.io/docs/v2.0.0/script-catalog/introspection/introspection-role-based-scope/</loc>
+         <lastmod>2025-04-03</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/v2.0.0/script-catalog/link_interception/linkinerception/</loc>
          <lastmod>2025-04-03</lastmod>
     </url>
     <url>

@@ -12,14 +12,14 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://jans.io/docs/v2.0.0/script-catalog/cache_refresh/cacherefresh/">
+        <link rel="canonical" href="https://jans.io/docs/v2.0.0/script-catalog/link_interception/linkinerception/">
       
       <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.5.7">
     
     
       
-        <title>CacheRefresh Detail Custom Script (CacheRefresh) - Janssen Documentation</title>
+        <title>Link Interception Detail Custom Script (LinkInterception) - Janssen Documentation</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#cacherefresh-detail-custom-script-cacherefresh" class="md-skip">
+        <a href="#link-interception-detail-custom-script-linkinterception" class="md-skip">
           Skip to content
         </a>
       
@@ -128,7 +128,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              CacheRefresh Detail Custom Script (CacheRefresh)
+              Link Interception Detail Custom Script (LinkInterception)
             
           </span>
         </div>
@@ -8767,18 +8767,18 @@
 
 
 
-  <a href="https://github.com/JanssenProject/jans/edit/main/docs/script-catalog/cache_refresh/cacherefresh.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/JanssenProject/jans/edit/main/docs/script-catalog/link_interception/linkinerception.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="cacherefresh-detail-custom-script-cacherefresh">CacheRefresh Detail Custom Script (CacheRefresh)<a class="headerlink" href="#cacherefresh-detail-custom-script-cacherefresh" title="Permanent link">#</a></h1>
+<h1 id="link-interception-detail-custom-script-linkinterception">Link Interception Detail Custom Script (LinkInterception)<a class="headerlink" href="#link-interception-detail-custom-script-linkinterception" title="Permanent link">#</a></h1>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
 <p>The Jans-Auth server implements <a href="https://datatracker.ietf.org/doc/html/rfc9396">OAuth 2.0 Rich Authorization Requests</a>.
-This script is used to control/customize cache refresh.</p>
+This script is used to control/customize link interception.</p>
 <h2 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">#</a></h2>
-<p>The CachRefresh script implements the <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/user/CacheRefreshType.java">CachRefreshType</a> interface. This extends methods from the base script type in addition to adding new methods:</p>
+<p>The CachRefresh script implements the <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/user/LinkInterceptionType.java">LinkInterceptionType</a> interface. This extends methods from the base script type in addition to adding new methods:</p>
 <h3 id="inherited-methods">Inherited Methods<a class="headerlink" href="#inherited-methods" title="Permanent link">#</a></h3>
 <table>
 <thead>
@@ -8822,7 +8822,7 @@ This script is used to control/customize cache refresh.</p>
 </tbody>
 </table>
 <h3 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="n">from</span><span class="w"> </span><span class="n">io</span><span class="p">.</span><span class="na">jans</span><span class="p">.</span><span class="na">model</span><span class="p">.</span><span class="na">custom</span><span class="p">.</span><span class="na">script</span><span class="p">.</span><span class="na">type</span><span class="p">.</span><span class="na">user</span><span class="w"> </span><span class="kn">import</span><span class="w"> </span><span class="nn">CacheRefreshType</span>
+<div class="highlight"><pre><span></span><code><span class="n">from</span><span class="w"> </span><span class="n">io</span><span class="p">.</span><span class="na">jans</span><span class="p">.</span><span class="na">model</span><span class="p">.</span><span class="na">custom</span><span class="p">.</span><span class="na">script</span><span class="p">.</span><span class="na">type</span><span class="p">.</span><span class="na">user</span><span class="w"> </span><span class="kn">import</span><span class="w"> </span><span class="nn">LinkInterceptionType</span>
 <span class="n">from</span><span class="w"> </span><span class="n">io</span><span class="p">.</span><span class="na">jans</span><span class="p">.</span><span class="na">util</span><span class="w"> </span><span class="kn">import</span><span class="w"> </span><span class="nn">StringHelper</span><span class="p">,</span><span class="w"> </span><span class="n">ArrayHelper</span>
 <span class="n">from</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">util</span><span class="w"> </span><span class="kn">import</span><span class="w"> </span><span class="nn">Arrays</span><span class="p">,</span><span class="w"> </span><span class="n">ArrayList</span>
 <span class="n">from</span><span class="w"> </span><span class="n">io</span><span class="p">.</span><span class="na">jans</span><span class="p">.</span><span class="na">oxtrust</span><span class="p">.</span><span class="na">model</span><span class="w"> </span><span class="kn">import</span><span class="w"> </span><span class="nn">JanssenCustomAttribute</span>
@@ -8830,26 +8830,26 @@ This script is used to control/customize cache refresh.</p>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">java</span>
 
-<span class="kd">class</span> <span class="nf">CacheRefresh</span><span class="p">(</span><span class="n">CacheRefreshType</span><span class="p">):</span>
+<span class="kd">class</span> <span class="nf">LinkInterception</span><span class="p">(</span><span class="n">LinkInterceptionType</span><span class="p">):</span>
 <span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">currentTimeMillis</span><span class="p">):</span>
 <span class="w">        </span><span class="n">self</span><span class="p">.</span><span class="na">currentTimeMillis</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">currentTimeMillis</span>
 
 <span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">customScript</span><span class="p">,</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">):</span>
-<span class="w">        </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Cache refresh. Initialization&quot;</span>
-<span class="w">        </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Cache refresh. Initialized successfully&quot;</span>
+<span class="w">        </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Link interception. Initialization&quot;</span>
+<span class="w">        </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Link interception. Initialized successfully&quot;</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">True</span><span class="w">   </span>
 
 <span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">):</span>
-<span class="w">        </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Cache refresh. Destroy&quot;</span>
-<span class="w">        </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Cache refresh. Destroyed successfully&quot;</span>
+<span class="w">        </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Link interception. Destroy&quot;</span>
+<span class="w">        </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Link interception. Destroyed successfully&quot;</span>
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">True</span>
 
 <span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="n">Check</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="k">this</span><span class="w"> </span><span class="n">instance</span><span class="w"> </span><span class="n">conform</span><span class="w"> </span><span class="n">starting</span><span class="w"> </span><span class="n">conditions</span><span class="w"> </span>
 <span class="w">    </span><span class="err">#</span><span class="w">   </span><span class="n">configurationAttributes</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">util</span><span class="p">.</span><span class="na">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span>
 <span class="w">    </span><span class="err">#</span><span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">True</span><span class="o">/</span><span class="n">False</span>
 <span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="nf">isStartProcess</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">):</span>
-<span class="w">        </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Cache refresh. Is start process method&quot;</span>
+<span class="w">        </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Link interception. Is start process method&quot;</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">False</span>
 
@@ -8858,7 +8858,7 @@ This script is used to control/customize cache refresh.</p>
 <span class="w">    </span><span class="err">#</span><span class="w">   </span><span class="n">configurationAttributes</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">util</span><span class="p">.</span><span class="na">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span>
 <span class="w">    </span><span class="err">#</span><span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">None</span><span class="w"> </span><span class="p">(</span><span class="n">use</span><span class="w"> </span><span class="n">password</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">configuration</span><span class="p">)</span><span class="w"> </span><span class="n">or</span><span class="w"> </span><span class="n">io</span><span class="p">.</span><span class="na">jans</span><span class="p">.</span><span class="na">model</span><span class="p">.</span><span class="na">custom</span><span class="p">.</span><span class="na">script</span><span class="p">.</span><span class="na">model</span><span class="p">.</span><span class="na">bind</span><span class="p">.</span><span class="na">BindCredentials</span>
 <span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="nf">getBindCredentials</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">configId</span><span class="p">,</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">):</span>
-<span class="w">        </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Cache refresh. GetBindCredentials method&quot;</span>
+<span class="w">        </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Link interception. GetBindCredentials method&quot;</span>
 <span class="err">#</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">configId</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;source&quot;</span><span class="p">:</span>
 <span class="err">#</span><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">BindCredentials</span><span class="p">(</span><span class="s">&quot;cn=Directory Manager&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;password&quot;</span><span class="p">)</span>
 
@@ -8868,7 +8868,7 @@ This script is used to control/customize cache refresh.</p>
 <span class="w">    </span><span class="err">#</span><span class="w">   </span><span class="n">user</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">io</span><span class="p">.</span><span class="na">jans</span><span class="p">.</span><span class="na">oxtrust</span><span class="p">.</span><span class="na">model</span><span class="p">.</span><span class="na">JanssenCustomPerson</span>
 <span class="w">    </span><span class="err">#</span><span class="w">   </span><span class="n">configurationAttributes</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">java</span><span class="p">.</span><span class="na">util</span><span class="p">.</span><span class="na">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span>
 <span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="nf">updateUser</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">):</span>
-<span class="w">        </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Cache refresh. UpdateUser method&quot;</span>
+<span class="w">        </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Link interception. UpdateUser method&quot;</span>
 
 <span class="w">        </span><span class="n">attributes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">user</span><span class="p">.</span><span class="na">getCustomAttributes</span><span class="p">()</span>
 
@@ -8893,7 +8893,7 @@ This script is used to control/customize cache refresh.</p>
 </code></pre></div>
 <h2 id="sample-scripts">Sample Scripts<a class="headerlink" href="#sample-scripts" title="Permanent link">#</a></h2>
 <ul>
-<li><a href="../../../script-catalog/cache_refresh/sample-script/SampleScript.py">CacheRefreshScirpt</a></li>
+<li><a href="../../../script-catalog/link_interception/sample-script/SampleScript.py">LinkInterceptionScirpt</a></li>
 </ul>
 
   <hr>
@@ -8901,7 +8901,7 @@ This script is used to control/customize cache refresh.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-21T08:21:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-21</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-04-03T18:06:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-04-03</span>
       
         <br>
         Created:
