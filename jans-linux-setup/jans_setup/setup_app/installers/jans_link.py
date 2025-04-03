@@ -23,7 +23,7 @@ class JansLinkInstaller(JettyInstaller):
         self.needdb = True
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
-        self.install_var = 'install_jans_ldap_link'
+        self.install_var = 'install_link_interception'
         self.register_progess()
 
         self.output_folder = os.path.join(Config.output_dir, self.service_name)

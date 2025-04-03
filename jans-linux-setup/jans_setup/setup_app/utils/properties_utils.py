@@ -281,17 +281,17 @@ class PropertiesUtils(SetupUtils):
 
 
     def prompt_for_jans_link(self):
-        if Config.installed_instance and Config.install_jans_ldap_link:
+        if Config.installed_instance and Config.install_link_interception:
             return
 
         prompt_jans_link = self.getPrompt("Install Jans LDAP Link Server?",
-                                            self.getDefaultOption(Config.install_jans_ldap_link)
+                                            self.getDefaultOption(Config.install_link_interception)
                                             )[0].lower()
 
-        Config.install_jans_ldap_link = prompt_jans_link == 'y'
+        Config.install_link_interception = prompt_jans_link == 'y'
 
-        if Config.installed_instance and Config.install_jans_ldap_link:
-            Config.addPostSetupService.append('install_jans_ldap_link')
+        if Config.installed_instance and Config.install_link_interception:
+            Config.addPostSetupService.append('install_link_interception')
 
 
     def prompt_for_jans_keycloak_link(self):

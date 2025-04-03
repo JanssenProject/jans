@@ -29,15 +29,17 @@ class JansInstaller(BaseInstaller, SetupUtils):
     def __repr__(self):
         setattr(base.current_app, self.__class__.__name__, self)
         txt = ''
+        name_sep = 35
+        state_sep = 25
         try:
             if not Config.installed_instance:
-                txt += 'hostname'.ljust(30) + Config.hostname.rjust(35) + "\n"
-                txt += 'orgName'.ljust(30) + Config.orgName.rjust(35) + "\n"
-                txt += 'os'.ljust(30) + Config.os_type.rjust(35) + "\n"
-                txt += 'city'.ljust(30) + Config.city.rjust(35) + "\n"
-                txt += 'state'.ljust(30) + Config.state.rjust(35) + "\n"
-                txt += 'countryCode'.ljust(30) + Config.countryCode.rjust(35) + "\n"
-                txt += 'Applications max ram (MB)'.ljust(30) + str(Config.application_max_ram).rjust(35) + "\n"
+                txt += 'hostname'.ljust(name_sep) + Config.hostname.rjust(state_sep) + "\n"
+                txt += 'orgName'.ljust(name_sep) + Config.orgName.rjust(state_sep) + "\n"
+                txt += 'os'.ljust(name_sep) + Config.os_type.rjust(state_sep) + "\n"
+                txt += 'city'.ljust(name_sep) + Config.city.rjust(state_sep) + "\n"
+                txt += 'state'.ljust(name_sep) + Config.state.rjust(state_sep) + "\n"
+                txt += 'countryCode'.ljust(name_sep) + Config.countryCode.rjust(state_sep) + "\n"
+                txt += 'Applications max ram (MB)'.ljust(name_sep) + str(Config.application_max_ram).rjust(state_sep) + "\n"
 
                 bc = []
 
@@ -49,14 +51,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
                 if bc:
                     bct = ', '.join(bc)
-                    txt += 'Backends'.ljust(30) + bct.rjust(35) + "\n"
+                    txt += 'Backends'.ljust(name_sep) + bct.rjust(state_sep) + "\n"
 
-                txt += 'Java Type'.ljust(30) + Config.java_type.rjust(35) + "\n"
+                txt += 'Java Type'.ljust(name_sep) + Config.java_type.rjust(state_sep) + "\n"
 
             def get_install_string(prefix, install_var):
                 if not base.argsp.allow_pre_released_features and Config.get(install_var+'_pre_released'):
                     return ''
-                return prefix.ljust(30) + repr(getattr(Config, install_var, False)).rjust(35) + (' *' if install_var in Config.addPostSetupService else '') + '\n'
+                return prefix.ljust(name_sep) + repr(getattr(Config, install_var, False)).rjust(state_sep) + (' *' if install_var in Config.addPostSetupService else '') + '\n'
 
             txt += get_install_string('Install Apache 2 web server', 'install_httpd')
             txt += get_install_string('Install Auth Server', 'install_jans_auth')
@@ -71,11 +73,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('Install Jans KC', 'install_jans_saml')):
                     txt += get_install_string(prompt_str, install_var)
 
-                if base.argsp.install_jans_ldap_link:
-                    txt += get_install_string('Install Jans LDAP Link Server', 'install_jans_ldap_link')
+                if base.argsp.install_link_interception:
+                    txt += get_install_string('Install Link Interception Server', 'install_link_interception')
 
             if base.argsp.t:
-                txt += 'Load Test Data '.ljust(30) + repr( base.argsp.t).rjust(35) + "\n"
+                txt += 'Load Test Data '.ljust(name_sep) + repr( base.argsp.t).rjust(state_sep) + "\n"
 
             return txt
 
@@ -631,7 +633,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('jans-config-api', 'install_config_api'),
                         ('jans-casa', 'install_casa'),
                         ('jans-fido2', 'install_fido2'),
-                        ('jans-link', 'install_jans_ldap_link'),
+                        ('jans-link', 'install_link_interception'),
                         ('jans-scim', 'install_scim_server'),
                         ('jans-lock', 'install_jans_lock_as_server'),
                         ('opa', 'install_opa'),
