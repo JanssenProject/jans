@@ -159,6 +159,26 @@ pub enum BootstrapConfigLoadingError {
          simultaneously."
     )]
     BothPrincipalsDisabled,
+
+    /// Error returned when `CEDARLING_LOG_TYPE` is set to `lock` but `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` is not set.
+    #[error(
+        "the `CEDARLING_LOG_TYPE` is set to `lock` but `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` is not set."
+    )]
+    MissingLockServerConfigUri,
+
+    /// Error returned when `CEDARLING_LOG_TYPE` is set to `lock` but `CEDARLING_LOCK_SERVER_IDPCONFIG_URI` is not set.
+    #[error(
+        "the `CEDARLING_LOG_TYPE` is set to `lock` but `CEDARLING_LOCK_SERVER_IDPCONFIG_URI` is not set."
+    )]
+    MissingLockServerIdpOidcUri,
+
+    /// Error returned when `CEDARLING_LOG_TYPE` is set to `lock` but `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` is not set.
+    #[error("the value of `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` is not a valid URI: {0}")]
+    InvalidLockServerConfigUri(#[from] url::ParseError),
+
+    /// Error returned when `CEDARLING_LOG_TYPE` is set to `lock` but `CEDARLING_LOCK_SSA_JWT` is not set.
+    #[error("the `CEDARLING_LOG_TYPE` is set to `lock` but `CEDARLING_LOCK_SSA_JWT` is not set.")]
+    MissingSsaJwt,
 }
 
 #[cfg(test)]

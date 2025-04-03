@@ -414,7 +414,7 @@ mod test {
         ";
 
         // Parse YAML
-        let parsed = serde_yml::from_str::<ClaimMapping>(&claim_mapping_yaml)
+        let parsed = serde_yml::from_str::<ClaimMapping>(claim_mapping_yaml)
             .expect("should parse token entity metadata");
 
         // Assert if the JSON got parsed correctly

@@ -113,7 +113,7 @@ async fn check_mapping_tokens_data() {
         .build_entities(&request)
         .await
         // log err to be human readable
-        .inspect_err(|err| println!("Error: {}", err.to_string()))
+        .inspect_err(|err| println!("Error: {}", err))
         .expect("request should be parsed without errors");
 
     // check value of resource entity

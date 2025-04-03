@@ -280,12 +280,13 @@ mod test {
         let expected_keys = expected_jwkset
             .keys
             .iter()
-            .filter_map(|key| match &key.common.key_id {
-                Some(key_id) => Some((
-                    key_id.as_str().into(),
-                    DecodingKey::from_jwk(key).expect("Should create DecodingKey from Jwk"),
-                )),
-                None => None,
+            .filter_map(|key| {
+                key.common.key_id.as_ref().map(|key_id| {
+                    (
+                        key_id.as_str().into(),
+                        DecodingKey::from_jwk(key).expect("Should create DecodingKey from Jwk"),
+                    )
+                })
             })
             .collect::<HashMap<Box<str>, DecodingKey>>();
 
@@ -387,12 +388,13 @@ mod test {
         let expected_keys = jwkset
             .keys
             .iter()
-            .filter_map(|key| match &key.common.key_id {
-                Some(key_id) => Some((
-                    key_id.as_str().into(),
-                    DecodingKey::from_jwk(key).expect("Should create DecodingKey from Jwk"),
-                )),
-                None => None,
+            .filter_map(|key| {
+                key.common.key_id.as_ref().map(|key_id| {
+                    (
+                        key_id.as_str().into(),
+                        DecodingKey::from_jwk(key).expect("Should create DecodingKey from Jwk"),
+                    )
+                })
             })
             .collect::<HashMap<Box<str>, DecodingKey>>();
         let expected = JwkStore {
@@ -567,12 +569,13 @@ mod test {
         let expected_keys = expected_jwkset
             .keys
             .iter()
-            .filter_map(|key| match &key.common.key_id {
-                Some(key_id) => Some((
-                    key_id.as_str().into(),
-                    DecodingKey::from_jwk(key).expect("Should create DecodingKey from Jwk"),
-                )),
-                None => None,
+            .filter_map(|key| {
+                key.common.key_id.as_ref().map(|key_id| {
+                    (
+                        key_id.as_str().into(),
+                        DecodingKey::from_jwk(key).expect("Should create DecodingKey from Jwk"),
+                    )
+                })
             })
             .collect::<HashMap<Box<str>, DecodingKey>>();
 

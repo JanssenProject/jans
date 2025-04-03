@@ -293,10 +293,8 @@ mod test {
         );
 
         // Check if the entity conforms to the schema
-        Entities::from_entities([entity.clone()], schema).expect(&format!(
-            "{} entity should conform to the schema",
-            entity.uid().to_string()
-        ));
+        Entities::from_entities([entity.clone()], schema)
+            .unwrap_or_else(|_| panic!("{} entity should conform to the schema", entity.uid()));
     }
 
     #[test]
@@ -315,32 +313,38 @@ mod test {
                 entity CustomToken;
             }
         "#;
-        let schema = Schema::from_str(&schema_src).expect("parse schema");
+        let schema = Schema::from_str(schema_src).expect("parse schema");
         let validator_schema =
-            ValidatorSchema::from_str(&schema_src).expect("parse validation schema");
+            ValidatorSchema::from_str(schema_src).expect("parse validation schema");
 
         // Set the custom workload name in the config
         let mut config = EntityBuilderConfig::default().with_workload();
         config.entity_names.workload = "Jans::CustomWorkload".into();
 
         // Set the custom token names in the IDP metadata
-        let mut iss = TrustedIssuer::default();
-        iss.tokens_metadata = HashMap::from([
-            (
-                "access_token".to_string(),
-                TokenEntityMetadata::builder()
-                    .entity_type_name("Jans::CustomAccessToken".to_string())
-                    .principal_mapping(["Jans::CustomWorkload".to_string()].into_iter().collect())
-                    .build(),
-            ),
-            (
-                "custom_token".to_string(),
-                TokenEntityMetadata::builder()
-                    .entity_type_name("AnotherNamespace::CustomToken".to_string())
-                    .principal_mapping(["Jans::CustomWorkload".to_string()].into_iter().collect())
-                    .build(),
-            ),
-        ]);
+        let iss = TrustedIssuer {
+            tokens_metadata: HashMap::from([
+                (
+                    "access_token".to_string(),
+                    TokenEntityMetadata::builder()
+                        .entity_type_name("Jans::CustomAccessToken".to_string())
+                        .principal_mapping(
+                            ["Jans::CustomWorkload".to_string()].into_iter().collect(),
+                        )
+                        .build(),
+                ),
+                (
+                    "custom_token".to_string(),
+                    TokenEntityMetadata::builder()
+                        .entity_type_name("AnotherNamespace::CustomToken".to_string())
+                        .principal_mapping(
+                            ["Jans::CustomWorkload".to_string()].into_iter().collect(),
+                        )
+                        .build(),
+                ),
+            ]),
+            ..Default::default()
+        };
         let issuers = HashMap::from([("some_iss".into(), iss)]);
         let tokens = HashMap::from([
             (
@@ -348,7 +352,7 @@ mod test {
                 Token::new(
                     "access_token",
                     json!({"jti": "some_jti", "aud": "some_aud"}).into(),
-                    Some(&issuers.get("some_iss").unwrap()),
+                    Some(issuers.get("some_iss").unwrap()),
                 ),
             ),
             (
@@ -356,7 +360,7 @@ mod test {
                 Token::new(
                     "custom_token",
                     json!({"jti": "some_jti"}).into(),
-                    Some(&issuers.get("some_iss").unwrap()),
+                    Some(issuers.get("some_iss").unwrap()),
                 ),
             ),
         ]);

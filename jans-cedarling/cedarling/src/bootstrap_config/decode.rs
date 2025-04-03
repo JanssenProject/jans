@@ -13,13 +13,13 @@ use std::fs;
 use std::path::Path;
 use std::str::FromStr;
 
-use super::BootstrapConfigRaw;
 use super::authorization_config::{AuthorizationConfig, IdTokenTrustMode};
 use super::raw_config::LoggerType;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, JwtConfig, LogConfig, LogTypeConfig,
     MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
+use super::{BootstrapConfigRaw, LockLogConfig};
 use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -55,7 +55,7 @@ impl BootstrapConfig {
                 max_items: raw.log_max_items,
             }),
             LoggerType::StdOut => LogTypeConfig::StdOut,
-            LoggerType::Lock => LogTypeConfig::Lock,
+            LoggerType::Lock => LogTypeConfig::Lock(raw.try_into()?),
         };
         let log_config = LogConfig {
             log_type,

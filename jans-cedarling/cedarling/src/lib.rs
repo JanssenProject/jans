@@ -45,7 +45,7 @@ use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
 use log::interface::LogWriter;
-use log::{LogEntry, LogType};
+use log::{InitLockLoggerError, LogEntry, LogType};
 pub use log::{LogLevel, LogStorage};
 
 #[doc(hidden)]
@@ -77,6 +77,10 @@ pub enum InitCedarlingError {
     /// Error while init tokio runtime
     #[error(transparent)]
     RuntimeInit(std::io::Error),
+    #[error("failed to initialize Lock logger: {0}")]
+    /// Error returned when Cedarling fails to obtain client credentials for sending
+    /// logs to the Lock Server.
+    InitLockLogger(#[from] InitLockLoggerError),
 }
 
 /// The instance of the Cedarling application.
@@ -104,7 +108,8 @@ impl Cedarling {
         let pdp_id = app_types::PdpID::new();
         let app_name = (!config.application_name.is_empty())
             .then(|| ApplicationName(config.application_name.clone()));
-        let log = log::init_logger(&config.log_config, pdp_id, app_name);
+
+        let log = log::init_logger(&config.log_config, pdp_id, app_name).await?;
 
         let service_config = ServiceConfig::new(config)
             .await

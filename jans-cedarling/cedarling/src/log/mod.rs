@@ -51,6 +51,8 @@
 
 mod err_log_entry;
 pub mod interface;
+
+mod lock_logger;
 mod log_entry;
 mod log_level;
 pub(crate) mod log_strategy;
@@ -58,6 +60,7 @@ mod memory_logger;
 mod nop_logger;
 mod stdout_logger;
 
+pub use lock_logger::InitLockLoggerError;
 pub use log_entry::*;
 pub use log_level::*;
 
@@ -77,10 +80,10 @@ pub(crate) type Logger = Arc<LogStrategy>;
 
 /// Initialize logger.
 /// entry point for initialize logger
-pub(crate) fn init_logger(
+pub(crate) async fn init_logger(
     config: &LogConfig,
     pdp_id: PdpID,
     app_name: Option<ApplicationName>,
-) -> Logger {
-    Arc::new(LogStrategy::new(config, pdp_id, app_name))
+) -> Result<Logger, InitLockLoggerError> {
+    Ok(Arc::new(LogStrategy::new(config, pdp_id, app_name).await?))
 }
