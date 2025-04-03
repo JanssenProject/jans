@@ -8,11 +8,11 @@ tags:
   - quick start
 ---
 
-# Cedarling Quick Start Guide
+# Cedarling Quick Start Guide (Part 1)
 
 ## Introduction
 
-[Jans Tarp](../../demos/jans-tarp) is a browser plugin that enables developers to test OpenID Connect flows. It embeds the Cedarling WASM PDP, and is one of the fastest ways to test out Cedar with real JSON web tokens. In this guide, we'll demonstrate how to use Tarp to register a client on an OAuth authorization server("AS"), and use the embedded Cedarling WebAssembly app to reach an authorization decision. We will demonstrate Role Based Access Control (RBAC). This will be done in three steps:
+[Jans Tarp](../../demos/jans-tarp) is a browser plugin that enables developers to test OpenID Connect flows. It embeds the Cedarling WASM PDP, and is one of the fastest ways to test out Cedar with real JSON web tokens. In this guide, we'll demonstrate how to use the embedded Cedarling WebAssembly app in Tarp to reach an authorization decision without tokens. We will demonstrate Role Based Access Control (RBAC). This will be done in three steps:
 
 1. [Author Cedar Policy Store](#author-cedar-policy-store)
 2. [Configure Tarp Cedarling Component](#configure-tarp-cedarling-component)
@@ -33,14 +33,10 @@ For this QuickStart Demo, we will use a policy where access is only granted if t
 ```
 @id("allow_supreme_ruler")
 permit(
-  principal is Jans::User,
+  principal in Jans::Role::"SupremeRuler",
   action,
   resource
-)
-when {
-  principal has userinfo_token.role &&
-  principal.userinfo_token.role.contains("SupremeRuler")
-};
+);
 ```
 
 Further information on Cedar can be found in the [official documentation](https://docs.cedarpolicy.com/)
@@ -59,14 +55,10 @@ The inputs for each section are as follows:
     ```
     @id("allow_supreme_ruler")
     permit(
-      principal is Jans::User,
+      principal in Jans::Role::"SupremeRuler",
       action,
       resource
-    )
-    when {
-      principal has userinfo_token.role &&
-      principal.userinfo_token.role.contains("SupremeRuler")
-    };
+    );
     ```
 
 3. Trusted issuers:
@@ -112,15 +104,8 @@ After following the guide, the policy store URI will be copied to the clipboard.
 ## Configure Tarp Cedarling Component 
 
 1. Open Tarp on your browser.
-   ![image](../assets/tarp-blank.png)
-2. Click on `Add Client` and fill in the following details:
-
-   * Issuer: `https://test-jans.gluu.info`.
-   * Client Expiry Date: One day after your current date
-   * Scopes: `openid`,`profile`, and `role`
-3. Click `Register`. 
-4. Click on `Cedarling`, then `Add Configurations`
-5. Paste in the following configuration, replacing `<Policy Store URI>` with your policy store URL. 
+2. Click on `Cedarling`, then `Add Configurations`
+3. Paste in the following configuration, replacing `<Policy Store URI>` with your policy store URL. 
   ```json
   {
       "CEDARLING_APPLICATION_NAME": "My App",
@@ -131,11 +116,9 @@ After following the guide, the policy store URI will be copied to the clipboard.
       "CEDARLING_WORKLOAD_AUTHZ": "disabled",
       "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
           "or": [
-              {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
               {"===": [{"var": "Jans::User"}, "ALLOW"]}
            ]
       },
-      "CEDARLING_LOCAL_JWKS": null,
       "CEDARLING_JWT_SIG_VALIDATION": "disabled",
       "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
       "CEDARLING_MAPPING_USER": "Jans::User",
@@ -150,22 +133,15 @@ After following the guide, the policy store URI will be copied to the clipboard.
       "CEDARLING_LOCK_LISTEN_SSE": "disabled"
   }
   ```
-6. Click `Save`. Tarp will validate your bootstrap and initialize Cedarling.
+4. Click `Save`. Tarp will validate your bootstrap and initialize Cedarling.
+5. Click on `Cedarling Authz Form`
+6. Fill in the following fields:
 
-## Test Policy 
-
-1. On the Authentication Flow screen, click on the lightning icon to trigger an authentication flow.
-2. Use the following values for triggering the flow:
-    * Acr Value: `basic`
-    * Scopes: `openid`, `profile`, and `role`
-3. We will be redirected to the test IDP. Login using a user that has the `SupremeRuler` role on this IDP.
-4. On the consent screen, click `Allow`
-5. After you are redirected back to Tarp, click on the `Cedarling Authz Request Form`
-6. Use the following input:
-
-    * Principal: Select all three tokens
+    * Principals: 
+    ```
+    ```
     * Action: `Jans::Action::"Read"`
-    * Resource:
+    * Resource: 
     ```json
     {
       "entity_type": "resource",
@@ -180,9 +156,4 @@ After following the guide, the policy store URI will be copied to the clipboard.
       }
     }
     ```
-7. Click on `Cedarling Authz Request`
-8. We will get a decision log back.
-
-### Sequence diagram
-
-A full sequence diagram of the mentioned steps can be found [here](https://sequencediagram.org/index.html#initialData=C4S2BsFMAIGFICYEMBO4QDsDm0kYdACqoAOAUGSaqAMYhUbDQBCKA9gO4DOkKl1IOgybEU5Kilr08TAIIBXYAAtoAZV4A3XhVaceKALQA+USQBc0AKKNe0BcrWbbNNhgBmILGVPH7K9ShaKBYAIgCeGEgAtoJw6JCM0ABKkFggXMAoSKCu0GR+joG8xqYWsPGJAJIhuPiONCiQwGS63MUmpBbWwLbwyGiYOABGbGzAGVkk0C7unt6kvor+TsHQAOKWhNAA9ABWeFwGSEvbjRkaAIx7HADWXPlLhUElndAAUgDqANKq82IvYgslQwYBASHQAC8YH1UOhsC12G1DB1AWpgNRcEs2CgQBDsiBcm5wJw-iRFg4AkELBstnsDkcTmdgJdtsdlNjcZAAPwAOj5DwpKwB5h2NHB4CGSBoNy5LgQkAAvHyeaTycsiqsaTt9hhDmylKdIOcrsA2DcEgL1c8USKAN4AIilNCNXAA+qbzRh7RYADyfQhGAC+OkR+mFZUQsMGdiWEIAFCQcRghOCADS4Gg5DDps5seQoZ3pmY9AAewAAlKqjK19BH+nCcCFIHQuASMEA)
+7. Click `Cedarling Authz Request`. We will get a decision back.
