@@ -137,7 +137,7 @@ mod test {
             &EntityUid::from_str("Jans::Access_token::\"some_jti\"").expect("a valid EntityUid"),
         );
         let entity = builder
-            .build_workload_entity(&tokens, &tkn_principal_mappings, &built_entities)
+            .build_workload_entity(&tokens, tkn_principal_mappings, &built_entities)
             .expect("should build workload entity");
 
         assert_entity_eq(&entity, expected, schema);
@@ -173,7 +173,7 @@ mod test {
                 principal: "Jans::Workload".into(),
                 attr_name: "access_token".into(),
                 expr: RestrictedExpression::new_entity_uid(
-                    EntityUid::from_str("Jans::Access_token::\"some_jti\"".into())
+                    EntityUid::from_str("Jans::Access_token::\"some_jti\"")
                         .expect("should parse EntityUid"),
                 ),
             }]
@@ -244,7 +244,7 @@ mod test {
                 principal: "Jans::Workload".into(),
                 attr_name: "access_token".into(),
                 expr: RestrictedExpression::new_entity_uid(
-                    EntityUid::from_str("Jans::Access_token::\"some_jti\"".into())
+                    EntityUid::from_str("Jans::Access_token::\"some_jti\"")
                         .expect("should parse EntityUid"),
                 ),
             }]
@@ -300,7 +300,7 @@ mod test {
                 principal: "Jans::Workload".into(),
                 attr_name: "access_token".into(),
                 expr: RestrictedExpression::new_entity_uid(
-                    EntityUid::from_str("Jans::Access_token::\"some_jti\"".into())
+                    EntityUid::from_str("Jans::Access_token::\"some_jti\"")
                         .expect("should parse EntityUid"),
                 ),
             }]

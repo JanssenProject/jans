@@ -47,7 +47,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 static POLICY_STORE_RAW: &str = include_str!("../../test_files/policy-store_ok.yaml");
 
 async fn init_cedarling() -> Cedarling {
-    let cedarling = Cedarling::new(&BootstrapConfig {
+    Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
             log_type: LogTypeConfig::Off,
@@ -75,9 +75,7 @@ async fn init_cedarling() -> Cedarling {
         entity_builder_config: EntityBuilderConfig::default(),
     })
     .await
-    .expect("should initialize cedarling");
-
-    cedarling
+    .expect("should initialize cedarling")
 }
 
 fn get_tokens() -> (String, String, String) {
