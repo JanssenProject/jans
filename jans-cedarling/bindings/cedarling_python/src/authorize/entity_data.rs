@@ -12,34 +12,34 @@ use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyType};
 use serde_pyobject::from_pyobject;
 
-/// ResourceData
+/// EntityData
 /// ============
 ///
-/// A Python wrapper for the Rust `cedarling::ResourceData` struct. This class represents
+/// A Python wrapper for the Rust `cedarling::EntityData` struct. This class represents
 /// a resource entity with a type, ID, and attributes. Attributes are stored as a payload
 /// in a dictionary format.
 ///
 /// Attributes
 /// ----------
-/// :param resource_type: Type of the resource entity.
-/// :param id: ID of the resource entity.
+/// :param entity_type: Type of the entity.
+/// :param id: ID of the entity.
 /// :param payload: Optional dictionary of attributes.
 ///
 /// Methods
 /// -------
 /// .. method:: __init__(self, resource_type: str, id: str, **kwargs: dict)
-///     Initialize a new ResourceData. In kwargs the payload is a dictionary of entity attributes.
+///     Initialize a new EntityData. In kwargs the payload is a dictionary of entity attributes.
 ///
-/// .. method:: from_dict(cls, value: dict) -> ResourceData
-///     Initialize a new ResourceData from a dictionary.
+/// .. method:: from_dict(cls, value: dict) -> EntityData
+///     Initialize a new EntityData from a dictionary.
 ///     To pass `resource_type` you need to use `type` key.
 #[derive(Clone, serde::Deserialize)]
 #[pyclass]
-pub struct ResourceData {
+pub struct EntityData {
     /// entity type name
     #[pyo3(set)]
     #[serde(rename = "type")]
-    pub resource_type: String,
+    pub entity_type: String,
     /// entity id
     #[pyo3(set)]
     pub id: String,
@@ -61,16 +61,16 @@ fn get_payload(object: Bound<'_, PyDict>) -> PyResult<PayloadType> {
 }
 
 #[pymethods]
-impl ResourceData {
+impl EntityData {
     #[new]
-    #[pyo3(signature = (resource_type, id, **kwargs))]
-    fn new(resource_type: String, id: String, kwargs: Option<Bound<'_, PyDict>>) -> PyResult<Self> {
+    #[pyo3(signature = (entity_type, id, **kwargs))]
+    fn new(entity_type: String, id: String, kwargs: Option<Bound<'_, PyDict>>) -> PyResult<Self> {
         let payload = kwargs
             .map(|dict| get_payload(dict))
             .unwrap_or(Ok(HashMap::new()))?;
 
         Ok(Self {
-            resource_type,
+            entity_type,
             id,
             payload,
         })
@@ -90,10 +90,10 @@ impl ResourceData {
     }
 }
 
-impl From<ResourceData> for cedarling::ResourceData {
-    fn from(value: ResourceData) -> Self {
+impl From<EntityData> for cedarling::EntityData {
+    fn from(value: EntityData) -> Self {
         Self {
-            resource_type: value.resource_type,
+            entity_type: value.entity_type,
             id: value.id,
             payload: value.payload,
         }

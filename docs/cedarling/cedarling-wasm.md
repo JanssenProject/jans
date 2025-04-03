@@ -64,9 +64,6 @@ python3 -m http.server
     - `jans/jans-cedarling/bindings/cedarling_wasm/index.html`: A simple example demonstrating basic usage.
     - `jans/jans-cedarling/bindings/cedarling_wasm/cedarling_app.html`: A fully featured `Cedarling` browser app where you can test and validate your configuration.
 
-
-
-
 For using result files in the browser project, you need to make the 
 result `pkg` directory accessible for loading in the browser so that you can 
 later import the corresponding file from the browser.
@@ -133,6 +130,56 @@ later import the corresponding file from the browser.
 
 ```
 
+Example of calling method `authorize_unsigned` for the custom principals:
+
+```js
+            let result = await instance.authorize_unsigned({
+                "principals": [
+                    {
+                        "type": "Jans::User",
+                        "id": "some_principal_id",
+                        "app_id": "application_id",
+                        "name": "John Doe",
+                        "email": "john.doe@example.com"
+                    },
+                    {
+                        "type": "Jans::Role",
+                        "id": "Admin",
+                    },
+                    {
+                        "type": "Jans::Group",
+                        "id": "some_group_id",
+                        "app_id": "group_app_id",
+                        "name": "Some Group",
+                        "country": "US"
+                    
+                    }
+                ]
+                "action": 'Jans::Action::"Read"',
+                "resource": {
+                    "type": "Jans::Application",
+                    "id": "some_id",
+                    "app_id": "application_id",
+                    "name": "Some Application",
+                    "url": {
+                        "host": "jans.test",
+                        "path": "/protected-endpoint",
+                        "protocol": "http"
+                    }
+                },
+                "context": {
+                    "current_time": Math.floor(Date.now() / 1000),
+                    "device_health": ["Healthy"],
+                    "fraud_indicators": ["Allowed"],
+                    "geolocation": ["America"],
+                    "network": "127.0.0.1",
+                    "network_type": "Local",
+                    "operating_system": "Linux",
+                    "user_agent": "Linux"
+                },
+            });
+```
+
 ## Defined API
 
 ```ts
@@ -141,11 +188,66 @@ later import the corresponding file from the browser.
  * This function can take as config parameter the eather `Map` other `Object`
  */
 export function init(config: any): Promise<Cedarling>;
+/**
+ * A WASM wrapper for the Rust `cedarling::AuthorizeResult` struct.
+ * Represents the result of an authorization request.
+ */
+export class AuthorizeResult {
 
+  /**
+   * Convert `AuthorizeResult` to json string value
+   */
+  json_string(): string;
+  principal(principal: string): AuthorizeResultResponse | undefined;
+  /**
+   * Result of authorization where principal is `Jans::Workload`
+   */
+  get workload(): AuthorizeResultResponse | undefined;
+  /**
+   * Result of authorization where principal is `Jans::Workload`
+   */
+  set workload(value: AuthorizeResultResponse | null | undefined);
+  /**
+   * Result of authorization where principal is `Jans::User`
+   */
+  get person(): AuthorizeResultResponse | undefined;
+  /**
+   * Result of authorization where principal is `Jans::User`
+   */
+  set person(value: AuthorizeResultResponse | null | undefined);
+  /**
+   * Result of authorization
+   * true means `ALLOW`
+   * false means `Deny`
+   *
+   * this field is [`bool`] type to be compatible with [authzen Access Evaluation Decision](https://openid.github.io/authzen/#section-6.2.1).
+   */
+  decision: boolean;
+  /**
+   * Request ID of the authorization request
+   */
+  request_id: string;
+}
+/**
+ * A WASM wrapper for the Rust `cedar_policy::Response` struct.
+ * Represents the result of an authorization request.
+ */
+export class AuthorizeResultResponse {
+
+  /**
+   * Authorization decision
+   */
+  readonly decision: boolean;
+  /**
+   * Diagnostics providing more information on how this decision was reached
+   */
+  readonly diagnostics: Diagnostics;
+}
 /**
  * The instance of the Cedarling application.
  */
 export class Cedarling {
+
   /**
    * Create a new instance of the Cedarling application.
    * Assume that config is `Object`
@@ -162,6 +264,11 @@ export class Cedarling {
    */
   authorize(request: any): Promise<AuthorizeResult>;
   /**
+   * Authorize request for unsigned principals.
+   * makes authorization decision based on the [`RequestUnsigned`]
+   */
+  authorize_unsigned(request: any): Promise<AuthorizeResult>;
+  /**
    * Get logs and remove them from the storage.
    * Returns `Array` of `Map`
    */
@@ -176,50 +283,23 @@ export class Cedarling {
    * Returns `Array` of `String`
    */
   get_log_ids(): Array<any>;
+  /**
+   * Get logs by tag, like `log_kind` or `log level`.
+   * Tag can be `log_kind`, `log_level`.
+   */
+  get_logs_by_tag(tag: string): any[];
+  /**
+   * Get logs by request_id.
+   * Return log entries that match the given request_id.
+   */
+  get_logs_by_request_id(request_id: string): any[];
+  /**
+   * Get log by request_id and tag, like composite key `request_id` + `log_kind`.
+   * Tag can be `log_kind`, `log_level`.
+   * Return log entries that match the given request_id and tag.
+   */
+  get_logs_by_request_id_and_tag(request_id: string, tag: string): any[];
 }
-
-/**
- * A WASM wrapper for the Rust `cedarling::AuthorizeResult` struct.
- * Represents the result of an authorization request.
- */
-export class AuthorizeResult {
-  /**
-   * Convert `AuthorizeResult` to json string value
-   */
-  json_string(): string;
-  /**
-   * Result of authorization where principal is `Jans::Workload`
-   */
-  workload?: AuthorizeResultResponse;
-  /**
-   * Result of authorization where principal is `Jans::User`
-   */
-  person?: AuthorizeResultResponse;
-  /**
-   * Result of authorization
-   * true means `ALLOW`
-   * false means `Deny`
-   *
-   * this field is [`bool`] type to be compatible with [authzen Access Evaluation Decision](https://openid.github.io/authzen/#section-6.2.1).
-   */
-  decision: boolean;
-}
-
-/**
- * A WASM wrapper for the Rust `cedar_policy::Response` struct.
- * Represents the result of an authorization request.
- */
-export class AuthorizeResultResponse {
-  /**
-   * Authorization decision
-   */
-  readonly decision: boolean;
-  /**
-   * Diagnostics providing more information on how this decision was reached
-   */
-  readonly diagnostics: Diagnostics;
-}
-
 /**
  * Diagnostics
  * ===========
@@ -227,20 +307,23 @@ export class AuthorizeResultResponse {
  * Provides detailed information about how a policy decision was made, including policies that contributed to the decision and any errors encountered during evaluation.
  */
 export class Diagnostics {
+
   /**
    * `PolicyId`s of the policies that contributed to the decision.
    * If no policies applied to the request, this set will be empty.
    *
    * The ids should be treated as unordered,
    */
-  readonly reason: (string)[];
+  readonly reason: string[];
   /**
    * Errors that occurred during authorization. The errors should be
    * treated as unordered, since policies may be evaluated in any order.
    */
-  readonly errors: (PolicyEvaluationError)[];
+  readonly errors: PolicyEvaluationError[];
 }
-
+export class JsJsonLogic {
+  apply(logic: any, data: any): any;
+}
 /**
  * PolicyEvaluationError
  * =====================
@@ -248,6 +331,7 @@ export class Diagnostics {
  * Represents an error that occurred when evaluating a Cedar policy.
  */
 export class PolicyEvaluationError {
+
   /**
    * Id of the policy with an error
    */

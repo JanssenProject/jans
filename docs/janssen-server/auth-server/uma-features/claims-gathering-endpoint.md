@@ -7,6 +7,8 @@ tags:
   - endpoint
 ---
 
+# Claims Gathering Endpoint 
+
 ## This content is in progress
 
 The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
