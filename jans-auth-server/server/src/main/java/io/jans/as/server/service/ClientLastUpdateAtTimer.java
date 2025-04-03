@@ -134,8 +134,7 @@ public class ClientLastUpdateAtTimer {
     }
 
     private void updateAccessTime(Client client, boolean isUpdateLogonTime, Date lastUpdatedAt) {
-        final boolean isInactiveCleanupActive = appConfiguration.getCleanUpInactiveClientAfterHoursOfInactivity() > 0;
-        if (isFalse(appConfiguration.getUpdateClientAccessTime()) && !isInactiveCleanupActive) {
+        if (isFalse(appConfiguration.getUpdateClientAccessTime())) {
             return;
         }
 

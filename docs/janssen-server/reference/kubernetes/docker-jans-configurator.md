@@ -6,7 +6,7 @@ tags:
 - docker image
 ---
 
-## Overview
+# Configurator
 
 Configurator is a tool to load (generate/restore) and/or dump (backup) the configuration (consists of configmaps and secrets).
 

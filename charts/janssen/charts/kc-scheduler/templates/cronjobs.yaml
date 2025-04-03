@@ -27,9 +27,13 @@ spec:
         spec:
         {{- with .Values.image.pullSecrets }}
           imagePullSecrets:
-            {{- toYaml . | nindent 8 }}
+            {{- toYaml . | nindent 10 }}
         {{- end }}
           dnsPolicy: {{ .Values.dnsPolicy | quote }}
+        {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 10 }}
+        {{- end }}
         {{- with .Values.dnsConfig }}
           dnsConfig:
 {{ toYaml . | indent 12 }}
@@ -81,6 +85,7 @@ spec:
               resources:
 {{- toYaml .Values.resources | nindent 16 }}
               {{- end }}
+              args: ["kc-sync"]
           volumes:
           {{- with .Values.volumes }}
 {{- toYaml . | nindent 12 }}

@@ -14,7 +14,7 @@ Responsible for synchronizing Keycloak SAML clients
 
 ## Source Code
 
-* <https://github.com/JanssenProject/jans/docker-jans-kc-scheduler>
+* <https://github.com/JanssenProject/jans/docker-jans-cloudtools>
 
 ## Requirements
 
@@ -32,7 +32,7 @@ Kubernetes: `>=v1.22.0-0`
 | dnsPolicy | string | `""` | Add custom dns policy |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
-| image.repository | string | `"ghcr.io/janssenproject/jans/kc-scheduler"` | Image  to use for deploying. |
+| image.repository | string | `"ghcr.io/janssenproject/jans/cloudtools"` | Image  to use for deploying. |
 | image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
 | interval | int | `10` | Interval of running the scheduler (in minutes) |
 | lifecycle | object | `{}` |  |
@@ -41,6 +41,7 @@ Kubernetes: `>=v1.22.0-0`
 | resources.limits.memory | string | `"300Mi"` | Memory limit. |
 | resources.requests.cpu | string | `"300m"` | CPU request. |
 | resources.requests.memory | string | `"300Mi"` | Memory request. |
+| tolerations | list | `[]` | Add tolerations for the pods |
 | usrEnvs | object | `{"normal":{},"secret":{}}` | Add custom normal and secret envs to the service |
 | usrEnvs.normal | object | `{}` | Add custom normal envs to the service variable1: value1 |
 | usrEnvs.secret | object | `{}` | Add custom secret envs to the service variable1: value1 |

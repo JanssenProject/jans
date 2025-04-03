@@ -40,6 +40,20 @@ pub async fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
 }
 
 /// create [`Cedarling`] from [`PolicyStoreSource`]
+/// with a callback function to modify the bootstrap configuration.
+pub async fn get_cedarling_with_callback<F>(policy_source: PolicyStoreSource, cb: F) -> Cedarling
+where
+    F: FnOnce(&mut BootstrapConfig),
+{
+    let mut config = get_config(policy_source);
+    cb(&mut config); // Apply the callback function
+
+    Cedarling::new(&config)
+        .await
+        .expect("bootstrap config should initialize correctly")
+}
+
+/// create [`Cedarling`] from [`PolicyStoreSource`]
 pub async fn get_cedarling_with_authorization_conf(
     policy_source: PolicyStoreSource,
     auth_conf: AuthorizationConfig,

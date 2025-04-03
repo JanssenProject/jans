@@ -60,7 +60,8 @@ When you are testing Janssen IdP with self-signed cert then follow below steps b
 * Configuration to run Agama flow
 * Add Your Jans Auth server host , Client expiry date, Scopes and click on `Register` client. It will register new OP Client on your Auth server.
 
-![image](./docs/images/tarp-client-reg.png)
+![image](./docs/images/add-oidc-client.png)
+![image](./docs/images/oidc-client-reg.png)
 
 * Add `Acr values` and `Scopes ` click on Trigger Auth Code flow.
 
@@ -74,7 +75,21 @@ When you are testing Janssen IdP with self-signed cert then follow below steps b
 
 ![image](./docs/images/successful-tarp-auth-screen.png)
 
+## Cedarling authorization
 
+* Add Cedarling bootstrap configuration on Cedarling tab (before authentication).
+
+![image](./docs/images/add-bootstrap-config.png)
+
+* After authentication, test Cedarling Authorization decision using following request form.
+
+![image](./docs/images/cedar-auth-form.png)
+
+## Cedarling unsigned authorization
+
+* The `authorize_unsigned` method allows making authorization decisions without JWT token verification.
+
+![image](./docs/images/unsigned-cedar-authz.png)
 
 ## Testing with Keycloak (installed on localhost)
 

@@ -175,6 +175,8 @@ alb:
 auth-server:
   # -- Boolean flag to enable/disable auth-server chart. You should never set this to false.
   enabled: true
+  # -- passing custom java options to auth-server. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+  cnCustomJavaOptions: ""
   # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
   appLoggers:
     # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e auth-server-script ===> 2022-12-20 17:49:55,744 INFO
@@ -296,7 +298,7 @@ auth-server-key-rotation:
     # -- Image pullPolicy to use for deploying.
     pullPolicy: IfNotPresent
     # -- Image  to use for deploying.
-    repository: ghcr.io/janssenproject/jans/certmanager
+    repository: ghcr.io/janssenproject/jans/cloudtools
     # -- Image  tag to use for deploying.
     tag: 0.0.0-nightly
     # -- Image Pull Secrets
@@ -364,6 +366,8 @@ casa:
   casaServiceName: casa
   # -- Boolean flag to enable/disable the casa chart.
   enabled: true
+  # -- passing custom java options to casa. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+  cnCustomJavaOptions: ""
   # -- Enable endpoints in either istio or nginx ingress depending on users choice
   ingress:
     # -- Enable casa endpoints /casa
@@ -377,6 +381,8 @@ config-api:
   configApiServerServiceName: config-api
   # -- Boolean flag to enable/disable the config-api chart.
   enabled: true
+  # -- passing custom java options to config-api. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+  cnCustomJavaOptions: ""
   # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
   appLoggers:
     # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e config-api_persistence ===> 2022-12-20 17:49:55,744 INFO
@@ -412,6 +418,8 @@ fido2:
   fido2ServiceName: fido2
   # -- Boolean flag to enable/disable the fido2 chart.
   enabled: true
+  # -- passing custom java options to fido2. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+  cnCustomJavaOptions: ""
   # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
   appLoggers:
     # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e fido2 ===> 2022-12-20 17:49:55,744 INFO
@@ -457,6 +465,8 @@ scim:
   scimServiceName: scim
   # -- Boolean flag to enable/disable the SCIM chart.
   enabled: true
+  # -- passing custom java options to scim. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+  cnCustomJavaOptions: ""
   # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
   appLoggers:
     # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e jans-scim ===> 2022-12-20 17:49:55,744 INFO
@@ -496,6 +506,8 @@ link:
   linkServiceName: link
   # -- Boolean flag to enable/disable the link chart.
   enabled: false
+  # -- passing custom java options to link. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+  cnCustomJavaOptions: ""
   # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
   appLoggers:
     # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e link-persistence ===> 2022-12-20 17:49:55,744 INFO
@@ -529,6 +541,8 @@ saml:
   samlServiceName: saml
   # -- Boolean flag to enable/disable the saml chart.
   enabled: false
+  # -- passing custom java options to saml. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+  cnCustomJavaOptions: ""
   # -- Enable endpoints in either istio or nginx ingress depending on users choice
   ingress:
     # Enable saml endpoints /kc
@@ -634,7 +648,8 @@ service:
     clientIP:
       timeoutSeconds: 10800
 
-
+# -- Add tolerations for the pods
+tolerations: []
 # Deployment manifest properties
 # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
 # https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
@@ -761,7 +776,7 @@ kc-scheduler:
     # -- Image pullPolicy to use for deploying.
     pullPolicy: IfNotPresent
     # -- Image  to use for deploying.
-    repository: ghcr.io/janssenproject/jans/kc-scheduler
+    repository: ghcr.io/janssenproject/jans/cloudtools
     # -- Image  tag to use for deploying.
     tag: 0.0.0-nightly
     # -- Image Pull Secrets
@@ -803,3 +818,66 @@ kc-scheduler:
   customCommand: []
   # -- Boolean flag to enable/disable the kc-scheduler cronjob chart.
   enabled: false
+
+# -- Cleanup expired entries in persistence
+cleanup:
+  # -- Add custom normal and secret envs to the service
+  usrEnvs:
+    # -- Add custom normal envs to the service
+    # variable1: value1
+    normal: {}
+    # -- Add custom secret envs to the service
+    # variable1: value1
+    secret: {}
+  # -- Add custom dns policy
+  dnsPolicy: ""
+  # -- Add custom dns config
+  dnsConfig: {}
+  image:
+    # -- Image pullPolicy to use for deploying.
+    pullPolicy: IfNotPresent
+    # -- Image  to use for deploying.
+    repository: ghcr.io/janssenproject/jans/cloudtools
+    # -- Image  tag to use for deploying.
+    tag: 0.0.0-nightly
+    # -- Image Pull Secrets
+    pullSecrets: [ ]
+  # -- Resource specs.
+  resources:
+    limits:
+      # -- CPU limit.
+      cpu: 300m
+      # -- Memory limit.
+      memory: 300Mi
+    requests:
+      # -- CPU request.
+      cpu: 300m
+      # -- Memory request.
+      memory: 300Mi
+  # -- Interval of running the cleanup process (in minutes)
+  interval: 60
+  # -- Max. numbers of entries to cleanup
+  limit: 1000
+  # -- Configure any additional volumes that need to be attached to the pod
+  volumes: []
+  # -- Configure any additional volumesMounts that need to be attached to the containers
+  volumeMounts: []
+  # Actions on lifecycle events such as postStart and preStop
+  # Example
+  # lifecycle:
+  #   postStart:
+  #     exec:
+  #       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
+  lifecycle: {}
+  # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
+  additionalLabels: { }
+  # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
+  additionalAnnotations: {}
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: []
+  # -- Add custom job's command. If passed, it will override the default conditional command.
+  customCommand: []
+  # -- Boolean flag to enable/disable the cleanup cronjob chart.
+  enabled: true

@@ -6,20 +6,7 @@
 
 package io.jans.as.server.service;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
-import org.slf4j.Logger;
-
 import com.google.common.collect.Lists;
-
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -84,6 +71,13 @@ import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.ServletContext;
+import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
+import org.slf4j.Logger;
+
+import java.lang.annotation.Annotation;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Javier Rojas Blum
@@ -163,9 +157,6 @@ public class AppInitializer {
 
     @Inject
     private ConfigurationFactory configurationFactory;
-
-    @Inject
-    private CleanerTimer cleanerTimer;
 
     @Inject
     private ClientLastUpdateAtTimer clientLastUpdateAtTimer;
@@ -266,7 +257,6 @@ public class AppInitializer {
         configurationFactory.initTimer();
         loggerService.initTimer(true);
         ldapStatusTimer.initTimer();
-        cleanerTimer.initTimer();
         clientLastUpdateAtTimer.initTimer();
         customScriptManager.initTimer(supportedCustomScriptTypes);
         keyGeneratorTimer.initTimer();
