@@ -5,7 +5,7 @@
 # the repo. Unless a later match takes precedence
 
 /jans-keycloak-integration/ @uprightech
-/jans-keycloak-link/ @shekhar16
+/jans-keycloak-link/ @yurem @yuriyz
 /docker-jans-*/ @moabu @iromli
 /automation/ @moabu @iromli
 /charts/ @moabu @iromli
@@ -26,7 +26,6 @@
 /jans-linux-setup/ @devrimyatar @yuriyz @yurem @yuriyzz
 /jans-linux-setup/jans_setup/setup_app/version.py @moabu @mo-auto
 /jans-linux-setup/static/scripts/admin_ui_plugin.py @devrimyatar @duttarnab
-/jans-cache-refresh/ @yurem @shekhar16
 /jans-link/ @yurem @yuriyz
 /agama/ @jgomer2001
 /jans-casa/ @jgomer2001 @maduvena

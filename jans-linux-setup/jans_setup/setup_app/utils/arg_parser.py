@@ -84,7 +84,7 @@ if PROFILE != OPENBANKING_PROFILE:
 
     parser.add_argument('--no-scim', help="Do not install Scim Server", action='store_true')
     parser.add_argument('--no-fido2', help="Do not install Fido2 Server", action='store_true')
-    parser.add_argument('--install-jans-ldap-link', help="Install Jans LDAP Link Server", action='store_true')
+    parser.add_argument('--install-link', help="Install Link Server", action='store_true')
     parser.add_argument('--install-jans-keycloak-link', help="Install Keycloak Link Server", action='store_true')
 
     parser.add_argument('--with-casa', help="Install Jans Casa", action='store_true')

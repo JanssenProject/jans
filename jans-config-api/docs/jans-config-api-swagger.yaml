@@ -4674,7 +4674,7 @@ paths:
                   - introspection
                   - resource_owner_password_credentials
                   - application_session
-                  - cache_refresh
+                  - link_interception
                   - client_registration
                   - id_generator
                   - uma_rpt_policy
@@ -4716,7 +4716,7 @@ paths:
                         "idp",
                         "introspection",
                         "persistence_extension",
-                        "cache_refresh",
+                        "link_interception",
                         "uma_rpt_policy",
                         "update_token",
                         "scim",
@@ -4767,7 +4767,7 @@ paths:
                         "idp",
                         "introspection",
                         "persistence_extension",
-                        "cache_refresh",
+                        "link_interception",
                         "uma_rpt_policy",
                         "update_token",
                         "scim",
@@ -9334,21 +9334,21 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        selected:
+        adminCanAccess:
           type: boolean
-        whitePagesCanView:
-          type: boolean
-        adminCanEdit:
+        adminCanView:
           type: boolean
         userCanView:
-          type: boolean
-        adminCanAccess:
           type: boolean
         userCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanView:
+        adminCanEdit:
+          type: boolean
+        selected:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9723,12 +9723,6 @@ components:
           type: integer
           format: int32
         userInfoLifetime:
-          type: integer
-          format: int32
-        cleanServiceInterval:
-          type: integer
-          format: int32
-        cleanServiceBatchChunkSize:
           type: integer
           format: int32
         keyRegenerationEnabled:
@@ -10222,8 +10216,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10233,6 +10225,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -11294,7 +11288,7 @@ components:
           - introspection
           - resource_owner_password_credentials
           - application_session
-          - cache_refresh
+          - link_interception
           - client_registration
           - id_generator
           - uma_rpt_policy
@@ -11351,14 +11345,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -11787,10 +11781,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
@@ -11953,8 +11947,6 @@ components:
           $ref: '#/components/schemas/TokenAttributes'
         dpop:
           type: string
-        accessToken:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -11964,6 +11956,8 @@ components:
           - REFRESH_TOKEN
           - AUTHORIZATION_CODE
           - TX_TOKEN
+        accessToken:
+          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:

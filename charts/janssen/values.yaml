@@ -1151,21 +1151,21 @@ global:
     appLoggers:
       # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e link-persistence ===> 2022-12-20 17:49:55,744 INFO
       enableStdoutLogPrefix: "true"
-      # -- cacherefresh.log target
+      # -- jans-link.log target
       linkLogTarget: "STDOUT"
-      # -- cacherefresh.log level
+      # -- jans-link.log level
       linkLogLevel: "INFO"
-      # -- cacherefresh_persistence.log target
+      # -- jans-link_persistence.log target
       persistenceLogTarget: "FILE"
-      # -- cacherefresh_persistence.log level
+      # -- jans-link_persistence.log level
       persistenceLogLevel: "INFO"
-      # -- cacherefresh_persistence_duration.log target
+      # -- jans-link_persistence_duration.log target
       persistenceDurationLogTarget: "FILE"
-      # -- cacherefresh_persistence_duration.log level
+      # -- jans-link_persistence_duration.log level
       persistenceDurationLogLevel: "INFO"
-      # -- cacherefresh_script.log target
+      # -- jans-link_script.log target
       scriptLogTarget: "FILE"
-      # -- cacherefresh_script.log level
+      # -- jans-link_script.log level
       scriptLogLevel: "INFO"
     # -- Enable endpoints in either istio or nginx ingress depending on users choice
     ingress:

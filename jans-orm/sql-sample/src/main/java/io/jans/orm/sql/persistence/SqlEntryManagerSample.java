@@ -24,7 +24,7 @@ public class SqlEntryManagerSample {
         Properties connectionProperties = new Properties();
 
 
-        boolean mysql = true;
+        boolean mysql = false;
     	if (mysql) {
             connectionProperties.put("sql#db.schema.name", "jansdb");
             connectionProperties.put("sql#connection.uri", "jdbc:mysql://localhost:3306/jansdb?profileSQL=true");
@@ -33,7 +33,7 @@ public class SqlEntryManagerSample {
             connectionProperties.put("sql#mysql.simple-json", "true");
         } else {
             connectionProperties.put("sql#db.schema.name", "public");
-        	connectionProperties.put("sql#connection.uri", "jdbc:postgresql://localhost:5432/jansdb");
+        	connectionProperties.put("sql#connection.uri", "jdbc:postgresql://u2404.jans.info:5432/jansdb");
         	connectionProperties.put("sql#db.disable.time-zone", "true");
         }
 
@@ -45,7 +45,7 @@ public class SqlEntryManagerSample {
         connectionProperties.put("sql#connection.pool.test-on-return", "true");
 
         connectionProperties.put("sql#auth.userName", "jans");
-        connectionProperties.put("sql#auth.userPassword", "secret");
+        connectionProperties.put("sql#auth.userPassword", "63_84MVEJFkoBfd");
         
         // Password hash method
         connectionProperties.put("sql#password.encryption.method", "SSHA-256");

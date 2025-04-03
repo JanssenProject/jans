@@ -237,7 +237,7 @@ public class AppInitializer {
         // Initialize script manager
         List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.values());
 
-        supportedCustomScriptTypes.remove(CustomScriptType.CACHE_REFRESH);
+        supportedCustomScriptTypes.remove(CustomScriptType.LINK_INTERCEPTION);
         supportedCustomScriptTypes.remove(CustomScriptType.SCIM);
         supportedCustomScriptTypes.remove(CustomScriptType.IDP);
         supportedCustomScriptTypes.remove(CustomScriptType.CONFIG_API);

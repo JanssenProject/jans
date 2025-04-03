@@ -123,7 +123,7 @@
 ### Features
 
 * **config-api:** cache config plugin refresh attributes ([#5276](https://github.com/JanssenProject/jans/issues/5276)) ([84dc3ee](https://github.com/JanssenProject/jans/commit/84dc3eed60f57da791557a61a738cc18ed8bdbc6))
-* **config-api:** rename cache-refresh-plugin to jans-link-plugin ([#5457](https://github.com/JanssenProject/jans/issues/5457)) ([98d984c](https://github.com/JanssenProject/jans/commit/98d984cc25198067ae07e4e48377deb06175e506))
+* **config-api:** rename link-interception-plugin to jans-link-plugin ([#5457](https://github.com/JanssenProject/jans/issues/5457)) ([98d984c](https://github.com/JanssenProject/jans/commit/98d984cc25198067ae07e4e48377deb06175e506))
 * **jans-link:** change schema name cache refresh to link ([#5484](https://github.com/JanssenProject/jans/issues/5484)) ([412f753](https://github.com/JanssenProject/jans/commit/412f753f1f11337b51ab1e212b9bd013021102be))
 
 
@@ -143,7 +143,7 @@
 
 ### Features
 
-* **config-api:** cache-refresh plugin code ([#5000](https://github.com/JanssenProject/jans/issues/5000)) ([eed9526](https://github.com/JanssenProject/jans/commit/eed9526415996278b52806cfe37a4dfb5076aa00))
+* **config-api:** link-interception plugin code ([#5000](https://github.com/JanssenProject/jans/issues/5000)) ([eed9526](https://github.com/JanssenProject/jans/commit/eed9526415996278b52806cfe37a4dfb5076aa00))
 * **jans-auth-server:** added ability to set client expiration via DCR [#5057](https://github.com/JanssenProject/jans/issues/5057) ([#5185](https://github.com/JanssenProject/jans/issues/5185)) ([a15054b](https://github.com/JanssenProject/jans/commit/a15054b1c3350d6ee0bb9c92d39f6b2d992abfa1))
 * **jans-auth-server:** made not found exceptions logging level configurable [#4973](https://github.com/JanssenProject/jans/issues/4973) ([#4982](https://github.com/JanssenProject/jans/issues/4982)) ([98be22b](https://github.com/JanssenProject/jans/commit/98be22b81d365b631d2b7ffcf76d1f3a5ea1935b))
 

@@ -6,7 +6,7 @@
     "idp",
     "introspection",
     "persistence_extension",
-    "cache_refresh",
+    "link_interception",
     "uma_rpt_policy",
     "update_token",
     "scim",

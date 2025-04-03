@@ -55,7 +55,7 @@ RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject
         && echo "${version}" > /api/cedarling_version \
         && release_version="${version}" \
         && if [ "$version" = "0.0.0" ]; then release_version="nightly"; fi \
-        && wget -q https://github.com/JanssenProject/jans/releases/download/"${release_version}"/cedarling_python-"${version}"-cp310-cp310-manylinux_2_31_x86_64.whl -O /api/cedarling_python-"${version}"-cp310-cp310-manylinux_2_31_x86_64.whl \
+        && wget -q https://github.com/JanssenProject/jans/releases/download/v"${release_version}"/cedarling_python-"${version}"-cp310-cp310-manylinux_2_31_x86_64.whl -O /api/cedarling_python-"${version}"-cp310-cp310-manylinux_2_31_x86_64.whl \
         && rm -rf /tmp/jans
 
 # Setting up proper permissions:
