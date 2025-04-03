@@ -305,7 +305,7 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isOidcClientRe
                                                 <AccordionDetails>
                                                     {Utils.isJSON(authzResult) ?
                                                         <Box>
-                                                            <JsonEditor data={principals} setData={setPrincipals} rootName="principals" />
+                                                            <JsonEditor data={JSON.parse(authzResult)} rootName="result" viewOnly={true} />
                                                         </Box> :
                                                         <TextField
                                                             autoFocus
