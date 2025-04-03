@@ -252,7 +252,7 @@ mod test {
         let attrs_shape = mapping_schema
             .get_entity_shape(entity_name)
             .expect("get entity requirements");
-        let attrs = build_entity_attrs(&attrs_src, &built_entities, Some(&attrs_shape), None)
+        let attrs = build_entity_attrs(&attrs_src, &built_entities, Some(attrs_shape), None)
             .expect("builds entity attrs");
 
         let dummy_entity = Entity::new(
@@ -355,7 +355,7 @@ mod test {
         let attrs = build_entity_attrs(
             &attrs_src,
             &built_entities,
-            Some(&attrs_shape),
+            Some(attrs_shape),
             Some(&claim_mappings),
         )
         .expect("builds entity attrs");

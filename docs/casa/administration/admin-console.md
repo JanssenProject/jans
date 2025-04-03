@@ -28,11 +28,12 @@ Widgets shown vary according to plugins installed. In a fresh installation, the 
 
 To add more authentication methods, please check the developer [guide](../developer/add-authn-methods.md).
 
-## Pass reset config
+## Password settings
 
-An admin
-can give users the ability to reset their password from inside Casa. To enable the password reset functionality,
-navigate to `Pass reset config` and click the toggle to `ON`.
+In this section, administrators may configure:
+
+- The ability for users to reset their password from inside Casa
+- Apply the rules defined for the `userPassword` attribute (length and regular expression) in Casa
 
 ![pw-reset-settings](../../assets/casa/admin-console/pw-reset-setting.png)
 

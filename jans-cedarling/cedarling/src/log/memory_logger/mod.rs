@@ -254,7 +254,7 @@ mod tests {
     fn test_log_and_get_logs() {
         let pdp_id = PdpID::new();
         let app_name = None;
-        let logger = create_memory_logger(pdp_id.clone(), app_name.clone());
+        let logger = create_memory_logger(pdp_id, app_name.clone());
 
         // create log entries
         let entry1 = LogEntry::new_with_data(LogType::Decision, None)
@@ -312,7 +312,7 @@ mod tests {
     fn test_pop_logs() {
         let pdp_id = PdpID::new();
         let app_name = None;
-        let logger = create_memory_logger(pdp_id.clone(), app_name.clone());
+        let logger = create_memory_logger(pdp_id, app_name.clone());
 
         // create log entries
         let entry1 = LogEntry::new_with_data(LogType::Decision, None);

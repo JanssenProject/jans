@@ -10,6 +10,9 @@ public class MainSettings {
     @JsonProperty("enable_pass_reset")
     private boolean enablePassReset;
 
+    @JsonProperty("use_password_policy")
+    private boolean usePasswordPolicy;
+
     @JsonProperty("use_branding")
     private boolean useExternalBranding;
 
@@ -50,6 +53,10 @@ public class MainSettings {
         return useExternalBranding;
     }
 
+    public boolean isUsePasswordPolicy() {
+        return usePasswordPolicy;
+    }
+
     public Map<String, String> getAcrPluginMap() {
         return acrPluginMap;
     }
@@ -80,6 +87,10 @@ public class MainSettings {
 
     public void setEnablePassReset(boolean enablePassReset) {
         this.enablePassReset = enablePassReset;
+    }
+
+    public void setUsePasswordPolicy(boolean usePasswordPolicy) {
+        this.usePasswordPolicy = usePasswordPolicy;
     }
 
     public void setLogLevel(String logLevel) {

@@ -177,6 +177,9 @@ class Plugin(DialogUtils):
                 response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
 
+                if response.status_code not in (200, 201):
+                    self.app.show_message(_('Error'), response.text + '\n' + response.reason, tobefocused=self.app.center_container)
+
             asyncio.ensure_future(coroutine())
 
         self.new_password = self.app.getTitledText(

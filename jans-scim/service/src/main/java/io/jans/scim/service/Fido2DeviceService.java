@@ -16,6 +16,7 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
@@ -71,7 +72,9 @@ public class Fido2DeviceService implements Serializable {
 		}
 	}
 
-	public Fido2RegistrationEntry getFido2DeviceById(String userId, String id) {
+	public Fido2RegistrationEntry getFido2DeviceById(String userId, String id)
+	        throws Exception {
+
 		Fido2RegistrationEntry f2d = null;
 		try {
 			String dn = getDnForFido2Device(id, userId);
@@ -82,7 +85,11 @@ public class Fido2DeviceService implements Serializable {
 				f2d = ldapEntryManager.findEntries(dn, Fido2RegistrationEntry.class, filter).get(0);
 			}
 		} catch (Exception e) {
-			log.error("Failed to find Fido 2 device with id " + id, e);
+		    if (!SearchException.class.isInstance(e.getCause())) {
+                log.error(e.getMessage(), e.getCause());
+                throw e;
+            }
+            log.debug("Failed to find Fido 2 device with id {}", id);
 		}
 		return f2d;
 

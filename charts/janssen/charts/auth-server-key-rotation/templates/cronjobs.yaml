@@ -57,7 +57,7 @@ spec:
                     {{- toYaml . | replace "- " "" | nindent 20}}
                     {{- end }}
                     /app/scripts/entrypoint.sh
-                {{- end}}    
+                {{- end}}
               {{- end}}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               env:
@@ -90,7 +90,7 @@ spec:
               resources:
 {{- toYaml .Values.resources | nindent 16 }}
               {{- end }}
-              args: ["patch", "auth", "--opts", "interval:{{ .Values.keysLife }}", "--opts", "key-strategy:{{ .Values.keysStrategy }}", "--opts", "privkey-push-delay:{{ .Values.keysPushDelay }}", "--opts", "privkey-push-strategy:{{ .Values.keysPushStrategy }}"]
+              args: ["certmanager", "patch", "auth", "--opts", "interval:{{ .Values.keysLife }}", "--opts", "key-strategy:{{ .Values.keysStrategy }}", "--opts", "privkey-push-delay:{{ .Values.keysPushDelay }}", "--opts", "privkey-push-strategy:{{ .Values.keysPushStrategy }}"]
           volumes:
           {{- with .Values.volumes }}
 {{- toYaml . | nindent 12 }}
