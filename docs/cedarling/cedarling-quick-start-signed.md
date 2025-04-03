@@ -8,15 +8,15 @@ tags:
   - quick start
 ---
 
-# Cedarling Quick Start Guide (Part 2)
+# Cedarling Quick Start 2 (Signed) 
 
 ## Introduction
 
 [Jans Tarp](../../demos/jans-tarp) is a browser plugin that enables developers to test OpenID Connect flows. It embeds the Cedarling WASM PDP, and is one of the fastest ways to test out Cedar with real JSON web tokens. In this guide, we'll demonstrate how to use Tarp to register a client on an OAuth authorization server("AS"), and use the embedded Cedarling WebAssembly app to reach an authorization decision. We will demonstrate Role Based Access Control (RBAC). This will be done in three steps:
 
-1. [Author Cedar Policy Store](#author-cedar-policy-store)
+1. [Author Cedarling Policy Store](#author-cedarling-policy-store)
 2. [Configure Tarp Cedarling Component](#configure-tarp-cedarling-component)
-3. [Test Policy](#test-policy)
+3. [Test Cedarling Policy Decisions](#test-cedarling-policy-decisions)
 
 
 ## Prerequisites
@@ -41,7 +41,7 @@ permit(
 
 Further information on Cedar can be found in the [official documentation](https://docs.cedarpolicy.com/)
 
-## Author Cedar Policy Store
+## Author Cedarling Policy Store
 
 To begin using the Cedarling, we need to set up a policy store. We will use [Agama Lab](https://cloud.gluu.org/agama-lab) for this. Please follow this video guide to set up your policy store:
 
@@ -50,17 +50,7 @@ To begin using the Cedarling, we need to set up a policy store. We will use [Aga
 The inputs for each section are as follows:
 
 1. Schema: The default schema provided by Agama Lab
-2. Policy:
-
-    ```
-    @id("allow_supreme_ruler")
-    permit(
-      principal in Jans::Role::"SupremeRuler",
-      action,
-      resource
-    );
-    ```
-
+2. Policy: The policy from [here](#cedar-policy)
 3. Trusted issuers:
 
   - Trust Issuer Name: `testIdp`
@@ -141,7 +131,7 @@ After following the guide, the policy store URI will be copied to the clipboard.
   ```
 6. Click `Save`. Tarp will validate your bootstrap and initialize Cedarling.
 
-## Test Policy 
+## Test Cedarling Policy Decisions
 
 1. On the Authentication Flow screen, click on the lightning icon to trigger an authentication flow.
 2. Use the following values for triggering the flow:
@@ -158,15 +148,8 @@ After following the guide, the policy store URI will be copied to the clipboard.
     ```json
     {
       "entity_type": "resource",
-      "type": "Jans::Application",
-      "id": "some_id",
-      "app_id": "application_id",
-      "name": "Some Application",
-      "url": {
-        "host": "jans.test",
-        "path": "/protected-endpoint",
-        "protocol": "http"
-      }
+      "type": "Jans::Object",
+      "id": "some_id"
     }
     ```
 7. Click on `Cedarling Authz Request`

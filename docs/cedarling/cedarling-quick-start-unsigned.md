@@ -8,15 +8,15 @@ tags:
   - quick start
 ---
 
-# Cedarling Quick Start Guide (Part 1)
+# Cedarling Quick Start 1 (Unsigned)
 
 ## Introduction
 
 [Jans Tarp](../../demos/jans-tarp) is a browser plugin that enables developers to test OpenID Connect flows. It embeds the Cedarling WASM PDP, and is one of the fastest ways to test out Cedar with real JSON web tokens. In this guide, we'll demonstrate how to use the embedded Cedarling WebAssembly app in Tarp to reach an authorization decision without tokens. We will demonstrate Role Based Access Control (RBAC). This will be done in three steps:
 
-1. [Author Cedar Policy Store](#author-cedar-policy-store)
+1. [Author Cedarling Policy Store](#author-cedarling-policy-store)
 2. [Configure Tarp Cedarling Component](#configure-tarp-cedarling-component)
-3. [Test Policy](#test-policy)
+3. [Test Unsigned Policy Decisions](#test-unsigned-policy-decisions)
 
 
 ## Prerequisites
@@ -28,76 +28,33 @@ Before we begin, we need to meet the following requirements:
 
 ## Cedar Policy
 
-For this QuickStart Demo, we will use a policy where access is only granted if the authenticated user has the `SupremeRuler` role. In Cedar, this is expressed like so:
+For this QuickStart Demo, we will use a policy where access is only granted if the principal entity from the provided input has the `SupremeRuler` role. In Cedar, this is expressed like so:
 
 ```
 @id("allow_supreme_ruler")
 permit(
-  principal in Jans::Role::"SupremeRuler",
+  principal is Jans::User,
   action,
   resource
-);
+)
+when {
+  principal has role &&
+  principal.role.contains("SupremeRuler")
+};
 ```
 
 Further information on Cedar can be found in the [official documentation](https://docs.cedarpolicy.com/)
 
-## Author Cedar Policy Store
+## Author Cedarling Policy Store
 
 To begin using the Cedarling, we need to set up a policy store. We will use [Agama Lab](https://cloud.gluu.org/agama-lab) for this. Please follow this video guide to set up your policy store:
 
-![agama-lab-policy-store](../assets/agama-lab-policy-store.mp4)
+![agama-lab-policy-store](../assets/agama-lab-policy-store-unsigned.mp4)
 
 The inputs for each section are as follows:
 
 1. Schema: The default schema provided by Agama Lab
-2. Policy:
-
-    ```
-    @id("allow_supreme_ruler")
-    permit(
-      principal in Jans::Role::"SupremeRuler",
-      action,
-      resource
-    );
-    ```
-
-3. Trusted issuers:
-
-  - Trust Issuer Name: `testIdp`
-  - Trust Issuer Description: `Test IDP`
-  - OpenID Configuration Endpoint: `https://test-jans.gluu.info/.well-known/openid-configuration`
-  - Trusted issuers token metadata:
-
-  ```json
-  {
-    "access_token": {
-      "trusted": true,
-      "entity_type_name": "Jans::Access_token",
-      "required_claims": [
-        "jti",
-        "iss",
-        "aud",
-        "sub",
-        "exp",
-        "nbf"
-      ],
-      "principal_mapping": [
-        "Jans::Workload"
-      ]
-    },
-    "id_token": {
-      "trusted": true,
-      "entity_type_name": "Jans::id_token"
-    },
-    "userinfo_token": {
-      "trusted": true,
-      "entity_type_name": "Jans::Userinfo_token",
-      "principal_mapping": [
-        "Jans::User"
-      ]
-    }
-  }
-  ```
+2. Policy: The policy [here](#cedar-policy)
 
 After following the guide, the policy store URI will be copied to the clipboard. We will need this in the next step.
 
@@ -134,27 +91,30 @@ After following the guide, the policy store URI will be copied to the clipboard.
   }
   ```
 4. Click `Save`. Tarp will validate your bootstrap and initialize Cedarling.
-5. Click on `Cedarling Authz Form`
-6. Fill in the following fields:
+
+## Test Unsigned Policy Decisions
+
+1. Click on `Cedarling Authz Form`
+2. Fill in the following fields:
 
     * Principals: 
-    ```
-    TBD
+    ```json
+    [
+      {
+        "type": "Jans::User",
+        "id": "some_id",
+        "sub": "some_sub",
+        "role": ["SupremeRuler"]
+      }
+    ]
     ```
     * Action: `Jans::Action::"Read"`
     * Resource: 
     ```json
     {
       "entity_type": "resource",
-      "type": "Jans::Application",
-      "id": "some_id",
-      "app_id": "application_id",
-      "name": "Some Application",
-      "url": {
-        "host": "jans.test",
-        "path": "/protected-endpoint",
-        "protocol": "http"
-      }
+      "type": "Jans::Object",
+      "id": "some_id"
     }
     ```
-7. Click `Cedarling Authz Request`. We will get a decision back.
+3. Click `Cedarling Authz Request`. We will get a decision back.
