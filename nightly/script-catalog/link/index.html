@@ -2205,6 +2205,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_1_7_2">
@@ -2381,6 +2383,20 @@
     <li class="md-nav__item">
       <a href="../../janssen-server/config-guide/auth-server-config/oauth-umaresources-config/" class="md-nav__link">
         UMA Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../janssen-server/config-guide/auth-server-config/session-management/" class="md-nav__link">
+        Session Management
       </a>
     </li>
   
@@ -8707,11 +8723,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#use-case-dummy-jans-link-cache-refresh-script" class="md-nav__link">
-    Use case: Dummy Jans Link (Cache Refresh) script
+  <a href="#use-case-dummy-jans-link-link-interception-script" class="md-nav__link">
+    Use case: Dummy Jans Link (Link Interception) script
   </a>
   
-    <nav class="md-nav" aria-label="Use case: Dummy Jans Link (Cache Refresh) script">
+    <nav class="md-nav" aria-label="Use case: Dummy Jans Link (Link Interception) script">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -8778,7 +8794,7 @@
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
 <p>In order to integrate your Jans instance with backend LDAP servers handling authentication in your existing network environment, Janssen provides a mechanism called Jans Link to copy user data to the Jans local LDAP server. During this process it is possible to specify key attribute(s) and specify attribute name transformations. There are also cases when it can be used to overwrite attribute values or to add new attributes based on other attribute values.</p>
 <h2 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">#</a></h2>
-<p>The Jans Link (Cache Refresh) script implements the <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/user/CacheRefreshType.java">CacheRefreshType</a> interface. This extends methods from the base script type in addition to adding new methods:</p>
+<p>The Jans Link (Link Interception) script implements the <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/user/LinkInterceptionType.java">LinkInterceptionType</a> interface. This extends methods from the base script type in addition to adding new methods:</p>
 <h3 id="inherited-methods">Inherited Methods<a class="headerlink" href="#inherited-methods" title="Permanent link">#</a></h3>
 <table>
 <thead>
@@ -8856,8 +8872,8 @@
 </tr>
 </tbody>
 </table>
-<h2 id="use-case-dummy-jans-link-cache-refresh-script">Use case: Dummy Jans Link (Cache Refresh) script<a class="headerlink" href="#use-case-dummy-jans-link-cache-refresh-script" title="Permanent link">#</a></h2>
-<p>This was adapted from <a href="https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/cache_refresh/sample-script/SampleScript.py">Jans link (Cache Refresh) script example</a>.</p>
+<h2 id="use-case-dummy-jans-link-link-interception-script">Use case: Dummy Jans Link (Link Interception) script<a class="headerlink" href="#use-case-dummy-jans-link-link-interception-script" title="Permanent link">#</a></h2>
+<p>This was adapted from <a href="https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/link_interception/sample-script/SampleScript.py">Jans link (Link Interception) script example</a>.</p>
 <h3 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.</span>
 <span class="c1"># Copyright (c) 2016, Janssen</span>
@@ -8865,7 +8881,7 @@
 <span class="c1"># Author: Yuriy Movchan</span>
 <span class="c1">#</span>
 
-<span class="kn">from</span> <span class="nn">io.jans.model.custom.script.type.user</span> <span class="kn">import</span> <span class="n">CacheRefreshType</span>
+<span class="kn">from</span> <span class="nn">io.jans.model.custom.script.type.user</span> <span class="kn">import</span> <span class="n">LinkInterceptionType</span>
 <span class="kn">from</span> <span class="nn">io.jans.util</span> <span class="kn">import</span> <span class="n">StringHelper</span><span class="p">,</span> <span class="n">ArrayHelper</span>
 <span class="kn">from</span> <span class="nn">java.util</span> <span class="kn">import</span> <span class="n">Arrays</span><span class="p">,</span> <span class="n">ArrayList</span>
 <span class="kn">from</span> <span class="nn">io.jans.oxtrust.model</span> <span class="kn">import</span> <span class="n">JanssenCustomAttribute</span>
@@ -8873,26 +8889,26 @@
 
 <span class="kn">import</span> <span class="nn">java</span>
 
-<span class="k">class</span> <span class="nc">CacheRefresh</span><span class="p">(</span><span class="n">CacheRefreshType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">LinkInterception</span><span class="p">(</span><span class="n">LinkInterceptionType</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
 
     <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
-        <span class="nb">print</span> <span class="s2">&quot;Cache refresh. Initialization&quot;</span>
-        <span class="nb">print</span> <span class="s2">&quot;Cache refresh. Initialized successfully&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Link interception. Initialization&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Link interception. Initialized successfully&quot;</span>
 
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
-        <span class="nb">print</span> <span class="s2">&quot;Cache refresh. Destroy&quot;</span>
-        <span class="nb">print</span> <span class="s2">&quot;Cache refresh. Destroyed successfully&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Link interception. Destroy&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Link interception. Destroyed successfully&quot;</span>
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="c1"># Check if this instance conform starting conditions </span>
     <span class="c1">#   configurationAttributes is java.util.Map&lt;String, SimpleCustomProperty&gt;</span>
     <span class="c1">#   return True/False</span>
     <span class="k">def</span> <span class="nf">isStartProcess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
-        <span class="nb">print</span> <span class="s2">&quot;Cache refresh. Is start process method&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Link interception. Is start process method&quot;</span>
 
         <span class="k">return</span> <span class="kc">False</span>
 
@@ -8901,7 +8917,7 @@
     <span class="c1">#   configurationAttributes is java.util.Map&lt;String, SimpleCustomProperty&gt;</span>
     <span class="c1">#   return None (use password from configuration) or io.jans.model.custom.script.model.bind.BindCredentials</span>
     <span class="k">def</span> <span class="nf">getBindCredentials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configId</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
-        <span class="nb">print</span> <span class="s2">&quot;Cache refresh. GetBindCredentials method&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Link interception. GetBindCredentials method&quot;</span>
         <span class="c1">#        if configId == &quot;source&quot;:</span>
         <span class="c1">#            return BindCredentials(&quot;cn=Directory Manager&quot;, &quot;password&quot;)</span>
 
@@ -8911,7 +8927,7 @@
     <span class="c1">#   user is io.jans.oxtrust.model.JanssenCustomPerson</span>
     <span class="c1">#   configurationAttributes is java.util.Map&lt;String, SimpleCustomProperty&gt;</span>
     <span class="k">def</span> <span class="nf">updateUser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
-        <span class="nb">print</span> <span class="s2">&quot;Cache refresh. UpdateUser method&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Link interception. UpdateUser method&quot;</span>
 
         <span class="n">attributes</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">getCustomAttributes</span><span class="p">()</span>
 
@@ -8940,7 +8956,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-21T08:21:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-21</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-04-03T18:06:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-04-03</span>
       
         <br>
         Created:

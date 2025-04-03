@@ -2272,6 +2272,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_1_7_2">
@@ -2448,6 +2450,20 @@
     <li class="md-nav__item">
       <a href="../../config-guide/auth-server-config/oauth-umaresources-config/" class="md-nav__link">
         UMA Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config-guide/auth-server-config/session-management/" class="md-nav__link">
+        Session Management
       </a>
     </li>
   
@@ -8837,10 +8853,9 @@ Enter<span class="w"> </span>Password<span class="w"> </span><span class="k">for
 </li>
 </ol>
 <p><code>bash
-Install Jans Config API? [Yes] : 
-Install Scim Server? [Yes] : 
-Install Fido2 Server? [Yes] : 
-Install Jans Link Server? [Yes] : 
+Install Jans Config API? [Yes] :
+Install Scim Server? [Yes] :
+Install Fido2 Server? [Yes] :
 Install Gluu Casa? [No] :</code></p>
 <ol>
 <li>Finally, review the summary screen that gives an overview of the selections made during the setup process.</li>
@@ -8886,7 +8901,7 @@ setup files will be preserved.</p>
                      [-setup-branch SETUP_BRANCH] [--disable-config-api-security] [--cli-test-client]
                      [--import-ldif IMPORT_LDIF] [-enable-script ENABLE_SCRIPT] [-disable-script DISABLE_SCRIPT]
                      [-java-version {11,17}] [-stm] [-w] [-t] [-x] [--allow-pre-released-features] [--no-data]
-                     [--no-jsauth] [--no-config-api] [--no-scim] [--no-fido2] [--install-jans-ldap-link]
+                     [--no-jsauth] [--no-config-api] [--no-scim] [--no-fido2] [--install-link]
                      [--install-jans-keycloak-link] [--with-casa] [--install-jans-saml] [--install-jans-lock]
                      [--install-opa] [--load-config-api-test] [-config-patch-creds CONFIG_PATCH_CREDS]
                      [-test-client-id TEST_CLIENT_ID] [-test-client-pw TEST_CLIENT_PW]
@@ -9111,10 +9126,6 @@ setup files will be preserved.</p>
 <td>Do not install Fido2 Server</td>
 </tr>
 <tr>
-<td>--install-jans-ldap-link</td>
-<td>Install LDAP Link Server</td>
-</tr>
-<tr>
 <td>--with-casa</td>
 <td>Install Gluu/Flex Casa Server</td>
 </tr>
@@ -9123,8 +9134,8 @@ setup files will be preserved.</p>
 <td>Load Config Api Test Data</td>
 </tr>
 <tr>
-<td>--install-cache-refresh</td>
-<td>Install Cache Refresh Server</td>
+<td>--install-link</td>
+<td>Install Link Server</td>
 </tr>
 <tr>
 <td>-config-patch-creds CONFIG_PATCH_CREDS</td>
@@ -9154,7 +9165,7 @@ setup files will be preserved.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-12-09T08:36:18+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-12-09</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-04-03T18:06:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-04-03</span>
       
         <br>
         Created:

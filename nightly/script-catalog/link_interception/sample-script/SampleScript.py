@@ -4,7 +4,7 @@
 # Author: Yuriy Movchan
 #
 
-from io.jans.model.custom.script.type.user import CacheRefreshType
+from io.jans.model.custom.script.type.user import LinkInterceptionType
 from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 from io.jans.oxtrust.model import JanssenCustomAttribute
@@ -12,26 +12,26 @@ from io.jans.model.custom.script.model.bind import BindCredentials
 
 import java
 
-class CacheRefresh(CacheRefreshType):
+class LinkInterception(LinkInterceptionType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, customScript, configurationAttributes):
-        print "Cache refresh. Initialization"
-        print "Cache refresh. Initialized successfully"
+        print "Link Interception. Initialization"
+        print "Link Interception. Initialized successfully"
 
         return True   
 
     def destroy(self, configurationAttributes):
-        print "Cache refresh. Destroy"
-        print "Cache refresh. Destroyed successfully"
+        print "Link Interception. Destroy"
+        print "Link Interception. Destroyed successfully"
         return True
 
     # Check if this instance conform starting conditions 
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     #   return True/False
     def isStartProcess(self, configurationAttributes):
-        print "Cache refresh. Is start process method"
+        print "Link Interception. Is start process method"
 
         return False
     
@@ -40,7 +40,7 @@ class CacheRefresh(CacheRefreshType):
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     #   return None (use password from configuration) or io.jans.model.custom.script.model.bind.BindCredentials
     def getBindCredentials(self, configId, configurationAttributes):
-        print "Cache refresh. GetBindCredentials method"
+        print "Link Interception. GetBindCredentials method"
 #        if configId == "source":
 #            return BindCredentials("cn=Directory Manager", "password")
 
@@ -50,7 +50,7 @@ class CacheRefresh(CacheRefreshType):
     #   user is io.jans.oxtrust.model.JanssenCustomPerson
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateUser(self, user, configurationAttributes):
-        print "Cache refresh. UpdateUser method"
+        print "Link Interception. UpdateUser method"
 
         attributes = user.getCustomAttributes()
 

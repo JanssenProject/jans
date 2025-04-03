@@ -2207,6 +2207,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_1_7_2">
@@ -2383,6 +2385,20 @@
     <li class="md-nav__item">
       <a href="../../janssen-server/config-guide/auth-server-config/oauth-umaresources-config/" class="md-nav__link">
         UMA Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../janssen-server/config-guide/auth-server-config/session-management/" class="md-nav__link">
+        Session Management
       </a>
     </li>
   
@@ -8780,7 +8796,7 @@
 <li>Create a file called <code>bootstrap.json</code>. You may use this <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/flask-sidecar/secrets/bootstrap.json">sample</a> file. </li>
 <li>Modify the bootstrap file to your specifications. In particular you need to provide a link to your policy store in <code>CEDARLING_POLICY_STORE_URI</code>. The configuration keys are described <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/cedarling_python.pyi#L10">here</a>.</li>
 <li>Pull the docker image:
-    <div class="highlight"><pre><span></span><code>docker pull ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
+    <div class="highlight"><pre><span></span><code>docker pull ghcr.io/janssenproject/jans/cedarling-flask-sidecar:2.0.0-1
 </code></pre></div></li>
 <li>
 <p>Run the docker image, replacing <code>&lt;/absolute/path/to/bootstrap.json&gt;</code> with the absolute path to your bootstrap file: </p>
@@ -8790,7 +8806,7 @@
 <span class="w">    </span>-e<span class="w"> </span><span class="nv">SIDECAR_DEBUG_RESPONSE</span><span class="o">=</span>False<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--mount<span class="w"> </span><span class="nv">type</span><span class="o">=</span>bind,src<span class="o">=</span>&lt;/absolute/path/to/bootstrap.json&gt;,dst<span class="o">=</span>/bootstrap.json<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">5000</span>:5000<span class="se">\</span>
-<span class="w">    </span>ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
+<span class="w">    </span>ghcr.io/janssenproject/jans/cedarling-flask-sidecar:2.0.0-1
 </code></pre></div>
 <ul>
 <li><code>SIDECAR_DEBUG_RESPONSE</code> is an option that will cause the sidecar to return extra diagnostic information for each query if set to <code>True</code>. This may be useful to check which policies are being used to reach a decision.</li>
@@ -8876,7 +8892,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-06T12:50:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-06</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-04-03T12:28:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-04-03</span>
       
         <br>
         Created:
