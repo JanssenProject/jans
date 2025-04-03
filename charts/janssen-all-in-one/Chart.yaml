@@ -3,14 +3,14 @@ annotations:
   artifacthub.io/containsSecurityUpdates: 'true'
   artifacthub.io/images: |
     - name: all-in-one
-      image: ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly
+      image: ghcr.io/janssenproject/jans/all-in-one:2.0.0-1
   artifacthub.io/license: Apache-2.0
-  artifacthub.io/prerelease: 'true'
+  artifacthub.io/prerelease: 'false'
   catalog.cattle.io/certified: partner
   catalog.cattle.io/release-name: janssen-all-in-one
   catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management All-in-One
 apiVersion: v2
-appVersion: "0.0.0-nightly"
+appVersion: "2.0.0"
 icon: >-
   https://raw.githubusercontent.com/JanssenProject/jans/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
 home: https://jans.io
@@ -22,4 +22,4 @@ maintainers:
     email: support@jans.io
 description: Janssen Access and Identity Management All-in-One Chart. This chart deploys the selected janssen microservice all in one deployment.
 name: janssen-all-in-one
-version: 0.0.0-nightly
+version: 2.0.0

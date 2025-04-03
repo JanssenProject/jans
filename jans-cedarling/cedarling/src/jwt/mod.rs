@@ -285,9 +285,11 @@ mod test {
             .expect(1)
             .create();
 
-        let mut iss = TrustedIssuer::default();
-        iss.oidc_endpoint = Url::parse(&(server.url() + "/.well-known/openid-configuration"))
-            .expect("should be a valid url");
+        let mut iss = TrustedIssuer {
+            oidc_endpoint: Url::parse(&(server.url() + "/.well-known/openid-configuration"))
+                .expect("should be a valid url"),
+            ..Default::default()
+        };
         // we remove the `iss` claims since mockito can't really create https
         // endpoints and the validation requires the `iss` to be https.
         for (_name, metadata) in iss.tokens_metadata.iter_mut() {

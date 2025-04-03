@@ -304,7 +304,7 @@ fn can_check_missing_claims() {
         matches!(
             result,
             Err(JwtValidatorError::MissingClaims(missing_claims))
-            if missing_claims == Vec::from(["nbf"].map(|s| s.into()))
+            if missing_claims == ["nbf"].map(|s| s.into())
         ),
         "Expected an error due to missing `nbf` claim"
     );

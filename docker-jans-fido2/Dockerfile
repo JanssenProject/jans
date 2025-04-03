@@ -41,8 +41,9 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # =====
 
 
-ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-03-21 10:15'
+ENV CN_VERSION=2.0.0
+ENV CN_BUILD_DATE='2025-04-03 12:00'
+
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
@@ -61,7 +62,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=a3a9bb2828b33e4573289f0330e48a9e44500c12
+ENV JANS_SOURCE_VERSION=3776c0ca1b009493a23779712996aad4433d4f05
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -210,7 +211,7 @@ EXPOSE $CN_FIDO2_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/fido2" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="0.0.0-nightly" \
+    org.opencontainers.image.version="2.0.0-1" \
     org.opencontainers.image.title="Janssen FIDO2" \
     org.opencontainers.image.description="FIDO2 server"
 

@@ -119,12 +119,12 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isOidcClientRe
     }, [isOidcClientRegistered]);
 
     React.useEffect(() => {
-        chrome.storage.local.get(["authzRequest"], (authzRequest) => {
-            if (!Utils.isEmpty(authzRequest) && Object.keys(authzRequest).length !== 0) {
-                setContext(authzRequest.authzRequest.context);
-                setAction(authzRequest.authzRequest.action);
-                setResource(authzRequest.authzRequest.resource);
-                setPrincipals(authzRequest.authzRequest.principals);
+        chrome.storage.local.get(["authzRequest_unsigned"], (result) => {
+            if (!Utils.isEmpty(result) && Object.keys(result).length !== 0) {
+                setContext(result.authzRequest_unsigned.context);
+                setAction(result.authzRequest_unsigned.action);
+                setResource(result.authzRequest_unsigned.resource);
+                setPrincipals(result.authzRequest_unsigned.principals);
             }
         });
     }, [data]);
@@ -192,13 +192,12 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isOidcClientRe
             resource,
         };
 
-        chrome.storage.local.set({ authzRequest: reqObj });
+        chrome.storage.local.set({ authzRequest_unsigned: reqObj });
         return reqObj;
     };
 
     return (
         <Container maxWidth="lg">
-            {oidcClientRegistered ?
                 <>
                     <AddCedarlingConfig isOpen={modelOpen} handleDialog={handleDialog} newData={{}} />
                     <HelpDrawer isOpen={drawerOpen} handleDrawer={handleDrawer} />
@@ -306,7 +305,7 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isOidcClientRe
                                                 <AccordionDetails>
                                                     {Utils.isJSON(authzResult) ?
                                                         <Box>
-                                                            <JsonEditor data={principals} setData={setPrincipals} rootName="principals" />
+                                                            <JsonEditor data={JSON.parse(authzResult)} rootName="result" viewOnly={true} />
                                                         </Box> :
                                                         <TextField
                                                             autoFocus
@@ -359,9 +358,7 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isOidcClientRe
                             </>}
                             <Box style={{textAlign: 'right', width: "60%"}}>© Gluu Inc. All Rights Reserved.</Box>
                     </Stack>
-                </> :
-                <Alert severity="warning">At least one OIDC client must be registered in Jans-TARP to add Cedarling configuration.</Alert>
-            }
+                </>
         </Container>
     );
 }

@@ -49,7 +49,7 @@ auth-server:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/auth-server
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -128,9 +128,9 @@ auth-server-key-rotation:
     # -- Image pullPolicy to use for deploying.
     pullPolicy: IfNotPresent
     # -- Image  to use for deploying.
-    repository: ghcr.io/janssenproject/jans/certmanager
+    repository: ghcr.io/janssenproject/jans/cloudtools
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -330,7 +330,7 @@ config:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/configurator
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Organization name. Used for certificate creation.
@@ -426,7 +426,7 @@ config-api:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/config-api
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -533,7 +533,7 @@ fido2:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/fido2
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -645,7 +645,7 @@ casa:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/casa
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1217,6 +1217,9 @@ global:
   cnConfiguratorKey: ""
   # -- Path to the file that contains the key to encrypt/decrypt the configuration schema file.
   cnConfiguratorKeyFile: /etc/jans/conf/configuration.key
+  cleanup:
+    # -- Boolean flag to enable/disable the cleanup cronjob chart.
+    enabled: true
 
 # -- Nginx ingress definitions chart
 nginx-ingress:
@@ -1266,7 +1269,7 @@ persistence:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/persistence-loader
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -1354,7 +1357,7 @@ scim:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/scim
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1466,7 +1469,7 @@ link:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/link
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1577,7 +1580,7 @@ saml:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/saml
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1658,9 +1661,9 @@ kc-scheduler:
     # -- Image pullPolicy to use for deploying.
     pullPolicy: IfNotPresent
     # -- Image  to use for deploying.
-    repository: ghcr.io/janssenproject/jans/kc-scheduler
+    repository: ghcr.io/janssenproject/jans/cloudtools
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 2.0.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -1677,6 +1680,69 @@ kc-scheduler:
       memory: 300Mi
   # -- Interval of running the scheduler (in minutes)
   interval: 10
+  # -- Configure any additional volumes that need to be attached to the pod
+  volumes: []
+  # -- Configure any additional volumesMounts that need to be attached to the containers
+  volumeMounts: []
+  # Actions on lifecycle events such as postStart and preStop
+  # Example
+  # lifecycle:
+  #   postStart:
+  #     exec:
+  #       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
+  lifecycle: {}
+  # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
+  additionalLabels: { }
+  # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
+  additionalAnnotations: {}
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: []
+  # -- Add custom job's command. If passed, it will override the default conditional command.
+  customCommand: []
+
+# -- Cleanup expired entries in persistence
+cleanup:
+  # -- Add tolerations for the pods
+  tolerations: [ ]
+  # -- Add custom normal and secret envs to the service
+  usrEnvs:
+    # -- Add custom normal envs to the service
+    # variable1: value1
+    normal: {}
+    # -- Add custom secret envs to the service
+    # variable1: value1
+    secret: {}
+  # -- Add custom dns policy
+  dnsPolicy: ""
+  # -- Add custom dns config
+  dnsConfig: {}
+  image:
+    # -- Image pullPolicy to use for deploying.
+    pullPolicy: IfNotPresent
+    # -- Image  to use for deploying.
+    repository: ghcr.io/janssenproject/jans/cloudtools
+    # -- Image  tag to use for deploying.
+    tag: 2.0.0-1
+    # -- Image Pull Secrets
+    pullSecrets: [ ]
+  # -- Resource specs.
+  resources:
+    limits:
+      # -- CPU limit.
+      cpu: 300m
+      # -- Memory limit.
+      memory: 300Mi
+    requests:
+      # -- CPU request.
+      cpu: 300m
+      # -- Memory request.
+      memory: 300Mi
+  # -- Interval of running the cleanup process (in minutes)
+  interval: 60
+  # -- Max. numbers of entries to cleanup
+  limit: 1000
   # -- Configure any additional volumes that need to be attached to the pod
   volumes: []
   # -- Configure any additional volumesMounts that need to be attached to the containers

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "jans-tarp",
-  "version": "0.0.0",
+  "version": "2.0.0",
   "description": "Relying Party tool in form of a Firefox Extension.",
   "icons": {
     "16": "icon.png",
