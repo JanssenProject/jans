@@ -5,7 +5,7 @@ annotations:
     - name: all-in-one
       image: ghcr.io/janssenproject/jans/all-in-one:1.5.0-1
   artifacthub.io/license: Apache-2.0
-  artifacthub.io/prerelease: 'true'
+  artifacthub.io/prerelease: 'false'
   catalog.cattle.io/certified: partner
   catalog.cattle.io/release-name: janssen-all-in-one
   catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management All-in-One

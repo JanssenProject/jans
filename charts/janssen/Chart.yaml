@@ -27,7 +27,7 @@ annotations:
     - name: cleanup
       image: ghcr.io/janssenproject/jans/cloudtools:1.5.0-1
   artifacthub.io/license: Apache-2.0
-  artifacthub.io/prerelease: 'true'
+  artifacthub.io/prerelease: 'false'
   catalog.cattle.io/certified: partner
   catalog.cattle.io/release-name: janssen
   catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management Microservices
