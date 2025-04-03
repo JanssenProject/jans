@@ -362,7 +362,7 @@ jobs:
         npm install
         npm run build
         cd ./dist/firefox
-        web-ext sign --api-key="${{ secrets.MOZILLA_API_KEY }}" --api-secret="${{ secrets.MOZILLA_API_SECRET }}" --channel="unlisted"
+        web-ext sign --channel=unlisted  --api-key="${{ secrets.MOZILLA_API_KEY }}" --api-secret="${{ secrets.MOZILLA_API_SECRET }}" || echo "Sign your extension for self-distribution to mozilla failed"
         cd ../..
         npm run pack
         mv ./release/jans-tarp-chrome-*.zip ../demo-jans-tarp-chrome-$VER.zip
