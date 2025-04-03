@@ -1,7 +1,7 @@
 
 apiVersion: v2
 name: persistence
-version: 1.5.0
+version: 2.0.0
 kubeVersion: ">=v1.22.0-0"
 description: Job to generate data and initial config for Janssen Server persistence layer.
 type: application
@@ -15,5 +15,5 @@ maintainers:
     email: support@jans.io
     url: https://github.com/moabu
 icon: https://github.com/JanssenProject/jans/raw/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
-appVersion: "1.5.0"
+appVersion: "2.0.0"
 
