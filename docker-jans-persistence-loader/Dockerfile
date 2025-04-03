@@ -159,7 +159,7 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/persistence-loader" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.5.0-1" \
+    org.opencontainers.image.version="2.0.0-1" \
     org.opencontainers.image.title="Janssen Authorization Server Persistence loader" \
     org.opencontainers.image.description="Generate initial data for persistence layer"
 

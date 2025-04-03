@@ -3,36 +3,36 @@ annotations:
   artifacthub.io/containsSecurityUpdates: 'true'
   artifacthub.io/images: |
     - name: auth-server
-      image: ghcr.io/janssenproject/jans/auth-server:1.5.0-1
+      image: ghcr.io/janssenproject/jans/auth-server:2.0.0-1
     - name: auth-server-key-rotation
-      image: ghcr.io/janssenproject/jans/cloudtools:1.5.0-1
+      image: ghcr.io/janssenproject/jans/cloudtools:2.0.0-1
     - name: configuration-manager
-      image: ghcr.io/janssenproject/jans/configurator:1.5.0-1
+      image: ghcr.io/janssenproject/jans/configurator:2.0.0-1
     - name:  config-api
-      image: ghcr.io/janssenproject/jans/config-api:1.5.0-1
+      image: ghcr.io/janssenproject/jans/config-api:2.0.0-1
     - name: fido2
-      image: ghcr.io/janssenproject/jans/fido2:1.5.0-1
+      image: ghcr.io/janssenproject/jans/fido2:2.0.0-1
     - name: persistence
-      image: ghcr.io/janssenproject/jans/persistence-loader:1.5.0-1
+      image: ghcr.io/janssenproject/jans/persistence-loader:2.0.0-1
     - name: casa
-      image: ghcr.io/janssenproject/jans/casa:1.5.0-1
+      image: ghcr.io/janssenproject/jans/casa:2.0.0-1
     - name: scim
-      image: ghcr.io/janssenproject/jans/scim:1.5.0-1
+      image: ghcr.io/janssenproject/jans/scim:2.0.0-1
     - name: link
-      image: ghcr.io/janssenproject/jans/link:1.5.0-1
+      image: ghcr.io/janssenproject/jans/link:2.0.0-1
     - name: saml
-      image: ghcr.io/janssenproject/jans/saml:1.5.0-1
+      image: ghcr.io/janssenproject/jans/saml:2.0.0-1
     - name: kc-scheduler
-      image: ghcr.io/janssenproject/jans/cloudtools:1.5.0-1
+      image: ghcr.io/janssenproject/jans/cloudtools:2.0.0-1
     - name: cleanup
-      image: ghcr.io/janssenproject/jans/cloudtools:1.5.0-1
+      image: ghcr.io/janssenproject/jans/cloudtools:2.0.0-1
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: 'false'
   catalog.cattle.io/certified: partner
   catalog.cattle.io/release-name: janssen
   catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management Microservices
 apiVersion: v2
-appVersion: "1.5.0"
+appVersion: "2.0.0"
 icon: >-
   https://raw.githubusercontent.com/JanssenProject/jans/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
 home: https://jans.io
@@ -44,60 +44,60 @@ maintainers:
     email: support@jans.io
 description: Janssen Access and Identity Management Microservices Chart. This chart deploys each janssen microservice as a separate deployment.
 name: janssen
-version: 1.5.0
+version: 2.0.0
 dependencies:
     - name: casa
-      version: 1.5.0
+      version: 2.0.0
       condition: global.casa.enabled
 
     - name: config
       condition: global.config.enabled
-      version: 1.5.0
+      version: 2.0.0
 
     - name: config-api
       condition: global.config-api.enabled
-      version: 1.5.0
+      version: 2.0.0
 
     - name: auth-server
       condition: global.auth-server.enabled
-      version: 1.5.0
+      version: 2.0.0
 
     - name: fido2
       condition: global.fido2.enabled
-      version: 1.5.0
+      version: 2.0.0
 
     - name: scim
       condition: global.scim.enabled
-      version: 1.5.0
+      version: 2.0.0
 
     - name: nginx-ingress
       condition: global.nginx-ingress.enabled
-      version: 1.5.0
+      version: 2.0.0
 
     - name: auth-server-key-rotation
       condition: global.auth-server-key-rotation.enabled
-      version: 1.5.0
+      version: 2.0.0
 
     - name: persistence
       condition: global.persistence.enabled
-      version: 1.5.0
+      version: 2.0.0
 
     - name: link
       condition: global.link.enabled
-      version: 1.5.0
+      version: 2.0.0
 
     - name: saml
       condition: global.saml.enabled
-      version: 1.5.0
+      version: 2.0.0
 
     - name: cn-istio-ingress
       condition: global.istio.ingress
-      version: 1.5.0
+      version: 2.0.0
 
     - name: kc-scheduler
       condition: global.kc-scheduler.enabled
-      version: 1.5.0
+      version: 2.0.0
 
     - name: cleanup
       condition: global.cleanup.enabled
-      version: 1.5.0
+      version: 2.0.0
