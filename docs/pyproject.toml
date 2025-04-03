@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "docs"
-version = "1.5.0"
+version = "2.0.0"
 description = "Janssen Documentation project"
 authors = [ "moabu <47318409+moabu@users.noreply.github.com>"]
 

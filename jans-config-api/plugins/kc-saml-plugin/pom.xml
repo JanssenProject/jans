@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>plugins</artifactId>
 		<groupId>io.jans.jans-config-api.plugins</groupId>
-		<version>1.5.0</version>
+		<version>2.0.0</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -55,7 +55,7 @@
 		<dependency>
 			<groupId>io.smallrye</groupId>
 			<artifactId>smallrye-config</artifactId>
-			<version>1.5.0</version>
+			<version>2.0.0</version>
 		</dependency>
 
 		<!-- Others -->

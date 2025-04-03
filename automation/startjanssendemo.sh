@@ -22,7 +22,7 @@ if [[ $JANS_PERSISTENCE != "MYSQL" ]] && [[ $JANS_PERSISTENCE != "PGSQL" ]]; the
   exit 1
 fi
 if [[ -z $JANS_VERSION ]]; then
-  JANS_VERSION="1.5.0-1"
+  JANS_VERSION="2.0.0-1"
 fi
 LOG_TARGET="FILE"
 LOG_LEVEL="TRACE"

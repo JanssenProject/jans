@@ -1,7 +1,7 @@
 
 apiVersion: v2
 name:  cn-istio-ingress
-version: 1.5.0
+version: 2.0.0
 kubeVersion: ">=v1.21.0-0"
 description: Istio Gateway
 type: application
@@ -17,4 +17,4 @@ maintainers:
     email: support@jans.io
     url: https://github.com/moabu
 icon: https://github.com/JanssenProject/jans/raw/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
-appVersion: "1.5.0"
+appVersion: "2.0.0"
