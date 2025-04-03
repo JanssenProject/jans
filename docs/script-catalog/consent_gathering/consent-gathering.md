@@ -6,7 +6,7 @@ tags:
   - consent
 ---
 
-## Overview
+# Consent Gathering
 OAuth 2.0 allows providers to prompt users for consent before releasing their personal information to a client (application). The standard consent process is binary: approve or deny. Using the consent gathering interception script, the consent flow can be customized to meet unique business requirements, for instance to support payment authorization, where you need to present transactional information, or where you need to step-up authentication to add security.
 
 ## Script identification during execution

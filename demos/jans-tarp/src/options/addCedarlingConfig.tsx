@@ -9,13 +9,14 @@ import DialogTitle from '@mui/material/DialogTitle';
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
-import __wbg_init, { init, Cedarling } from "@janssenproject/cedarling_wasm";
+import initWasm, { init, Cedarling } from "@janssenproject/cedarling_wasm";
 import { v4 as uuidv4 } from 'uuid';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { JsonEditor } from 'json-edit-react';
 import axios from 'axios';
+import Utils from './Utils';
 
 export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
   const [open, setOpen] = React.useState(isOpen);
@@ -70,7 +71,7 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
     } else if (inputSelection === 'json') {
       bootstrap = e.target.value;
     }
-    if (isEmpty(bootstrap) || Object.keys(bootstrap).length === 0) {
+    if (Utils.isEmpty(bootstrap) || Object.keys(bootstrap).length === 0) {
       setErrorMessage('Empty authorization request not allowed.');
       return false;
     }
@@ -96,7 +97,7 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
         return;
       }
 
-      await __wbg_init();
+      await initWasm();
       let instance: Cedarling = await init(bootstrap);
 
       chrome.storage.local.get(["cedarlingConfig"], (result) => {
@@ -115,9 +116,6 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
     setLoading(false);
   }
 
-  const isEmpty = (value) => {
-    return (value == null || value.length === 0);
-  }
   return (
     <React.Fragment>
       <Dialog

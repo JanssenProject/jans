@@ -143,6 +143,7 @@ nav:
       - Cache Configuration: janssen-server/config-guide/auth-server-config/cache-configuration.md
       - Rate Limit: janssen-server/config-guide/auth-server-config/rate-limit.md
       - UMA Management: janssen-server/config-guide/auth-server-config/oauth-umaresources-config.md
+      - Session Management: janssen-server/config-guide/auth-server-config/session-management.md
     - FIDO2 Configuration: janssen-server/config-guide/fido2-config/janssen-fido2-configuration.md
     - SCIM Configuration:
       - SCIM User Resources: janssen-server/config-guide/scim-config/user-config.md
@@ -285,7 +286,6 @@ nav:
       - Engine and bridge configurations: janssen-server/developer/agama/engine-bridge-config.md
       - Agama flows in native applications: janssen-server/developer/agama/native-applications.md
       - FAQ: janssen-server/developer/agama/faq.md
-      - Quick Start Using Agama Lab: janssen-server/developer/agama/quick-start-using-agama-lab.md
     - External Libraries: janssen-server/developer/external-libraries.md
     - CORS: janssen-server/developer/cors.md
     - X-Frame-Options: janssen-server/developer/xframe.md

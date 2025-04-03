@@ -6,7 +6,7 @@ tags:
   - RevokeToken
 ---
 
-## Overview
+# Revoke Token
 Revoke Token scripts allow injecting custom logic during token revocation.
 
 ## Interface

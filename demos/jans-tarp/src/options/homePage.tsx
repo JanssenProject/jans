@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import Password from '@mui/icons-material/Password';
 import LockPerson from '@mui/icons-material/LockPerson';
 import OIDCClients from './oidcClients';
-import Cedarling from './cedarling';
+import CedarlingMgmt from './cedarling';
 import Grid from '@mui/material/Grid';
 
 interface TabPanelProps {
@@ -71,7 +71,7 @@ export default function HomePage({ data, notifyOnDataChange }) {
       <CustomTabPanel value={value} index={1}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Cedarling
+            <CedarlingMgmt
               data={data.cedarlingConfig}
               notifyOnDataChange={notifyOnDataChange}
               isOidcClientRegistered={(data?.oidcClients !== undefined && data?.oidcClients?.length !== 0)}

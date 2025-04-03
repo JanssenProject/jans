@@ -4,7 +4,7 @@ tags:
   - developer
   - script-catalog
 ---
-## Overview  
+# Update Token
 
 By overriding the interface methods in [`UpdateTokenType`](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/token/UpdateTokenType.java) inside a custom script you can
 

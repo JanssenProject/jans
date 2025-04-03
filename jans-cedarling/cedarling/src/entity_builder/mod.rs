@@ -11,7 +11,7 @@ mod build_entity_attrs;
 mod build_expr;
 mod build_iss_entity;
 mod build_principal_entity;
-mod build_resource_entity;
+mod build_cedar_entity;
 mod build_role_entity;
 mod build_token_entities;
 mod built_entities;
@@ -20,7 +20,7 @@ mod error;
 mod schema;
 mod value_to_expr;
 
-use crate::ResourceData;
+use crate::EntityData;
 use crate::authz::AuthorizeEntitiesData;
 use crate::common::PartitionResult;
 use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
@@ -76,7 +76,7 @@ impl EntityBuilder {
     pub fn build_entities(
         &self,
         tokens: &HashMap<String, Token>,
-        resource: &ResourceData,
+        resource: &EntityData,
     ) -> Result<AuthorizeEntitiesData, BuildEntityError> {
         let mut tkn_principal_mappings = TokenPrincipalMappings::default();
         let mut built_entities = BuiltEntities::from(&self.iss_entities);
@@ -126,7 +126,7 @@ impl EntityBuilder {
             (None, Vec::new())
         };
 
-        let resource = self.build_resource_entity(resource)?;
+        let resource = self.build_cedar_entity(resource)?;
 
         let issuers = self.iss_entities.values().cloned().collect();
         Ok(AuthorizeEntitiesData {
@@ -369,8 +369,8 @@ mod test {
             .expect("init entity builder");
 
         let entities = entity_builder
-            .build_entities(&tokens, &ResourceData {
-                resource_type: "Jans::Resource".into(),
+            .build_entities(&tokens, &EntityData {
+                entity_type: "Jans::Resource".into(),
                 id: "some_id".into(),
                 payload: HashMap::new(),
             })
