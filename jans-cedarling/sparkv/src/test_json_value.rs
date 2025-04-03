@@ -5,7 +5,6 @@
 
 use crate::Config;
 use crate::SparKV;
-use serde_json;
 
 #[cfg(test)]
 fn json_value_size(value: &serde_json::Value) -> usize {
