@@ -31,7 +31,7 @@ RUN pip3 install "poetry==$POETRY_VERSION" gunicorn \
 # ===============
 # Project setup
 # ===============
-ENV JANS_SOURCE_VERSION=3776c0ca1b009493a23779712996aad4433d4f05
+ENV JANS_SOURCE_VERSION=15a44bcb369e1d5ef045e2a2664c2c995fb89a61
 
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
@@ -53,7 +53,7 @@ RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject
         && cp -r ../../flask-sidecar/* /api \
         && version=$(sed -n 's/.*version = "\([0-9].[0-9].[0-9]\)"/\1/p' Cargo.toml) \
         && echo "${version}" > /api/cedarling_version \
-        && release_version="${version}" \
+        && release_version="v${version}" \
         && if [ "$version" = "0.0.0" ]; then release_version="nightly"; fi \
         && wget -q https://github.com/JanssenProject/jans/releases/download/v"${release_version}"/cedarling_python-"${version}"-cp310-cp310-manylinux_2_31_x86_64.whl -O /api/cedarling_python-"${version}"-cp310-cp310-manylinux_2_31_x86_64.whl \
         && rm -rf /tmp/jans
