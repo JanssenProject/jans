@@ -53,7 +53,9 @@ To begin using the Cedarling, we need to set up a policy store. We will use [Aga
 
 The inputs for each section are as follows:
 
-1. Schema: The default schema provided by Agama Lab
+1. Schema:
+  * Create a new entity named `Object` with no attributes
+  * Add the new `Object` entity to the `Read` action as a resource
 2. Policy: The policy [here](#cedar-policy)
 
 After following the guide, the policy store URI will be copied to the clipboard. We will need this in the next step.
