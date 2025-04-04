@@ -372,7 +372,8 @@ jobs:
         cd ..
         
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload $VER *.zip *.xpi *.sha256sum --clobber
+        gh release upload $VER *.zip *.sha256sum --clobber
+        gh release upload $VER *.xpi  --clobber || echo "Sign your extension for self-distribution to mozilla failed"
   build_cedarling_python:
     if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-20.04
