@@ -1,6 +1,6 @@
 # kc-scheduler
 
-![Version: 0.0.0-nightly](https://img.shields.io/badge/Version-0.0.0--nightly-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.0-nightly](https://img.shields.io/badge/AppVersion-0.0.0--nightly-informational?style=flat-square)
+![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.0.0](https://img.shields.io/badge/AppVersion-2.0.0-informational?style=flat-square)
 
 Responsible for synchronizing Keycloak SAML clients
 
@@ -14,7 +14,7 @@ Responsible for synchronizing Keycloak SAML clients
 
 ## Source Code
 
-* <https://github.com/JanssenProject/jans/docker-jans-kc-scheduler>
+* <https://github.com/JanssenProject/jans/docker-jans-cloudtools>
 
 ## Requirements
 
@@ -32,8 +32,8 @@ Kubernetes: `>=v1.22.0-0`
 | dnsPolicy | string | `""` | Add custom dns policy |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
-| image.repository | string | `"ghcr.io/janssenproject/jans/kc-scheduler"` | Image  to use for deploying. |
-| image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
+| image.repository | string | `"ghcr.io/janssenproject/jans/cloudtools"` | Image  to use for deploying. |
+| image.tag | string | `"2.0.0-1"` | Image  tag to use for deploying. |
 | interval | int | `10` | Interval of running the scheduler (in minutes) |
 | lifecycle | object | `{}` |  |
 | resources | object | `{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}}` | Resource specs. |

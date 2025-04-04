@@ -85,6 +85,7 @@ spec:
               resources:
 {{- toYaml .Values.resources | nindent 16 }}
               {{- end }}
+              args: ["kc-sync"]
           volumes:
           {{- with .Values.volumes }}
 {{- toYaml . | nindent 12 }}

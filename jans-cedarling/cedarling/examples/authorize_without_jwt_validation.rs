@@ -41,7 +41,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 ]
             }))
             .unwrap(),
-            ..Default::default()
         },
         entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
     })
@@ -134,9 +133,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             ]),
             action: "Jans::Action::\"Update\"".to_string(),
             context: serde_json::json!({}),
-            resource: ResourceData {
+            resource: EntityData {
                 id: "random_id".to_string(),
-                resource_type: "Jans::Issue".to_string(),
+                entity_type: "Jans::Issue".to_string(),
                 payload: HashMap::from_iter([
                     (
                         "org_id".to_string(),

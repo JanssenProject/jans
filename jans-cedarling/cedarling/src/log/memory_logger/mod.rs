@@ -254,7 +254,7 @@ mod tests {
     fn test_log_and_get_logs() {
         let pdp_id = PdpID::new();
         let app_name = None;
-        let logger = create_memory_logger(pdp_id.clone(), app_name.clone());
+        let logger = create_memory_logger(pdp_id, app_name.clone());
 
         // create log entries
         let entry1 = LogEntry::new_with_data(LogType::Decision, None)
@@ -263,8 +263,7 @@ mod tests {
                 action: "test_action".to_string(),
                 resource: "test_resource".to_string(),
                 context: serde_json::json!({}),
-                person_authorize_info: Default::default(),
-                workload_authorize_info: Default::default(),
+                authorize_info: Default::default(),
                 authorized: true,
                 entities: serde_json::json!({}),
             });
@@ -313,7 +312,7 @@ mod tests {
     fn test_pop_logs() {
         let pdp_id = PdpID::new();
         let app_name = None;
-        let logger = create_memory_logger(pdp_id.clone(), app_name.clone());
+        let logger = create_memory_logger(pdp_id, app_name.clone());
 
         // create log entries
         let entry1 = LogEntry::new_with_data(LogType::Decision, None);

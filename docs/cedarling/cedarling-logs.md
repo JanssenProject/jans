@@ -125,7 +125,10 @@ Example of decision log.
     "pdp_id": "9e189c4b-96ae-4818-8e7f-75a42186af15",
     "policystore_id": "a1bf93115de86de760ee0bea1d529b521489e5a11747",
     "policystore_version": "undefined",
-    "principal": "User & Workload",
+    "principal": [
+        "User",
+        "Workload"
+    ],
     "User": {
         "username": "admin@gluu.org"
     },

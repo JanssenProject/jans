@@ -6,7 +6,8 @@ tags:
 - docker image
 ---
 
-## Overview
+
+# Cert Container Configuration
 
 Container image to manage X.509 certificates and crypto keys in Janssen Server.
 The container is designed to run as a one-time command (or Job in Kubernetes world).
@@ -186,7 +187,7 @@ spec:
         spec:
           containers:
             - name: auth-key-rotation
-              image: ghcr.io/janssenproject/jans/certmanager:0.0.0-nightly
+              image: ghcr.io/janssenproject/jans/certmanager:2.0.0-1
               resources:
                 requests:
                   memory: "300Mi"

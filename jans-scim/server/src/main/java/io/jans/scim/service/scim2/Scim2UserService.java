@@ -653,6 +653,7 @@ public class Scim2UserService implements Serializable {
 		    
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
+			return false;
 		}
 		return true;
          

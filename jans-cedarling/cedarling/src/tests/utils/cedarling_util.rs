@@ -40,6 +40,20 @@ pub async fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
 }
 
 /// create [`Cedarling`] from [`PolicyStoreSource`]
+/// with a callback function to modify the bootstrap configuration.
+pub async fn get_cedarling_with_callback<F>(policy_source: PolicyStoreSource, cb: F) -> Cedarling
+where
+    F: FnOnce(&mut BootstrapConfig),
+{
+    let mut config = get_config(policy_source);
+    cb(&mut config); // Apply the callback function
+
+    Cedarling::new(&config)
+        .await
+        .expect("bootstrap config should initialize correctly")
+}
+
+/// create [`Cedarling`] from [`PolicyStoreSource`]
 pub async fn get_cedarling_with_authorization_conf(
     policy_source: PolicyStoreSource,
     auth_conf: AuthorizationConfig,
@@ -93,7 +107,7 @@ pub fn get_policy_id(resp: &Option<cedar_policy::Response>) -> Option<Vec<String
 macro_rules! cmp_policy {
     ($resp:expr, $vec_policy_id:expr, $msg:expr) => {
         let policy_ids_resp =
-            crate::tests::utils::cedarling_util::get_policy_id(&$resp).map(|mut v| {
+            $crate::tests::utils::cedarling_util::get_policy_id(&$resp).map(|mut v| {
                 v.sort();
                 v
             });
@@ -136,7 +150,7 @@ pub fn get_decision(resp: &Option<cedar_policy::Response>) -> Option<cedar_polic
 macro_rules! cmp_decision {
     ($resp:expr, $decision:expr, $msg:expr) => {
         assert_eq!(
-            crate::tests::utils::cedarling_util::get_decision(&$resp),
+            $crate::tests::utils::cedarling_util::get_decision(&$resp),
             Some($decision),
             $msg
         )

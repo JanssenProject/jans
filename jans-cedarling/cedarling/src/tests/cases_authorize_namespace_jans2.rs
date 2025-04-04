@@ -85,7 +85,7 @@ async fn test_namespace_jans2() {
 
     cmp_policy!(
         result.workload,
-        vec!["1"],
+        ["1"],
         "reason of permit workload should be '1'"
     );
 
@@ -97,7 +97,7 @@ async fn test_namespace_jans2() {
 
     cmp_policy!(
         result.person,
-        vec!["2"],
+        ["2"],
         "reason of permit person should be '2'"
     );
 

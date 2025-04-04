@@ -6,7 +6,7 @@ tags:
   - SSO
 ---
 
-## Overview
+# SAML SSO
 
 The Janssen Server acts as a SAML Identity Provider to support outbound SAML
 single sign-on (SSO). It does this by leveraging the SAML features available

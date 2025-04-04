@@ -6,7 +6,7 @@ tags:
 - docker image
 ---
 
-# Overview
+# Config API Container Configuration
 
 Docker image packaging for config-api.
 

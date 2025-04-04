@@ -1,14 +1,26 @@
 package io.jans.link.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+
 import io.jans.link.constants.JansConstants;
-import io.jans.link.external.ExternalCacheRefreshService;
-import io.jans.link.model.CacheCompoundKey;
+import io.jans.link.external.ExternalLinkService;
 import io.jans.link.model.GluuCustomPerson;
 import io.jans.link.model.GluuSimplePerson;
 import io.jans.link.model.JansInumMap;
-import io.jans.link.model.config.AppConfiguration;
-import io.jans.link.model.config.shared.CacheRefreshConfiguration;
-import io.jans.link.model.config.shared.CacheRefreshAttributeMapping;
+import io.jans.link.model.config.shared.LinkAttributeMapping;
+import io.jans.link.model.config.shared.LinkConfiguration;
 import io.jans.link.util.PropertyUtil;
 import io.jans.model.GluuStatus;
 import io.jans.model.JansCustomAttribute;
@@ -32,11 +44,6 @@ import io.jans.service.ObjectSerializationService;
 import io.jans.service.SchemaService;
 import io.jans.util.OxConstants;
 import jakarta.inject.Inject;
-import org.apache.commons.io.FilenameUtils;
-import org.slf4j.Logger;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public abstract class BaseJansLinkTimer {
@@ -46,21 +53,19 @@ public abstract class BaseJansLinkTimer {
     @Inject
     private Logger log;
     @Inject
-    private CacheRefreshService cacheRefreshService;
+    private LinkService linkService;
     @Inject
     private PersonService personService;
     @Inject
     private PersistenceEntryManager ldapEntryManager;
     @Inject
-    private CacheRefreshSnapshotFileService cacheRefreshSnapshotFileService;
+    private LinkSnapshotFileService linkSnapshotFileService;
     @Inject
-    private ExternalCacheRefreshService externalCacheRefreshService;
+    private ExternalLinkService externalLinkService;
     @Inject
     private SchemaService schemaService;
     @Inject
     private InumService inumService;
-    /*@Inject
-    private AppConfiguration appConfiguration;*/
 
     @Inject
     private EncryptionService encryptionService;
@@ -159,17 +164,17 @@ public abstract class BaseJansLinkTimer {
         return deletedPersons;
     }
 
-    public List<String> updateTargetEntriesViaVDS(CacheRefreshConfiguration cacheRefreshConfiguration,
+    public List<String> updateTargetEntriesViaVDS(LinkConfiguration linkConfiguration,
                                                    LdapServerConnection targetServerConnection, Set<String> changedInums) {
         List<String> result = new ArrayList<String>();
 
         PersistenceEntryManager targetPersistenceEntryManager = targetServerConnection.getPersistenceEntryManager();
-        Filter filter = cacheRefreshService.createObjectClassPresenceFilter();
+        Filter filter = linkService.createObjectClassPresenceFilter();
         for (String changedInum : changedInums) {
             String baseDn = "action=synchronizecache," + personService.getDnForPerson(changedInum);
             try {
                 targetPersistenceEntryManager.findEntries(baseDn, DummyEntry.class, filter, SearchScope.SUB, null,
-                        null, 0, 0, cacheRefreshConfiguration.getLdapSearchSizeLimit());
+                        null, 0, 0, linkConfiguration.getLdapSearchSizeLimit());
                 result.add(changedInum);
                 log.info("Updated entry with inum {}"+ changedInum);
             } catch (BasePersistenceException ex) {
@@ -180,17 +185,17 @@ public abstract class BaseJansLinkTimer {
         return result;
     }
 
-    /*public List<String> updateTargetEntriesViaCopy(CacheRefreshConfiguration cacheRefreshConfiguration,
+    /*public List<String> updateTargetEntriesViaCopy(LinkConfiguration linkConfiguration,
                                                     Map<CacheCompoundKey, GluuSimplePerson> sourcePersonCacheCompoundKeyMap,
                                                     HashMap<CacheCompoundKey, JansInumMap> primaryKeyAttrValueInumMap, Set<String> changedInums) {
         HashMap<String, CacheCompoundKey> inumCacheCompoundKeyMap = getInumCacheCompoundKeyMap(
                 primaryKeyAttrValueInumMap);
-        Map<String, String> targetServerAttributesMapping = getTargetServerAttributesMapping(cacheRefreshConfiguration);
+        Map<String, String> targetServerAttributesMapping = getTargetServerAttributesMapping(LinkConfiguration);
         String[] customObjectClasses = appConfiguration.getPersonObjectClassTypes();
 
         List<String> result = new ArrayList<String>();
 
-        if (!validateTargetServerSchema(cacheRefreshConfiguration, targetServerAttributesMapping,
+        if (!validateTargetServerSchema(LinkConfiguration, targetServerAttributesMapping,
                 customObjectClasses)) {
             return result;
         }
@@ -215,11 +220,11 @@ public abstract class BaseJansLinkTimer {
         return result;
     }*/
 
-    public boolean validateTargetServerSchema(CacheRefreshConfiguration cacheRefreshConfiguration,
+    public boolean validateTargetServerSchema(LinkConfiguration linkConfiguration,
                                                Map<String, String> targetServerAttributesMapping, String[] customObjectClasses) {
         // Get list of return attributes
-        String[] keyAttributesWithoutValues = getCompoundKeyAttributesWithoutValues(cacheRefreshConfiguration);
-        String[] sourceAttributes = getSourceAttributes(cacheRefreshConfiguration);
+        String[] keyAttributesWithoutValues = getCompoundKeyAttributesWithoutValues(linkConfiguration);
+        String[] sourceAttributes = getSourceAttributes(linkConfiguration);
         String[] returnAttributes = ArrayHelper.arrayMerge(keyAttributesWithoutValues, sourceAttributes);
 
         GluuSimplePerson sourcePerson = new GluuSimplePerson();
@@ -237,13 +242,13 @@ public abstract class BaseJansLinkTimer {
         targetPerson.setCustomObjectClasses(customObjectClasses);
 
         // Update list of return attributes according mapping
-        cacheRefreshService.setTargetEntryAttributes(sourcePerson, targetServerAttributesMapping, targetPerson);
+        linkService.setTargetEntryAttributes(sourcePerson, targetServerAttributesMapping, targetPerson);
 
         // Execute interceptor script
-        externalCacheRefreshService.executeExternalUpdateUserMethods(targetPerson);
-        boolean executionResult = externalCacheRefreshService.executeExternalUpdateUserMethods(targetPerson);
+        externalLinkService.executeExternalUpdateUserMethods(targetPerson);
+        boolean executionResult = externalLinkService.executeExternalUpdateUserMethods(targetPerson);
         if (!executionResult) {
-            log.error("Failed to execute Cache Refresh scripts for person '{}'"+ targetInum);
+            log.error("Failed to execute Link Interception scripts for person '{}'"+ targetInum);
             return false;
         }
 
@@ -319,12 +324,12 @@ public abstract class BaseJansLinkTimer {
         //####################################
         targetPerson.setSourceServerUserDn(sourcePerson.getDn());
 
-        cacheRefreshService.setTargetEntryAttributes(sourcePerson, targetServerAttributesMapping, targetPerson);
+        linkService.setTargetEntryAttributes(sourcePerson, targetServerAttributesMapping, targetPerson);
 
         // Execute interceptor script
-        boolean executionResult = externalCacheRefreshService.executeExternalUpdateUserMethods(targetPerson);
+        boolean executionResult = externalLinkService.executeExternalUpdateUserMethods(targetPerson);
         if (!executionResult) {
-            log.error("Failed to execute Cache Refresh scripts for person '{}'"+ targetInum);
+            log.error("Failed to execute Link Interception scripts for person '{}'"+ targetInum);
             return false;
         }
 
@@ -358,7 +363,7 @@ public abstract class BaseJansLinkTimer {
         return result;
     }*/
 
-    /*public List<JansInumMap> loadInumServerEntries(CacheRefreshConfiguration cacheRefreshConfiguration,
+    /*public List<JansInumMap> loadInumServerEntries(LinkConfiguration LinkConfiguration,
                                                     LdapServerConnection inumDbServerConnection) {
         PersistenceEntryManager inumDbPersistenceEntryManager = inumDbServerConnection.getPersistenceEntryManager();
         String inumbaseDn = inumDbServerConnection.getBaseDns()[0];
@@ -370,17 +375,17 @@ public abstract class BaseJansLinkTimer {
         Filter filter = Filter.createANDFilter(filterObjectClass, filterStatus);
 
         return inumDbPersistenceEntryManager.findEntries(inumbaseDn, JansInumMap.class, filter, SearchScope.SUB, null,
-                null, 0, 0, cacheRefreshConfiguration.getLdapSearchSizeLimit());
+                null, 0, 0, LinkConfiguration.getLdapSearchSizeLimit());
     }*/
 
     public List<GluuSimplePerson> loadSourceServerEntriesWithoutLimits(
-            CacheRefreshConfiguration cacheRefreshConfiguration, LdapServerConnection[] sourceServerConnections)
+            LinkConfiguration LinkConfiguration, LdapServerConnection[] sourceServerConnections)
             throws SearchException {
-        Filter customFilter = cacheRefreshService.createFilter(cacheRefreshConfiguration.getCustomLdapFilter());
-        String[] keyAttributes = getCompoundKeyAttributes(cacheRefreshConfiguration);
-        String[] keyAttributesWithoutValues = getCompoundKeyAttributesWithoutValues(cacheRefreshConfiguration);
-        String[] keyObjectClasses = getCompoundKeyObjectClasses(cacheRefreshConfiguration);
-        String[] sourceAttributes = getSourceAttributes(cacheRefreshConfiguration);
+        Filter customFilter = linkService.createFilter(LinkConfiguration.getCustomLdapFilter());
+        String[] keyAttributes = getCompoundKeyAttributes(LinkConfiguration);
+        String[] keyAttributesWithoutValues = getCompoundKeyAttributesWithoutValues(LinkConfiguration);
+        String[] keyObjectClasses = getCompoundKeyObjectClasses(LinkConfiguration);
+        String[] sourceAttributes = getSourceAttributes(LinkConfiguration);
 
         String[] returnAttributes = ArrayHelper.arrayMerge(keyAttributesWithoutValues, sourceAttributes);
 
@@ -392,7 +397,7 @@ public abstract class BaseJansLinkTimer {
 
             PersistenceEntryManager sourcePersistenceEntryManager = sourceServerConnection.getPersistenceEntryManager();
             String[] baseDns = sourceServerConnection.getBaseDns();
-            Filter filter = cacheRefreshService.createFilter(keyAttributes, keyObjectClasses, "", customFilter);
+            Filter filter = linkService.createFilter(keyAttributes, keyObjectClasses, "", customFilter);
             if (log.isTraceEnabled()) {
                 log.trace("Using next filter to load entris from source server: {}"+ filter);
             }
@@ -400,7 +405,7 @@ public abstract class BaseJansLinkTimer {
             for (String baseDn : baseDns) {
                 List<GluuSimplePerson> currentSourcePersons = sourcePersistenceEntryManager.findEntries(baseDn,
                         GluuSimplePerson.class, filter, SearchScope.SUB, returnAttributes, null, 0, 0,
-                        cacheRefreshConfiguration.getLdapSearchSizeLimit());
+                        LinkConfiguration.getLdapSearchSizeLimit());
 
                 // Add to result and ignore root entry if needed
                 for (GluuSimplePerson currentSourcePerson : currentSourcePersons) {
@@ -420,13 +425,13 @@ public abstract class BaseJansLinkTimer {
         return sourcePersons;
     }
 
-    public List<GluuSimplePerson> loadSourceServerEntries(CacheRefreshConfiguration cacheRefreshConfiguration,
+    public List<GluuSimplePerson> loadSourceServerEntries(LinkConfiguration LinkConfiguration,
                                                            LdapServerConnection[] sourceServerConnections) throws SearchException {
-        Filter customFilter = cacheRefreshService.createFilter(cacheRefreshConfiguration.getCustomLdapFilter());
-        String[] keyAttributes = getCompoundKeyAttributes(cacheRefreshConfiguration);
-        String[] keyAttributesWithoutValues = getCompoundKeyAttributesWithoutValues(cacheRefreshConfiguration);
-        String[] keyObjectClasses = getCompoundKeyObjectClasses(cacheRefreshConfiguration);
-        String[] sourceAttributes = getSourceAttributes(cacheRefreshConfiguration);
+        Filter customFilter = linkService.createFilter(LinkConfiguration.getCustomLdapFilter());
+        String[] keyAttributes = getCompoundKeyAttributes(LinkConfiguration);
+        String[] keyAttributesWithoutValues = getCompoundKeyAttributesWithoutValues(LinkConfiguration);
+        String[] keyObjectClasses = getCompoundKeyObjectClasses(LinkConfiguration);
+        String[] sourceAttributes = getSourceAttributes(LinkConfiguration);
 
         String[] twoLettersArray = createTwoLettersArray();
         String[] returnAttributes = ArrayHelper.arrayMerge(keyAttributesWithoutValues, sourceAttributes);
@@ -440,7 +445,7 @@ public abstract class BaseJansLinkTimer {
             PersistenceEntryManager sourcePersistenceEntryManager = sourceServerConnection.getPersistenceEntryManager();
             String[] baseDns = sourceServerConnection.getBaseDns();
             for (String keyAttributeStart : twoLettersArray) {
-                Filter filter = cacheRefreshService.createFilter(keyAttributes, keyObjectClasses, keyAttributeStart,
+                Filter filter = linkService.createFilter(keyAttributes, keyObjectClasses, keyAttributeStart,
                         customFilter);
                 if (log.isDebugEnabled()) {
                     log.trace("Using next filter to load entris from source server: {}"+ filter);
@@ -449,7 +454,7 @@ public abstract class BaseJansLinkTimer {
                 for (String baseDn : baseDns) {
                     List<GluuSimplePerson> currentSourcePersons = sourcePersistenceEntryManager.findEntries(baseDn,
                             GluuSimplePerson.class, filter, SearchScope.SUB, returnAttributes, null, 0, 0,
-                            cacheRefreshConfiguration.getLdapSearchSizeLimit());
+                            LinkConfiguration.getLdapSearchSizeLimit());
 
                     // Add to result and ignore root entry if needed
                     for (GluuSimplePerson currentSourcePerson : currentSourcePersons) {
@@ -470,19 +475,19 @@ public abstract class BaseJansLinkTimer {
         return sourcePersons;
     }
 
-    public List<TypedGluuSimplePerson> loadTargetServerEntries(CacheRefreshConfiguration cacheRefreshConfiguration,
+    public List<TypedGluuSimplePerson> loadTargetServerEntries(LinkConfiguration LinkConfiguration,
                                                                 PersistenceEntryManager targetPersistenceEntryManager) {
         Filter filter = Filter.createEqualityFilter(OxConstants.OBJECT_CLASS, JansConstants.objectClassPerson);
 
         return targetPersistenceEntryManager.findEntries(personService.getDnForPerson(null), TypedGluuSimplePerson.class,
                 filter, SearchScope.SUB, TARGET_PERSON_RETURN_ATTRIBUTES, null, 0, 0,
-                cacheRefreshConfiguration.getLdapSearchSizeLimit());
+                LinkConfiguration.getLdapSearchSizeLimit());
     }
 
     public JansInumMap addGluuInumMap(String inumbBaseDn, PersistenceEntryManager inumDbPersistenceEntryManager,
                                        String[] primaryKeyAttrName, String[][] primaryKeyValues) {
-        String inum = cacheRefreshService.generateInumForNewInumMap(inumbBaseDn, inumDbPersistenceEntryManager);
-        String inumDn = cacheRefreshService.getDnForInum(inumbBaseDn, inum);
+        String inum = linkService.generateInumForNewInumMap(inumbBaseDn, inumDbPersistenceEntryManager);
+        String inumDn = linkService.getDnForInum(inumbBaseDn, inum);
 
         JansInumMap inumMap = new JansInumMap();
         inumMap.setDn(inumDn);
@@ -498,7 +503,7 @@ public abstract class BaseJansLinkTimer {
             inumMap.setTertiaryKeyValues(primaryKeyValues[2]);
         }
         inumMap.setStatus(GluuStatus.ACTIVE);
-        cacheRefreshService.addInumMap(inumDbPersistenceEntryManager, inumMap);
+        linkService.addInumMap(inumDbPersistenceEntryManager, inumMap);
 
         return inumMap;
     }
@@ -592,8 +597,8 @@ public abstract class BaseJansLinkTimer {
         return result;
     }
 
-    public String getInumCachePath(CacheRefreshConfiguration cacheRefreshConfiguration) {
-        return FilenameUtils.concat(cacheRefreshConfiguration.getSnapshotFolder(), "inum_cache.dat");
+    public String getInumCachePath(LinkConfiguration LinkConfiguration) {
+        return FilenameUtils.concat(LinkConfiguration.getSnapshotFolder(), "inum_cache.dat");
     }
 
     public PersistenceEntryManager getLdapEntryManager() {
@@ -629,29 +634,29 @@ public abstract class BaseJansLinkTimer {
         }
     }
 
-    public CacheRefreshUpdateMethod getUpdateMethod(CacheRefreshConfiguration cacheRefreshConfiguration) {
-        String updateMethod = cacheRefreshConfiguration.getUpdateMethod();
+    public LinkUpdateMethod getUpdateMethod(LinkConfiguration LinkConfiguration) {
+        String updateMethod = LinkConfiguration.getUpdateMethod();
         if (StringHelper.isEmpty(updateMethod)) {
-            return CacheRefreshUpdateMethod.COPY;
+            return LinkUpdateMethod.COPY;
         }
 
-        return CacheRefreshUpdateMethod.getByValue(cacheRefreshConfiguration.getUpdateMethod());
+        return LinkUpdateMethod.getByValue(LinkConfiguration.getUpdateMethod());
     }
 
-    public String[] getSourceAttributes(CacheRefreshConfiguration cacheRefreshConfiguration) {
-        return cacheRefreshConfiguration.getSourceAttributes().toArray(new String[0]);
+    public String[] getSourceAttributes(LinkConfiguration LinkConfiguration) {
+        return LinkConfiguration.getSourceAttributes().toArray(new String[0]);
     }
 
-    public String[] getCompoundKeyObjectClasses(CacheRefreshConfiguration cacheRefreshConfiguration) {
-        return cacheRefreshConfiguration.getKeyObjectClasses().toArray(new String[0]);
+    public String[] getCompoundKeyObjectClasses(LinkConfiguration LinkConfiguration) {
+        return LinkConfiguration.getKeyObjectClasses().toArray(new String[0]);
     }
 
-    public String[] getCompoundKeyAttributes(CacheRefreshConfiguration cacheRefreshConfiguration) {
-        return cacheRefreshConfiguration.getKeyAttributes().toArray(new String[0]);
+    public String[] getCompoundKeyAttributes(LinkConfiguration LinkConfiguration) {
+        return LinkConfiguration.getKeyAttributes().toArray(new String[0]);
     }
 
-    public String[] getCompoundKeyAttributesWithoutValues(CacheRefreshConfiguration cacheRefreshConfiguration) {
-        String[] result = cacheRefreshConfiguration.getKeyAttributes().toArray(new String[0]);
+    public String[] getCompoundKeyAttributesWithoutValues(LinkConfiguration LinkConfiguration) {
+        String[] result = LinkConfiguration.getKeyAttributes().toArray(new String[0]);
         for (int i = 0; i < result.length; i++) {
             int index = result[i].indexOf('=');
             if (index != -1) {
@@ -662,9 +667,9 @@ public abstract class BaseJansLinkTimer {
         return result;
     }
 
-    public Map<String, String> getTargetServerAttributesMapping(CacheRefreshConfiguration cacheRefreshConfiguration) {
+    public Map<String, String> getTargetServerAttributesMapping(LinkConfiguration LinkConfiguration) {
         Map<String, String> result = new HashMap<String, String>();
-        for (CacheRefreshAttributeMapping attributeMapping : cacheRefreshConfiguration.getAttributeMapping()) {
+        for (LinkAttributeMapping attributeMapping : LinkConfiguration.getAttributeMapping()) {
             result.put(attributeMapping.getDestination(), attributeMapping.getSource());
         }
 

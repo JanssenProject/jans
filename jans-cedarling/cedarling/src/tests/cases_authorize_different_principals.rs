@@ -105,7 +105,7 @@ async fn success_test_for_all_principals() {
     );
     cmp_policy!(
         result.workload,
-        vec!["1"],
+        ["1"],
         "reason of permit workload should be '1'"
     );
 
@@ -117,7 +117,7 @@ async fn success_test_for_all_principals() {
 
     cmp_policy!(
         result.person,
-        vec!["2", "3"],
+        ["2", "3"],
         "reason of permit person should be '2'"
     );
 
@@ -155,7 +155,7 @@ async fn success_test_for_principal_workload() {
     );
     cmp_policy!(
         result.workload,
-        vec!["1"],
+        ["1"],
         "reason of permit workload should be '1'"
     );
 
@@ -195,7 +195,7 @@ async fn success_test_for_principal_user() {
     );
     cmp_policy!(
         result.person,
-        vec!["2"],
+        ["2"],
         "reason of permit person should be '2'"
     );
 
@@ -234,7 +234,7 @@ async fn success_test_for_principal_person_role() {
 
     cmp_policy!(
         result.person,
-        vec!["2", "3"],
+        ["2", "3"],
         "reason of permit person should be '2'"
     );
 
@@ -285,7 +285,7 @@ async fn success_test_for_principal_workload_role() {
     );
     cmp_policy!(
         result.workload,
-        vec!["1"],
+        ["1"],
         "reason of permit workload should be '1'"
     );
 
@@ -296,7 +296,7 @@ async fn success_test_for_principal_workload_role() {
     );
     cmp_policy!(
         result.person,
-        vec!["3"],
+        ["3"],
         "reason of permit person should be '3'"
     );
 
@@ -337,7 +337,7 @@ async fn success_test_for_principal_workload_true_or_user_false() {
     );
     cmp_policy!(
         result.workload,
-        vec!["1"],
+        ["1"],
         "reason of permit workload should be '1'"
     );
 
@@ -400,7 +400,7 @@ async fn success_test_for_principal_workload_false_or_user_true() {
     );
     cmp_policy!(
         result.person,
-        vec!["2"],
+        ["2"],
         "reason of permit person should be '2'"
     );
 
@@ -485,10 +485,7 @@ async fn test_where_principal_workload_cant_be_applied() {
         .await
         .expect_err("request should be parsed with error");
 
-    assert!(matches!(
-        result,
-        crate::AuthorizeError::WorkloadRequestValidation(_)
-    ))
+    assert!(matches!(result, crate::AuthorizeError::InvalidPrincipal(_)))
 }
 
 /// Check if action executes when principal user can't be applied
@@ -516,8 +513,8 @@ async fn test_where_principal_user_cant_be_applied() {
         .expect_err("request should be parsed with error");
 
     assert!(
-        matches!(result, crate::AuthorizeError::UserRequestValidation(_)),
-        "expected error UserRequestValidation, got: {}",
+        matches!(result, crate::AuthorizeError::InvalidPrincipal(_)),
+        "expected error InvalidPrincipal, got: {}",
         result
     )
 }

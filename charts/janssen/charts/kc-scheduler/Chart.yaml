@@ -1,7 +1,7 @@
 
 apiVersion: v2
 name: kc-scheduler
-version: 0.0.0-nightly
+version: 2.0.0
 kubeVersion: ">=v1.22.0-0"
 description: Responsible for synchronizing Keycloak SAML clients
 type: application
@@ -10,10 +10,10 @@ keywords:
   - SAML
 home: https://jans.io
 sources:
-  - https://github.com/JanssenProject/jans/docker-jans-kc-scheduler
+  - https://github.com/JanssenProject/jans/docker-jans-cloudtools
 maintainers:
   - name: Mohammad Abudayyeh
     email: support@jans.io
     url: https://github.com/moabu
 icon: https://github.com/JanssenProject/jans/raw/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
-appVersion: "0.0.0-nightly"
+appVersion: "2.0.0"

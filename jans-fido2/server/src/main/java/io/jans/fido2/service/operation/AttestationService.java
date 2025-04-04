@@ -361,13 +361,13 @@ public class AttestationService {
 		
 		//credentialCreationOptions.setHints(new HashSet<String>(hints));
 		
-		credentialCreationOptions.setAuthenticatorSelection(new AuthenticatorSelection());
 		if (attestationOptions.getAuthenticatorSelection() != null)
 		{
 			credentialCreationOptions.setAuthenticatorSelection(attestationOptions.getAuthenticatorSelection());
 		}
 		else
 		{
+			credentialCreationOptions.setAuthenticatorSelection(new AuthenticatorSelection());
 			// only platform
 			if (hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE.getValue()) && hints.size() == 1) {
 				

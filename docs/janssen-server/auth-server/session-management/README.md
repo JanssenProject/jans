@@ -77,18 +77,7 @@ session events, see:
 ### MySQL 
 All session information is saved in this table : https://github.com/JanssenProject/jans/blob/main/docs/admin/reference/database/mysql-schema.md#janssessid 
 
-### TUI
-
-To start searching and deleting sessions, navigate to
-`Auth Server`->`Sessions`.  This brings up a screen as shown below
-with searching and deleting sessions.
-
-![Searching Sessions](../../../assets/tui-auth-server-sessions.png)
-
-After entering search criterias, navigate to **< Search >** button end press **Enter**.
-To delete a session, select it and press **delete** key.
-
-Refer to complete documentation [here](../../config-guide/config-tools/jans-tui/README.md)
+Follow [this link](../../config-guide/auth-server-config/session-management.md) for session management with configuration tools.
 
 
 ## FAQ

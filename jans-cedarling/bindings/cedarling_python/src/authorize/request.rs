@@ -5,7 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::resource_data::ResourceData;
+use super::entity_data::EntityData;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
@@ -22,7 +22,7 @@ use std::collections::HashMap;
 /// ----------
 /// :param tokens: A class containing the JWTs what will be used for the request.
 /// :param action: The action to be authorized.
-/// :param resource: Resource data (wrapped `ResourceData` object).
+/// :param resource: Resource data (wrapped `EntityData` object).
 /// :param context: Python dictionary with additional context.
 ///
 /// Example
@@ -37,7 +37,7 @@ pub struct Request {
     /// cedar_policy action
     pub action: String,
     /// cedar_policy resource data
-    pub resource: ResourceData,
+    pub resource: EntityData,
     /// context to be used in cedar_policy
     pub context: Py<PyDict>,
 }
@@ -46,12 +46,7 @@ pub struct Request {
 impl Request {
     #[new]
     #[pyo3(signature = (tokens, action, resource, context))]
-    fn new(
-        tokens: Py<PyDict>,
-        action: String,
-        resource: ResourceData,
-        context: Py<PyDict>,
-    ) -> Self {
+    fn new(tokens: Py<PyDict>, action: String, resource: EntityData, context: Py<PyDict>) -> Self {
         Self {
             tokens,
             action,

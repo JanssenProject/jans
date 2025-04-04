@@ -7,7 +7,7 @@ tags:
   - components
 ---
 
-# Overview
+# Kubernetes
 
 This Reference guide helps you learn about the components and architecture of Janssen.
 

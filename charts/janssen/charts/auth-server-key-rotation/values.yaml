@@ -16,9 +16,9 @@ image:
   # -- Image pullPolicy to use for deploying.
   pullPolicy: IfNotPresent
   # -- Image  to use for deploying.
-  repository: janssenproject/certmanager
+  repository: janssenproject/cloudtools
   # -- Image  tag to use for deploying.
-  tag: 0.0.0-nightly
+  tag: 2.0.0-1
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Auth server key rotation keys life in hours

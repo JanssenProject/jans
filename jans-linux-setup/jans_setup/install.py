@@ -263,6 +263,7 @@ def uninstall_jans():
         '/opt/kc-scheduler',
         '/etc/cron.d/kc-scheduler-cron',
         '/etc/cron.d/jans-session',
+        '/usr/local/bin/jans',
         ]
 
     if not argsp.keep_downloads:

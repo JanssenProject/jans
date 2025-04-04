@@ -14,7 +14,8 @@ use super::LogLevel;
 use super::interface::{Indexed, Loggable};
 use crate::common::policy_store::PoliciesContainer;
 use crate::jwt::Token;
-use smol_str::SmolStr;
+use cedar_policy::EntityUid;
+use smol_str::{SmolStr, ToSmolStr};
 use uuid7::Uuid;
 
 /// ISO-8601 time format for [`chrono`]
@@ -132,45 +133,20 @@ pub struct AuthorizationLogInfo {
     pub context: serde_json::Value,
     /// cedar-policy entities json presentation for forensic analysis
     pub entities: serde_json::Value,
-
-    // We use actually same structures but with different unique field names.
-    // It allow deserialize json to flatten structure.
-    /// Person authorize info
-    #[serde(flatten)]
-    pub person_authorize_info: Option<UserAuthorizeInfo>,
-    /// Workload authorize info
-    #[serde(flatten)]
-    pub workload_authorize_info: Option<WorkloadAuthorizeInfo>,
-
+    /// List of authorize info entries for debug
+    pub authorize_info: Vec<AuthorizeInfo>,
     /// is authorized
     pub authorized: bool,
 }
 
-/// Person authorize info
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-pub struct UserAuthorizeInfo {
-    /// cedar-policy user/person principal
-    #[serde(rename = "person_principal")]
-    pub principal: String,
-    /// cedar-policy user/person diagnostics information
-    #[serde(rename = "person_diagnostics")]
-    pub diagnostics: Diagnostics,
-    /// cedar-policy user/person decision
-    #[serde(rename = "person_decision")]
-    pub decision: Decision,
-}
-
 /// Workload authorize info
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-pub struct WorkloadAuthorizeInfo {
-    /// cedar-policy workload principal
-    #[serde(rename = "workload_principal")]
+pub struct AuthorizeInfo {
+    /// cedar-policy principal
     pub principal: String,
-    #[serde(rename = "workload_diagnostics")]
-    /// cedar-policy workload diagnostics information
+    /// cedar-policy diagnostics information
     pub diagnostics: Diagnostics,
-    /// cedar-policy workload decision
-    #[serde(rename = "workload_decision")]
+    /// cedar-policy decision
     pub decision: Decision,
 }
 
@@ -259,7 +235,7 @@ pub struct DiagnosticsRefs<'a> {
 }
 
 impl DiagnosticsRefs<'_> {
-    pub fn new<'a>(diagnostics: &[&'a Option<&Diagnostics>]) -> DiagnosticsRefs<'a> {
+    pub fn new<'a>(diagnostics: &'a [Option<&'a Diagnostics>]) -> DiagnosticsRefs<'a> {
         let policy_info_iter = diagnostics
             .iter()
             .filter_map(|diagnostic_opt| diagnostic_opt.map(|diagnostic| &diagnostic.reason))
@@ -345,10 +321,12 @@ pub struct DecisionLogEntry<'a> {
     /// decision for request
     pub decision: Decision,
     /// Dictionary with the token type and claims which should be included in the log
+    #[serde(skip_serializing_if = "LogTokensInfo::is_empty")]
     pub tokens: LogTokensInfo<'a>,
     /// time in micro-seconds spent for decision
     pub decision_time_micro_sec: i64,
 }
+
 impl DecisionLogEntry<'_> {
     pub fn principal(user: bool, workload: bool) -> Vec<SmolStr> {
         let mut tags = Vec::with_capacity(2);
@@ -359,6 +337,13 @@ impl DecisionLogEntry<'_> {
             tags.push("Workload".into());
         }
         tags
+    }
+
+    pub fn all_principals(principals: &[EntityUid]) -> Vec<SmolStr> {
+        principals
+            .iter()
+            .map(|uid| uid.type_name().to_smolstr())
+            .collect()
     }
 }
 
@@ -502,5 +487,13 @@ impl<'a> LogTokensInfo<'a> {
             .collect::<HashMap<&'a str, HashMap<&'a str, &'a serde_json::Value>>>();
 
         Self(tokens_logging_info)
+    }
+
+    pub(crate) fn empty() -> Self {
+        Self(HashMap::new())
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
     }
 }
