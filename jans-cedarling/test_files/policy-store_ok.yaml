@@ -71,7 +71,7 @@ policy_stores:
           entity TrustedIssuer = {"issuer_entity_id": Url};
           entity User in [Role] = {
             sub: String,
-            role: String,
+            role?: String,
             email: String,
             username: String,
             country: String,
