@@ -16,21 +16,23 @@ tags:
 
 **Steps:**
 
-1. [Create Cedar policy and schema](#create-cedar-policy-and-schema)  
-2. [Configure Tarp Cedarling](#configure-tarp-cedarling)  
-3. [Test the policy](#test-the-policy)
+1. [Create Cedar policy and schema](#create-cedar-policy-and-schema)
+2. [Configure Tarp with the policy store](#configure-tarp-with-the-policy-store)
+3. [Test the policy using Cedarling](#test-the-policy-using-cedarling)
 
 ## Prerequisites
 
 Install Jans Tarp in [Firefox](https://www.mozilla.org/en-US/firefox/) or [Chrome](https://www.google.com/chrome/index.html):
 
-- **Download** [latest release](https://github.com/JanssenProject/jans/releases/tag/nightly)
-- **Firefox**: `about:debugging` → This Firefox → Load Temporary Add-on → select zip  
-- **Chrome**: Extract zip → Extensions → Enable Developer Mode → Load Unpacked → select folder
+* [Download Tarp](https://github.com/JanssenProject/jans/releases/tag/nightly)
+* Firefox:
+  * `about:debugging` → This Firefox → Load Temporary Add-on → select ZIP
+* Chrome:
+  * Extract ZIP → Settings > Extensions → Enable Developer Mode → Load Unpacked → select folder
 
 ## Cedar Policy
 
-This demo grants access only to user entities with the `SupremeRuler` role:
+This demo policy grants access only to user entities with the `SupremeRuler` role:
 
 ```
 @id("allow_supreme_ruler")
@@ -62,7 +64,7 @@ Follow this video walkthrough:
 
 At the end, copy the generated **policy store URI** for the next step.
 
-## Configure Tarp Cedarling
+## Configure Tarp with the policy store 
 
 1. Open Tarp → `Cedarling` → `Add Configurations`
 2. Paste the following, replacing `<Policy Store URI>`:
@@ -94,7 +96,7 @@ At the end, copy the generated **policy store URI** for the next step.
 
 3. Click `Save` to initialize Cedarling.
 
-## Test the Policy
+## Test the policy using cedarling 
 
 Video walkthrough:
 
