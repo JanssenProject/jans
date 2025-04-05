@@ -3,16 +3,27 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+mod unsigned;
 mod user;
 mod workload;
 
 use super::entity_id_getters::*;
+use super::schema::AttrsShape;
 use super::*;
 use cedar_policy::Entity;
+use smol_str::SmolStr;
 use std::collections::HashSet;
 
 type TokenClaims = HashMap<String, Value>;
-type AttrSrc<'a> = (&'a TokenClaims, Option<&'a ClaimMappings>);
+
+#[derive(Clone, Copy)]
+pub enum AttrSrc<'a> {
+    Token {
+        claims: &'a TokenClaims,
+        mappings: Option<&'a ClaimMappings>,
+    },
+    Unsigned(&'a HashMap<String, Value>),
+}
 
 impl EntityBuilder {
     fn build_principal_entity(
@@ -33,19 +44,15 @@ impl EntityBuilder {
             get_first_valid_entity_id(&id_srcs).map_err(|e| e.while_building(type_name))?;
 
         // Extract attributes from sources
-        let (user_attrs, errs): (Vec<_>, Vec<_>) = attrs_srcs
-            .into_iter()
-            .map(|(src, mappings)| build_entity_attrs(src, built_entities, attrs_shape, mappings))
-            .partition_result();
+        let ExtractedAttrsResult { attrs, errs } =
+            extract_attrs_from_sources(attrs_srcs, built_entities, attrs_shape);
 
         let mut entity_attrs: HashMap<String, RestrictedExpression> = if errs.is_empty() {
             // what should happen if claims have the same name but different values?
-            user_attrs
-                .into_iter()
-                .fold(HashMap::new(), |mut acc, attrs| {
-                    acc.extend(attrs);
-                    acc
-                })
+            attrs.into_iter().fold(HashMap::new(), |mut acc, attrs| {
+                acc.extend(attrs);
+                acc
+            })
         } else {
             let errs: Vec<_> = errs.into_iter().flat_map(|e| e.into_inner()).collect();
             return Err(BuildEntityErrorKind::from(errs).while_building(type_name));
@@ -61,6 +68,33 @@ impl EntityBuilder {
 
         Ok(entity)
     }
+}
+
+fn extract_attrs_from_sources(
+    srcs: Vec<AttrSrc<'_>>,
+    built_entities: &BuiltEntities,
+    attrs_shape: Option<&HashMap<SmolStr, AttrsShape>>,
+) -> ExtractedAttrsResult {
+    let (attrs, errs) = srcs
+        .into_iter()
+        .map(|src| match src {
+            AttrSrc::Token { claims, mappings } => {
+                build_entity_attrs(claims, built_entities, attrs_shape, mappings)
+            },
+            AttrSrc::Unsigned(src) => build_entity_attrs(src, built_entities, attrs_shape, None),
+        })
+        .partition_result();
+    ExtractedAttrsResult { attrs, errs }
+}
+
+struct ExtractedAttrsResult {
+    attrs: Vec<HashMap<String, RestrictedExpression>>,
+    errs: Vec<BuildAttrsErrorVec>,
+}
+
+pub struct BuiltPrincipalUnsigned {
+    pub principal: Entity,
+    pub parents: Vec<Entity>,
 }
 
 /// Information on how to get a principal's ID.
@@ -127,7 +161,7 @@ mod test {
         ));
 
         // Case where there's available sources but the token is missing the claim
-        let id_srcs = vec![EntityIdSrc {
+        let id_srcs = vec![EntityIdSrc::Token {
             token: &id_token,
             claim: "missing_claim",
         }];

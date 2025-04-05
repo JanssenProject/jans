@@ -9,8 +9,9 @@ use test_utils::assert_eq;
 use tokio::test;
 
 use super::utils::*;
+use crate::authz::request::EntityData;
 use crate::{
-    EntityData, JsonRule, RequestUnsigned, cmp_decision, cmp_policy,
+    JsonRule, RequestUnsigned, cmp_decision, cmp_policy,
     tests::utils::cedarling_util::get_cedarling_with_callback,
 }; /* macros is defined in the cedarling\src\tests\utils\cedarling_util.rs */
 
@@ -99,7 +100,7 @@ async fn test_authorize_unsigned_for_all_principals_success() {
     );
     cmp_policy!(
         test_principal_1_result,
-        vec!["5"],
+        ["5"],
         "reason of permit should be '5' for TestPrincipal1"
     );
 
@@ -111,7 +112,7 @@ async fn test_authorize_unsigned_for_all_principals_success() {
 
     cmp_policy!(
         test_principal_2_result,
-        vec!["5"],
+        ["5"],
         "reason of permit should be '5' for TestPrincipal2"
     );
 
@@ -123,7 +124,7 @@ async fn test_authorize_unsigned_for_all_principals_success() {
 
     cmp_policy!(
         test_principal_3_result,
-        vec!["5"],
+        ["5"],
         "reason of permit should be '5' for TestPrincipal3"
     );
 
@@ -211,7 +212,7 @@ async fn test_authorize_unsigned_for_all_principals_success_using_entity_same_ty
     );
     cmp_policy!(
         test_principal_1_result,
-        vec!["5"],
+        ["5"],
         "reason of permit should be '5' for TestPrincipal1"
     );
 
@@ -223,7 +224,7 @@ async fn test_authorize_unsigned_for_all_principals_success_using_entity_same_ty
 
     cmp_policy!(
         test_principal_2_result,
-        vec!["5"],
+        ["5"],
         "reason of permit should be '5' for TestPrincipal2"
     );
 
@@ -235,7 +236,7 @@ async fn test_authorize_unsigned_for_all_principals_success_using_entity_same_ty
 
     cmp_policy!(
         test_principal_3_result,
-        vec!["5"],
+        ["5"],
         "reason of permit should be '5' for TestPrincipal3"
     );
 
@@ -327,7 +328,7 @@ async fn test_authorize_unsigned_for_all_principals_failure() {
 
     cmp_policy!(
         test_principal_2_result,
-        vec!["5"],
+        ["5"],
         "reason of permit should be '5' for TestPrincipal2"
     );
 

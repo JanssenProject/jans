@@ -5,9 +5,9 @@
 
 use std::fmt::Display;
 
+use super::build_expr::{BuildExprError, BuildExprErrorVec};
 use super::entity_id_getters::GetEntityIdErrors;
 use super::schema::BuildMappingSchemaError;
-use super::build_expr::{BuildExprError, BuildExprErrorVec};
 use cedar_policy::ExpressionConstructionError;
 use smol_str::SmolStr;
 use thiserror::Error;
@@ -130,4 +130,12 @@ fn collect_errors_to_str<T: Display>(errors: &[T]) -> String {
         .map(|e| e.to_string())
         .collect::<Vec<_>>()
         .join(", ")
+}
+
+#[derive(Debug, Error)]
+pub enum BuildUnsignedEntityError {
+    #[error("the role entity must be either a String or an Array of strings but got: {0:?}")]
+    InvalidType(serde_json::Value),
+    #[error(transparent)]
+    BuildEntity(#[from] BuildEntityError),
 }
