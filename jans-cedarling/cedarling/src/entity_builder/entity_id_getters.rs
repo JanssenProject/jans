@@ -63,14 +63,25 @@ pub fn collect_all_valid_entity_ids(id_srcs: &[EntityIdSrc]) -> Vec<SmolStr> {
     id_srcs
         .iter()
         .filter_map(|src| match src {
-            EntityIdSrc::Token { token, claim } => token.get_claim_val(claim),
-            EntityIdSrc::String(_) => todo!(),
+            EntityIdSrc::Token { token, claim } => token.get_claim_val(claim).cloned(),
+            EntityIdSrc::String(eid) => id_str_src_to_value(eid),
         })
         .flat_map(claim_to_ids)
         .collect()
 }
 
-fn claim_to_ids(claim: &Value) -> Vec<SmolStr> {
+fn id_str_src_to_value(eid: &str) -> Option<Value> {
+    let eid = eid.trim().to_string();
+    if eid.is_empty() {
+        None
+    } else {
+        let eid =
+            serde_json::from_str::<Value>(&eid).expect("Strings should always be a valid JSON");
+        Some(eid)
+    }
+}
+
+fn claim_to_ids(claim: Value) -> Vec<SmolStr> {
     let mut ids = Vec::with_capacity(1 + claim.as_array().map(|v| v.len()).unwrap_or_default());
     match claim {
         serde_json::Value::Number(number) => {
