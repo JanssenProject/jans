@@ -322,6 +322,7 @@ impl Authz {
             principals,
             roles,
             resource,
+            built_entities,
         } = self
             .config
             .entity_builder
@@ -335,7 +336,7 @@ impl Authz {
         let context = build_context(
             &self.config,
             request.context.clone(),
-            &BuiltEntities::default(),
+            &built_entities,
             &schema.schema,
             &action,
         )?;

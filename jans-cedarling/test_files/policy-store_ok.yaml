@@ -101,11 +101,11 @@ policy_stores:
             jti: String,
           };
           type Context = {
-            user: User,
-            workload: Workload,
-            access_token: Access_token,
-            id_token: Id_token,
-            userinfo_token: Userinfo_token,
+            user?: User,
+            workload?: Workload,
+            access_token?: Access_token,
+            id_token?: Id_token,
+            userinfo_token?: Userinfo_token,
           };
           action "Update" appliesTo {
             principal: [Workload, User, Role],

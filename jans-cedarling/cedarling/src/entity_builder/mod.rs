@@ -145,13 +145,19 @@ impl EntityBuilder {
         &self,
         request: &RequestUnsigned,
     ) -> Result<BuiltEntitiesUnsigned, BuildUnsignedEntityError> {
-        let built_entities = BuiltEntities::default();
+        let mut built_entities = BuiltEntities::default();
 
         let mut principals = Vec::with_capacity(request.principals.len());
-        let mut roles = Vec::new();
+        let mut roles = Vec::<Entity>::new();
         for principal in request.principals.iter() {
             let BuiltPrincipalUnsigned { principal, parents } =
                 self.build_principal_unsigned(principal, &built_entities)?;
+
+            built_entities.insert(&principal.uid());
+            for role in roles.iter() {
+                built_entities.insert(&role.uid());
+            }
+
             principals.push(principal);
             roles.extend(parents);
         }
@@ -162,6 +168,7 @@ impl EntityBuilder {
             principals,
             roles,
             resource,
+            built_entities,
         })
     }
 
@@ -189,6 +196,7 @@ pub struct BuiltEntitiesUnsigned {
     pub principals: Vec<Entity>,
     pub roles: Vec<Entity>,
     pub resource: Entity,
+    pub built_entities: BuiltEntities,
 }
 
 pub fn build_cedar_entity(
