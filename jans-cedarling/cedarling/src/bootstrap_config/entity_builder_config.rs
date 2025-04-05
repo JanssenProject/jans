@@ -35,7 +35,8 @@ pub struct EntityBuilderConfig {
 /// [`authorize_unsigned`] interface.
 ///
 ///
-/// This can be set using the `CEDARLING_UNSIGNED_ROLE_ID_SRC` bootstrap property
+/// This can be set using the `CEDARLING_UNSIGNED_ROLE_ID_SRC` bootstrap property and
+/// defaults to 'role' when not set.
 ///
 /// [`authorize_unsigned`]: crate::Cedarling::authorize_unsigned
 pub struct UnsignedRoleIdSrc(String);
