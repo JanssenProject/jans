@@ -3,6 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use derive_more::derive::Deref;
+use serde::{Deserialize, Serialize};
+
 use super::BootstrapConfigRaw;
 
 const DEFAULT_WORKLOAD_ENTITY_NAME: &str = "Jans::Workload";
@@ -23,6 +26,42 @@ pub struct EntityBuilderConfig {
     pub build_workload: bool,
     /// Toggles building the `User` entity
     pub build_user: bool,
+    /// The attribute to use when creating Role entities in the unsigned interface
+    pub unsigned_role_id_src: UnsignedRoleIdSrc,
+}
+
+#[derive(Debug, PartialEq, Clone, Deref, Serialize)]
+/// The attribute that will be used to create the Role entity when using the
+/// [`authorize_unsigned`] interface.
+///
+///
+/// This can be set using the `CEDARLING_UNSIGNED_ROLE_ID_SRC` bootstrap property
+///
+/// [`authorize_unsigned`]: crate::Cedarling::authorize_unsigned
+pub struct UnsignedRoleIdSrc(String);
+
+const DEFAULT_UNSIGNED_ROLE_ID_SRC: &str = "role";
+
+impl Default for UnsignedRoleIdSrc {
+    fn default() -> Self {
+        Self(DEFAULT_UNSIGNED_ROLE_ID_SRC.to_string())
+    }
+}
+
+impl<'de> Deserialize<'de> for UnsignedRoleIdSrc {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let role_str = String::deserialize(deserializer)?.trim().to_string();
+        let src = if role_str.is_empty() {
+            Self(DEFAULT_UNSIGNED_ROLE_ID_SRC.to_string())
+        } else {
+            Self(role_str)
+        };
+
+        Ok(src)
+    }
 }
 
 impl EntityBuilderConfig {
@@ -93,6 +132,7 @@ impl From<&BootstrapConfigRaw> for EntityBuilderConfig {
             entity_names,
             build_workload: config.workload_authz.into(),
             build_user: config.user_authz.into(),
+            unsigned_role_id_src: config.unsigned_role_id_src.clone(),
         }
     }
 }

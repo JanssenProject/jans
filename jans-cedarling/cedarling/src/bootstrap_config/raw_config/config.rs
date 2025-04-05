@@ -9,6 +9,7 @@ use super::super::authorization_config::IdTokenTrustMode;
 use super::default_values::*;
 use super::feature_types::*;
 use super::json_util::*;
+use crate::UnsignedRoleIdSrc;
 use crate::common::json_rules::JsonRule;
 use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
@@ -131,6 +132,10 @@ pub struct BootstrapConfigRaw {
     /// Mapping name of cedar schema Role entity.
     #[serde(rename = "CEDARLING_MAPPING_ROLE", default)]
     pub mapping_role: Option<String>,
+
+    /// Mapping name of cedar schema Role entity.
+    #[serde(rename = "CEDARLING_UNSIGNED_ROLE_ID_SRC", default)]
+    pub unsigned_role_id_src: UnsignedRoleIdSrc,
 
     /// Path to a local file pointing containing a JWKS.
     #[serde(

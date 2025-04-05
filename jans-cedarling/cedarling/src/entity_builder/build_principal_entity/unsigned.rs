@@ -7,9 +7,6 @@ use super::*;
 use cedar_policy::Entity;
 use std::collections::HashSet;
 
-// TODO: add a bootstrap property to contril this
-pub const DEFAULT_UNSIGNED_ROLE_SRC: &str = "role";
-
 impl EntityBuilder {
     pub fn build_principal_unsigned(
         &self,
@@ -53,7 +50,7 @@ impl EntityBuilder {
     ) -> Result<Vec<Entity>, BuildUnsignedEntityError> {
         let mut role_ids = Vec::<String>::new();
 
-        if let Some(role) = principal.attributes.get(DEFAULT_UNSIGNED_ROLE_SRC) {
+        if let Some(role) = principal.attributes.get(&*self.config.unsigned_role_id_src) {
             role_ids.append(&mut extract_roles_from_value(role)?);
         }
 
