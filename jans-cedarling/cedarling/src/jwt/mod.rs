@@ -14,17 +14,21 @@
 mod issuers_store;
 mod jwk_store;
 mod key_service;
+mod log;
 #[cfg(test)]
 mod test_utils;
 mod token;
 mod validator;
 
 use crate::JwtConfig;
+use crate::LogWriter;
 use crate::common::policy_store::TrustedIssuer;
+use crate::log::Logger;
 use base64::DecodeError;
 use base64::Engine;
 use base64::prelude::*;
 use key_service::{KeyService, KeyServiceError};
+use log::*;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
@@ -72,6 +76,7 @@ pub enum JwtServiceInitError {
 
 pub struct JwtService {
     validators: HashMap<ValidatorId, JwtValidator>,
+    logger: Option<Logger>,
 }
 
 #[derive(Eq, Hash, PartialEq, Debug)]
@@ -84,6 +89,7 @@ impl JwtService {
     pub async fn new(
         config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
+        logger: Option<Logger>,
     ) -> Result<Self, JwtServiceInitError> {
         let key_service: Arc<_> =
             match (&config.jwt_sig_validation, &config.jwks, &trusted_issuers) {
@@ -119,6 +125,11 @@ impl JwtService {
                 let origin = iss.oidc_endpoint.origin().ascii_serialization();
                 for (tkn, metadata) in iss.tokens_metadata.iter() {
                     if !metadata.trusted {
+                        if let Some(logger) = logger.as_ref() {
+                            logger.log_any(JwtLogEntry::system(format!(
+                                "skipping metadata for {tkn} since `trusted == false`"
+                            )));
+                        }
                         continue;
                     }
 
@@ -149,7 +160,14 @@ impl JwtService {
             }
         }
 
-        Ok(Self { validators })
+        Ok(Self { validators, logger })
+    }
+
+    /// Helper for making [`crate::LogType::System`] logs.
+    fn system_log(&self, msg: String) {
+        if let Some(logger) = self.logger.as_ref() {
+            logger.log_any(JwtLogEntry::system(msg));
+        }
     }
 
     pub async fn validate_tokens<'a>(
@@ -177,9 +195,12 @@ impl JwtService {
                 validator
             } else {
                 // we just ignore input tokens that are not defined
-                // in the token entity mapper bootstrap config
-                //
-                // TODO: should we log that we skip some tokens?
+                // in the policy store's tokens
+                if let Some(iss) = iss {
+                    self.system_log(format!(
+                        "ignoring {token_name} since it's from an untrusted issuer: '{iss}'"
+                    ));
+                }
                 continue;
             };
 
@@ -304,6 +325,7 @@ mod test {
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
             },
             Some(HashMap::from([("Jans".into(), iss.clone())])),
+            None,
         )
         .await
         .inspect_err(|e| eprintln!("error msg: {}", e))
