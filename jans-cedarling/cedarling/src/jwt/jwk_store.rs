@@ -18,7 +18,7 @@ use super::{KeyId, TrustedIssuerId};
 use crate::LogWriter;
 use crate::common::policy_store::TrustedIssuer;
 use crate::http::{HttpClient, HttpClientError};
-use crate::jwt::log::JwtLogEntry;
+use crate::jwt::log_entry::JwtLogEntry;
 use crate::log::Logger;
 
 #[derive(Deserialize)]

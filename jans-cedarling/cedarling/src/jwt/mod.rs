@@ -14,7 +14,7 @@
 mod issuers_store;
 mod jwk_store;
 mod key_service;
-mod log;
+mod log_entry;
 #[cfg(test)]
 mod test_utils;
 mod token;
@@ -28,7 +28,7 @@ use base64::DecodeError;
 use base64::Engine;
 use base64::prelude::*;
 use key_service::{KeyService, KeyServiceError};
-use log::*;
+use log_entry::*;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
