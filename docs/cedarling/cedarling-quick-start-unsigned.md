@@ -33,7 +33,7 @@ Cedarling needs policies and a schema to authorize access. These are bundled in 
 
 Follow this video walkthrough:
 
-https://streamable.com/ioxbst
+https://streamable.com/kvjcv6
 
 - **Schema setup**:
   - Open the policy store
@@ -104,7 +104,7 @@ At the end, copy the generated **policy store URI** for the next step.
 
 Video walkthrough:
 
-https://streamable.com/7lc2ey
+https://streamable.com/25wcb7
 
 1. Go to `Cedarling Authz Form`
 2. Input the following:
