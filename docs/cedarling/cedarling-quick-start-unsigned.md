@@ -27,20 +27,26 @@ Install Jans Tarp in [Chrome](https://www.google.com/chrome/index.html):
 * [Download Tarp](https://github.com/JanssenProject/jans/releases/download/nightly/demo-jans-tarp-chrome-nightly.zip)
 * Extract ZIP → Settings > Extensions → Enable Developer Mode → Load Unpacked → select folder
 
-## Create Cedar Policy and Schema
+## 1. Create Cedar Policy and Schema
 
-Cedarling needs policies and a schema to authorize access. These are bundled in a *policy store* (a JSON file). To create one, use [Agama Lab](https://cloud.gluu.org/agama-lab)’s **Policy Designer**, which provides a visual tool to define entities, actions, resources, and policies.
+Cedarling needs policies and a schema to authorize access. These are bundled in a *policy store* (a JSON file). To create one, use [Agama Lab](https://cloud.gluu.org/agama-lab)’s **Policy Designer**, a developer authoring tool that enables you to publish your policy store to an easily accessible Github URL. 
 
 Follow this video walkthrough:
 
 https://streamable.com/ioxbst
 
-**Inputs:**
-
-- **Schema**:
-  - Add entity `Object` (no attributes)
-  - Link `Object` to the `Read` action as a resource
-- **Policy**:
+- **Schema setup**:
+  - Open the policy store
+  - Click on `Schema`
+  - Scroll down to `Entities` and click on the `+` sign
+    - Entity type name: `SecretDocument`
+    - Click Save
+  - Scroll down to `Actions` and click on it  
+  - Click on `Read` and select the pencil icon
+    - Under Resources, add `SecretDocument`
+    - Click Save
+  - Scroll back up and click the green `Save` button on top of the entity list
+- **Policy setup**:
   This demo policy grants access only to user entities with the `SupremeRuler` role:
   
   ```
@@ -55,10 +61,14 @@ https://streamable.com/ioxbst
     principal.role.contains("SupremeRuler")
   };
   ```
+  - Click on `Policies`
+  - Click `Add Policy` and then `Text Policy`
+  - Paste in the policy from above
+  - Click Save
 
 At the end, copy the generated **policy store URI** for the next step.
 
-## Configure Tarp with the policy store 
+## 2. Configure Tarp with the policy store 
 
 1. Open Tarp → `Cedarling` → `Add Configurations`
 2. Paste the following, replacing `<Policy Store URI>`:
@@ -88,9 +98,9 @@ At the end, copy the generated **policy store URI** for the next step.
   }
   ```
 
-3. Click `Save` to initialize Cedarling.
+3. Click `Save` to initialize Cedarling. This will start the Cedarling in Tarp, fetch and validate your policy store, and configure Cedarling to validate requests based on the User. 
 
-## Test the policy using cedarling 
+## 3. Test the policy using cedarling 
 
 Video walkthrough:
 
@@ -119,7 +129,7 @@ https://streamable.com/7lc2ey
 ```
     {
       "entity_type": "resource",
-      "type": "Jans::Object",
+      "type": "Jans::SecretDocument",
       "id": "some_id"
     }
 ```
@@ -137,3 +147,26 @@ https://streamable.com/7lc2ey
 ```
 
 The top-level `decision: true` confirms successful authorization.
+
+To verify that Cedarling is authorizing based on the policy, use the following principal:
+
+```
+[
+  {
+    "type": "Jans::User",
+    "id": "some_id",
+    "sub": "some_sub",
+    "role": [""]
+  }
+]
+```
+And click `Cedarling Authz Request` again. Cedarling will return a new result:
+
+```
+{
+  "decision": false,
+  ...
+}
+```
+
+The top-level `decision: false` shows Cedarling denying authorization. 
