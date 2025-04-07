@@ -22,30 +22,10 @@ tags:
 
 ## Prerequisites
 
-Install Jans Tarp in [Firefox](https://www.mozilla.org/en-US/firefox/) or [Chrome](https://www.google.com/chrome/index.html):
+Install Jans Tarp in [Chrome](https://www.google.com/chrome/index.html):
 
-* [Download Tarp](https://github.com/JanssenProject/jans/releases/tag/nightly)
-* Firefox:
-  * `about:debugging` → This Firefox → Load Temporary Add-on → select ZIP
-* Chrome:
-  * Extract ZIP → Settings > Extensions → Enable Developer Mode → Load Unpacked → select folder
-
-## Cedar Policy
-
-This demo policy grants access only to user entities with the `SupremeRuler` role:
-
-```
-@id("allow_supreme_ruler")
-permit(
-  principal is Jans::User,
-  action,
-  resource
-)
-when {
-  principal has role &&
-  principal.role.contains("SupremeRuler")
-};
-```
+* [Download Tarp](https://github.com/JanssenProject/jans/releases/download/nightly/demo-jans-tarp-chrome-nightly.zip)
+* Extract ZIP → Settings > Extensions → Enable Developer Mode → Load Unpacked → select folder
 
 ## Create Cedar Policy and Schema
 
@@ -53,14 +33,28 @@ Cedarling needs policies and a schema to authorize access. These are bundled in 
 
 Follow this video walkthrough:
 
-![agama-lab-policy-store](../assets/agama-lab-policy-store-unsigned.mp4)
+![agama-lab-policy-store](https://streamable.com/ioxbst)
 
 **Inputs:**
 
 - **Schema**:
   - Add entity `Object` (no attributes)
   - Link `Object` to the `Read` action as a resource
-- **Policy**: Use the [policy above](#cedar-policy)
+- **Policy**:
+  This demo policy grants access only to user entities with the `SupremeRuler` role:
+  
+  ```
+  @id("allow_supreme_ruler")
+  permit(
+    principal is Jans::User,
+    action,
+    resource
+  )
+  when {
+    principal has role &&
+    principal.role.contains("SupremeRuler")
+  };
+  ```
 
 At the end, copy the generated **policy store URI** for the next step.
 
@@ -100,14 +94,14 @@ At the end, copy the generated **policy store URI** for the next step.
 
 Video walkthrough:
 
-![tarp-cedarling-setup-unsigned](../assets/tarp-cedarling-setup-unsigned.mp4)
+![tarp-cedarling-setup-unsigned](https://streamable.com/7lc2ey)
 
 1. Go to `Cedarling Authz Form`
 2. Input the following:
 
 **Principals:**
 
-    ```json
+    ```
     [
       {
         "type": "Jans::User",
@@ -122,7 +116,7 @@ Video walkthrough:
 
 **Resource:**
 
-    ```json
+    ```
     {
       "entity_type": "resource",
       "type": "Jans::Object",
@@ -134,7 +128,7 @@ Video walkthrough:
 
 **Sample Response:**
 
-    ```json
+    ```
     {
       "decision": true,
       "request_id": "019602e5-b148-7d0b-9d15-9d000c0d370b",
