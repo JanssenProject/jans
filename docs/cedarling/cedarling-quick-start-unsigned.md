@@ -33,7 +33,7 @@ Cedarling needs policies and a schema to authorize access. These are bundled in 
 
 Follow this video walkthrough:
 
-![agama-lab-policy-store](https://streamable.com/ioxbst)
+https://streamable.com/ioxbst
 
 **Inputs:**
 
@@ -94,7 +94,7 @@ At the end, copy the generated **policy store URI** for the next step.
 
 Video walkthrough:
 
-![tarp-cedarling-setup-unsigned](https://streamable.com/7lc2ey)
+https://streamable.com/7lc2ey
 
 1. Go to `Cedarling Authz Form`
 2. Input the following:
