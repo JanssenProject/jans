@@ -101,7 +101,7 @@ https://streamable.com/7lc2ey
 
 **Principals:**
 
-    ```
+```
     [
       {
         "type": "Jans::User",
@@ -110,30 +110,30 @@ https://streamable.com/7lc2ey
         "role": ["SupremeRuler"]
       }
     ]
-    ```
+```
 
 **Action:** `Jans::Action::"Read"`
 
 **Resource:**
 
-    ```
+```
     {
       "entity_type": "resource",
       "type": "Jans::Object",
       "id": "some_id"
     }
-    ```
+```
 
 3. Click `Cedarling Authz Request`
 
 **Sample Response:**
 
-    ```
+```
     {
       "decision": true,
       "request_id": "019602e5-b148-7d0b-9d15-9d000c0d370b",
       ...
     }
-    ```
+```
 
 The top-level `decision: true` confirms successful authorization.
