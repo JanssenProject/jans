@@ -141,6 +141,10 @@
          <lastmod>2025-04-08</lastmod>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/cedarling/cedarling-getting-started/</loc>
+         <lastmod>2025-04-08</lastmod>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/cedarling/cedarling-jwt-mapping/</loc>
          <lastmod>2025-04-08</lastmod>
     </url>
@@ -186,6 +190,26 @@
     </url>
     <url>
          <loc>https://jans.io/docs/head/cedarling/cedarling-wasm/</loc>
+         <lastmod>2025-04-08</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/cedarling/getting-started/javascript/</loc>
+         <lastmod>2025-04-08</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/cedarling/getting-started/kotlin/</loc>
+         <lastmod>2025-04-08</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/cedarling/getting-started/python/</loc>
+         <lastmod>2025-04-08</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/cedarling/getting-started/rust/</loc>
+         <lastmod>2025-04-08</lastmod>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/cedarling/getting-started/swift/</loc>
          <lastmod>2025-04-08</lastmod>
     </url>
     <url>
