@@ -298,29 +298,39 @@ nav:
       - janssen-server/developer/scripts/README.md
       - Application Session: script-catalog/application_session/application-session.md
       - Authorization Challenge: script-catalog/authorization_challenge/authorization-challenge.md
+      - Authorization Detail: script-catalog/authz_detail/authz-detail.md
       - CIBA End User Notification: script-catalog/ciba/ciba.md
       - Client Registration: script-catalog/client_registration/client-registration.md
       - Client Authentication: script-catalog/client_authn/client-authn.md
       - Config API: script-catalog/config_api/config-api.md
+      - IDP: script-catalog/idp/idp-extension.md
       - Consent Gathering: script-catalog/consent_gathering/consent-gathering.md
       - Dynamic Scope: script-catalog/dynamic_scope/dynamic-scope.md
       - End Session: script-catalog/end_session/end-session.md
       - ID Generator: script-catalog/id_generator/id-generator.md
-      - Introspection: script-catalog/introspection/introspection.md
-      - OpenID Configuration: script-catalog/discovery/discovery.md
+      - Introspection: script-catalog/introspection/README.md
+      - OpenID Configuration: script-catalog/discovery/discovery/README.md
       - Persistence: script-catalog/persistence_extension/persistence.md
       - Person Authentication: script-catalog/person_authentication/person-authentication.md
       - Post Authentication: script-catalog/post_authn/post-authentication.md
       - Resource Owner Password Credentials: script-catalog/resource_owner_password_credentials/ropc.md
       - Revoke Token: script-catalog/revoke_token/revoke-token.md
       - SCIM: script-catalog/scim/scim.md
+      - Token Exchange: script-catalog/token_exchange/token-exchange.md
       - Script Debugging: script-catalog/introspection/interception-scripts-debug.md
+      - Access Evaluation: script-catalog/access_evaluation/access-evaluation.md
+      - Access Evaluation Discovery: script-catalog/access_evaluation/access-evaluation-discovery.md
       - Select Account: script-catalog/select_account/select-account.md
       - Spontaneous Scope: script-catalog/spontaneous_scope/spontaneous-scope.md
+      - Fido2 Extension: script-catalog/fido2_extension/fido2-extension.md
+      - Create User: script-catalog/create_user/create-user.md
+      - Healtch Check: script-catalog/health_check/health-check.md
       - UMA Claims (JWT Transformation): script-catalog/uma_rpt_claims/uma-claims-jwt.md
       - UMA Claims Gathering (Web Flow): script-catalog/uma_claims_gathering/uma-claims-web.md
       - UMA RPT Policies: script-catalog/uma_rpt_policy/uma-rpt.md
       - Update Token: script-catalog/update_token/update-token.md
+      - Link interception: script-catalog/link_interception/link-interception.md
+      - SSA Modify Response: script-catalog/ssa/ssa-modify-response.md
   - Reference Guide:
     - janssen-server/reference/README.md
     - Javadocs / OpenAPI:
