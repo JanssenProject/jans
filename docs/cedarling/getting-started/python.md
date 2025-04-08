@@ -58,7 +58,7 @@ This produces a `.whl` file in the `target/wheels/` directory.
 maturin develop
 ```
 
-### Installing using `pip`
+### Installation using `pip`
 
 Coming Soon...
 

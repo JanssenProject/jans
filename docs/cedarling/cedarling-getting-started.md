@@ -38,12 +38,12 @@ The main way you will interact with Cedarling are through the following interfac
 The initialization or `init` interface is how you will initialize Cedarling. Initialization involves loading:
 
 **Bootstrap Configuration**
-: A set of properties that will tells how Cedarling behaves within your application.
-: Learn more in the [bootstrap properties guide](./cedarling-properties.md).
+- A set of properties that will tells how Cedarling behaves within your application.
+- Learn more in the [bootstrap properties guide](./cedarling-properties.md).
 
 **Policy Store**
-: A JSON file containing the schema, policies, trusted issuers, and token metadata schema used for making authorization decisions.
-: Learn more in the [policy store guide](./cedarling-policy-store.md).
+- A JSON file containing the schema, policies, trusted issuers, and token metadata schema used for making authorization decisions.
+- Learn more in the [policy store guide](./cedarling-policy-store.md).
 
 The bootstrap configuration and policy store directly influence how Cedarling performs [authorization](#authorization).
 
@@ -59,13 +59,13 @@ When using Cedarling, **Action** and **Resource** are typically defined in the [
 Cedarling currently provides two modes of authorization:
 
 **Standard (Token-based) Interface**
-: Extracts the **Principal** from a JWT.
-: Accepts the **Context** as a structured map (format might vary by language).
+- Extracts the **Principal** from a JWT.
+- Accepts the **Context** as a structured map (format might vary by language).
 
 **Unsigned Authorization**
-: Accepts the **Principal** directly without requiring a JWT.
-: This makes authorization decisions by passing a set of **Principals** directly.
-: Similar to the standard interface, the **Context** is passed in as-is in a map-like structure.
+- Accepts the **Principal** directly without requiring a JWT.
+- This makes authorization decisions by passing a set of **Principals** directly.
+- Similar to the standard interface, the **Context** is passed in as-is in a map-like structure.
 
 ### Logging
 
