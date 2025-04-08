@@ -274,5 +274,5 @@ print(logs)
 
 ## See Also
 
-- [Cedarling Sidecar Tutorial](../../cedarling-sidecar-tutorial.md)
+- [Cedarling Sidecar Tutorial](../cedarling-sidecar-tutorial.md)
 
