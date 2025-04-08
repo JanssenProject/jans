@@ -25,7 +25,7 @@ source venv/bin/activate
 
 **2. Install `maturin`**
 
-``sh
+```sh
 # for non-Linux systems
 pip install maturin
 
@@ -44,15 +44,15 @@ cd jans/jans-cedarling/bindings/cedarling_python/
 
 You have two options from here:
 
-  **a. Build a wheel**
+**a. Build a wheel**
 
-  ```sh
-  maturin build --release
-  ```
+```sh
+maturin build --release
+```
 
-  This produces a `.whl` file in the `target/wheels/` directory.
+This produces a `.whl` file in the `target/wheels/` directory.
 
-  **b. Install into your virtual environment directly**
+**b. Install into your virtual environment directly**
 
 ```sh
 maturin develop
