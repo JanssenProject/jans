@@ -2,6 +2,7 @@
 tags:
   - cedar
   - cedarling
+  - getting-started
 ---
 
 # Getting Started with Cedarling
@@ -12,10 +13,11 @@ Cedarling supports both [Token-Based Access Control (TBAC)](./cedarling-overview
 
 You can integrate Cedarling into your application using the following language libraries:
 
-- [Rust](./cedarling-rust)
-- [Python](./cedarling-python)
-- [Kotlin](./cedarling-kotlin)
-- [Swift](./cedarling-swift)
+- [Rust](./getting-started/rust.md)
+- [JavaScript](./getting-started/javascript.md)
+- [Python](./getting-started/python.md)
+- [Kotlin](./getting-started/kotlin.md)
+- [Swift](./getting-started/swift.md)
 
 Alternatively, you can use the [Cedarling Sidecar](./cedarling-overview.md) for a drop-in deployment.
 
