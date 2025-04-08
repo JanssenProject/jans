@@ -66,11 +66,11 @@ In this tutorial, we are going to use [Iamshowcase](https://sptest.iamshowcase.c
 - Download sp metadata: `wget https://sptest.iamshowcase.com/testsp_metadata.xml`
 - Open Jans TUI and navigate to **Jans SAML > Service Providers > Add Service Provider**:
 
-<img src= "../../assets/SAML-Service-provider.png">
+![image](../../assets/SAML-Service-provider.png)
 
 - Release some attributes, for example: `email`, `username`
   
-<img src= "../../assets/SAML-release-attribute.png">
+![image](../../assets/SAML-release-attribute.png)
 
 - Finally Save it.
 
@@ -82,7 +82,8 @@ Since We are done at Janssen Server side, now let's connect SP with the IDP:
 - Go to: https://sptest.iamshowcase.com/instructions#spinit and upload the IDP metadata.
 - It will give you an SP link to test the SAML SSO flow:
 
-<img src ="../../assets/sp-url.png">
+
+![image](../../assets/sp-url.png)
 
 ### Test SSO
 
