@@ -2,9 +2,11 @@
 tags:
   - administration
   - developer
-  - scripts
+  - script-catalog
   - Jans-link
 ---
+
+# Link Interception Detail Custom Script (LinkInterception)
 
 ## Overview
 
@@ -23,7 +25,7 @@ The Jans Link (Link Interception) script implements the [LinkInterceptionType](h
 
 ### New Methods
 
-| Method header                                                       | Method description                                       |
+| Method header | Method description |
 |:--------------------------------------------------------------------|:---------------------------------------------------------|
 | `def isStartProcess(self, configurationAttributes)`               | This method is called during start of jans link process. |
 | `def getBindCredentials(self, configId, configurationAttributes)` | Get bind credentials required to access source server    |
@@ -67,7 +69,7 @@ class LinkInterception(LinkInterceptionType):
         print "Link interception. Initialization"
         print "Link interception. Initialized successfully"
 
-        return True
+        return True   
 
     def destroy(self, configurationAttributes):
         print "Link interception. Destroy"
@@ -81,7 +83,7 @@ class LinkInterception(LinkInterceptionType):
         print "Link interception. Is start process method"
 
         return False
-
+    
     # Get bind credentials required to access source server 
     #   configId is the source server
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
@@ -119,4 +121,9 @@ class LinkInterception(LinkInterceptionType):
 
     def getApiVersion(self):
         return 11
+
 ```
+
+
+## Sample Scripts
+- [LinkInterceptionScirpt](../../../script-catalog/link_interception/sample-script/SampleScript.py)
