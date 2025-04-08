@@ -2209,6 +2209,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_1_7_2">
@@ -2385,6 +2387,20 @@
     <li class="md-nav__item">
       <a href="../../../config-guide/auth-server-config/oauth-umaresources-config/" class="md-nav__link">
         UMA Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../config-guide/auth-server-config/session-management/" class="md-nav__link">
+        Session Management
       </a>
     </li>
   
@@ -9334,7 +9350,11 @@ parameters as described below:</p>
         ...
     ],
     &quot;ssaSigningAlg&quot;: &quot;RS512&quot;,
-    &quot;ssaExpirationInDays&quot;: 30
+    &quot;ssaExpirationInDays&quot;: 30,
+    &quot;ssaMapSoftwareRolesToScopes&quot;: {
+        &quot;admin&quot;: [&quot;read&quot;, &quot;write&quot;, &quot;delete&quot;],
+        &quot;user&quot;: [&quot;read&quot;]
+    }
 }
 </code></pre></div>
 <ul>
@@ -9342,6 +9362,7 @@ parameters as described below:</p>
 <li><code>ssaCustomAttributes</code> — List of custom attributes, which are received in the request when creating an SSA.</li>
 <li><code>ssaSigningAlg</code> — Algorithm to sign the JWT that is returned after creating an SSA.</li>
 <li><code>ssaExpirationInDays</code> — Expiration expressed in days, when an SSA is created and the expiration is not sent.</li>
+<li><code>ssaMapSoftwareRolesToScopes</code> - mapping between software roles of SSA and scopes. When SSA is created it will try to set scopes based on software roles.</li>
 </ul>
 <h2 id="ssa-security">SSA Security<a class="headerlink" href="#ssa-security" title="Permanent link">#</a></h2>
 <p>To call SSA services, a token of type <code>client_credentials</code> must be generated with the following scopes enabled:</p>
@@ -9785,7 +9806,7 @@ Connection: Keep-Alive
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-25T16:29:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-25</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-04-04T16:30:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-04-04</span>
       
         <br>
         Created:
