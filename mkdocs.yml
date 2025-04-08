@@ -414,6 +414,7 @@ nav:
       - Using CLI/TUI: janssen-server/usermgmt/usermgmt-cli-tui.md
       - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
 - Cedarling:
+  - Getting Started: 'cedarling/cedarling-getting-started.md'
   - Overview: 'cedarling/cedarling-overview.md'
   - Reference:
     - Policy Store: 'cedarling/cedarling-policy-store.md'
