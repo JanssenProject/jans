@@ -13,12 +13,16 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.exception.CryptoProviderException;
+import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwk.KeyOpsType;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.ssa.SsaErrorResponseType;
 import io.jans.as.model.ssa.SsaScopeType;
+import io.jans.as.model.util.StringUtils;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
@@ -29,6 +33,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 
@@ -161,13 +166,13 @@ public class SsaService {
     /**
      * Generates a new JWT using a given SSA.
      * <p>
-     * Method throws an {@link Exception} if it fails to generate JWT
+     * Method throws an {@link CryptoProviderException} or {@link InvalidJwtException} if it fails to generate JWT
      * </p>
      *
      * @param ssa Ssa
      * @return Jwt with SSA structure
      */
-    public Jwt generateJwt(Ssa ssa) throws Exception {
+    public Jwt generateJwt(Ssa ssa) throws CryptoProviderException, InvalidJwtException {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(appConfiguration.getSsaConfiguration().getSsaSigningAlg());
         if (signatureAlgorithm == null) {
             log.error("Invalid signature algorithm, not found: {}", appConfiguration.getSsaConfiguration().getSsaSigningAlg());
@@ -184,23 +189,38 @@ public class SsaService {
         jwt.getHeader().setAlgorithm(signatureAlgorithm);
         jwt.getHeader().setKeyId(keyId);
 
-        jwt.getClaims().setJwtId(ssa.getId());
-        jwt.getClaims().setIssuedAt(ssa.getCreationDate());
-        jwt.getClaims().setExpirationTime(ssa.getExpirationDate());
-        jwt.getClaims().setIssuer(appConfiguration.getIssuer());
-        jwt.getClaims().setClaim(SOFTWARE_ID.getName(), ssa.getAttributes().getSoftwareId());
-        jwt.getClaims().setClaim(ORG_ID.getName(), ssa.getOrgId());
-        jwt.getClaims().setClaim(SOFTWARE_ROLES.getName(), ssa.getAttributes().getSoftwareRoles());
-        jwt.getClaims().setClaim(GRANT_TYPES.getName(), ssa.getAttributes().getGrantTypes());
-        jwt.getClaims().setClaim(LIFETIME.getName(), ssa.getAttributes().getLifetime());
-        if (!ssa.getAttributes().getCustomAttributes().isEmpty()) {
-            ssa.getAttributes().getCustomAttributes().forEach((key, value) -> jwt.getClaims().setClaim(key, value));
-        }
+        fillPayload(jwt.getClaims(), ssa);
 
         String signature = cryptoProvider.sign(jwt.getSigningInput(), jwt.getHeader().getKeyId(), null, signatureAlgorithm);
         jwt.setEncodedSignature(signature);
 
         return jwt;
+    }
+
+    public void fillPayload(JwtClaims claims, Ssa ssa) {
+        claims.setJwtId(ssa.getId());
+        claims.setIssuedAt(ssa.getCreationDate());
+        claims.setExpirationTime(ssa.getExpirationDate());
+        claims.setIssuer(appConfiguration.getIssuer());
+        claims.setClaim(SOFTWARE_ID.getName(), ssa.getAttributes().getSoftwareId());
+        claims.setClaim(ORG_ID.getName(), ssa.getOrgId());
+        claims.setClaim(SOFTWARE_ROLES.getName(), ssa.getAttributes().getSoftwareRoles());
+        claims.setClaim(GRANT_TYPES.getName(), ssa.getAttributes().getGrantTypes());
+        claims.setClaim(LIFETIME.getName(), ssa.getAttributes().getLifetime());
+        if (CollectionUtils.isNotEmpty(ssa.getAttributes().getScopes())) {
+            claims.setClaim(SCOPE.getName(), StringUtils.implode(ssa.getAttributes().getScopes(), " "));
+        }
+        if (!ssa.getAttributes().getCustomAttributes().isEmpty()) {
+            ssa.getAttributes().getCustomAttributes().forEach((key, value) -> claims.setClaim(key, value));
+        }
+
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Claims: {}", claims.toJsonString());
+            }
+        } catch (InvalidJwtException e) {
+            // ignore, it's just for debug
+        }
     }
 
     /**

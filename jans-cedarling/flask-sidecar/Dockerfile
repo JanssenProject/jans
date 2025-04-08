@@ -55,7 +55,7 @@ RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject
         && echo "${version}" > /api/cedarling_version \
         && release_version="v${version}" \
         && if [ "$version" = "0.0.0" ]; then release_version="nightly"; fi \
-        && wget -q https://github.com/JanssenProject/jans/releases/download/v"${release_version}"/cedarling_python-"${version}"-cp310-cp310-manylinux_2_31_x86_64.whl -O /api/cedarling_python-"${version}"-cp310-cp310-manylinux_2_31_x86_64.whl \
+        && wget -q https://github.com/JanssenProject/jans/releases/download/"${release_version}"/cedarling_python-"${version}"-cp310-cp310-manylinux_2_31_x86_64.whl -O /api/cedarling_python-"${version}"-cp310-cp310-manylinux_2_31_x86_64.whl \
         && rm -rf /tmp/jans
 
 # Setting up proper permissions:
@@ -77,7 +77,7 @@ EXPOSE 5000
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cedarling-flask-sidecar" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="2.0.0-1" \
+    org.opencontainers.image.version="1.5.0-1" \
     org.opencontainers.image.title="AuthZen Flask API" \
     org.opencontainers.image.description="Flask API that implements the [AuthZen](https://openid.github.io/authzen/) specification with the [cedarling](../) python binding."
 

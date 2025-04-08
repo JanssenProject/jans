@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.0.0](https://github.com/JanssenProject/jans/compare/v1.4.0...v2.0.0) (2025-04-03)
+## [1.5.0](https://github.com/JanssenProject/jans/compare/v1.4.0...v1.5.0) (2025-04-04)
 
 
 ### ⚠ BREAKING CHANGES
