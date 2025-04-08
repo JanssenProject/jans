@@ -329,6 +329,8 @@ nav:
       - UMA Claims Gathering (Web Flow): script-catalog/uma_claims_gathering/uma-claims-web.md
       - UMA RPT Policies: script-catalog/uma_rpt_policy/uma-rpt.md
       - Update Token: script-catalog/update_token/update-token.md
+      - Link interception: script-catalog/link_interception/link-interception.md
+      - SSA Modify Response: script-catalog/ssa/ssa-modify-response.md
   - Reference Guide:
     - janssen-server/reference/README.md
     - Javadocs / OpenAPI:
