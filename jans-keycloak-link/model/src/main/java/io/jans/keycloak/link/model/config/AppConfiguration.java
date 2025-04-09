@@ -21,7 +21,7 @@ import java.util.List;
  */
 @Vetoed
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AppConfiguration extends CacheRefreshConfiguration {
+public class AppConfiguration extends LinkConfiguration {
 
     private String baseDN;
 

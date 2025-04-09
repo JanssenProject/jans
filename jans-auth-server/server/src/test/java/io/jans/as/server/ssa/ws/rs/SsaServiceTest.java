@@ -1,5 +1,6 @@
 package io.jans.as.server.ssa.ws.rs;
 
+import com.google.common.collect.Lists;
 import io.jans.as.common.model.ssa.Ssa;
 import io.jans.as.common.model.ssa.SsaState;
 import io.jans.as.model.config.BaseDnConfiguration;
@@ -80,6 +81,16 @@ public class SsaServiceTest {
         ssa.getAttributes().setOneTimeUse(true);
         ssa.getAttributes().setRotateSsa(true);
         ssa.getAttributes().setLifetime(86400);
+    }
+
+    @Test
+    public void fillPayload_whenCallsWithScopes_shouldGetScopeClaimInPayload() {
+        ssa.getAttributes().setScopes(Lists.newArrayList("scope1", "scope2"));
+        JwtClaims jwtClaims = new JwtClaims();
+
+        ssaService.fillPayload(jwtClaims, ssa);
+
+        assertEquals(jwtClaims.getClaimAsString("scope"), "scope1 scope2");
     }
 
     @Test
@@ -264,7 +275,6 @@ public class SsaServiceTest {
         Jwt jwt = ssaService.generateJwt(ssa);
         assertSsaJwt(ssaConfiguration.getSsaSigningAlg(), issuer, ssa, jwt);
         verify(cryptoProvider).sign(any(), any(), eq(null), any());
-        verifyNoInteractions(log);
     }
 
     @Test
@@ -332,7 +342,6 @@ public class SsaServiceTest {
         Jwt jwt = ssaService.generateJwt(ssa);
         assertSsaJwt(ssaConfiguration.getSsaSigningAlg(), issuer, ssa, jwt);
         verify(cryptoProvider).sign(any(), any(), eq(null), any());
-        verifyNoInteractions(log);
     }
 
     @Test

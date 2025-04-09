@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-auth-server-parent</artifactId>
-		<version>0.0.0-nightly</version>
+		<version>1.5.0</version>
 	</parent>
 	<artifactId>jans-auth-persistence-model</artifactId>
 	<name>Persistence model</name>

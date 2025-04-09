@@ -16,7 +16,7 @@ services:
       - MYSQL_PASSWORD=1t5Fin3#security
       - MYSQL_ROOT_PASSWORD=1t5Fin3#security
   jans:
-    image: ${JANSSEN_IMAGE:-ghcr.io/janssenproject/jans/monolith:0.0.0-nightly}
+    image: ${JANSSEN_IMAGE:-ghcr.io/janssenproject/jans/monolith:1.5.0-1}
     restart: always
     ports:
       - "443:443"
