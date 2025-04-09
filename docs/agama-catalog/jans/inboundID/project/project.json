@@ -2,7 +2,7 @@
     "projectName": "agama-inbound-oauth",
     "author": "jgomer2001",
     "type": "Community",
-    "version": "0.0.0-nightly",
+    "version": "1.5.0",
     "description": "A project useful to delegate authorization to external services like social sites",
     "noDirectLaunch": [ "io.jans.inbound.Apple", "io.jans.inbound.GenericProvider", "io.jans.inbound.oauth2.AuthzCode", "io.jans.inbound.oauth2.AuthzCodeWithUserInfo" ],
     "configs": { 

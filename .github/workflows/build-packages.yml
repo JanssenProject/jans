@@ -366,13 +366,14 @@ jobs:
         cd ../..
         npm run pack
         mv ./release/jans-tarp-chrome-*.zip ../demo-jans-tarp-chrome-$VER.zip
-        mv ./dist/firefox/web-ext-artifacts/*.xpi ../demo-jans-tarp-firefox-$VER.xpi
+        mv ./dist/firefox/web-ext-artifacts/*.xpi ../demo-jans-tarp-firefox-$VER.xpi || touch ../demo-jans-tarp-firefox-$VER.xpi
         sha256sum ../demo-jans-tarp-chrome-$VER.zip > ../demo-jans-tarp-chrome-$VER.zip.sha256sum
         sha256sum ../demo-jans-tarp-firefox-$VER.xpi > ../demo-jans-tarp-firefox-$VER.xpi.sha256sum
         cd ..
         
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload $VER *.zip *.xpi *.sha256sum --clobber
+        gh release upload $VER *.zip *.sha256sum --clobber
+        gh release upload $VER *.xpi  --clobber || echo "Sign your extension for self-distribution to mozilla failed"
   build_cedarling_python:
     if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-20.04

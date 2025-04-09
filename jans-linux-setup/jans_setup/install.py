@@ -342,6 +342,9 @@ def do_install():
     if argsp.download_exit:
         setup_args += ' --download-exit'
 
+    if argsp.yes:
+        setup_args += ' -n'
+
     if setup_args:
         setup_cmd += ' ' + setup_args
 
