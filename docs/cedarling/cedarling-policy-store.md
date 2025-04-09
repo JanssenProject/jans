@@ -81,10 +81,10 @@ The `policies` field describes the Cedar policies that will be used in Cedarling
   }
 ```
 
-- **unique_policy_id**: (*String*) A uniqe policy ID used to for tracking and auditing purposes.
+- **unique_policy_id**: (*String*) A unique policy ID used to for tracking and auditing purposes.
 - **name** : (*String*) A name for the policy
 - **description** : (*String*) A brief description of cedar policy
-- **creation_date** :  (*String*) Policy creating date in `YYYY-MM-DDTHH:MM:SS.ssssss`
+- **creation_date** : (*String*) Policy creating date in `YYYY-MM-DDTHH:MM:SS.ssssss`
 - **policy_content** : (*String* | *Object*) The Cedar Policy. See [policy_content](#policy_content) below.
 
 ### `policy_content`
