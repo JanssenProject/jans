@@ -191,8 +191,8 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
 
               {inputSelection === 'json' &&
                 (<Tooltip title="Copy JSON configuration">
-                  <IconButton aria-label="Copy" style={{ maxWidth: '5vmax', float: 'right' }}>
-                    <ContentCopyIcon sx={{ color: pink[500] }} onClick={copyToClipboard} />
+                  <IconButton aria-label="Copy" style={{ maxWidth: '5vmax', float: 'right' }} onClick={copyToClipboard}>
+                    <ContentCopyIcon sx={{ color: pink[500] }} />
                   </IconButton>
                 </Tooltip>)}
             </div>
