@@ -52,10 +52,32 @@ Follow this video walkthrough:
 **Inputs:**
 
 - **Schema**:
-   - Add entity `Object` (no attributes)
-   - Add `Object` to the `Read` action as a resource
-- **Policy**: Use the [policy above](#cedar-policy)
+   - Under `Entity types`, add a new entity type `Object` with no attributes and hit `save`
+   - Under `Actions`, select the `Read` action and edit it. Add `Object` as a resource and hit `save`
+   - Scroll to top of the page and hit `save` to save the schema changes
+- **Policy**: 
+  This demo policy grants access only to users with the `SupremeRuler` role:
+
+  ```
+  @id("allow_supreme_ruler")
+  permit(
+    principal in Jans::Role::"SupremeRuler",
+    action,
+    resource
+  );
+  ```
+  - Click on `Policies`
+  - Click `Add Policy` and then `Text Editor`
+  - Paste in the policy from above
+  - Click Save
+
 - **Trusted Issuers**:
+
+  Add your IDP as a trusted issuer using the `Trusted Issuer` tab. 
+
+  - Click on `Add issuer` and add details as shown below.
+
+
    - Name: `testIdp`
    - Description: `Test IDP`
    - OIDC Config URL: `https://test-jans.gluu.info/.well-known/openid-configuration`
@@ -81,7 +103,7 @@ Follow this video walkthrough:
      }
      ```
 
-At the end, copy the generated **policy store URI** for the next step.
+At the end, user the `Copy Link` button to copy the generated **policy store URI** for the next step.
 
 ## Configure Tarp with the policy store 
 
@@ -91,8 +113,9 @@ At the end, copy the generated **policy store URI** for the next step.
    * Expiry: The day after today 
    * Scopes: `openid`, `profile`, `role`
 3. Click `Register`
-4. Go to `Cedarling` → `Add Configurations`
-5. Paste the config below (replace `<Policy Store URI>`):
+4. Go to `Cedarling` tab and click `Add Configurations`
+5. Select `JSON` configuration type and Paste the config as given below. Remember to replace `<Policy Store URI>` with 
+the URI of your policy store:
 
 ```json
     {
@@ -123,14 +146,15 @@ At the end, copy the generated **policy store URI** for the next step.
 
 ## Test the policy using cedarling
 
-1. In Tarp, click the ⚡ icon to begin authentication
+1. In Tarp, under `Authentication flow` tab, click the ⚡ icon to begin authentication
 2. Input:
    * ACR: `basic`
    * Scopes: `openid`, `profile`, `role`
 3. Login on the test IDP with a user having `SupremeRuler` role
 4. Click `Allow` on the consent screen
-5. Back in Tarp, open `Cedarling Authz Request Form`
-6. Input:
+5. If the authentication is successful, Tarp will show you a page with token details and `Cedarling Authz Request Form` section
+5. Open `Cedarling Authz Request Form`
+6. Use the details before as an input to this form:
    * Principal: select all 3 tokens
    * Action: `Jans::Action::"Read"`
    * Resource:
@@ -141,7 +165,9 @@ At the end, copy the generated **policy store URI** for the next step.
        "id": "some_id"
      }
      ```
+7. Leave the `Context` blank
 7. Click `Cedarling Authz Request`
+
 
 **Sample Response:**
 
