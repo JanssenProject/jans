@@ -7,11 +7,11 @@
 //!
 //! This module is responsible for mapping JWTs to Cedar entities
 
+mod build_cedar_entity;
 mod build_entity_attrs;
 mod build_expr;
 mod build_iss_entity;
 mod build_principal_entity;
-mod build_cedar_entity;
 mod build_role_entity;
 mod build_token_entities;
 mod built_entities;
@@ -85,7 +85,7 @@ impl EntityBuilder {
         for (tkn_name, tkn) in tokens.iter() {
             let entity_name = tkn
                 .iss
-                .and_then(|iss| iss.tokens_metadata.get(tkn_name))
+                .and_then(|iss| iss.token_metadata.get(tkn_name))
                 .map(|metadata| metadata.entity_type_name.as_str())
                 .or_else(|| default_tkn_entity_name(tkn_name));
 
@@ -323,7 +323,7 @@ mod test {
 
         // Set the custom token names in the IDP metadata
         let iss = TrustedIssuer {
-            tokens_metadata: HashMap::from([
+            token_metadata: HashMap::from([
                 (
                     "access_token".to_string(),
                     TokenEntityMetadata::builder()
