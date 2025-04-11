@@ -35,11 +35,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             decision_log_user_claims: vec!["client_id".to_string(), "username".to_string()],
             decision_log_workload_claims: vec!["org_id".to_string()],
             id_token_trust_mode: IdTokenTrustMode::None,
-            principal_bool_operator: JsonRule::new(serde_json::json!({
-                "or" : [
-                    {"===": [{"var": "Jans::User"}, "ALLOW"]}
-                ]
-            }))
+            principal_bool_operator: JsonRule::new(serde_json::json!(
+                {"===": [{"var": "Jans::User"}, "ALLOW"]}
+            ))
             .unwrap(),
         },
         entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
