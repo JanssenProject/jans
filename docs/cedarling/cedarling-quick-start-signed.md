@@ -62,11 +62,11 @@ Follow this video walkthrough:
   and open the policy store
   - Click on `Schema` tab
     - Scroll down to `Entity Types` and click on the `+` sign
-      - Entity type name: `SecretDocument`
+      - Entity type name: `Object`
       - Click Save
     - Scroll down to `Actions` and click on it  
       - Click on `Read` and select the pencil icon
-      - Under Resources, add `SecretDocument`
+      - Under Resources, add `Object`
       - Click Save
     - Scroll back up and click the green `Save` button on top of the entity list
 
