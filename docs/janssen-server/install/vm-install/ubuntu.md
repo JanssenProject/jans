@@ -9,6 +9,7 @@ tags:
 # Ubuntu Janssen Installation
 
 ## Supported Versions
+- Ubuntu 24.04
 - Ubuntu 22.04
 - Ubuntu 20.04
 
@@ -32,13 +33,14 @@ sudo gpg --import automation-jans-public-gpg.asc;
 
 ## Install the Package
 
-### Ubuntu 22.04
+### Ubuntu 24.04
 
 - Download the release package from the Github Janssen Project
 [Releases](https://github.com/JanssenProject/jans/releases)
 
+
 ```
-wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb -P /tmp
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb -P /tmp
 ```
 
 - Verify integrity of the downloaded package by verifying published `sha256sum`.   
@@ -46,63 +48,35 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
     Download `sha256sum` file for the package
 
     ```shell
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum -P /tmp
     ```
 
     Check the hash if it is matching.
 
     ```shell
     cd /tmp
-    sha256sum -c jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum
+    sha256sum -c jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text
-    jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum: OK
+    jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum: OK
     ```
 
 - Install the package
 
 ```
-sudo apt install  ./jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
+sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
 ```
 
-### Ubuntu 20.04
+> **Note:**  
+> Ubuntu 20.04 and 22.04 users can also download the appropriate `Debian` package from the [Janssen Project Releases](https://github.com/JanssenProject/jans/releases).  
+> 
+> Package names:  
+> - `ubuntu20.04_amd64.deb`  
+> - `ubuntu22.04_amd64.deb`
 
-- Download the release package from the Github Janssen Project
-[Releases](https://github.com/JanssenProject/jans/releases)
-
-```
-wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb -P /tmp
-```
-
-- Verify integrity of the downloaded package by verifying published `sha256sum`.   
-
-    Download `sha256sum` file for the package
-
-    ```shell
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb.sha256sum -P /tmp
-    ```
-
-    Check the hash if it is matching.
-
-    ```shell
-    cd /tmp
-    sha256sum -c jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb.sha256sum
-    ```
-
-    Output similar to below should confirm the integrity of the downloaded package.
-
-    ```text
-    jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb.sha256sum: OK
-    ```
-
-- Install the package
-
-```
-sudo apt install  ./jans_replace-janssen-version-stable.ubuntu20.04_amd64.deb
-```
 
 ## Run the setup script
 
