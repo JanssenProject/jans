@@ -102,6 +102,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value to indicate of Pushed Authorisation Request(PAR)is required", defaultValue = "false")
     private Boolean requirePar = false;
 
+    @DocProperty(description = "Boolean value to indicate whether public client is allowed for Pushed Authorisation Request(PAR)", defaultValue = "false")
+    private Boolean parForbidPublicClient = false;
+
     @DocProperty(description = "URL for the Device Authorization")
     private String deviceAuthzEndpoint;
 
@@ -1970,6 +1973,16 @@ public class AppConfiguration implements Configuration {
 
     public void setRequirePar(Boolean requirePar) {
         this.requirePar = requirePar;
+    }
+
+    public Boolean getParForbidPublicClient() {
+        if (parForbidPublicClient == null) parForbidPublicClient = false;
+        return parForbidPublicClient;
+    }
+
+    public AppConfiguration setParForbidPublicClient(Boolean parForbidPublicClient) {
+        this.parForbidPublicClient = parForbidPublicClient;
+        return this;
     }
 
     public String getOpenIdConfigurationEndpoint() {

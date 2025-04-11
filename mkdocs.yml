@@ -360,18 +360,7 @@ nav:
         - Auth Server: janssen-server/reference/json/feature-flags/janssenauthserver-feature-flags.md
     - Kubernetes:
       - janssen-server/reference/kubernetes/README.md
-      - Helm Chart: janssen-server/reference/kubernetes/helm-chart.md
       - Configuration Keys: janssen-server/reference/kubernetes/config-secret-keys.md
-      - Image Config Properties:
-        - Auth Server: janssen-server/reference/kubernetes/docker-jans-auth-server.md
-        - Casa: janssen-server/reference/kubernetes/docker-jans-casa.md
-        - Cert Manager: janssen-server/reference/kubernetes/docker-jans-certmanager.md
-        - Config API: janssen-server/reference/kubernetes/docker-jans-config-api.md
-        - Configurator: janssen-server/reference/kubernetes/docker-jans-configurator.md
-        - FIDO2: janssen-server/reference/kubernetes/docker-jans-fido2.md
-        - Monolith: janssen-server/reference/kubernetes/docker-jans-monolith.md
-        - Persistence: janssen-server/reference/kubernetes/docker-jans-persistence-loader.md
-        - SCIM: janssen-server/reference/kubernetes/docker-jans-scim.md
     - Learning Reference: janssen-server/reference/learning-reference.md
   - FIDO Admin Guide:
     - janssen-server/fido/README.md
@@ -416,6 +405,9 @@ nav:
 - Cedarling:
   - Getting Started: 'cedarling/cedarling-getting-started.md'
   - Overview: 'cedarling/cedarling-overview.md'
+  - Quick Start:
+    - Quick Start Part 1: 'cedarling/cedarling-quick-start-unsigned.md'
+    - Quick Start Part 2: 'cedarling/cedarling-quick-start-signed.md'
   - Reference:
     - Policy Store: 'cedarling/cedarling-policy-store.md'
     - Properties: 'cedarling/cedarling-properties.md'
