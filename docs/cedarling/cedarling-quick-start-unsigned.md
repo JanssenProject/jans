@@ -18,7 +18,7 @@ using the Cedarling. To do this, we need 3 things.
 3. A running instance of the Cedarling
 
 For `1` above, we will be using [Agama Lab policy designer](https://gluu.org/agama/authorization-policy-designer/) to quickly author
-a [Cedar] policy. 
+a [Cedar](https://www.cedarpolicy.com/) policy and a policy store.
 
 For `2` and `3`, we will use [Jans Tarp](https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md). Jans Tarp is an easy to install browser
 plug-in that comes with embedded Cedarling instance (WASM). Jans Tarp also provides
@@ -27,7 +27,7 @@ purpose.
 
 ## Setup
 
-- Install Jans Tarp [on Chrome browser](https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md#releases) browser
+- Install the Jans Tarp [on Chrome browser](https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md#releases)
 
 ## Step-1: Create Cedar Policy and Schema
 
@@ -54,7 +54,8 @@ https://streamable.com/kvjcv6
 
 ### Policy setup
 
-  This demo policy grants access only to user entities with the `SupremeRuler` role:
+  In this guide, we will use a policy that grants access only to the user 
+  entities with the `SupremeRuler` role:
   
   ```
   @id("allow_supreme_ruler")
@@ -70,11 +71,12 @@ https://streamable.com/kvjcv6
   ```
 
   - Click on `Policies` tab in policy designer
-  - Click `Add Policy` and then `Text Policy`
+  - Click `Add Policy` and then select `Text Editor`
   - Paste in the policy from above
   - Click Save
 
-At the end, copy the generated **policy store URI** for the next step.
+At the end, use the `Copy Link` button to copy the generated policy store URI 
+for the next step.
 
 ## Step-2: Configure Tarp 
 
