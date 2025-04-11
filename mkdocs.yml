@@ -409,8 +409,10 @@ nav:
     - Quick Start Part 1: 'cedarling/cedarling-quick-start-unsigned.md'
     - Quick Start Part 2: 'cedarling/cedarling-quick-start-signed.md'
   - Reference:
+    - Interfaces: 'cedarling/cedarling-interfaces.md'
     - Policy Store: 'cedarling/cedarling-policy-store.md'
     - Properties: 'cedarling/cedarling-properties.md'
+    - Boolean Engine: 'cedarling/cedarling-boolean-engine.md'
     - Logs: 'cedarling/cedarling-logs.md'
     - JWT Validation: 'cedarling/cedarling-jwt-validation.md'
     - JWT Mapping: 'cedarling/cedarling-jwt-mapping.md'
