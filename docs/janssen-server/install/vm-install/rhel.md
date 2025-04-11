@@ -61,7 +61,7 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text
-    jans-replace-janssen-version-stable-el8.x86_64.rpm: OK
+    jans-replace-janssen-version-stable.el8.x86_64.rpm: OK
     ```
   
 - Install the package
