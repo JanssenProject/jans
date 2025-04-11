@@ -127,7 +127,7 @@ public class BaseScimWebService {
         return Response.status(statusCode).entity(errorResponse).build();
     }
 
-    public Response validateExistenceOfUser(String id) {
+    public Response validateExistenceOfUser(String id) throws Exception {
 
         Response response = null;
         if (StringUtils.isNotEmpty(id)) {

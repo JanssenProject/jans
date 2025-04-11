@@ -90,13 +90,16 @@ public class PassResetViewModel extends UserViewModel {
 
         if (pst.passwordMatch(user.getUserName(), currentPassword)) {
             if (newPasswordConfirm != null && newPasswordConfirm.equals(newPassword)) {
+                Boolean success = pst.changePassword(user.getId(), newPassword);
 
-                if (pst.changePassword(user.getId(), newPassword)) {
+                if (success == null) {
+                    UIUtils.showMessageUI(false, Labels.getLabel("usr.pass.validation_failed"));
+                } else if (!success) {
+                    UIUtils.showMessageUI(false);
+                } else {
                     logger.info("User {} has changed his password", user.getUserName());
                     resetPassSettings();
                     UIUtils.showMessageUI(true, Labels.getLabel("usr.passreset_changed"));
-                } else {
-                    UIUtils.showMessageUI(false);
                 }
 
             } else {
@@ -117,14 +120,18 @@ public class PassResetViewModel extends UserViewModel {
 
         if ((newPasswordConfirm != null && newPasswordConfirm.equals(newPassword))) {
 
-            if (pst.changePassword(user.getId(), newPassword)) {
+            Boolean success = pst.changePassword(user.getId(), newPassword); 
+            if (success == null) {
+                UIUtils.showMessageUI(false, Labels.getLabel("usr.pass.validation_failed"));
+            } else if (!success) {
+                UIUtils.showMessageUI(false);
+            } else {            
                 String userName = user.getUserName();
-                logger.info("User {} has changed his password", userName);
+                logger.info("User {} assigned his password", userName);
+
                 resetPassSettings();
                 pst.reloadStatus();
                 Messagebox.show(Labels.getLabel("usr.password_set.success", new String[]{userName}), null, Messagebox.OK, Messagebox.INFORMATION);
-            } else {
-                UIUtils.showMessageUI(false);
             }
         } else {
             resetPassSettings();

@@ -6,6 +6,8 @@ tags:
   - rpt-token
 ---
 
+# UMA RPT Token
+
 ## Background
 
 The UMA requesting party token (RPT) is an OAuth access token associated with

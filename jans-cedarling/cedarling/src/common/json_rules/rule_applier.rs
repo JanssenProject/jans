@@ -38,7 +38,7 @@ impl<'a> RuleApplier<'a> {
 }
 
 #[derive(Debug, derive_more::Display, derive_more::Error)]
-#[display("Could not apply rule due to error: {source}")]
+#[display("Could not apply json logic rule due to error: {source}")]
 pub struct ApplyRuleError {
     source: datalogic_rs::Error,
 }

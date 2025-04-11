@@ -1133,37 +1133,37 @@
                             "type": "object",
                             "properties": {
                                 "linkLogTarget": {
-                                    "description": "cacherefresh.log target",
+                                    "description": "jans-link.log target",
                                     "type": "string",
                                     "pattern": "^(STDOUT|FILE)$"
                                 },
                                 "linkLogLevel": {
-                                    "description": "cacherefresh.log level",
+                                    "description": "jans-link.log level",
                                     "type": "string",
                                     "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
                                 },
                                 "persistenceLogLevel": {
-                                    "description": "cacherefresh_persistence.log level",
+                                    "description": "jans-link_persistence.log level",
                                     "type": "string",
                                     "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
                                 },
                                 "persistenceDurationLogTarget": {
-                                    "description": "cacherefresh_persistence_duration.log target",
+                                    "description": "jans-link_persistence_duration.log target",
                                     "type": "string",
                                     "pattern": "^(STDOUT|FILE)$"
                                 },
                                 "persistenceDurationLogLevel": {
-                                    "description": "cacherefresh_persistence_duration.log level",
+                                    "description": "jans-link_persistence_duration.log level",
                                     "type": "string",
                                     "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
                                 },
                                 "scriptLogTarget": {
-                                    "description": "cacherefresh_script.log target",
+                                    "description": "jans-link_script.log target",
                                     "type": "string",
                                     "pattern": "^(STDOUT|FILE)$"
                                 },
                                 "scriptLogLevel": {
-                                    "description": "cacherefresh_script.log level",
+                                    "description": "jans-link_script.log level",
                                     "type": "string",
                                     "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
                                 }

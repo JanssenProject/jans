@@ -295,6 +295,8 @@ def transform_auth_dynamic_config_hook(conf, manager):
         "ssa",
         "global_token_revocation",
         "status_list",
+        "rate_limit",
+        "access_evaluation",
     ]:
         if flag not in conf["featureFlags"]:
             conf["featureFlags"].append(flag)

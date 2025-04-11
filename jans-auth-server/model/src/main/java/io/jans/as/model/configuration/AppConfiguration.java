@@ -375,9 +375,6 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service")
     private String opTosUri;
 
-    @DocProperty(description = "Defines client inactivity period in hours which means that client will be removed once it is passed.")
-    public int cleanUpInactiveClientAfterHoursOfInactivity = -1;
-
     @DocProperty(description = "Interval for client periodic update timer. Update timer is used to debounce frequent updates of the client to avoid performance degradation.")
     public int clientPeriodicUpdateTimerInterval = 3;
 
@@ -407,12 +404,6 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "The lifetime of the User Info", defaultValue = "3600")
     private int userInfoLifetime;
-
-    @DocProperty(description = "Time interval for the Clean Service in seconds")
-    private int cleanServiceInterval;
-
-    @DocProperty(description = "Clean service chunk size which is used during clean up", defaultValue = "100")
-    private int cleanServiceBatchChunkSize = 100;
 
     @DocProperty(description = "Boolean value specifying whether to regenerate keys")
     private Boolean keyRegenerationEnabled;
@@ -2390,14 +2381,6 @@ public class AppConfiguration implements Configuration {
         this.opTosUri = opTosUri;
     }
 
-    public int getCleanUpInactiveClientAfterHoursOfInactivity() {
-        return cleanUpInactiveClientAfterHoursOfInactivity;
-    }
-
-    public void setCleanUpInactiveClientAfterHoursOfInactivity(int cleanUpInactiveClientAfterHoursOfInactivity) {
-        this.cleanUpInactiveClientAfterHoursOfInactivity = cleanUpInactiveClientAfterHoursOfInactivity;
-    }
-
     public int getClientPeriodicUpdateTimerInterval() {
         return clientPeriodicUpdateTimerInterval;
     }
@@ -2551,22 +2534,6 @@ public class AppConfiguration implements Configuration {
 
     public void setStatusListIndexAllocationBlockSize(int statusListIndexAllocationBlockSize) {
         this.statusListIndexAllocationBlockSize = statusListIndexAllocationBlockSize;
-    }
-
-    public int getCleanServiceInterval() {
-        return cleanServiceInterval;
-    }
-
-    public void setCleanServiceInterval(int cleanServiceInterval) {
-        this.cleanServiceInterval = cleanServiceInterval;
-    }
-
-    public int getCleanServiceBatchChunkSize() {
-        return cleanServiceBatchChunkSize;
-    }
-
-    public void setCleanServiceBatchChunkSize(int cleanServiceBatchChunkSize) {
-        this.cleanServiceBatchChunkSize = cleanServiceBatchChunkSize;
     }
 
     public Boolean getKeyRegenerationEnabled() {

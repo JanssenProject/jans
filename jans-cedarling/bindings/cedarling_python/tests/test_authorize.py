@@ -4,7 +4,7 @@
 # Copyright (c) 2024, Gluu, Inc.
 
 from cedarling_python import Cedarling
-from cedarling_python import ResourceData, Request, authorize_errors
+from cedarling_python import EntityData, Request, authorize_errors
 from config import load_bootstrap_config
 
 
@@ -99,7 +99,7 @@ DENY_DECISION_STR = "DENY"
 
 
 # Create resouce with type "Jans::Issue" from cedar-policy schema.
-RESOURCE = ResourceData.from_dict({
+RESOURCE = EntityData.from_dict({
     "type": "Jans::Issue",
     "id": "random_id",
     "org_id": "some_long_id",
@@ -168,7 +168,7 @@ def raise_authorize_error(bootstrap_config):
     # }
     #
     # org_id should be *string*
-    resource = ResourceData.from_dict({
+    resource = EntityData.from_dict({
         "type": "Jans::Issue",
         "id": "random_id",
         "org_id": 1,  # it should be string according to schema in policy store
@@ -185,7 +185,7 @@ def raise_authorize_error(bootstrap_config):
         context={}, resource=resource)
 
     # here triggers `authorize_errors.ResourceEntityError`
-    # because ResourceData do not pass schema validation
+    # because EntityData do not pass schema validation
     instance.authorize(request)
 
 

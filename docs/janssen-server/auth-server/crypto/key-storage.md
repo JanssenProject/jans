@@ -6,7 +6,7 @@ tags:
   - key-storage
 ---
 
-# Overview
+# Janssen Key Storage
 
 A Java KeyStore is a file that contains set of aliases. Every alias can contain private key and public key and certificate (additional property info about owner of they key) or only public key and certificate.
 
@@ -20,9 +20,7 @@ KeyStore are used by follow crypto primitives:
   - digital signature;
   - symmetric-key algorithm.
 
-# Janssen Key Storages
 
-## Janssen Key Storages
 
 Janssen KeyStore files contain:
   - Private Keys;

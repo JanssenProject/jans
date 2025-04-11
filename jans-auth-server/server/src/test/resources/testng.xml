@@ -15,6 +15,7 @@
             <class name="io.jans.as.server.model.registration.RegisterParamsValidatorTest" />
             <class name="io.jans.as.server.model.common.ExecutionContextTest" />
             <class name="io.jans.as.server.model.common.TxTokenTest" />
+            <class name="io.jans.as.server.model.common.AuthorizationGrantTest" />
 
             <class name="io.jans.as.server.service.MTLSServiceTest" />
             <class name="io.jans.as.server.service.ScopeServiceTest" />
@@ -324,12 +325,6 @@
 			<class name="io.jans.as.server.comp.LocaleTest" />
 		</classes>
 	</test>
-
-    <test name="Cleaner timer test" enabled="true">
-        <classes>
-            <class name="io.jans.as.server.comp.CleanerTimerTest" />
-        </classes>
-    </test>
 
 	<test name="Remove unused clients test" enabled="true">
 		<classes>

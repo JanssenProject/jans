@@ -134,7 +134,7 @@ mod tests {
         };
         let log_entry = LogEntryWithClientInfo::from_loggable(
             log_entry.clone(),
-            pdp_id.clone(),
+            pdp_id,
             app_name.clone(),
         );
 

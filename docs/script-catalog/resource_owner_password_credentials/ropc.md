@@ -6,7 +6,7 @@ tags:
   - ResourceOwnerPasswordCredentials
 ---
 
-## Overview
+# Resource Owner Password Credential
 Resource Owner Password Credentials script allows modifying the behavior of Resource Owner Password Credentials Grant ([RFC 6749](https://www.rfc-editor.org/rfc/rfc6749#section-4.3)).
 
 The script is invoked after normal authentication and can either leave current result or change it - authenticate if not authenticated - it should return True and optionally set user (via `context.setUser(user)`).
