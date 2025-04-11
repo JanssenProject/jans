@@ -18,9 +18,10 @@ These Bootstrap Properties control default application level behavior.
 * **`CEDARLING_USER_AUTHZ`** : When `enabled`, Cedar engine authorization is queried for a User principal.
 * **`CEDARLING_WORKLOAD_AUTHZ`** : When `enabled`, Cedar engine authorization is queried for a Workload principal.
 * **`CEDARLING_PRINCIPAL_BOOLEAN_OPERATION`** : property specifies what boolean operation to use for the `USER` and `WORKLOAD` when making authz (authorization) decisions. [See here](#user-workload-boolean-operation).
-* **`CEDARLING_MAPPING_USER`** : Name of Cedar User schema entity if we don't want to use default. When specified cedarling try build defined entity (from schema) as user instead of default `User` entity defined in `cedar` schema. Works in namespace defined in the policy store.
+* **`CEDARLING_MAPPING_USER`** : Name of Cedar User schema entity if we don't want to use default. When specified Cedarling try build defined entity (from schema) as user instead of default `User` entity defined in `cedar` schema. Works in namespace defined in the policy store.
 * **`CEDARLING_MAPPING_WORKLOAD`** : Name of Cedar Workload schema entity
 * **`CEDARLING_MAPPING_ROLE`** : Name of Cedar Role schema entity
+* **`CEDARLING_UNSIGNED_ROLE_ID_SRC`** : The attribute that will be used to create the Role entity when using the unsigned interface. Defaults to `"role"`.
 
 **The following bootstrap properties are needed to configure log behavior:**
 

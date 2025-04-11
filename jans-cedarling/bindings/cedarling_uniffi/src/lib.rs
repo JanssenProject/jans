@@ -70,7 +70,7 @@ impl EntityData {
         let inner = core::EntityData {
             entity_type,
             id,
-            payload: converted_payload,
+            attributes: converted_payload,
         };
         Ok(Self { inner })
     }

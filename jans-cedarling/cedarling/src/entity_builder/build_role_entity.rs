@@ -63,7 +63,7 @@ impl<'a> RoleIdSrcs<'a> {
                             .get_metadata()
                             .and_then(|m| m.role_mapping.as_deref())
                             .unwrap_or(src.claim);
-                        EntityIdSrc { token, claim }
+                        EntityIdSrc::Token { token, claim }
                     })
                 })
                 .collect::<Vec<_>>(),

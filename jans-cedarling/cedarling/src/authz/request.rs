@@ -94,5 +94,12 @@ pub struct EntityData {
     pub id: String,
     /// entity attributes
     #[serde(flatten)]
-    pub payload: HashMap<String, Value>,
+    pub attributes: HashMap<String, Value>,
+}
+
+impl EntityData {
+    /// Deserializes a JSON string into [`EntityData`]
+    pub fn from_json(entity_data: &str) -> Result<Self, serde_json::Error> {
+        serde_json::from_str::<Self>(entity_data)
+    }
 }

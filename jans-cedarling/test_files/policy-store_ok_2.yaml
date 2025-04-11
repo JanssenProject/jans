@@ -133,11 +133,11 @@ policy_stores:
         entity TestPrincipal3  = {"is_ok": Bool};
         entity Empty;
         type Context = {
-          user: User,
-          workload: Workload,
-          access_token: Access_token,
-          id_token: Id_token,
-          userinfo_token: Userinfo_token,
+          user?: User,
+          workload?: Workload,
+          access_token?: Access_token,
+          id_token?: Id_token,
+          userinfo_token?: Userinfo_token,
         };
         type ContextWithoutWorkload = {
           user: User,
