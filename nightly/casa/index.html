@@ -6339,10 +6339,6 @@
         
           
         
-          
-        
-          
-        
       
       
         
@@ -6371,202 +6367,9 @@
   
   
     <li class="md-nav__item">
-      <a href="../janssen-server/reference/kubernetes/helm-chart/" class="md-nav__link">
-        Helm Chart
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../janssen-server/reference/kubernetes/config-secret-keys/" class="md-nav__link">
         Configuration Keys
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_12_4_4" type="checkbox" id="__nav_1_12_4_4" >
-      
-      
-      
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-      
-      
-        <label class="md-nav__link" for="__nav_1_12_4_4">
-          Image Config Properties
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Image Config Properties" data-md-level="4">
-        <label class="md-nav__title" for="__nav_1_12_4_4">
-          <span class="md-nav__icon md-icon"></span>
-          Image Config Properties
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../janssen-server/reference/kubernetes/docker-jans-auth-server/" class="md-nav__link">
-        Auth Server
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../janssen-server/reference/kubernetes/docker-jans-casa/" class="md-nav__link">
-        Casa
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../janssen-server/reference/kubernetes/docker-jans-certmanager/" class="md-nav__link">
-        Cert Manager
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../janssen-server/reference/kubernetes/docker-jans-config-api/" class="md-nav__link">
-        Config API
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../janssen-server/reference/kubernetes/docker-jans-configurator/" class="md-nav__link">
-        Configurator
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../janssen-server/reference/kubernetes/docker-jans-fido2/" class="md-nav__link">
-        FIDO2
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../janssen-server/reference/kubernetes/docker-jans-monolith/" class="md-nav__link">
-        Monolith
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../janssen-server/reference/kubernetes/docker-jans-persistence-loader/" class="md-nav__link">
-        Persistence
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../janssen-server/reference/kubernetes/docker-jans-scim/" class="md-nav__link">
-        SCIM
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
     </li>
   
 
@@ -9073,14 +8876,14 @@
 </ul>
 <p>Additional authenticators and use cases can be supported via <a href="#existing-plugins">custom plugins</a>.</p>
 <h2 id="2fa-enrollment-apis">2FA enrollment APIs<a class="headerlink" href="#2fa-enrollment-apis" title="Permanent link">#</a></h2>
-<p>To facilitate 2FA device enrollment during account registration, or elsewhere in an application ecosystem, Casa exposes <a href="https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/enrollment-api.yaml">APIs</a>  for enrolling the following types of authenticators:   </p>
+<p>To facilitate 2FA device enrollment during account registration, or elsewhere in an application ecosystem, Casa exposes <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/enrollment-api.yaml">APIs</a>  for enrolling the following types of authenticators:   </p>
 <ul>
 <li>Phone numbers for SMS OTP</li>
 <li>OTP apps, cards, or dongles  </li>
 <li>FIDO security keys</li>
 </ul>
 <h2 id="configuration-via-apis">Configuration via APIs<a class="headerlink" href="#configuration-via-apis" title="Permanent link">#</a></h2>
-<p>Besides a comprehensive graphical <a href="administration/admin-console/">admin console</a>, application settings can also be manipulated by means of a configuration <a href="https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/admin-api.yaml">API</a>.</p>
+<p>Besides a comprehensive graphical <a href="administration/admin-console/">admin console</a>, application settings can also be manipulated by means of a configuration <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/admin-api.yaml">API</a>.</p>
 <h2 id="existing-plugins">Existing plugins<a class="headerlink" href="#existing-plugins" title="Permanent link">#</a></h2>
 <p>Casa is a plugin-oriented, Java web application. Existing functionality can be extended and new functionality and APIs can be introduced through plugins. Currently, there are plugins available for the following:</p>
 <ul>

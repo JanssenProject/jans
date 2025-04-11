@@ -6413,10 +6413,6 @@
         
           
         
-          
-        
-          
-        
       
       
         
@@ -6445,202 +6441,9 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../janssen-server/reference/kubernetes/helm-chart/" class="md-nav__link">
-        Helm Chart
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../janssen-server/reference/kubernetes/config-secret-keys/" class="md-nav__link">
         Configuration Keys
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_12_4_4" type="checkbox" id="__nav_1_12_4_4" >
-      
-      
-      
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-      
-      
-        <label class="md-nav__link" for="__nav_1_12_4_4">
-          Image Config Properties
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Image Config Properties" data-md-level="4">
-        <label class="md-nav__title" for="__nav_1_12_4_4">
-          <span class="md-nav__icon md-icon"></span>
-          Image Config Properties
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../janssen-server/reference/kubernetes/docker-jans-auth-server/" class="md-nav__link">
-        Auth Server
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../janssen-server/reference/kubernetes/docker-jans-casa/" class="md-nav__link">
-        Casa
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../janssen-server/reference/kubernetes/docker-jans-certmanager/" class="md-nav__link">
-        Cert Manager
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../janssen-server/reference/kubernetes/docker-jans-config-api/" class="md-nav__link">
-        Config API
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../janssen-server/reference/kubernetes/docker-jans-configurator/" class="md-nav__link">
-        Configurator
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../janssen-server/reference/kubernetes/docker-jans-fido2/" class="md-nav__link">
-        FIDO2
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../janssen-server/reference/kubernetes/docker-jans-monolith/" class="md-nav__link">
-        Monolith
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../janssen-server/reference/kubernetes/docker-jans-persistence-loader/" class="md-nav__link">
-        Persistence
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../janssen-server/reference/kubernetes/docker-jans-scim/" class="md-nav__link">
-        SCIM
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
     </li>
   
 
@@ -9100,7 +8903,7 @@
 
 
 <h1 id="persistence-script">Persistence Script<a class="headerlink" href="#persistence-script" title="Permanent link">#</a></h1>
-<p>By overriding the interface methods in <a href="https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java">PersistenceType</a> inside a custom script you can</p>
+<p>By overriding the interface methods in <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java">PersistenceType</a> inside a custom script you can</p>
 <ol>
 <li>Load initialization data from DB or initialize services after the creation of Entry Manager. </li>
 <li>Release resources, terminate services etc. after the destruction of Entry Manager.</li>
@@ -9114,7 +8917,7 @@ Information about an entity (person, session, client, scripts etc) constitutes a
 The Entry Manager (CRUD operations) implementation for each type of Persistence is available in the Janssen server and the relevant Entry Manager (SQLEntryManager, etc.) is created when the server starts up. </p>
 </div>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
-<p>The Jans-Auth server contains a <a href="https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/persistence_extension/PersistenceExtension.py"><code>PeristenceType</code></a> script.</p>
+<p>The Jans-Auth server contains a <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/persistence_extension/PersistenceExtension.py"><code>PeristenceType</code></a> script.</p>
 <h2 id="hashed-passwords">Hashed Passwords<a class="headerlink" href="#hashed-passwords" title="Permanent link">#</a></h2>
 <p>Hashed passwords can be created using any method from this <a href="https://github.com/JanssenProject/jans/blob/main/jans-orm/core/src/main/java/io/jans/orm/operation/auth/PasswordEncryptionMethod.java">enum</a>, instead of the native/default SSHA256.
 The ORM module of the Janssen server does the following: </p>

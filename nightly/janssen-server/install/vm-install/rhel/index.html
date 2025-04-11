@@ -6428,10 +6428,6 @@
         
           
         
-          
-        
-          
-        
       
       
         
@@ -6460,202 +6456,9 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference/kubernetes/helm-chart/" class="md-nav__link">
-        Helm Chart
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../reference/kubernetes/config-secret-keys/" class="md-nav__link">
         Configuration Keys
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_12_4_4" type="checkbox" id="__nav_1_12_4_4" >
-      
-      
-      
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-      
-      
-        <label class="md-nav__link" for="__nav_1_12_4_4">
-          Image Config Properties
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Image Config Properties" data-md-level="4">
-        <label class="md-nav__title" for="__nav_1_12_4_4">
-          <span class="md-nav__icon md-icon"></span>
-          Image Config Properties
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../reference/kubernetes/docker-jans-auth-server/" class="md-nav__link">
-        Auth Server
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../reference/kubernetes/docker-jans-casa/" class="md-nav__link">
-        Casa
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../reference/kubernetes/docker-jans-certmanager/" class="md-nav__link">
-        Cert Manager
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../reference/kubernetes/docker-jans-config-api/" class="md-nav__link">
-        Config API
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../reference/kubernetes/docker-jans-configurator/" class="md-nav__link">
-        Configurator
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../reference/kubernetes/docker-jans-fido2/" class="md-nav__link">
-        FIDO2
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../reference/kubernetes/docker-jans-monolith/" class="md-nav__link">
-        Monolith
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../reference/kubernetes/docker-jans-persistence-loader/" class="md-nav__link">
-        Persistence
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../reference/kubernetes/docker-jans-scim/" class="md-nav__link">
-        SCIM
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
     </li>
   
 
@@ -9145,26 +8948,26 @@ sudo yum -y module enable mod_auth_openidc
 <li>Download the release package from the Github Janssen Project
   <a href="https://github.com/JanssenProject/jans/releases">Releases</a></li>
 </ul>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.el8.x86_64.rpm -P ~/
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el8.x86_64.rpm -P ~/
 </code></pre></div>
 <ul>
 <li>
 <p>Verify integrity of the downloaded package using published <code>sha256sum</code>.</p>
 <p>Download <code>sha256sum</code> file for the package</p>
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.el8.x86_64.rpm.sha256sum<span class="w"> </span>-P<span class="w"> </span>~/
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el8.x86_64.rpm.sha256sum<span class="w"> </span>-P<span class="w"> </span>~/
 </code></pre></div>
 <p>Check the hash if it is matching.</p>
-<div class="highlight"><pre><span></span><code>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans-0.0.0-nightly-el8.x86_64.rpm.sha256sum
+<div class="highlight"><pre><span></span><code>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans-replace-janssen-version-stable-el8.x86_64.rpm.sha256sum
 </code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
-<div class="highlight"><pre><span></span><code>jans-0.0.0-nightly-el8.x86_64.rpm: OK
+<div class="highlight"><pre><span></span><code>jans-replace-janssen-version-stable-el8.x86_64.rpm: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo yum install ~/jans-0.0.0-nightly.el8.x86_64.rpm
+<div class="highlight"><pre><span></span><code>sudo yum install ~/jans-replace-janssen-version-stable.el8.x86_64.rpm
 </code></pre></div>
 <h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>
