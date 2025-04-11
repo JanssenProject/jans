@@ -25,9 +25,9 @@ plug-in that comes with embedded Cedarling instance (WASM). Jans Tarp also provi
 user interface to build authorization and authentication requests for testing
 purpose.
 
-## Prerequisites
+## Setup
 
-- Jans Tarp [installed on Chrome](https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md#releases) browser
+- Install Jans Tarp [on Chrome browser](https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md#releases) browser
 
 ## Step-1: Create Cedar Policy and Schema
 
