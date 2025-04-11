@@ -83,7 +83,7 @@ pub struct RequestUnsigned {
     pub context: Value,
 }
 
-/// Cedar policy resource data
+/// Cedar policy entity data
 /// fields represent EntityUid
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EntityData {
