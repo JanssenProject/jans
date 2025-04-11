@@ -49,10 +49,7 @@ impl EntityBuilder {
 
         let mut entity_attrs: HashMap<String, RestrictedExpression> = if errs.is_empty() {
             // what should happen if claims have the same name but different values?
-            attrs.into_iter().fold(HashMap::new(), |mut acc, attrs| {
-                acc.extend(attrs);
-                acc
-            })
+            HashMap::from_iter(attrs.into_iter().flatten())
         } else {
             let errs: Vec<_> = errs.into_iter().flat_map(|e| e.into_inner()).collect();
             return Err(BuildEntityErrorKind::from(errs).while_building(type_name));
