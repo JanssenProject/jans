@@ -163,7 +163,7 @@ This record contains the information needed to validate tokens from this issuer:
     "name": "name_of_the_trusted_issuer",
     "description": "description for the trusted issuer",
     "openid_configuration_endpoint": "https://<trusted-issuer-hostname>/.well-known/openid-configuration",
-    "tokens_metadata": {
+    "token_metadata": {
       "access_tokens": {
         "trusted": true,
         "token_id": "jti",
@@ -186,7 +186,7 @@ This record contains the information needed to validate tokens from this issuer:
 - **description** : (*String*) A brief description of the trusted issuer, providing context for administrators.
 - **openid_configuration_endpoint** : (*String*) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at `/.well-known/openid-configuration`).
 - **trusted_issuer_id** : (*Object*, *optional*) Metadata related to a particular issuer. You can add as many trusted issuers you want. Furthermore, the name this object is what will be used as the entity ID of the [Trusted Issuer](./cedarling-entities.md#trusted-issuer) that Cedarling automatically creates at startup.
-- **tokens_metadata** : (*Object*, *optional*) Tokens metadata in a map of *token name* -> *token metadata*. See  [Token Metadata Schema](#token-metadata-schema).
+- **token_metadata** : (*Object*, *optional*) Tokens metadata in a map of *token name* -> *token metadata*. See  [Token Metadata Schema](#token-metadata-schema).
 
 ### Token Metadata Schema
 
