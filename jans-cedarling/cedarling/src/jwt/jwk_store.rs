@@ -15,8 +15,11 @@ use serde_json::Value;
 use time::OffsetDateTime;
 
 use super::{KeyId, TrustedIssuerId};
+use crate::LogWriter;
 use crate::common::policy_store::TrustedIssuer;
 use crate::http::{HttpClient, HttpClientError};
+use crate::jwt::log_entry::JwtLogEntry;
+use crate::log::Logger;
 
 #[derive(Deserialize)]
 struct OpenIdConfig {
@@ -87,18 +90,22 @@ impl JwkStore {
     pub fn new_from_jwks_value(store_id: Arc<str>, jwks: Value) -> Result<Self, JwkStoreError> {
         let jwks =
             serde_json::from_value::<IntermediateJwks>(jwks).map_err(JwkStoreError::DecodeJwk)?;
-        Self::new_from_jwks(store_id, jwks)
+        Self::new_from_jwks(store_id, jwks, None)
     }
 
     /// Creates a JwkStore from a [`String`]
     pub fn new_from_jwks_str(store_id: Arc<str>, jwks: &str) -> Result<Self, JwkStoreError> {
         let jwks =
             serde_json::from_str::<IntermediateJwks>(jwks).map_err(JwkStoreError::DecodeJwk)?;
-        Self::new_from_jwks(store_id, jwks)
+        Self::new_from_jwks(store_id, jwks, None)
     }
 
     /// Creates a JwkStore from an [`IntermediateJwks`]
-    fn new_from_jwks(store_id: Arc<str>, jwks: IntermediateJwks) -> Result<Self, JwkStoreError> {
+    fn new_from_jwks(
+        store_id: Arc<str>,
+        jwks: IntermediateJwks,
+        logger: Option<Logger>,
+    ) -> Result<Self, JwkStoreError> {
         let mut keys = HashMap::new();
         let mut keys_without_id = Vec::new();
 
@@ -116,11 +123,11 @@ impl JwkStore {
                     // if the error indicates an unknown variant,
                     // we can safely ignore it.
                     if e.to_string().contains("unknown variant") {
-                        // TODO: pass this message to the logger
-                        eprintln!(
-                            "Encountered a JWK with an unsupported algorithm, ignoring it: {}",
-                            e
-                        );
+                        if let Some(logger) = logger.as_ref() {
+                            logger.log_any(JwtLogEntry::system(format!(
+                                "encountered a JWK with an unsupported algorithm, ignoring it: {e}"
+                            )));
+                        }
                         continue;
                     } else {
                         Err(JwkStoreError::DecodeJwk(e))?
