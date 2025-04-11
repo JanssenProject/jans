@@ -29,7 +29,7 @@ purpose.
 
 - Jans Tarp [installed on Chrome](https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md) browser
 
-## Create Cedar Policy and Schema
+## Step-1: Create Cedar Policy and Schema
 
 The Cedarling needs policies and a schema to authorize access. These are bundled in a *policy store* (a JSON file). To create one, use [Agama Lab policy designer guide](https://gluu.org/agama/authorization-policy-designer/) and steps below. As an end result, the policy
 designer will publish your policy store to a GitHub repository. 
@@ -76,7 +76,7 @@ https://streamable.com/kvjcv6
 
 At the end, copy the generated **policy store URI** for the next step.
 
-## Configure Tarp 
+## Step-2: Configure Tarp 
 
 In this step, we will add the policy store details in the Jans Tarp that is
 installed in the browser. The Cedarling instance embedded in the Tarp will
@@ -115,7 +115,7 @@ the `<Policy Store URI>` value to point to your policy store
  Click `Save` to initialize Cedarling. This will start the Cedarling in Tarp,
  fetch and validate your policy store, and configure Cedarling to validate requests based on the User. 
 
-## Test the policy using cedarling 
+## Step-3: Test the policy using cedarling 
 
 Video walkthrough:
 
