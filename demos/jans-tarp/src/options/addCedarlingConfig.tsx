@@ -24,6 +24,7 @@ import { pink } from '@mui/material/colors';
 import cedarlingBootstrapJson from './cedarlingBootstrap.json';
 import Chip from '@mui/material/Chip';
 import ViewListIcon from '@mui/icons-material/ViewList';
+import UseSnackbar from './UseSnackbar';
 export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
   const [open, setOpen] = React.useState(isOpen);
   const [bootstrap, setBootstrap] = React.useState(newData);
@@ -32,6 +33,8 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
   const [inputSelection, setInputSelection] = React.useState("json");
   const [showConfiguration, setShowConfiguration] = React.useState(false);
   const [showConfigurationButton, setShowConfigurationButton] = React.useState(true);
+  const [snackbar, setSnackbar] = React.useState({ open: false, message: '' });
+
   const ADD_BOOTSTRAP_ERROR = 'Error in adding bootstrap. Check web console for logs.'
 
   React.useEffect(() => {
@@ -71,9 +74,9 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
     try {
       const jsonString = JSON.stringify(bootstrap, null, 2); // pretty print
       navigator.clipboard.writeText(jsonString);
-      console.log("JSON copied to clipboard!" + jsonString);
+      setSnackbar({ open: true, message: 'JSON copied to clipboard!' });
     } catch (error) {
-      console.error("Copy failed:", error);
+      setSnackbar({ open: true, message: 'Copy failed: ' + error.message });
     }
   };
 
@@ -143,6 +146,7 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
 
   return (
     <React.Fragment>
+      <UseSnackbar isSnackbarOpen={snackbar.open} handleSnackbar={(open) => setSnackbar({ ...snackbar, open })} message={snackbar.message}/>
       <Dialog
         open={open}
         onClose={handleClose}
