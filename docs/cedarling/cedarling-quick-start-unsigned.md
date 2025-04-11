@@ -8,52 +8,45 @@ tags:
   - quick start
 ---
 
-# Authorization Using The Cedarling
+# Cedarling Quick Start 1 (Unsigned)
 
-This quick start guide shows how to quickly test authorization of a user action
-using the Cedarling. To do this, we need 3 things. 
+## Introduction
 
-1. Authorization policy
-2. A request for user action
-3. A running instance of the Cedarling
+[Jans Tarp](../../demos/jans-tarp) is a browser plugin for testing OpenID Connect flows. This guide shows how to use Cedarling in Tarp to enforce Cedar policies using Attribute Based Access Control (ABAC).
 
-For `1` above, we will be using [Agama Lab policy designer](https://gluu.org/agama/authorization-policy-designer/) to quickly author
-a [Cedar] policy. 
+**Steps:**
 
-For `2` and `3`, we will use [Jans Tarp](https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md). Jans Tarp is an easy to install browser
-plug-in that comes with embedded Cedarling instance (WASM). Jans Tarp also provides
-user interface to build authorization and authentication requests for testing
-purpose.
+1. [Create Cedar policy and schema](#create-cedar-policy-and-schema)
+2. [Configure Tarp with the policy store](#configure-tarp-with-the-policy-store)
+3. [Test the policy using Cedarling](#test-the-policy-using-cedarling)
 
-## Setup
+## Prerequisites
 
-- Install Jans Tarp [on Chrome browser](https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md#releases) browser
+Install Jans Tarp in [Chrome](https://www.google.com/chrome/index.html):
 
-## Step-1: Create Cedar Policy and Schema
+* [Download Tarp](https://github.com/JanssenProject/jans/releases/download/nightly/demo-jans-tarp-chrome-nightly.zip)
+* Extract ZIP → Settings > Extensions → Enable Developer Mode → Load Unpacked → select folder
 
-The Cedarling needs policies and a schema to authorize access. These are bundled in a *policy store* (a JSON file). To create one, use [Agama Lab policy designer guide](https://gluu.org/agama/authorization-policy-designer/) and steps below. As an end result, the policy
-designer will publish your policy store to a GitHub repository. 
+## 1. Create Cedar Policy and Schema
+
+Cedarling needs policies and a schema to authorize access. These are bundled in a *policy store* (a JSON file). To create one, use [Agama Lab](https://cloud.gluu.org/agama-lab)’s **Policy Designer**, a developer authoring tool that enables you to publish your policy store to an easily accessible Github URL. 
 
 Follow this video walkthrough:
 
 https://streamable.com/kvjcv6
 
-### Schema setup
-
-  - Open the [Agama Lab policy designer](https://cloud.gluu.org/agama-lab/dashboard/policy_store)
-  and open the policy store
-  - Click on `Schema` tab
-    - Scroll down to `Entity Types` and click on the `+` sign
-      - Entity type name: `SecretDocument`
-      - Click Save
-    - Scroll down to `Actions` and click on it  
-      - Click on `Read` and select the pencil icon
-      - Under Resources, add `SecretDocument`
-      - Click Save
-    - Scroll back up and click the green `Save` button on top of the entity list
-
-### Policy setup
-
+- **Schema setup**:
+  - Open the policy store
+  - Click on `Schema`
+  - Scroll down to `Entities` and click on the `+` sign
+    - Entity type name: `SecretDocument`
+    - Click Save
+  - Scroll down to `Actions` and click on it  
+  - Click on `Read` and select the pencil icon
+    - Under Resources, add `SecretDocument`
+    - Click Save
+  - Scroll back up and click the green `Save` button on top of the entity list
+- **Policy setup**:
   This demo policy grants access only to user entities with the `SupremeRuler` role:
   
   ```
@@ -68,24 +61,17 @@ https://streamable.com/kvjcv6
     principal.role.contains("SupremeRuler")
   };
   ```
-
-  - Click on `Policies` tab in policy designer
+  - Click on `Policies`
   - Click `Add Policy` and then `Text Policy`
   - Paste in the policy from above
   - Click Save
 
 At the end, copy the generated **policy store URI** for the next step.
 
-## Step-2: Configure Tarp 
+## 2. Configure Tarp with the policy store 
 
-In this step, we will add the policy store details in the Jans Tarp that is
-installed in the browser. The Cedarling instance embedded in the Tarp will
-use the policy stored in this store to evaluate the authorization result.
-
-1. Open Tarp installed in the Chrome browser 
-2. Navigate to the `Cedarling` tab and click on `Add Configurations`
-3. Paste the following configuration parameters as JSON. Make sure to update
-the `<Policy Store URI>` value to point to your policy store
+1. Open Tarp → `Cedarling` → `Add Configurations`
+2. Paste the following, replacing `<Policy Store URI>`:
 
   ```
   {
@@ -112,19 +98,20 @@ the `<Policy Store URI>` value to point to your policy store
   }
   ```
 
- Click `Save` to initialize Cedarling. This will start the Cedarling in Tarp,
- fetch and validate your policy store, and configure Cedarling to validate requests based on the User. 
+3. Click `Save` to initialize Cedarling. This will start the Cedarling in Tarp, fetch and validate your policy store, and configure Cedarling to validate requests based on the User. 
 
-## Step-3: Test the policy using cedarling 
+## 3. Test the policy using cedarling 
 
 Video walkthrough:
 
 https://streamable.com/25wcb7
 
-1. Go to Tarp, under `Cedarling` tab, click on `Cedarling Authz Form`
+1. Go to `Cedarling Authz Form`
 2. Input the following:
 
-```JSON title="Principal"
+**Principals:**
+
+```
     [
       {
         "type": "Jans::User",
@@ -135,11 +122,11 @@ https://streamable.com/25wcb7
     ]
 ```
 
-```JSON title="Actions"
-Jans::Action::"Read"
-```
+**Action:** `Jans::Action::"Read"`
 
-```JSON title="Resource"
+**Resource:**
+
+```
     {
       "entity_type": "resource",
       "type": "Jans::SecretDocument",
@@ -147,10 +134,11 @@ Jans::Action::"Read"
     }
 ```
 
-The request is ready to be sent. To send the request to the Cedarling, 
-click on `Cedarling Authz Request`
+3. Click `Cedarling Authz Request`
 
-```JSON title="Sample Response"
+**Sample Response:**
+
+```
     {
       "decision": true,
       "request_id": "019602e5-b148-7d0b-9d15-9d000c0d370b",
@@ -160,7 +148,7 @@ click on `Cedarling Authz Request`
 
 The top-level `decision: true` confirms successful authorization.
 
-Let's check a scenario where authorization is denied.
+To verify that Cedarling is authorizing based on the policy, use the following principal:
 
 ```
 [
