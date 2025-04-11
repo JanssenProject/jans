@@ -47,6 +47,41 @@ The initialization or `init` interface is how you will initialize Cedarling. Ini
 
 The bootstrap configuration and policy store directly influence how Cedarling performs [authorization](#authorization).
 
+=== "JavaScript"
+
+    ```js
+    import initWasm, { init } from "/pkg/cedarling_wasm.js";
+
+    let cedarling = await init({});
+    ```
+
+=== "Python"
+
+    ```py
+    cedarling = Cedarling(BootstrapConfig.load_from_file(
+      "./bootstrap_props.json"
+    ))
+    ```
+
+=== "Rust"
+
+    ```rs
+    let cedarling = Cedarling::new(&BootstrapConfig::from_env().unwrap());
+    ```
+
+=== "Kotlin"
+
+    ```kt
+    val instance: Cedarling? = bootstrapConfig?.let {
+      Cedarling.loadFromJson(...);
+    };
+    ```
+
+=== "Swift"
+
+    ```swift
+    let cedarling = try Cedarling.loadFromJson(config: "...")
+    ```
 
 ### Authorization
 
@@ -60,7 +95,223 @@ Cedarling currently provides two modes of authorization:
 
 **Standard (Token-based) Interface**
 - Extracts the **Principal** from a JWT.
-- Accepts the **Context** as a structured map (format might vary by language).
+- Accepts the **Context** as a structured map.
+
+=== "JavaScript"
+
+    ```js
+    const tokens = {
+      access_token: "<access_token>",
+      id_token: "<id_token>",
+      userinfo_token: "<userinfo_token>",
+    };
+
+    const action = 'Jans::Action::"Read"';
+
+    const resource = {
+      type: "Jans::Application",
+      id: "app_id_001",
+      name: "Some Application",
+      url: {
+        host: "example.com",
+        path: "/admin-dashboard",
+        protocol: "https",
+      },
+    };
+
+    const context = {
+      current_time: Date.now(),
+      device_health: ["Healthy"],
+      fraud_indicators: ["Allowed"],
+      geolocation: ["America"],
+      network: "127.0.0.1",
+      network_type: "Local",
+      operating_system: "Linux",
+    };
+
+    const result = await cedarling.authorize({
+      tokens,
+      action,
+      resource,
+      context,
+    });
+    ```
+
+=== "Python"
+
+    ```py
+    import time
+
+    tokens = {
+        "access_token": "<access_token>",
+        "id_token": "<id_token>",
+        "userinfo_token": "<userinfo_token>"
+    }
+
+    action = 'Jans::Action::"Read"'
+
+    resource = EntityData(
+        entity_type="Jans::Application",
+        id="app_id_001",
+        name="Some Application",
+        url={
+            "host": "example.com",
+            "path": "/admin-dashboard",
+            "protocol": "https"
+        }
+    )
+
+    context = {
+        "current_time": int(time.time() * 1000),
+        "device_health": ["Healthy"],
+        "fraud_indicators": ["Allowed"],
+        "geolocation": ["America"],
+        "network": "127.0.0.1",
+        "network_type": "Local",
+        "operating_system": "Linux",
+    }
+
+    result = cedarling.authorize(Request(
+        tokens,
+        action,
+        resource,
+        context,
+    ))
+    ```
+=== Rust
+
+    ```rs
+    use std::collections::HashMap;
+    use chrono::Utc;
+    use serde_json::json;
+
+    let tokens = HashMap::from([
+        ("access_token".to_string(), "<access_token>".to_string()),
+        ("id_token".to_string(), "<id_token>".to_string()),
+        ("userinfo_token".to_string(), "<userinfo_token>".to_string()),
+    ]);
+
+    let action = "Jans::Action::\"Read\"".to_string();
+
+    let resource = EntityData {
+        entity_type: "Jans::Application".to_string(),
+        id: "app_id_001".to_string(),
+        payload: HashMap::from([
+            ("name".to_string(), json!("Some Application")),
+            ("url".to_string(), json!({
+                "host": "example.com",
+                "path": "/admin-dashboard",
+                "protocol": "https"
+            }))
+        ]),
+    };
+
+    let context = json!({
+        "current_time": Utc::now().timestamp_millis(),
+        "device_health": ["Healthy"],
+        "fraud_indicators": ["Allowed"],
+        "geolocation": ["America"],
+        "network": "127.0.0.1",
+        "network_type": "Local",
+        "operating_system": "Linux",
+    });
+
+    let result = cedarling.authorize(Request {
+        tokens,
+        action,
+        resource,
+        context,
+    });
+    ```
+
+=== Kotlin
+
+    ```kotlin
+    val tokens = mapOf(
+        "access_token" to "<access_token>",
+        "id_token" to "<id_token>",
+        "userinfo_token" to "<userinfo_token>"
+    )
+
+    val action = """Jans::Action::"Read""""
+
+    val resource = mapOf(
+        "type" to "Jans::Application",
+        "id" to "app_id_001",
+        "name" to "Some Application",
+        "url" to mapOf(
+            "host" to "example.com",
+            "path" to "/admin-dashboard",
+            "protocol" to "https"
+        )
+    )
+
+    val context = mapOf(
+        "current_time" to System.currentTimeMillis(),
+        "device_health" to listOf("Healthy"),
+        "fraud_indicators" to listOf("Allowed"),
+        "geolocation" to listOf("America"),
+        "network" to "127.0.0.1",
+        "network_type" to "Local",
+        "operating_system" to "Linux"
+    )
+
+    val result = cedarling?.authorize(
+        tokens,
+        action,
+        resource["type"] as String,
+        resource["id"] as String,
+        anyToJson(resource),
+        context
+    )
+    ```
+
+=== Swift
+
+    ```swift
+    let tokens: [String: String] = [
+        "access_token": "<access_token>",
+        "id_token": "<id_token>",
+        "userinfo_token": "<userinfo_token>"
+    ]
+
+    let action = #"Jans::Action::"Read""#
+
+    let resource: [String: Any] = [
+        "resource_type": "Jans::Application",
+        "resource_id": "app_id_001",
+        "name": "Some Application",
+        "url": [
+            "host": "example.com",
+            "path": "/admin-dashboard",
+            "protocol": "https"
+        ]
+    ]
+
+    let context: [String: Any] = [
+        "current_time": Int(Date().timeIntervalSince1970 * 1000),
+        "device_health": ["Healthy"],
+        "fraud_indicators": ["Allowed"],
+        "geolocation": ["America"],
+        "network": "127.0.0.1",
+        "network_type": "Local",
+        "operating_system": "Linux"
+    ]
+
+    let payloadJsonString = try JSONSerialization.data(
+        withJSONObject: resource,
+        options: []
+    ).toUtf8String()
+
+    let result: AuthorizeResult = try cedarling.authorize(
+        tokens: tokens,
+        action: action,
+        resourceType: resource["resource_type"] as! String,
+        resourceId: resource["resource_id"] as! String,
+        payload: payloadJsonString,
+        context: context
+    )
+    ```
 
 **Unsigned Authorization**
 - Accepts the **Principal** directly without requiring a JWT.
