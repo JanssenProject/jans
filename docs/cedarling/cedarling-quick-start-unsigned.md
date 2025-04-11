@@ -27,7 +27,7 @@ purpose.
 
 ## Prerequisites
 
-- Jans Tarp [installed on Chrome](https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md) browser
+- Jans Tarp [installed on Chrome](https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md#releases) browser
 
 ## Step-1: Create Cedar Policy and Schema
 
