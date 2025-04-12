@@ -302,9 +302,8 @@ fn test_json_rule_and_operator_with_empty_principal() {
         "Decision should be DENY for AND rule when one of the principals is missing"
     );
 
-    assert_eq!(
-        result.principals.get("Jans::Workload").is_none(),
-        true,
+    assert!(
+        !result.principals.contains_key("Jans::Workload"),
         "Jans::Workload principal should not be present"
     );
     assert_eq!(
@@ -335,9 +334,8 @@ fn test_json_rule_or_operator_with_empty_principal() {
         "Decision should be ALLOW  for OR rule when one of the principals is missing"
     );
 
-    assert_eq!(
-        result.principals.get("Jans::Workload").is_none(),
-        true,
+    assert!(
+        !result.principals.contains_key("Jans::Workload"),
         "Jans::Workload principal should not be present"
     );
     assert_eq!(
