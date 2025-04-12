@@ -6339,10 +6339,6 @@
         
           
         
-          
-        
-          
-        
       
       
         
@@ -6371,202 +6367,9 @@
   
   
     <li class="md-nav__item">
-      <a href="../../janssen-server/reference/kubernetes/helm-chart/" class="md-nav__link">
-        Helm Chart
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../janssen-server/reference/kubernetes/config-secret-keys/" class="md-nav__link">
         Configuration Keys
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_12_4_4" type="checkbox" id="__nav_1_12_4_4" >
-      
-      
-      
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-      
-      
-        <label class="md-nav__link" for="__nav_1_12_4_4">
-          Image Config Properties
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Image Config Properties" data-md-level="4">
-        <label class="md-nav__title" for="__nav_1_12_4_4">
-          <span class="md-nav__icon md-icon"></span>
-          Image Config Properties
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../janssen-server/reference/kubernetes/docker-jans-auth-server/" class="md-nav__link">
-        Auth Server
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../janssen-server/reference/kubernetes/docker-jans-casa/" class="md-nav__link">
-        Casa
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../janssen-server/reference/kubernetes/docker-jans-certmanager/" class="md-nav__link">
-        Cert Manager
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../janssen-server/reference/kubernetes/docker-jans-config-api/" class="md-nav__link">
-        Config API
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../janssen-server/reference/kubernetes/docker-jans-configurator/" class="md-nav__link">
-        Configurator
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../janssen-server/reference/kubernetes/docker-jans-fido2/" class="md-nav__link">
-        FIDO2
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../janssen-server/reference/kubernetes/docker-jans-monolith/" class="md-nav__link">
-        Monolith
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../janssen-server/reference/kubernetes/docker-jans-persistence-loader/" class="md-nav__link">
-        Persistence
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../janssen-server/reference/kubernetes/docker-jans-scim/" class="md-nav__link">
-        SCIM
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
     </li>
   
 
@@ -9362,9 +9165,10 @@
 <li><strong><code>CEDARLING_USER_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a User principal.</li>
 <li><strong><code>CEDARLING_WORKLOAD_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a Workload principal.</li>
 <li><strong><code>CEDARLING_PRINCIPAL_BOOLEAN_OPERATION</code></strong> : property specifies what boolean operation to use for the <code>USER</code> and <code>WORKLOAD</code> when making authz (authorization) decisions. <a href="#user-workload-boolean-operation">See here</a>.</li>
-<li><strong><code>CEDARLING_MAPPING_USER</code></strong> : Name of Cedar User schema entity if we don't want to use default. When specified cedarling try build defined entity (from schema) as user instead of default <code>User</code> entity defined in <code>cedar</code> schema. Works in namespace defined in the policy store.</li>
+<li><strong><code>CEDARLING_MAPPING_USER</code></strong> : Name of Cedar User schema entity if we don't want to use default. When specified Cedarling try build defined entity (from schema) as user instead of default <code>User</code> entity defined in <code>cedar</code> schema. Works in namespace defined in the policy store.</li>
 <li><strong><code>CEDARLING_MAPPING_WORKLOAD</code></strong> : Name of Cedar Workload schema entity</li>
 <li><strong><code>CEDARLING_MAPPING_ROLE</code></strong> : Name of Cedar Role schema entity</li>
+<li><strong><code>CEDARLING_UNSIGNED_ROLE_ID_SRC</code></strong> : The attribute that will be used to create the Role entity when using the unsigned interface. Defaults to <code>"role"</code>.</li>
 </ul>
 <p><strong>The following bootstrap properties are needed to configure log behavior:</strong></p>
 <ul>
@@ -9682,7 +9486,7 @@ Examples:  </p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-26T15:21:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-26</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-04-12T09:34:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-04-12</span>
       
         <br>
         Created:
