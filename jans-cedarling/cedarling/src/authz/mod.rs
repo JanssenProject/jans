@@ -314,36 +314,24 @@ impl Authz {
         let request_id = gen_uuid7();
 
         let schema = &self.config.policy_store.schema;
-
         // Parse action UID.
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
             .map_err(AuthorizeError::Action)?;
 
-        let resource_entity = self
+        let BuiltEntitiesUnsigned {
+            principals,
+            roles,
+            resource,
+            built_entities,
+        } = self
             .config
             .entity_builder
-            .build_cedar_entity(&request.resource)?;
-
-        let principal_entities = request
-            .principals
-            .into_iter()
-            .map(|entity_data| self.config.entity_builder.build_cedar_entity(&entity_data))
-            .collect::<Result<Vec<_>, _>>()?;
-
-        let built_entities = BuiltEntities::from_iter(
-            principal_entities
-                .iter()
-                .chain(vec![&resource_entity])
-                .map(|entity| entity.uid()),
-        );
-
-        // Get entity UIDs what we will be used on authorize check
-        let principal_uids = principal_entities
+            .build_entities_unsigned(&request)?;
+        let principal_uids = principals
             .iter()
-            .map(|entity| entity.uid())
-            .collect::<Vec<_>>();
-
-        let resource_uid = resource_entity.uid();
+            .map(|p| p.uid())
+            .collect::<Vec<EntityUid>>();
+        let resource_uid = resource.uid();
 
         let context = build_context(
             &self.config,
@@ -354,7 +342,7 @@ impl Authz {
         )?;
 
         let entities = Entities::from_entities(
-            principal_entities.into_iter().chain(vec![resource_entity]),
+            principals.into_iter().chain(roles).chain([resource]),
             Some(&schema.schema),
         )?;
 
@@ -592,6 +580,9 @@ pub enum AuthorizeError {
     /// Error encountered while executing the rule for principals
     #[error(transparent)]
     ExecuteRule(#[from] ApplyRuleError),
+    #[error("failed to build role entities for unsigned request: {0}")]
+    /// Error encountered while building Role entity in an unsigned request
+    BuildUnsignedRoleEntity(#[from] BuildUnsignedEntityError),
 }
 
 #[derive(Debug, derive_more::Error, derive_more::Display)]

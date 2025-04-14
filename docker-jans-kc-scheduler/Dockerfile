@@ -13,8 +13,8 @@ RUN apk update \
 # KC scheduler
 # ============
 
-ENV CN_VERSION=1.5.0
-ENV CN_BUILD_DATE='2025-04-04 12:00'
+ENV CN_VERSION=0.0.0-nightly
+ENV CN_BUILD_DATE='2025-04-11 08:25'
 ENV SCHEDULER_HOME=/opt/kc-scheduler
 
 RUN mkdir -p ${SCHEDULER_HOME}/bin \
@@ -38,7 +38,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/codehaus/janino/janino/3.1.9/jani
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=15a44bcb369e1d5ef045e2a2664c2c995fb89a61
+ENV JANS_SOURCE_VERSION=3377ed1cb1e82fd4f7f22842533913f6bd3a80a3
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -139,7 +139,7 @@ EXPOSE $CN_SAML_HTTP_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/kc-scheduler" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.5.0-1" \
+    org.opencontainers.image.version="0.0.0-nightly" \
     org.opencontainers.image.title="Janssen KC scheduler" \
     org.opencontainers.image.description=""
 
