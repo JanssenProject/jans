@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#cedarling-quick-start-1-unsigned" class="md-skip">
+        <a href="#authorization-using-the-cedarling" class="md-skip">
           Skip to content
         </a>
       
@@ -7285,36 +7285,49 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#introduction" class="md-nav__link">
-    Introduction
+  <a href="#setup" class="md-nav__link">
+    Setup
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    Prerequisites
+  <a href="#step-1-create-cedar-policy-and-schema" class="md-nav__link">
+    Step-1: Create Cedar Policy and Schema
+  </a>
+  
+    <nav class="md-nav" aria-label="Step-1: Create Cedar Policy and Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schema-setup" class="md-nav__link">
+    Schema setup
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-setup" class="md-nav__link">
+    Policy setup
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-configure-tarp" class="md-nav__link">
+    Step-2: Configure Tarp
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#1-create-cedar-policy-and-schema" class="md-nav__link">
-    1. Create Cedar Policy and Schema
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2-configure-tarp-with-the-policy-store" class="md-nav__link">
-    2. Configure Tarp with the policy store
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#3-test-the-policy-using-cedarling" class="md-nav__link">
-    3. Test the policy using cedarling
+  <a href="#step-3-test-the-policy-using-cedarling" class="md-nav__link">
+    Step-3: Test the policy using cedarling
   </a>
   
 </li>
@@ -8811,36 +8824,49 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#introduction" class="md-nav__link">
-    Introduction
+  <a href="#setup" class="md-nav__link">
+    Setup
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    Prerequisites
+  <a href="#step-1-create-cedar-policy-and-schema" class="md-nav__link">
+    Step-1: Create Cedar Policy and Schema
+  </a>
+  
+    <nav class="md-nav" aria-label="Step-1: Create Cedar Policy and Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schema-setup" class="md-nav__link">
+    Schema setup
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-setup" class="md-nav__link">
+    Policy setup
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-configure-tarp" class="md-nav__link">
+    Step-2: Configure Tarp
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#1-create-cedar-policy-and-schema" class="md-nav__link">
-    1. Create Cedar Policy and Schema
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2-configure-tarp-with-the-policy-store" class="md-nav__link">
-    2. Configure Tarp with the policy store
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#3-test-the-policy-using-cedarling" class="md-nav__link">
-    3. Test the policy using cedarling
+  <a href="#step-3-test-the-policy-using-cedarling" class="md-nav__link">
+    Step-3: Test the policy using cedarling
   </a>
   
 </li>
@@ -8902,45 +8928,49 @@
   </a>
 
 
-<h1 id="cedarling-quick-start-1-unsigned">Cedarling Quick Start 1 (Unsigned)<a class="headerlink" href="#cedarling-quick-start-1-unsigned" title="Permanent link">#</a></h1>
-<h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">#</a></h2>
-<p><a href="../../demos/jans-tarp">Jans Tarp</a> is a browser plugin for testing OpenID Connect flows. This guide shows how to use Cedarling in Tarp to enforce Cedar policies using Attribute Based Access Control (ABAC).</p>
-<p><strong>Steps:</strong></p>
+<h1 id="authorization-using-the-cedarling">Authorization Using The Cedarling<a class="headerlink" href="#authorization-using-the-cedarling" title="Permanent link">#</a></h1>
+<p>This quick start guide shows how to quickly test authorization of a user action
+using the Cedarling. To do this, we need 3 things. </p>
 <ol>
-<li><a href="#create-cedar-policy-and-schema">Create Cedar policy and schema</a></li>
-<li><a href="#configure-tarp-with-the-policy-store">Configure Tarp with the policy store</a></li>
-<li><a href="#test-the-policy-using-cedarling">Test the policy using Cedarling</a></li>
+<li>Authorization policy</li>
+<li>A request for user action</li>
+<li>A running instance of the Cedarling</li>
 </ol>
-<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
-<p>Install Jans Tarp in <a href="https://www.google.com/chrome/index.html">Chrome</a>:</p>
+<p>For <code>1</code> above, we will be using <a href="https://gluu.org/agama/authorization-policy-designer/">Agama Lab policy designer</a> to quickly author
+a <a href="https://www.cedarpolicy.com/">Cedar</a> policy and a policy store.</p>
+<p>For <code>2</code> and <code>3</code>, we will use <a href="https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md">Jans Tarp</a>. Jans Tarp is an easy to install browser
+plug-in that comes with embedded Cedarling instance (WASM). Jans Tarp also provides
+user interface to build authorization and authentication requests for testing
+purpose.</p>
+<h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">#</a></h2>
 <ul>
-<li><a href="https://github.com/JanssenProject/jans/releases/download/nightly/demo-jans-tarp-chrome-nightly.zip">Download Tarp</a></li>
-<li>Extract ZIP → Settings &gt; Extensions → Enable Developer Mode → Load Unpacked → select folder</li>
+<li>Install the Jans Tarp <a href="https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md#releases">on Chrome browser</a></li>
 </ul>
-<h2 id="1-create-cedar-policy-and-schema">1. Create Cedar Policy and Schema<a class="headerlink" href="#1-create-cedar-policy-and-schema" title="Permanent link">#</a></h2>
-<p>Cedarling needs policies and a schema to authorize access. These are bundled in a <em>policy store</em> (a JSON file). To create one, use <a href="https://cloud.gluu.org/agama-lab">Agama Lab</a>’s <strong>Policy Designer</strong>, a developer authoring tool that enables you to publish your policy store to an easily accessible Github URL. </p>
+<h2 id="step-1-create-cedar-policy-and-schema">Step-1: Create Cedar Policy and Schema<a class="headerlink" href="#step-1-create-cedar-policy-and-schema" title="Permanent link">#</a></h2>
+<p>The Cedarling needs policies and a schema to authorize access. These are bundled in a <em>policy store</em> (a JSON file). To create one, use <a href="https://gluu.org/agama/authorization-policy-designer/">Agama Lab policy designer guide</a> and steps below. As an end result, the policy
+designer will publish your policy store to a GitHub repository. </p>
 <p>Follow this video walkthrough:</p>
 <p>https://streamable.com/kvjcv6</p>
+<h3 id="schema-setup">Schema setup<a class="headerlink" href="#schema-setup" title="Permanent link">#</a></h3>
 <ul>
-<li><strong>Schema setup</strong>:</li>
-<li>Open the policy store</li>
-<li>Click on <code>Schema</code></li>
-<li>Scroll down to <code>Entities</code> and click on the <code>+</code> sign<ul>
+<li>Open the <a href="https://cloud.gluu.org/agama-lab/dashboard/policy_store">Agama Lab policy designer</a>
+  and open the policy store</li>
+<li>Click on <code>Schema</code> tab<ul>
+<li>Scroll down to <code>Entity Types</code> and click on the <code>+</code> sign</li>
 <li>Entity type name: <code>SecretDocument</code></li>
 <li>Click Save</li>
-</ul>
-</li>
 <li>Scroll down to <code>Actions</code> and click on it  </li>
-<li>Click on <code>Read</code> and select the pencil icon<ul>
+<li>Click on <code>Read</code> and select the pencil icon</li>
 <li>Under Resources, add <code>SecretDocument</code></li>
 <li>Click Save</li>
+<li>Scroll back up and click the green <code>Save</code> button on top of the entity list</li>
 </ul>
 </li>
-<li>Scroll back up and click the green <code>Save</code> button on top of the entity list</li>
-<li><strong>Policy setup</strong>:
-  This demo policy grants access only to user entities with the <code>SupremeRuler</code> role:</li>
 </ul>
-<p><div class="highlight"><pre><span></span><code>@id(&quot;allow_supreme_ruler&quot;)
+<h3 id="policy-setup">Policy setup<a class="headerlink" href="#policy-setup" title="Permanent link">#</a></h3>
+<p>In this guide, we will use a policy that grants access only to the user 
+  entities with the <code>SupremeRuler</code> role:</p>
+<div class="highlight"><pre><span></span><code>@id(&quot;allow_supreme_ruler&quot;)
 permit(
   principal is Jans::User,
   action,
@@ -8951,15 +8981,23 @@ when {
   principal.role.contains(&quot;SupremeRuler&quot;)
 };
 </code></pre></div>
-  - Click on <code>Policies</code>
-  - Click <code>Add Policy</code> and then <code>Text Policy</code>
-  - Paste in the policy from above
-  - Click Save</p>
-<p>At the end, copy the generated <strong>policy store URI</strong> for the next step.</p>
-<h2 id="2-configure-tarp-with-the-policy-store">2. Configure Tarp with the policy store<a class="headerlink" href="#2-configure-tarp-with-the-policy-store" title="Permanent link">#</a></h2>
+<ul>
+<li>Click on <code>Policies</code> tab in policy designer</li>
+<li>Click <code>Add Policy</code> and then select <code>Text Editor</code></li>
+<li>Paste in the policy from above</li>
+<li>Click Save</li>
+</ul>
+<p>At the end, use the <code>Copy Link</code> button to copy the generated policy store URI 
+for the next step.</p>
+<h2 id="step-2-configure-tarp">Step-2: Configure Tarp<a class="headerlink" href="#step-2-configure-tarp" title="Permanent link">#</a></h2>
+<p>In this step, we will add the policy store details in the Jans Tarp that is
+installed in the browser. The Cedarling instance embedded in the Tarp will
+use the policy stored in this store to evaluate the authorization result.</p>
 <ol>
-<li>Open Tarp → <code>Cedarling</code> → <code>Add Configurations</code></li>
-<li>Paste the following, replacing <code>&lt;Policy Store URI&gt;</code>:</li>
+<li>Open Tarp installed in the Chrome browser </li>
+<li>Navigate to the <code>Cedarling</code> tab and click on <code>Add Configurations</code></li>
+<li>Paste the following configuration parameters as JSON. Make sure to update
+the <code>&lt;Policy Store URI&gt;</code> value to point to your policy store</li>
 </ol>
 <div class="highlight"><pre><span></span><code>{
     &quot;CEDARLING_APPLICATION_NAME&quot;: &quot;My App&quot;,
@@ -8984,46 +9022,42 @@ when {
     &quot;CEDARLING_LOCK_LISTEN_SSE&quot;: &quot;disabled&quot;
 }
 </code></pre></div>
-<ol>
-<li>Click <code>Save</code> to initialize Cedarling. This will start the Cedarling in Tarp, fetch and validate your policy store, and configure Cedarling to validate requests based on the User. </li>
-</ol>
-<h2 id="3-test-the-policy-using-cedarling">3. Test the policy using cedarling<a class="headerlink" href="#3-test-the-policy-using-cedarling" title="Permanent link">#</a></h2>
+<p>Click <code>Save</code> to initialize Cedarling. This will start the Cedarling in Tarp,
+ fetch and validate your policy store, and configure Cedarling to validate requests based on the User. </p>
+<h2 id="step-3-test-the-policy-using-cedarling">Step-3: Test the policy using cedarling<a class="headerlink" href="#step-3-test-the-policy-using-cedarling" title="Permanent link">#</a></h2>
 <p>Video walkthrough:</p>
 <p>https://streamable.com/25wcb7</p>
 <ol>
-<li>Go to <code>Cedarling Authz Form</code></li>
+<li>Go to Tarp, under <code>Cedarling</code> tab, click on <code>Cedarling Authz Form</code></li>
 <li>Input the following:</li>
 </ol>
-<p><strong>Principals:</strong></p>
-<div class="highlight"><pre><span></span><code>    [
-      {
-        &quot;type&quot;: &quot;Jans::User&quot;,
-        &quot;id&quot;: &quot;some_id&quot;,
-        &quot;sub&quot;: &quot;some_sub&quot;,
-        &quot;role&quot;: [&quot;SupremeRuler&quot;]
-      }
-    ]
+<div class="highlight"><span class="filename">Principal</span><pre><span></span><code><span class="w">    </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;SupremeRuler&quot;</span><span class="p">]</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
 </code></pre></div>
-<p><strong>Action:</strong> <code>Jans::Action::"Read"</code></p>
-<p><strong>Resource:</strong></p>
-<div class="highlight"><pre><span></span><code>    {
-      &quot;entity_type&quot;: &quot;resource&quot;,
-      &quot;type&quot;: &quot;Jans::SecretDocument&quot;,
-      &quot;id&quot;: &quot;some_id&quot;
-    }
+<div class="highlight"><span class="filename">Actions</span><pre><span></span><code><span class="err">Ja</span><span class="kc">ns</span><span class="p">::</span><span class="err">Ac</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="p">::</span><span class="s2">&quot;Read&quot;</span>
 </code></pre></div>
-<ol>
-<li>Click <code>Cedarling Authz Request</code></li>
-</ol>
-<p><strong>Sample Response:</strong></p>
-<div class="highlight"><pre><span></span><code>    {
-      &quot;decision&quot;: true,
-      &quot;request_id&quot;: &quot;019602e5-b148-7d0b-9d15-9d000c0d370b&quot;,
-      ...
-    }
+<div class="highlight"><span class="filename">Resource</span><pre><span></span><code><span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;resource&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::SecretDocument&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+</code></pre></div>
+<p>The request is ready to be sent. To send the request to the Cedarling, 
+click on <code>Cedarling Authz Request</code></p>
+<div class="highlight"><span class="filename">Sample Response</span><pre><span></span><code><span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;decision&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;request_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;019602e5-b148-7d0b-9d15-9d000c0d370b&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="err">...</span>
+<span class="w">    </span><span class="p">}</span>
 </code></pre></div>
 <p>The top-level <code>decision: true</code> confirms successful authorization.</p>
-<p>To verify that Cedarling is authorizing based on the policy, use the following principal:</p>
+<p>Let's check a scenario where authorization is denied.</p>
 <p><div class="highlight"><pre><span></span><code>[
   {
     &quot;type&quot;: &quot;Jans::User&quot;,
@@ -9046,7 +9080,7 @@ And click <code>Cedarling Authz Request</code> again. Cedarling will return a ne
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-04-09T15:22:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-04-09</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-04-14T18:48:51+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-04-14</span>
       
         <br>
         Created:
