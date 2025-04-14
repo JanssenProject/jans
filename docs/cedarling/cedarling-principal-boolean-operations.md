@@ -1,3 +1,13 @@
+---
+tags:
+  - administration
+  - authorization / authz
+  - Cedar
+  - Cedarling
+  - boolean
+  - operations
+---
+
 # User-Workload Boolean Operation
 
 The `CEDARLING_PRINCIPAL_BOOLEAN_OPERATION` property specifies what boolean operation to use when combining authorization decisions for `USER` and `WORKLOAD` principals. This JSON Logic rule determines the final authorization outcome based on individual principal decisions.

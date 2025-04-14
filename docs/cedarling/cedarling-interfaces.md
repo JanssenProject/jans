@@ -1,6 +1,16 @@
+---
+tags:
+  - administration
+  - authorization / authz
+  - Cedar
+  - Cedarling
+  - interfaces
+---
+
 # Cedarling Interfaces
 
-Cedarling provides a number of methods to interface with the Cedar engine. These are described below.
+Cedarling provides a number of methods to interface with the Cedar engine. 
+These are described below.
 
 ## Init
 
