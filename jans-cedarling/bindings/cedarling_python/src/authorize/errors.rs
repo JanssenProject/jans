@@ -93,6 +93,13 @@ create_exception!(
     "Error encountered while executing the rule for principals"
 );
 
+create_exception!(
+    authorize_errors,
+    BuildUnsignedRoleEntityError,
+    AuthorizeError,
+    "Error building Role entity for unsigned request"
+);
+
 #[pyclass]
 #[derive()]
 pub struct ErrorPayload(CedarlingAuthorizeError);
@@ -140,7 +147,8 @@ errors_functions! {
     BuildContext => BuildContextError,
     IdTokenTrustMode => IdTokenTrustModeError,
     BuildEntity => BuildEntityError,
-    ExecuteRule => ExecuteRuleError
+    ExecuteRule => ExecuteRuleError,
+    BuildUnsignedRoleEntity => BuildUnsignedRoleEntityError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {

@@ -49,10 +49,10 @@ const Options = () => {
           notifyOnDataChange={handleDataChange}
         />
       case 'loginPage':
-        return <UserDetails
-          data={data.loginDetails}
-          notifyOnDataChange={handleDataChange}
-        />
+        return <HomePage
+        data={data}
+        notifyOnDataChange={handleDataChange}
+      />
       default:
         return null
     }
