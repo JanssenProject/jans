@@ -537,6 +537,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether to persist session_id in cache", defaultValue = "false")
     private Boolean sessionIdPersistInCache = false;
 
+    @DocProperty(description = "Defines list of user claims that has to be put in session attributes", defaultValue = "false")
+    private List<String> sessionIdUserClaimsInAttributes = new ArrayList<>();
+
     @DocProperty(description = "Boolean value specifying whether to include sessionId in response", defaultValue = "false")
     private Boolean includeSidInResponse = false;
 
@@ -1399,6 +1402,15 @@ public class AppConfiguration implements Configuration {
 
     public void setSessionIdPersistInCache(Boolean sessionIdPersistInCache) {
         this.sessionIdPersistInCache = sessionIdPersistInCache;
+    }
+
+    public List<String> getSessionIdUserClaimsInAttributes() {
+        return sessionIdUserClaimsInAttributes;
+    }
+
+    public AppConfiguration setSessionIdUserClaimsInAttributes(List<String> sessionIdUserClaimsInAttributes) {
+        this.sessionIdUserClaimsInAttributes = sessionIdUserClaimsInAttributes;
+        return this;
     }
 
     public Boolean getChangeSessionIdOnAuthentication() {
