@@ -6,31 +6,36 @@ tags:
   - Cedar
   - Cedarling
   - quick start
+  - TBAC
 ---
 
-# Cedarling Quick Start 2 (Signed)
+# Implementing TBAC using Cedarling
 
-## Introduction
+This guide shows how to implement 
+[Token Based Access Control(TBAC)](./cedarling-overview.md#token-based-access-control-tbac) using 
+the Cedarling. To do this, we need 3 things. 
 
-[Jans Tarp](../../demos/jans-tarp) is a browser plugin that enables developers to test OpenID Connect flows. It embeds the Cedarling WASM PDP and lets us test Cedar with real JWTs. This guide demonstrates Role Based Access Control (RBAC) using three steps:
+1. An Authorization policy
+2. A request for user action
+3. A running instance of the Cedarling
 
-1. [Create Cedar policy and schema](#create-cedar-policy-and-schema)
-2. [Configure Tarp with the policy store](#configure-tarp-with-the-policy-store)
-3. [Test the policy using Cedarling](#test-the-policy-using-cedarling)
+For `1` above, we will be using [Agama Lab policy designer](https://gluu.org/agama/authorization-policy-designer/) to quickly author
+a [Cedar] policy and policy store.
 
-## Prerequisites
+For `2` and `3`, we will use [Jans Tarp](https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md). Jans Tarp is an easy to install browser
+plug-in that comes with embedded Cedarling instance (WASM). Jans Tarp also provides
+user interface to build authorization and authentication requests for testing
+purpose.
 
-Install Jans Tarp in [Firefox](https://www.mozilla.org/en-US/firefox/) or [Chrome](https://www.google.com/chrome/index.html):
+## Setup
 
-* [Download Tarp](https://github.com/JanssenProject/jans/releases/tag/nightly)
-* Firefox:
-  * `about:debugging` → This Firefox → Load Temporary Add-on → select ZIP
-* Chrome:
-  * Extract ZIP → Settings > Extensions → Enable Developer Mode → Load Unpacked → select folder
+- Install Jans Tarp [on Chrome browser](https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md#releases) browser
 
-## Cedar Policy
+## Step-1: Create Cedar Policy and Schema
 
-This demo policy grants access only to users with the `SupremeRuler` role:
+In this guide, we will use a policy that grants access to all actions and all
+the resources, only to the users with the `SupremeRuler` role. Policy text 
+looks like below.
 
 ```
 @id("allow_supreme_ruler")
@@ -41,21 +46,61 @@ permit(
 );
 ```
 
-## Create Cedar Policy and Schema 
-
-Cedarling needs policies and a schema to authorize access. These are bundled in a *policy store* (a JSON file). To create one, use [Agama Lab](https://cloud.gluu.org/agama-lab)’s **Policy Designer**, which provides a visual tool to define entities, actions, resources, and policies.
+The Cedarling needs policies and a schema to authorize access. 
+These are bundled in a *policy store* (a JSON file). To create a policy store, 
+use [Agama Lab policy designer guide](https://gluu.org/agama/authorization-policy-designer/) 
+and steps below. At the end of these steps, the policy
+designer will publish your policy store to a GitHub repository. 
 
 Follow this video walkthrough:
 
 ![agama-lab-policy-store](../assets/agama-lab-policy-store.mp4)
 
-**Inputs:**
+### Schema setup
 
-- **Schema**:
-   - Add entity `Object` (no attributes)
-   - Add `Object` to the `Read` action as a resource
-- **Policy**: Use the [policy above](#cedar-policy)
-- **Trusted Issuers**:
+  - Open the [Agama Lab policy designer](https://cloud.gluu.org/agama-lab/dashboard/policy_store)
+  and open the policy store
+  - Click on `Schema` tab
+    - Scroll down to `Entity Types` and click on the `+` sign
+      - Entity type name: `Object`
+      - Click Save
+    - Scroll down to `Actions` and click on it  
+      - Click on `Read` and select the pencil icon
+      - Under Resources, add `Object`
+      - Click Save
+    - Scroll back up and click the green `Save` button on top of the entity list
+
+### Policy setup
+
+  We will be using the policy below that grants access only to users with 
+  the `SupremeRuler` role.
+
+  ```
+  @id("allow_supreme_ruler")
+  permit(
+    principal in Jans::Role::"SupremeRuler",
+    action,
+    resource
+  );
+  ```
+
+  Follow the steps below to add the above policy to the policy store.
+
+  - Click on `Policies`
+  - Click `Add Policy` and then `Text Editor`
+  - Paste in the policy from above
+  - Click Save
+
+### Trusted issuer setup
+
+  When implementing TBAC, the Cedarling will validate the tokens with the IDP.
+  To be able to this, we need to provide trusted issuer information to the 
+  Cedarling. We can do this by adding the trusted issuer information to the
+  policy store.
+  
+  Add your IDP as a trusted issuer using the `Trusted Issuer` tab. 
+
+  - Click on `Add issuer` and add details as shown below.
    - Name: `testIdp`
    - Description: `Test IDP`
    - OIDC Config URL: `https://test-jans.gluu.info/.well-known/openid-configuration`
@@ -81,18 +126,25 @@ Follow this video walkthrough:
      }
      ```
 
-At the end, copy the generated **policy store URI** for the next step.
+At the end, use the `Copy Link` button to copy the generated 
+**policy store URI** for the next step.
 
-## Configure Tarp with the policy store 
+## Step-2: Configure Tarp with the policy store 
 
-1. Open Tarp
-2. `Add Client`:
+In this step, we will add the policy store details in the Jans Tarp that is
+installed in the browser. The Cedarling instance embedded in the Tarp will
+use the policy stored in this store to evaluate the authorization result.
+
+1. Open Tarp installed in the Chrome browser 
+2. Click `Add Client`. Use details below to add a new client.
    * Issuer: `https://test-jans.gluu.info`
    * Expiry: The day after today 
    * Scopes: `openid`, `profile`, `role`
 3. Click `Register`
-4. Go to `Cedarling` → `Add Configurations`
-5. Paste the config below (replace `<Policy Store URI>`):
+4. Go to `Cedarling` tab and click `Add Configurations`
+5. Select `JSON` configuration type and Paste the config as given below. 
+Remember to replace `<Policy Store URI>` with 
+the URI of your policy store:
 
 ```json
     {
@@ -119,18 +171,23 @@ At the end, copy the generated **policy store URI** for the next step.
     }
 ```
 
-6. Click `Save` to initialize Cedarling.
+6.  Click `Save` to initialize Cedarling. This will start the Cedarling in Tarp,
+ fetch and validate your policy store, and configure Cedarling to validate requests based on the User. 
 
-## Test the policy using cedarling
+## Step-3: Test the policy using the Cedarling
 
-1. In Tarp, click the ⚡ icon to begin authentication
+Since we are implementing TBAC, we have to authenticate the user first to get
+the tokens. 
+
+1. In Tarp, under `Authentication flow` tab, click the ⚡ icon to begin authentication
 2. Input:
    * ACR: `basic`
    * Scopes: `openid`, `profile`, `role`
-3. Login on the test IDP with a user having `SupremeRuler` role
+3. Login using a user having the `SupremeRuler` role
 4. Click `Allow` on the consent screen
-5. Back in Tarp, open `Cedarling Authz Request Form`
-6. Input:
+5. If the authentication is successful, Tarp will show you a page with token details and `Cedarling Authz Request Form` section
+5. Open `Cedarling Authz Request Form`
+6. Use the details below as an input to this form:
    * Principal: select all 3 tokens
    * Action: `Jans::Action::"Read"`
    * Resource:
@@ -141,11 +198,11 @@ At the end, copy the generated **policy store URI** for the next step.
        "id": "some_id"
      }
      ```
+7. Leave the `Context` blank
 7. Click `Cedarling Authz Request`
 
-**Sample Response:**
 
-```json
+```json title="Sample Response"
 {
   ...
   "decision": true,
