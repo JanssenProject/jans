@@ -103,8 +103,6 @@ mod fallback {
     /// Panics when:
     /// - A runtime to initialize a new LogStrategy could not be built.
     /// - A fallback logger could not be initialized.
-    // Can't we just log to StdOut directly instead of trying to initialize a StdOutLogger
-    // in this roundabout way?
     pub fn log(msg: &str, pdp_id: &PdpID, app_name: &Option<ApplicationName>) {
         // level is so that all messages passed here are logged.
         let logger = StdOutLogger::new(LogLevel::TRACE);

@@ -6,6 +6,10 @@
 //! The [`LogWorker`] runs in the background and is responsible for collecting and sending
 //! logs to the lock server's `/audit/log` endpoint.
 
+use crate::LogWriter;
+use crate::log::Logger;
+use crate::log::lock_logger::log_entry::LockLogEntry;
+
 use super::WORKER_HTTP_RETRY_DUR;
 use reqwest::Client;
 use serde_json::Value;
@@ -21,7 +25,7 @@ pub type SerializedLogEntry = Box<str>;
 /// Responsible for sending logs to the lock server
 pub struct LogWorker {
     // it would be nice to store a struct here but we can't really store
-    // `VecDeque<dyn Loggable>` so we just serialize the logs before storin them in the
+    // `VecDeque<dyn Loggable>` so we just serialize the logs before storing them in the
     // buffer. We use `Box<str>`s to save some memory.
     //
     // TODO: should we cap the capacity? what to do with the excess logs if the buffer
@@ -30,15 +34,22 @@ pub struct LogWorker {
     log_interval: Duration,
     http_client: Arc<Client>,
     log_endpoint: Url,
+    fallback_logger: Logger,
 }
 
 impl LogWorker {
-    pub fn new(log_interval: Duration, http_client: Arc<Client>, log_endpoint: Url) -> Self {
+    pub fn new(
+        log_interval: Duration,
+        http_client: Arc<Client>,
+        log_endpoint: Url,
+        fallback_logger: Logger,
+    ) -> Self {
         Self {
             log_interval,
             log_buffer: VecDeque::new(),
             http_client,
             log_endpoint,
+            fallback_logger,
         }
     }
 
@@ -80,7 +91,13 @@ impl LogWorker {
 
         // log errors to stdout since there's nowhere else to log
         if failed_serializations > 1 {
-            eprintln!("failed to serialize {failed_serializations} log entries");
+            self.fallback_logger
+                .log_any(LockLogEntry::error_fmt(format!(
+                    // This probably wouldn't happen as we define the log entries
+                    // internally and they should always be serializable
+                    "skipping {} log entries that couldn't be serialized",
+                    failed_serializations
+                )));
         }
 
         loop {
@@ -97,7 +114,12 @@ impl LogWorker {
                     break;
                 },
                 Err(err) => {
-                    eprintln!("failed to POST logs: {err}");
+                    self.fallback_logger
+                        .log_any(LockLogEntry::error_fmt(format!(
+                            "failed to POST logs to '{}': {}",
+                            self.log_endpoint.as_ref(),
+                            err
+                        )));
                     sleep(WORKER_HTTP_RETRY_DUR).await;
                 },
             }

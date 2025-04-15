@@ -4,13 +4,18 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 mod lock_config;
+mod log_entry;
 mod log_worker;
 mod register_client;
 
 use super::interface::Loggable;
-use crate::app_types::PdpID;
+use super::log_strategy::LogStrategyLogger;
+use super::stdout_logger::StdOutLogger;
+use super::{LogStrategy, Logger};
+use crate::app_types::{ApplicationName, PdpID};
 use crate::{LockLogConfig, LogWriter};
 use lock_config::*;
+use log_entry::LockLogEntry;
 use log_worker::*;
 use register_client::*;
 use reqwest::Client;
@@ -26,11 +31,14 @@ pub const WORKER_HTTP_RETRY_DUR: Duration = Duration::from_secs(10);
 /// Stores logs in a buffer then sends them to the lock server in the background
 pub(crate) struct LockLogger {
     log_worker_tx: Option<mpsc::Sender<SerializedLogEntry>>,
+    /// An StdOut logger
+    fallback_logger: Logger,
 }
 
 impl LockLogger {
     pub async fn new(
         pdp_id: PdpID,
+        app_name: Option<ApplicationName>,
         bootstrap_conf: &LockLogConfig,
     ) -> Result<Self, InitLockLoggerError> {
         // TODO: validate SSA JWT
@@ -58,6 +66,12 @@ impl LockLogger {
         headers.insert("Authorization", auth_header);
         let http_client = Arc::new(Client::builder().default_headers(headers).build()?);
 
+        let fallback_logger = Arc::new(LogStrategy::new_with_logger(
+            LogStrategyLogger::StdOut(StdOutLogger::new(bootstrap_conf.log_level)),
+            pdp_id,
+            app_name,
+        ));
+
         let log_worker_tx = match (bootstrap_conf.log_interval, lock_config.audit_endpoints.log) {
             // Case where Cedarling's config enables sending logs but the lock server
             // does not have a log endpoint
@@ -66,8 +80,12 @@ impl LockLogger {
                 let (log_tx, log_rx) = mpsc::channel::<SerializedLogEntry>(100);
 
                 // Spawn log worker
-                let mut log_worker =
-                    LogWorker::new(log_interval, http_client.clone(), (*log_endpoint).clone());
+                let mut log_worker = LogWorker::new(
+                    log_interval,
+                    http_client.clone(),
+                    (*log_endpoint).clone(),
+                    fallback_logger.clone(),
+                );
                 tokio::spawn(async move { log_worker.run(log_rx).await });
 
                 Some(log_tx)
@@ -76,21 +94,25 @@ impl LockLogger {
             _ => None,
         };
 
-        Ok(Self { log_worker_tx })
+        Ok(Self {
+            log_worker_tx,
+            fallback_logger,
+        })
     }
 }
 
 impl LogWriter for LockLogger {
     fn log_any<T: Loggable>(&self, entry: T) {
-        // TODO: we could probably just generalize the fallback logger then log there.
         let entry = serde_json::to_string(&entry)
             .expect("entry should serialize successfully")
             .into_boxed_str();
         if let Some(log_tx) = self.log_worker_tx.as_ref() {
             if let Err(err) = log_tx.try_send(entry) {
-                eprintln!(
-                    "failed to send log entry to LogWorker, the thread may have unexpectedly closed or is full: {err}"
-                );
+                self.fallback_logger
+                    .log_any(LockLogEntry::error_fmt(format!(
+                        "failed to send log entry to LogWorker, the thread may have unexpectedly closed or is full: {}",
+                        err
+                    )));
             }
         }
     }
@@ -145,10 +167,11 @@ mod test {
             health_interval: None,
             telemetry_interval: None,
             listen_sse: false,
+            log_level: LogLevel::TRACE,
         };
 
         // Test startup
-        let logger = LockLogger::new(pdp_id, &config)
+        let logger = LockLogger::new(pdp_id, None, &config)
             .await
             .expect("build lock logger");
         lock_config_endpoint.assert();

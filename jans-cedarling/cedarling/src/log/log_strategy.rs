@@ -43,9 +43,9 @@ impl LogStrategy {
                 MemoryLogger::new(*memory_config, config.log_level, pdp_id, app_name.clone()),
             ),
             LogTypeConfig::StdOut => LogStrategyLogger::StdOut(StdOutLogger::new(config.log_level)),
-            LogTypeConfig::Lock(lock_bootstrap_config) => {
-                LogStrategyLogger::Lock(LockLogger::new(pdp_id, lock_bootstrap_config).await?)
-            },
+            LogTypeConfig::Lock(lock_bootstrap_config) => LogStrategyLogger::Lock(
+                LockLogger::new(pdp_id, app_name.clone(), lock_bootstrap_config).await?,
+            ),
         };
         Ok(Self {
             logger,

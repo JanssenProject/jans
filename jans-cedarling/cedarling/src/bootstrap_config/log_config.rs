@@ -53,6 +53,8 @@ pub struct MemoryLogConfig {
 /// Config for the lock logger that are set using the bootstrap configs.
 #[derive(Debug, Clone, PartialEq)]
 pub struct LockLogConfig {
+    /// The logging level
+    pub log_level: LogLevel,
     /// URI where Cedarling can get metadata about the lock server.
     /// i.e. `.well-known/lock-server-configuration`
     ///  
@@ -126,6 +128,7 @@ impl TryFrom<&BootstrapConfigRaw> for LockLogConfig {
             health_interval,
             telemetry_interval,
             listen_sse,
+            log_level: raw.log_level,
         })
     }
 }
