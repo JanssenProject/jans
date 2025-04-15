@@ -537,7 +537,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether to persist session_id in cache", defaultValue = "false")
     private Boolean sessionIdPersistInCache = false;
 
-    @DocProperty(description = "Defines list of user claims that has to be put in session attributes", defaultValue = "false")
+    @DocProperty(description = "Defines list of user claims that has to be put in session attributes")
     private List<String> sessionIdUserClaimsInAttributes = new ArrayList<>();
 
     @DocProperty(description = "Boolean value specifying whether to include sessionId in response", defaultValue = "false")
