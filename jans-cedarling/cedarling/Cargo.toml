@@ -41,6 +41,8 @@ strum = { version = "0.26", features = ["derive"] }
 cedar-policy-validator = "4.3.3"
 cedar-policy-core = "4.3.3"
 datalogic-rs = "2.1.2"
+futures = "0.3.31"
+wasm-bindgen-futures = { workspace = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { workspace = true, features = ["console"] }

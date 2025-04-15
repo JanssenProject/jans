@@ -11,12 +11,13 @@ use crate::log::Logger;
 use crate::log::lock_logger::log_entry::LockLogEntry;
 
 use super::WORKER_HTTP_RETRY_DUR;
+use futures::StreamExt;
+use futures::channel::mpsc;
 use reqwest::Client;
 use serde_json::Value;
 use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::sync::mpsc;
 use tokio::time::sleep;
 use url::Url;
 
@@ -57,7 +58,7 @@ impl LogWorker {
         loop {
             tokio::select! {
                 // Append log to the buffer
-                log_entry = log_rx.recv() => {
+                log_entry = log_rx.next() => {
                     let Some(log_entry) = log_entry else {
                         break;
                     };

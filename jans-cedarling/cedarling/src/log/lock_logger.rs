@@ -14,23 +14,23 @@ use super::stdout_logger::StdOutLogger;
 use super::{LogStrategy, Logger};
 use crate::app_types::{ApplicationName, PdpID};
 use crate::{LockLogConfig, LogWriter};
+use futures::channel::mpsc;
 use lock_config::*;
 use log_entry::LockLogEntry;
 use log_worker::*;
 use register_client::*;
 use reqwest::Client;
 use reqwest::header::{HeaderMap, HeaderValue};
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use thiserror::Error;
-use tokio::sync::mpsc;
 
 /// The base duration to wait for if an http request fails for workers.
 pub const WORKER_HTTP_RETRY_DUR: Duration = Duration::from_secs(10);
 
 /// Stores logs in a buffer then sends them to the lock server in the background
 pub(crate) struct LockLogger {
-    log_worker_tx: Option<mpsc::Sender<SerializedLogEntry>>,
+    log_worker_tx: RwLock<Option<mpsc::Sender<SerializedLogEntry>>>,
     /// An StdOut logger
     fallback_logger: Logger,
 }
@@ -86,13 +86,19 @@ impl LockLogger {
                     (*log_endpoint).clone(),
                     fallback_logger.clone(),
                 );
+
+                #[cfg(any(target_arch = "wasm32", target_arch = "wasm64"))]
+                wasm_bindgen_futures::spawn_local(async move { log_worker.run(log_rx).await });
+
+                #[cfg(not(any(target_arch = "wasm32", target_arch = "wasm64")))]
                 tokio::spawn(async move { log_worker.run(log_rx).await });
 
                 Some(log_tx)
             },
             // Other cases that will always resolve to Cedarling not having to send logs
             _ => None,
-        };
+        }
+        .into();
 
         Ok(Self {
             log_worker_tx,
@@ -106,7 +112,20 @@ impl LogWriter for LockLogger {
         let entry = serde_json::to_string(&entry)
             .expect("entry should serialize successfully")
             .into_boxed_str();
-        if let Some(log_tx) = self.log_worker_tx.as_ref() {
+
+        let mut log_tx = match self.log_worker_tx.write() {
+            Ok(log_tx) => log_tx,
+            Err(err) => {
+                self.fallback_logger
+                    .log_any(LockLogEntry::error_fmt(format!(
+                        "failed to acquire write lock for the LockLogSender. cedarling will not be able to send this entry to the lock server: {}",
+                        err
+                    )));
+                return;
+            },
+        };
+
+        if let Some(log_tx) = log_tx.as_mut() {
             if let Err(err) = log_tx.try_send(entry) {
                 self.fallback_logger
                     .log_any(LockLogEntry::error_fmt(format!(
