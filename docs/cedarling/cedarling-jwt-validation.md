@@ -10,6 +10,8 @@ tags:
 
 # Cedarling JWT Flow
 
+JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct the Principal entities. In order to verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status(active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.
+
 ![](../assets/lock-cedarling-diagram-4.jpg)
 
 ## Json Web Token Validation
@@ -18,7 +20,7 @@ tags:
 
 ###  JWT Signature Validation
 
-To enable this feature, set the `CEDARLING_JWT_VALIDATION` bootstrap property to `True`. For development and testing purposes, you can set this property to `False` and submit an unsigned JWT, such as one generated from [JWT.io](https://jwt.io). On init, the Cedarling will fetch the latest public 
+To enable this feature, set the `CEDARLING_JWT_VALIDATION` bootstrap property to `True`. For development and testing purposes, you can set this property to `False` and submit an unsigned JWT, such as one generated from [jwt.io](https://jwt.io). On initialization, the Cedarling will fetch the latest public 
 keys from the issuers specified in the Policy Store and cache them. The cedarling uses the JWT `iss` claim to select the appropriate keys for validation.
 
 ### JWT Content Validation
