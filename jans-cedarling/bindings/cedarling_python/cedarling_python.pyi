@@ -99,6 +99,9 @@ class Cedarling:
 
     def authorize(self, request: Request) -> AuthorizeResult: ...
 
+    def authorize_unsigned(
+        self, request: RequestUnsigned) -> AuthorizeResult: ...
+
     def pop_logs(self) -> List[Dict]: ...
 
     def get_log_by_id(self, id: str) -> Optional[Dict]: ...
@@ -117,26 +120,40 @@ class Cedarling:
 class Request:
     tokens: Dict[str, str]
     action: str
-    resource: ResourceData
+    resource: EntityData
     context: Dict[str, Any]
 
     def __init__(self,
                  tokens: Dict[str, Any],
                  action: str,
-                 resource: ResourceData,
+                 resource: EntityData,
                  context: Dict[str, Any]) -> None: ...
 
 
 @final
-class ResourceData:
-    resource_type: str
+class RequestUnsigned:
+    principals: List[EntityData]
+    action: str
+    resource: EntityData
+    context: Dict[str, Any]
+
+    def __init__(self,
+                 principals: List[EntityData],
+                 action: str,
+                 resource: EntityData,
+                 context: Dict[str, Any]) -> None: ...
+
+
+@final
+class EntityData:
+    entity_type: str
     id: str
     payload: Dict[str, Any]
 
-    def __init__(self, resource_type: str, id: str, **kwargs) -> None: ...
+    def __init__(self, entity_type: str, id: str, **kwargs) -> None: ...
 
     @classmethod
-    def from_dict(cls, value: Dict[str, Any]) -> "ResourceData": ...
+    def from_dict(cls, value: Dict[str, Any]) -> "EntityData": ...
 
 
 @final
@@ -146,6 +163,8 @@ class AuthorizeResult:
     def workload(self) -> AuthorizeResultResponse | None: ...
 
     def person(self) -> AuthorizeResultResponse | None: ...
+
+    def principal(self, principal: str) -> AuthorizeResultResponse | None: ...
 
     def request_id(self) -> str: ...
 

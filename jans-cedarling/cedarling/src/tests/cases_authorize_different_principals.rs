@@ -485,10 +485,7 @@ async fn test_where_principal_workload_cant_be_applied() {
         .await
         .expect_err("request should be parsed with error");
 
-    assert!(matches!(
-        result,
-        crate::AuthorizeError::WorkloadRequestValidation(_)
-    ))
+    assert!(matches!(result, crate::AuthorizeError::InvalidPrincipal(_)))
 }
 
 /// Check if action executes when principal user can't be applied
@@ -516,8 +513,8 @@ async fn test_where_principal_user_cant_be_applied() {
         .expect_err("request should be parsed with error");
 
     assert!(
-        matches!(result, crate::AuthorizeError::UserRequestValidation(_)),
-        "expected error UserRequestValidation, got: {}",
+        matches!(result, crate::AuthorizeError::InvalidPrincipal(_)),
+        "expected error InvalidPrincipal, got: {}",
         result
     )
 }

@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::{AuthorizeEntitiesData, AuthzConfig};
+use super::AuthzConfig;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
 use crate::entity_builder::BuiltEntities;
@@ -15,11 +15,10 @@ use smol_str::ToSmolStr;
 pub fn build_context(
     config: &AuthzConfig,
     request_context: Value,
-    entities_data: &AuthorizeEntitiesData,
+    build_entities: &BuiltEntities,
     schema: &cedar_policy::Schema,
     action: &cedar_policy::EntityUid,
 ) -> Result<cedar_policy::Context, BuildContextError> {
-    // NOTE: we use the context namespace to
     let namespace = action.type_name().namespace();
     let action_name = &action.id().escaped();
     let json_schema = &config.policy_store.schema.json;
@@ -32,7 +31,6 @@ pub fn build_context(
 
     // Get the entities required for the context
     let mut ctx_entity_refs = json!({});
-    let build_entities = &entities_data.built_entities();
 
     if let Some(ctx) = action_schema.applies_to.context.as_ref() {
         match ctx {
@@ -98,24 +96,45 @@ fn build_entity_refs_from_attr(
     schema: &CedarSchemaJson,
 ) -> Result<Option<Value>, BuildContextError> {
     match attr {
-        Attribute::Entity { name, .. } => {
-            if let Some((type_name, _type_schema)) = schema
-                .get_entity_schema(name, Some(namespace))
-                .map_err(|e| BuildContextError::ParseEntityName(name.to_string(), e))?
-            {
-                map_entity_id(&type_name, built_entities)
-            } else {
-                Ok(None)
+        Attribute::Entity { name, required } => {
+            let Some((type_name, _type_schema)) =
+                schema
+                    .get_entity_schema(name, Some(namespace))
+                    .map_err(|e| BuildContextError::ParseEntityName(name.to_string(), e))?
+            else {
+                return Ok(None);
+            };
+
+            match map_entity_id(&type_name, built_entities) {
+                Ok(res) => Ok(res),
+                Err(err) => {
+                    if *required {
+                        Err(err)
+                    } else {
+                        Ok(None)
+                    }
+                },
             }
         },
-        Attribute::EntityOrCommon { name, .. } => {
-            if let Some((type_name, _type_schema)) = schema
-                .get_entity_schema(name, Some(namespace))
-                .map_err(|e| BuildContextError::ParseEntityName(name.to_string(), e))?
-            {
-                return map_entity_id(&type_name, built_entities);
+        Attribute::EntityOrCommon { name, required } => {
+            let Some((type_name, _type_schema)) =
+                schema
+                    .get_entity_schema(name, Some(namespace))
+                    .map_err(|e| BuildContextError::ParseEntityName(name.to_string(), e))?
+            else {
+                return Ok(None);
+            };
+
+            match map_entity_id(&type_name, built_entities) {
+                Ok(res) => Ok(res),
+                Err(err) => {
+                    if *required {
+                        Err(err)
+                    } else {
+                        Ok(None)
+                    }
+                },
             }
-            Ok(None)
         },
         _ => Ok(None),
     }

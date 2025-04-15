@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
@@ -7,6 +7,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Edit from '@mui/icons-material/Edit';
 import { pink, green } from '@mui/material/colors';
+import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
@@ -14,13 +15,17 @@ import AddIcon from '@mui/icons-material/Add';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
-import AddCedarlingConfig from './addCedarlingConfig'
+import AddCedarlingConfig from './addCedarlingConfig';
+import CedarlingUnsignedAuthz from './cedarlingUnsignedAuthz';
+import CedarlingSignedAuthz from './cedarlingSignedAuthz';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import HelpDrawer from './helpDrawer'
 import Alert from '@mui/material/Alert';
 import { JsonEditor } from 'json-edit-react'
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -90,15 +95,10 @@ function Row(props: { row: any, notifyOnDataChange }) {
     );
 }
 
-export default function Cedarling({ data, notifyOnDataChange, isOidcClientRegistered }) {
+export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }) {
     const [modelOpen, setModelOpen] = React.useState(false);
     const [drawerOpen, setDrawerOpen] = React.useState(false);
-    const [oidcClientRegistered, setOidcClientRegistered] = React.useState(false);
-
-
-    React.useEffect(() => {
-        setOidcClientRegistered(isOidcClientRegistered)
-    }, [isOidcClientRegistered]);
+    const [screenType, setScreenType] = React.useState("config");
 
     const handleDialog = (isOpen) => {
         setModelOpen(isOpen);
@@ -109,20 +109,43 @@ export default function Cedarling({ data, notifyOnDataChange, isOidcClientRegist
         setDrawerOpen(isOpen);
     };
 
+    const handleScreenChange = (
+        event: React.MouseEvent<HTMLElement>,
+        newScreenType: string,
+    ) => {
+        setScreenType(newScreenType);
+    };
+
     return (
         <Container maxWidth="lg">
-            {oidcClientRegistered ?
-                <>
-                    <AddCedarlingConfig isOpen={modelOpen} handleDialog={handleDialog} newData={{}} />
-                    <HelpDrawer isOpen={drawerOpen} handleDrawer={handleDrawer} />
-                    <Stack direction="column" spacing={2} sx={{ mb: 1 }}>
-                        <Stack direction="row" spacing={2} sx={{ mb: 1 }} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            {(data === undefined || data?.length == 0) ?
-                                <Button color="success" variant="outlined" startIcon={<AddIcon />} onClick={() => setModelOpen(true)} style={{ maxWidth: '200px' }}>
-                                    Add Configurations
-                                </Button> : ''}
-                        </Stack>
-                        <TableContainer component={Paper}>
+                <AddCedarlingConfig isOpen={modelOpen} handleDialog={handleDialog} newData={{}} />
+                <HelpDrawer isOpen={drawerOpen} handleDrawer={handleDrawer} />
+                <Stack direction="column" spacing={2} sx={{ mb: 1 }}>
+                    <Stack direction="row" spacing={2} sx={{ mb: 1 }} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        {(data === undefined || data?.length == 0) ?
+                            <Button color="success" variant="outlined" startIcon={<AddIcon />} onClick={() => setModelOpen(true)} style={{ maxWidth: '200px' }}>
+                                Add Configurations
+                            </Button> : ''}
+                    </Stack>
+                    {(data === undefined || data?.length == 0) ? '' :
+                        <Box maxWidth="md">
+                            <ToggleButtonGroup
+                                color="primary"
+                                value={screenType}
+                                exclusive
+                                onChange={handleScreenChange}
+                                aria-label="Platform"
+                            >
+                                <ToggleButton value="config">Bootstrap Configuration</ToggleButton>
+                                <ToggleButton value="unsignedAuthz">Cedarling Unsigned Authz Form</ToggleButton>
+                                {isLoggedIn &&
+                                    <ToggleButton value="signedAuthz">Cedarling Signed Authz Form</ToggleButton>
+                                }
+                            </ToggleButtonGroup>
+                        </Box>
+                    }
+                    {screenType === 'config' &&
+                        (<TableContainer component={Paper}>
                             <Table aria-label="collapsible table">
                                 <TableHead>
                                     <TableRow>
@@ -138,11 +161,18 @@ export default function Cedarling({ data, notifyOnDataChange, isOidcClientRegist
                                     }
                                 </TableBody>
                             </Table>
-                        </TableContainer>
-                    </Stack>
-                </> :
-                <Alert severity="warning">At least one OIDC client must be registered in Jans-TARP to add Cedarling configuration.</Alert>
-            }
+                        </TableContainer>)}
+                        {(data === undefined || data?.length == 0) ? '' :
+                            (
+                                <>
+                                    {screenType === 'unsignedAuthz' &&
+                                        <CedarlingUnsignedAuthz data={data} />}
+                                    {(screenType === 'signedAuthz' && isLoggedIn)&&
+                                        <CedarlingSignedAuthz data={data} />}
+                                </>
+                            )
+                        }
+                </Stack>
         </Container>
     );
 }

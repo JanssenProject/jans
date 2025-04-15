@@ -78,7 +78,7 @@ let input = {
   }
 }
 
-decision_result = await cedarling(input)
+decision_result = await cedarling.authorize(input)
 ```
 
 ## Automatically Adding Entity References to the Context
@@ -165,3 +165,50 @@ let context = {
   "time": 1719266610.98636,
 }
 ```
+
+## Unsigned Authorization (authorize_unsigned)
+
+The `authorize_unsigned` method allows making authorization decisions without JWT token verification. This is useful when:
+
+- You already have verified the principals through other means
+- You need to make authorization decisions for non-token based scenarios
+- You're implementing custom authentication flows
+
+Example usage:
+
+```js
+let input = {
+  "principals": [
+    {
+      "id": "user123",
+      "type": "User",
+      "email": "user@example.com",
+      "roles": ["admin"]
+    }
+  ],
+  "action": "View",
+  "resource": {
+    "id": "ticket-10101",
+    "type" : "Ticket",
+    "owner": "bob@acme.com", 
+    "org_id": "Acme"
+  },
+  "context": {
+    "ip_address": "54.9.21.201",
+    "network_type": "VPN",
+    "user_agent": "Chrome 125.0.6422.77 (Official Build) (arm64)",
+    "time": "1719266610.98636",
+  }
+};
+
+decision_result = await cedarling.authorize_unsigned(input);
+```
+
+### When to use authorize_unsigned vs authorize
+
+| Feature               | authorize          | authorize_unsigned  |
+|-----------------------|--------------------|---------------------|
+| JWT validation        | Yes                | No                  |
+| Token requirements    | Requires valid JWTs| Accepts raw entities|
+| Use case              | Standard auth flows| Custom auth flows   |
+| Security              | Higher (validates) | Lower (trusts input)|

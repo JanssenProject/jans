@@ -39,4 +39,17 @@ export default class Utils {
         const data = await encoder.encode(plain);
         return window.crypto.subtle.digest('SHA-256', data);
     }
+
+    static isJSON(str) {
+        try {
+            JSON.parse(str);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+    
+    static isEmpty(value) {
+        return (value == null || value.length === 0);
+    }
 }

@@ -1,5 +1,6 @@
 package io.jans.casa.ui.vm.admin;
 
+import io.jans.casa.conf.MainSettings;
 import io.jans.casa.core.PasswordStatusService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ public class PassResetViewModel extends MainViewModel {
     private PasswordStatusService pst;
 
     private boolean passResetEnabled;
+    private boolean passPolicy;
 
     public boolean isPassResetEnabled() {
         return passResetEnabled;
@@ -26,15 +28,30 @@ public class PassResetViewModel extends MainViewModel {
         this.passResetEnabled = passResetEnabled;
     }
 
-    @Init
-    public void init() {
-        passResetEnabled = getSettings().isEnablePassReset();
+    public boolean isPassPolicy() {
+        return passPolicy;
     }
 
-    public void change() {
-        getSettings().setEnablePassReset(passResetEnabled);
+    public void setPassPolicy(boolean passPolicy) {
+        this.passPolicy = passPolicy;
+    }
+
+    @Init
+    public void init() {
+        MainSettings ms = getSettings();
+        passResetEnabled = ms.isEnablePassReset();
+        passPolicy = ms.isUsePasswordPolicy();        
+    }
+
+    public void update() {
+        
+        MainSettings ms = getSettings();
+        ms.setEnablePassReset(passResetEnabled);
+        ms.setUsePasswordPolicy(passPolicy);
+        
         updateMainSettings();
         pst.reloadStatus();
+
     }
 
 }

@@ -101,10 +101,10 @@ async fn call_authorize(
             ]),
             action: "Jans::Action::\"Update\"".to_string(),
             context: serde_json::json!({}),
-            resource: ResourceData {
+            resource: EntityData {
                 id: "random_id".to_string(),
-                resource_type: "Jans::Issue".to_string(),
-                payload: HashMap::from_iter([
+                entity_type: "Jans::Issue".to_string(),
+                attributes: HashMap::from_iter([
                     (
                         "org_id".to_string(),
                         serde_json::Value::String("some_long_id".to_string()),

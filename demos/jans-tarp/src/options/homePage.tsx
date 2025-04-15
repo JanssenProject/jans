@@ -6,8 +6,10 @@ import Box from '@mui/material/Box';
 import Password from '@mui/icons-material/Password';
 import LockPerson from '@mui/icons-material/LockPerson';
 import OIDCClients from './oidcClients';
-import Cedarling from './cedarling';
+import CedarlingMgmt from './cedarling';
 import Grid from '@mui/material/Grid';
+import Utils from './Utils';
+import UserDetails from './userDetails'
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -58,23 +60,30 @@ export default function HomePage({ data, notifyOnDataChange }) {
           aria-label="scrollable force tabs example"
           TabIndicatorProps={{ sx: { bgcolor: "#148514" } }}
         >
-          <Tab label="Authentication Flow" icon={<Password />} />
+          {(!Utils.isEmpty(data.loginDetails) && Object.keys(data.loginDetails).length !== 0) ?
+            <Tab label="User Details" icon={<Password />} /> :
+            <Tab label="Authentication Flow" icon={<Password />} />}
           <Tab label="Cedarling" icon={<LockPerson />} />
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
-        <OIDCClients
-          data={data.oidcClients}
-          notifyOnDataChange={notifyOnDataChange}
-        />
+        {(!Utils.isEmpty(data.loginDetails) && Object.keys(data.loginDetails).length !== 0) ?
+          <UserDetails
+            data={data.loginDetails}
+            notifyOnDataChange={notifyOnDataChange}
+          /> :
+          <OIDCClients
+            data={data.oidcClients}
+            notifyOnDataChange={notifyOnDataChange}
+          />}
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Cedarling
+            <CedarlingMgmt
               data={data.cedarlingConfig}
+              isLoggedIn={(!Utils.isEmpty(data.loginDetails) && Object.keys(data.loginDetails).length !== 0)}
               notifyOnDataChange={notifyOnDataChange}
-              isOidcClientRegistered={(data?.oidcClients !== undefined && data?.oidcClients?.length !== 0)}
             />
           </Grid>
         </Grid>

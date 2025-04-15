@@ -196,7 +196,7 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
                 context.getExecutionContext().setUser(user);
                 scriptLogger.debug("User {} is authenticated successfully", user.getUserId());
 
-                entryManager.remove(deviceSessionObject.getDn(), AuthorizationChallengeSession.class);
+                //entryManager.remove(deviceSessionObject.getDn(), AuthorizationChallengeSession.class);
                 return true;
             }
             

@@ -143,6 +143,7 @@ nav:
       - Cache Configuration: janssen-server/config-guide/auth-server-config/cache-configuration.md
       - Rate Limit: janssen-server/config-guide/auth-server-config/rate-limit.md
       - UMA Management: janssen-server/config-guide/auth-server-config/oauth-umaresources-config.md
+      - Session Management: janssen-server/config-guide/auth-server-config/session-management.md
     - FIDO2 Configuration: janssen-server/config-guide/fido2-config/janssen-fido2-configuration.md
     - SCIM Configuration:
       - SCIM User Resources: janssen-server/config-guide/scim-config/user-config.md
@@ -285,7 +286,6 @@ nav:
       - Engine and bridge configurations: janssen-server/developer/agama/engine-bridge-config.md
       - Agama flows in native applications: janssen-server/developer/agama/native-applications.md
       - FAQ: janssen-server/developer/agama/faq.md
-      - Quick Start Using Agama Lab: janssen-server/developer/agama/quick-start-using-agama-lab.md
     - External Libraries: janssen-server/developer/external-libraries.md
     - CORS: janssen-server/developer/cors.md
     - X-Frame-Options: janssen-server/developer/xframe.md
@@ -298,29 +298,39 @@ nav:
       - janssen-server/developer/scripts/README.md
       - Application Session: script-catalog/application_session/application-session.md
       - Authorization Challenge: script-catalog/authorization_challenge/authorization-challenge.md
+      - Authorization Detail: script-catalog/authz_detail/authz-detail.md
       - CIBA End User Notification: script-catalog/ciba/ciba.md
       - Client Registration: script-catalog/client_registration/client-registration.md
       - Client Authentication: script-catalog/client_authn/client-authn.md
       - Config API: script-catalog/config_api/config-api.md
+      - IDP: script-catalog/idp/idp-extension.md
       - Consent Gathering: script-catalog/consent_gathering/consent-gathering.md
       - Dynamic Scope: script-catalog/dynamic_scope/dynamic-scope.md
       - End Session: script-catalog/end_session/end-session.md
       - ID Generator: script-catalog/id_generator/id-generator.md
-      - Introspection: script-catalog/introspection/introspection.md
-      - OpenID Configuration: script-catalog/discovery/discovery.md
+      - Introspection: script-catalog/introspection/README.md
+      - OpenID Configuration: script-catalog/discovery/discovery/README.md
       - Persistence: script-catalog/persistence_extension/persistence.md
       - Person Authentication: script-catalog/person_authentication/person-authentication.md
       - Post Authentication: script-catalog/post_authn/post-authentication.md
       - Resource Owner Password Credentials: script-catalog/resource_owner_password_credentials/ropc.md
       - Revoke Token: script-catalog/revoke_token/revoke-token.md
       - SCIM: script-catalog/scim/scim.md
+      - Token Exchange: script-catalog/token_exchange/token-exchange.md
       - Script Debugging: script-catalog/introspection/interception-scripts-debug.md
+      - Access Evaluation: script-catalog/access_evaluation/access-evaluation.md
+      - Access Evaluation Discovery: script-catalog/access_evaluation/access-evaluation-discovery.md
       - Select Account: script-catalog/select_account/select-account.md
       - Spontaneous Scope: script-catalog/spontaneous_scope/spontaneous-scope.md
+      - Fido2 Extension: script-catalog/fido2_extension/fido2-extension.md
+      - Create User: script-catalog/create_user/create-user.md
+      - Healtch Check: script-catalog/health_check/health-check.md
       - UMA Claims (JWT Transformation): script-catalog/uma_rpt_claims/uma-claims-jwt.md
       - UMA Claims Gathering (Web Flow): script-catalog/uma_claims_gathering/uma-claims-web.md
       - UMA RPT Policies: script-catalog/uma_rpt_policy/uma-rpt.md
       - Update Token: script-catalog/update_token/update-token.md
+      - Link interception: script-catalog/link_interception/link-interception.md
+      - SSA Modify Response: script-catalog/ssa/ssa-modify-response.md
   - Reference Guide:
     - janssen-server/reference/README.md
     - Javadocs / OpenAPI:
@@ -350,18 +360,7 @@ nav:
         - Auth Server: janssen-server/reference/json/feature-flags/janssenauthserver-feature-flags.md
     - Kubernetes:
       - janssen-server/reference/kubernetes/README.md
-      - Helm Chart: janssen-server/reference/kubernetes/helm-chart.md
       - Configuration Keys: janssen-server/reference/kubernetes/config-secret-keys.md
-      - Image Config Properties:
-        - Auth Server: janssen-server/reference/kubernetes/docker-jans-auth-server.md
-        - Casa: janssen-server/reference/kubernetes/docker-jans-casa.md
-        - Cert Manager: janssen-server/reference/kubernetes/docker-jans-certmanager.md
-        - Config API: janssen-server/reference/kubernetes/docker-jans-config-api.md
-        - Configurator: janssen-server/reference/kubernetes/docker-jans-configurator.md
-        - FIDO2: janssen-server/reference/kubernetes/docker-jans-fido2.md
-        - Monolith: janssen-server/reference/kubernetes/docker-jans-monolith.md
-        - Persistence: janssen-server/reference/kubernetes/docker-jans-persistence-loader.md
-        - SCIM: janssen-server/reference/kubernetes/docker-jans-scim.md
     - Learning Reference: janssen-server/reference/learning-reference.md
   - FIDO Admin Guide:
     - janssen-server/fido/README.md
@@ -404,7 +403,11 @@ nav:
       - Using CLI/TUI: janssen-server/usermgmt/usermgmt-cli-tui.md
       - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
 - Cedarling:
+  - Getting Started: 'cedarling/cedarling-getting-started.md'
   - Overview: 'cedarling/cedarling-overview.md'
+  - Quick Start:
+    - Quick Start Part 1: 'cedarling/cedarling-quick-start-unsigned.md'
+    - Quick Start Part 2: 'cedarling/cedarling-quick-start-signed.md'
   - Reference:
     - Policy Store: 'cedarling/cedarling-policy-store.md'
     - Properties: 'cedarling/cedarling-properties.md'

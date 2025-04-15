@@ -24,9 +24,10 @@ impl EntityBuilder {
         let attrs_srcs: Vec<_> = USER_ATTR_SRC_TKNS
             .iter()
             .filter_map(|name| {
-                tokens
-                    .get(*name)
-                    .map(|tkn| (tkn.claims_value(), tkn.claim_mappings()))
+                tokens.get(*name).map(|tkn| AttrSrc::Token {
+                    claims: tkn.claims_value(),
+                    mappings: tkn.claim_mappings(),
+                })
             })
             .collect();
         if attrs_srcs.is_empty() {
@@ -83,7 +84,7 @@ impl UserIdSrcResolver {
                 // if a `user_id` is availble in the token's entity metadata
                 let claim =
                     if let Some(claim) = token.get_metadata().and_then(|m| m.user_id.as_ref()) {
-                        eid_srcs.push(EntityIdSrc { token, claim });
+                        eid_srcs.push(EntityIdSrc::Token { token, claim });
                         Some(claim)
                     } else {
                         None
@@ -93,7 +94,7 @@ impl UserIdSrcResolver {
                 if claim.map(|claim| claim == src.claim).unwrap_or(false) {
                     continue;
                 }
-                eid_srcs.push(EntityIdSrc {
+                eid_srcs.push(EntityIdSrc::Token {
                     token,
                     claim: src.claim,
                 });
@@ -131,8 +132,7 @@ mod test {
         );
         let entity = builder
             .build_user_entity(tokens, tkn_principal_mappings, &built_entities, roles)
-            .expect("should build workload entity");
-
+            .expect("should build user entity");
         assert_entity_eq(&entity, expected, schema);
     }
 

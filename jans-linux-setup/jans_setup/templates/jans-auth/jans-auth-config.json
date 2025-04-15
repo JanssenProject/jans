@@ -540,7 +540,8 @@
         "ssaEndpoint":"https://%(hostname)s/jans-auth/restv1/ssa",
         "ssaSigningAlg": "RS256",
         "ssaExpirationInDays": 30,
-        "ssaCustomAttributes": []
+        "ssaCustomAttributes": [],
+        "ssaMapSoftwareRolesToScopes": {}
     },
     "cibaEndUserNotificationConfig": {
         "apiKey": "",

@@ -9,41 +9,51 @@ use serde_json::Value;
 use smol_str::{SmolStr, ToSmolStr};
 use std::fmt::Display;
 
-#[derive(Copy, Clone)]
-pub struct EntityIdSrc<'a> {
-    pub token: &'a Token<'a>,
-    pub claim: &'a str,
+pub enum EntityIdSrc<'a> {
+    Token {
+        token: &'a Token<'a>,
+        claim: &'a str,
+    },
+    String(&'a str),
 }
 
 pub fn get_first_valid_entity_id(id_srcs: &[EntityIdSrc]) -> Result<SmolStr, BuildEntityErrorKind> {
     let mut errors = Vec::new();
 
     for src in id_srcs.iter() {
-        let claim = match src.token.get_claim_val(src.claim) {
-            Some(claim) => claim,
-            None => {
-                errors.push(GetEntityIdError {
-                    token: src.token.name.clone(),
-                    claim: src.claim.to_string(),
-                    reason: GetEntityIdErrorReason::MissingClaim,
-                });
-                continue;
+        match src {
+            EntityIdSrc::Token {
+                token,
+                claim: claim_name,
+            } => {
+                let claim = match token.get_claim_val(claim_name) {
+                    Some(claim) => claim,
+                    None => {
+                        errors.push(GetEntityIdError {
+                            token: token.name.clone(),
+                            claim: claim_name.to_string(),
+                            reason: GetEntityIdErrorReason::MissingClaim,
+                        });
+                        continue;
+                    },
+                };
+
+                let claim = claim.to_string();
+                let id = claim.trim_matches('"');
+
+                if id.is_empty() {
+                    errors.push(GetEntityIdError {
+                        token: token.name.clone(),
+                        claim: claim_name.to_string(),
+                        reason: GetEntityIdErrorReason::EmptyString,
+                    });
+                    continue;
+                }
+
+                return Ok(id.to_smolstr());
             },
-        };
-
-        let claim = claim.to_string();
-        let id = claim.trim_matches('"');
-
-        if id.is_empty() {
-            errors.push(GetEntityIdError {
-                token: src.token.name.clone(),
-                claim: src.claim.to_string(),
-                reason: GetEntityIdErrorReason::EmptyString,
-            });
-            continue;
+            EntityIdSrc::String(eid) => return Ok(eid.to_smolstr()),
         }
-
-        return Ok(id.to_smolstr());
     }
 
     Err(BuildEntityErrorKind::MissingEntityId(errors.into()))
@@ -52,12 +62,26 @@ pub fn get_first_valid_entity_id(id_srcs: &[EntityIdSrc]) -> Result<SmolStr, Bui
 pub fn collect_all_valid_entity_ids(id_srcs: &[EntityIdSrc]) -> Vec<SmolStr> {
     id_srcs
         .iter()
-        .filter_map(|src| src.token.get_claim_val(src.claim))
+        .filter_map(|src| match src {
+            EntityIdSrc::Token { token, claim } => token.get_claim_val(claim).cloned(),
+            EntityIdSrc::String(eid) => id_str_src_to_value(eid),
+        })
         .flat_map(claim_to_ids)
         .collect()
 }
 
-fn claim_to_ids(claim: &Value) -> Vec<SmolStr> {
+fn id_str_src_to_value(eid: &str) -> Option<Value> {
+    let eid = eid.trim().to_string();
+    if eid.is_empty() {
+        None
+    } else {
+        let eid =
+            serde_json::from_str::<Value>(&eid).expect("Strings should always be a valid JSON");
+        Some(eid)
+    }
+}
+
+fn claim_to_ids(claim: Value) -> Vec<SmolStr> {
     let mut ids = Vec::with_capacity(1 + claim.as_array().map(|v| v.len()).unwrap_or_default());
     match claim {
         serde_json::Value::Number(number) => {
@@ -136,7 +160,7 @@ mod test {
         );
 
         // Using the token's aud
-        let id = get_first_valid_entity_id(&[EntityIdSrc {
+        let id = get_first_valid_entity_id(&[EntityIdSrc::Token {
             token: &token,
             claim: "aud",
         }])
@@ -145,11 +169,11 @@ mod test {
 
         // Using the token's aud if the client_id is not present
         let id = get_first_valid_entity_id(&[
-            EntityIdSrc {
+            EntityIdSrc::Token {
                 token: &token,
                 claim: "client_id",
             },
-            EntityIdSrc {
+            EntityIdSrc::Token {
                 token: &token,
                 claim: "aud",
             },
@@ -169,11 +193,11 @@ mod test {
 
         // Using the first valid id even if others are also valid
         let id = get_first_valid_entity_id(&[
-            EntityIdSrc {
+            EntityIdSrc::Token {
                 token: &token,
                 claim: "client_id",
             },
-            EntityIdSrc {
+            EntityIdSrc::Token {
                 token: &token,
                 claim: "aud",
             },
@@ -189,11 +213,11 @@ mod test {
 
         // Errors when no valid ids found
         let err = get_first_valid_entity_id(&[
-            EntityIdSrc {
+            EntityIdSrc::Token {
                 token: &token,
                 claim: "empty",
             },
-            EntityIdSrc {
+            EntityIdSrc::Token {
                 token: &token,
                 claim: "missing",
             },
@@ -211,11 +235,16 @@ mod test {
                 reason: GetEntityIdErrorReason::MissingClaim,
             },
         ];
-        assert!(matches!(
+        assert!(
+            matches!(
+                err,
+                BuildEntityErrorKind::MissingEntityId(GetEntityIdErrors(ref errs))
+                    if *errs == expected_errs
+            ),
+            "expected: {:?}\nbut got: {:?}",
+            BuildEntityErrorKind::MissingEntityId(GetEntityIdErrors(expected_errs)),
             err,
-            BuildEntityErrorKind::MissingEntityId(GetEntityIdErrors(ref errs))
-                if *errs == expected_errs
-        ));
+        );
     }
 
     #[test]
@@ -232,7 +261,7 @@ mod test {
         );
 
         // Collecting one valid id
-        let ids = collect_all_valid_entity_ids(&[EntityIdSrc {
+        let ids = collect_all_valid_entity_ids(&[EntityIdSrc::Token {
             token: &token1,
             claim: "role",
         }]);
@@ -240,11 +269,11 @@ mod test {
 
         // Collecting multiple valid ids
         let ids = collect_all_valid_entity_ids(&[
-            EntityIdSrc {
+            EntityIdSrc::Token {
                 token: &token1,
                 claim: "role",
             },
-            EntityIdSrc {
+            EntityIdSrc::Token {
                 token: &token2,
                 claim: "role",
             },
@@ -253,19 +282,19 @@ mod test {
 
         // Ignore invalid ids
         let ids = collect_all_valid_entity_ids(&[
-            EntityIdSrc {
+            EntityIdSrc::Token {
                 token: &token1,
                 claim: "role",
             },
-            EntityIdSrc {
+            EntityIdSrc::Token {
                 token: &token1,
                 claim: "missing",
             },
-            EntityIdSrc {
+            EntityIdSrc::Token {
                 token: &token1,
                 claim: "",
             },
-            EntityIdSrc {
+            EntityIdSrc::Token {
                 token: &token2,
                 claim: "role",
             },

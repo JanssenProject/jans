@@ -46,16 +46,9 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    WorkloadRequestValidationError,
+    InvalidPrincipalError,
     AuthorizeError,
-    "Error encountered while creating cedar_policy::Request for workload entity principal"
-);
-
-create_exception!(
-    authorize_errors,
-    UserRequestValidationError,
-    AuthorizeError,
-    "Error encountered while creating cedar_policy::Request for user entity principal"
+    "Error encountered while creating cedar_policy::Request for principal"
 );
 
 create_exception!(
@@ -100,6 +93,13 @@ create_exception!(
     "Error encountered while executing the rule for principals"
 );
 
+create_exception!(
+    authorize_errors,
+    BuildUnsignedRoleEntityError,
+    AuthorizeError,
+    "Error building Role entity for unsigned request"
+);
+
 #[pyclass]
 #[derive()]
 pub struct ErrorPayload(CedarlingAuthorizeError);
@@ -141,14 +141,14 @@ errors_functions! {
     ProcessTokens => ProcessTokens,
     Action => ActionError,
     CreateContext => CreateContextError,
-    WorkloadRequestValidation => WorkloadRequestValidationError,
-    UserRequestValidation => UserRequestValidationError,
+    InvalidPrincipal => InvalidPrincipalError,
     ValidateEntities => ValidateEntitiesError,
     EntitiesToJson => EntitiesToJsonError,
     BuildContext => BuildContextError,
     IdTokenTrustMode => IdTokenTrustModeError,
     BuildEntity => BuildEntityError,
-    ExecuteRule => ExecuteRuleError
+    ExecuteRule => ExecuteRuleError,
+    BuildUnsignedRoleEntity => BuildUnsignedRoleEntityError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {

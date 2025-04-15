@@ -89,11 +89,19 @@ The `authz` interface provides the main functionality of the Cedarling: to autho
 application by mapping the data and JWTs sent in the request, and evaluating it against the policies using 
 the [Rust Cedar Engine](https://github.com/cedar-policy/cedar). 
 
-The authz interface answers the question: "Is this action, on this resource, given this context, 
+The authz interface has two variants:
+
+1. `authorize` - Check signature of JWT tokens before making authorization decisions
+2. `authorize_unsigned` - Makes authorization decisions by passing a set of principals directly.
+
+The standard `authorize` method answers the question: "Is this action, on this resource, given this context, 
 allowed with these JWTs?". The Cedarling returns the decision--*allow* or *deny*. If denied, the 
 Cedarling returns "diagnostics"--additional context to clarify why the decision was not allowed. 
 During `authz`, the Cedarling can perform two more important jobs: (1) validate JWT tokens; (2) log 
 the resulting decision. 
+
+The `authorize_unsigned` variant is used when JWTs have already been validated or when working with 
+non-token based principals. It follows the same evaluation logic but skips JWT validation steps.
 
 The `log` interface enables developers to retrieve decision and system logs from the Cedarling's 
 in-memory cache. See the Cedarling [log](./cedarling-logs) documentation for more information. 

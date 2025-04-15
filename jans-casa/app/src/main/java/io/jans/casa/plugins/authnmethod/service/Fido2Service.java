@@ -75,13 +75,13 @@ public class Fido2Service extends BaseService {
                 Filter.createEqualityFilter("jansStatus", state),
                 Filter.createEqualityFilter("personInum", userId),
                 Filter.createEqualityFilter("jansApp", appId));
-        logger.trace("Filter:"+filter);
+        logger.trace("Filter is {}", filter);
+        
         List<FidoDevice> devices = new ArrayList<>();
         try {
             List<Fido2RegistrationEntry> list = persistenceService.find(Fido2RegistrationEntry.class,
             	String.format("ou=%s,%s", FIDO2_OU, persistenceService.getPersonDn(userId)), filter);
 
-            logger.trace(list.toString()+list.size());
             for (Fido2RegistrationEntry entry : list) {
             	FidoDevice device = new FidoDevice();
             	Set<String> transports = new HashSet<>(Arrays.asList(entry.getRegistrationData().getTransports()));
@@ -92,7 +92,7 @@ public class Fido2Service extends BaseService {
             	device.setTransports(transports.toArray(new String[0]));
                 devices.add(device);
                 
-            	logger.trace("device name - "+device.getNickName());
+            	logger.trace("Device name is {}", device.getNickName());
             }
             return devices.stream().sorted().collect(Collectors.toList());
         } catch (Exception e) {
@@ -193,7 +193,7 @@ public class Fido2Service extends BaseService {
         JsonNode jsonObj=mapper.readTree(tokenResponse);
     	try (Response response = attestationService.verify(mapper.convertValue(jsonObj, io.jans.fido2.model.attestation.AttestationResult.class))) {
             int status = response.getStatus();
-            logger.debug("Status of attestation: "+status);
+            logger.debug("Status of attestation: {}", status);
             boolean verified = status == Response.Status.OK.getStatusCode();
             
             if (!verified) {

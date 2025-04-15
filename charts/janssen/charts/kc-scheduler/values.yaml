@@ -14,7 +14,7 @@ image:
   # -- Image pullPolicy to use for deploying.
   pullPolicy: IfNotPresent
   # -- Image  to use for deploying.
-  repository: ghcr.io/janssenproject/jans/kc-scheduler
+  repository: ghcr.io/janssenproject/jans/cloudtools
   # -- Image  tag to use for deploying.
   tag: 0.0.0-nightly
   # -- Image Pull Secrets

@@ -40,7 +40,7 @@ end
 
 ### Sample Authzen request
 
-```
+```json
 {
 	"subject": {
 		"type": "token_bundle",
@@ -89,8 +89,9 @@ To begin using Cedarling, you need to set up a policy store. We’ll use this [A
    ![image](../assets/cedarling-policy-store-name.png)
 4. Open the policy store and navigate to Policies.
 5. Click `Add Policy`, select `Text Editor`.
-   ![image](../assets/cedarling-add-policy.png) 
+   ![image](../assets/cedarling-add-policy.png)
 6. Paste the following Cedar policy:
+
     ```bash
     @id("allow_one")
     permit(
@@ -103,7 +104,8 @@ To begin using Cedarling, you need to set up a policy store. We’ll use this [A
       principal.access_token.scope.contains("openid")
     };
     ```
-7. Click `Save`. Agama Lab will validate your policy. 
+
+7. Click `Save`. Agama Lab will validate your policy.
 8. Next, click on `Trusted Issuers` and add the following issuer:
   
     * Name: `Gluu`
@@ -154,9 +156,9 @@ Create a file named `bootstrap.json`. You may use the [sample](https://github.co
 }
 ```
 
- * Set `CEDARLING_MAPPING_WORKLOAD` to `Jans::Workload`
+* Set `CEDARLING_MAPPING_WORKLOAD` to `Jans::Workload`
 
- * Set `CEDARLING_ID_TOKEN_TRUST_MODE` to "none"
+* Set `CEDARLING_ID_TOKEN_TRUST_MODE` to "none"
 
  Pull the Docker image:
 
@@ -178,23 +180,29 @@ it is your Docker container ID.
 * Clone the Janssen repository and navigate to `jans/jans-cedarling/flask-sidecar`.
 * Run `poetry install` to install dependencies.
 * Download and install the latest Cedarling nightly wheel:
+
 ```bash
 wget https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.whl
 ```
-* Install the nightly wheel: 
-```
+
+* Install the nightly wheel:
+
+```bash
 poetry run pip install cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.whl
 ```
+
 * Modify `secrets/bootstrap.json` to your specifications.
 
 * Navigate to `jans/jans-cedarling/flask-sidecar/main`
 
 * Create a file called `.env` and paste in the following content. Alternatively, set the following environment variables:
+
 ```
 APP_MODE=development
 CEDARLING_BOOTSTRAP_CONFIG_FILE=../secrets/bootstrap.json
 SIDECAR_DEBUG_RESPONSE=False
 ```
+
 * Run the sidecar: `poetry run flask run`
 
 * The sidecar is now running on [http://127.0.0.1:5000](http://127.0.0.1:5000)
@@ -219,7 +227,6 @@ pip install flask requests
 ```
 
 * Create a file called `gateway.py` with the following content:
-
 
 ```python
 from flask import Flask, abort, request
@@ -300,6 +307,7 @@ The cedarling decision log will be outputted by the Docker container or directly
 ```bash
 $ docker logs <container ID>
 ```
+
 ```json
 {
   "request_id": "0194cdbc-b8c7-798d-8cc8-fb483448e6fa",
@@ -325,7 +333,6 @@ $ docker logs <container ID>
   "decision_time_ms": 0
 }
 ```
-
 
 ## Customizing the policy
 
@@ -397,7 +404,7 @@ json should be similar to the one below:
 
 Let's make the corresponding changes in the policy.
 
-```
+```cedar
 @id("allow_one")
 permit(
   principal is Jans::Workload,
