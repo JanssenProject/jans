@@ -121,7 +121,7 @@ id_token = "<id_token>"
 userinfo_token = "<userinfo_token>"
 ```
 
-Your *principals* will be build from this tokens.
+Your *principals* will be built from this tokens.
 
 **2. Define the resource**
 
@@ -255,7 +255,7 @@ request = RequestUnsigned(
 
 **6. Perform Authorization**
 
-Finally, call the `authorize` function to check whether the principals are allowed to perform the specified action on the resource.A
+Finally, call the `authorize` function to check whether the principals are allowed to perform the specified action on the resource.
 
 ```py
 result = cedarling.authorize_unsigned(request);
