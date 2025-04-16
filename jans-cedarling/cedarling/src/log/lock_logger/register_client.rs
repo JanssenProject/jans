@@ -14,7 +14,7 @@ use serde::Deserialize;
 use serde_json::json;
 use thiserror::Error;
 
-pub const CEDARLING_SCOPES: &str = "cedarling";
+pub const CEDARLING_SCOPES: &str = "cedarling https://jans.io/oauth/lock/log.write";
 
 pub async fn register_client(
     pdp_id: PdpID,
@@ -64,8 +64,7 @@ pub async fn register_client(
     // Get access token
     let form_data = serde_json::from_value::<HashMap<String, String>>(json!({
         "grant_type": "client_credentials",
-        // "client_id": client_id,
-        // "scope": CEDARLING_SCOPES,
+        "scope": CEDARLING_SCOPES,
     }))
     // this should never fail since this is a hard-coded valid JSON
     .expect("serialize form data");
