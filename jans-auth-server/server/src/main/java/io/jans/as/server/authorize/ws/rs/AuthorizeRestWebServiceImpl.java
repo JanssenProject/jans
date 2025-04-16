@@ -514,7 +514,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         ResponseBuilder builder = RedirectUtil.getRedirectResponseBuilder(authzRequest.getRedirectUriResponse().getRedirectUri(), authzRequest.getHttpRequest());
 
         addCustomHeaders(builder, authzRequest);
-        updateSession(authzRequest, sessionUser);
+        updateSession(authzRequest, sessionUser, user);
 
         runCiba(authzRequest, client);
         processDeviceAuthorization(deviceAuthzUserCode, user);
@@ -534,6 +534,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             sessionUser.setSessionAttributes(requestParameterMap);
 
             cookieService.createSessionIdCookie(sessionUser, authzRequest.getHttpRequest(), authzRequest.getHttpResponse(), false);
+            sessionIdService.updateAttributesWithUserClaims(sessionUser.getSessionAttributes(), user);
             sessionIdService.updateSessionId(sessionUser);
         }
         return sessionUser;
@@ -800,11 +801,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
 
                     SessionId sessionUser = sessionIdService.generateAuthenticatedSessionId(authzRequest.getHttpRequest(), userDn, authzRequest.getPrompt());
+                    User user = userService.getUserByDnSilently(sessionUser.getUserDn());
                     sessionUser.setSessionAttributes(requestParameterMap);
 
                     cookieService.createSessionIdCookie(sessionUser, authzRequest.getHttpRequest(), authzRequest.getHttpResponse(), false);
+                    sessionIdService.updateAttributesWithUserClaims(sessionUser.getSessionAttributes(), user);
                     sessionIdService.updateSessionId(sessionUser);
-                    User user = userService.getUserByDn(sessionUser.getUserDn());
+
                     return new Pair<>(user, sessionUser);
                 } else {
                     applicationAuditLogger.sendMessage(authzRequest.getAuditLog());
@@ -1030,13 +1033,14 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return builder.build();
     }
 
-    private void updateSession(AuthzRequest authzRequest, SessionId sessionUser) {
+    private void updateSession(AuthzRequest authzRequest, SessionId sessionUser, User user) {
         authzRequestService.addDeviceSecretToSession(authzRequest, sessionUser);
 
         int rpRedirectCount = Util.parseIntSilently(sessionUser.getSessionAttributes().get(SUCCESSFUL_RP_REDIRECT_COUNT), 0);
         rpRedirectCount++;
 
         sessionUser.getSessionAttributes().put(SUCCESSFUL_RP_REDIRECT_COUNT, Integer.toString(rpRedirectCount));
+        sessionIdService.updateAttributesWithUserClaims(sessionUser.getSessionAttributes(), user);
         sessionIdService.updateSessionId(sessionUser);
     }
 
