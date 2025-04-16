@@ -87,7 +87,7 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
     let options: ILooseObject = {
       scope: scopes,
       response_type: client?.responseType[0],
-      redirect_uri: chrome.identity.getRedirectURL(),
+      redirect_uri: redirectUrl,
       client_id: client?.clientId,
       code_challenge_method: 'S256',
       code_challenge: hashed,
