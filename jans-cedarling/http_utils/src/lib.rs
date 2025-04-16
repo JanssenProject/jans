@@ -46,6 +46,8 @@ pub enum HttpRequestError {
     MaxRetriesExceeded,
     #[error("failed to deserialize response to JSON: {0}")]
     DeserializeToJson(#[source] reqwest::Error),
+    #[error("failed to initialize HTTP client: {0}")]
+    InitializeHttpClient(#[source] reqwest::Error),
 }
 
 /// Sends an HTTP request with backoff retry logic.

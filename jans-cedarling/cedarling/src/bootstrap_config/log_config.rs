@@ -92,6 +92,8 @@ pub struct LockLogConfig {
     /// This is set using the `CEDARLING_LOCK_LISTEN_SSE` bootstrap property.
     //  TODO: This feature is not yet implemented
     pub listen_sse: bool,
+    /// Allow interaction with a Lock server with invalid certificates. Used for testing.
+    pub accept_invalid_certs: bool,
 }
 
 impl TryFrom<&BootstrapConfigRaw> for LockLogConfig {
@@ -129,6 +131,7 @@ impl TryFrom<&BootstrapConfigRaw> for LockLogConfig {
             telemetry_interval,
             listen_sse,
             log_level: raw.log_level,
+            accept_invalid_certs: raw.accept_invalid_certs.into(),
         })
     }
 }

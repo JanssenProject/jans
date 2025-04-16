@@ -236,6 +236,10 @@ pub struct BootstrapConfigRaw {
     /// Controls whether Cedarling should listen for updates from the Lock Server.
     #[serde(rename = "CEDARLING_LOCK_LISTEN_SSE", default)]
     pub listen_sse: FeatureToggle,
+
+    /// Allow interaction with a Lock server with invalid certificates. Used for testing.
+    #[serde(rename = "CEDARLING_LOCK_ACCEPT_INVALID_CERTS", default)]
+    pub accept_invalid_certs: FeatureToggle,
 }
 
 impl BootstrapConfigRaw {

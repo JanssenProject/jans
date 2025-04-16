@@ -37,13 +37,13 @@ impl LockLogEntry {
 
 impl Loggable for LockLogEntry {
     fn get_log_level(&self) -> Option<crate::LogLevel> {
-        todo!()
+        Some(self.level)
     }
 }
 
 impl Indexed for LockLogEntry {
     fn get_id(&self) -> uuid7::Uuid {
-        todo!()
+        self.id
     }
 
     fn get_additional_ids(&self) -> Vec<uuid7::Uuid> {

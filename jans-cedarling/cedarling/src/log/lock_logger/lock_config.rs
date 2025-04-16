@@ -10,7 +10,7 @@ use std::str::FromStr;
 
 use derive_more::derive::Deref;
 use http_utils::{Backoff, HttpRequestError, Sender};
-use reqwest::Client;
+use reqwest::{Client, ClientBuilder};
 use serde::{Deserialize, Deserializer, de};
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
@@ -64,8 +64,19 @@ pub struct ConfigEndpoints {
 }
 
 impl LockConfig {
-    pub async fn get(lock_config_url: &url::Url) -> Result<Self, HttpRequestError> {
-        let client = Client::new();
+    pub async fn get(
+        lock_config_url: &url::Url,
+        accept_invalid_certs: bool,
+    ) -> Result<Self, HttpRequestError> {
+        let client = if accept_invalid_certs {
+            ClientBuilder::new()
+                .danger_accept_invalid_certs(true)
+                .build()
+                .map_err(HttpRequestError::InitializeHttpClient)?
+        } else {
+            Client::new()
+        };
+
         let mut sender = Sender::new(Backoff::default_exponential());
 
         let config: LockConfig = sender.send(|| client.get(lock_config_url.as_ref())).await?;
@@ -94,7 +105,6 @@ impl<'de> Deserialize<'de> for Url {
         D: Deserializer<'de>,
     {
         let src: String = String::deserialize(deserializer)?;
-        println!("deserializing url src: {src}");
         let url = src
             .parse()
             .map_err(|e| de::Error::custom(format!("error while parsing `{src}` as a URL: {e}")))?;

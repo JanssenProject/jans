@@ -10,7 +10,7 @@ use std::collections::HashMap;
 use super::lock_config::Url;
 use crate::app_types::PdpID;
 use http_utils::{Backoff, Sender};
-use reqwest::Client;
+use reqwest::{Client, ClientBuilder};
 use serde::Deserialize;
 use serde_json::json;
 use thiserror::Error;
@@ -21,8 +21,15 @@ pub async fn register_client(
     pdp_id: PdpID,
     oidc_endpoint: &Url,
     ssa_jwt: &str,
+    accept_invalid_cert: bool,
 ) -> Result<ClientCredentials, ClientRegistrationError> {
-    let client = Client::new();
+    let client = if accept_invalid_cert {
+        ClientBuilder::new()
+            .danger_accept_invalid_certs(true)
+            .build()?
+    } else {
+        Client::new()
+    };
 
     #[cfg(not(test))]
     let mut sender = Sender::new(Backoff::default_exponential());
@@ -103,6 +110,8 @@ pub enum ClientRegistrationError {
     RegisterLockClient(#[source] http_utils::HttpRequestError),
     #[error("failed to get access token: {0}")]
     GetAccessToken(#[source] http_utils::HttpRequestError),
+    #[error("failed to initialize HTTP client: {0}")]
+    InitializeHttpClient(#[from] reqwest::Error),
 }
 
 #[derive(Debug, Deserialize)]
