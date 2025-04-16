@@ -110,6 +110,7 @@ nav:
     - Managing Key Rotation: janssen-server/vm-ops/managing-key-rotation.md
     - Certificates: janssen-server/vm-ops/certificates.md
     - Jans Command: janssen-server/vm-ops/jans-command.md
+    - Data Cleaning: janssen-server/vm-ops/data-cleaning.md
   - Terraform and IaC:
     - janssen-server/terraform/README.md
   - Configuration Guide:
