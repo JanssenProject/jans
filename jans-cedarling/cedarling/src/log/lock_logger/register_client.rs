@@ -7,10 +7,9 @@
 
 use std::collections::HashMap;
 
-use super::lock_config::Url;
+use super::{init_http_client, lock_config::Url};
 use crate::app_types::PdpID;
 use http_utils::{Backoff, Sender};
-use reqwest::{Client, ClientBuilder};
 use serde::Deserialize;
 use serde_json::json;
 use thiserror::Error;
@@ -21,15 +20,9 @@ pub async fn register_client(
     pdp_id: PdpID,
     oidc_endpoint: &Url,
     ssa_jwt: &str,
-    accept_invalid_cert: bool,
+    accept_invalid_certs: bool,
 ) -> Result<ClientCredentials, ClientRegistrationError> {
-    let client = if accept_invalid_cert {
-        ClientBuilder::new()
-            .danger_accept_invalid_certs(true)
-            .build()?
-    } else {
-        Client::new()
-    };
+    let client = init_http_client(None, accept_invalid_certs)?;
 
     #[cfg(not(test))]
     let mut sender = Sender::new(Backoff::default_exponential());

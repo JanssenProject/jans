@@ -35,6 +35,31 @@ pub(crate) struct LockLogger {
     fallback_logger: Logger,
 }
 
+pub fn init_http_client(
+    default_headers: Option<HeaderMap>,
+    accept_invalid_certs: bool,
+) -> Result<Client, reqwest::Error> {
+    let headers = default_headers.unwrap_or_default();
+
+    if accept_invalid_certs {
+        // NOTE: WASM builds fail when calling .danger_accept_invalid_certs
+        #[cfg(any(target_arch = "wasm32", target_arch = "wasm64"))]
+        {
+            Client::builder().default_headers(headers).build()
+        }
+
+        #[cfg(not(any(target_arch = "wasm32", target_arch = "wasm64")))]
+        {
+            Client::builder()
+                .default_headers(headers)
+                .danger_accept_invalid_certs(true)
+                .build()
+        }
+    } else {
+        Client::builder().default_headers(headers).build()
+    }
+}
+
 impl LockLogger {
     pub async fn new(
         pdp_id: PdpID,
@@ -69,14 +94,10 @@ impl LockLogger {
                 .expect("build header");
         auth_header.set_sensitive(true);
         headers.insert("Authorization", auth_header);
-        let http_client = Arc::new(if bootstrap_conf.accept_invalid_certs {
-            Client::builder()
-                .default_headers(headers)
-                .danger_accept_invalid_certs(true)
-                .build()?
-        } else {
-            Client::builder().default_headers(headers).build()?
-        });
+        let http_client = Arc::new(init_http_client(
+            Some(headers),
+            bootstrap_conf.accept_invalid_certs,
+        )?);
 
         let fallback_logger = Arc::new(LogStrategy::new_with_logger(
             LogStrategyLogger::StdOut(StdOutLogger::new(bootstrap_conf.log_level)),

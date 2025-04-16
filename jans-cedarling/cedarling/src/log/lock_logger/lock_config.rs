@@ -10,8 +10,9 @@ use std::str::FromStr;
 
 use derive_more::derive::Deref;
 use http_utils::{Backoff, HttpRequestError, Sender};
-use reqwest::{Client, ClientBuilder};
 use serde::{Deserialize, Deserializer, de};
+
+use crate::log::lock_logger::init_http_client;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[allow(dead_code)]
@@ -68,14 +69,8 @@ impl LockConfig {
         lock_config_url: &url::Url,
         accept_invalid_certs: bool,
     ) -> Result<Self, HttpRequestError> {
-        let client = if accept_invalid_certs {
-            ClientBuilder::new()
-                .danger_accept_invalid_certs(true)
-                .build()
-                .map_err(HttpRequestError::InitializeHttpClient)?
-        } else {
-            Client::new()
-        };
+        let client = init_http_client(None, accept_invalid_certs)
+            .map_err(HttpRequestError::InitializeHttpClient)?;
 
         let mut sender = Sender::new(Backoff::default_exponential());
 
