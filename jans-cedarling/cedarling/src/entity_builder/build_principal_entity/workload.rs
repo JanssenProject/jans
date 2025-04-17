@@ -25,9 +25,10 @@ impl EntityBuilder {
         let attrs_srcs: Vec<_> = WORKLOAD_ATTR_SRC_TKNS
             .iter()
             .filter_map(|name| {
-                tokens
-                    .get(*name)
-                    .map(|tkn| (tkn.claims_value(), tkn.claim_mappings()))
+                tokens.get(*name).map(|tkn| AttrSrc::Token {
+                    claims: tkn.claims_value(),
+                    mappings: tkn.claim_mappings(),
+                })
             })
             .collect();
         if attrs_srcs.is_empty() {
@@ -93,7 +94,7 @@ impl WorkloadIdSrcResolver {
                 let claim = if let Some(claim) =
                     token.get_metadata().and_then(|m| m.workload_id.as_ref())
                 {
-                    eid_srcs.push(EntityIdSrc { token, claim });
+                    eid_srcs.push(EntityIdSrc::Token { token, claim });
                     Some(claim)
                 } else {
                     None
@@ -103,7 +104,7 @@ impl WorkloadIdSrcResolver {
                 if claim.map(|claim| claim == src.claim).unwrap_or(false) {
                     continue;
                 }
-                eid_srcs.push(EntityIdSrc {
+                eid_srcs.push(EntityIdSrc::Token {
                     token,
                     claim: src.claim,
                 });
