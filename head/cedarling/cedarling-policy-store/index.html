@@ -9213,7 +9213,7 @@
 <span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_trusted_issuer&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;description for the trusted issuer&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://&lt;trusted-issuer-hostname&gt;/.well-known/openid-configuration&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;tokens_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;access_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
@@ -9236,7 +9236,7 @@
 <li><strong>description</strong> : (<em>String</em>) A brief description of the trusted issuer, providing context for administrators.</li>
 <li><strong>openid_configuration_endpoint</strong> : (<em>String</em>) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at <code>/.well-known/openid-configuration</code>).</li>
 <li><strong>trusted_issuer_id</strong> : (<em>Object</em>, <em>optional</em>) Metadata related to a particular issuer. You can add as many trusted issuers you want. Furthermore, the name this object is what will be used as the entity ID of the <a href="../cedarling-entities/#trusted-issuer">Trusted Issuer</a> that Cedarling automatically creates at startup.</li>
-<li><strong>tokens_metadata</strong> : (<em>Object</em>, <em>optional</em>) Tokens metadata in a map of <em>token name</em> -&gt; <em>token metadata</em>. See  <a href="#token-metadata-schema">Token Metadata Schema</a>.</li>
+<li><strong>token_metadata</strong> : (<em>Object</em>, <em>optional</em>) Tokens metadata in a map of <em>token name</em> -&gt; <em>token metadata</em>. See  <a href="#token-metadata-schema">Token Metadata Schema</a>.</li>
 </ul>
 <h3 id="token-metadata-schema">Token Metadata Schema<a class="headerlink" href="#token-metadata-schema" title="Permanent link">#</a></h3>
 <p>The Token Entity Metadata Schema defines how tokens are mapped, parsed, and transformed within Cedarling. It allows you to specify how to extract user IDs, roles, and other claims from a token using customizable parsers.</p>
@@ -9446,7 +9446,7 @@ trusted IDPs and to publish a policy store to a Github repository.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-20T20:31:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-20</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-04-17T15:32:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-04-17</span>
       
         <br>
         Created:
