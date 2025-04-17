@@ -84,7 +84,7 @@
                     "type": "string",
                     "format": "uri"
                 },
-                "tokens_metadata": {
+                "token_metadata": {
                     "description": "Metadata that describes how to interpret tokens issued by this trusted issuer.",
                     "$ref": "#/$defs/TokenMetadata"
                 }
