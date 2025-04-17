@@ -122,20 +122,18 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
     console.log('Obtained autorization URL: ' + authzUrl)
 
     const resultUrl: string = await new Promise((resolve, reject) => {
-      customLaunchWebAuthFlow({
-        url: authzUrl,
-        redirectUrl: redirectUrl
-      }, (callbackUrl, error) => {
-        if (!!error) {
-          console.error('Error in executing auth url: ', error)
-          logout()
-          reject(error)
-        } else {
-          console.log('Callback Url: ', callbackUrl)
-          resolve(callbackUrl);
-        }
-      });
+    chrome.identity.launchWebAuthFlow({
+      url: authzUrl,
+      interactive: true
+    }, (responseUrl) => {
+      if (chrome.runtime.lastError || !responseUrl) {
+        console.error("Authentication failed:", chrome.runtime.lastError || "No redirect URL");
+        reject("Authentication failed:" + chrome.runtime.lastError || "No redirect URL")
+      } else {
+        resolve(responseUrl)
+      }
     });
+  });
 
     if (resultUrl) {
       const urlParams = new URLSearchParams(new URL(resultUrl).search)
@@ -191,92 +189,6 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
     }
   }
 
-  const logout = () => {
-    chrome.identity.clearAllCachedAuthTokens(async () => {
-
-      const loginDetails: string = await new Promise((resolve, reject) => {
-        chrome.storage.local.get(["loginDetails"], (result) => {
-          resolve(JSON.stringify(result));
-        });
-      });
-
-      chrome.storage.local.remove(["loginDetails"], function () {
-        var error = chrome.runtime.lastError;
-        if (error) {
-          console.error(error);
-        } else {
-          window.location.href = `${client.endSessionEndpoint}?state=${uuidv4()}&post_logout_redirect_uri=${chrome.runtime.getURL('options.html')}&id_token_hint=${JSON.parse(loginDetails).loginDetails.id_token}`
-        }
-      });
-    });
-  }
-
-  const customLaunchWebAuthFlow = (options, callback) => {
-    var requestId = Math.random().toString(36).substring(2);
-    var redirectUrl = options.redirectUrl;
-    var authUrl = options.url + "&state=" + requestId;
-    chrome.tabs.create({ url: authUrl }, function (tab) {
-      var intervalId = setInterval(function () {
-        chrome.tabs.get(tab.id, function (currentTab) {
-          if (!currentTab) {
-            clearInterval(intervalId);
-            chrome.tabs.remove(tab.id);
-            callback(undefined, new Error('Authorization tab was closed.'));
-          }
-        });
-      }, 1000);
-
-      const onTabRemoved = (tabId, removeInfo) => {
-        if (tabId === tab.id) {
-          chrome.tabs.onRemoved.removeListener(onTabRemoved); // Clean up the listener
-          chrome.tabs.remove(tab.id);
-          callback(undefined, new Error('Authorization tab was closed.'));
-          setLoading(false);
-        }
-      };
-
-      chrome.tabs.onRemoved.addListener(onTabRemoved);
-
-      chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo, tab) {
-        if (!!chrome.runtime.lastError) {
-          chrome.tabs.remove(tabId);
-          callback(undefined, chrome.runtime.lastError);
-          chrome.tabs.onUpdated.removeListener(listener);
-        }
-        if (tabId === tab?.id && changeInfo?.status === "complete") {
-          chrome.tabs.sendMessage(tab.id, { requestId: requestId }, function (response) {
-            clearInterval(intervalId);
-            chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
-              let url = tabs[0].url;
-              const urlParams = new URLSearchParams(new URL(url).search)
-              const code = urlParams.get('code')
-              if (code != null && areUrlsEqual(url, redirectUrl)) {
-                callback(url, undefined);
-                chrome.tabs.remove(tab.id);
-                setLoading(false);
-                chrome.tabs.onUpdated.removeListener(listener);
-              }
-            });
-          });
-        }
-      })
-    });
-  }
-
-  const areUrlsEqual = (url1, url2) => {
-    // Create URL objects for comparison
-
-    const parsedUrl1 = new URL(url1);
-    const parsedUrl2 = new URL(url2);
-
-    // Compare individual components
-    return (
-      parsedUrl1.protocol === parsedUrl2.protocol &&
-      parsedUrl1.host === parsedUrl2.host &&
-      parsedUrl1.pathname === parsedUrl2.pathname &&
-      parsedUrl1.port === parsedUrl2.port
-    );
-  }
   return (
     <React.Fragment>
       <Dialog

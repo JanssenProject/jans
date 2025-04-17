@@ -18,9 +18,14 @@ argsp = parser.parse_args()
 
 cleaner_dir = '/opt/jans/data-cleaner'
 log_dir = os.path.join(cleaner_dir, 'logs')
+cleaner_tmp_dir = os.path.join(cleaner_dir, 'tmp')
+cmd_fn = os.path.join(cleaner_tmp_dir, f'data-clean-{os.urandom(8).hex()}.sql')
 
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
+
+if not os.path.exists(cleaner_tmp_dir):
+    os.makedirs(cleaner_tmp_dir)
 
 my_logger = logging.getLogger('Janns Data Cleaner')
 my_logger.setLevel(logging.DEBUG)
@@ -42,6 +47,8 @@ try:
 except Exception as e:
     my_logger.error(e)
     sys.exit()
+
+clnt_last_access_interval = config['main'].get('cleanUpInactiveClientAfterHoursOfInactivity')
 
 if not argsp.yes:
     print(f"This command will remove first {argsp.limit} entires of the following tables where expiration is before than now")
@@ -75,33 +82,43 @@ db_user = jans_sql_prop['auth.userName']
 db_user_pw_enc = jans_sql_prop['auth.userPassword']
 db_user_pw = os.popen(f'/opt/jans/bin/encode.py -D {db_user_pw_enc}').read().strip()
 
-
 def run_command(cmd, env):
-    my_logger.info('Executing %s', qcmd)
+    my_logger.info('Executing %s', cmd)
 
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, shell=True)
-    output, err = p.communicate()
-    outputs = output.decode()
-    errs = err.decode()
-    if outputs:
-        my_logger.debug(outputs)
-    if errs:
-        my_logger.error(errs)
+    output = subprocess.run(cmd, env=env, shell=True, capture_output=True)
+    if output.stdout:
+        my_logger.debug(output.stdout.decode())
+    if output.stderr:
+        my_logger.error(output.stderr.decode())
 
 
 if db_type == 'mysql':
     mysql_cmd = shutil.which('mysql')
-    cmd = f'{mysql_cmd} -vv --user={db_user} --host={db_host} --port={db_port} {db_name} -e '
-    for table in tables:
-        qcmd = cmd + f'"DELETE FROM {table} WHERE del=TRUE AND exp < NOW() LIMIT {argsp.limit};"'
-        run_command(qcmd, env={'MYSQL_PWD': db_user_pw})
+    cmd = f'{mysql_cmd} -vv --user={db_user} --host={db_host} --port={db_port} {db_name} < {cmd_fn}'
 
+    with open(cmd_fn, 'w') as w:
+        for table in tables:
+            sql_query = f'''DELETE FROM {table} WHERE del=TRUE AND exp < NOW() LIMIT {argsp.limit};\n'''
+            w.write(sql_query)
+            if table == 'jansClnt' and clnt_last_access_interval:
+                sql_query = f'''DELETE FROM {table} WHERE del=TRUE AND jansLastAccessTime < DATE_SUB(NOW(), INTERVAL {clnt_last_access_interval} HOUR) LIMIT {argsp.limit};\n'''
+                w.write(sql_query)
+    run_command(cmd, env={'MYSQL_PWD': db_user_pw})
+    os.remove(cmd_fn)
 
 elif db_type == 'postgresql':
-    pgsql_cmd = shutil.which('psql')
-    cmd = f'{pgsql_cmd} --user={db_user} --host={db_host} --port={db_port} --dbname={db_name} --command '
-    for table in tables:
-        qcmd = cmd + f'\'DELETE FROM "{table}" WHERE "doc_id" IN (SELECT "doc_id" FROM "{table}" WHERE "del"=TRUE and "exp" < NOW() LIMIT {argsp.limit});\''
-        run_command(qcmd, env={'PGPASSWORD': db_user_pw})
+    with open(cmd_fn, 'w') as w:
+        pgsql_cmd = shutil.which('psql')
+        cmd = f'{pgsql_cmd} -a -b -e --user={db_user} --host={db_host} --port={db_port} --dbname={db_name} -f {cmd_fn}'
+        for table in tables:
+            sql_query = f'''DELETE FROM "{table}" WHERE "doc_id" IN (SELECT "doc_id" FROM "{table}" WHERE "del"=TRUE and "exp" < NOW() LIMIT {argsp.limit});\n'''
+            w.write(sql_query)
+            if table == 'jansClnt' and clnt_last_access_interval:
+                sql_query = f'''DELETE FROM "{table}" WHERE "doc_id" IN (SELECT "doc_id" FROM "{table}" WHERE "del"=TRUE and "jansLastAccessTime" < (NOW() - INTERVAL '{clnt_last_access_interval}' HOUR) LIMIT {argsp.limit});\n'''
+                w.write(sql_query)
+
+    run_command(cmd, env={'PGPASSWORD': db_user_pw})
+    os.remove(cmd_fn)
+
 else:
     sys.stderr.write(f"Database {db_type} is not supported by this script.\n")
