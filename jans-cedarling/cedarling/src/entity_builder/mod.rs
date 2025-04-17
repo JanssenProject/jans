@@ -87,7 +87,7 @@ impl EntityBuilder {
         for (tkn_name, tkn) in tokens.iter() {
             let entity_name = tkn
                 .iss
-                .and_then(|iss| iss.tokens_metadata.get(tkn_name))
+                .and_then(|iss| iss.token_metadata.get(tkn_name))
                 .map(|metadata| metadata.entity_type_name.as_str())
                 .or_else(|| default_tkn_entity_name(tkn_name));
 
@@ -364,7 +364,7 @@ mod test {
 
         // Set the custom token names in the IDP metadata
         let iss = TrustedIssuer {
-            tokens_metadata: HashMap::from([
+            token_metadata: HashMap::from([
                 (
                     "access_token".to_string(),
                     TokenEntityMetadata::builder()

@@ -101,7 +101,7 @@ pub struct TrustedIssuer {
     pub oidc_endpoint: Url,
     /// Metadata for tokens issued by the trusted issuer.
     #[serde(default)]
-    pub tokens_metadata: HashMap<String, TokenEntityMetadata>,
+    pub token_metadata: HashMap<String, TokenEntityMetadata>,
 }
 
 fn de_oidc_endpoint_url<'de, D>(deserializer: D) -> Result<Url, D::Error>
@@ -124,7 +124,7 @@ impl Default for TrustedIssuer {
             // This will only really be called during testing so we just put this test value
             oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .unwrap(),
-            tokens_metadata: HashMap::from([
+            token_metadata: HashMap::from([
                 ("access_token".into(), TokenEntityMetadata::access_token()),
                 ("id_token".into(), TokenEntityMetadata::id_token()),
                 (
@@ -148,26 +148,26 @@ impl Default for &TrustedIssuer {
 impl TrustedIssuer {
     /// Retrieves the claim that defines the `Role` for a given token type.
     pub fn get_role_mapping(&self, token_name: &str) -> Option<&str> {
-        self.tokens_metadata
+        self.token_metadata
             .get(token_name)
             .and_then(|x| x.role_mapping.as_deref())
     }
 
     /// Retrieves the claim that defines the `User` for a given token type.
     pub fn get_user_mapping(&self, token_name: &str) -> Option<&str> {
-        self.tokens_metadata
+        self.token_metadata
             .get(token_name)
             .and_then(|x| x.user_id.as_deref())
     }
 
     pub fn get_claim_mapping(&self, token_name: &str) -> Option<&ClaimMappings> {
-        self.tokens_metadata
+        self.token_metadata
             .get(token_name)
             .map(|x| &x.claim_mapping)
     }
 
     pub fn get_token_metadata(&self, token_name: &str) -> Option<&TokenEntityMetadata> {
-        self.tokens_metadata.get(token_name)
+        self.token_metadata.get(token_name)
     }
 }
 
