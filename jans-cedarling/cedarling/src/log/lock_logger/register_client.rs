@@ -14,7 +14,7 @@ use serde::Deserialize;
 use serde_json::json;
 use thiserror::Error;
 
-pub const CEDARLING_SCOPES: &str = "cedarling https://jans.io/oauth/lock/log.write";
+pub const CEDARLING_SCOPES: &str = "https://jans.io/oauth/lock/log.write";
 
 pub async fn register_client(
     pdp_id: PdpID,
