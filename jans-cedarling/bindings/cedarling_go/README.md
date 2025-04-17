@@ -44,7 +44,7 @@ cp target/release/libcedarling_go.dylib .
 go build .
 ```
 
-Make sure Rust build artifacts (e.g. libcedarling_go.so) are located in the same directory as the Go binary or ensure the directory is included in the `LD_LIBRARY_PATH` environment variable (on Linux), for example:
+Ensure Rust build artifacts (e.g. libcedarling_go.so) are placed alongside the Go binary on Windows. On Linux, you must add their directory to `LD_LIBRARY_PATH`, e.g.:
 
 ```bash
 export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
