@@ -18,9 +18,9 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
     const [showPayloadAT, setShowPayloadAT] = useState(false);
     const [showPayloadUI, setShowPayloadUI] = useState(false);
     const [decodedTokens, setDecodedTokens] = React.useState<{
-    accessToken: IJWT;
-    userInfoToken: IJWT;
-    idToken: IJWT;
+        accessToken: IJWT;
+        userInfoToken: IJWT;
+        idToken: IJWT;
     }>({
         accessToken: { header: {}, payload: {} },
         userInfoToken: { header: {}, payload: {} },
@@ -28,7 +28,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
     });
 
     React.useEffect(() => {
-        
+
         if (data) {
             setDecodedTokens({
                 accessToken: decodeJWT(data.access_token),
@@ -49,28 +49,41 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
             return { header: {}, payload: {} }; // Return empty object on error
         }
     };
-    
+
     async function logout() {
         setLoading(true);
         try {
-            chrome.identity.clearAllCachedAuthTokens(async () => {
 
-                const loginDetails: string = await new Promise((resolve, reject) => {
-                    chrome.storage.local.get(["loginDetails"], (result) => {
-                        resolve(JSON.stringify(result));
-                    });
+            const loginDetails: string = await new Promise((resolve, reject) => {
+                chrome.storage.local.get(["loginDetails"], (result) => {
+                    resolve(JSON.stringify(result));
                 });
+            });
 
-                const openidConfiguration: string = await new Promise((resolve, reject) => { chrome.storage.local.get(["opConfiguration"], (result) => { resolve(JSON.stringify(result)); }) });
+            const openidConfiguration: string = await new Promise((resolve, reject) => { chrome.storage.local.get(["opConfiguration"], (result) => { resolve(JSON.stringify(result)); }) });
 
-                chrome.storage.local.remove(["loginDetails"], function () {
-                    var error = chrome.runtime.lastError;
-                    if (error) {
-                        console.error(error);
-                    } else {
-                        window.location.href = `${JSON.parse(openidConfiguration).opConfiguration.end_session_endpoint}?state=${uuidv4()}&post_logout_redirect_uri=${chrome.runtime.getURL('options.html')}&id_token_hint=${JSON.parse(loginDetails).loginDetails.id_token}`
-                    }
-                });
+            chrome.storage.local.remove(["loginDetails"], function () {
+                var error = chrome.runtime.lastError;
+                if (error) {
+                    console.error(error);
+                } else {
+                    const logoutUrl = `${JSON.parse(openidConfiguration).opConfiguration.end_session_endpoint}?state=${uuidv4()}&post_logout_redirect_uri=${chrome.identity.getRedirectURL('logout')}&id_token_hint=${JSON.parse(loginDetails).loginDetails.id_token}`
+                    chrome.identity.launchWebAuthFlow(
+                        {
+                            url: logoutUrl,
+                            interactive: true
+                        },
+                        (responseUrl) => {
+                            if (chrome.runtime.lastError) {
+                                console.error("Logout error:", chrome.runtime.lastError);
+                            } else {
+                                console.log("Logged out successfully."); 
+                                chrome.storage.local.remove("tokens");
+                            }
+                        }
+                    );
+
+                }
             });
         } catch (err) {
             const loginDetails: string = await new Promise((resolve, reject) => {
@@ -115,12 +128,12 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                         </AccordionSummary>
                         <AccordionDetails>
                             <div className="alert alert-success alert-dismissable fade in">
-                                <p>{showPayloadAT ? (!!data ? 
+                                <p>{showPayloadAT ? (!!data ?
                                     <>
                                         <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.accessToken.header} rootName="header" />
                                         <JsonEditor data={decodedTokens.accessToken.payload} collapse={true} viewOnly={true} rootName="payload" />
-                                    </> 
-                                : '') : (!!data ? data?.access_token : '')}</p>
+                                    </>
+                                    : '') : (!!data ? data?.access_token : '')}</p>
                                 <a href="#!" onClick={() => setShowPayloadAT(!showPayloadAT)}>{showPayloadAT ? "Show JWT" : "Show Payload"}</a>
                             </div>
                         </AccordionDetails>
@@ -136,7 +149,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                         <AccordionDetails>
 
                             <div className="alert alert-success alert-dismissable fade in">
-                                <p>{showPayloadIdToken ? (!!data ? 
+                                <p>{showPayloadIdToken ? (!!data ?
                                     <>
                                         <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.idToken.header} rootName="header" />
                                         <JsonEditor data={decodedTokens.idToken.payload} collapse={true} viewOnly={true} rootName="payload" />
@@ -157,7 +170,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                 </AccordionSummary>
                 <AccordionDetails>
                     <div className="alert alert-success alert-dismissable fade in">
-                        <p>{showPayloadUI ? (!!data ? 
+                        <p>{showPayloadUI ? (!!data ?
                             <>
                                 <JsonEditor collapse={true} viewOnly={true} data={decodedTokens.userInfoToken.header} rootName="header" />
                                 <JsonEditor data={decodedTokens.userInfoToken.payload} collapse={true} viewOnly={true} rootName="payload" />
