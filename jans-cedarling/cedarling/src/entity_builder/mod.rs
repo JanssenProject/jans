@@ -55,9 +55,10 @@ impl EntityBuilder {
         let schema = schema.map(MappingSchema::try_from).transpose()?;
 
         let (ok, errs) = trusted_issuers
-            .iter()
-            .map(|(iss_id, iss)| {
-                build_iss_entity(&config.entity_names.iss, iss_id, iss, schema.as_ref())
+            .values()
+            .map(|iss| {
+                let iss_id = iss.oidc_endpoint.origin().ascii_serialization();
+                build_iss_entity(&config.entity_names.iss, &iss_id, iss, schema.as_ref())
             })
             .partition_result();
 

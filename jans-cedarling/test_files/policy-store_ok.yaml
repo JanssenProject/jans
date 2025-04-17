@@ -28,6 +28,10 @@ policy_stores:
             user_id: "sub"
             principal_mapping:
               - "Jans::User"
+      AnotherIssuer:
+        name: "Another Issuer"
+        description: "This is a placeholder issuer used to test if Cedarling still works with multiple issuers"
+        openid_configuration_endpoint: "https://another.jans.org/.well-known/openid-configuration"
     policies:
       840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
         description: simple policy example for principal workload
