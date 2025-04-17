@@ -17,13 +17,23 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import { JsonEditor } from 'json-edit-react';
 import axios from 'axios';
 import Utils from './Utils';
-
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import { pink } from '@mui/material/colors';
+import cedarlingBootstrapJson from './cedarlingBootstrap.json';
+import Chip from '@mui/material/Chip';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import UseSnackbar from './UseSnackbar';
 export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
   const [open, setOpen] = React.useState(isOpen);
   const [bootstrap, setBootstrap] = React.useState(newData);
   const [errorMessage, setErrorMessage] = React.useState("")
   const [loading, setLoading] = React.useState(false);
   const [inputSelection, setInputSelection] = React.useState("json");
+  const [showConfiguration, setShowConfiguration] = React.useState(false);
+  const [showConfigurationButton, setShowConfigurationButton] = React.useState(true);
+  const [snackbar, setSnackbar] = React.useState({ open: false, message: '' });
 
   const ADD_BOOTSTRAP_ERROR = 'Error in adding bootstrap. Check web console for logs.'
 
@@ -36,7 +46,15 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
   }, [isOpen]);
 
   React.useEffect(() => {
-    setBootstrap(newData)
+    if (Utils.isEmpty(newData) || Object.keys(newData).length === 0) {
+      setBootstrap({});
+      setShowConfiguration(true);
+      setShowConfigurationButton(true);
+    } else {
+      setBootstrap(newData);
+      setShowConfiguration(false);
+      setShowConfigurationButton(false);
+    }
   }, [newData]);
 
   const handleClose = () => {
@@ -50,6 +68,16 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
     setLoading(false);
     handleDialog(true)
     setOpen(true);
+  };
+
+  const copyToClipboard = () => {
+    try {
+      const jsonString = JSON.stringify(bootstrap, null, 2); // pretty print
+      navigator.clipboard.writeText(jsonString);
+      setSnackbar({ open: true, message: 'JSON copied to clipboard!' });
+    } catch (error) {
+      setSnackbar({ open: true, message: 'Copy failed: ' + error.message });
+    }
   };
 
   const validateBootstrap = async (e) => {
@@ -118,6 +146,7 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
 
   return (
     <React.Fragment>
+      <UseSnackbar isSnackbarOpen={snackbar.open} handleSnackbar={(open) => setSnackbar({ ...snackbar, open })} message={snackbar.message}/>
       <Dialog
         open={open}
         onClose={handleClose}
@@ -153,24 +182,55 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
             {(!!errorMessage || errorMessage !== '') ?
               <Alert severity="error">{errorMessage}</Alert> : ''
             }
-            <RadioGroup
-              row
-              aria-labelledby="demo-row-radio-buttons-group-label"
-              name="row-radio-buttons-group"
-              defaultValue="json"
-            >
-              <FormControlLabel value="json" control={<Radio onClick={() => { setErrorMessage(''); setInputSelection("json"); }} color="success" />} label="JSON" />
-              <FormControlLabel value="url" control={<Radio onClick={() => { setErrorMessage(''); setInputSelection("url") }} />} label="URL" />
-            </RadioGroup>
-            {inputSelection === 'json' ?
-              <JsonEditor
-                data={bootstrap}
-                setData={setBootstrap}
-                rootName="bootstrapConfig"
-              />
-              : ''}
-            {inputSelection === 'url' ?
-              <TextField
+            <div style={{ display: 'flex', justifyContent: 'space-between', minWidth: '250px', maxWidth: 'min(600px, 90vw)' }}>
+              <RadioGroup
+                row
+                aria-labelledby="demo-row-radio-buttons-group-label"
+                name="row-radio-buttons-group"
+                defaultValue="json"
+              >
+                <FormControlLabel value="json" control={<Radio onClick={() => { setErrorMessage(''); setInputSelection("json"); }} color="success" />} label="JSON" />
+                <FormControlLabel value="url" control={<Radio onClick={() => { setErrorMessage(''); setInputSelection("url") }} />} label="URL" />
+              </RadioGroup>
+
+              {inputSelection === 'json' &&
+                (<Tooltip title="Copy JSON configuration">
+                  <IconButton aria-label="Copy" style={{ maxWidth: '5vmax', float: 'right' }} onClick={copyToClipboard}>
+                    <ContentCopyIcon sx={{ color: pink[500] }} />
+                  </IconButton>
+                </Tooltip>)}
+            </div>
+
+            {inputSelection === 'json' &&
+              (
+                <>
+                {showConfigurationButton && (
+                <div style={{maxWidth: '50vmax'}}>
+                  <Chip icon={<ViewListIcon />}
+                    label={showConfiguration ? "Show Minimal Configuration" : "Remove Minimal Configuration"}
+                    variant="outlined"
+                    onClick={() => {
+                      if (showConfiguration) {
+                        setBootstrap(cedarlingBootstrapJson);
+                        setShowConfiguration(false);
+                      } else {
+                        setBootstrap({});
+                        setShowConfiguration(true);
+                      }
+                    }
+                    }
+                  />
+                  </div>)}
+                  <JsonEditor
+                    data={bootstrap}
+                    setData={setBootstrap}
+                    rootName="bootstrapConfig"
+                    icons={{ copy: <ContentCopyIcon /> }}
+                  />
+                </>
+              )}
+            {inputSelection === 'url' &&
+              (<TextField
                 error={errorMessage.length !== 0}
                 autoFocus
                 required
@@ -185,7 +245,7 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
                 onBlur={(e) => {
                   validateBootstrap(e);
                 }}
-              /> : ''}
+              />)}
           </Stack>
         </DialogContent>
         <DialogActions>

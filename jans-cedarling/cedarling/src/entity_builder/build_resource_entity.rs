@@ -7,7 +7,7 @@ use super::*;
 use crate::EntityData;
 
 impl EntityBuilder {
-    pub fn build_cedar_entity(&self, resource: &EntityData) -> Result<Entity, BuildEntityError> {
+    pub fn build_resource_entity(&self, resource: &EntityData) -> Result<Entity, BuildEntityError> {
         let resource_type_name = &resource.entity_type;
 
         let attrs_shape = self
@@ -15,7 +15,7 @@ impl EntityBuilder {
             .as_ref()
             .and_then(|s| s.get_entity_shape(resource_type_name));
         let attrs = build_entity_attrs(
-            &resource.payload,
+            &resource.attributes,
             &BuiltEntities::default(),
             attrs_shape,
             None,
@@ -53,7 +53,7 @@ mod test {
         let resource_data = EntityData {
             entity_type: "Jans::HTTP_Request".to_string(),
             id: "some_request".to_string(),
-            payload: HashMap::from([
+            attributes: HashMap::from([
                 ("header".to_string(), json!({"Accept": "test"})),
                 (
                     "url".to_string(),
@@ -62,7 +62,7 @@ mod test {
             ]),
         };
         let entity = builder
-            .build_cedar_entity(&resource_data)
+            .build_resource_entity(&resource_data)
             .expect("expected to build resource entity");
 
         assert_entity_eq(
@@ -96,10 +96,10 @@ mod test {
         let resource_data = EntityData {
             entity_type: "Jans::HTTP_Request".to_string(),
             id: "some_request".to_string(),
-            payload: HashMap::new(),
+            attributes: HashMap::new(),
         };
         let entity = builder
-            .build_cedar_entity(&resource_data)
+            .build_resource_entity(&resource_data)
             .expect("expected to build resource entity");
 
         assert!(
