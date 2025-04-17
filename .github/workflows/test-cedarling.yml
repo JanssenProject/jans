@@ -75,3 +75,30 @@ jobs:
       working-directory: jans-cedarling/bindings/cedarling_python
       run: |
         tox
+  golang_tests:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
+    - name: Install Golang dependencies
+      uses: actions/setup-go@v5
+      with:
+          go-version: '1.24'
+    - name: Run build rust artifacts
+      working-directory: jans-cedarling/bindings/cedarling_go
+      run: |
+        sh build_and_copy_artifacts.sh
+    - name: Install Go dependencies
+      working-directory: jans-cedarling/bindings/cedarling_go
+      run: |
+        go mod download && go mod tidy
+    - name: Run golang tests
+      working-directory: jans-cedarling/bindings/cedarling_go
+      run: |
+        export LD_LIBRARY_PATH="$(pwd):${LD_LIBRARY_PATH}"
+        go test .
