@@ -10,9 +10,11 @@ tags:
 Janssen setup creates a crontab for cleaning data from database backend. The data cleaning process cleans those
 expired data from SQL tables. In general temporary data has the following fields set:
 
-__del__ : This is a boolean field indicating that the data can be deleted when it expires.
 
-__exp__ : This is a datetime field indicating expire time.
+__del__This is a boolean field indicating that the data can be deleted when it expires.
+
+__exp__This is a datetime field indicating expire time.
+
 
 The cleaning script examines the following tables and deletes row whose `del` field is `TRUE`
 and `exp` field contains a date-time that is older than current time. The following tables are examined:
@@ -52,9 +54,11 @@ You can change the content of crontab entry if you know what to do, but rather w
 
 This script creates a crontab entry with the following argument:
 
-__-limit__ : Limit to delete entry per execution
+```
+__-limit__Limit to delete entry per execution
 
-__-interval__ : {everyminute, hourly, daily, weekly, monthly, midnight}
+__-interval__{everyminute, hourly, daily, weekly, monthly, midnight}
+```
 
 For example, to create a crontab entry that is executed daily with deleting 5000 data, you can execute the following command:
 
