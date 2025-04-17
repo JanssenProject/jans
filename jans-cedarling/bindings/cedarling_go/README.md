@@ -64,7 +64,6 @@ config := map[string]any{
     "CEDARLING_WORKLOAD_AUTHZ": "enabled",
     "CEDARLING_LOG_LEVEL": "INFO",
     "CEDARLING_LOG_TYPE": "std_out",
-    "CEDARLING_LOG_LEVEL": "INFO",
     "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
 }
 
@@ -76,11 +75,11 @@ instance, err := cedarling_go.NewCedarling(config)
 
 ```go
 resource := cedarling_go.EntityData{
-    EntityType: "MyApp::Resource",
-    ID:         "resource123",
+    EntityType: "Jans::Issue",
+    ID:         "random_id",
     Payload: map[string]any{
-        "owner": "user123",
-        "status": "active",
+        "org_id":  "some_long_id",
+        "country": "US",
     },
 }
 
@@ -90,7 +89,7 @@ request := cedarling_go.Request{
         "id_token":       "your.id.token",
         "userinfo_token": "your.userinfo.token",
     },
-    Action:   "MyApp::Action::Update",
+    Action:   "Jans::Action::\"Update\"",
     Resource: resource,
 }
 
@@ -111,17 +110,19 @@ if result.Decision {
 ```go
 principals := []cedarling_go.EntityData{
     {
-        EntityType: "MyApp::Principal",
-        ID:         "principal1",
+        EntityType: "Jans::User",
+        ID:         "random_id",
         Payload: map[string]any{
-            "role": "admin",
+            "role": ["admin"],
+            "country": "US",
+            "sub": "random_sub",
         },
     },
 }
 
 request := cedarling_go.RequestUnsigned{
     Principals: principals,
-    Action:     "MyApp::Action::View",
+    Action:     "Jans::Action::\"Update\"",
     Resource:   resource,
 }
 
