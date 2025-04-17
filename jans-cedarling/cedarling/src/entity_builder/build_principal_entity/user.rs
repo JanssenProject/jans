@@ -194,7 +194,7 @@ mod test {
                 "attrs": {
                     "iss": {"__entity": {
                         "type": "Jans::TrustedIssuer",
-                        "id": "some_iss",
+                        "id": "https://test.jans.org",
                     }},
                     "sub": "some_sub",
                     "id_token": {"__entity": {
@@ -268,7 +268,7 @@ mod test {
                 "attrs": {
                     "iss": {"__entity": {
                         "type": "Jans::TrustedIssuer",
-                        "id": "some_iss",
+                        "id": "https://test.jans.org",
                     }},
                     "sub": "some_sub",
                     "userinfo_token": {"__entity": {
@@ -360,7 +360,7 @@ mod test {
                 "attrs": {
                     "iss": {"__entity": {
                         "type": "Jans::TrustedIssuer",
-                        "id": "some_iss",
+                        "id": "https://test.jans.org",
                     }},
                     "sub": "id_tkn_sub",
                     "from_id_tkn": "from_id_tkn",

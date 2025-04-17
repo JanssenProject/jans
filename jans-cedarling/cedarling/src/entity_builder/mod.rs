@@ -7,11 +7,11 @@
 //!
 //! This module is responsible for mapping JWTs to Cedar entities
 
+mod build_cedar_entity;
 mod build_entity_attrs;
 mod build_expr;
 mod build_iss_entity;
 mod build_principal_entity;
-mod build_cedar_entity;
 mod build_role_entity;
 mod build_token_entities;
 mod built_entities;
@@ -54,9 +54,10 @@ impl EntityBuilder {
         let schema = schema.map(MappingSchema::try_from).transpose()?;
 
         let (ok, errs) = trusted_issuers
-            .iter()
-            .map(|(iss_id, iss)| {
-                build_iss_entity(&config.entity_names.iss, iss_id, iss, schema.as_ref())
+            .values()
+            .map(|iss| {
+                let iss_id = iss.oidc_endpoint.origin().ascii_serialization();
+                build_iss_entity(&config.entity_names.iss, &iss_id, iss, schema.as_ref())
             })
             .partition_result();
 

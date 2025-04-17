@@ -200,7 +200,7 @@ mod test {
                 "attrs": {
                     "iss": {"__entity": {
                         "type": "Jans::TrustedIssuer",
-                        "id": "some_iss",
+                        "id": "https://test.jans.org",
                     }},
                     "aud": "some_aud",
                     "access_token": {"__entity": {
@@ -271,7 +271,7 @@ mod test {
                 "attrs": {
                     "iss": {"__entity": {
                         "type": "Jans::TrustedIssuer",
-                        "id": "some_iss",
+                        "id": "https://test.jans.org",
                     }},
                     "client_id": "some_client_id",
                     "access_token": {"__entity": {
