@@ -138,6 +138,11 @@ namespace Jans {
       resource: [HTTP_Request],
       context: Context
     };
+    action POST appliesTo {
+      principal: [Workload],
+      resource: [HTTP_Request],
+      context: Context
+    };
     action PUT appliesTo {
       principal: [Workload],
       resource: [HTTP_Request],
