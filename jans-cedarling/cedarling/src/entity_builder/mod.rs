@@ -7,7 +7,6 @@
 //!
 //! This module is responsible for mapping JWTs to Cedar entities
 
-mod build_cedar_entity;
 mod build_entity_attrs;
 mod build_expr;
 mod build_iss_entity;
