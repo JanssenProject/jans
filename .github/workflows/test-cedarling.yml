@@ -92,7 +92,8 @@ jobs:
     - name: Run build rust artifacts
       working-directory: jans-cedarling/bindings/cedarling_go
       run: |
-        sh build_and_copy_artifacts.sh
+        cargo build -r -p cedarling_go
+        cp "../../target/release/libcedarling_go.so" "."
     - name: Install Go dependencies
       working-directory: jans-cedarling/bindings/cedarling_go
       run: |
