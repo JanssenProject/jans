@@ -57,13 +57,13 @@ impl LogStrategy {
         logger: LogStrategyLogger,
         pdp_id: PdpID,
         app_name: Option<ApplicationName>,
-        lock_logger: Option<LockService>,
+        lock_service: Option<LockService>,
     ) -> Self {
         Self {
             logger,
             pdp_id,
             app_name,
-            lock_service: RwLock::new(lock_logger),
+            lock_service: RwLock::new(lock_service),
         }
     }
 
@@ -72,11 +72,11 @@ impl LogStrategy {
         &self.logger
     }
 
-    pub fn set_lock_service(&self, lock_logger: LockService) {
+    pub fn set_lock_service(&self, lock_service: LockService) {
         *self
             .lock_service
             .write()
-            .expect("obtain lock_logger write lock") = Some(lock_logger);
+            .expect("obtain lock_service write lock") = Some(lock_service);
     }
 }
 
@@ -114,13 +114,13 @@ impl LogWriter for LogStrategy {
     fn log_any<T: Loggable>(&self, entry: T) {
         let entry =
             LogEntryWithClientInfo::from_loggable(entry, self.pdp_id, self.app_name.clone());
-        if let Some(lock_logger) = self
+        if let Some(lock_service) = self
             .lock_service
             .read()
-            .expect("obtain lock_logger read lock")
+            .expect("obtain lock_service read lock")
             .as_ref()
         {
-            lock_logger.log_any(entry.clone());
+            lock_service.log_any(entry.clone());
         }
         match &self.logger {
             LogStrategyLogger::Off(log) => log.log_any(entry),
