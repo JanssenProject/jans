@@ -6,11 +6,30 @@
 use cedarling::*;
 use serde_json::json;
 use std::collections::{HashMap, HashSet};
+use std::time::Duration;
+use tokio::time::sleep;
 
 static POLICY_STORE_RAW: &str = include_str!("../../test_files/policy-store_ok.yaml");
 
+const SSA_JWT: &str = "eyJraWQiOiJzc2FfOTgwYTQ0ZDQtZWE3OS00YTM1LThlNjMtNzlhNzg4NTNmYzUwX3NpZ19yczI1NiIsInR5cCI6IkpXVCIsImFsZyI6IlJTMjU2In0.eyJzb2Z0d2FyZV9pZCI6IkNlZGFybGluZ1Rlc3QiLCJncmFudF90eXBlcyI6WyJhdXRob3JpemF0aW9uX2NvZGUiLCJyZWZyZXNoX3Rva2VuIl0sIm9yZ19pZCI6InRlc3QiLCJpc3MiOiJodHRwczovL2RlbW9leGFtcGxlLmphbnMuaW8iLCJzb2Z0d2FyZV9yb2xlcyI6WyJjZWRhcmxpbmciXSwiZXhwIjozMzE5NzE3ODEyLCJpYXQiOjE3NDI5MTc4MTMsImp0aSI6IjM5NTA0NTRlLTM5MWMtNDlhOS05YzYxLTY4MGMyNWE4MDk0ZCJ9.INA5qvpheWvJe6DJaeLkOYt1YH3W9gJQ3yy5Cr5G9_QbzazV23FMJDH2Rbysauk4YNC0oIsTL4MBQ_dRn3YaPLapOhizIlxZQF_uHBpYnopsk6KxgiRQTotg1Kw7Kwsi1RHtfHXpplSS15Dc-9QrOIGbNu44zEt1F5FYV5feW2c0u5HIRISoMNPutOYfMH18bZaBM28N8BssuqLv5X_Bc8EuSkmNTERP5L4khv6Mi3uVItkgK9xTbMKCpUstH_LchT1BKD_pTTMAQx6g6TOf3gnwKYQcmQhjJWFUbXnKCjghExV4PrYc6P8YaXdFnPBYoovd8FxS5qrX8trkh6pxeQ";
+
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // This configuration is specifically for the lock server interaction
+    let lock_config = LockServiceConfig {
+        log_level: LogLevel::TRACE,
+        config_uri: "https://demoexample.jans.io/.well-known/lock-server-configuration"
+            .parse()
+            .unwrap(),
+        dynamic_config: false,
+        ssa_jwt: Some(SSA_JWT.to_string()),
+        log_interval: Some(Duration::from_secs(3)), // send logs every 3 secs
+        health_interval: None,                      // don't send healthchecks
+        telemetry_interval: None,                   // don't send telemetry
+        listen_sse: false,
+        accept_invalid_certs: true,
+    };
+
     let cedarling = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
@@ -41,7 +60,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .unwrap(),
         },
         entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
-        lock_config: None,
+        lock_config: Some(lock_config),
     })
     .await?;
 
@@ -85,6 +104,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         Err(e) => eprintln!("Error while authorizing: {}\n {:?}\n\n", e, e),
     }
+
+    println!("sleeping for 10 secs to give time for Cedarling's Lock service to send the logs");
+    // we sleep for a bit so we don't exit before any logs are sent
+    sleep(Duration::from_secs(10)).await;
+    println!("logs should be sent to the lock server by now!");
 
     Ok(())
 }
