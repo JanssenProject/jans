@@ -19,7 +19,7 @@ pub const CEDARLING_SCOPES: &str = "https://jans.io/oauth/lock/log.write";
 pub async fn register_client(
     pdp_id: PdpID,
     oidc_endpoint: &Url,
-    ssa_jwt: &str,
+    ssa_jwt: Option<&String>,
     accept_invalid_certs: bool,
 ) -> Result<ClientCredentials, ClientRegistrationError> {
     let client = init_http_client(None, accept_invalid_certs)?;
@@ -41,22 +41,24 @@ pub async fn register_client(
         .map_err(ClientRegistrationError::GetOpenidConfig)?;
 
     // Register client
+    let mut dcr_body = json!({
+        "token_endpoint_auth_method": "client_secret_basic",
+        "grant_types": ["client_credentials"],
+        "client_name": format!("cedarling-{}", pdp_id),
+        "scope": CEDARLING_SCOPES,
+        "access_token_as_jwt": true,
+    });
+    if let Some(ssa_jwt) = ssa_jwt {
+        dcr_body["software_statement"] = json!(ssa_jwt);
+    }
     let ClientIdAndSecret {
         client_id,
         client_secret,
     } = sender
         .send(|| {
-            client.post(&oidc.registration_endpoint).body(
-                json!({
-                    "token_endpoint_auth_method": "client_secret_basic",
-                    "grant_types": ["client_credentials"],
-                    "client_name": format!("cedarling-{}", pdp_id),
-                    "scope": CEDARLING_SCOPES,
-                    "access_token_as_jwt": true,
-                    "software_statement": ssa_jwt,
-                })
-                .to_string(),
-            )
+            client
+                .post(&oidc.registration_endpoint)
+                .body(dcr_body.to_string())
         })
         .await
         .map_err(ClientRegistrationError::RegisterLockClient)?;

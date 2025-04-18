@@ -22,7 +22,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .parse()
             .unwrap(),
         dynamic_config: false,
-        ssa_jwt: SSA_JWT.into(),
+        ssa_jwt: Some(SSA_JWT.to_string()),
         log_interval: Some(Duration::from_secs(3)), // send logs every 3 secs
         health_interval: None,                      // don't send healthchecks
         telemetry_interval: None,                   // don't send telemetry

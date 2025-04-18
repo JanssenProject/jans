@@ -67,7 +67,7 @@ pub struct LockServiceConfig {
     /// Client Registration.
     ///
     /// This is set using the `CEDARLING_LOCK_SSA_JWT` bootstrap property.
-    pub ssa_jwt: Box<str>,
+    pub ssa_jwt: Option<String>,
     /// Intervals to send log messges to the lock server.
     /// Set this to [`None`] to disable transmission.
     ///
@@ -104,12 +104,7 @@ impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
             .ok_or(BootstrapConfigLoadingError::MissingLockServerConfigUri)?
             .parse()?;
 
-        // TODO: validate this JWT
-        let ssa_jwt = raw
-            .lock_ssa_jwt
-            .clone()
-            .ok_or(BootstrapConfigLoadingError::MissingSsaJwt)?
-            .into_boxed_str();
+        let ssa_jwt = raw.lock_ssa_jwt.clone();
 
         let log_interval =
             (raw.audit_log_interval > 0).then(|| Duration::from_secs(raw.audit_log_interval));
