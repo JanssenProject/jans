@@ -517,7 +517,7 @@ class SecretSchema(Schema):
         return {k: v for k, v in in_data.items() if v}
 
     @validates("encoded_salt")
-    def validate_salt(self, value):
+    def validate_salt(self, value, data_key):
         if value and len(value) != 24:
             raise ValidationError("Length must be 24")
 
@@ -525,7 +525,7 @@ class SecretSchema(Schema):
             raise ValidationError("Only alphanumeric characters are allowed")
 
     @validates("admin_password")
-    def validate_password(self, value, **kwargs):
+    def validate_password(self, value, data_key):
         if not PASSWD_RGX.search(value):
             raise ValidationError(
                 "Must be at least 6 characters and include "
@@ -829,7 +829,7 @@ class ConfigmapSchema(Schema):
     )
 
     @validates("hostname")
-    def validate_fqdn(self, value):
+    def validate_fqdn(self, value, data_key):
         if not FQDN(value).is_valid:
             raise ValidationError("Invalid FQDN format.")
 
@@ -840,7 +840,7 @@ class ConfigmapSchema(Schema):
         return {k: v for k, v in in_data.items() if v}
 
     @validates("optional_scopes")
-    def validate_optional_scopes(self, value):
+    def validate_optional_scopes(self, value, data_key):
         try:
             scopes = json.loads(value)
         except json.decoder.JSONDecodeError:
