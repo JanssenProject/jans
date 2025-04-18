@@ -246,6 +246,7 @@ public class AuthorizationChallengeService {
         });
 
         cookieService.createSessionIdCookie(sessionUser, authzRequest.getHttpRequest(), authzRequest.getHttpResponse(), false);
+        sessionIdService.updateAttributesWithUserClaims(sessionUser.getSessionAttributes(), user);
         sessionIdService.updateSessionId(sessionUser);
         log.trace("Session updated with {}", sessionUser);
 
