@@ -50,7 +50,7 @@ pub struct MemoryLogConfig {
 
 /// Config for the lock logger that are set using the bootstrap configs.
 #[derive(Debug, Clone, PartialEq)]
-pub struct LockLogConfig {
+pub struct LockServiceConfig {
     /// The logging level
     pub log_level: LogLevel,
     /// URI where Cedarling can get metadata about the lock server.
@@ -94,7 +94,7 @@ pub struct LockLogConfig {
     pub accept_invalid_certs: bool,
 }
 
-impl TryFrom<&BootstrapConfigRaw> for LockLogConfig {
+impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
     type Error = BootstrapConfigLoadingError;
 
     fn try_from(raw: &BootstrapConfigRaw) -> Result<Self, Self::Error> {
@@ -120,7 +120,7 @@ impl TryFrom<&BootstrapConfigRaw> for LockLogConfig {
 
         let listen_sse = raw.listen_sse.into();
 
-        Ok(LockLogConfig {
+        Ok(LockServiceConfig {
             config_uri,
             dynamic_config: raw.dynamic_configuration.into(),
             ssa_jwt,

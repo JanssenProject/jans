@@ -19,7 +19,7 @@ use super::{
     BootstrapConfig, BootstrapConfigLoadingError, JwtConfig, LogConfig, LogTypeConfig,
     MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
-use super::{BootstrapConfigRaw, LockLogConfig};
+use super::{BootstrapConfigRaw, LockServiceConfig};
 use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};

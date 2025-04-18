@@ -6,9 +6,9 @@
 //! The [`LogWorker`] runs in the background and is responsible for collecting and sending
 //! logs to the lock server's `/audit/log` endpoint.
 
+use super::log_entry::LockLogEntry;
 use crate::LogWriter;
 use crate::log::Logger;
-use crate::log::lock_logger::log_entry::LockLogEntry;
 
 use super::WORKER_HTTP_RETRY_DUR;
 use futures::StreamExt;
@@ -43,14 +43,14 @@ impl LogWorker {
         log_interval: Duration,
         http_client: Arc<Client>,
         log_endpoint: Url,
-        fallback_logger: Option<Logger>,
+        logger: Option<Logger>,
     ) -> Self {
         Self {
             log_interval,
             log_buffer: VecDeque::new(),
             http_client,
             log_endpoint,
-            fallback_logger,
+            fallback_logger: logger,
         }
     }
 

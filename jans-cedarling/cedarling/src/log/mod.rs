@@ -52,7 +52,6 @@
 mod err_log_entry;
 pub mod interface;
 
-mod lock_logger;
 mod log_entry;
 mod log_level;
 pub(crate) mod log_strategy;
@@ -60,8 +59,6 @@ mod memory_logger;
 mod nop_logger;
 mod stdout_logger;
 
-pub use lock_logger::InitLockLoggerError;
-use lock_logger::LockLogger;
 pub use log_entry::*;
 pub use log_level::*;
 
@@ -73,9 +70,10 @@ use std::sync::Arc;
 pub use interface::LogStorage;
 pub(crate) use log_strategy::LogStrategy;
 
-use crate::LockLogConfig;
+use crate::LockServiceConfig;
 use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::LogConfig;
+use crate::lock::{InitLockServiceError, LockService};
 
 /// Type alias for logger that is used in application
 pub(crate) type Logger = Arc<LogStrategy>;
@@ -86,19 +84,12 @@ pub(crate) async fn init_logger(
     config: &LogConfig,
     pdp_id: PdpID,
     app_name: Option<ApplicationName>,
-    lock_logger: Option<LockLogger>,
-) -> Result<Logger, InitLockLoggerError> {
+    lock_config: Option<&LockServiceConfig>,
+) -> Result<Logger, InitLockServiceError> {
     let logger = Arc::new(LogStrategy::new(config, pdp_id, app_name).await?);
-    if let Some(lock_logger) = lock_logger {
-        logger.set_lock_logger(lock_logger);
+    if let Some(lock_config) = lock_config {
+        let lock_service = LockService::new(pdp_id, lock_config, Some(logger.clone())).await?;
+        logger.set_lock_service(lock_service);
     }
     Ok(logger)
-}
-
-/// Initialize lock integration
-pub(crate) async fn init_lock(
-    lock_config: &LockLogConfig,
-    pdp_id: PdpID,
-) -> Result<LockLogger, InitLockLoggerError> {
-    LockLogger::new(pdp_id, lock_config, None).await
 }

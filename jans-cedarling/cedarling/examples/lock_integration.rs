@@ -16,7 +16,7 @@ const SSA_JWT: &str = "eyJraWQiOiJzc2FfOTgwYTQ0ZDQtZWE3OS00YTM1LThlNjMtNzlhNzg4N
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This configuration is specifically for the lock server interaction
-    let lock_config = LockLogConfig {
+    let lock_config = LockServiceConfig {
         log_level: LogLevel::TRACE,
         config_uri: "https://demoexample.jans.io/.well-known/lock-server-configuration"
             .parse()
@@ -105,10 +105,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Err(e) => eprintln!("Error while authorizing: {}\n {:?}\n\n", e, e),
     }
 
-    println!("sleeping for 10 secs to give time for Cedarling to send the logs");
+    println!("sleeping for 10 secs to give time for Cedarling's Lock service to send the logs");
     // we sleep for a bit so we don't exit before any logs are sent
     sleep(Duration::from_secs(10)).await;
-    println!("logs should be sent by now!");
+    println!("logs should be sent to the lock server by now!");
 
     Ok(())
 }

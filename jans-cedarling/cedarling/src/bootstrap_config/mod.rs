@@ -43,7 +43,7 @@ pub struct BootstrapConfig {
     /// A set of properties used to configure the JWTs to Cedar Entity mappings
     pub entity_builder_config: EntityBuilderConfig,
     /// A set of properties used to configure the integrationi with the lock server
-    pub lock_config: Option<LockLogConfig>,
+    pub lock_config: Option<LockServiceConfig>,
 }
 
 impl BootstrapConfig {

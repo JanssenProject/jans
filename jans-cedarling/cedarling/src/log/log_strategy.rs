@@ -5,21 +5,21 @@
 
 use std::sync::RwLock;
 
-use super::InitLockLoggerError;
+use super::InitLockServiceError;
 use super::interface::{Indexed, LogStorage, LogWriter, Loggable};
-use super::lock_logger::LockLogger;
 use super::memory_logger::MemoryLogger;
 use super::nop_logger::NopLogger;
 use super::stdout_logger::StdOutLogger;
 use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::{LogConfig, LogTypeConfig};
+use crate::lock::LockService;
 use serde::Serialize;
 
 pub(crate) struct LogStrategy {
     logger: LogStrategyLogger,
     pdp_id: PdpID,
     app_name: Option<ApplicationName>,
-    lock_logger: RwLock<Option<LockLogger>>,
+    lock_service: RwLock<Option<LockService>>,
 }
 
 /// LogStrategy implements strategy pattern for logging.
@@ -37,7 +37,7 @@ impl LogStrategy {
         config: &LogConfig,
         pdp_id: PdpID,
         app_name: Option<ApplicationName>,
-    ) -> Result<Self, InitLockLoggerError> {
+    ) -> Result<Self, InitLockServiceError> {
         let logger = match &config.log_type {
             LogTypeConfig::Off => LogStrategyLogger::Off(NopLogger),
             LogTypeConfig::Memory(memory_config) => LogStrategyLogger::MemoryLogger(
@@ -49,7 +49,7 @@ impl LogStrategy {
             logger,
             pdp_id,
             app_name,
-            lock_logger: RwLock::new(None),
+            lock_service: RwLock::new(None),
         })
     }
 
@@ -57,13 +57,13 @@ impl LogStrategy {
         logger: LogStrategyLogger,
         pdp_id: PdpID,
         app_name: Option<ApplicationName>,
-        lock_logger: Option<LockLogger>,
+        lock_logger: Option<LockService>,
     ) -> Self {
         Self {
             logger,
             pdp_id,
             app_name,
-            lock_logger: RwLock::new(lock_logger),
+            lock_service: RwLock::new(lock_logger),
         }
     }
 
@@ -72,9 +72,9 @@ impl LogStrategy {
         &self.logger
     }
 
-    pub fn set_lock_logger(&self, lock_logger: LockLogger) {
+    pub fn set_lock_service(&self, lock_logger: LockService) {
         *self
-            .lock_logger
+            .lock_service
             .write()
             .expect("obtain lock_logger write lock") = Some(lock_logger);
     }
@@ -115,7 +115,7 @@ impl LogWriter for LogStrategy {
         let entry =
             LogEntryWithClientInfo::from_loggable(entry, self.pdp_id, self.app_name.clone());
         if let Some(lock_logger) = self
-            .lock_logger
+            .lock_service
             .read()
             .expect("obtain lock_logger read lock")
             .as_ref()

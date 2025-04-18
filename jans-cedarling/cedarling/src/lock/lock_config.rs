@@ -8,11 +8,10 @@
 
 use std::str::FromStr;
 
+use super::init_http_client;
 use derive_more::derive::Deref;
 use http_utils::{Backoff, HttpRequestError, Sender};
 use serde::{Deserialize, Deserializer, de};
-
-use crate::log::lock_logger::init_http_client;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[allow(dead_code)]
@@ -159,8 +158,8 @@ where
 
 #[cfg(test)]
 mod test {
+    use super::super::lock_config::{AuditEndpoints, ConfigEndpoints};
     use super::LockConfig;
-    use crate::log::lock_logger::lock_config::{AuditEndpoints, ConfigEndpoints};
     use serde_json::json;
     use test_utils::assert_eq;
 
