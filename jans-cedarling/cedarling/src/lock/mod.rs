@@ -14,7 +14,7 @@ mod log_worker;
 mod register_client;
 
 use crate::app_types::PdpID;
-use crate::log::Logger;
+use crate::log::LoggerWeak;
 use crate::log::interface::Loggable;
 use crate::{LockServiceConfig, LogWriter};
 use futures::channel::mpsc;
@@ -34,7 +34,7 @@ pub const WORKER_HTTP_RETRY_DUR: Duration = Duration::from_secs(10);
 /// Stores logs in a buffer then sends them to the lock server in the background
 pub(crate) struct LockService {
     log_worker_tx: RwLock<Option<mpsc::Sender<SerializedLogEntry>>>,
-    logger: Option<Logger>,
+    logger: Option<LoggerWeak>,
 }
 
 pub fn init_http_client(
@@ -66,7 +66,7 @@ impl LockService {
     pub async fn new(
         pdp_id: PdpID,
         bootstrap_conf: &LockServiceConfig,
-        logger: Option<Logger>,
+        logger: Option<LoggerWeak>,
     ) -> Result<Self, InitLockServiceError> {
         // TODO: validate SSA JWT
         // Validating the SSA JWT involves getting the keys from the IDP however, slotting in the
@@ -145,11 +145,13 @@ impl LogWriter for LockService {
         let mut log_tx = match self.log_worker_tx.write() {
             Ok(log_tx) => log_tx,
             Err(err) => {
-                if let Some(logger) = self.logger.as_ref() {
-                    logger.log_any(LockLogEntry::error_fmt(format!(
+                if let Some(logger_weak) = self.logger.as_ref() {
+                    if let Some(logger) = logger_weak.upgrade() {
+                        logger.log_any(LockLogEntry::error_fmt(format!(
                         "failed to acquire write lock for the LockLogSender. cedarling will not be able to send this entry to the lock server: {}",
                         err
                     )));
+                    }
                 }
                 return;
             },
@@ -157,11 +159,13 @@ impl LogWriter for LockService {
 
         if let Some(log_tx) = log_tx.as_mut() {
             if let Err(err) = log_tx.try_send(entry) {
-                if let Some(logger) = self.logger.as_ref() {
-                    logger.log_any(LockLogEntry::error_fmt(format!(
+                if let Some(logger_weak) = self.logger.as_ref() {
+                    if let Some(logger) = logger_weak.upgrade() {
+                        logger.log_any(LockLogEntry::error_fmt(format!(
                         "failed to send log entry to LogWorker, the thread may have unexpectedly closed or is full: {}",
                         err
                     )));
+                    }
                 }
             }
         }

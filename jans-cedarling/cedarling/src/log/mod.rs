@@ -65,7 +65,7 @@ pub use log_level::*;
 #[cfg(test)]
 mod test;
 
-use std::sync::Arc;
+use std::sync::{Arc, Weak};
 
 pub use interface::LogStorage;
 pub(crate) use log_strategy::LogStrategy;
@@ -77,6 +77,7 @@ use crate::lock::{InitLockServiceError, LockService};
 
 /// Type alias for logger that is used in application
 pub(crate) type Logger = Arc<LogStrategy>;
+pub(crate) type LoggerWeak = Weak<LogStrategy>;
 
 /// Initialize logger.
 /// entry point for initialize logger
@@ -87,8 +88,9 @@ pub(crate) async fn init_logger(
     lock_config: Option<&LockServiceConfig>,
 ) -> Result<Logger, InitLockServiceError> {
     let logger = Arc::new(LogStrategy::new(config, pdp_id, app_name).await?);
+    let logger_weak = Arc::downgrade(&logger);
     if let Some(lock_config) = lock_config {
-        let lock_service = LockService::new(pdp_id, lock_config, Some(logger.clone())).await?;
+        let lock_service = LockService::new(pdp_id, lock_config, Some(logger_weak)).await?;
         logger.set_lock_service(lock_service);
     }
     Ok(logger)
