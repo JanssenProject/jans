@@ -108,7 +108,13 @@ impl Cedarling {
         let app_name = (!config.application_name.is_empty())
             .then(|| ApplicationName(config.application_name.clone()));
 
-        let log = log::init_logger(&config.log_config, pdp_id, app_name).await?;
+        let lock_logger = if let Some(config) = config.lock_config.as_ref() {
+            Some(log::init_lock(config, pdp_id).await?)
+        } else {
+            None
+        };
+
+        let log = log::init_logger(&config.log_config, pdp_id, app_name, lock_logger).await?;
 
         let service_config = ServiceConfig::new(config)
             .await

@@ -8,11 +8,9 @@ mod log_entry;
 mod log_worker;
 mod register_client;
 
+use super::Logger;
 use super::interface::Loggable;
-use super::log_strategy::LogStrategyLogger;
-use super::stdout_logger::StdOutLogger;
-use super::{LogStrategy, Logger};
-use crate::app_types::{ApplicationName, PdpID};
+use crate::app_types::PdpID;
 use crate::{LockLogConfig, LogWriter};
 use futures::channel::mpsc;
 use lock_config::*;
@@ -32,7 +30,7 @@ pub const WORKER_HTTP_RETRY_DUR: Duration = Duration::from_secs(10);
 pub(crate) struct LockLogger {
     log_worker_tx: RwLock<Option<mpsc::Sender<SerializedLogEntry>>>,
     /// An StdOut logger
-    fallback_logger: Logger,
+    fallback_logger: Option<Logger>,
 }
 
 pub fn init_http_client(
@@ -63,8 +61,8 @@ pub fn init_http_client(
 impl LockLogger {
     pub async fn new(
         pdp_id: PdpID,
-        app_name: Option<ApplicationName>,
         bootstrap_conf: &LockLogConfig,
+        fallback_logger: Option<Logger>,
     ) -> Result<Self, InitLockLoggerError> {
         // TODO: validate SSA JWT
         // Validating the SSA JWT involves getting the keys from the IDP however, slotting in the
@@ -98,12 +96,6 @@ impl LockLogger {
             Some(headers),
             bootstrap_conf.accept_invalid_certs,
         )?);
-
-        let fallback_logger = Arc::new(LogStrategy::new_with_logger(
-            LogStrategyLogger::StdOut(StdOutLogger::new(bootstrap_conf.log_level)),
-            pdp_id,
-            app_name,
-        ));
 
         let log_worker_tx = match (bootstrap_conf.log_interval, lock_config.audit_endpoints.log) {
             // Case where Cedarling's config enables sending logs but the lock server
@@ -149,22 +141,24 @@ impl LogWriter for LockLogger {
         let mut log_tx = match self.log_worker_tx.write() {
             Ok(log_tx) => log_tx,
             Err(err) => {
-                self.fallback_logger
-                    .log_any(LockLogEntry::error_fmt(format!(
+                if let Some(logger) = self.fallback_logger.as_ref() {
+                    logger.log_any(LockLogEntry::error_fmt(format!(
                         "failed to acquire write lock for the LockLogSender. cedarling will not be able to send this entry to the lock server: {}",
                         err
                     )));
+                }
                 return;
             },
         };
 
         if let Some(log_tx) = log_tx.as_mut() {
             if let Err(err) = log_tx.try_send(entry) {
-                self.fallback_logger
-                    .log_any(LockLogEntry::error_fmt(format!(
+                if let Some(logger) = self.fallback_logger.as_ref() {
+                    logger.log_any(LockLogEntry::error_fmt(format!(
                         "failed to send log entry to LogWorker, the thread may have unexpectedly closed or is full: {}",
                         err
                     )));
+                }
             }
         }
     }
@@ -224,7 +218,7 @@ mod test {
         };
 
         // Test startup
-        let logger = LockLogger::new(pdp_id, None, &config)
+        let logger = LockLogger::new(pdp_id, &config, None)
             .await
             .expect("build lock logger");
         lock_config_endpoint.assert();
@@ -379,7 +373,7 @@ mod test {
             .create()
     }
 
-    #[derive(Serialize)]
+    #[derive(Serialize, Clone)]
     struct MockLogEntry {
         level: LogLevel,
         id: String,

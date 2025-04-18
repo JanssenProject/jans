@@ -8,7 +8,7 @@ use crate::log::gen_uuid7;
 use crate::log::interface::{Indexed, Loggable};
 use serde::Serialize;
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct LockLogEntry {
     message: String,
     level: LogLevel,

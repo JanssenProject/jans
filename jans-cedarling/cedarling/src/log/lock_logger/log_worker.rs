@@ -35,7 +35,7 @@ pub struct LogWorker {
     log_interval: Duration,
     http_client: Arc<Client>,
     log_endpoint: Url,
-    fallback_logger: Logger,
+    fallback_logger: Option<Logger>,
 }
 
 impl LogWorker {
@@ -43,7 +43,7 @@ impl LogWorker {
         log_interval: Duration,
         http_client: Arc<Client>,
         log_endpoint: Url,
-        fallback_logger: Logger,
+        fallback_logger: Option<Logger>,
     ) -> Self {
         Self {
             log_interval,
@@ -92,13 +92,14 @@ impl LogWorker {
 
         // log errors to stdout since there's nowhere else to log
         if failed_serializations > 1 {
-            self.fallback_logger
-                .log_any(LockLogEntry::error_fmt(format!(
+            if let Some(fallback_logger) = self.fallback_logger.as_ref() {
+                fallback_logger.log_any(LockLogEntry::error_fmt(format!(
                     // This probably wouldn't happen as we define the log entries
                     // internally and they should always be serializable
                     "skipping {} log entries that couldn't be serialized",
                     failed_serializations
                 )));
+            }
         }
 
         loop {
@@ -115,13 +116,14 @@ impl LogWorker {
                     break;
                 },
                 Err(err) => {
-                    self.fallback_logger
-                        .log_any(LockLogEntry::error_fmt(format!(
+                    if let Some(fallback_logger) = self.fallback_logger.as_ref() {
+                        fallback_logger.log_any(LockLogEntry::error_fmt(format!(
                             "failed to POST logs to '{}': {}",
                             self.log_endpoint.as_ref(),
                             err
                         )));
-                    sleep(WORKER_HTTP_RETRY_DUR).await;
+                        sleep(WORKER_HTTP_RETRY_DUR).await;
+                    }
                 },
             }
         }

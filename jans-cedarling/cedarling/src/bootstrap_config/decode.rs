@@ -44,6 +44,8 @@ impl BootstrapConfig {
             return Err(BootstrapConfigLoadingError::BothPrincipalsDisabled);
         }
 
+        let lock_config = raw.lock.is_enabled().then(|| raw.try_into()).transpose()?;
+
         // Decode LogCofig
         let log_type = match raw.log_type {
             LoggerType::Off => LogTypeConfig::Off,
@@ -55,7 +57,6 @@ impl BootstrapConfig {
                 max_items: raw.log_max_items,
             }),
             LoggerType::StdOut => LogTypeConfig::StdOut,
-            LoggerType::Lock => LogTypeConfig::Lock(raw.try_into()?),
         };
         let log_config = LogConfig {
             log_type,
@@ -135,6 +136,7 @@ impl BootstrapConfig {
             jwt_config,
             authorization_config,
             entity_builder_config: raw.into(),
+            lock_config,
         })
     }
 }

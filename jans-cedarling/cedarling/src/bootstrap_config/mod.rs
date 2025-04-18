@@ -42,6 +42,8 @@ pub struct BootstrapConfig {
     pub authorization_config: AuthorizationConfig,
     /// A set of properties used to configure the JWTs to Cedar Entity mappings
     pub entity_builder_config: EntityBuilderConfig,
+    /// A set of properties used to configure the integrationi with the lock server
+    pub lock_config: Option<LockLogConfig>,
 }
 
 impl BootstrapConfig {
@@ -160,24 +162,24 @@ pub enum BootstrapConfigLoadingError {
     )]
     BothPrincipalsDisabled,
 
-    /// Error returned when `CEDARLING_LOG_TYPE` is set to `lock` but `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` is not set.
+    /// Error returned when `CEDARLING_LOCK` is set to `enabled` but `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` is not set.
     #[error(
-        "the `CEDARLING_LOG_TYPE` is set to `lock` but `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` is not set."
+        "the `CEDARLING_LOCK` is set to `enabled` but `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` is not set."
     )]
     MissingLockServerConfigUri,
 
-    /// Error returned when `CEDARLING_LOG_TYPE` is set to `lock` but `CEDARLING_LOCK_SERVER_IDPCONFIG_URI` is not set.
+    /// Error returned when `CEDARLING_LOCK` is set to `enabled` but `CEDARLING_LOCK_SERVER_IDPCONFIG_URI` is not set.
     #[error(
-        "the `CEDARLING_LOG_TYPE` is set to `lock` but `CEDARLING_LOCK_SERVER_IDPCONFIG_URI` is not set."
+        "the `CEDARLING_LOCK` is set to `enabled` but `CEDARLING_LOCK_SERVER_IDPCONFIG_URI` is not set."
     )]
     MissingLockServerIdpOidcUri,
 
-    /// Error returned when `CEDARLING_LOG_TYPE` is set to `lock` but `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` is not set.
+    /// Error returned when `CEDARLING_LOCK` is set to `enabled` but `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` is not set.
     #[error("the value of `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` is not a valid URI: {0}")]
     InvalidLockServerConfigUri(#[from] url::ParseError),
 
-    /// Error returned when `CEDARLING_LOG_TYPE` is set to `lock` but `CEDARLING_LOCK_SSA_JWT` is not set.
-    #[error("the `CEDARLING_LOG_TYPE` is set to `lock` but `CEDARLING_LOCK_SSA_JWT` is not set.")]
+    /// Error returned when `CEDARLING_LOCK` is set to `enabled` but `CEDARLING_LOCK_SSA_JWT` is not set.
+    #[error("the `CEDARLING_LOCK` is set to `enabled` but `CEDARLING_LOCK_SSA_JWT` is not set.")]
     MissingSsaJwt,
 }
 
@@ -225,6 +227,7 @@ mod test {
                 ..Default::default()
             },
             entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
+            lock_config: None,
         };
 
         assert_eq!(deserialized, expected);
@@ -266,6 +269,7 @@ mod test {
                 ..Default::default()
             },
             entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
+            lock_config: None,
         };
 
         assert_eq!(deserialized, expected);

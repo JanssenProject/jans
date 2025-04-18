@@ -15,22 +15,25 @@ const SSA_JWT: &str = "eyJraWQiOiJzc2FfOTgwYTQ0ZDQtZWE3OS00YTM1LThlNjMtNzlhNzg4N
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // This configuration is specifically for the lock server interaction
+    let lock_config = LockLogConfig {
+        log_level: LogLevel::TRACE,
+        config_uri: "https://demoexample.jans.io/.well-known/lock-server-configuration"
+            .parse()
+            .unwrap(),
+        dynamic_config: false,
+        ssa_jwt: SSA_JWT.into(),
+        log_interval: Some(Duration::from_secs(3)), // send logs every 3 secs
+        health_interval: None,                      // don't send healthchecks
+        telemetry_interval: None,                   // don't send telemetry
+        listen_sse: false,
+        accept_invalid_certs: true,
+    };
+
     let cedarling = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
-            log_type: LogTypeConfig::Lock(LockLogConfig {
-                log_level: LogLevel::TRACE,
-                config_uri: "https://demoexample.jans.io/.well-known/lock-server-configuration"
-                    .parse()
-                    .unwrap(),
-                dynamic_config: false,
-                ssa_jwt: SSA_JWT.into(),
-                log_interval: Some(Duration::from_secs(3)),
-                health_interval: None,
-                telemetry_interval: None,
-                listen_sse: false,
-                accept_invalid_certs: true,
-            }),
+            log_type: LogTypeConfig::StdOut,
             log_level: LogLevel::INFO,
         },
         policy_store_config: PolicyStoreConfig {
@@ -57,6 +60,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .unwrap(),
         },
         entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
+        lock_config: Some(lock_config),
     })
     .await?;
 
@@ -101,8 +105,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Err(e) => eprintln!("Error while authorizing: {}\n {:?}\n\n", e, e),
     }
 
+    println!("sleeping for 10 secs to give time for Cedarling to send the logs");
     // we sleep for a bit so we don't exit before any logs are sent
-    sleep(Duration::from_secs(15)).await;
+    sleep(Duration::from_secs(10)).await;
+    println!("logs should be sent by now!");
 
     Ok(())
 }

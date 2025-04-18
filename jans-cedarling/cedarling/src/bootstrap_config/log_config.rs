@@ -30,8 +30,6 @@ pub enum LogTypeConfig {
     Memory(MemoryLogConfig),
     /// Logger writes log information to std output stream.
     StdOut,
-    /// The logger sends log data to the server.
-    Lock(LockLogConfig),
 }
 
 /// Configuration for memory log.

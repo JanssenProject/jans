@@ -69,7 +69,7 @@ mod fallback {
     use crate::log::stdout_logger::StdOutLogger;
 
     /// conform to Loggable requirement imposed by LogStrategy
-    #[derive(serde::Serialize)]
+    #[derive(serde::Serialize, Clone)]
     struct StrWrap<'a>(&'a str);
 
     impl crate::log::interface::Indexed for StrWrap<'_> {
@@ -112,6 +112,7 @@ mod fallback {
             LogStrategyLogger::StdOut(logger),
             *pdp_id,
             app_name.clone(),
+            None,
         );
 
         use crate::log::interface::LogWriter;

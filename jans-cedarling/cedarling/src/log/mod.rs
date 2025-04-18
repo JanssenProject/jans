@@ -61,6 +61,7 @@ mod nop_logger;
 mod stdout_logger;
 
 pub use lock_logger::InitLockLoggerError;
+use lock_logger::LockLogger;
 pub use log_entry::*;
 pub use log_level::*;
 
@@ -72,6 +73,7 @@ use std::sync::Arc;
 pub use interface::LogStorage;
 pub(crate) use log_strategy::LogStrategy;
 
+use crate::LockLogConfig;
 use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::LogConfig;
 
@@ -84,6 +86,19 @@ pub(crate) async fn init_logger(
     config: &LogConfig,
     pdp_id: PdpID,
     app_name: Option<ApplicationName>,
+    lock_logger: Option<LockLogger>,
 ) -> Result<Logger, InitLockLoggerError> {
-    Ok(Arc::new(LogStrategy::new(config, pdp_id, app_name).await?))
+    let logger = Arc::new(LogStrategy::new(config, pdp_id, app_name).await?);
+    if let Some(lock_logger) = lock_logger {
+        logger.set_lock_logger(lock_logger);
+    }
+    Ok(logger)
+}
+
+/// Initialize lock integration
+pub(crate) async fn init_lock(
+    lock_config: &LockLogConfig,
+    pdp_id: PdpID,
+) -> Result<LockLogger, InitLockLoggerError> {
+    LockLogger::new(pdp_id, lock_config, None).await
 }

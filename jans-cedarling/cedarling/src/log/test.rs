@@ -195,7 +195,7 @@ fn test_log_stdout_logger() {
     let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
     let logger = StdOutLogger::new_with(buffer, LogLevel::TRACE);
     let strategy =
-        LogStrategy::new_with_logger(LogStrategyLogger::StdOut(logger), pdp_id, app_name);
+        LogStrategy::new_with_logger(LogStrategyLogger::StdOut(logger), pdp_id, app_name, None);
 
     // Act
     strategy.log_any(log_entry);
@@ -208,7 +208,7 @@ fn test_log_stdout_logger() {
 #[test]
 fn test_log_storage_for_only_writer() {
     let logger = LogStrategyLogger::Off(NopLogger);
-    let strategy = LogStrategy::new_with_logger(logger, PdpID::new(), None);
+    let strategy = LogStrategy::new_with_logger(logger, PdpID::new(), None, None);
 
     // make same test as for the memory logger
     // create log entries

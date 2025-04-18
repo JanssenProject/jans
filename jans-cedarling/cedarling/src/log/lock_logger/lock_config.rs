@@ -75,7 +75,6 @@ impl LockConfig {
         let mut sender = Sender::new(Backoff::default_exponential());
 
         let config: LockConfig = sender.send(|| client.get(lock_config_url.as_ref())).await?;
-        println!("config: {:?}", config);
 
         Ok(config)
     }
