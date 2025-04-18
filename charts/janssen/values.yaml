@@ -1220,6 +1220,50 @@ global:
   cleanup:
     # -- Boolean flag to enable/disable the cleanup cronjob chart.
     enabled: true
+  keycloak-link:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      destinationRule: {}
+      podDisruptionBudget: {}
+      virtualService: {}
+      pod: {}
+      deployment: {}
+      horizontalPodAutoscaler: {}
+      service: {}
+    # -- Name of the keycloak-link service. Please keep it as default.
+    keycloakLinkServiceName: keycloak-link
+    # -- Boolean flag to enable/disable the keycloak-link chart.
+    enabled: false
+    # -- passing custom java options to link. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    cnCustomJavaOptions: ""
+    # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
+    appLoggers:
+      # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e keycloak-link-persistence ===> 2022-12-20 17:49:55,744 INFO
+      enableStdoutLogPrefix: "true"
+      # -- jans-keycloak-link.log target
+      keycloakLinkLogTarget: "STDOUT"
+      # -- jans-keycloak-link.log level
+      keycloakLinkLogLevel: "INFO"
+      # -- jans-keycloak-link_persistence.log target
+      persistenceLogTarget: "FILE"
+      # -- jans-keycloak-link_persistence.log level
+      persistenceLogLevel: "INFO"
+      # -- jans-keycloak-link_persistence_duration.log target
+      persistenceDurationLogTarget: "FILE"
+      # -- jans-keycloak-link_persistence_duration.log level
+      persistenceDurationLogLevel: "INFO"
+      # -- jans-keycloak-link_script.log target
+      scriptLogTarget: "FILE"
+      # -- jans-keycloak-link_script.log level
+      scriptLogLevel: "INFO"
+    # -- Enable endpoints in either istio or nginx ingress depending on users choice
+    ingress:
+      # Enable keycloak-link endpoints /jans-keycloak-link
+      keycloakLinkEnabled: true
+      # -- keycloak-link ingress resource labels. key app is taken
+      keycloakLinkLabels: { }
+      # -- keycloak-link ingress resource additional annotations.
+      keycloakLinkAdditionalAnnotations: { }
 
 # -- Nginx ingress definitions chart
 nginx-ingress:
@@ -1763,4 +1807,113 @@ cleanup:
   # - /tmp/custom2.sh
   customScripts: []
   # -- Add custom job's command. If passed, it will override the default conditional command.
+  customCommand: []
+
+# -- Keycloak Link.
+keycloak-link:
+  # -- Add tolerations for the pods
+  tolerations: [ ]
+  # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
+  # https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  topologySpreadConstraints: {}
+    # -- Define below as many constraints as needed. The key name should follow the structure tsc1, tsc2...etc.
+    # Do not enter the key labelSelector in the entry/entries below as that is automatically injected by the chart
+    #tsc1:
+    #  maxSkew: 1
+    #  minDomains: 1 # optional; beta since v1.25
+    #  topologyKey: kubernetes.io/hostname
+    #  whenUnsatisfiable: DoNotSchedule
+    #  matchLabelKeys: [] # optional; alpha since v1.25
+    #  nodeAffinityPolicy: [] # optional; alpha since v1.25
+    #  nodeTaintsPolicy: [] # optional; alpha since v1.25
+    #tsc2:
+      #maxSkew: 1
+  # -- Configure the PodDisruptionBudget
+  pdb:
+    enabled: true
+    maxUnavailable: "90%"
+  # -- Configure the HorizontalPodAutoscaler
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 50
+    # -- metrics if targetCPUUtilizationPercentage is not set
+    metrics: []
+    # -- Scaling Policies
+    behavior: {}
+  # -- Add custom normal and secret envs to the service
+  usrEnvs:
+    # -- Add custom normal envs to the service
+    # variable1: value1
+    normal: {}
+    # -- Add custom secret envs to the service
+    # variable1: value1
+    secret: {}
+  # -- Add custom dns policy
+  dnsPolicy: ""
+  # -- Add custom dns config
+  dnsConfig: {}
+  image:
+    # -- Image pullPolicy to use for deploying.
+    pullPolicy: IfNotPresent
+    # -- Image  to use for deploying.
+    repository: ghcr.io/janssenproject/jans/keycloak-link
+    # -- Image  tag to use for deploying.
+    tag: 0.0.0-nightly
+    # -- Image Pull Secrets
+    pullSecrets: [ ]
+  # -- Service replica number.
+  replicas: 1
+  # -- Resource specs.
+  resources:
+    limits:
+      # -- CPU limit.
+      cpu: 500m
+      # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
+      memory: 1200Mi
+    requests:
+      # -- CPU request.
+      cpu: 500m
+      # -- Memory request.
+      memory: 1200Mi
+  # -- Configure the liveness healthcheck for the auth server if needed.
+  livenessProbe:
+    # -- http liveness probe endpoint
+    exec:
+      command:
+        - python3
+        - /app/scripts/healthcheck.py
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 5
+  readinessProbe:
+    # -- http readiness probe endpoint
+    exec:
+      command:
+        - python3
+        - /app/scripts/healthcheck.py
+    initialDelaySeconds: 25
+    periodSeconds: 25
+    timeoutSeconds: 5
+  # -- Configure any additional volumes that need to be attached to the pod
+  volumes: []
+  # -- Configure any additional volumesMounts that need to be attached to the containers
+  volumeMounts: []
+  # Actions on lifecycle events such as postStart and preStop
+  # Example
+  # lifecycle:
+  #   postStart:
+  #     exec:
+  #       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
+  lifecycle: {}
+  # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
+  additionalLabels: { }
+  # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
+  additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
+  # -- Add custom pod's command. If passed, it will override the default conditional command.
   customCommand: []
