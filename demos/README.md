@@ -8,6 +8,6 @@ Holds a docker load test image packaging for Janssen. This image can load test u
 - A first party android mobile application that leverages dynamic client registration (DCR), DPoP access tokens.
 - Passkey authentication
 
-## [Janssen Tarp](jans-tarp)
+## [Janssen Tarp](janssen-tarp)
 A Relying Party tool in form of a Browser Extension for convenient testing of authentication flows on a browser.
 
