@@ -22,14 +22,14 @@ the Cedarling. To do this, we need 3 things.
 For `1` above, we will be using [Agama Lab policy designer](https://gluu.org/agama/authorization-policy-designer/) to quickly author
 a [Cedar] policy and policy store.
 
-For `2` and `3`, we will use [Jans Tarp](https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md). Jans Tarp is an easy to install browser
+For `2` and `3`, we will use [Janssen Tarp](https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md). Jans Tarp is an easy to install browser
 plug-in that comes with embedded Cedarling instance (WASM). Jans Tarp also provides
 user interface to build authorization and authentication requests for testing
 purpose.
 
 ## Setup
 
-- Install Jans Tarp [on Chrome browser](https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md#releases) browser
+- Install Janssen Tarp [on Chrome browser](https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md#releases) browser
 
 ## Step-1: Create Cedar Policy and Schema
 
@@ -131,7 +131,7 @@ At the end, use the `Copy Link` button to copy the generated
 
 ## Step-2: Configure Tarp with the policy store 
 
-In this step, we will add the policy store details in the Jans Tarp that is
+In this step, we will add the policy store details in the Janssen Tarp that is
 installed in the browser. The Cedarling instance embedded in the Tarp will
 use the policy stored in this store to evaluate the authorization result.
 
