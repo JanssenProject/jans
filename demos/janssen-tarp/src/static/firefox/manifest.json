@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "jans-tarp",
+  "name": "janssen-tarp",
   "version": "0.0.0",
   "description": "Relying Party tool in form of a Firefox Extension.",
   "icons": {
@@ -25,7 +25,7 @@
   "options_page": "options.html",
   "browser_specific_settings": {
     "gecko": {
-      "id": "jans-tarp@gluu.org"
+      "id": "janssen-tarp@jans.io"
     }
   },
   "content_security_policy": {
