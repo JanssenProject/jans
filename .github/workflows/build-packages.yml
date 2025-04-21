@@ -344,7 +344,7 @@ jobs:
         cd demos
         VER=$(echo ${{ github.event.ref }} | cut -d '/' -f 3)
         for i in $(ls -d */); do zip -r demo-${i%/}-$VER-source.zip $i && sha256sum demo-${i%/}-$VER-source.zip > demo-${i%/}-$VER-source.zip.sha256sum; done
-        sudo rm demo-jans-tarp-$VER-source.zip demo-jans-tarp-$VER-source.zip.sha256sum
+        sudo rm demo-jans-tarp-$VER-source.zip demo-jans-tarp-$VER-source.zip.sha256sum || echo "No such file or directory"
         cd jans-tarp
         # Get the latest cedarling wasm package
         TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
