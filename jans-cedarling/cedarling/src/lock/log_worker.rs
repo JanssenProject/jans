@@ -8,7 +8,7 @@
 
 use super::log_entry::LockLogEntry;
 use crate::LogWriter;
-use crate::log::{Logger, LoggerWeak};
+use crate::log::LoggerWeak;
 
 use super::WORKER_HTTP_RETRY_DUR;
 use futures::StreamExt;
