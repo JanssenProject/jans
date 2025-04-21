@@ -1177,7 +1177,7 @@ spec:
               service:
                 name: {{ index .Values.global "keycloak-link" "keycloakLinkServiceName" }}
                 port:
-                  number: 9091
+                  number: 9092
   {{- end }}
   {{- end }}
 {{- end }}
