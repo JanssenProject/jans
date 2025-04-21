@@ -52,6 +52,14 @@ export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
 
 ## Usage
 
+### Adding Cedarling to Your Go Application
+
+To add Cedarling to your Go application you need execute the following command:
+
+```sh
+go get github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go
+```
+
 ### Initialization
 
 ```go
@@ -163,4 +171,17 @@ If you change rust bindings to generate golang part you need to run:
 rust2go-cli --src src/user.rs --dst internal/gen.go --without-main
 ```
 
-And update `internal/gen.go` package name to `internal` and make other changes accordingly.
+Update `internal/gen.go` package name to `internal` and make changes in other files accordingly.
+
+Before running unit tests you may need to execute
+
+```sh
+go mod download
+go mod tidy
+```
+
+To run unit tests, use the following command:
+
+```sh
+go test .
+```
