@@ -197,6 +197,37 @@ data:
   CN_MESSAGE_TYPE: {{ .Values.configmap.cnMessageType | quote }}
   CN_CONFIGURATOR_CONFIGURATION_FILE: {{ .Values.global.cnConfiguratorConfigurationFile | quote }}
   CN_CONFIGURATOR_DUMP_FILE: {{ .Values.global.cnConfiguratorDumpFile | quote }}
+  {{- if .Values.global.link.enabled }}
+  CN_LINK_APP_LOGGERS: {{ .Values.global.link.appLoggers
+  | toJson
+  | replace "linkLogTarget" "link_log_target"
+  | replace "linkLogLevel" "link_log_level"
+  | replace "persistenceLogTarget" "persistence_log_target"
+  | replace "persistenceLogLevel" "persistence_log_level"
+  | replace "persistenceDurationLogTarget" "persistence_duration_log_target"
+  | replace "persistenceDurationLogLevel" "persistence_duration_log_level"
+  | replace "scriptLogTarget" "script_log_target"
+  | replace "scriptLogLevel" "script_log_level"
+  | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
+  | squote
+  }}
+  {{- end }}
+  {{- if index .Values "global" "keycloak-link" "enabled" }}
+  CN_KEYCLOAK_LINK_APP_LOGGERS: {{ index .Values "global" "keycloak-link" "appLoggers"
+  | toJson
+  | replace "keycloakLinkLogTarget" "keycloak_link_log_target"
+  | replace "keycloakLinkLogLevel" "keycloak_link_log_level"
+  | replace "persistenceLogTarget" "persistence_log_target"
+  | replace "persistenceLogLevel" "persistence_log_level"
+  | replace "persistenceDurationLogTarget" "persistence_duration_log_target"
+  | replace "persistenceDurationLogLevel" "persistence_duration_log_level"
+  | replace "scriptLogTarget" "script_log_target"
+  | replace "scriptLogLevel" "script_log_level"
+  | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
+  | squote
+  }}
+  {{- end }}
+
 ---
 
 apiVersion: v1
