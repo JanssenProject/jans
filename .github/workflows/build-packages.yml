@@ -350,7 +350,7 @@ jobs:
         TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
           TAG="0.0.0"
-          RANDOM_NUMBER=$(printf "%04d" $((RANDOM % 10000)))
+          RANDOM_NUMBER=$((RANDOM % 9000 + 1000))
           jq --arg version "0.0.$RANDOM_NUMBER" '.version = $version' src/static/firefox/manifest.json > temp.json && mv temp.json src/static/firefox/manifest.json
           echo "Replaced  $RANDOM_NUMBER in manifest.json"
         fi
