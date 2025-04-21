@@ -25,7 +25,7 @@
   "options_page": "options.html",
   "browser_specific_settings": {
     "gecko": {
-      "id": "janssen-tarp@gluu.org"
+      "id": "janssen-tarp@jans.io"
     }
   },
   "content_security_policy": {

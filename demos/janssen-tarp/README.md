@@ -56,7 +56,7 @@ When you are testing Janssen IdP with self-signed cert then follow below steps b
 
 ## Testing using Janssen Tarp
 
-* Setup Jans-Tarp. [Instructions](https://github.com/JanssenProject/jans/tree/main/demos/jans-tarp)
+* Setup Jans-Tarp. [Instructions](https://github.com/JanssenProject/jans/tree/main/demos/janssen-tarp)
 * Configuration to run Agama flow
 * Add Your Jans Auth server host , Client expiry date, Scopes and click on `Register` client. It will register new OP Client on your Auth server.
 
