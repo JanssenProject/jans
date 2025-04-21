@@ -102,6 +102,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value to indicate of Pushed Authorisation Request(PAR)is required", defaultValue = "false")
     private Boolean requirePar = false;
 
+    @DocProperty(description = "Boolean value to indicate whether public client is allowed for Pushed Authorisation Request(PAR)", defaultValue = "false")
+    private Boolean parForbidPublicClient = false;
+
     @DocProperty(description = "URL for the Device Authorization")
     private String deviceAuthzEndpoint;
 
@@ -533,6 +536,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Boolean value specifying whether to persist session_id in cache", defaultValue = "false")
     private Boolean sessionIdPersistInCache = false;
+
+    @DocProperty(description = "Defines list of user claims that has to be put in session attributes")
+    private List<String> sessionIdUserClaimsInAttributes = new ArrayList<>();
 
     @DocProperty(description = "Boolean value specifying whether to include sessionId in response", defaultValue = "false")
     private Boolean includeSidInResponse = false;
@@ -1398,6 +1404,15 @@ public class AppConfiguration implements Configuration {
         this.sessionIdPersistInCache = sessionIdPersistInCache;
     }
 
+    public List<String> getSessionIdUserClaimsInAttributes() {
+        return sessionIdUserClaimsInAttributes;
+    }
+
+    public AppConfiguration setSessionIdUserClaimsInAttributes(List<String> sessionIdUserClaimsInAttributes) {
+        this.sessionIdUserClaimsInAttributes = sessionIdUserClaimsInAttributes;
+        return this;
+    }
+
     public Boolean getChangeSessionIdOnAuthentication() {
         if (changeSessionIdOnAuthentication == null) changeSessionIdOnAuthentication = true;
         return changeSessionIdOnAuthentication;
@@ -1970,6 +1985,16 @@ public class AppConfiguration implements Configuration {
 
     public void setRequirePar(Boolean requirePar) {
         this.requirePar = requirePar;
+    }
+
+    public Boolean getParForbidPublicClient() {
+        if (parForbidPublicClient == null) parForbidPublicClient = false;
+        return parForbidPublicClient;
+    }
+
+    public AppConfiguration setParForbidPublicClient(Boolean parForbidPublicClient) {
+        this.parForbidPublicClient = parForbidPublicClient;
+        return this;
     }
 
     public String getOpenIdConfigurationEndpoint() {

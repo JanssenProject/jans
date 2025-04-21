@@ -83,6 +83,9 @@ public class SessionIdServiceTest {
     @Mock
     private StatService statService;
 
+    @Mock
+    private AttributeService attributeService;
+
     @Test
     public void isAgamaInSessionAndRequest_forAgama_shouldReturnTrue() {
         assertTrue(SessionIdService.isAgamaInSessionAndRequest("agama", Lists.newArrayList("agama_io.jans.agamaLab.main")));
