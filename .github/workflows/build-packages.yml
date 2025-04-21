@@ -344,8 +344,8 @@ jobs:
         cd demos
         VER=$(echo ${{ github.event.ref }} | cut -d '/' -f 3)
         for i in $(ls -d */); do zip -r demo-${i%/}-$VER-source.zip $i && sha256sum demo-${i%/}-$VER-source.zip > demo-${i%/}-$VER-source.zip.sha256sum; done
-        sudo rm demo-jans-tarp-$VER-source.zip demo-jans-tarp-$VER-source.zip.sha256sum || echo "No such file or directory"
-        cd jans-tarp
+        sudo rm demo-janssen-tarp-$VER-source.zip demo-janssen-tarp-$VER-source.zip.sha256sum || echo "No such file or directory"
+        cd janssen-tarp
         # Get the latest cedarling wasm package
         TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
@@ -365,10 +365,10 @@ jobs:
         web-ext sign --channel=unlisted  --api-key="${{ secrets.MOZILLA_API_KEY }}" --api-secret="${{ secrets.MOZILLA_API_SECRET }}" || echo "Sign your extension for self-distribution to mozilla failed"
         cd ../..
         npm run pack
-        mv ./release/jans-tarp-chrome-*.zip ../demo-jans-tarp-chrome-$VER.zip
-        mv ./dist/firefox/web-ext-artifacts/*.xpi ../demo-jans-tarp-firefox-$VER.xpi || touch ../demo-jans-tarp-firefox-$VER.xpi
-        sha256sum ../demo-jans-tarp-chrome-$VER.zip > ../demo-jans-tarp-chrome-$VER.zip.sha256sum
-        sha256sum ../demo-jans-tarp-firefox-$VER.xpi > ../demo-jans-tarp-firefox-$VER.xpi.sha256sum
+        mv ./release/janssen-tarp-chrome-*.zip ../demo-janssen-tarp-chrome-$VER.zip
+        mv ./dist/firefox/web-ext-artifacts/*.xpi ../demo-janssen-tarp-firefox-$VER.xpi || touch ../demo-janssen-tarp-firefox-$VER.xpi
+        sha256sum ../demo-janssen-tarp-chrome-$VER.zip > ../demo-janssen-tarp-chrome-$VER.zip.sha256sum
+        sha256sum ../demo-janssen-tarp-firefox-$VER.xpi > ../demo-janssen-tarp-firefox-$VER.xpi.sha256sum
         cd ..
         
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
