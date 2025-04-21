@@ -8954,13 +8954,13 @@ using the Cedarling. To do this, we need 3 things. </p>
 </ol>
 <p>For <code>1</code> above, we will be using <a href="https://gluu.org/agama/authorization-policy-designer/">Agama Lab policy designer</a> to quickly author
 a <a href="https://www.cedarpolicy.com/">Cedar</a> policy and a policy store.</p>
-<p>For <code>2</code> and <code>3</code>, we will use <a href="https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md">Jans Tarp</a>. Jans Tarp is an easy to install browser
-plug-in that comes with embedded Cedarling instance (WASM). Jans Tarp also provides
+<p>For <code>2</code> and <code>3</code>, we will use <a href="https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md">Janssen Tarp</a>. Janssen Tarp is an easy to install browser
+plug-in that comes with embedded Cedarling instance (WASM). Janssen Tarp also provides
 user interface to build authorization and authentication requests for testing
 purpose.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">#</a></h2>
 <ul>
-<li>Install the Jans Tarp <a href="https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md#releases">on Chrome browser</a></li>
+<li>Install the Janssen Tarp <a href="https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md#releases">on Chrome browser</a></li>
 </ul>
 <h2 id="step-1-create-cedar-policy-and-schema">Step-1: Create Cedar Policy and Schema<a class="headerlink" href="#step-1-create-cedar-policy-and-schema" title="Permanent link">#</a></h2>
 <p>The Cedarling needs policies and a schema to authorize access. These are bundled in a <em>policy store</em> (a JSON file). To create one, use <a href="https://gluu.org/agama/authorization-policy-designer/">Agama Lab policy designer guide</a> and steps below. As an end result, the policy
@@ -9006,7 +9006,7 @@ when {
 <p>At the end, use the <code>Copy Link</code> button to copy the generated policy store URI 
 for the next step.</p>
 <h2 id="step-2-configure-tarp">Step-2: Configure Tarp<a class="headerlink" href="#step-2-configure-tarp" title="Permanent link">#</a></h2>
-<p>In this step, we will add the policy store details in the Jans Tarp that is
+<p>In this step, we will add the policy store details in the Janssen Tarp that is
 installed in the browser. The Cedarling instance embedded in the Tarp will
 use the policy stored in this store to evaluate the authorization result.</p>
 <ol>
@@ -9096,7 +9096,7 @@ And click <code>Cedarling Authz Request</code> again. Cedarling will return a ne
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-04-14T18:48:51+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-04-14</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-04-21T16:14:52+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-04-21</span>
       
         <br>
         Created:
