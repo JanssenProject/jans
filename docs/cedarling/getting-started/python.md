@@ -12,9 +12,9 @@ tags:
 
 ## Installation
 
-### Building from source
+At the moment, the Cedarling Python bindings are not available via package managers like PyPI. To use them, you'll need to build from source.
 
-The recommended way to use Cedarling in a Python project is by compiling a wheel using [Maturin](https://github.com/PyO3/maturin).
+The recommended approach is to compile a Python wheel using [Maturin](https://github.com/PyO3/maturin), a tool for building and publishing Rust-based Python packages.
 
 **1. Set up a virtual environment**
 
@@ -57,10 +57,6 @@ This produces a `.whl` file in the `target/wheels/` directory.
 ```sh
 maturin develop
 ```
-
-### Installation using `pip`
-
-Coming Soon...
 
 ## Including in projects
 
