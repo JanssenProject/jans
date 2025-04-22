@@ -12,7 +12,6 @@ Go bindings for the Jans Cedarling authorization engine, providing policy-based 
 - [Installation](#installation)
 - [Usage](#usage)
 - [Building for Production](#building-for-production)
-- [For Developers](#for-developers)
 
 ## Installation
 
@@ -265,19 +264,3 @@ Consider these settings for production deployments:
 
 - Set `CEDARLING_LOG_LEVEL` to `WARN` or `ERROR`
 - Enable JWT validation (ensure tokens are properly signed)
-- Use a persistent policy store (e.g., database) instead of local files
-
-## For Developers
-
-### Updating Bindings
-
-We use [rust2go](https://github.com/ihciah/rust2go) to generate Go bindings from Rust code. After modifying the Rust code:
-
-```bash
-rust2go-cli --src src/user.rs --dst internal/gen.go --without-main
-```
-
-Update the generated `internal/gen.go`:
-
-- Change the package name to `internal`
-- Adjust types and method signatures as needed
