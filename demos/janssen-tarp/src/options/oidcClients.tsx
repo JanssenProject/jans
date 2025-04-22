@@ -95,7 +95,7 @@ function Row(props: { row: ReturnType<typeof createData>, notifyOnDataChange }) 
             <AuthFlowInputs isOpen={open} handleDialog={handleDialog} client={row} notifyOnDataChange={notifyOnDataChange} />
             <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
                 <TableCell>
-                    <Tooltip title="Delete Client from jans-tarp">
+                    <Tooltip title="Delete Client from janssen-tarp">
                         <IconButton aria-label="Delete">
                             <DeleteForeverOutlinedIcon sx={{ color: pink[500] }} onClick={resetClient} />
                         </IconButton>

@@ -14,6 +14,7 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Stack from '@mui/material/Stack';
 import initWasm, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
 import Utils from './Utils';
 const CedarlingSignedAuthz = ({ data }) => {
@@ -98,6 +99,13 @@ const CedarlingSignedAuthz = ({ data }) => {
         setLogType(newLogType);
       };
 
+    const resetInputs = () => {
+        setAction("");
+        setResource({});
+        setContext({});
+        setTokenSelection({ accessToken: false, userInfo: false, idToken: false });
+    };  
+
     return (
         <div className="box">
             {cedarlingBootstrapPresent ? 
@@ -112,9 +120,9 @@ const CedarlingSignedAuthz = ({ data }) => {
                 <AccordionDetails>
                     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                         <InputLabel id="principal-value-label">Principal</InputLabel>
-                        <FormControlLabel control={<Checkbox color="success" onChange={() => setTokenSelection((prev) => ({ ...prev, accessToken: !prev.accessToken }))} />} label="Access Token" />
-                        <FormControlLabel control={<Checkbox color="success" onChange={() => setTokenSelection((prev) => ({ ...prev, userInfo: !prev.userInfo }))} />} label="Userinfo Token" />
-                        <FormControlLabel control={<Checkbox color="success" onChange={() => setTokenSelection((prev) => ({ ...prev, idToken: !prev.idToken }))} />} label="Id Token" />
+                        <FormControlLabel control={<Checkbox color="success" checked={tokenSelection.accessToken} onChange={() => setTokenSelection((prev) => ({ ...prev, accessToken: !prev.accessToken }))} />} label="Access Token" />
+                        <FormControlLabel control={<Checkbox color="success" checked={tokenSelection.userInfo} onChange={() => setTokenSelection((prev) => ({ ...prev, userInfo: !prev.userInfo }))} />} label="Userinfo Token" />
+                        <FormControlLabel control={<Checkbox color="success" checked={tokenSelection.idToken} onChange={() => setTokenSelection((prev) => ({ ...prev, idToken: !prev.idToken }))} />} label="Id Token" />
 
                         <TextField
                             autoFocus
@@ -149,7 +157,10 @@ const CedarlingSignedAuthz = ({ data }) => {
                             <ToggleButton value="Metric">Metric</ToggleButton>
                         </ToggleButtonGroup>
                         <hr />
-                        <Button variant="outlined" color="success" onClick={triggerCedarlingAuthzRequest}>Cedarling Authz Request</Button>
+                        <Stack direction="row" spacing={2}>
+                            <Button variant="outlined" color="success" onClick={triggerCedarlingAuthzRequest}>Cedarling Authz Request</Button>
+                            <Button variant="outlined" color="success" onClick={() => resetInputs()}>Reset</Button>
+                        </Stack>
                     </div>
                 </AccordionDetails>
             </Accordion> : ''}

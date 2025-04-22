@@ -14,6 +14,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import initWasm, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
 import Utils from './Utils';
+import Stack from '@mui/material/Stack';
 
 export default function CedarlingUnsignedAuthz({ data }) {
     const [context, setContext] = React.useState({});
@@ -86,6 +87,13 @@ export default function CedarlingUnsignedAuthz({ data }) {
         return reqObj;
     };
 
+    const resetInputs = () => {
+        setAction("");
+        setResource({});
+        setContext({});
+        setPrincipals([]);
+    };  
+
     return (
         <Container maxWidth="lg">
             {(data === undefined || data?.length == 0) ? '' :
@@ -136,7 +144,10 @@ export default function CedarlingUnsignedAuthz({ data }) {
                                     <ToggleButton value="Metric">Metric</ToggleButton>
                                 </ToggleButtonGroup>
                                 <hr />
-                                <Button variant="outlined" color="success" onClick={triggerCedarlingAuthzRequest}>Cedarling Authz Request</Button>
+                                <Stack direction="row" spacing={2}>
+                                    <Button variant="outlined" color="success" onClick={triggerCedarlingAuthzRequest}>Cedarling Authz Request</Button>
+                                    <Button variant="outlined" color="success" onClick={() => resetInputs()}>Reset</Button>
+                                </Stack>
                             </div>
                         </AccordionDetails>
                     </Accordion>
