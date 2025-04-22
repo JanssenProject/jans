@@ -41,13 +41,13 @@ Navigate to the Cedarling Go bindings directory:
 cd jans/jans-cedarling/bindings/cedarling_go
 ```
 
-```bash
+```sh
 cargo build --release -p cedarling_go
 ```
 
 **2. Copy the built artifacts to your application directory:**
 
-```bash
+```sh
 # Windows
 cp target/release/cedarling_go.dll .
 cp target/release/cedarling_go.dll.lib cedarling_go.lib
@@ -96,7 +96,7 @@ go get github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go
 ***4. Add the Cedarling Go package to your Go application:***  
 Build your Go application:
 
-```bash
+```sh
 go build .
 ```
 
@@ -117,7 +117,7 @@ Run application to ensure it works correctly.
   - Files:
     - `libcedarling_go.so`
 
-```bash
+```sh
 export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
 ```
 
@@ -125,7 +125,7 @@ export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
   - Files:
     - `libcedarling_go.dylib`
 
-```bash
+```sh
 export DYLD_LIBRARY_PATH=$(pwd):$DYLD_LIBRARY_PATH
 ```
 
