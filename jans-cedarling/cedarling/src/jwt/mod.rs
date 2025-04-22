@@ -117,7 +117,7 @@ impl JwtService {
         if let Some(issuers) = trusted_issuers.as_ref() {
             for iss in issuers.values() {
                 let origin = iss.oidc_endpoint.origin().ascii_serialization();
-                for (tkn, metadata) in iss.tokens_metadata.iter() {
+                for (tkn, metadata) in iss.token_metadata.iter() {
                     if !metadata.trusted {
                         continue;
                     }
@@ -292,7 +292,7 @@ mod test {
         };
         // we remove the `iss` claims since mockito can't really create https
         // endpoints and the validation requires the `iss` to be https.
-        for (_name, metadata) in iss.tokens_metadata.iter_mut() {
+        for (_name, metadata) in iss.token_metadata.iter_mut() {
             metadata.required_claims.remove("iss");
         }
 

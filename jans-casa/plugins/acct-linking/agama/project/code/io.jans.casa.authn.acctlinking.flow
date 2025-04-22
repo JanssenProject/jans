@@ -75,7 +75,7 @@ uid = Call io.jans.casa.acctlinking.UidUtils#lookupUid uidRef uid profile.ID[0] 
 profile.jansExtUid = Call io.jans.casa.acctlinking.UidUtils#attrValuesAdding uid "jansExtUid" jansExtUid
 
 profile.uid = [ uid ]
-profile.ID = null       //ID not part of DB schema - jansExtUid has what is needed
+Call profile remove "ID"       //ID not part of DB schema - jansExtUid has what is needed
 
 uid | E = Call idProc process profile
 When E is null
