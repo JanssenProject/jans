@@ -95,7 +95,7 @@ Build your Go application:
 go build .
 ```
 
-Run run application to ensure it works correctly.
+Run application to ensure it works correctly.
 
 ***Runtime Notes:***
 
