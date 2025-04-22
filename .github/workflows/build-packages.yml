@@ -546,3 +546,41 @@ jobs:
         gpg --armor --detach-sign cedarling-krakend-arm64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so || echo "Failed to sign"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${{ env.VERSION }}" *.so *.sha256sum *.asc
+  enrich_sbom:
+    if: github.repository == 'JanssenProject/jans'
+    runs-on: ubuntu-latest
+    steps:
+
+    # TODO: add the correct secret
+    - name: Fetch Jans SBOM
+      run: |
+        curl -H "Authorization: Bearer ${{ secrets.ACTION_SECRET_GH_API_ACCESS_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3.raw" \
+              -o gh-sbom.json \
+              https://api.github.com/repos/JanssenProject/jans/dependency-graph/sbom
+
+    # Trim the SBOM to remove the parent `SBOM` element. 
+    # install jq to trim the SBOM
+    - name: Install jq
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y jq
+  
+    # Trim the SBOM to only have value of `SBOM` element
+    - name: Trim SBOM
+      run: |
+        jq '.sbom' gh-sbom.json > trimmed-sbom.json
+
+    # Install Parlay CLI
+    - name: Install Parlay CLI
+      run: |
+        wget https://github.com/snyk/parlay/releases/download/v0.8.0/parlay_0.8.0_linux_amd64.deb
+        sudo dpkg -i parlay_0.8.0_linux_amd64.deb
+
+    # Enrich the SBOM using Parlay CLI with ecosystems
+    - name: Enrich trimmed SBOM using Parlay
+      run: |
+        cat trimmed-sbom.json | \
+        parlay ecosystems enrich - | \
+        parlay scorecard enrich - > enriched-sbom.json
+        mv enriched-sbom.json sbom.json
