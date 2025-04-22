@@ -9,7 +9,7 @@ type Request struct {
 	Tokens   map[string]string
 	Action   string
 	Resource EntityData
-	Context  interface{}
+	Context  any
 }
 
 func (r Request) MarshalJSON() ([]byte, error) {
@@ -22,7 +22,7 @@ func (r Request) MarshalJSON() ([]byte, error) {
 		Tokens   map[string]string `json:"tokens"`
 		Action   string            `json:"action"`
 		Resource EntityData        `json:"resource"`
-		Context  interface{}       `json:"context"`
+		Context  any               `json:"context"`
 	}{
 		Tokens:   r.Tokens,
 		Action:   r.Action,
@@ -37,12 +37,12 @@ type EntityData struct {
 	EntityType string
 	ID         string
 	// Payload will be flattened into the JSON object.
-	Payload map[string]interface{}
+	Payload map[string]any
 }
 
 // MarshalJSON flattens Payload into the top-level JSON object.
 func (e EntityData) MarshalJSON() ([]byte, error) {
-	m := map[string]interface{}{
+	m := map[string]any{
 		"type": e.EntityType,
 		"id":   e.ID,
 	}
@@ -54,7 +54,7 @@ func (e EntityData) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON extracts "type" and "id" then stores the rest in Payload.
 func (e *EntityData) UnmarshalJSON(data []byte) error {
-	m := make(map[string]interface{})
+	m := make(map[string]any)
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
