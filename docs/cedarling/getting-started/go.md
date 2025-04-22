@@ -10,12 +10,15 @@ tags:
 Go bindings for the Jans Cedarling authorization engine, providing policy-based access control.
 
 - [Installation](#installation)
+- [Documentation](#documentation)
 - [Usage](#usage)
 - [Building for Production](#building-for-production)
 
 ## Installation
 
 ### Building from Source
+
+If youre using pre-built binaries from the [Jans releases page](https://github.com/JanssenProject/jans/releases), you can skip this step. Otherwise, follow these instructions to build from source.
 
 **Prerequisites:**
 
@@ -68,9 +71,12 @@ Run go test to ensure everything is working correctly:
 go test .
 ```
 
-**3. Build your Go application with dynamic linking:**
+### Build your Go application with dynamic linking
 
-***3.1 Add linker flags in your main.go file:***  
+**1. Download pre-built binaries:**  
+Download the appropriate pre-built binary for your platform from the [Jans releases page](https://github.com/JanssenProject/jans/releases) or build it from source as described above.
+
+***2. Add linker flags in your main.go file:***  
 You need specify linker flags in your `main.go` file to link against the Cedarling library.
 
 ```go
@@ -78,16 +84,16 @@ You need specify linker flags in your `main.go` file to link against the Cedarli
 import "C"
 ```
 
-And make sure that the Cedarling library is located in the same directory as your main package.
+And make sure that the Cedarling library files are located in the same directory as your main package.
 
-***3.2 Add the Cedarling Go package to your Go application:***  
+***3. Add the Cedarling Go package to your Go application:***  
 Use `go get` to fetch the Cedarling Go package:
 
 ```sh
 go get github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go
 ```
 
-***3.3 Add the Cedarling Go package to your Go application:***  
+***4. Add the Cedarling Go package to your Go application:***  
 Build your Go application:
 
 ```bash
