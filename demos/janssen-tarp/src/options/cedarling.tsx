@@ -160,7 +160,7 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }) 
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {(cedarlingConfig === undefined || Object.keys(cedarlingConfig?.length == 0)) ?
+                                    {(cedarlingConfig === undefined || cedarlingConfig?.length == 0) ?
                                         <TableCell colSpan={6}><Alert severity="warning">No Records to show.</Alert></TableCell> :
                                         cedarlingConfig.map((row, index) => (<Row key={index} row={row} notifyOnDataChange={notifyOnDataChange} />))
                                     }

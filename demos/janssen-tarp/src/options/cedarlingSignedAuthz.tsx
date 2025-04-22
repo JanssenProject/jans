@@ -28,9 +28,9 @@ const CedarlingSignedAuthz = ({ data }) => {
     const [loginDetails, setLoginDetails] = React.useState({access_token: "", id_token: "", userDetails: ""});
 
     React.useEffect(() => {
-        if (!Utils.isEmpty(data?.cedarlingConfig) && Object.keys(data?.cedarlingConfig).length !== 0) {
+        if (!Utils.isEmpty(data?.cedarlingConfig) && data?.cedarlingConfig.length !== 0) {
             setCedarlingConfig(data?.cedarlingConfig);
-            setCedarlingBootstrapPresent((!Utils.isEmpty(data?.cedarlingConfig) && Object.keys(data?.cedarlingConfig).length !== 0));
+            setCedarlingBootstrapPresent((!Utils.isEmpty(data?.cedarlingConfig) && data?.cedarlingConfig.length !== 0));
         }
         setLoginDetails(data?.loginDetails);
 
@@ -85,8 +85,7 @@ const CedarlingSignedAuthz = ({ data }) => {
             context: formFields.context,
             resource: formFields.resource,
         };
-        console.log(reqObj)
-        console.log(data)
+        
         chrome.storage.local.set({ authzRequest: reqObj });
         return reqObj;
     };
