@@ -63,14 +63,6 @@ or use scripts provided in the repository to automate this process:
 sh build_and_copy_artifacts.sh
 ```
 
-- ***Runtime Notes:***
-  - On **Windows**, place the Rust artifacts (`cedarling_go.dll` and `cedarling_go.lib`) alongside the Go binary.
-  - On **Linux**, add the library directory to `LD_LIBRARY_PATH`:
-
-    ```bash
-    export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
-    ```
-
 Run go test to ensure everything is working correctly:
 
 ```sh
@@ -79,23 +71,58 @@ go test .
 
 **3. Build your Go application with dynamic linking:**
 
-***3.1 Add the Cedarling Go package to your Go application:***  
+***3.1 Add linker flags in your main.go file:***  
+You need specify linker flags in your `main.go` file to link against the Cedarling library.
+
+```go
+// #cgo LDFLAGS: -L. -lcedarling_go
+import "C"
+```
+
+And make sure that the Cedarling library is located in the same directory as your main package.
+
+***3.2 Add the Cedarling Go package to your Go application:***  
 Use `go get` to fetch the Cedarling Go package:
 
 ```sh
 go get github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go
 ```
 
-***3.2 Add the Cedarling Go package to your Go application:***  
+***3.3 Add the Cedarling Go package to your Go application:***  
 Build your Go application:
 
 ```bash
 go build .
 ```
 
-**Don't forget about runtime notes for different operating systems (from previous section).**
-
 Run run application to ensure it works correctly.
+
+***Runtime Notes:***
+
+- On **Windows**, place the Rust artifacts (`cedarling_go.dll` and `cedarling_go.lib`) alongside the Go binary.
+  - Files:
+    - `cedarling_go.dll`
+    - `cedarling_go.lib`
+  - Windows make search in next directories:
+    - The directory containing your Go executable (recommended location)
+    - Windows system directories (e.g., `C:\Windows\System32`)
+    - The `PATH` environment variable directories
+
+- On **Linux**, add the library directory to `LD_LIBRARY_PATH`:
+  - Files:
+    - `libcedarling_go.so`
+
+```bash
+export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
+```
+
+- On **MacOS**, add the library directory to `DYLD_LIBRARY_PATH` (not tested):
+  - Files:
+    - `libcedarling_go.dylib`
+
+```bash
+export DYLD_LIBRARY_PATH=$(pwd):$DYLD_LIBRARY_PATH
+```
 
 ## Documentation
 

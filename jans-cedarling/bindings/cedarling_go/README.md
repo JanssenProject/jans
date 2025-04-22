@@ -18,13 +18,13 @@ Go bindings for the Jans Cedarling authorization engine, providing policy-based 
 
 ### Building from Source
 
-1. Build the Rust library:
+- Build the Rust library:
 
 ```bash
 cargo build --release
 ```
 
-1. Copy the built artifacts to folder with your application:
+- Copy the built artifacts to folder with your application:
 
 ```bash
 # Windows
@@ -38,17 +38,30 @@ cp target/release/libcedarling_go.so .
 cp target/release/libcedarling_go.dylib .
 ```
 
-1. Build your Go application with dynamic linking:
+- Add linker flags in your main.go file:
+
+```go
+// #cgo LDFLAGS: -L. -lcedarling_go
+import "C"
+```
+
+It allows CGO to link against the Cedarling library.
+Libs should be located in the same directory as your main package.
+
+- Build your Go application with dynamic linking:
 
 ```bash
 go build .
 ```
 
-Ensure Rust build artifacts (e.g. libcedarling_go.so) are placed alongside the Go binary on Windows. On Linux, you must add their directory to `LD_LIBRARY_PATH`, e.g.:
+- Run your Go application.  
+Ensure Rust build artifacts are located in correct directory:
+  - For Windows, DLLs and .lib filesare placed alongside the Go binary.
+  - On Linux, you must add their directory to `LD_LIBRARY_PATH`, e.g.:
 
-```bash
-export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
-```
+    ```bash
+    export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
+    ```
 
 ## Usage
 
@@ -159,7 +172,7 @@ For production deployments, consider:
 - Setting appropriate log levels
 - Enabling JWT validation when using token-based auth
 
-## For developers
+## For `cedarling_go` developers
 
 We use [rust2go](https://github.com/ihciah/rust2go) to convert Rust code to Go. This tool helps in maintaining the bindings up-to-date with minimal effort.
 
