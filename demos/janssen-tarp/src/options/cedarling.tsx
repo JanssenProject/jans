@@ -99,6 +99,11 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }) 
     const [modelOpen, setModelOpen] = React.useState(false);
     const [drawerOpen, setDrawerOpen] = React.useState(false);
     const [screenType, setScreenType] = React.useState("config");
+    const [cedarlingConfig, setCedarlingConfig] = React.useState([]);
+
+    React.useEffect(() => { 
+        setCedarlingConfig(data?.cedarlingConfig)
+    }, [data])
 
     const handleDialog = (isOpen) => {
         setModelOpen(isOpen);
@@ -122,12 +127,12 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }) 
                 <HelpDrawer isOpen={drawerOpen} handleDrawer={handleDrawer} />
                 <Stack direction="column" spacing={2} sx={{ mb: 1 }}>
                     <Stack direction="row" spacing={2} sx={{ mb: 1 }} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        {(data === undefined || data?.length == 0) ?
+                        {(cedarlingConfig === undefined || cedarlingConfig?.length == 0) ?
                             <Button color="success" variant="outlined" startIcon={<AddIcon />} onClick={() => setModelOpen(true)} style={{ maxWidth: '200px' }}>
                                 Add Configurations
                             </Button> : ''}
                     </Stack>
-                    {(data === undefined || data?.length == 0) ? '' :
+                    {(cedarlingConfig === undefined || cedarlingConfig?.length == 0) ? '' :
                         <Box maxWidth="md">
                             <ToggleButtonGroup
                                 color="primary"
@@ -155,14 +160,14 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }) 
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {(data === undefined || data?.length == 0) ?
+                                    {(cedarlingConfig === undefined || Object.keys(cedarlingConfig?.length == 0)) ?
                                         <TableCell colSpan={6}><Alert severity="warning">No Records to show.</Alert></TableCell> :
-                                        data.map((row, index) => (<Row key={index} row={row} notifyOnDataChange={notifyOnDataChange} />))
+                                        cedarlingConfig.map((row, index) => (<Row key={index} row={row} notifyOnDataChange={notifyOnDataChange} />))
                                     }
                                 </TableBody>
                             </Table>
                         </TableContainer>)}
-                        {(data === undefined || data?.length == 0) ? '' :
+                        {(cedarlingConfig === undefined || cedarlingConfig?.length == 0) ? '' :
                             (
                                 <>
                                     {screenType === 'unsignedAuthz' &&

@@ -18,41 +18,42 @@ import Stack from '@mui/material/Stack';
 import initWasm, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
 import Utils from './Utils';
 const CedarlingSignedAuthz = ({ data }) => {
-    const [context, setContext] = React.useState({});
-    const [action, setAction] = React.useState("");
+    const [formFields, setFormFields] = useState({ action: "", context: {}, resource: {} });
     const [tokenSelection, setTokenSelection] = useState({ accessToken: false, userInfo: false, idToken: false });
-    const [resource, setResource] = React.useState({});
     const [cedarlingBootstrapPresent, setCedarlingBootstrapPresent] = React.useState(false);
-    const [authzResult, setAuthzResult] = React.useState("")
-    const [authzLogs, setAuthzLogs] = React.useState("")
-    const [logType, setLogType] = React.useState('Decision');
+    const [authzResult, setAuthzResult] = useState("")
+    const [authzLogs, setAuthzLogs] = useState("")
+    const [logType, setLogType] = useState('Decision');
+    const [cedarlingConfig, setCedarlingConfig] = React.useState([]);
+    const [loginDetails, setLoginDetails] = React.useState({access_token: "", id_token: "", userDetails: ""});
 
     React.useEffect(() => {
+        if (!Utils.isEmpty(data?.cedarlingConfig) && Object.keys(data?.cedarlingConfig).length !== 0) {
+            setCedarlingConfig(data?.cedarlingConfig);
+            setCedarlingBootstrapPresent((!Utils.isEmpty(data?.cedarlingConfig) && Object.keys(data?.cedarlingConfig).length !== 0));
+        }
+        setLoginDetails(data?.loginDetails);
+
         chrome.storage.local.get(["authzRequest"], (authzRequest) => {
             if (!Utils.isEmpty(authzRequest) && Object.keys(authzRequest).length !== 0) {
-                setContext(authzRequest.authzRequest.context);
-                setAction(authzRequest.authzRequest.action);
-                setResource(authzRequest.authzRequest.resource);
-            }
-        });
-        chrome.storage.local.get(["cedarlingConfig"], async (cedarlingConfig) => {
-            setCedarlingBootstrapPresent(false);
-            if (Object.keys(cedarlingConfig).length !== 0 && !Utils.isEmpty(cedarlingConfig?.cedarlingConfig)) {
-                setCedarlingBootstrapPresent(true);
+                setFormFields({
+                    action: authzRequest.authzRequest.action,
+                    context: authzRequest.authzRequest.context,
+                    resource: authzRequest.authzRequest.resource
+                });
             }
         });
     }, [data])
-    
+
     const triggerCedarlingAuthzRequest = async () => {
         setAuthzResult("");
         setAuthzLogs("");
         let reqObj = await createCedarlingAuthzRequestObj();
-        chrome.storage.local.get(["cedarlingConfig"], async (cedarlingConfig) => {
             let instance: Cedarling;
             try {
                 if (Object.keys(cedarlingConfig).length !== 0) {
                     await initWasm();
-                    instance = await init(!Utils.isEmpty(cedarlingConfig?.cedarlingConfig) ? cedarlingConfig?.cedarlingConfig[0] : undefined);
+                    instance = await init(!Utils.isEmpty(cedarlingConfig) ? cedarlingConfig[0] : undefined);
                     let result: AuthorizeResult = await instance.authorize(reqObj);
                     let logs = await instance.get_logs_by_request_id_and_tag(result.request_id, logType);
                     setAuthzResult(result.json_string())
@@ -71,23 +72,21 @@ const CedarlingSignedAuthz = ({ data }) => {
                     setAuthzLogs(pretty_logs.toString());
                 }
             }
-
-        });
-
     }
 
     const createCedarlingAuthzRequestObj = async () => {
         const reqObj = {
             tokens: {
-                ...(tokenSelection.accessToken && { access_token: data?.access_token}),
-                ...(tokenSelection.idToken && { id_token: data?.id_token}),
-                ...(tokenSelection.userInfo && { userinfo_token: data?.userDetails}),
+                ...(tokenSelection.accessToken && { access_token: loginDetails?.access_token }),
+                ...(tokenSelection.idToken && { id_token: loginDetails?.id_token }),
+                ...(tokenSelection.userInfo && { userinfo_token: loginDetails?.userDetails }),
             },
-            action,
-            context,
-            resource,
+            action: formFields.action,
+            context: formFields.context,
+            resource: formFields.resource,
         };
-
+        console.log(reqObj)
+        console.log(data)
         chrome.storage.local.set({ authzRequest: reqObj });
         return reqObj;
     };
@@ -95,75 +94,97 @@ const CedarlingSignedAuthz = ({ data }) => {
     const handleLogTypeChange = (
         event: React.MouseEvent<HTMLElement>,
         newLogType: string,
-      ) => {
+    ) => {
         setLogType(newLogType);
-      };
+    };
 
     const resetInputs = () => {
-        setAction("");
-        setResource({});
-        setContext({});
+        setFormFields({
+            action: "",
+            context: {},
+            resource: {}
+        });
         setTokenSelection({ accessToken: false, userInfo: false, idToken: false });
-    };  
+    };
 
     return (
         <div className="box">
-            {cedarlingBootstrapPresent ? 
-            <Accordion defaultExpanded>
-                <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1-content"
-                    id="panel1-header"
-                >
-                    <Typography component="span"><strong>Cedarling Signed Authz Request Form</strong></Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                        <InputLabel id="principal-value-label">Principal</InputLabel>
-                        <FormControlLabel control={<Checkbox color="success" checked={tokenSelection.accessToken} onChange={() => setTokenSelection((prev) => ({ ...prev, accessToken: !prev.accessToken }))} />} label="Access Token" />
-                        <FormControlLabel control={<Checkbox color="success" checked={tokenSelection.userInfo} onChange={() => setTokenSelection((prev) => ({ ...prev, userInfo: !prev.userInfo }))} />} label="Userinfo Token" />
-                        <FormControlLabel control={<Checkbox color="success" checked={tokenSelection.idToken} onChange={() => setTokenSelection((prev) => ({ ...prev, idToken: !prev.idToken }))} />} label="Id Token" />
+            {cedarlingBootstrapPresent ?
+                <Accordion defaultExpanded>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="panel1-content"
+                        id="panel1-header"
+                    >
+                        <Typography component="span"><strong>Cedarling Signed Authz Request Form</strong></Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                            <InputLabel id="principal-value-label">Principal</InputLabel>
+                            <FormControlLabel control={<Checkbox color="success" checked={tokenSelection.accessToken} onChange={() => setTokenSelection((prev) => ({ ...prev, accessToken: !prev.accessToken }))} />} label="Access Token" />
+                            <FormControlLabel control={<Checkbox color="success" checked={tokenSelection.userInfo} onChange={() => setTokenSelection((prev) => ({ ...prev, userInfo: !prev.userInfo }))} />} label="Userinfo Token" />
+                            <FormControlLabel control={<Checkbox color="success" checked={tokenSelection.idToken} onChange={() => setTokenSelection((prev) => ({ ...prev, idToken: !prev.idToken }))} />} label="Id Token" />
 
-                        <TextField
-                            autoFocus
-                            required
-                            margin="dense"
-                            id="action"
-                            name="action"
-                            label="Action"
-                            type="text"
-                            fullWidth
-                            variant="outlined"
-                            value={action}
-                            onChange={(e) => {
-                                setAction(e.target.value);
-                            }}
-                        />
-                        <InputLabel id="resource-value-label">Resource</InputLabel>
-                        <JsonEditor data={resource} setData={setResource} rootName="resource" />
-                        <InputLabel id="context-value-label">Context</InputLabel>
-                        <JsonEditor data={context} setData={setContext} rootName="context" />
+                            <TextField
+                                autoFocus
+                                required
+                                margin="dense"
+                                id="action"
+                                name="action"
+                                label="Action"
+                                type="text"
+                                fullWidth
+                                variant="outlined"
+                                value={formFields.action}
+                                onChange={(e) => {
+                                    const { name, value } = e.target;
+                                    setFormFields((prev) => ({
+                                        ...prev,
+                                        [name]: value
+                                    }));
+                                }}
+                            />
+                            <InputLabel id="resource-value-label">Resource</InputLabel>
+                            <JsonEditor
+                                data={formFields.resource}
+                                setData={(e) => {
+                                    setFormFields((prev) => ({
+                                        ...prev,
+                                        ["resource"]: e
+                                    }));
+                                }}
+                                rootName="resource" />
+                            <InputLabel id="context-value-label">Context</InputLabel>
+                            <JsonEditor
+                                data={formFields.context}
+                                setData={(e) => {
+                                    setFormFields((prev) => ({
+                                        ...prev,
+                                        ["context"]: e
+                                    }));
+                                }}
+                                rootName="context" />
 
-                        <InputLabel id="principal-value-label">Log Type</InputLabel>
-                        <ToggleButtonGroup
-                            color="primary"
-                            value={logType}
-                            exclusive
-                            onChange={handleLogTypeChange}
-                            aria-label="Platform"
+                            <InputLabel id="principal-value-label">Log Type</InputLabel>
+                            <ToggleButtonGroup
+                                color="primary"
+                                value={logType}
+                                exclusive
+                                onChange={handleLogTypeChange}
+                                aria-label="Platform"
                             >
-                            <ToggleButton value="Decision">Decision</ToggleButton>
-                            <ToggleButton value="System">System</ToggleButton>
-                            <ToggleButton value="Metric">Metric</ToggleButton>
-                        </ToggleButtonGroup>
-                        <hr />
-                        <Stack direction="row" spacing={2}>
-                            <Button variant="outlined" color="success" onClick={triggerCedarlingAuthzRequest}>Cedarling Authz Request</Button>
-                            <Button variant="outlined" color="success" onClick={() => resetInputs()}>Reset</Button>
-                        </Stack>
-                    </div>
-                </AccordionDetails>
-            </Accordion> : ''}
+                                <ToggleButton value="Decision">Decision</ToggleButton>
+                                <ToggleButton value="System">System</ToggleButton>
+                                <ToggleButton value="Metric">Metric</ToggleButton>
+                            </ToggleButtonGroup>
+                            <hr />
+                            <Stack direction="row" spacing={2}>
+                                <Button variant="outlined" color="success" onClick={triggerCedarlingAuthzRequest}>Cedarling Authz Request</Button>
+                                <Button variant="outlined" color="success" onClick={() => resetInputs()}>Reset</Button>
+                            </Stack>
+                        </div>
+                    </AccordionDetails>
+                </Accordion> : ''}
             {!!authzResult ?
                 <Accordion defaultExpanded>
                     <AccordionSummary
