@@ -144,7 +144,8 @@ func TestAuthorizeSuccess(t *testing.T) {
 		},
 		Action:   "Jans::Action::\"Update\"",
 		Resource: resource,
-		Context:  make(map[string]any),
+		// will be mapped to {}
+		Context: nil,
 	}
 
 	result, err := instance.Authorize(request)
@@ -228,7 +229,8 @@ func TestAuthorizeUnsignedSuccess(t *testing.T) {
 		Principals: principals,
 		Action:     "Jans::Action::\"UpdateForTestPrincipals\"",
 		Resource:   resource,
-		Context:    make(map[string]any),
+		// will be mapped to {}
+		Context: nil,
 	}
 
 	result, err := instance.AuthorizeUnsigned(request)

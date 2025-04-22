@@ -6,10 +6,31 @@ import (
 )
 
 type Request struct {
-	Tokens   map[string]string `json:"tokens"`
-	Action   string            `json:"action"`
-	Resource EntityData        `json:"resource"`
-	Context  interface{}       `json:"context"`
+	Tokens   map[string]string
+	Action   string
+	Resource EntityData
+	Context  interface{}
+}
+
+func (r Request) MarshalJSON() ([]byte, error) {
+	context := r.Context
+	if context == nil {
+		context = json.RawMessage(`{}`)
+	}
+
+	aux := struct {
+		Tokens   map[string]string `json:"tokens"`
+		Action   string            `json:"action"`
+		Resource EntityData        `json:"resource"`
+		Context  interface{}       `json:"context"`
+	}{
+		Tokens:   r.Tokens,
+		Action:   r.Action,
+		Resource: r.Resource,
+		Context:  context,
+	}
+	return json.Marshal(aux)
+
 }
 
 type EntityData struct {
@@ -152,8 +173,29 @@ func (r CedarResponse) MarshalJSON() ([]byte, error) {
 }
 
 type RequestUnsigned struct {
-	Principals []EntityData `json:"principals"`
-	Action     string       `json:"action"`
-	Resource   EntityData   `json:"resource"`
-	Context    any          `json:"context"`
+	Principals []EntityData
+	Action     string
+	Resource   EntityData
+	Context    any
+}
+
+func (r RequestUnsigned) MarshalJSON() ([]byte, error) {
+	context := r.Context
+	if context == nil {
+		context = json.RawMessage(`{}`)
+	}
+
+	aux := struct {
+		Principals []EntityData `json:"principals"`
+		Action     string       `json:"action"`
+		Resource   EntityData   `json:"resource"`
+		Context    any          `json:"context"`
+	}{
+		Principals: r.Principals,
+		Action:     r.Action,
+		Resource:   r.Resource,
+		Context:    context,
+	}
+	return json.Marshal(aux)
+
 }
