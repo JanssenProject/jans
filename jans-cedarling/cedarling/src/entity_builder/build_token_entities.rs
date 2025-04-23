@@ -61,7 +61,7 @@ impl<'a> TokenIdSrcs<'a> {
         for src in DEFAULT_TKN_ID_SRCS.iter() {
             // if a `token_id` is availble in the token's entity metadata
             let claim = if let Some(claim) = token.get_metadata().and_then(|m| m.user_id.as_ref()) {
-                eid_srcs.push(EntityIdSrc { token, claim });
+                eid_srcs.push(EntityIdSrc::Token { token, claim });
                 Some(claim)
             } else {
                 None
@@ -71,7 +71,7 @@ impl<'a> TokenIdSrcs<'a> {
             if claim.map(|claim| claim == src.claim).unwrap_or(false) {
                 continue;
             }
-            eid_srcs.push(EntityIdSrc {
+            eid_srcs.push(EntityIdSrc::Token {
                 token,
                 claim: src.claim,
             });
@@ -151,7 +151,7 @@ mod test {
                 "attrs": {
                     "iss": {"__entity": {
                         "type": "Jans::TrustedIssuer",
-                        "id": "some_iss",
+                        "id": "https://test.jans.org",
                     }},
                     "jti": "some_jti",
                 },

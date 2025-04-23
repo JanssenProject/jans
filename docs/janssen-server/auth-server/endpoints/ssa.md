@@ -59,7 +59,11 @@ parameters as described below:
         ...
     ],
     "ssaSigningAlg": "RS512",
-    "ssaExpirationInDays": 30
+    "ssaExpirationInDays": 30,
+    "ssaMapSoftwareRolesToScopes": {
+        "admin": ["read", "write", "delete"],
+        "user": ["read"]
+    }
 }
 ```
 
@@ -67,6 +71,7 @@ parameters as described below:
 - `ssaCustomAttributes` — List of custom attributes, which are received in the request when creating an SSA.
 - `ssaSigningAlg` — Algorithm to sign the JWT that is returned after creating an SSA.
 - `ssaExpirationInDays` — Expiration expressed in days, when an SSA is created and the expiration is not sent.
+- `ssaMapSoftwareRolesToScopes` - mapping between software roles of SSA and scopes. When SSA is created it will try to set scopes based on software roles.
 
 ## SSA Security
 

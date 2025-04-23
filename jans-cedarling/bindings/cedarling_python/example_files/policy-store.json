@@ -31,7 +31,7 @@
                     "name": "Jans",
                     "description": "Janssen",
                     "openid_configuration_endpoint": "https://account.gluu.org/.well-known/openid-configuration",
-                    "tokens_metadata": {
+                    "token_metadata": {
                         "access_token": {
                             "entity_type_name": "Jans::Access_token"
                         },

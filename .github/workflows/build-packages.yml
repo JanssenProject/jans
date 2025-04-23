@@ -19,7 +19,7 @@ jobs:
         name: [ubuntu24, ubuntu22, ubuntu20, el8, suse15]
         include:
           - name: ubuntu24
-            os: ubuntu-latest
+            os: ubuntu-22.04
             asset_suffix: ~ubuntu24.04_amd64.deb
             build_files: deb/noble
             asset_prefix: '_'
@@ -27,37 +27,37 @@ jobs:
             sign_cmd: cosign sign-blob --yes --output-certificate cert.pem --output-signature sig
             python_version: 3.11
           - name: ubuntu22
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             asset_suffix: ~ubuntu22.04_amd64.deb
             build_files: deb/jammy
             asset_prefix: '_'
             asset_path: jans
-            sign_cmd: dpkg-sig -s builder -k DE92BEF14A1A4E542F678B64DC3C790386C73900
+            sign_cmd: cosign sign-blob --yes --output-certificate cert.pem --output-signature sig
             python_version: 3.8
           - name: ubuntu20
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             asset_suffix: ~ubuntu20.04_amd64.deb
             build_files: deb/focal
             asset_prefix: '_'
             asset_path: jans
-            sign_cmd: dpkg-sig -s builder -k DE92BEF14A1A4E542F678B64DC3C790386C73900
+            sign_cmd: cosign sign-blob --yes --output-certificate cert.pem --output-signature sig
             python_version: 3.8
           - name: el8
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             asset_suffix: .el8.x86_64.rpm
             build_files: rpm/el8
             asset_prefix: '-'
             asset_path: jans/rpmbuild/RPMS/x86_64
             sign_cmd: rpm --addsign
-            python_version: 3.6
+            python_version: 3.8
           - name: suse15
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             asset_suffix: .suse15.x86_64.rpm
             build_files: rpm/suse15
             asset_prefix: '-'
             asset_path: jans/rpmbuild/RPMS/x86_64
             sign_cmd: rpm --addsign
-            python_version: 3.6
+            python_version: 3.8
 
     steps:
     - name: Harden Runner
@@ -172,7 +172,7 @@ jobs:
         overwrite: true
   build_python_packages:
     if: github.repository == 'JanssenProject/jans'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
@@ -207,10 +207,10 @@ jobs:
           make zipapp 
           mv jans-cli-tui.pyz jans-cli-tui-linux-suse-X86-64.pyz
           sha256sum jans-cli-tui-linux-suse-X86-64.pyz > jans-cli-tui-linux-suse-X86-64.pyz.sha256sum
-    - name: Set up Python 3.6
+    - name: Set up Python 3.8
       uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
       with:
-        python-version: 3.6
+        python-version: 3.8
     - name: Build with Ubuntu
       continue-on-error: true
       run: |
@@ -244,7 +244,7 @@ jobs:
   upload_python_packages:
     if: github.repository == 'JanssenProject/jans'
     needs: build_python_packages
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         name: [ubuntu, suse]
@@ -344,12 +344,15 @@ jobs:
         cd demos
         VER=$(echo ${{ github.event.ref }} | cut -d '/' -f 3)
         for i in $(ls -d */); do zip -r demo-${i%/}-$VER-source.zip $i && sha256sum demo-${i%/}-$VER-source.zip > demo-${i%/}-$VER-source.zip.sha256sum; done
-        sudo rm demo-jans-tarp-$VER-source.zip demo-jans-tarp-$VER-source.zip.sha256sum
-        cd jans-tarp
+        sudo rm demo-janssen-tarp-$VER-source.zip demo-janssen-tarp-$VER-source.zip.sha256sum || echo "No such file or directory"
+        cd janssen-tarp
         # Get the latest cedarling wasm package
         TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
           TAG="0.0.0"
+          RANDOM_NUMBER=$((RANDOM % 9000 + 1000))
+          jq --arg version "0.0.$RANDOM_NUMBER" '.version = $version' src/static/firefox/manifest.json > temp.json && mv temp.json src/static/firefox/manifest.json
+          echo "Replaced  $RANDOM_NUMBER in manifest.json"
         fi
         wget https://github.com/${{ github.repository }}/releases/download/"${VER}"/cedarling_wasm_"${TAG}"_pkg.tar.gz -O cedarling_wasm.tar.gz
         mkdir -p wasm
@@ -365,17 +368,18 @@ jobs:
         web-ext sign --channel=unlisted  --api-key="${{ secrets.MOZILLA_API_KEY }}" --api-secret="${{ secrets.MOZILLA_API_SECRET }}" || echo "Sign your extension for self-distribution to mozilla failed"
         cd ../..
         npm run pack
-        mv ./release/jans-tarp-chrome-*.zip ../demo-jans-tarp-chrome-$VER.zip
-        mv ./dist/firefox/web-ext-artifacts/*.xpi ../demo-jans-tarp-firefox-$VER.xpi
-        sha256sum ../demo-jans-tarp-chrome-$VER.zip > ../demo-jans-tarp-chrome-$VER.zip.sha256sum
-        sha256sum ../demo-jans-tarp-firefox-$VER.xpi > ../demo-jans-tarp-firefox-$VER.xpi.sha256sum
+        mv ./release/janssen-tarp-chrome-*.zip ../demo-janssen-tarp-chrome-$VER.zip
+        mv ./dist/firefox/web-ext-artifacts/*.xpi ../demo-janssen-tarp-firefox-$VER.xpi || touch ../demo-janssen-tarp-firefox-$VER.xpi
+        sha256sum ../demo-janssen-tarp-chrome-$VER.zip > ../demo-janssen-tarp-chrome-$VER.zip.sha256sum
+        sha256sum ../demo-janssen-tarp-firefox-$VER.xpi > ../demo-janssen-tarp-firefox-$VER.xpi.sha256sum
         cd ..
         
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload $VER *.zip *.xpi *.sha256sum --clobber
+        gh release upload $VER *.zip *.sha256sum --clobber
+        gh release upload $VER *.xpi  --clobber || echo "Sign your extension for self-distribution to mozilla failed"
   build_cedarling_python:
     if: github.repository == 'JanssenProject/jans'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
@@ -411,10 +415,10 @@ jobs:
           TAG="0.0.0"
         fi
         cd ${{ github.workspace }}/jans-cedarling/target/wheels
-        sha256sum cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_31_x86_64.whl > cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_31_x86_64.whl.sha256sum
-        sha256sum cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_31_x86_64.whl > cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_31_x86_64.whl.sha256sum
-        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_31_x86_64.whl || echo "Failed to sign"
-        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_31_x86_64.whl || echo "Failed to sign"
+        sha256sum cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_34_x86_64.whl > cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_34_x86_64.whl.sha256sum
+        sha256sum cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_34_x86_64.whl > cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_34_x86_64.whl.sha256sum
+        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_34_x86_64.whl || echo "Failed to sign"
+        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_34_x86_64.whl || echo "Failed to sign"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${VERSION}" *.whl *.sha256sum *.asc
   build_cedarling_wasm:
@@ -486,7 +490,7 @@ jobs:
         gh release upload "${VERSION}" *.tar.gz *.sha256sum *.asc
   build_cedarling_krakend:
     if: github.repository == 'JanssenProject/jans'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         krakend-builder-image: [ 'builder:2.9.0', 'builder:2.9.0-linux-generic' ]

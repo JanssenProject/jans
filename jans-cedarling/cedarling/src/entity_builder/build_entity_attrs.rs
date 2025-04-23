@@ -87,22 +87,35 @@ pub fn build_entity_attrs_with_shape(
                 }
             },
             AttrSrc::EntityRef(entity_ref_src) => {
-                let mut missing_refs: Vec<SmolStr> = Vec::new();
+                let eid_opt = match entities.get_single(entity_ref_src) {
+                    Some(eid) => Some(eid),
+                    None => match entities.get_multiple(entity_ref_src) {
+                        Some(eids) => {
+                            let src_val_opt = attrs_src
+                                .get(attr_name.as_str())
+                                .and_then(|val| val.as_str());
 
-                // skip if the source couldn't be found and was not required
-                let Some(id) = entities.get_single(entity_ref_src) else {
+                            match src_val_opt {
+                                Some(src_val) if eids.contains(&src_val.to_smolstr()) => {
+                                    Some(src_val)
+                                },
+                                _ => None,
+                            }
+                        },
+                        None => None,
+                    },
+                };
+
+                let Some(eid) = eid_opt else {
                     if attr_shape.is_required() {
-                        missing_refs.push((*entity_ref_src).clone());
+                        errs.push(BuildAttrsError::MissingEntityRefs(vec![
+                            (**entity_ref_src).clone(),
+                        ]));
                     }
                     continue;
                 };
 
-                if !missing_refs.is_empty() {
-                    errs.push(BuildAttrsError::MissingEntityRefs(missing_refs));
-                    continue;
-                }
-
-                match entity_ref_src.build_expr(id) {
+                match entity_ref_src.build_expr(eid) {
                     Ok(src) => {
                         attrs.insert(attr_name.to_string(), src);
                     },
