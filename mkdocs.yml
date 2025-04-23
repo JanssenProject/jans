@@ -404,6 +404,7 @@ nav:
       - Using CLI/TUI: janssen-server/usermgmt/usermgmt-cli-tui.md
       - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
 - Cedarling:
+  - Overview: 'cedarling/cedarling-overview.md'
   - Getting Started: 
     - 'cedarling/cedarling-getting-started.md'
     - Javascript: 'cedarling/getting-started/javascript.md'
@@ -411,7 +412,6 @@ nav:
     - Rust: 'cedarling/getting-started/rust.md'
     - Kotlin: 'cedarling/getting-started/kotlin.md'
     - Swift: 'cedarling/getting-started/swift.md'
-  - Overview: 'cedarling/cedarling-overview.md'
   - Quick Start:
     - Authorization Using Cedarling: 'cedarling/cedarling-quick-start-unsigned.md'
     - Implement TBAC Using Cedarling: 'cedarling/cedarling-quick-start-tbac.md'
