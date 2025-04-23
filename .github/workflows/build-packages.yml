@@ -653,4 +653,4 @@ jobs:
           
           if [ -n "$FILE_LIB" ]; then
             gh release upload "${VERSION}" $FILE_LIB $FILE_LIB.sha256sum $FILE_LIB.asc
-         fi
+          fi
