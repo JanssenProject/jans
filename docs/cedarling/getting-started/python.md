@@ -12,7 +12,9 @@ tags:
 
 ## Installation
 
-At the moment, the Cedarling Python bindings are not available via package managers like PyPI. To use them, you'll need to build from source.
+At the moment, the Cedarling Python bindings are not available via package managers like PyPI. To use them, you can either download a precompiled `cedarling_python` wheel from the [releases page](https://github.com/JanssenProject/jans/releases) or [build it from the source](#building-from-source).
+
+### Building from source
 
 The recommended approach is to compile a Python wheel using [Maturin](https://github.com/PyO3/maturin), a tool for building and publishing Rust-based Python packages.
 
