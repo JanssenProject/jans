@@ -355,7 +355,12 @@
 				<artifactId>jakarta.xml.bind-api</artifactId>
 				<version>${jakarta.xml.bind.api.version}</version>
 			</dependency>
-
+			<dependency>
+			    <groupId>jakarta.ws.rs</groupId>
+			    <artifactId>jakarta.ws.rs-api</artifactId>
+			    <version>3.1.0</version>
+			</dependency>
+			
 		<!-- 	<dependency>
 				<groupId>javax.enterprise</groupId>
 				<artifactId>cdi-api</artifactId>
