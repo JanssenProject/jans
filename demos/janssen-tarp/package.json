@@ -1,5 +1,5 @@
 {
-  "name": "jans-tarp",
+  "name": "janssen-tarp",
   "version": "0.0.0",
   "description": "Relying Party tool in form of a Chrome Extension.",
   "main": "index.js",
