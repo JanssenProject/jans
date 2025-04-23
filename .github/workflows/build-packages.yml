@@ -548,7 +548,18 @@ jobs:
         gh release upload "${{ env.VERSION }}" *.so *.sha256sum *.asc
   build_cedarling_go:
     if: github.repository == 'JanssenProject/jans'
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        name: [ubuntu22, mac, windows]
+        include:
+          - name: ubuntu22
+            os: ubuntu-22.04
+          - name: mac
+            os: macos-15
+          - name: windows
+            os: windows-2025
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
@@ -559,10 +570,10 @@ jobs:
         uses: actions/setup-go@v5
         with:
             go-version: '1.24'
-      - name: Build rust artifacts
+      - name: Build rust artifacts linux
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
+        if: matrix.name == 'ubuntu22'
         run: |
-          sudo apt install rustup
           rustup update stable && rustup default stable
           TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
           VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
@@ -572,6 +583,38 @@ jobs:
           fi
           cargo build -r -p cedarling_go
           cp ../../target/release/libcedarling_go.so libcedarling_go-${TAG}.so
+      - name: Build rust artifacts mac
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
+        if: matrix.name == 'mac'
+        run: |
+          brew install rustup
+          rustup update stable && rustup default stable
+          TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+          VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+          if [ "${TAG}" == "nightly" ]; then
+            VERSION=nightly
+            TAG="0.0.0"
+          fi
+          cargo build -r -p cedarling_go
+          cp ../../target/release/libcedarling_go.dylib libcedarling_go-${TAG}.dylib
+      - name: Build rust artifacts windows
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
+        if: matrix.name == 'windows'
+        run: |
+          choco install rustup.install
+          rustup-init --no-modify-path -y
+          rustup update stable && rustup default stable
+          TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+          VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+          if [ "${TAG}" == "nightly" ]; then
+            VERSION=nightly
+            TAG="0.0.0"
+          fi
+          cargo build -r -p cedarling_go
+          cp ../../target/release/cedarling_go.dll cedarling_go-${TAG}.dll
+          cp ../../target/release/cedarling_go.dll.lib cedarling_go-${TAG}.lib
+          
+
       - name: Generate sha256sum and sign
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
         run: |
@@ -581,8 +624,29 @@ jobs:
             VERSION=nightly
             TAG="0.0.0"
           fi
-          sha256sum libcedarling_go-${TAG}.so >> libcedarling_go-${TAG}.so.sha256sum 
-          gpg --armor --detach-sign libcedarling_go-${TAG}.so || echo "Failed to sign"
-          gpg --armor --detach-sign libcedarling_go-${TAG}.so.sha256sum || echo "Failed to sign"
+      
+          if: matrix.name == 'ubuntu22'
+            FILE="libcedarling_go-${TAG}.so"
+          elif: matrix.name == 'mac'
+            FILE="libcedarling_go-${TAG}.dylib"
+          elif: matrix.name == 'windows'
+            FILE="cedarling_go-${TAG}.dll"
+            FILE_LIB="cedarling_go-${TAG}.lib"
+          fi
+      
+          sha256sum $FILE >> $FILE.sha256sum
+          gpg --armor --detach-sign $FILE || echo "Failed to sign"
+          gpg --armor --detach-sign $FILE.sha256sum || echo "Failed to sign"
+      
+          if [[ -n "$FILE_LIB" ]]; then
+            sha256sum $FILE_LIB >> $FILE_LIB.sha256sum
+            gpg --armor --detach-sign $FILE_LIB || echo "Failed to sign"
+            gpg --armor --detach-sign $FILE_LIB.sha256sum || echo "Failed to sign"
+          fi
+      
           echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-          gh release upload "${{ env.VERSION }}" *.so *.sha256sum *.asc
+          gh release upload "${VERSION}" $FILE $FILE.sha256sum $FILE.asc
+      
+          if [[ -n "$FILE_LIB" ]]; then
+            gh release upload "${VERSION}" $FILE_LIB $FILE_LIB.sha256sum $FILE_LIB.asc
+          fi
