@@ -612,7 +612,6 @@ jobs:
         shell: bash
         run: |
           choco install rustup.install
-          rustup-init --no-modify-path -y
           rustup update stable && rustup default stable
           TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
           VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
