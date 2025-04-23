@@ -178,7 +178,7 @@ Cedarling currently provides two modes of authorization:
         context,
     ))
     ```
-=== Rust
+=== "Rust"
 
     ```rs
     use std::collections::HashMap;
@@ -224,7 +224,7 @@ Cedarling currently provides two modes of authorization:
     });
     ```
 
-=== Kotlin
+=== "Kotlin"
 
     ```kotlin
     val tokens = mapOf(
@@ -266,7 +266,7 @@ Cedarling currently provides two modes of authorization:
     )
     ```
 
-=== Swift
+=== "Swift"
 
     ```swift
     let tokens: [String: String] = [
