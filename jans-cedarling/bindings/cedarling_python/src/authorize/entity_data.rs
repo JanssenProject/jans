@@ -27,7 +27,7 @@ use serde_pyobject::from_pyobject;
 ///
 /// Methods
 /// -------
-/// .. method:: __init__(self, resource_type: str, id: str, **kwargs: dict)
+/// .. method:: __init__(self, entity_type: str, id: str, **kwargs: dict)
 ///     Initialize a new EntityData. In kwargs the payload is a dictionary of entity attributes.
 ///
 /// .. method:: from_dict(cls, value: dict) -> EntityData
