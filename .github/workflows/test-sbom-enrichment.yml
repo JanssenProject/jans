@@ -16,6 +16,7 @@ jobs:
               -H "Accept: application/vnd.github.v3.raw" \
               -o gh-sbom.json \
               https://api.github.com/repos/JanssenProject/jans/dependency-graph/sbom
+        wc gh-sbom.json
 
     # Trim the SBOM to remove the parent `SBOM` element. 
     # install jq to trim the SBOM
@@ -28,6 +29,7 @@ jobs:
     - name: Trim SBOM
       run: |
         jq '.sbom' gh-sbom.json > trimmed-sbom.json
+        wc trimmed-sbom.json
 
     # Install Parlay CLI
     - name: Install Parlay CLI
@@ -42,3 +44,4 @@ jobs:
         parlay ecosystems enrich - | \
         parlay scorecard enrich - > enriched-sbom.json
         mv enriched-sbom.json sbom.json
+        wc sbom.json
