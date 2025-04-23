@@ -24,7 +24,7 @@
 		<httpcore.version>4.4.15</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
 
-		<resteasy.version>6.0.3.Final</resteasy.version>
+		<resteasy.version>6.2.12.Final</resteasy.version>
 		<richfaces.version>4.5.19-gluu.Final</richfaces.version>
 		<weld.version>4.0.3.Final</weld.version>
 	
