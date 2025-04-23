@@ -606,7 +606,7 @@ jobs:
           rustup update stable && rustup default stable
           TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
           VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
-          if [ "${TAG}" == "nightly" ]; then
+          if [ "${TAG}" = "nightly" ]; then
             VERSION=nightly
             TAG="0.0.0"
           fi
@@ -620,33 +620,37 @@ jobs:
         run: |
           TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
           VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
-          if [ "${TAG}" == "nightly" ]; then
+          if [ "${TAG}" = "nightly" ]; then
             VERSION=nightly
             TAG="0.0.0"
           fi
-      
-          if: matrix.name == 'ubuntu22'
-            FILE="libcedarling_go-${TAG}.so"
-          elif: matrix.name == 'mac'
-            FILE="libcedarling_go-${TAG}.dylib"
-          elif: matrix.name == 'windows'
-            FILE="cedarling_go-${TAG}.dll"
-            FILE_LIB="cedarling_go-${TAG}.lib"
-          fi
-      
+          
+          case "${{ matrix.name }}" in
+            ubuntu22)
+              FILE="libcedarling_go-${TAG}.so"
+              ;;
+            mac)
+              FILE="libcedarling_go-${TAG}.dylib"
+              ;;
+            windows)
+              FILE="cedarling_go-${TAG}.dll"
+              FILE_LIB="cedarling_go-${TAG}.lib"
+              ;;
+          esac
+          
           sha256sum $FILE >> $FILE.sha256sum
           gpg --armor --detach-sign $FILE || echo "Failed to sign"
           gpg --armor --detach-sign $FILE.sha256sum || echo "Failed to sign"
-      
-          if [[ -n "$FILE_LIB" ]]; then
+          
+          if [ -n "$FILE_LIB" ]; then
             sha256sum $FILE_LIB >> $FILE_LIB.sha256sum
             gpg --armor --detach-sign $FILE_LIB || echo "Failed to sign"
             gpg --armor --detach-sign $FILE_LIB.sha256sum || echo "Failed to sign"
           fi
-      
+          
           echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
           gh release upload "${VERSION}" $FILE $FILE.sha256sum $FILE.asc
-      
-          if [[ -n "$FILE_LIB" ]]; then
+          
+          if [ -n "$FILE_LIB" ]; then
             gh release upload "${VERSION}" $FILE_LIB $FILE_LIB.sha256sum $FILE_LIB.asc
-          fi
+         fi
