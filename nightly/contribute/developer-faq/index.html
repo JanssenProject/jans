@@ -246,18 +246,11 @@
   
   
   
-    
-
-  
-  
-  
     <li class="md-tabs__item">
       <a href="../../cedarling/cedarling-getting-started/" class="md-tabs__link">
         Cedarling
       </a>
     </li>
-  
-
   
 
       
@@ -7209,63 +7202,10 @@
   
   
   
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_1" type="checkbox" id="__nav_2_1" >
-      
-      
-      
-        
-          
-        
-          
-        
-      
-      
-        <label class="md-nav__link" for="__nav_2_1">
-          Getting Started
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Getting Started" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_1">
-          <span class="md-nav__icon md-icon"></span>
-          Getting Started
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
     <li class="md-nav__item">
       <a href="../../cedarling/cedarling-getting-started/" class="md-nav__link">
-        Getting Started with Cedarling
+        Getting Started
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../cedarling/getting-started/go/" class="md-nav__link">
-        Golang
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
     </li>
   
 
@@ -9156,7 +9096,7 @@ you as a quick reference to generate Let's Encrypt CA certificates.</p>
 </div>
 <p>This installation uses Gluu Testing certificate.</p>
 <h3 id="download-installer">Download Installer<a class="headerlink" href="#download-installer" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-linux-setup/jans_setup/install.py -O install.py
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py -O install.py
 </code></pre></div>
 <h3 id="execute-installer">Execute Installer<a class="headerlink" href="#execute-installer" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>python3 install.py --profile=openbanking --args=&quot;-ob-key-fn=/opt/jans/jans-setup/openbanking/static/ob-gluu-test.key -static-kid=ob-gluu-test -jwks-uri=https://ox.gluu.org/icrby8xcvbcv/ob/ob-gluu-test.jwks --disable-ob-auth-script -ob-alias=ob-gluu-test&quot;
