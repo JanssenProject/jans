@@ -65,18 +65,22 @@ jobs:
         # generate Framing Software Component Transparency (v3) compliance report
         echo "Generating Framing Software Component Transparency (v3) compliance report"
         sbomqs compliance --fsct -j enriched-sbom.json > jans-sbom-fsct-report.json
+        wc jans-sbom-fsct-report.json
 
         # generate BSI TR-03183-2 (v2.0.0) compliance report
         echo "Generating BSI TR-03183-2 (v2.0.0) compliance report"
         sbomqs compliance --bsi-v2 -j enriched-sbom.json > jans-sbom-bsi-v2-report.json
+        wc jans-sbom-bsi-v2-report.json
 
         # generate NTIA minimum elements (July 12, 2021) compliance report
         echo "Generating NTIA minimum elements (July 12, 2021) compliance report"
         sbomqs compliance --ntia -j enriched-sbom.json > jans-sbom-NTIA-report.json
+        wc jans-sbom-NTIA-report.json
 
         # generate OpenChain Telco SBOM (v1.0) compliance report
         echo "Generating OpenChain Telco SBOM (v1.0) compliance report"
         sbomqs compliance --oct -j enriched-sbom.json > jans-sbom-openchain-report.json
+        wc jans-sbom-openchain-report.json
 
 
     #   # Upload the enriched SBOM to the release
