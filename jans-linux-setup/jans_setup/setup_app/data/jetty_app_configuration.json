@@ -6,7 +6,7 @@
       "ratio": 0.25
     },
     "jetty": {
-      "modules": "server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket"
+      "modules": "server,resources,http,http-forwarded,threadpool,console-capture,ee9-jsp,ee9-deploy,ee9-annotations,ee9-websocket-jakarta,ee9-cdi-decorate"
     },
     "installed": false,
     "name": "jans-auth"
@@ -18,7 +18,7 @@
       "ratio": 0.10
     },
     "jetty": {
-      "modules": "server,deploy,resources,http,http-forwarded,threadpool,console-capture,jsp"
+      "modules": "server,resources,http,http-forwarded,threadpool,console-capture,ee9-jsp,ee9-deploy,ee9-cdi-decorate"
     },
     "installed": false,
     "name": "jans-fido2"
@@ -30,7 +30,7 @@
       "ratio": 0.15
     },
     "jetty": {
-      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
+      "modules": "server,resources,http,http-forwarded,console-capture,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate"
     },
     "installed": false,
     "name": "jans-scim"
@@ -42,7 +42,7 @@
       "ratio": 0.10
     },
     "jetty": {
-      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
+      "modules": "server,resources,http,http-forwarded,console-capture,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate"
     },
     "installed": false,
     "name": "jans-config-api"
@@ -54,7 +54,7 @@
       "ratio": 0.10
     },
     "jetty": {
-      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
+      "modules": "server,resources,http,http-forwarded,console-capture,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate"
     },
     "installed": false,
     "name": "jans-link"
@@ -67,7 +67,7 @@
       "ratio": 0.10
     },
     "jetty": {
-      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,cdi-decorate"
+      "modules": "server,resources,http,http-forwarded,console-capture,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate"
     },
     "installed": false,
     "name": "jans-casa"
@@ -79,7 +79,7 @@
       "ratio": 0.10
     },
     "jetty": {
-      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
+      "modules": "server,resources,http,http-forwarded,console-capture,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate"
     },
     "installed": false,
     "name": "jans-keycloak-link"
@@ -91,7 +91,7 @@
       "ratio": 0.10
     },
     "jetty": {
-      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
+      "modules": "server,resources,http,http-forwarded,console-capture,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate"
     },
     "installed": false,
     "name": "jans-lock"
