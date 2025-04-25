@@ -497,6 +497,19 @@
                     }
                 }
             },
+            "POST": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "HTTP_Request"
+                    ],
+                    "principalTypes": [
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
             "PUT": {
                 "appliesTo": {
                     "resourceTypes": [
