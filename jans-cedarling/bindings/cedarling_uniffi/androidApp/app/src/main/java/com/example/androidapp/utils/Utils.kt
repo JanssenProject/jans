@@ -36,3 +36,8 @@ fun addFieldToJson(jsonString: String, key: String, value: Any): String {
     jsonObject.put(key, value)  // Add new field
     return jsonObject.toString()
 }
+
+
+fun toJsonString(obj: Any): String {
+    return Gson().toJson(obj)
+}

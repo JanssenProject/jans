@@ -1,5 +1,6 @@
 package com.example.androidapp.widgets
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -11,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.androidapp.utils.toJsonString
 import com.example.androidapp.views.JsonTreeView
 import uniffi.mobile.AuthorizeResult
 
@@ -31,13 +33,14 @@ fun StateDialog(
                 Text("Authorization Result:", style = MaterialTheme.typography.titleMedium)
                 Text("${result?.decision ?: "N/A"}", modifier = Modifier.padding(4.dp))
 
-                result?.jsonPerson?.let {
+                result?.person?.let {
                     Text("Person:", style = MaterialTheme.typography.titleMedium)
-                    JsonTreeView(it)
+                    Log.d("Person: {}", toJsonString(it))
+                    JsonTreeView(toJsonString(it))
                 }
-                result?.jsonWorkload?.let {
+                result?.workload?.let {
                     Text("Workload:", style = MaterialTheme.typography.titleMedium)
-                    JsonTreeView(it)
+                    JsonTreeView(toJsonString(it))
                 }
                 Text("Logs:", style = MaterialTheme.typography.titleMedium)
                 logs?.forEach { log ->

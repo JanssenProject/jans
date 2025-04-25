@@ -36,6 +36,8 @@ import uniffi.mobile.AuthorizeResult
 import uniffi.mobile.Cedarling
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import uniffi.mobile.EntityData
+import uniffi.mobile.JsonValue
 import java.io.File
 
 class MainActivity : ComponentActivity() {
@@ -133,15 +135,13 @@ fun CardListScreen() {
 
             val nullableResource = resource?.let { jsonToMapWithAnyType(it) };
             val resourceMap = nullableResource.orEmpty();
-
-            val nonNullableConext: String = context.orEmpty()
-
+            val nonNullableResource: String = resource.orEmpty();
+            val nonNullableConext: String = context.orEmpty();
+            val jsonContext: JsonValue = nonNullableConext;
             val result: AuthorizeResult? = instance?.authorize(tokensMap,
                 nonNullableAction,
-                resourceMap.get("type").toString(),
-                resourceMap.get("id").toString(),
-                anyToJson(resourceMap.get("payload")),
-                nonNullableConext
+                EntityData.fromJson(nonNullableResource),
+                jsonContext
             );
 
             val logs: List<String>? = instance?.getLogsByRequestIdAndTag(result?.requestId.orEmpty(), logType)
