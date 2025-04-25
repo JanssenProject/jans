@@ -3,6 +3,7 @@ package io.jans.scim.ws.rs.scim2;
 import java.util.Collections;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -25,7 +26,7 @@ import io.jans.service.JsonService;
  * This class implements the endpoint at which the requester can obtain SCIM metadata configuration. Similar to the SCIM
  * /ServiceProviderConfig endpoint
  */
-@ApplicationScoped
+@Dependent
 @Path("/scim-configuration")
 @Api(value = "/.well-known/scim-configuration", description = "The SCIM server endpoint that provides configuration data.")
 public class ScimConfigurationWS {
