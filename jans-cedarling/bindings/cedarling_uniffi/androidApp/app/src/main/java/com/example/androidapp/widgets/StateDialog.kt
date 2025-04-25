@@ -35,7 +35,6 @@ fun StateDialog(
 
                 result?.person?.let {
                     Text("Person:", style = MaterialTheme.typography.titleMedium)
-                    Log.d("Person: {}", toJsonString(it))
                     JsonTreeView(toJsonString(it))
                 }
                 result?.workload?.let {
