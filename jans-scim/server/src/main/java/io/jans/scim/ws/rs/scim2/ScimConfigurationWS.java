@@ -2,16 +2,6 @@ package io.jans.scim.ws.rs.scim2;
 
 import java.util.Collections;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-
 import org.slf4j.Logger;
 
 import com.wordnik.swagger.annotations.Api;
@@ -21,6 +11,14 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 import io.jans.scim.ScimConfiguration;
 import io.jans.service.JsonService;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 /**
  * This class implements the endpoint at which the requester can obtain SCIM metadata configuration. Similar to the SCIM
