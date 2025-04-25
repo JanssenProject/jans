@@ -625,7 +625,7 @@ jobs:
 
 
     # Upload the enriched SBOM and compliance reports to the release
-    - name: Upload the enriched SBOM and reports
+    - name: Upload the enriched SBOM 
       uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
