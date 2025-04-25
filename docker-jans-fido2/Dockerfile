@@ -13,7 +13,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.24
+ARG JETTY_VERSION=12.0.19
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -55,7 +55,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
     && zip -d jans-fido2.war WEB-INF/jetty-web.xml \
     && zip -r jans-fido2.war WEB-INF/jetty-env.xml \
     && cp jans-fido2.war ${JETTY_BASE}/jans-fido2/webapps/jans-fido2.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-fido2 --add-module=server,deploy,resources,http,http-forwarded,threadpool,jsp,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-fido2 --add-modules=server,resources,http,forwarded,threadpool,ee9-deploy,ee9-cdi-decorate,jmx,logging-log4j2 --approve-all-licenses \
     && rm -rf /tmp/jans-fido2.war /tmp/WEB-INF
 
 # ===========

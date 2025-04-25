@@ -13,7 +13,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.24
+ARG JETTY_VERSION=12.0.19
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -42,7 +42,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-casa/webapps \
     && zip -d jans-casa.war WEB-INF/jetty-web.xml \
     && zip -r jans-casa.war WEB-INF/jetty-env.xml \
     && cp jans-casa.war ${JETTY_BASE}/jans-casa/webapps/jans-casa.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-casa --add-module=server,deploy,resources,http,jsp,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-casa --add-modules=server,resources,http,forwarded,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate,jmx,logging-log4j2 --approve-all-licenses \
     && rm -rf /tmp/jans-casa.war /tmp/WEB-INF
 
 # casa plugins

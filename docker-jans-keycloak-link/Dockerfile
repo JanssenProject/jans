@@ -13,7 +13,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.24
+ARG JETTY_VERSION=12.0.19
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -54,7 +54,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-keycloak-link/webapps \
     && zip -d jans-keycloak-link.war WEB-INF/jetty-web.xml \
     && zip -r jans-keycloak-link.war WEB-INF/jetty-env.xml \
     && cp jans-keycloak-link.war ${JETTY_BASE}/jans-keycloak-link/webapps/jans-keycloak-link.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-keycloak-link --add-module=server,deploy,resources,http,http-forwarded,threadpool,jsp,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-keycloak-link --add-modules=server,resources,http,forwarded,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate,jmx,logging-log4j2 --approve-all-licenses \
     && rm -rf /tmp/jans-keycloak-link.war /tmp/WEB-INF
 
 # ===========
