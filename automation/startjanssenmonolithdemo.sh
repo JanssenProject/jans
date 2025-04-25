@@ -19,6 +19,10 @@ if [[ -z $EXT_IP ]]; then
   EXT_IP=$(curl ipinfo.io/ip)
 fi
 
+if [[ -z $JANS_BUILD_COMMIT ]]; then
+  JANS_BUILD_COMMIT="main"
+fi
+
 wait_for_services() {
   code=404
   while [[ "$code" != "200" ]]; do
@@ -52,7 +56,7 @@ rm -rf /tmp/jans || echo "/tmp/jans doesn't exist"
 git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
-    && git checkout main \
+    && git checkout "$JANS_BUILD_COMMIT" \
     && git sparse-checkout set docker-jans-monolith \
     && cd "$WORKING_DIRECTORY"
 
