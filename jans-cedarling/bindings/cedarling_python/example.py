@@ -45,11 +45,10 @@ instance = Cedarling(bootstrap_config)
 def authorize_with_token():
     # //// Execute authentication request ////
 
-    # field resource_type and id is mandatory
+    # field entity_type and id is mandatory
     # other fields are attributes of the resource.
     resource = EntityData(
-        entity_type="resource",
-        resource_type="Jans::Application",
+        entity_type="Jans::Application",
         id="random_id",
         app_id="application_id",
         name="Some Application",

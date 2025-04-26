@@ -13,7 +13,7 @@ policy_stores:
         name: "Jans"
         description: "A Test IDP"
         openid_configuration_endpoint: "https://test.jans.org/.well-known/openid-configuration"
-        tokens_metadata:
+        token_metadata:
           access_token:
             entity_type_name: "Jans::Access_token"
             workload_id: "client_id"
@@ -28,6 +28,10 @@ policy_stores:
             user_id: "sub"
             principal_mapping:
               - "Jans::User"
+      AnotherIssuer:
+        name: "Another Issuer"
+        description: "This is a placeholder issuer used to test if Cedarling still works with multiple issuers"
+        openid_configuration_endpoint: "https://another.jans.org/.well-known/openid-configuration"
     policies:
       840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
         description: simple policy example for principal workload
@@ -60,6 +64,19 @@ policy_stores:
                 principal.country == resource.country &&
                 principal.id_token.aud == "5b4487c4-8db1-409d-a653-f907b8094039" 
             };
+      555da5d85403f35ea76519ed1a18a33989f855bf1cf8:
+        cedar_version: v4.0.0
+        description: Superuser that can do anything
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+              principal in Jans::Role::"SuperUser",
+                action,
+                resource
+            );
     schema:
       encoding: none
       content_type: cedar
@@ -70,13 +87,13 @@ policy_stores:
           entity Role;
           entity TrustedIssuer = {"issuer_entity_id": Url};
           entity User in [Role] = {
-            sub: String,
-            role: String,
+            sub?: String,
+            role?: String,
             email: String,
             username: String,
             country: String,
-            id_token: Id_token,
-            userinfo_token: Userinfo_token,
+            id_token?: Id_token,
+            userinfo_token?: Userinfo_token,
           };
           entity Workload = {
             iss: Jans::TrustedIssuer,
@@ -101,11 +118,11 @@ policy_stores:
             jti: String,
           };
           type Context = {
-            user: User,
-            workload: Workload,
-            access_token: Access_token,
-            id_token: Id_token,
-            userinfo_token: Userinfo_token,
+            user?: User,
+            workload?: Workload,
+            access_token?: Access_token,
+            id_token?: Id_token,
+            userinfo_token?: Userinfo_token,
           };
           action "Update" appliesTo {
             principal: [Workload, User, Role],

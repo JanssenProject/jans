@@ -11,7 +11,7 @@ mod build_entity_attrs;
 mod build_expr;
 mod build_iss_entity;
 mod build_principal_entity;
-mod build_cedar_entity;
+mod build_resource_entity;
 mod build_role_entity;
 mod build_token_entities;
 mod built_entities;
@@ -20,12 +20,13 @@ mod error;
 mod schema;
 mod value_to_expr;
 
-use crate::EntityData;
 use crate::authz::AuthorizeEntitiesData;
+use crate::authz::request::EntityData;
 use crate::common::PartitionResult;
 use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
-use crate::entity_builder_config::*;
+use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
 use crate::jwt::Token;
+use crate::{RequestUnsigned, entity_builder_config::*};
 use build_entity_attrs::*;
 use build_iss_entity::build_iss_entity;
 use cedar_policy::{Entity, EntityUid, RestrictedExpression};
@@ -54,9 +55,10 @@ impl EntityBuilder {
         let schema = schema.map(MappingSchema::try_from).transpose()?;
 
         let (ok, errs) = trusted_issuers
-            .iter()
-            .map(|(iss_id, iss)| {
-                build_iss_entity(&config.entity_names.iss, iss_id, iss, schema.as_ref())
+            .values()
+            .map(|iss| {
+                let iss_id = iss.oidc_endpoint.origin().ascii_serialization();
+                build_iss_entity(&config.entity_names.iss, &iss_id, iss, schema.as_ref())
             })
             .partition_result();
 
@@ -85,7 +87,7 @@ impl EntityBuilder {
         for (tkn_name, tkn) in tokens.iter() {
             let entity_name = tkn
                 .iss
-                .and_then(|iss| iss.tokens_metadata.get(tkn_name))
+                .and_then(|iss| iss.token_metadata.get(tkn_name))
                 .map(|metadata| metadata.entity_type_name.as_str())
                 .or_else(|| default_tkn_entity_name(tkn_name));
 
@@ -126,7 +128,7 @@ impl EntityBuilder {
             (None, Vec::new())
         };
 
-        let resource = self.build_cedar_entity(resource)?;
+        let resource = self.build_resource_entity(resource)?;
 
         let issuers = self.iss_entities.values().cloned().collect();
         Ok(AuthorizeEntitiesData {
@@ -136,6 +138,38 @@ impl EntityBuilder {
             resource,
             roles,
             tokens: token_entities,
+        })
+    }
+
+    /// Builds the entities using the unsigned interface
+    pub fn build_entities_unsigned(
+        &self,
+        request: &RequestUnsigned,
+    ) -> Result<BuiltEntitiesUnsigned, BuildUnsignedEntityError> {
+        let mut built_entities = BuiltEntities::default();
+
+        let mut principals = Vec::with_capacity(request.principals.len());
+        let mut roles = Vec::<Entity>::new();
+        for principal in request.principals.iter() {
+            let BuiltPrincipalUnsigned { principal, parents } =
+                self.build_principal_unsigned(principal, &built_entities)?;
+
+            built_entities.insert(&principal.uid());
+            for role in roles.iter() {
+                built_entities.insert(&role.uid());
+            }
+
+            principals.push(principal);
+            roles.extend(parents);
+        }
+
+        let resource = self.build_resource_entity(&request.resource)?;
+
+        Ok(BuiltEntitiesUnsigned {
+            principals,
+            roles,
+            resource,
+            built_entities,
         })
     }
 
@@ -157,6 +191,13 @@ impl EntityBuilder {
 
         build_cedar_entity(type_name, id, attrs, parents)
     }
+}
+
+pub struct BuiltEntitiesUnsigned {
+    pub principals: Vec<Entity>,
+    pub roles: Vec<Entity>,
+    pub resource: Entity,
+    pub built_entities: BuiltEntities,
 }
 
 pub fn build_cedar_entity(
@@ -323,7 +364,7 @@ mod test {
 
         // Set the custom token names in the IDP metadata
         let iss = TrustedIssuer {
-            tokens_metadata: HashMap::from([
+            token_metadata: HashMap::from([
                 (
                     "access_token".to_string(),
                     TokenEntityMetadata::builder()
@@ -372,7 +413,7 @@ mod test {
             .build_entities(&tokens, &EntityData {
                 entity_type: "Jans::Resource".into(),
                 id: "some_id".into(),
-                payload: HashMap::new(),
+                attributes: HashMap::new(),
             })
             .expect("build entities");
 

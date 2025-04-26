@@ -185,12 +185,12 @@ Attributes
 
 Methods
 -------
-.. method:: __init__(self, resource_type: str, id: str, **kwargs: dict)
+.. method:: __init__(self, entity_type: str, id: str, **kwargs: dict)
     Initialize a new EntityData. In kwargs the payload is a dictionary of entity attributes.
 
 .. method:: from_dict(cls, value: dict) -> EntityData
     Initialize a new EntityData from a dictionary.
-    To pass `resource_type` you need to use `type` key.
+    To pass `entity_type` you need to use `type` key.
 ___
 
 PolicyEvaluationError
@@ -227,6 +227,28 @@ request = Request(access_token="token123", action="read", resource=resource, con
 ```
 ___
 
+# RequestUnsigned
+Request
+=======
+
+A Python wrapper for the Rust `cedarling::RequestUnsigned` struct. Represents
+authorization data for unsigned authorization requests for many principals.
+
+Attributes
+----------  
+:param principals: A list of `EntityData` objects representing the principals.  
+:param action: The action to be authorized.  
+:param resource: Resource data (wrapped `ResourceData` object).  
+:param context: Python dictionary with additional context.
+
+Example
+-------
+```python
+# Create a request for authorization
+request = Request(principals=[principal], action="read", resource=resource, context={})
+```
+___
+
 # authorize_errors.ActionError
 Error encountered while parsing Action to EntityUid
 ___
@@ -241,6 +263,10 @@ ___
 
 # authorize_errors.BuildEntityError
 Error encountered while running on strict id token trust mode
+___
+
+# authorize_errors.BuildUnsignedRoleEntityError
+Error building Role entity for unsigned request
 ___
 
 # authorize_errors.CreateContextError
