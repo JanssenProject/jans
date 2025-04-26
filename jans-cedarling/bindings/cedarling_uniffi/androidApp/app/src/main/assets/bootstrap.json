@@ -21,7 +21,7 @@
   "CEDARLING_LOG_TYPE": "memory",
   "CEDARLING_POLICY_STORE_ID": "840da5d85403f35ea76519ed1a18a33989f855bf1cf8",
   "CEDARLING_USER_AUTHZ": "enabled",
-  "CEDARLING_POLICY_STORE_URI": "https://raw.githubusercontent.com/duttarnab/cedarling_android/refs/heads/main/policy-store.json",
+  "CEDARLING_POLICY_STORE_URI": "https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/bindings/cedarling_uniffi/test_files/policy-store.json",
   "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
     "or": [
       {

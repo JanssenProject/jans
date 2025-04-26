@@ -6,15 +6,6 @@ import com.google.gson.reflect.TypeToken
 import org.json.JSONObject
 import java.io.IOException
 
-fun anyToJson(any: Any?): String {
-    return Gson().toJson(any)
-}
-
-fun jsonToMapWithAnyType(jsonString: String): Map<String, Any> {
-    val type = object : TypeToken<Map<String, Any>>() {}.type
-    return Gson().fromJson(jsonString, type) ?: emptyMap()
-}
-
 fun jsonToMapWithStringType(jsonString: String): Map<String, String> {
     val type = object : TypeToken<Map<String, Any>>() {}.type
     val map: Map<String, Any> = Gson().fromJson(jsonString, type) ?: emptyMap()
@@ -30,13 +21,6 @@ fun readJsonFromAssets(context: Context, fileName: String): String? {
         null
     }
 }
-
-fun addFieldToJson(jsonString: String, key: String, value: Any): String {
-    val jsonObject = JSONObject(jsonString)
-    jsonObject.put(key, value)  // Add new field
-    return jsonObject.toString()
-}
-
 
 fun toJsonString(obj: Any): String {
     return Gson().toJson(obj)
