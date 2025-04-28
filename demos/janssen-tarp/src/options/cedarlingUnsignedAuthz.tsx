@@ -14,23 +14,23 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import initWasm, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
 import Utils from './Utils';
+import Stack from '@mui/material/Stack';
 
 export default function CedarlingUnsignedAuthz({ data }) {
-    const [context, setContext] = React.useState({});
-    const [resource, setResource] = React.useState({});
-    const [principals, setPrincipals] = React.useState([]);
-    const [action, setAction] = React.useState("");
     const [logType, setLogType] = React.useState('Decision');
     const [authzResult, setAuthzResult] = React.useState("");
     const [authzLogs, setAuthzLogs] = React.useState("");
+    const [formFields, setFormFields] = React.useState({ principals: [], action: "", context: {}, resource: {} });
 
     React.useEffect(() => {
         chrome.storage.local.get(["authzRequest_unsigned"], (result) => {
             if (!Utils.isEmpty(result) && Object.keys(result).length !== 0) {
-                setContext(result.authzRequest_unsigned.context);
-                setAction(result.authzRequest_unsigned.action);
-                setResource(result.authzRequest_unsigned.resource);
-                setPrincipals(result.authzRequest_unsigned.principals);
+                setFormFields({
+                    principals: result.authzRequest_unsigned.principals,
+                    action: result.authzRequest_unsigned.action,
+                    context: result.authzRequest_unsigned.context,
+                    resource: result.authzRequest_unsigned.resource
+                });
             }
         });
     }, [data]);
@@ -76,14 +76,23 @@ export default function CedarlingUnsignedAuthz({ data }) {
 
     const createCedarlingAuthzRequestObj = async () => {
         const reqObj = {
-            principals,
-            action,
-            context,
-            resource,
+            principals: formFields.principals,
+            action: formFields.action,
+            context: formFields.context,
+            resource: formFields.resource,
         };
 
         chrome.storage.local.set({ authzRequest_unsigned: reqObj });
         return reqObj;
+    };
+
+    const resetInputs = () => {
+        setFormFields({
+            principals: [],
+            action: "",
+            context: {},
+            resource: {}
+        });
     };
 
     return (
@@ -101,7 +110,16 @@ export default function CedarlingUnsignedAuthz({ data }) {
                         <AccordionDetails>
                             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                                 <InputLabel id="principal-value-label">Principals</InputLabel>
-                                <JsonEditor data={principals} setData={setPrincipals} rootName="principals" />
+                                <JsonEditor
+                                    data={formFields.principals}
+                                    setData={(e: any) => {
+                                        setFormFields((prev) => ({
+                                            ...prev,
+                                            ["principals"]: e
+                                        }));
+                                    }}
+                                    rootName="principals"
+                                />
 
                                 <TextField
                                     autoFocus
@@ -113,15 +131,35 @@ export default function CedarlingUnsignedAuthz({ data }) {
                                     type="text"
                                     fullWidth
                                     variant="outlined"
-                                    value={action}
+                                    value={formFields.action}
                                     onChange={(e) => {
-                                        setAction(e.target.value);
+                                        const { name, value } = e.target;
+                                        setFormFields((prev) => ({
+                                            ...prev,
+                                            [name]: value
+                                        }));
                                     }}
                                 />
                                 <InputLabel id="resource-value-label">Resource</InputLabel>
-                                <JsonEditor data={resource} setData={setResource} rootName="resource" />
+                                <JsonEditor
+                                    data={formFields.resource}
+                                    rootName="resource"
+                                    setData={(e) => {
+                                        setFormFields((prev) => ({
+                                            ...prev,
+                                            ["resource"]: e
+                                        }));
+                                    }} />
                                 <InputLabel id="context-value-label">Context</InputLabel>
-                                <JsonEditor data={context} setData={setContext} rootName="context" />
+                                <JsonEditor
+                                    data={formFields.context}
+                                    setData={(e) => {
+                                        setFormFields((prev) => ({
+                                            ...prev,
+                                            ["context"]: e
+                                        }));
+                                    }}
+                                    rootName="context" />
 
                                 <InputLabel id="principal-value-label">Log Type</InputLabel>
                                 <ToggleButtonGroup
@@ -136,7 +174,10 @@ export default function CedarlingUnsignedAuthz({ data }) {
                                     <ToggleButton value="Metric">Metric</ToggleButton>
                                 </ToggleButtonGroup>
                                 <hr />
-                                <Button variant="outlined" color="success" onClick={triggerCedarlingAuthzRequest}>Cedarling Authz Request</Button>
+                                <Stack direction="row" spacing={2}>
+                                    <Button variant="outlined" color="success" onClick={triggerCedarlingAuthzRequest}>Cedarling Authz Request</Button>
+                                    <Button variant="outlined" color="success" onClick={() => resetInputs()}>Reset</Button>
+                                </Stack>
                             </div>
                         </AccordionDetails>
                     </Accordion>
