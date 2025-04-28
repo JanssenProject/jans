@@ -151,7 +151,7 @@ mod test {
                 "attrs": {
                     "iss": {"__entity": {
                         "type": "Jans::TrustedIssuer",
-                        "id": "some_iss",
+                        "id": "https://test.jans.org",
                     }},
                     "jti": "some_jti",
                 },

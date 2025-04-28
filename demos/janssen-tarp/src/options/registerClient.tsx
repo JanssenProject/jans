@@ -146,9 +146,9 @@ export default function RegisterClient({ isOpen, handleDialog }) {
         const registrationUrl = openidConfig.data.registration_endpoint;
 
         var registerObj: ILooseObject = {
-          redirect_uris: [issuerUrl],
+          redirect_uris: [chrome.identity.getRedirectURL()],
           scope: scopes,
-          post_logout_redirect_uris: [chrome.runtime.getURL('options.html')],
+          post_logout_redirect_uris: [chrome.identity.getRedirectURL('logout')],
           response_types: ['code'],
           grant_types: ['authorization_code'],
           application_type: 'web',
