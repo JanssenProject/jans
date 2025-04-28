@@ -14,7 +14,8 @@ use serde::Deserialize;
 use serde_json::json;
 use thiserror::Error;
 
-pub const CEDARLING_SCOPES: &str = "cedarling";
+pub const DCR_SCOPE: &str = "cedarling";
+pub const ACCESS_TKN_SCOPE: &str = "https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write";
 
 pub async fn register_client(
     pdp_id: PdpID,
@@ -45,7 +46,7 @@ pub async fn register_client(
         "token_endpoint_auth_method": "client_secret_basic",
         "grant_types": ["client_credentials"],
         "client_name": format!("cedarling-{}", pdp_id),
-        "scope": CEDARLING_SCOPES,
+        "scope": DCR_SCOPE,
         "access_token_as_jwt": true,
     });
     if let Some(ssa_jwt) = ssa_jwt {
@@ -66,7 +67,7 @@ pub async fn register_client(
     // Get access token
     let form_data = serde_json::from_value::<HashMap<String, String>>(json!({
         "grant_type": "client_credentials",
-        "scope": CEDARLING_SCOPES,
+        "scope": ACCESS_TKN_SCOPE,
     }))
     // this should never fail since this is a hard-coded valid JSON
     .expect("serialize form data");

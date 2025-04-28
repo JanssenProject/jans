@@ -333,7 +333,7 @@ mod test {
                 "token_endpoint_auth_method": "client_secret_basic",
                 "grant_types": ["client_credentials"],
                 "client_name": format!("cedarling-{}", pdp_id),
-                "scope": CEDARLING_SCOPES,
+                "scope": DCR_SCOPE,
                 "access_token_as_jwt": true,
                 "software_statement": ssa_jwt,
             })))
