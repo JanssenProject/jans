@@ -6,14 +6,19 @@
 
 package io.jans.util;
 
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 public final class Util {
 
@@ -124,13 +129,7 @@ public final class Util {
      * @return json mapper
      */
     public static ObjectMapper createJsonMapper() {
-        final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector();
-        final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
-
-        final AnnotationIntrospector pair = AnnotationIntrospector.pair(jackson, jaxb);
-
-        final ObjectMapper mapper = new ObjectMapper();
-        mapper.setAnnotationIntrospector(pair);
+    	final ObjectMapper mapper = new ObjectMapper();
         return mapper;
     }
 
