@@ -480,6 +480,7 @@ public class CustomScriptResource extends ConfigBaseResource {
 
     private CustomScript updateFileTypeCustomScript(CustomScript customScript) {
         logger.info("Handling CustomScript if location type is File - customScript:{}", customScript);
+        
         // Note File type customScript is intended only for dev
         if (customScript == null) {
             return customScript;
