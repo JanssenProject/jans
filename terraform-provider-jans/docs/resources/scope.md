@@ -221,6 +221,7 @@ Optional:
 - `redirect_uris_regex` (String) If set, redirectUri must match to this regexp
 - `requested_lifetime` (Number) List of requested lifetime.
 - `require_par` (Boolean) boolean value to indicate of Pushed Authorisation Request(PAR)is required.
+- `require_pcke` (Boolean) Specifies whether to require PCKE (Proof Key for Code Exchange) for authorization code flow.
 - `ropc_scripts` (List of String) List of Resource Owner Password Credentials (ROPC) scripts.
 - `rpt_claims_scripts` (List of String) List of Requesting Party Token (RPT) claims scripts.
 - `run_introspection_script_before_jwt_creation` (Boolean) boolean property which indicates whether to run introspection script and then include claims 
@@ -229,6 +230,7 @@ Optional:
 - `spontaneous_scopes` (List of String) List of spontaneous scope regular expression.
 - `tls_client_auth_subject_dn` (String) String representation of the expected subject distinguished name of the certificate, which 
 									the OAuth client will use in mutual TLS authentication.
+- `token_exchange_scripts` (List of String) List of token exchange scripts.
 - `tx_token_encrypted_response_alg` (String) JWE alg algorithm (JWA) required for encrypting the TX Token response.
 - `tx_token_encrypted_response_enc` (String) JWE enc algorithm (JWA) required for encrypting the TX Token response.
 - `tx_token_lifetime` (Number) Specifies the Client-specific TX Token expiration.

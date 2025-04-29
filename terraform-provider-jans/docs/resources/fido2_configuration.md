@@ -61,8 +61,6 @@ resource "jans_fido2_configuration" "global" {
 ### Optional
 
 - `base_endpoint` (String) The base URL for Fido2 endpoints. Example: https://server.example.com/fido2/restv1
-- `clean_service_batch_chunk_size` (Number) Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.
-- `clean_service_interval` (Number) Time interval for the Clean Service in seconds.
 - `disable_jdk_logger` (Boolean) Boolean value specifying whether to enable JDK Loggers.
 - `external_logger_configuration` (String) Path to external Fido2 logging configuration.
 - `fido2_configuration` (Block List, Max: 1) Fido2Configuration. (see [below for nested schema](#nestedblock--fido2_configuration))
@@ -76,6 +74,7 @@ resource "jans_fido2_configuration" "global" {
 - `person_custom_object_class_list` (List of String) Custom object class list for dynamic person enrolment.
 - `super_gluu_enabled` (Boolean) Boolean value to indicate if SuperGluu is to be enabled.
 - `use_local_cache` (Boolean) Boolean value to indicate if Local Cache is to be used.
+- `user_info_lifetime` (Number) User info lifetime.
 
 ### Read-Only
 
