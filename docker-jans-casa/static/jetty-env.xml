@@ -2,7 +2,7 @@
 <!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://www.eclipse.org/jetty/configure_10_0.dtd">
 
 <Configure id="webAppCtx"
-	class="org.eclipse.jetty.webapp.WebAppContext">
+	class="org.eclipse.jetty.ee9.webapp.WebAppContext">
 	<New id="BeanManager" class="org.eclipse.jetty.plus.jndi.Resource">
 		<Arg>
 			<Ref refid="webAppCtx" />
