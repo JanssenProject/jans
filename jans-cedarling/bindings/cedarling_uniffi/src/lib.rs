@@ -90,14 +90,6 @@ pub struct JsonValue(String);
 
 uniffi::custom_newtype!(JsonValue, String);
 
-#[uniffi::export]
-impl JsonValue {
-    #[uniffi::constructor]
-    pub fn new(value: String) -> Self {
-        Self(value)
-    }
-}
-
 impl TryFrom<JsonValue> for Value {
     type Error = serde_json::Error;
     fn try_from(value: JsonValue) -> Result<Self, Self::Error> {

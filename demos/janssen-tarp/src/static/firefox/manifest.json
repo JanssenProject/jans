@@ -11,7 +11,7 @@
   },
 
   "action": {
-    "default_title": "jans-tarp",
+    "default_title": "janssen-tarp",
     "default_popup": "popup.html"
   },
   "permissions": [

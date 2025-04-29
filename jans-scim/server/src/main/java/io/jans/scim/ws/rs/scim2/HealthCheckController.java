@@ -6,7 +6,8 @@
 
 package io.jans.scim.ws.rs.scim2;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import io.jans.orm.PersistenceEntryManager;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -14,15 +15,13 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-import io.jans.orm.PersistenceEntryManager;
-
 /**
  * Health check controller
  * 
  * @author Yuriy Movchan
  * @version Jul 24, 2020
  */
-@ApplicationScoped
+@Dependent
 @Path("/")
 public class HealthCheckController {
 

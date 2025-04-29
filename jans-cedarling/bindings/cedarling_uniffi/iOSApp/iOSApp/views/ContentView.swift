@@ -100,8 +100,8 @@ struct ContentView: View {
             let result: AuthorizeResult = try instance.authorize(
                 tokens: tokens,
                 action: action,
-                resourceType: resource["resource_type"] as! String,
-                resourceId: resource["resource_id"] as! String,
+                resourceType: resource["type"] as! String,
+                resourceId: resource["id"] as! String,
                 payload: payloadJsonString,
                 context: Helper.dictionaryToString(context)
             )

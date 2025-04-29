@@ -138,8 +138,8 @@ fun CardListScreen() {
 
             val result: AuthorizeResult? = instance?.authorize(tokensMap,
                 nonNullableAction,
-                resourceMap.get("resource_type").toString(),
-                resourceMap.get("resource_id").toString(),
+                resourceMap.get("type").toString(),
+                resourceMap.get("id").toString(),
                 anyToJson(resourceMap.get("payload")),
                 nonNullableConext
             );

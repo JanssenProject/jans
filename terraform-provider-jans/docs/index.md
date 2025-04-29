@@ -20,7 +20,7 @@ terraform {
   required_providers {
     janssen = {
       source = "JanssenProject/jans"
-      version = "1.2.0"
+      version = "1.4.0"
     }
   }
 }
