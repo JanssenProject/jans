@@ -4637,7 +4637,8 @@
         "jansPermissionGrantedMap",
         "jansInvolvedClnts",
         "deviceSecret",
-        "jansSessAttr"
+        "jansSessAttr",
+        "jansAttrs"
       ],
       "must": [
         "objectclass"
