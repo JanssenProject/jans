@@ -484,8 +484,8 @@ public class CustomScriptResource extends ConfigBaseResource {
         if (customScript == null) {
             return customScript;
         }
-        logger.info("Handling CustomScript if location type is File - customScript.getLocationType().getValue():{}, customScript.getLocationPath():{}", customScript.getLocationType().getValue(), customScript.getLocationPath());
-        if (ScriptLocationType.FILE.getValue().equalsIgnoreCase(customScript.getLocationType().getValue())) {
+        logger.info("Handling CustomScript if location type is File - customScript.getLocationType():{}, customScript.getLocationPath():{}", customScript.getLocationType(), customScript.getLocationPath());
+        if (customScript.getLocationPath()!=null && ScriptLocationType.FILE.getValue().equalsIgnoreCase(customScript.getLocationType().getValue())) {
             logger.info("Modifying customScript as getLocationType is File - customScript:{}", customScript);
             String fileName = CUSTOM_FILE_SCRIPT_DEFAULT_LOCATION;
             if (StringUtils.isNotBlank(customScript.getLocationPath())) {
@@ -495,7 +495,7 @@ public class CustomScriptResource extends ConfigBaseResource {
             }
         }
         
-        logger.info("\n\n Handling CustomScript if location type is File - customScript.getLocationType().getValue():{}, customScript.getLocationPath():{}", customScript.getLocationType().getValue(), customScript.getLocationPath());
+        logger.info("\n\n Handling CustomScript if location type is File - customScript.getLocationType():{}, customScript.getLocationPath():{}", customScript.getLocationType(), customScript.getLocationPath());
         return customScript;
     }
 
