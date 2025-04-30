@@ -801,18 +801,12 @@
 				</dependency> -->
 
 				<dependency>
-					<groupId>org.glassfish</groupId>
-					<artifactId>jakarta.el</artifactId>
-				</dependency>
-				<dependency>
 					<groupId>jakarta.el</groupId>
 					<artifactId>jakarta.el-api</artifactId>
-					<scope>test</scope>
 				</dependency>
 				<dependency>
 				    <groupId>jakarta.servlet.jsp</groupId>
 				    <artifactId>jakarta.servlet.jsp-api</artifactId>
-				    <scope>provided</scope>
 				</dependency>
 
 				<dependency>

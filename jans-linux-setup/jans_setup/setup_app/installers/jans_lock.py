@@ -95,8 +95,6 @@ class JansLockInstaller(JettyInstaller):
 
     def install_as_server(self):
         self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
-        self.logIt(f"Copying {self.source_files[0][0]} into jetty webapps folder...")
-        self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
         self.enable()
 
     def install_as_service(self):
