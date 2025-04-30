@@ -334,20 +334,22 @@ nav:
       - SSA Modify Response: script-catalog/ssa/ssa-modify-response.md
   - Reference Guide:
     - janssen-server/reference/README.md
+    - Cedarling Development Rust Docs:
+        - Cedarling: https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html
     - Javadocs / OpenAPI:
       - janssen-server/reference/openapi.md
-      - agama: https://janssenproject.github.io/javadocs/agama/transpiler/index.html
-      - jans-auth-server: https://janssenproject.github.io/javadocs/jans-auth-server/server/index.html
-      - jans-casa: https://janssenproject.github.io/javadocs/jans-casa/config/index.html
-      - jans-config-api: https://janssenproject.github.io/javadocs/jans-config-api/server/index.html
-      - jans-core: https://janssenproject.github.io/javadocs/jans-core/server/io/jans/server/filters/package-summary.html
-      - jans-fido2: https://janssenproject.github.io/javadocs/jans-fido2/server/index.html
-      - jans-keycloak-integration: https://janssenproject.github.io/javadocs/jans-keycloak-integration/server/index.html
-      - jans-keycloak-link: https://janssenproject.github.io/javadocs/jans-keycloak-link/server/index.html
-      - jans-link: https://janssenproject.github.io/javadocs/jans-link/server/index.html
-      - jans-lock: https://janssenproject.github.io/javadocs/jans-lock/server/index.html
-      - jans-orm: https://janssenproject.github.io/javadocs/jans-orm/cdi/io/jans/orm/service/package-summary.html
-      - jans-scim: https://janssenproject.github.io/javadocs/jans-scim/server/index.html
+      - agama: https://janssenproject.github.io/developer-docs/agama/transpiler/index.html
+      - jans-auth-server: https://janssenproject.github.io/developer-docs/jans-auth-server/server/index.html
+      - jans-casa: https://janssenproject.github.io/developer-docs/jans-casa/config/index.html
+      - jans-config-api: https://janssenproject.github.io/developer-docs/jans-config-api/server/index.html
+      - jans-core: https://janssenproject.github.io/developer-docs/jans-core/server/io/jans/server/filters/package-summary.html
+      - jans-fido2: https://janssenproject.github.io/developer-docs/jans-fido2/server/index.html
+      - jans-keycloak-integration: https://janssenproject.github.io/developer-docs/jans-keycloak-integration/server/index.html
+      - jans-keycloak-link: https://janssenproject.github.io/developer-docs/jans-keycloak-link/server/index.html
+      - jans-link: https://janssenproject.github.io/developer-docs/jans-link/server/index.html
+      - jans-lock: https://janssenproject.github.io/developer-docs/jans-lock/server/index.html
+      - jans-orm: https://janssenproject.github.io/developer-docs/jans-orm/cdi/io/jans/orm/service/package-summary.html
+      - jans-scim: https://janssenproject.github.io/developer-docs/jans-scim/server/index.html
     - JSON Configuration/Properties:
       - janssen-server/reference/json/README.md
       - Properties:
