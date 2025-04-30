@@ -9598,6 +9598,10 @@ components:
           type: array
           items:
             type: string
+        sessionJwtSigningAlgValuesSupported:
+          type: array
+          items:
+            type: string
         txTokenSigningAlgValuesSupported:
           type: array
           items:
