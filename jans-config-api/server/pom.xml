@@ -475,13 +475,11 @@
 				<dependency>
 					<groupId>org.glassfish</groupId>
 					<artifactId>jakarta.el</artifactId>
-					<scope>provided</scope>
 				</dependency>
 
 				<dependency>
 					<groupId>jakarta.el</groupId>
 					<artifactId>jakarta.el-api</artifactId>
-					<scope>test</scope>
 				</dependency>
 
 				<dependency>
