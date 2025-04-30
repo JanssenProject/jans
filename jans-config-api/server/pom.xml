@@ -524,11 +524,6 @@
 					<scope>test</scope>
 				</dependency>
 				<dependency>
-					<groupId>org.jboss.weld</groupId>
-					<artifactId>weld-web</artifactId>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
 					<groupId>org.bitbucket.b_c</groupId>
 					<artifactId>jose4j</artifactId>
 				</dependency>
