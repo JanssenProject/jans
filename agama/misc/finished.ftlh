@@ -7,13 +7,13 @@
         
         <p class="my-4">Redirecting you...
         
-        <form action="${webCtx.contextPath}/postlogin.htm" method="post">
+        <form action="${webCtx.contextPath}/${data.post_finish_url}" method="post">
             <noscript>
                 <p>Your browser does not seem to support Javascript. Click on the button below to be redirected
                 <p><input type="submit" class="btn btn-success px-4" value="Continue">
             </noscript>
         </form>
-        
+
         <script>
             function submit() {
                 document.forms[0].submit()

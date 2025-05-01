@@ -20,7 +20,7 @@
                     <#if (selector[method])??>
                         <#assign s = selector[method]>
                     <#else>
-                        <#assign s = { "icon": "<i class=\"far fa-question-circle\" data-fa-transform=\"shrink-2\"></i>", "text": "???"}>
+                        <#assign s = { "icon": "<i class=\"far fa-question-circle\" data-fa-transform=\"shrink-2\"></i>" }>
                     </#if>
                     
                     <tr class="pointer" onClick="javascript:select('${method}')">
@@ -28,7 +28,14 @@
                             <div class="f1 bsgreen">${s.icon?no_esc}</div>
                         </td>
                         <td class="w5" style="vertical-align:middle">
-                            <span class="db pa1 f6 dark-blue2 mb0">${s.text?no_esc}</span>
+
+                            <#if s.textKey??>
+                                <#assign t = labels(s.textKey)>
+                            <#else>
+                                <#assign t = (s.text)!"???">
+                            </#if>
+
+                            <span class="db pa1 f6 dark-blue2 mb0">${t?no_esc}</span>
                         </td>
                     </tr>
                 </#list>

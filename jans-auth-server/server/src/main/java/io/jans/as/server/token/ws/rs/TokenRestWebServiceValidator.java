@@ -60,11 +60,12 @@ public class TokenRestWebServiceValidator {
     @Inject
     private AbstractCryptoProvider cryptoProvider;
 
-    public void validatePKCE(AuthorizationCodeGrant grant, String codeVerifier, OAuth2AuditLog oAuth2AuditLog) {
+    public void validatePKCE(AuthorizationCodeGrant grant, String codeVerifier, OAuth2AuditLog oAuth2AuditLog, Client client) {
         log.trace("PKCE validation, code_verifier: {}, code_challenge: {}, method: {}",
                 codeVerifier, grant.getCodeChallenge(), grant.getCodeChallengeMethod());
 
-        if (isTrue(appConfiguration.getRequirePkce()) && (Strings.isNullOrEmpty(codeVerifier) || Strings.isNullOrEmpty(grant.getCodeChallenge()))) {
+        final boolean requirePkce = isTrue(appConfiguration.getRequirePkce()) || client.getAttributes().getRequirePkce();
+        if (requirePkce && (Strings.isNullOrEmpty(codeVerifier) || Strings.isNullOrEmpty(grant.getCodeChallenge()))) {
             if (log.isErrorEnabled()) {
                 log.error("PKCE is required but code_challenge or code verifier is blank, grantId: {}, codeVerifier: {}, codeChallenge: {}", grant.getGrantId(), codeVerifier, grant.getCodeChallenge());
             }
@@ -82,7 +83,7 @@ public class TokenRestWebServiceValidator {
     }
 
     public void validateParams(String grantType, String code,
-                               String redirectUri, String refreshToken, OAuth2AuditLog auditLog) {
+                               String refreshToken, OAuth2AuditLog auditLog) {
         log.debug("Starting to validate request parameters");
         if (grantType == null || grantType.isEmpty()) {
             final String msg = "Grant Type is not set.";
@@ -95,11 +96,6 @@ public class TokenRestWebServiceValidator {
         if (gt == GrantType.AUTHORIZATION_CODE) {
             if (StringUtils.isBlank(code)) {
                 final String msg = "Code is not set for AUTHORIZATION_CODE.";
-                log.trace(msg);
-                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), auditLog));
-            }
-            if (StringUtils.isBlank(redirectUri)) {
-                final String msg = "redirect_uri is not set for AUTHORIZATION_CODE.";
                 log.trace(msg);
                 throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), auditLog));
             }
@@ -171,6 +167,14 @@ public class TokenRestWebServiceValidator {
 
     public void validateGrant(AuthorizationGrant grant, Client client, Object identifier, OAuth2AuditLog auditLog) {
         validateGrant(grant, client, identifier, auditLog, null);
+    }
+
+    public void validateRedirectUri(String redirectUri, OAuth2AuditLog auditLog) {
+        if (StringUtils.isBlank(redirectUri)) {
+            final String msg = "redirect_uri is not set for AUTHORIZATION_CODE.";
+            log.trace(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), auditLog));
+        }
     }
 
 

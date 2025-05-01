@@ -40,6 +40,6 @@ and SCIM interception scripts enable you to filter results by adding this
 `tenant_id` to queries behind the scenes. For example, you could also render
 different login pages by using `default_acr_values` for clients.
 
-It's possible in the future Jansen Project will implement some kind of support
+It's possible in the future Janssen Project will implement some kind of support
 to bundle a multitenancy approach that captures some of the properties described
 above at the code level, but for the time being, it is not a priority.

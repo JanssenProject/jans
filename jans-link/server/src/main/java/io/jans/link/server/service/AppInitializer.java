@@ -51,7 +51,7 @@ import jakarta.inject.Named;
 
 /**
  * 
- * Cache refresh server initializer
+ * Link server initializer
  * @author Yuriy Movchan
  * @version May 12, 2020
  */
@@ -123,7 +123,7 @@ public class AppInitializer {
 				.initPythonInterpreter(configurationFactory.getBaseConfiguration().getString("pythonModulesDir", null));
 		
 		// Initialize script manager
-		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.CACHE_REFRESH);
+		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.LINK_INTERCEPTION);
 
 		// There is no Fido2 scripts yet
 		//supportedCustomScriptTypes.clear();

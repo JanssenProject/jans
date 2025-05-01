@@ -4,187 +4,6 @@
 This document describes the Cedarling Python bindings types.
 Documentation was generated from python types.
 
-BootstrapConfig
-===============
-
-A Python wrapper for the Rust `cedarling::BootstrapConfig` struct.
-Configures the `Cedarling` application, including authorization, logging, and policy store settings.
-
-Attributes
-----------  
-:param application_name: A human-friendly identifier for the application.
-:param policy_store_uri: Optional URI of the policy store JSON file.
-:param policy_store_id: An identifier for the policy store.
-:param log_type: Log type, e.g., 'none', 'memory', 'std_out', or 'lock'.
-:param log_ttl: (Optional) TTL (time to live) in seconds for log entities when `log_type` is 'memory'. The default is 60s.
-:param user_authz: Enables querying Cedar engine authorization for a User principal.
-:param workload_authz: Enables querying Cedar engine authorization for a Workload principal.
-:param usr_workload_bool_op: Boolean operation ('AND' or 'OR') for combining `USER` and `WORKLOAD` authz results.
-:param local_jwks: Path to a local file containing a JWKS.
-:param local_policy_store: A JSON string containing a policy store.
-:param policy_store_local_fn: Path to a policy store JSON file.
-:param jwt_sig_validation: Validates JWT signatures if enabled.
-:param jwt_status_validation: Validates JWT status on startup if enabled.
-:param jwt_signature_algorithms_supported: A list of supported JWT signature algorithms.
-:param at_iss_validation: When enabled, the `iss` (Issuer) claim must be present in the Access Token and thescheme must be `https`.
-:param at_jti_validation: When enabled, the `jti` (JWT ID) claim must be present in the Access Token.
-:param at_nbf_validation: When enabled, the `nbf` (Not Before) claim must be present in the Access Token.
-:param at_exp_validation: When enabled, the `exp` (Expiration) claim must be present in the Access Token.
-:param idt_iss_validation: When enabled, the `iss` (Issuer) claim must be present in the ID Token.
-:param idt_sub_validation: When enabled, the `sub` (Subject) claim must be present in the ID Token.
-:param idt_exp_validation: When enabled, the `exp` (Expiration) claim must be present in the ID Token.
-:param idt_iat_validation: When enabled, the `iat` (Issued At) claim must be present in the ID Token.
-:param idt_aud_validation: When enabled, the `aud` (Audience) claim must be present in the ID Token.
-:param userinfo_iss_validation: When enabled, the `iss` (Issuer) claim must be present in the Userinfo Token.
-:param userinfo_sub_validation: When enabled, the `sub` (Subject) claim must be present in the Userinfo Token.
-:param userinfo_aud_validation: When enabled, the `aud` (Audience) claim must be present in the Userinfo Token.
-:param userinfo_exp_validation: When enabled, the `exp` (Expiration) claim must be present in the Userinfo Token.
-:param id_token_trust_mode: Trust mode for ID tokens, either 'None' or 'Strict'.
-:param lock: Enables integration with Lock Master for policies and SSE events.
-:param lock_master_configuration_uri: URI where Cedarling can get JSON file with all required metadata about Lock Master, i.e. .well-known/lock-master-configuration.
-:param dynamic_configuration: Toggles listening for SSE config updates.
-:param lock_ssa_jwt: SSA for DCR in a Lock Master deployment. Cedarling will validate this SSA JWT prior to DCR.
-:param audit_log_interval: Interval (in seconds) for sending log messages to Lock Master (0 to disable).
-:param audit_health_interval: Interval (in seconds) for sending health updates to Lock Master (0 to disable).
-:param audit_health_telemetry_interval: Interval (in seconds) for sending telemetry updates to Lock Master (0 to disable).
-:param listen_sse: Toggles listening for updates from the Lock Server.
-
-Example
--------
-```python
-from cedarling import BootstrapConfig
-# Example configuration
-bootstrap_config = BootstrapConfig({
-    "application_name": "MyApp",
-    "policy_store_uri": None,
-    "policy_store_id": "policy123",
-    "log_type": "memory",
-    "log_ttl": 86400,
-    "user_authz": "enabled",
-    "workload_authz": "enabled",
-    "usr_workload_bool_op": "AND",
-    "local_jwks": "./path/to/your_jwks.json",
-    "local_policy_store": None,
-    "policy_store_local_fn": "./path/to/your_policy_store.json",
-    "jwt_sig_validation": "enabled",
-    "jwt_status_validation": "disabled",
-    "at_iss_validation": "enabled",
-    "at_jti_validation": "enabled",
-    "at_nbf_validation": "disabled",
-    "idt_iss_validation": "enabled",
-    "idt_sub_validation": "enabled",
-    "idt_exp_validation": "enabled",
-    "idt_iat_validation": "enabled",
-    "idt_aud_validation": "enabled",
-    "userinfo_iss_validation": "enabled",
-    "userinfo_sub_validation": "enabled",
-    "userinfo_aud_validation": "enabled",
-    "userinfo_exp_validation": "enabled",
-    "id_token_trust_mode": "Strict",
-    "lock": "disabled",
-    "lock_master_configuration_uri": None,
-    "dynamic_configuration": "disabled",
-    "lock_ssa_jwt": None,
-    "audit_log_interval": 0,
-    "audit_health_interval": 0,
-    "audit_health_telemetry_interval": 0,
-    "listen_sse": "disabled",
-})
-```
-___
-
-Cedarling
-=========
-
-A Python wrapper for the Rust `cedarling::Cedarling` struct.
-Represents an instance of the Cedarling application, a local authorization service
-that answers authorization questions based on JWT tokens.
-
-Attributes
-----------  
-:param config: A `BootstrapConfig` object for initializing the Cedarling instance.
-
-Methods
--------
-.. method:: __init__(self, config)
-
-    Initializes the Cedarling instance with the provided configuration.
-
-    :param config: A `BootstrapConfig` object with startup settings.
-
-.. method:: pop_logs(self) -> List[dict]
-
-    Retrieves and removes all logs from storage.
-
-    :returns: A list of log entries as Python objects.
-
-    :raises ValueError: If an error occurs while fetching logs.
-
-.. method:: get_log_by_id(self, id: str) -> dict|None
-
-    Gets a log entry by its ID.
-
-    :param id: The log entry ID.
-
-    :raises ValueError: If an error occurs while fetching the log.
-
-.. method:: get_log_ids(self) -> List[str]
-
-    Retrieves all stored log IDs.
-
-.. method:: authorize(self, request: Request) -> AuthorizeResult
-
-    Execute authorize request
-    :param request: Request struct for authorize.
-
-___
-
-ResourceData
-============
-
-A Python wrapper for the Rust `cedarling::ResourceData` struct. This class represents
-a resource entity with a type, ID, and attributes. Attributes are stored as a payload
-in a dictionary format.
-
-Attributes
-----------  
-:param resource_type: Type of the resource entity.  
-:param id: ID of the resource entity.  
-:param payload: Optional dictionary of attributes.
-
-Methods
--------
-.. method:: __init__(self, resource_type: str, id: str, **kwargs: dict)
-    Initialize a new ResourceData. In kwargs the payload is a dictionary of entity attributes.
-
-.. method:: from_dict(cls, value: dict) -> ResourceData
-    Initialize a new ResourceData from a dictionary.
-    To pass `resource_type` you need to use `type` key.
-___
-
-Request
-=======
-
-A Python wrapper for the Rust `cedarling::Request` struct. Represents
-authorization data with access token, action, resource, and context.
-
-Attributes
-----------  
-:param access_token: The access token string.  
-:param id_token: The id token string.  
-:param userinfo_token: The user info token string.  
-:param action: The action to be authorized.  
-:param resource: Resource data (wrapped `ResourceData` object).  
-:param context: Python dictionary with additional context.
-
-Example
--------
-```python
-# Create a request for authorization
-request = Request(access_token="token123", action="read", resource=resource, context={})
-```
-___
-
 AuthorizeResult
 ===============
 
@@ -211,6 +30,114 @@ Attributes
 ----------  
 :param decision: The authorization decision (wrapped `Decision` object).  
 :param diagnostics: Additional information on the decision (wrapped `Diagnostics` object).
+___
+
+BootstrapConfig
+=========
+
+A Python wrapper for the Rust `cedarling::BootstrapConfig` struct.
+Configures the `Cedarling` application, including authorization, logging, and policy store settings.
+
+Methods
+-------
+.. method:: __init__(self, options)
+
+    Initializes the Cedarling instance with the provided configuration.
+
+    :param options: A `dict` with startup settings.
+
+.. method:: load_from_file(str) -> BootstrapConfig
+
+    Loads the bootstrap config from a file.
+
+    :returns: A BootstrapConfig instance
+
+    :raises ValueError: If a provided value is invalid or decoding fails.
+    :raises OSError: If there is an error reading while the file.
+
+.. method:: load_from_json(str) -> BootstrapConfig
+
+    Loads the bootstrap config from a JSON string.
+
+    :returns: A BootstrapConfig instance
+
+    :raises ValueError: If a provided value is invalid or decoding fails.
+
+.. method:: from_env(config=None) -> BootstrapConfig
+
+    Loads the bootstrap config from environment variables, optionally merging with provided config.
+
+    :param config: Optional dictionary with additional configuration to merge with environment variables.
+    :returns: A BootstrapConfig instance
+    :raises ValueError: If a provided value is invalid or decoding fails.
+___
+
+Cedarling
+=========
+
+A Python wrapper for the Rust `cedarling::Cedarling` struct.
+Represents an instance of the Cedarling application, a local authorization service
+that answers authorization questions based on JWT tokens.
+
+Attributes
+----------  
+:param config: A `BootstrapConfig` object for initializing the Cedarling instance.
+
+Methods
+-------
+.. method:: __init__(self, config)
+
+    Initializes the Cedarling instance with the provided configuration.
+
+    :param config: A `BootstrapConfig` object with startup settings.
+
+.. method:: authorize(self, request: Request) -> AuthorizeResult
+
+    Execute authorize request
+    :param request: Request struct for authorize.
+
+.. method:: pop_logs(self) -> List[dict]
+
+    Retrieves and removes all logs from storage.
+
+    :returns: A list of log entries as Python objects.
+
+.. method:: get_log_by_id(self, id: str) -> dict|None
+
+    Gets a log entry by its ID.
+
+    :param id: The log entry ID.
+
+.. method:: get_log_ids(self) -> List[str]
+
+    Retrieves all stored log IDs.
+
+.. method:: get_logs_by_tag(self, tag: str) -> List[dict]
+
+    Retrieves all logs matching a specific tag. Tags can be 'log_kind', 'log_level' params from log entries.
+
+    :param tag: A string specifying the tag type.
+
+    :returns: A list of log entries filtered by the tag, each converted to a Python dictionary.
+
+.. method:: get_logs_by_request_id(self, id: str) -> List[dict]
+
+    Retrieves log entries associated with a specific request ID. Each log entry is converted to a Python dictionary containing fields like 'id', 'timestamp', and 'message'.
+
+    :param id: The unique identifier for the request.
+
+    :returns: A list of dictionaries, each representing a log entry related to the specified request ID.
+
+.. method:: get_logs_by_request_id_and_tag(self, id: str, tag: str) -> List[dict]
+
+    Retrieves all logs associated with a specific request ID and tag. The tag can be 'log_kind', 'log_level' params from log entries.
+
+    :param id: The request ID as a string.
+
+    :param tag: The tag type as a string.
+
+    :returns: A list of log entries matching both the request ID and tag, each converted to a Python dictionary.
+
 ___
 
 Decision
@@ -243,6 +170,29 @@ errors : list of PolicyEvaluationError
     A list of errors that occurred during the authorization process. These are unordered as policies may be evaluated in any order.
 ___
 
+EntityData
+============
+
+A Python wrapper for the Rust `cedarling::EntityData` struct. This class represents
+a resource entity with a type, ID, and attributes. Attributes are stored as a payload
+in a dictionary format.
+
+Attributes
+----------  
+:param entity_type: Type of the entity.  
+:param id: ID of the entity.  
+:param payload: Optional dictionary of attributes.
+
+Methods
+-------
+.. method:: __init__(self, entity_type: str, id: str, **kwargs: dict)
+    Initialize a new EntityData. In kwargs the payload is a dictionary of entity attributes.
+
+.. method:: from_dict(cls, value: dict) -> EntityData
+    Initialize a new EntityData from a dictionary.
+    To pass `entity_type` you need to use `type` key.
+___
+
 PolicyEvaluationError
 =====================
 
@@ -256,8 +206,47 @@ error : str
     The error message describing the evaluation failure.
 ___
 
-# authorize_errors.AccessTokenEntitiesError
-Error encountered while creating access token entities
+Request
+=======
+
+A Python wrapper for the Rust `cedarling::Request` struct. Represents
+authorization data with access token, action, resource, and context.
+
+Attributes
+----------  
+:param tokens: A class containing the JWTs what will be used for the request.  
+:param action: The action to be authorized.  
+:param resource: Resource data (wrapped `EntityData` object).  
+:param context: Python dictionary with additional context.
+
+Example
+-------
+```python
+# Create a request for authorization
+request = Request(access_token="token123", action="read", resource=resource, context={})
+```
+___
+
+# RequestUnsigned
+Request
+=======
+
+A Python wrapper for the Rust `cedarling::RequestUnsigned` struct. Represents
+authorization data for unsigned authorization requests for many principals.
+
+Attributes
+----------  
+:param principals: A list of `EntityData` objects representing the principals.  
+:param action: The action to be authorized.  
+:param resource: Resource data (wrapped `ResourceData` object).  
+:param context: Python dictionary with additional context.
+
+Example
+-------
+```python
+# Create a request for authorization
+request = Request(principals=[principal], action="read", resource=resource, context={})
+```
 ___
 
 # authorize_errors.ActionError
@@ -268,35 +257,43 @@ ___
 Exception raised by authorize_errors
 ___
 
+# authorize_errors.BuildContextError
+Error encountered while building the request context
+___
+
+# authorize_errors.BuildEntityError
+Error encountered while running on strict id token trust mode
+___
+
+# authorize_errors.BuildUnsignedRoleEntityError
+Error building Role entity for unsigned request
+___
+
 # authorize_errors.CreateContextError
 Error encountered while validating context according to the schema
 ___
 
-# authorize_errors.CreateIdTokenEntityError
-Error encountered while creating id token entities
+# authorize_errors.EntitiesToJsonError
+Error encountered while parsing all entities to json for logging
 ___
 
-# authorize_errors.CreateRequestUserEntityError
-Error encountered while creating cedar_policy::Request for user entity principal
+# authorize_errors.ExecuteRuleError
+Error encountered while executing the rule for principals
 ___
 
-# authorize_errors.CreateRequestWorkloadEntityError
-Error encountered while creating cedar_policy::Request for workload entity principal
+# authorize_errors.IdTokenTrustModeError
+Error encountered while running on strict id token trust mode
 ___
 
-# authorize_errors.CreateUserEntityError
-Error encountered while creating id token entities
+# authorize_errors.InvalidPrincipalError
+Error encountered while creating cedar_policy::Request for principal
 ___
 
-# authorize_errors.DecodeTokens
-Error encountered while decoding JWT token data
+# authorize_errors.ProcessTokens
+Error encountered while processing JWT token data
 ___
 
-# authorize_errors.EntitiesError
-Error encountered while collecting all entities
-___
-
-# authorize_errors.ResourceEntityError
-Error encountered while creating resource entity
+# authorize_errors.ValidateEntitiesError
+Error encountered while validating the entities to the schema
 ___
 

@@ -185,7 +185,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
 
         try {
-            tokenRestWebServiceValidator.validateParams(grantType, code, redirectUri, refreshToken, auditLog);
+            tokenRestWebServiceValidator.validateParams(grantType, code, refreshToken, auditLog);
 
             GrantType gt = GrantType.fromString(grantType);
             log.debug("Grant type: '{}'", gt);
@@ -212,7 +212,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             executionContext.setAuthzDetails(authzDetails);
 
             if (gt == GrantType.AUTHORIZATION_CODE) {
-                return processAuthorizationCode(code, scope, codeVerifier, sessionIdObj, executionContext);
+                return processAuthorizationCode(code, scope, codeVerifier, sessionIdObj, redirectUri, executionContext);
             } else if (gt == GrantType.REFRESH_TOKEN) {
                 return processRefreshTokenGrant(scope, refreshToken, idTokenPreProcessing, executionContext);
             } else if (gt == GrantType.CLIENT_CREDENTIALS) {
@@ -434,7 +434,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         return null;
     }
 
-    private Response processAuthorizationCode(String code, String scope, String codeVerifier, SessionId sessionIdObj, ExecutionContext executionContext) {
+    private Response processAuthorizationCode(String code, String scope, String codeVerifier, SessionId sessionIdObj, String redirectUri, ExecutionContext executionContext) {
         Client client = executionContext.getClient();
 
         log.debug("Attempting to find authorizationCodeGrant by clientId: '{}', code: '{}'", client.getClientId(), code);
@@ -444,7 +444,13 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
         // if authorization code is not found then code was already used or wrong client provided = remove all grants with this auth code
         tokenRestWebServiceValidator.validateGrant(authorizationCodeGrant, client, code, executionContext.getAuditLog(), grant -> grantService.removeAllByAuthorizationCode(code));
-        tokenRestWebServiceValidator.validatePKCE(authorizationCodeGrant, codeVerifier, executionContext.getAuditLog());
+
+        // validate redirectUri only for Authorization Code Flow. For First-Party App redirect uri is blank. It is perfectly valid case.
+        // redirect uri must be validated after grant is validated
+        if (!authorizationCodeGrant.isAuthorizationChallenge()) {
+            tokenRestWebServiceValidator.validateRedirectUri(redirectUri, executionContext.getAuditLog());
+        }
+        tokenRestWebServiceValidator.validatePKCE(authorizationCodeGrant, codeVerifier, executionContext.getAuditLog(), client);
         dPoPService.validateDpopThumprint(authorizationCodeGrant.getDpopJkt(), executionContext.getDpop());
 
         authorizationCodeGrant.setIsCachedWithNoPersistence(false);

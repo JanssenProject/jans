@@ -10,7 +10,7 @@ keywords:
   - SAML
 home: https://jans.io
 sources:
-  - https://github.com/JanssenProject/jans/docker-jans-kc-scheduler
+  - https://github.com/JanssenProject/jans/docker-jans-cloudtools
 maintainers:
   - name: Mohammad Abudayyeh
     email: support@jans.io

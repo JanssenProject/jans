@@ -4,8 +4,8 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
-use pyo3::prelude::*;
 use pyo3::Bound;
+use pyo3::prelude::*;
 
 pub(crate) mod bootstrap_config;
 

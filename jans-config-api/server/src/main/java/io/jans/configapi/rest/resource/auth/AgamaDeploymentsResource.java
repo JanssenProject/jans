@@ -3,6 +3,7 @@ package io.jans.configapi.rest.resource.auth;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.ads.model.Deployment;
 import io.jans.agama.model.Flow;
 import io.jans.as.model.util.Pair;
@@ -77,12 +78,14 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path(ApiConstants.NAME_PARAM_PATH)
     public Response getDeployment(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) String projectName) {
-
+        if (logger.isInfoEnabled()) {
+            logger.info("Get projectName:{}", escapeLog(projectName));
+        }
         Pair<Boolean, Deployment> p = getDeploymentP(projectName);
         Deployment d = p.getSecond();
         
         if (d == null) return errorResponse(p.getFirst(), projectName);
-
+        logger.debug("deployment:{}", d);
         return Response.ok(d).build();
 
     }
@@ -102,7 +105,9 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @Path(ApiConstants.NAME_PARAM_PATH)
     public Response deploy(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME)
                 String projectName, @Parameter(description = "Boolean value to indicating to auto configure the project ") @QueryParam("autoconfigure") String autoconfigure, @Parameter(description = "Agama gama file") byte[] gamaBinary) {
-        
+        if (logger.isInfoEnabled()) {
+            logger.info("Deploy projectName:{}, autoconfigure:{}, gamaBinary:{}", escapeLog(projectName), escapeLog(autoconfigure), escapeLog(gamaBinary));
+        }
         if (gamaBinary == null)
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Project name or binary data missing").build();
@@ -131,7 +136,9 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
             superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     @Path(ApiConstants.NAME_PARAM_PATH)
     public Response undeploy(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) String projectName) {
-        
+        if (logger.isInfoEnabled()) {
+            logger.info("Undeploy projectName:{}", escapeLog(projectName));
+        }
         Boolean result = ads.createUndeploymentTask(projectName);
         
         if (result == null)
@@ -156,16 +163,18 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.CONFIGS + ApiConstants.NAME_PARAM_PATH)
     public Response getConfigs(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) String projectName) {
-
+        if (logger.isInfoEnabled()) {
+            logger.info("getConfigs projectName:{}", escapeLog(projectName));
+        }
         Pair<Boolean, Deployment> p = getDeploymentP(projectName);
         Deployment d = p.getSecond();
-        
+        logger.debug("Deployment:{}", d);
         if (d == null) return errorResponse(p.getFirst(), projectName);
         
         Map<String, Map<String, Object>> configs = new HashMap<>();
         Set<String> flowIds = Optional.ofNullable(d.getDetails().getFlowsError())
                 .map(Map::keySet).orElse(Collections.emptySet());
-
+        logger.debug("flowIds:{}", flowIds);
         for (String qname : flowIds) {
             Map<String, Object> config = Optional.ofNullable(flowService.getFlowByName(qname))
                     .map(f -> f.getMetadata().getProperties()).orElse(null);
@@ -177,6 +186,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
                 configs.put(qname, config);
             }
         }
+        logger.debug("configs:{}", configs);
         //Use own mapper so any empty maps/nulls that may be found inside flows configurations are not
         //ignored. Using @JsonInclude(Include.ALWAYS) in FlowMetadata#properties did not help
         try {
@@ -203,7 +213,9 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @Path(ApiConstants.CONFIGS + ApiConstants.NAME_PARAM_PATH)
     public Response setConfigs(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) String projectName,
             @Parameter(description = "Agama flow config, key is `name` of config property and `value` is the property value. ") Map<String, Map<String, Object>> flowsConfigs) {
-
+        if (logger.isInfoEnabled()) {
+            logger.info("Set Agama project configs projectName:{}, flowsConfigs:{}", escapeLog(projectName), escapeLog(flowsConfigs));
+        }
         if (flowsConfigs == null) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Mapping of flows vs. configs not provided").build();
@@ -211,13 +223,13 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
         Pair<Boolean, Deployment> p = getDeploymentP(projectName);
         Deployment d = p.getSecond();
-        
+        logger.debug("Set Agama project configs Deployment:{}",  d);
         if (d == null) return errorResponse(p.getFirst(), projectName);
 
         Map<String, Boolean> results = new HashMap<>();
         Set<String> flowIds = Optional.ofNullable(d.getDetails().getFlowsError())
                 .map(Map::keySet).orElse(Collections.emptySet());
-
+        logger.debug("Set Agama project configs  flowIds:{}",  flowIds);
         for (String qname : flowsConfigs.keySet()) {
             if (qname != null && flowIds.contains(qname)) {
 
@@ -242,6 +254,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
                         projectName.replaceAll("[\n\r]", "_"));
             }
         } 
+        logger.debug("Final Agama project configs results:{}", results);
         return Response.ok(results).build();
 
     }

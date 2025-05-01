@@ -28,10 +28,10 @@ get_prometheus_opt() {
 
 get_prometheus_lib() {
     if [ -n "${CN_PROMETHEUS_PORT}" ]; then
-        prom_agent_version="0.17.2"
+        agent_version=${PROMETHEUS_AGENT_VERSION:-1.0.1}
 
         if [ ! -f /opt/prometheus/jmx_prometheus_javaagent.jar ]; then
-            wget -q https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/${prom_agent_version}/jmx_prometheus_javaagent-${prom_agent_version}.jar -O /opt/prometheus/jmx_prometheus_javaagent.jar
+            curl -sS "https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/${agent_version}/jmx_prometheus_javaagent-${agent_version}.jar" -o /opt/prometheus/jmx_prometheus_javaagent.jar
         fi
     fi
 }

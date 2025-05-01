@@ -9,7 +9,23 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+
+import io.jans.scim.model.scim2.ListResponse;
+import io.jans.scim.model.scim2.SearchRequest;
+import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
+import io.jans.scim.model.scim2.group.GroupResource;
+import io.jans.scim.model.scim2.user.UserResource;
+import io.jans.scim.model.scim2.util.ScimResourceUtil;
+import io.jans.scim.service.filter.ProtectedApi;
+import io.jans.scim.service.scim2.interceptor.RefAdjusted;
+import io.jans.scim.service.scim2.serialization.ListResponseJsonSerializer;
+import io.jans.util.Pair;
 import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.Consumes;
@@ -21,25 +37,10 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import io.jans.scim.model.scim2.ListResponse;
-import io.jans.scim.model.scim2.SearchRequest;
-import io.jans.scim.model.scim2.fido.FidoDeviceResource;
-import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
-import io.jans.scim.model.scim2.group.GroupResource;
-import io.jans.scim.model.scim2.user.UserResource;
-import io.jans.scim.model.scim2.util.ScimResourceUtil;
-import io.jans.scim.service.filter.ProtectedApi;
-import io.jans.scim.service.scim2.interceptor.RefAdjusted;
-import io.jans.scim.service.scim2.serialization.ListResponseJsonSerializer;
-import io.jans.util.Pair;
-
 /**
  * Implementation of the /.search endpoint for the root URL of the service
  */
+@Dependent
 @Named
 @Path("/v2/.search")
 public class SearchResourcesWebService extends BaseScimWebService {
@@ -49,9 +50,6 @@ public class SearchResourcesWebService extends BaseScimWebService {
 
     @Inject
     private GroupWebService groupWS;
-
-    @Inject
-    private FidoDeviceWebService fidoWS;
 
     @Inject
     private Fido2DeviceWebService fido2WS;
@@ -199,7 +197,7 @@ public class SearchResourcesWebService extends BaseScimWebService {
 
     /**
      * Returns a JsonNode with the response obtained from sending a POST to a search method given the SearchRequest passed
-     * @param index Determines the concrete search method to be executed: (0 - user; 1 - group; 2 - fido device)
+     * @param index Determines the concrete search method to be executed: (0 - user; 1 - group; 2 - fido2 device)
      * @param searchRequest
      * @return
      */
@@ -217,9 +215,6 @@ public class SearchResourcesWebService extends BaseScimWebService {
                     r = groupWS.searchGroupsPost(searchRequest);
                     break;
                 case 2:
-                    r = fidoWS.searchDevicesPost(searchRequest, null);
-                    break;
-                case 3:
                     r = fido2WS.searchF2DevicesPost(searchRequest, null);
                     break;
             }
@@ -246,7 +241,7 @@ public class SearchResourcesWebService extends BaseScimWebService {
         mapper=new ObjectMapper();
 
         //Do not alter the order of appearance (see getListResponseTree)
-        resourceClasses=new Class[]{UserResource.class, GroupResource.class, FidoDeviceResource.class, Fido2DeviceResource.class};
+        resourceClasses=new Class[]{UserResource.class, GroupResource.class, Fido2DeviceResource.class};
         NUM_RESOURCE_TYPES =resourceClasses.length;
     }
 

@@ -12,6 +12,7 @@ import traceback
 import code
 import site
 import warnings
+import select
 
 from pathlib import Path
 from queue import Queue
@@ -43,7 +44,7 @@ os.environ['JANS_PROFILE'] = profile
 from setup_app.utils import arg_parser
 
 argsp = arg_parser.get_parser()
-
+aks_setup_removal = argsp.n
 
 # first import paths and make changes if necassary
 from setup_app import paths
@@ -284,9 +285,9 @@ if Config.installed_instance:
     if not argsp.shell:
         propertiesUtils.promptForProperties()
 
-        if not (argsp.t or argsp.x) and not Config.addPostSetupService:
-            print("No service was selected to install. Exiting ...")
-            sys.exit()
+        #if not (argsp.t or argsp.x) and not Config.addPostSetupService:
+        #    print("No service was selected to install. Exiting ...")
+        #    sys.exit()
 
 def print_or_log(msg):
     print(msg) if argsp.x else base.logIt(msg)
@@ -489,12 +490,36 @@ def main():
         msg_text = msg.post_installation if Config.installed_instance else msg.installation_completed.format(
             Config.hostname)
         print(msg_text)
-        print('\n', static.colors.ENDC)
-        print(static.colors.DANGER)
-        print(msg.setup_removal_warning)
-        print(static.colors.ENDC, '\n')
+
         # we need this for progress write last line
         time.sleep(2)
+
+        if not os.environ.get('FLEX_PRE_JANS'):
+            if not aks_setup_removal:
+                print(f"\033[31m\033[1mDo you want to remove directories {Config.distFolder} and {__STATIC_SETUP_DIR__} [yes/N] \033[0m")
+
+                i, o, e = select.select( [sys.stdin], [], [], 10 )
+                romove_setup_files = False
+                if i:
+                    response = sys.stdin.readline().strip()
+                    if response == 'yes':
+                        romove_setup_files = True
+                    elif response.startswith('y') and response != 'yes':
+                        print("Please type \033[1m yes \033[0m to remove ")
+                        i_, o_, e_ = select.select( [sys.stdin], [], [], 10 )
+                        if i_:
+                            response_ = sys.stdin.readline().strip()
+                            if response_ == 'yes':
+                                romove_setup_files = True
+
+                if not romove_setup_files:
+                    print (f"You can remove directories {Config.distFolder} and {__STATIC_SETUP_DIR__} anytime")
+                else:
+                    print(f"Removig {Config.distFolder}")
+                    shutil.rmtree(Config.distFolder)
+                    os.chdir(Path.home())
+                    print(f"Removing {__STATIC_SETUP_DIR__}")
+                    shutil.rmtree(__STATIC_SETUP_DIR__)
 
 if __name__ == "__main__":
     main()

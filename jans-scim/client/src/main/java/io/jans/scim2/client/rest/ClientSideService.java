@@ -27,7 +27,7 @@ import jakarta.ws.rs.core.Response;
 /*
  * Created by jgomer on 2017-09-04.
  */
-public interface ClientSideService extends ClientSideUserService, ClientSideGroupService, ClientSideFidoDeviceService, ClientSideFido2DeviceService {
+public interface ClientSideService extends ClientSideUserService, ClientSideGroupService, ClientSideFido2DeviceService {
 
     /**
      * Performs a GET to the <code>/ServiceProviderConfig</code> endpoint that returns a JSON structure that describes

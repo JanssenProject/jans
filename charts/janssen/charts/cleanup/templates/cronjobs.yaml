@@ -1,0 +1,103 @@
+{{ if and (index .Values "global" "cleanup" "enabled") (.Values.global.saml.enabled) -}}
+kind: CronJob
+apiVersion: batch/v1
+metadata:
+  name: {{ include "cleanup.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    APP_NAME: cleanup
+    release: {{ .Release.Name }}
+{{ include "cleanup.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.additionalAnnotations }}
+  annotations:
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+  schedule: "@every {{ .Values.interval }}m"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+        {{- with .Values.image.pullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 10 }}
+        {{- end }}
+          dnsPolicy: {{ .Values.dnsPolicy | quote }}
+        {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.dnsConfig }}
+          dnsConfig:
+{{ toYaml . | indent 12 }}
+        {{- end }}
+          containers:
+            - name: {{ include "cleanup.name" . }}
+              {{- if or (.Values.customScripts) (.Values.customCommand) }}
+              command:
+                {{- if .Values.customCommand }}
+                {{- toYaml .Values.customCommand | nindent 18 }}
+                {{- else }}
+                - /bin/sh
+                - -c
+                - |
+                    {{- with .Values.customScripts }}
+                    {{- toYaml . | replace "- " "" | nindent 20}}
+                    {{- end }}
+                    /app/scripts/entrypoint.sh
+                {{- end}}
+              {{- end}}
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              env:
+                {{- include "cleanup.usr-envs" . | indent 16 }}
+                {{- include "cleanup.usr-secret-envs" . | indent 16 }}
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              lifecycle:
+{{- toYaml .Values.lifecycle | nindent 16 }}
+              volumeMounts:
+              {{- with .Values.volumeMounts }}
+{{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- with (include "cn.config.schema" . | fromYaml).volumeMounts }}
+{{- toYaml . | nindent 16 }}
+              {{- end }}
+              envFrom:
+                - configMapRef:
+                    name: {{ .Release.Name }}-config-cm
+                {{ if .Values.global.usrEnvs.secret }}
+                - secretRef:
+                    name: {{ .Release.Name }}-global-user-custom-envs
+                {{- end }}
+                {{ if .Values.global.usrEnvs.normal }}
+                - configMapRef:
+                    name: {{ .Release.Name }}-global-user-custom-envs
+                {{- end }}
+              {{- if .Values.global.cloud.testEnviroment }}
+              resources: {}
+              {{- else }}
+              resources:
+{{- toYaml .Values.resources | nindent 16 }}
+              {{- end }}
+              args: ["cleanup", "--limit", "{{ .Values.limit }}"]
+          volumes:
+          {{- with .Values.volumes }}
+{{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with (include "cn.config.schema" . | fromYaml).volumes }}
+{{- toYaml . | nindent 12 }}
+          {{- end }}
+          restartPolicy: Never
+          {{- if not .Values.global.isFqdnRegistered }}
+          hostAliases:
+            - ip: {{ .Values.global.lbIp }}
+              hostnames:
+                - {{ .Values.global.fqdn }}
+          {{- end }}
+{{- end }}

@@ -3,7 +3,7 @@ import glob
 import re
 import shutil
 import zipfile
-
+import tempfile
 import xml.etree.ElementTree as ET
 
 from setup_app import paths
@@ -162,8 +162,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         jetty_modules_list = [m.strip() for m in jetty_modules.split(',')]
         if self.jetty_dist_string == 'jetty-home':
-            if 'cdi-decorate' not in jetty_modules_list:
-                jetty_modules_list.append('cdi-decorate')
+            if 'ee9-cdi-decorate' not in jetty_modules_list:
+                jetty_modules_list.append('ee9-cdi-decorate')
             jetty_modules = ','.join(jetty_modules_list)
 
         if base.snap:
@@ -247,7 +247,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                 self.chown(jetty_tmpfiles_dst, Config.root_user, Config.root_group)
                 self.run([paths.cmd_chmod, '644', jetty_tmpfiles_dst])
 
-            self.copyFile(self.jetty_bin_sh_fn, os.path.join(Config.distFolder, 'scripts', service_name), backup=False)
+            self.copyFile(self.jetty_bin_sh_fn, os.path.join(Config.jansOptFolder, 'scripts', service_name), backup=False)
 
         serviceConfiguration['installed'] = True
 
@@ -260,8 +260,45 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             if not os.path.exists(run_dir):
                 self.run([paths.cmd_mkdir, '-p', run_dir])
 
+
+        self.update_jetty_env(self.source_files[0][0])
+        jetty_service_webapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
+        self.logIt(f"Copying {self.source_files[0][0]} into {jetty_service_webapps}")
+        self.copyFile(self.source_files[0][0], jetty_service_webapps)
+
         self.write_webapps_xml()
         self.configure_extra_libs(self.source_files[0][0])
+
+
+    def update_jetty_env(self, war_fn):
+        cur_dir = os.getcwd()
+        env_src_fn = 'WEB-INF/jetty-env.xml'
+        web_xml_fn = 'WEB-INF/jetty-web.xml'
+
+        src_txt = 'org.eclipse.jetty.webapp.WebAppContext'
+
+        with zipfile.ZipFile(war_fn) as zwar:
+
+            if web_xml_fn in zwar.namelist() or (env_src_fn in zwar.namelist() and src_txt in zwar.read(env_src_fn).decode()):
+                with tempfile.TemporaryDirectory() as tmpdirname:
+                    os.chdir(tmpdirname)
+                    zwar.extractall()
+                    xml_content = self.readFile(env_src_fn)
+                    if src_txt in xml_content:
+                        self.logIt(f"Updating {env_src_fn} in {war_fn}")
+                        xml_content = xml_content.replace(src_txt, 'org.eclipse.jetty.ee9.webapp.WebAppContext')
+                        self.writeFile(env_src_fn, xml_content, backup=False)
+
+                    if os.path.exists(web_xml_fn):
+                        self.logIt(f"Removing {web_xml_fn} from {war_fn}")
+                        os.remove(web_xml_fn)
+
+                    cmd = f'{Config.cmd_jar} cf {war_fn} *'
+                    self.logIt("Re-packing {war_fn} with command", cmd)
+                    os.system(cmd)
+
+        os.chdir(cur_dir)
+
 
     def set_jetty_param(self, jettyServiceName, jetty_param, jetty_val, inifile='start.ini'):
 

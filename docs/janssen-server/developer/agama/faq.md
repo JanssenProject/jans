@@ -129,12 +129,6 @@ We plan to offer a debugger in the future. In the meantime, you can do `printf`-
 
 ## Miscellaneous
 
-### Does the engine support AJAX?
-
-If you require a flow with no page refreshes, it could be implemented using AJAX calls as long as they align to the [POST-REDIRECT-GET](./advanced-usages.md#flow-advance-and-navigation) pattern, where a form is submitted, and as response a 302/303 HTTP redirection is obtained. Your Javascript code must also render UI elements in accordance with the data obtained by following the redirect (GET). Also, care must be taken in order to process server errors, timeouts, etc. In general, this requires a considerable amount of effort.
-
-If you require AJAX to consume a resource (service) residing in the same domain of your server, there is no restriction - the engine is not involved. Interaction with external domains may require to setup CORS configuration appropriately in the authentication server.  
-
 ### How to launch a flow?
 
 A flow is launched by issuing an authentication request in a browser as explained [here](./jans-agama-engine.md#launching-flows). 
@@ -195,3 +189,7 @@ Note the localization context (language, country, etc.) used in such a call is b
 ### Can Agama code be called from Java?
 
 No. These two languages are supposed to play roles that should not be mixed, check [here](./agama-best-practices.md#about-flow-design).
+
+### How to run flows from native applications instead of web browsers?
+
+There is a separate doc page covering this aspect [here](./native-applications.md).

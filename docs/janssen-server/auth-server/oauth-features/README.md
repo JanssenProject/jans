@@ -26,7 +26,7 @@ The [Janssen Authentication Server](https://github.com/JanssenProject/jans/tree/
 - OAuth 2.0 Mutual-TLS Client Authentication and Certificate-Bound Access Tokens [(spec)](https://datatracker.ietf.org/doc/html/rfc8705)
 - Assertion Framework for OAuth 2.0 Client Authentication and Authorization Grants [(spec)](https://www.rfc-editor.org/rfc/rfc7521.html)
 - JWT Secured Authorization Response Mode for OAuth 2.0 (JARM) [(spec)](https://openid.net/specs/oauth-v2-jarm.html)
-- OAuth 2.0 for First-Party Native Applications [(spec draft)](https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-native-apps-02.html)
+- OAuth 2.0 for First-Party Applications [(spec draft)](https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-apps-02.html)
 - The Use of Attestation in OAuth 2.0 Dynamic Client Registration [(spec draft)](https://www.ietf.org/id/draft-tschofenig-oauth-attested-dclient-reg-00.html)
 - OpenID Connect Core Error Code unmet_authentication_requirements [(spec)](https://openid.net/specs/openid-connect-unmet-authentication-requirements-1_0.html)
 - Transaction Tokens [(spec)](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html)

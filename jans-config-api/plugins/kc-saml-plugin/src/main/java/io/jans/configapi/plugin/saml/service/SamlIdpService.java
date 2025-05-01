@@ -6,7 +6,6 @@
 
 package io.jans.configapi.plugin.saml.service;
 
-import io.jans.service.document.store.service.DocumentStoreService;
 import io.jans.service.document.store.conf.DocumentStoreType;
 import io.jans.service.document.store.service.LocalDocumentStoreService;
 import io.jans.util.exception.InvalidConfigurationException;
@@ -38,8 +37,6 @@ public class SamlIdpService {
 
     @Inject
     Logger logger;
-    @Inject
-    private DocumentStoreService documentStoreService;
 
     @Inject
     private LocalDocumentStoreService localDocumentStoreService;
@@ -58,7 +55,7 @@ public class SamlIdpService {
     }
 
     public boolean isLocalDocumentStoreType() {
-        return documentStoreService.getProviderType() == DocumentStoreType.LOCAL;
+        return localDocumentStoreService.getProviderType() == DocumentStoreType.LOCAL;
     }
 
     public String saveMetadataFile(String metadataDir, String metadataFileName, String documentStoreModuleName,
@@ -83,14 +80,13 @@ public class SamlIdpService {
         }
 
         String metadataFile = metadataDir + File.separator + metadataFileName;
-        logger.info("documentStoreService:{}, metadataFile:{}, localDocumentStoreService:{} ", documentStoreService,
-                metadataFile, localDocumentStoreService);
+        logger.info("metadataFile:{}, localDocumentStoreService:{} ", metadataFile, localDocumentStoreService);
         try {
-            String result = documentStoreService.saveDocumentStream(metadataFile, null,
-                    stream, documentStoreModuleName);
+            String result = localDocumentStoreService.saveDocumentStream(metadataFile, null, stream,
+                    documentStoreModuleName);
             logger.info("SAML file saving result:{}", result);
 
-            InputStream newFile = documentStoreService.readDocumentAsStream(metadataFile);
+            InputStream newFile = localDocumentStoreService.readDocumentAsStream(metadataFile);
             logger.info("SAML file read newFile:{}", newFile);
 
             if (result != null) {
@@ -114,16 +110,16 @@ public class SamlIdpService {
             return new GluuErrorHandler(false, true, validationLog);
         }
 
-        try (InputStream stream = documentStoreService.readDocumentAsStream(metadataPath)) {
+        try (InputStream stream = localDocumentStoreService.readDocumentAsStream(metadataPath)) {
             return XMLValidator.validateMetadata(stream, samlSchema);
         }
     }
 
     public boolean renameMetadata(String metadataPath, String destinationMetadataPath) {
         logger.debug("Rename metadata file documentStoreService:{},metadataPath:{}, destinationMetadataPath:{}",
-                documentStoreService, metadataPath, destinationMetadataPath);
+                localDocumentStoreService, metadataPath, destinationMetadataPath);
         try {
-            return documentStoreService.renameDocument(metadataPath, destinationMetadataPath) != null;
+            return localDocumentStoreService.renameDocument(metadataPath, destinationMetadataPath) != null;
         } catch (Exception ex) {
             logger.error("Failed to rename metadata '{}' to '{}'", metadataPath, destinationMetadataPath, ex);
         }
@@ -133,24 +129,24 @@ public class SamlIdpService {
 
     public InputStream getFileFromDocumentStore(String path) {
 
-        logger.debug("Get file from DocumentStore. Path: {}",path);
+        logger.debug("Get file from DocumentStore. Path: {}", path);
         try {
-            return documentStoreService.readDocumentAsStream(path);
-        }catch(Exception e) {
-            logger.error("Failed to get file '{}' from DocumentStore",path);
+            return localDocumentStoreService.readDocumentAsStream(path);
+        } catch (Exception e) {
+            logger.error("Failed to get file '{}' from DocumentStore", path);
             return null;
         }
     }
 
-    private String getTempMetadataFilename(String metadataFolder, String fileName) {
-        logger.info("documentStoreService:{}, localDocumentStoreService:{}, metadataFolder:{}, fileName:{}",
-                documentStoreService, localDocumentStoreService, metadataFolder, fileName);
+    public String getTempMetadataFilename(String metadataFolder, String fileName) {
+        logger.info("localDocumentStoreService:{}, metadataFolder:{}, fileName:{}", localDocumentStoreService,
+                metadataFolder, fileName);
         synchronized (SamlIdpService.class) {
             String possibleTemp;
             do {
                 possibleTemp = fileName + INumGenerator.generate(2);
                 logger.debug("possibleTemp:{}", possibleTemp);
-            } while (documentStoreService.hasDocument(metadataFolder + possibleTemp));
+            } while (localDocumentStoreService.hasDocument(metadataFolder + possibleTemp));
             return possibleTemp;
         }
     }

@@ -6,6 +6,8 @@
 
 package io.jans.orm.model.fido2;
 
+import java.util.Arrays;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -14,16 +16,16 @@ public class Fido2RegistrationData extends Fido2Data {
     private static final long serialVersionUID = 4599467930864459334L;
 
     private String username;
-    private String domain;
+    private String origin;
     private String userId;
     private String challenge;
 
-    private String attenstationRequest;
-    private String attenstationResponse;
+    private String attestationRequest;
+    private String attestationResponse;
 
     private String uncompressedECPoint;
     private String publicKeyId;
-
+    
     private String type;
 
     private Fido2RegistrationStatus status;
@@ -34,22 +36,26 @@ public class Fido2RegistrationData extends Fido2Data {
 
     private int signatureAlgorithm;
 
-    private String applicationId;
+    private String rpId;
+    //Credential backup eligibility and current backup state is conveyed by the backupStateFlag and backupEligibilityFlag flags in the authenticator data. See https://w3c.github.io/webauthn/#sctn-authenticator-data
+    private boolean backupStateFlag;
+    private boolean backupEligibilityFlag;
+    private boolean attestedCredentialDataFlag;
+	private boolean extensionDataFlag;
+	private boolean userVerifiedFlag;
+	private boolean userPresentFlag;
 
+	private String authentictatorAttachment;
+	
+	private String credId;
+	private String transports[];
+	
     public String getUsername() {
         return username;
     }
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getDomain() {
-        return domain;
-    }
-
-    public void setDomain(String domain) {
-        this.domain = domain;
     }
 
     public String getUserId() {
@@ -68,20 +74,20 @@ public class Fido2RegistrationData extends Fido2Data {
         this.challenge = challenge;
     }
 
-    public String getAttenstationRequest() {
-        return attenstationRequest;
+    public String getAttestationRequest() {
+        return attestationRequest;
     }
 
-    public void setAttenstationRequest(String attenstationRequest) {
-        this.attenstationRequest = attenstationRequest;
+    public void setAttestationRequest(String attestationRequest) {
+        this.attestationRequest = attestationRequest;
     }
 
-    public String getAttenstationResponse() {
-        return attenstationResponse;
+    public String getAttestationResponse() {
+        return attestationResponse;
     }
 
-    public void setAttenstationResponse(String attenstationResponse) {
-        this.attenstationResponse = attenstationResponse;
+    public void setAttestationResponse(String attestationResponse) {
+        this.attestationResponse = attestationResponse;
     }
 
     public String getUncompressedECPoint() {
@@ -140,20 +146,108 @@ public class Fido2RegistrationData extends Fido2Data {
         this.signatureAlgorithm = signatureAlgorithm;
     }
 
-    public String getApplicationId() {
-		return applicationId;
+    public boolean getBackupStateFlag() {
+        return this.backupStateFlag;
+    }
+
+    public void setBackupStateFlag(boolean backupStateFlag) {
+        this.backupStateFlag = backupStateFlag;
+    }
+
+    public boolean getBackupEligibilityFlag() {
+        return this.backupEligibilityFlag;
+    }
+
+    public void setBackupEligibilityFlag(boolean backupEligibilityFlag) {
+        this.backupEligibilityFlag = backupEligibilityFlag;
+    }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
+    }
+
+    public String getRpId() {
+        return rpId;
+    }
+
+    public void setRpId(String rpId) {
+        this.rpId = rpId;
+    }
+
+	public boolean isAttestedCredentialDataFlag() {
+		return attestedCredentialDataFlag;
 	}
 
-	public void setApplicationId(String applicationId) {
-		this.applicationId = applicationId;
+	public void setAttestedCredentialDataFlag(boolean attestedCredentialDataFlag) {
+		this.attestedCredentialDataFlag = attestedCredentialDataFlag;
+	}
+
+	public boolean isExtensionDataFlag() {
+		return extensionDataFlag;
+	}
+
+	public void setExtensionDataFlag(boolean extensionDataFlag) {
+		this.extensionDataFlag = extensionDataFlag;
+	}
+
+	public boolean isUserVerifiedFlag() {
+		return userVerifiedFlag;
+	}
+
+	public void setUserVerifiedFlag(boolean userVerifiedFlag) {
+		this.userVerifiedFlag = userVerifiedFlag;
+	}
+
+	public boolean isUserPresentFlag() {
+		return userPresentFlag;
+	}
+
+	public void setUserPresentFlag(boolean userPresentFlag) {
+		this.userPresentFlag = userPresentFlag;
+	}
+
+	public String getAuthentictatorAttachment() {
+		return authentictatorAttachment;
+	}
+
+	public void setAuthentictatorAttachment(String authentictatorAttachment) {
+		this.authentictatorAttachment = authentictatorAttachment;
+	}
+
+	public String getCredId() {
+		return credId;
+	}
+
+	public void setCredId(String credId) {
+		this.credId = credId;
+	}
+
+	public String[] getTransports() {
+		return transports;
+	}
+
+	public void setTransports(String[] transports) {
+		this.transports = transports;
 	}
 
 	@Override
 	public String toString() {
-		return "Fido2RegistrationData [username=" + username + ", domain=" + domain + ", userId=" + userId + ", challenge=" + challenge
-				+ ", attenstationRequest=" + attenstationRequest + ", attenstationResponse=" + attenstationResponse
-				+ ", uncompressedECPoint=" + uncompressedECPoint + ", publicKeyId=" + publicKeyId + ", type=" + type + ", status=" + status
-				+ ", counter=" + counter + ", attestationType=" + attestationType + ", signatureAlgorithm=" + signatureAlgorithm
-				+ ", applicationId=" + applicationId + "]";
+		return "Fido2RegistrationData [username=" + username + ", origin=" + origin + ", userId=" + userId
+				+ ", challenge=" + challenge + ", attestationRequest=" + attestationRequest + ", attestationResponse="
+				+ attestationResponse + ", uncompressedECPoint=" + uncompressedECPoint + ", publicKeyId=" + publicKeyId
+				+ ", type=" + type + ", status=" + status + ", counter=" + counter + ", attestationType="
+				+ attestationType + ", signatureAlgorithm=" + signatureAlgorithm + ", rpId=" + rpId
+				+ ", backupStateFlag=" + backupStateFlag + ", backupEligibilityFlag=" + backupEligibilityFlag
+				+ ", attestedCredentialDataFlag=" + attestedCredentialDataFlag + ", extensionDataFlag="
+				+ extensionDataFlag + ", userVerifiedFlag=" + userVerifiedFlag + ", userPresentFlag=" + userPresentFlag
+				+ ", authentictatorAttachment=" + authentictatorAttachment + ", credId=" + credId + ", transports="
+				+ Arrays.toString(transports) + "]";
 	}
+
+	
+	
 }

@@ -1,21 +1,25 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-use super::http_client::{HttpClient, HttpClientError};
-use super::{KeyId, TrustedIssuerId};
-use crate::common::policy_store::TrustedIssuer;
-use jsonwebtoken::jwk::Jwk;
-use jsonwebtoken::DecodingKey;
-use serde::Deserialize;
-use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Debug;
 use std::sync::Arc;
+
+use jsonwebtoken::DecodingKey;
+use jsonwebtoken::jwk::Jwk;
+
+use serde::Deserialize;
+use serde_json::Value;
 use time::OffsetDateTime;
+
+use super::{KeyId, TrustedIssuerId};
+use crate::LogWriter;
+use crate::common::policy_store::TrustedIssuer;
+use crate::http::{HttpClient, HttpClientError};
+use crate::jwt::log_entry::JwtLogEntry;
+use crate::log::Logger;
 
 #[derive(Deserialize)]
 struct OpenIdConfig {
@@ -84,17 +88,24 @@ impl PartialEq for JwkStore {
 impl JwkStore {
     /// Creates a JwkStore from a [`serde_json::Value`]
     pub fn new_from_jwks_value(store_id: Arc<str>, jwks: Value) -> Result<Self, JwkStoreError> {
-        let jwks = serde_json::from_value::<IntermediateJwks>(jwks)?;
-        Self::new_from_jwks(store_id, jwks)
+        let jwks =
+            serde_json::from_value::<IntermediateJwks>(jwks).map_err(JwkStoreError::DecodeJwk)?;
+        Self::new_from_jwks(store_id, jwks, None)
     }
+
     /// Creates a JwkStore from a [`String`]
     pub fn new_from_jwks_str(store_id: Arc<str>, jwks: &str) -> Result<Self, JwkStoreError> {
-        let jwks = serde_json::from_str::<IntermediateJwks>(jwks)?;
-        Self::new_from_jwks(store_id, jwks)
+        let jwks =
+            serde_json::from_str::<IntermediateJwks>(jwks).map_err(JwkStoreError::DecodeJwk)?;
+        Self::new_from_jwks(store_id, jwks, None)
     }
 
     /// Creates a JwkStore from an [`IntermediateJwks`]
-    fn new_from_jwks(store_id: Arc<str>, jwks: IntermediateJwks) -> Result<Self, JwkStoreError> {
+    fn new_from_jwks(
+        store_id: Arc<str>,
+        jwks: IntermediateJwks,
+        logger: Option<Logger>,
+    ) -> Result<Self, JwkStoreError> {
         let mut keys = HashMap::new();
         let mut keys_without_id = Vec::new();
 
@@ -102,7 +113,8 @@ impl JwkStore {
             let kid = key
                 .get("kid")
                 .map(|kid| serde_json::from_value::<String>(kid.clone()))
-                .transpose()?;
+                .transpose()
+                .map_err(JwkStoreError::DecodeJwk)?;
 
             // try to create a key
             let key = match serde_json::from_value::<Jwk>(key) {
@@ -111,11 +123,11 @@ impl JwkStore {
                     // if the error indicates an unknown variant,
                     // we can safely ignore it.
                     if e.to_string().contains("unknown variant") {
-                        // TODO: pass this message to the logger
-                        eprintln!(
-                            "Encountered a JWK with an unsupported algorithm, ignoring it: {}",
-                            e
-                        );
+                        if let Some(logger) = logger.as_ref() {
+                            logger.log_any(JwtLogEntry::system(format!(
+                                "encountered a JWK with an unsupported algorithm, ignoring it: {e}"
+                            )));
+                        }
                         continue;
                     } else {
                         Err(JwkStoreError::DecodeJwk(e))?
@@ -149,23 +161,21 @@ impl JwkStore {
     }
 
     /// Creates a JwkStore by fetching the keys from the given [`TrustedIssuer`].
-    pub fn new_from_trusted_issuer(
+    pub async fn new_from_trusted_issuer(
         store_id: TrustedIssuerId,
         issuer: &TrustedIssuer,
         http_client: &HttpClient,
     ) -> Result<Self, JwkStoreError> {
         // fetch openid configuration
-        let response = http_client.get(&issuer.openid_configuration_endpoint)?;
+        let response = http_client.get(issuer.oidc_endpoint.as_str()).await?;
         let openid_config = response
             .json::<OpenIdConfig>()
-            .map_err(JwkStoreError::FetchOpenIdConfig)?;
+            .map_err(JwkStoreError::DeserializeOpenIdConfig)?;
 
         // fetch jwks
-        let response = http_client.get(&openid_config.jwks_uri)?;
+        let response = http_client.get(&openid_config.jwks_uri).await?;
 
-        let jwks = response.text().map_err(JwkStoreError::FetchJwks)?;
-
-        let mut store = Self::new_from_jwks_str(store_id, &jwks)?;
+        let mut store = Self::new_from_jwks_str(store_id, response.text())?;
         store.issuer = Some(openid_config.issuer.into());
         store.source_iss = Some(issuer.clone());
 
@@ -203,16 +213,16 @@ impl JwkStore {
 
 #[derive(thiserror::Error, Debug)]
 pub enum JwkStoreError {
-    #[error("Failed to fetch OpenIdConfig remote server: {0}")]
-    FetchOpenIdConfig(#[source] reqwest::Error),
-    #[error("Failed to fetch JWKS from remote server: {0}")]
+    #[error("failed to derserialize OpenIdConfig: {0}")]
+    DeserializeOpenIdConfig(#[source] serde_json::Error),
+    #[error("failed to fetch JWKS from remote server: {0}")]
     FetchJwks(#[source] reqwest::Error),
-    #[error("Failed to make HTTP Request: {0}")]
+    #[error("failed to make HTTP Request: {0}")]
     Http(#[from] HttpClientError),
-    #[error("Failed to create Decoding Key from JWK: {0}")]
+    #[error("failed to create Decoding Key from JWK: {0}")]
     CreateDecodingKey(#[from] jsonwebtoken::errors::Error),
-    #[error("Failed to decode JWK: {0}")]
-    DecodeJwk(#[from] serde_json::Error),
+    #[error("failed to decode JWK: {0}")]
+    DecodeJwk(#[source] serde_json::Error),
 }
 
 /// A simple struct to deserialize a collection of JWKs (JSON Web Keys).
@@ -228,15 +238,19 @@ struct IntermediateJwks {
 
 #[cfg(test)]
 mod test {
-    use crate::{
-        common::policy_store::TrustedIssuer,
-        jwt::{http_client::HttpClient, jwk_store::JwkStore},
-    };
-    use jsonwebtoken::{jwk::JwkSet, DecodingKey};
+    use std::collections::HashMap;
+    use std::time::Duration;
+
+    use jsonwebtoken::DecodingKey;
+    use jsonwebtoken::jwk::JwkSet;
     use mockito::Server;
     use serde_json::json;
-    use std::{collections::HashMap, time::Duration};
     use time::OffsetDateTime;
+    use url::Url;
+
+    use crate::common::policy_store::TrustedIssuer;
+    use crate::http::HttpClient;
+    use crate::jwt::jwk_store::JwkStore;
 
     #[test]
     fn can_load_from_jwkset() {
@@ -273,12 +287,13 @@ mod test {
         let expected_keys = expected_jwkset
             .keys
             .iter()
-            .filter_map(|key| match &key.common.key_id {
-                Some(key_id) => Some((
-                    key_id.as_str().into(),
-                    DecodingKey::from_jwk(key).expect("Should create DecodingKey from Jwk"),
-                )),
-                None => None,
+            .filter_map(|key| {
+                key.common.key_id.as_ref().map(|key_id| {
+                    (
+                        key_id.as_str().into(),
+                        DecodingKey::from_jwk(key).expect("Should create DecodingKey from Jwk"),
+                    )
+                })
             })
             .collect::<HashMap<Box<str>, DecodingKey>>();
 
@@ -308,9 +323,9 @@ mod test {
         );
     }
 
-    #[test]
-    fn can_load_from_trusted_issuers() {
-        let mut mock_server = Server::new();
+    #[tokio::test]
+    async fn can_load_from_trusted_issuers() {
+        let mut mock_server = Server::new_async().await;
 
         // Setup OpenId config endpoint
         let openid_config_json = json!({
@@ -344,10 +359,8 @@ mod test {
             "alg": "RS256",
             "kty": "RSA",
             "kid": kid2,
-        }
+        }]});
 
-        ]
-        });
         let jwks_endpoint = mock_server
             .mock("GET", "/jwks")
             .with_status(200)
@@ -361,15 +374,17 @@ mod test {
         let source_iss = TrustedIssuer {
             name: "Test Trusted Issuer".to_string(),
             description: "This is a test trusted issuer".to_string(),
-            openid_configuration_endpoint: format!(
+            oidc_endpoint: Url::parse(&format!(
                 "{}/.well-known/openid-configuration",
                 mock_server.url()
-            ),
+            ))
+            .expect("should be a valid URL"),
             ..Default::default()
         };
 
         let mut result =
             JwkStore::new_from_trusted_issuer("test".into(), &source_iss, &http_client)
+                .await
                 .expect("Should load JwkStore from Trusted Issuer");
         // We edit the `last_updated` from the result so that the comparison
         // wont fail because of the timestamp.
@@ -380,12 +395,13 @@ mod test {
         let expected_keys = jwkset
             .keys
             .iter()
-            .filter_map(|key| match &key.common.key_id {
-                Some(key_id) => Some((
-                    key_id.as_str().into(),
-                    DecodingKey::from_jwk(key).expect("Should create DecodingKey from Jwk"),
-                )),
-                None => None,
+            .filter_map(|key| {
+                key.common.key_id.as_ref().map(|key_id| {
+                    (
+                        key_id.as_str().into(),
+                        DecodingKey::from_jwk(key).expect("Should create DecodingKey from Jwk"),
+                    )
+                })
             })
             .collect::<HashMap<Box<str>, DecodingKey>>();
         let expected = JwkStore {
@@ -560,12 +576,13 @@ mod test {
         let expected_keys = expected_jwkset
             .keys
             .iter()
-            .filter_map(|key| match &key.common.key_id {
-                Some(key_id) => Some((
-                    key_id.as_str().into(),
-                    DecodingKey::from_jwk(key).expect("Should create DecodingKey from Jwk"),
-                )),
-                None => None,
+            .filter_map(|key| {
+                key.common.key_id.as_ref().map(|key_id| {
+                    (
+                        key_id.as_str().into(),
+                        DecodingKey::from_jwk(key).expect("Should create DecodingKey from Jwk"),
+                    )
+                })
             })
             .collect::<HashMap<Box<str>, DecodingKey>>();
 

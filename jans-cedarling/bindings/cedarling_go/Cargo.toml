@@ -1,0 +1,17 @@
+[package]
+name = "cedarling_go"
+version = "0.0.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+rust2go = { version = "0.4.0" }
+tokio = { workspace = true, features = ["rt-multi-thread"] }
+cedarling = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[target.'cfg(not(target_arch = "wasm32"))'.build-dependencies]
+rust2go = { version = "0.4.0", features = ["build"] }

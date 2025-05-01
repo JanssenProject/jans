@@ -9,7 +9,7 @@ tags:
 
 ## Overview
 
-The Jans-Auth server implements [OAuth 2.0 for First-Party Native Applications](https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-native-apps-02.html).
+The Jans-Auth server implements [OAuth 2.0 for First-Party Applications](https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-apps-02.html).
 This script is used to control/customize Authorization Challenge Endpoint.
 
 ## Behavior
@@ -44,12 +44,15 @@ The Authorization Challenage script implements the [AuthorizationChallenageType]
 |:-----|:------|
 |`def authorize(self, context)`| Called when the request is received. |
 |`def getAuthenticationMethodClaims(self, context)`| Called to get authn method claims. It is injected into `id_token`. Returns key-value map. |
+|`def prepareAuthzRequest(self, context)`| Prepared authorization request before `authorize` method. It's good place to restore data from session if needed. |
 
 `authorize` method returns true/false which indicates to server whether to issue `authorization_code` in response or not.
 
 If parameters is not present then error has to be created and `false` returned.
 If all is good script has to return `true` and it's strongly recommended to set user `context.getExecutionContext().setUser(user);` so AS can keep tracking what exactly user is authenticated.
 
+`prepareAuthzRequest` should typically be used for authorization request manipulation before `authorize` method is invoked. 
+Also if there is multi-step flow where some data are stored in `session` object, it is good place to restore data from session into request (please find example in sample below). 
 
 ### Objects
 | Object name | Object description |
@@ -458,6 +461,19 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
     @Override
     public Map<String, String> getAuthenticationMethodClaims(Object context) {
         return new HashMap<>();
+    }    
+    
+    @Override
+    public void prepareAuthzRequest(Object scriptContext) {
+        ExternalScriptContext context = (ExternalScriptContext) scriptContext;
+        final AuthorizationChallengeSession sessionObject = context.getAuthzRequest().getAuthorizationChallengeSessionObject();
+        if (sessionObject != null) {
+            final Map<String, String> sessionAttributes = sessionObject.getAttributes().getAttributes();
+            final String scopeFromSession = sessionAttributes.get("scope");
+            if (StringUtils.isNotBlank(scopeFromSession) && StringUtils.isBlank(context.getAuthzRequest().getScope())) {
+                context.getAuthzRequest().setScope(scopeFromSession);
+            }
+        }
     }
 }
 

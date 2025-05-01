@@ -73,7 +73,8 @@ public class CertificateVerifier {
         List<String> duplicateSignatures = attestationCerts.stream().map(cert -> base64Service.encodeToString(cert.getSignature()))
                 .filter(trustedSignatures::contains).collect(Collectors.toList());
         if (!duplicateSignatures.isEmpty()) {
-            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Root certificate in the attestation");
+        	log.error("!duplicateSignatures.isEmpty()");
+        	throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Root certificate in the attestation");
         }
     }
 
@@ -83,6 +84,7 @@ public class CertificateVerifier {
             Set<TrustAnchor> trustAnchors = trustChainCertificates.parallelStream().map(f -> new TrustAnchor(f, null)).collect(Collectors.toSet());
 
             if (trustAnchors.isEmpty()) {
+            	log.error("trustAnchors.isEmpty()");
                 throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Trust anchors certs list is empty!");
             }
 

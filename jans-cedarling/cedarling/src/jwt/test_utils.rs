@@ -1,13 +1,10 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
-use jsonwebkey as jwk;
-use jsonwebtoken as jwt;
 use serde::Serialize;
+use {jsonwebkey as jwk, jsonwebtoken as jwt};
 
 /// A pair of encoding and decoding keys.
 pub struct KeyPair {
@@ -77,7 +74,7 @@ pub fn generate_token_using_claims(
 }
 
 /// Generates a JwkSet from the given keys
-pub fn generate_jwks(keys: &Vec<KeyPair>) -> jwt::jwk::JwkSet {
+pub fn generate_jwks(keys: &[KeyPair]) -> jwt::jwk::JwkSet {
     let keys = keys
         .iter()
         .map(|key_pair| key_pair.decoding_key.clone())

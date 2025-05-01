@@ -1,9 +1,11 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+
 import inspect
 from types import ModuleType
-from cedarling_python import BootstrapConfig
-from cedarling_python import Cedarling
-from cedarling_python import ResourceData, Request, AuthorizeResult, AuthorizeResultResponse, Decision, Diagnostics, PolicyEvaluationError
-from cedarling_python import authorize_errors
+import cedarling_python
 
 
 # script to show the signature and documentation string for a python cedarling bindings
@@ -90,12 +92,23 @@ def print_module_doc(module: ModuleType):
         print_doc(getattr(module, attr), module.__name__)
 
 
-types = [
-         BootstrapConfig,
-         Cedarling,
-         ResourceData, Request, AuthorizeResult, AuthorizeResultResponse, Decision, Diagnostics, PolicyEvaluationError,
-         authorize_errors
-         ]
+def filter(name):
+    """
+    Filter attribute names of `cedarling_python` library.
+    """
+    if name.startswith("_") or name is None:
+        return False
+
+    if name == "cedarling_python":
+        return False
+
+    return True
+
+
+attr_names = [attr for attr in dir(cedarling_python) if filter(attr)]
+attr_names.sort()
+
+types = [getattr(cedarling_python, attr_name) for attr_name in attr_names]
 
 if __name__ == "__main__":
 

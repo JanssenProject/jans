@@ -30,7 +30,7 @@ pub struct AuthorizeResult {
 impl AuthorizeResult {
     /// Returns true if request is allowed
     fn is_allowed(&self) -> bool {
-        self.inner.is_allowed()
+        self.inner.decision
     }
 
     /// Get the decision value for workload
@@ -41,6 +41,20 @@ impl AuthorizeResult {
     /// Get the decision value for person/user
     fn person(&self) -> Option<AuthorizeResultResponse> {
         self.inner.person.clone().map(|v| v.into())
+    }
+
+    /// Get the decision value for a specific principal
+    fn principal(&self, principal: &str) -> Option<AuthorizeResultResponse> {
+        self.inner
+            .principals
+            .get(principal)
+            .cloned()
+            .map(|v| v.into())
+    }
+
+    /// Get the request ID associated with this result
+    fn request_id(&self) -> String {
+        self.inner.request_id.clone()
     }
 }
 

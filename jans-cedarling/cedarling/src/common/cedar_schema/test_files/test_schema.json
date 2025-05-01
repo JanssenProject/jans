@@ -1,0 +1,185 @@
+{
+    "Jans": {
+        "commonTypes": {
+            "Context": {
+                "type": "Record",
+                "attributes": {
+                    "access_token": {
+                        "type": "EntityOrCommon",
+                        "name": "Access_token"
+                    },
+                    "time": {
+                        "type": "EntityOrCommon",
+                        "name": "Long"
+                    },
+                    "user": {
+                        "type": "EntityOrCommon",
+                        "name": "User"
+                    },
+                    "workload": {
+                        "type": "EntityOrCommon",
+                        "name": "Workload"
+                    }
+                }
+            },
+            "Url": {
+                "type": "Record",
+                "attributes": {
+                    "host": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
+                    },
+                    "path": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
+                    },
+                    "protocol": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
+                    }
+                }
+            }
+        },
+        "entityTypes": {
+            "Access_token": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "exp": {
+                            "type": "EntityOrCommon",
+                            "name": "Long"
+                        },
+                        "iss": {
+                            "type": "EntityOrCommon",
+                            "name": "TrustedIssuer"
+                        }
+                    }
+                }
+            },
+            "Issue": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "country": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "org_id": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        }
+                    }
+                }
+            },
+            "Role": {},
+            "TrustedIssuer": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "issuer_entity_id": {
+                            "type": "EntityOrCommon",
+                            "name": "Url"
+                        }
+                    }
+                }
+            },
+            "User": {
+                "memberOfTypes": [
+                    "Role"
+                ],
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "country": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "email": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "sub": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "username": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        }
+                    }
+                }
+            },
+            "Workload": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "client_id": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "iss": {
+                            "type": "EntityOrCommon",
+                            "name": "TrustedIssuer"
+                        },
+                        "name": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "org_id": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        }
+                    }
+                }
+            }
+        },
+        "actions": {
+            "UpdateWithRecordCtx": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Issue"
+                    ],
+                    "principalTypes": [
+                        "Workload",
+                        "User"
+                    ],
+                    "context": {
+                        "type": "Record",
+                        "attributes": {
+                            "access_token": {
+                                "type": "EntityOrCommon",
+                                "name": "Access_token"
+                            },
+                            "time": {
+                                "type": "EntityOrCommon",
+                                "name": "Long"
+                            },
+                            "user": {
+                                "type": "EntityOrCommon",
+                                "name": "User"
+                            },
+                            "workload": {
+                                "type": "EntityOrCommon",
+                                "name": "Workload"
+                            }
+                        }
+                    }
+                }
+            },
+            "UpdateWithTypeCtx": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Issue"
+                    ],
+                    "principalTypes": [
+                        "Workload",
+                        "User"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            }
+        }
+    }
+}

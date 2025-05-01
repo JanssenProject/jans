@@ -17,6 +17,7 @@ from org.json import JSONObject
 from java.lang import String
 from com.google.common.collect import Sets
 from io.jans.model.custom.script.type.token import UpdateTokenType
+from jakarta.ws.rs import BadRequestException
 
 class UpdateToken(UpdateTokenType):
     def __init__(self, currentTimeMillis):
@@ -103,7 +104,7 @@ class UpdateToken(UpdateTokenType):
                             for scope in ele.getPermissions():
                                 if not scope in scopes:
                                     scopes.add(scope)
-            
+
                     permissionTag = context.getHttpRequest().getParameter("permission_tag")
                     permissions = adminUIConfig.getDynamic().getPermissions()
 
@@ -119,10 +120,18 @@ class UpdateToken(UpdateTokenType):
                     print e
 
                 print "Following scopes will be added in api token: {}".format(scopes)
+            else:
+                print "Error:  The User-Info JWT is not valid"
+                raise BadRequestException("The User-Info JWT is not valid")
+
             context.overwriteAccessTokenScopes(accessToken, scopes)
+        except BadRequestException:
+            print "Handling BadRequestException"
+            return False
         except Exception as e:
                 print "Exception occured. Unable to resolve role/scope mapping."
                 print e
+                return False
         return True
 
     # context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )

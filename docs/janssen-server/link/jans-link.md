@@ -45,35 +45,64 @@ systemctl stop jans-link
 
 ## Jans LDAP Link Configuration
 
-### Using Jans CLI
 
-Janssen Server [CLI](../config-guide/config-tools/jans-cli/README.md) provides
-number of operations and metadata information about Jans LDAP link.
+The Janssen Server provides multiple configuration tools to perform these
+tasks.
+
+
+
+=== "Use Command-line"
+
+    Use the command line to perform actions from the terminal. Learn how to 
+    use Jans CLI [here](./config-tools/jans-cli/README.md) or jump straight to 
+    the [Using Command Line](#using-command-line)
+
+=== "Use Text-based UI"
+
+    Use a fully functional text-based user interface from the terminal. 
+    Learn how to use Jans Text-based UI (TUI) 
+    [here](./config-tools/jans-tui/README.md) or jump straight to the
+    [Using Text-based UI](#using-text-based-ui)
+
+=== "Use REST API"
+
+    The Jans link does not have a REST API.
+### Using Command Line
+
+Janssen Server [CLI](../config-guide/config-tools/jans-cli/README.md) provides the number of operations and metadata information about the Jans LDAP link.
 
 To see Jans-Link info using Jans CLI
-```bash
-/opt/jans/jans-cli/config-cli.py --info JansLinkConfiguration
+
+```bash title="Command"
+ jans cli --info JansLinkConfiguration
 ```
 
-To see Jans Link properties using below command.
-```bash
-/opt/jans/jans-cli/config-cli.py --operation-id get-jans-link-properties
+```text
+Operation ID: get-jans-link-properties
+  Description: Gets Jans Link App configuration.
+Operation ID: put-jans-link-properties
+  Description: Updates Jans Link configuration properties.
+  Schema: Jans Link Plugin:AppConfiguration
 ```
+ 
+#### Gets Jans Link App configuration
 
-To see basic schema of Jans-Link use below command
-```bash
-/opt/jans/jans-cli/config-cli.py --schema "Jans Link Plugin:AppConfiguration"
+To see Jans Link properties, use the below command. Use the operation ID 
+`get-jans-link-properties` to get all the Jans link on the Janssen Server.
+
+```bash title="Command"
+ jans cli --operation-id get-jans-link-properties
 ```
+The output of the above command will be similar to this:
 
-Output of above command will be similar to this:
-```json
+```json title="Sample Output"
 {
   "inumConfig": {
     "configId": "local_inum",
-    "bindDN": "cn=directory manager",
-    "bindPassword": "+iChsQofo6Y=",
+    "bindDN": "@ldap_binddn@",
+    "bindPassword": "@ldap_bind_encoded_pw@",
     "servers": [
-      "localhost:1636"
+      "@ldap_hostname@:@ldaps_port@"
     ],
     "maxConnections": 10,
     "useSSL": true,
@@ -148,19 +177,63 @@ Output of above command will be similar to this:
   "problemCount": "3",
   "useLocalCache": false
 }
-
 ```
 
-## Using Jans TUI
 
-Janssen Server [TUI](../config-guide/config-tools/jans-tui/README.md) provides
-ability configure Jans LDAP link component with a menu option as shown below:
+
+#### Updates Jans Link configuration properties
+
+Let's update the Jans Link configuration properties using the Janssen CLI command line. 
+To perform the `put-jans-link-properties` operation, we have to use its schema. 
+To get its schema:
+
+
+```bash title="Command"
+jans cli --schema "Jans Link Plugin:AppConfiguration"
+```
+
+You can also use the following command for `Jans Link Plugin:AppConfiguration` a schema example.
+
+```bash title="Command"
+jans cli --schema-sample "Jans Link Plugin:AppConfiguration"
+```
+To update the configuration, follow the steps below.
+
+
+1. [Get Jans Link App configuration](#gets-jans-link-app-configuration) and store it into 
+a file for editing. The following command will retrieve the existing Jans link in the schema file.
+```bash title="Command"
+jans cli -no-color \
+--operation-id get-jans-link-properties > /tmp/update-jans-link.json
+```
+2. Edit and update the desired configuration values in the file while keeping other properties 
+and values unchanged. Updates must adhere to the `Jans Link Plugin:AppConfiguration` schema as mentioned 
+[here](#using-command-line).
+3. We have seen in the jans link `maxConnections:10` and `useSSL:true`. We are going to 
+update it with `maxConnections:15` and `useSSL:false`.
+```bash title="Command"
+jans cli --operation-id put-jans-link-properties \
+--data /tmp/update-jans-link.json
+```
+Upon successful execution of the update, the Janssen Server responds with updated configuration
+
+
+###  Using Text-based UI
+
+Start TUI using the command below:
+
+```bash title="Command"
+jans tui
+```
+
+Navigate to `Jans Link` -> `Configuration` to open the screen as shown
+in the image below.
 
 ![link-config](../../assets/ldap-link-main-tab.png)
 
-Section below covers Jans LDAP link configuration in more details.
+The section below covers Jans LDAP link configuration in more detail.
 
-### Configuration Using TUI
+#### Configuration Using 
 
 In order to configre Jans LDAP Link, the administrator needs to know various 
 values of the backend LDAP(or Active Directory). For example, `host` & `port`, 
@@ -179,7 +252,7 @@ Let's move forward with the Jans-Link setup.
 
 
 * `Enabled` : Enable your Jans-link configuration.
-
+TUI
 * `Refresh Method`: There have two refresh mode `copy` and `VDS`. If the organization has any kind of Active Directory/LDAP server, they are strongly recommended to use the Copy Method from the drop-down menu. Any organization with a database like mysql can use the VDS method. This option can be enabled via the drop-down menu in Refresh Method option.
 
 * `Mapping` : In the source attribute to destination attribute mapping field, you can enter the source attribute value on the left, and the destination attribute on the right. In other words, you can specify what the attribute is on the backend in the left field, and what it should be rendered as when it comes through the Jans Server in the right field.
@@ -198,7 +271,7 @@ Let's move forward with the Jans-Link setup.
 * `Load Source Data withLimited Search`
 
 
-**Customer Backend Key Attribute**
+#### Customer Backend Key Attribute
 
 ![customerBackend](../../assets/ldap-link-customer-backend.png)
 
@@ -208,10 +281,10 @@ Let's move forward with the Jans-Link setup.
 
 * `Source Attributes` : This contains the list of attributes which will be pulled and read by the Jans Server.
 
-* `Custom LDAP Filter` :  If there is any custom search required, this filtering mechanism can be used such as "sn=*" whereas the value of this field ensures that every user must contain an attribute named `SN`.
+* `Custom LDAP Filter` : If there is any custom search required, this filtering mechanism can be used such as "sn=*" whereas the value of this field ensures that every user must contain an attribute named `SN`.
 
 
-**Source Backend LDAP Server**
+#### Source Backend LDAP Server 
 
 ![sbls](../../assets/ldap-link-source-backend.png)
 
@@ -237,7 +310,7 @@ Add new Source LDAP Config
 * `Enable` : This check-box is used to save and push the changes. Do not use this unless the server administrator has entered all the required values.
 
 
-**Inum DB Server**
+#### Inum DB Server 
 
 ![inumsbs](../../assets/ldap-link-inum-db.png)
 

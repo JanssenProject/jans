@@ -109,7 +109,7 @@ As part of pre-release QA check, we run a set of [manual sanity checks](#sanity-
 
 - Review functioning of `.well-known` endpoints for OpenId, Fido, UMA, SCIM modules 
 - Test device authentication flow using TUI  
-- Test password authentication flow using Janssen Server Tent 
+- Test password authentication flow using Jans Tarp 
 - Test Agama project deployment and functioning  
 
 ### Post-release QA checklist

@@ -110,7 +110,7 @@ public interface AuthorizeRestWebService {
      * If the state parameter was present in the client authorization
      * request. The exact value received from the client.</dd>
      * </dl>
-     * <p/>
+     * <p>
      * <p>
      * When the responseType parameter is set to <strong>token</strong>:
      * </p>
@@ -245,7 +245,7 @@ public interface AuthorizeRestWebService {
      * If the state parameter was present in the client authorization
      * request. The exact value received from the client.</dd>
      * </dl>
-     * <p/>
+     * <p>
      * <p>
      * When the responseType parameter is set to <strong>token</strong>:
      * </p>

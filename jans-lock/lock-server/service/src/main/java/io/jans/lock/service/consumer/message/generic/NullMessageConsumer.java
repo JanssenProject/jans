@@ -40,6 +40,9 @@ public class NullMessageConsumer extends MessageConsumer {
 	@Inject
 	private Logger log;
 
+	/*
+	 * Message: {"tknTyp" : "access_token", "tknId": "UUID"}
+	 */
 	@Override
 	@Asynchronous
 	public void onMessage(String channel, String message) {

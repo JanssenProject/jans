@@ -12,7 +12,6 @@ import io.jans.model.SmtpConfiguration;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
-import io.jans.scim.model.GluuConfiguration;
 import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.service.cache.CacheConfiguration;
 import io.jans.service.cache.InMemoryConfiguration;
@@ -117,8 +116,7 @@ public class ApplicationFactory {
 
 	@Produces @RequestScoped
 	public SmtpConfiguration getSmtpConfiguration() {
-		GluuConfiguration configuration = configurationService.getConfiguration();
-		SmtpConfiguration smtpConfiguration = configuration.getSmtpConfiguration();
+		SmtpConfiguration smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();
 		
 		if (smtpConfiguration == null) {
 			return new SmtpConfiguration();

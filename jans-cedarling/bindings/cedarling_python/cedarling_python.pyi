@@ -1,151 +1,95 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+
 from typing import Optional, List, final, Dict, Any
+
 
 @final
 class BootstrapConfig:
     """
     Represents the configuration options for bootstrapping the application.
 
-    Attributes:
-        application_name (str): The name of the application.
-        policy_store_id (str): The ID of the policy store.
-        log_type (str): Type of logging. Defaults to "memory".
-        log_ttl (int): Log time-to-live in seconds. Defaults to 60.
-        user_authz (str): User authorization status. Defaults to "enabled".
-        workload_authz (str): Workload authorization status. Defaults to "enabled".
-        usr_workload_bool_op (str): Logical operator for user workload. Defaults to "AND".
-        local_jwks (str or None): Local JWKS (JSON Web Key Set). Defaults to None.
-        local_policy_store (str or None): Local policy store configuration. Defaults to None.
-        policy_store_local_fn (str or None): Local policy store function. Defaults to None.
-        jwt_sig_validation (str): JWT signature validation status. Defaults to "enabled".
-        jwt_status_validation (str): JWT status validation status. Defaults to "enabled".
-        jwt_signature_algorithms_supported (list): Supported JWT signature algorithms. Defaults to an empty list.
-        at_iss_validation (str): Access token issuer validation status. Defaults to "enabled".
-        at_jti_validation (str): Access token JWT ID validation status. Defaults to "enabled".
-        at_nbf_validation (str): Access token "not before" validation status. Defaults to "enabled".
-        at_exp_validation (str): Access token expiration validation status. Defaults to "enabled".
-        idt_iss_validation (str): ID token issuer validation status. Defaults to "enabled".
-        idt_sub_validation (str): ID token subject validation status. Defaults to "enabled".
-        idt_exp_validation (str): ID token expiration validation status. Defaults to "enabled".
-        idt_iat_validation (str): ID token issued-at validation status. Defaults to "enabled".
-        idt_aud_validation (str): ID token audience validation status. Defaults to "enabled".
-        userinfo_iss_validation (str): User info issuer validation status. Defaults to "enabled".
-        userinfo_sub_validation (str): User info subject validation status. Defaults to "enabled".
-        userinfo_aud_validation (str): User info audience validation status. Defaults to "enabled".
-        userinfo_exp_validation (str): User info expiration validation status. Defaults to "enabled".
-        id_token_trust_mode (str): Trust mode for ID tokens. Defaults to "strict".
-        lock (str): Lock mechanism status. Defaults to "disabled".
-        lock_master_configuration_uri (str or None): Master configuration URI for locks. Defaults to None.
-        dynamic_configuration (str): Dynamic configuration status. Defaults to "disabled".
-        lock_ssa_jwt (str or None): JWT for SSA locks. Defaults to None.
-        audit_log_interval (int): Interval for audit logs in seconds. Defaults to 0.
-        audit_health_interval (int): Interval for health audit in seconds. Defaults to 0.
-        audit_health_telemetry_interval (int): Interval for telemetry health audit in seconds. Defaults to 0.
-        listen_sse (str): Server-Sent Events listening status. Defaults to "disabled".
-
     Example Usage:
         bootstrap_config = BootstrapConfig({
-            "application_name": "MyApp",
-            "policy_store_id": "12345",
-            "log_type": "memory",
-            "log_ttl": 30,
+            "CEDARLING_APPLICATION_NAME": "MyApp",
+            "CEDARLING_POLICY_STORE_ID": "12345",
+            "CEDARLING_LOG_TYPE": "memory",
+            "CEDARLING_LOG_TTL": 30,
+            ...
         })
     """
-
-    application_name: str
-    policy_store_uri: str | None
-    policy_store_id: str | None
-    log_type: str | None
-    log_ttl: int | None
-    user_authz: bool | None
-    workload_authz: bool | None
-    usr_workload_bool_op: str | None
-    local_jwks: str | None
-    local_policy_store: str | None
-    policy_store_local_fn: str | None
-    jwt_sig_validation: str
-    jwt_status_validation: str
-    jwt_signature_algorithms_supported: List[str]
-    at_iss_validation: str
-    at_jti_validation: str
-    at_nbf_validation: str
-    at_exp_validation: str
-    idt_iss_validation: str
-    idt_sub_validation: str
-    idt_exp_validation: str
-    idt_iat_validation: str
-    idt_aud_validation: str
-    userinfo_iss_validation: str
-    userinfo_sub_validation: str
-    userinfo_aud_validation: str
-    userinfo_exp_validation: str
-    id_token_trust_mode: str | None
-    lock: str
-    lock_master_configuration_uri: str | None
-    dynamic_configuration: str
-    lock_ssa_jwt: str | None
-    audit_log_interval: int
-    audit_health_interval: int
-    audit_health_telemetry_interval: int
-    listen_sse: str
 
     def __init__(
         self,
         options: dict,
-    ) -> None: ...
-    """
-    Initialize a new instance of the class with configuration options.
+    ) -> None:
+        """
+        Initialize a new instance of the class with configuration options.
 
-    Args:
-        options (dict): A Python dictionary containing configuration key-value pairs. 
-            The following keys are required:
-            - "application_name" (str): The name of the application.
-            - "policy_store_id" (str): The ID of the policy store.
-            
-            Optional keys and their default values:
-            - "policy_store_uri" (str or None): URI of the policy store. Defaults to None.
-            - "log_type" (str): Type of logging. Defaults to "memory".
-            - "log_ttl" (int): Log time-to-live in seconds. Defaults to 60.
-            - "user_authz" (str): User authorization status. Defaults to "enabled".
-            - "workload_authz" (str): Workload authorization status. Defaults to "enabled".
-            - "usr_workload_bool_op" (str): Logical operator for user workload. Defaults to "AND".
-            - "local_jwks" (str or None): Local JWKS (JSON Web Key Set). Defaults to None.
-            - "local_policy_store" (str or None): Local policy store configuration. Defaults to None.
-            - "policy_store_local_fn" (str or None): Local policy store function. Defaults to None.
-            - "jwt_sig_validation" (str): JWT signature validation status. Defaults to "enabled".
-            - "jwt_status_validation" (str): JWT status validation status. Defaults to "enabled".
-            - "jwt_signature_algorithms_supported" (list): Supported JWT signature algorithms. Defaults to an empty list.
-            - "at_iss_validation" (str): Access token issuer validation status. Defaults to "enabled".
-            - "at_jti_validation" (str): Access token JWT ID validation status. Defaults to "enabled".
-            - "at_nbf_validation" (str): Access token "not before" validation status. Defaults to "enabled".
-            - "at_exp_validation" (str): Access token expiration validation status. Defaults to "enabled".
-            - "idt_iss_validation" (str): ID token issuer validation status. Defaults to "enabled".
-            - "idt_sub_validation" (str): ID token subject validation status. Defaults to "enabled".
-            - "idt_exp_validation" (str): ID token expiration validation status. Defaults to "enabled".
-            - "idt_iat_validation" (str): ID token issued-at validation status. Defaults to "enabled".
-            - "idt_aud_validation" (str): ID token audience validation status. Defaults to "enabled".
-            - "userinfo_iss_validation" (str): User info issuer validation status. Defaults to "enabled".
-            - "userinfo_sub_validation" (str): User info subject validation status. Defaults to "enabled".
-            - "userinfo_aud_validation" (str): User info audience validation status. Defaults to "enabled".
-            - "userinfo_exp_validation" (str): User info expiration validation status. Defaults to "enabled".
-            - "id_token_trust_mode" (str): Trust mode for ID tokens. Defaults to "strict".
-            - "lock" (str): Lock mechanism status. Defaults to "disabled".
-            - "lock_master_configuration_uri" (str or None): Master configuration URI for locks. Defaults to None.
-            - "dynamic_configuration" (str): Dynamic configuration status. Defaults to "disabled".
-            - "lock_ssa_jwt" (str or None): JWT for SSA locks. Defaults to None.
-            - "audit_log_interval" (int): Interval for audit logs in seconds. Defaults to 0.
-            - "audit_health_interval" (int): Interval for health audit in seconds. Defaults to 0.
-            - "audit_health_telemetry_interval" (int): Interval for telemetry health audit in seconds. Defaults to 0.
-            - "listen_sse" (str): Server-Sent Events listening status. Defaults to "disabled".
+        Args:
+            options (dict): A dictionary containing configuration key-value pairs.
+            For more imformation visit https://docs.jans.io/head/cedarling/cedarling-properties/
+        Returns:
+            None: This method initializes the instance.
 
-    Returns:
-        An instance of the class.
+        Raises:
+            KeyError: If any required configuration key is missing.
+            ValueError: If a provided value is invalid or extraction fails.
+        """
+        ...
 
-    Raises:
-        KeyError: If any required configuration key is missing.
-        ValueError: If a provided value is invalid or extraction fails.
-    """
+    @staticmethod
+    def load_from_file(path: str) -> BootstrapConfig:
+        """
+        Loads the configuration from a file.
 
-    def disable_all_jwt_validation(self) -> None: ...
+        Args:
+            path (str): The path to the configuration file.
+
+        Returns:
+            BootstrapConfig: An instance of the configuration class.
+
+        Raises:
+            ValueError: If a provided value is invalid or decoding fails.
+            OSError: If there is an error while reading the file.
+        """
+        ...
+
+    @staticmethod
+    def load_from_json(config_json: str) -> BootstrapConfig:
+        """
+        Loads the configuration from a JSON string.
+
+        Args:
+            config_json (str): The JSON string containing the configuration.
+
+        Returns:
+            BootstrapConfig: An instance of the configuration class.
+
+        Raises:
+            ValueError: If a provided value is invalid or extraction fails.
+        """
+        ...
+
+    @staticmethod
+    def from_env(options: Dict | None = None) -> BootstrapConfig:
+        """
+        Loads the configuration from environment variables.
+
+        Reads environment variables matching the configuration keys listed in the
+        class documentation. All required keys must be present in the environment.
+        You can specify dict, but keys from environment variables have bigger priority.
+
+        Returns:
+            BootstrapConfig: An instance of the configuration class.
+
+        Raises:
+            KeyError: If any required environment variable is missing.
+            ValueError: If a provided value is invalid or extraction fails.
+        """
+        ...
 
 
 @final
@@ -153,43 +97,63 @@ class Cedarling:
 
     def __init__(self, config: BootstrapConfig) -> None: ...
 
+    def authorize(self, request: Request) -> AuthorizeResult: ...
+
+    def authorize_unsigned(
+        self, request: RequestUnsigned) -> AuthorizeResult: ...
+
     def pop_logs(self) -> List[Dict]: ...
 
     def get_log_by_id(self, id: str) -> Optional[Dict]: ...
 
     def get_log_ids(self) -> List[str]: ...
 
-    def authorize(self, request: Request) -> AuthorizeResult: ...
+    def get_logs_by_tag(self, tag: str) -> List[Dict]: ...
+
+    def get_logs_by_request_id(self, request_id: str) -> List[Dict]: ...
+
+    def get_logs_by_request_id_and_tag(
+        self, request_id: str, tag: str) -> List[Dict]: ...
 
 
 @final
 class Request:
-    access_token: str
-    id_token: str
-    userinfo_token: str
+    tokens: Dict[str, str]
     action: str
-    resource: ResourceData
+    resource: EntityData
     context: Dict[str, Any]
 
     def __init__(self,
-                 access_token: str,
-                 id_token: str,
-                 userinfo_token: str,
+                 tokens: Dict[str, Any],
                  action: str,
-                 resource: ResourceData,
+                 resource: EntityData,
                  context: Dict[str, Any]) -> None: ...
 
 
 @final
-class ResourceData:
-    resource_type: str
+class RequestUnsigned:
+    principals: List[EntityData]
+    action: str
+    resource: EntityData
+    context: Dict[str, Any]
+
+    def __init__(self,
+                 principals: List[EntityData],
+                 action: str,
+                 resource: EntityData,
+                 context: Dict[str, Any]) -> None: ...
+
+
+@final
+class EntityData:
+    entity_type: str
     id: str
     payload: Dict[str, Any]
 
-    def __init__(self, resource_type: str, id: str, **kwargs) -> None: ...
+    def __init__(self, entity_type: str, id: str, **kwargs) -> None: ...
 
     @classmethod
-    def from_dict(cls, value: Dict[str, Any]) -> "ResourceData": ...
+    def from_dict(cls, value: Dict[str, Any]) -> "EntityData": ...
 
 
 @final
@@ -199,6 +163,10 @@ class AuthorizeResult:
     def workload(self) -> AuthorizeResultResponse | None: ...
 
     def person(self) -> AuthorizeResultResponse | None: ...
+
+    def principal(self, principal: str) -> AuthorizeResultResponse | None: ...
+
+    def request_id(self) -> str: ...
 
 
 @final

@@ -23,8 +23,9 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
-import io.jans.scim.model.GluuGroup;
+import io.jans.scim.model.JansGroup;
 import io.jans.scim.model.scim.ScimCustomPerson;
 import io.jans.scim.model.scim2.user.Email;
 import io.jans.scim.model.scim2.util.DateUtil;
@@ -73,13 +74,17 @@ public class UserPersistenceHelper {
         persistenceEntryManager.persist(person);
     }
 
-    public ScimCustomPerson getPersonByInum(String inum) {
+    public ScimCustomPerson getPersonByInum(String inum) throws Exception {
 
         ScimCustomPerson person = null;
         try {
             person = persistenceEntryManager.find(ScimCustomPerson.class, personService.getDnForPerson(inum));
         } catch (Exception e) {
-            log.warn("Failed to find Person by Inum {}", inum);
+            if (!SearchException.class.isInstance(e.getCause())) {
+                log.error(e.getMessage(), e.getCause());
+                throw e;
+            }
+            log.debug("Failed to find Person by Inum {}", inum);
         }
         return person;
 
@@ -109,7 +114,7 @@ public class UserPersistenceHelper {
         
         for (String oneGroup : groups) {
             try {
-                GluuGroup aGroup = groupService.getGroupByDn(oneGroup);
+                JansGroup aGroup = groupService.getGroupByDn(oneGroup);
                 List<String> groupMembers = aGroup.getMembers();
                 int idx = Optional.ofNullable(groupMembers).map(l -> l.indexOf(dn)).orElse(-1);
                 

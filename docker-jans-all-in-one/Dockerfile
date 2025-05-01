@@ -58,11 +58,12 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=871c36da8a2550ee2febd7c0d72c521898b226c3
+ENV JANS_SOURCE_VERSION=d2bc747e157a6e48a4270dff70ecea2cb78afd16
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
-RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+ARG GIT_CLONE_DEPTH=100
+RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
@@ -72,11 +73,13 @@ RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/ja
 # Python
 # ------
 
+# default pip timeout
+ARG PIP_TIMEOUT=15
 COPY /app/requirements.txt /app/requirements.txt
 RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.disabled \
     && python3 -m ensurepip \
-    && pip3 install --no-cache-dir -U pip wheel setuptools \
-    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && pip3 install --no-cache-dir -U pip wheel setuptools --timeout ${PIP_TIMEOUT} \
+    && pip3 install --no-cache-dir -r /app/requirements.txt --timeout ${PIP_TIMEOUT} \
     && pip3 uninstall -y pip wheel
 
 # -------
@@ -130,6 +133,7 @@ RUN ln -sf /app/jans_aio/jans_config_api/entrypoint.sh /app/bin/jans-config-api-
 COPY --from=jans-fido2-src /opt/jans/jetty/jans-fido2 /opt/jans/jetty/jans-fido2
 COPY --from=jans-fido2-src /app/templates/jans-fido2 /app/templates/jans-fido2
 COPY --from=jans-fido2-src /etc/jans/conf/fido2 /etc/jans/conf/fido2
+COPY --from=jans-fido2-src /app/static/fido2 /app/static/fido2
 COPY --from=jans-fido2-src /app/scripts /app/jans_aio/jans_fido2
 RUN ln -sf /app/jans_aio/jans_fido2/entrypoint.sh /app/bin/jans-fido2-entrypoint.sh
 

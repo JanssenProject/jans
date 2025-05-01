@@ -142,5 +142,16 @@
       "certifi": "python3-certifi",
       "psycopg2": "python3-psycopg2"
     }
+  },
+  "ubuntu 24": {
+    "optional": "",
+    "mandatory": "apache2 rsyslog python3-urllib3 python3-certifi postgresql postgresql-contrib",
+    "python": {
+      "requests": "python3-requests",
+      "ruamel.yaml": "python3-ruamel.yaml",
+      "cryptography": "python3-cryptography",
+      "certifi": "python3-certifi",
+      "psycopg2": "python3-psycopg2"
+    }
   }
 }
