@@ -29,71 +29,113 @@ use std::env;
 //  All fields should be available to parse from string, because env vars always string.
 pub struct BootstrapConfigRaw {
     ///  Human friendly identifier for the application
-    #[serde(rename = "CEDARLING_APPLICATION_NAME")]
+    #[serde(rename = "CEDARLING_APPLICATION_NAME", alias = "cedarling_application_name")]
     pub application_name: String,
 
     /// Location of policy store JSON, used if policy store is not local, or retreived from Lock Master.
     #[serde(
         rename = "CEDARLING_POLICY_STORE_URI",
+        alias = "cedarling_policy_store_uri",
         default,
         deserialize_with = "parse_option_string"
     )]
     pub policy_store_uri: Option<String>,
 
     /// An identifier for the policy store.
-    #[serde(rename = "CEDARLING_POLICY_STORE_ID", default)]
+    #[serde(
+        rename = "CEDARLING_POLICY_STORE_ID",
+        alias = "cedarling_policy_store_id", 
+        default
+    )]
     pub policy_store_id: String,
 
     /// How the Logs will be presented.
-    #[serde(rename = "CEDARLING_LOG_TYPE", default)]
+    #[serde(
+        rename = "CEDARLING_LOG_TYPE",
+        alias = "cedarling_log_type",
+        default
+    )]
     pub log_type: LoggerType,
 
     /// Log level filter for logging. TRACE is lowest. FATAL is highest.
-    #[serde(rename = "CEDARLING_LOG_LEVEL", default)]
+    #[serde(
+        rename = "CEDARLING_LOG_LEVEL", 
+        alias = "cedarling_log_level", 
+        default
+    )]
     pub log_level: LogLevel,
 
     /// If `log_type` is set to [`LogType::Memory`], this is the TTL (time to live) of
     /// log entities in seconds.
-    #[serde(rename = "CEDARLING_LOG_TTL", default)]
+    #[serde(
+        rename = "CEDARLING_LOG_TTL",
+        alias = "cedarling_log_ttl",
+        default
+    )]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub log_ttl: Option<u64>,
 
     /// Maximum number of log entities that can be stored using [`LogType::Memory`].
     /// If value is 0, there is no limit. But if None, default value is applied.
-    #[serde(rename = "CEDARLING_LOG_MAX_ITEMS", default)]
+    #[serde(
+        rename = "CEDARLING_LOG_MAX_ITEMS", 
+        alias = "cedarling_log_max_items", 
+        default
+    )]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub log_max_items: Option<usize>,
 
     /// Maximum size of a single log entity in bytes using [`LogType::Memory`].
     /// If value is 0, there is no limit. But if None, default value is applied.
-    #[serde(rename = "CEDARLING_LOG_MAX_ITEM_SIZE", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    #[serde(
+        rename = "CEDARLING_LOG_MAX_ITEM_SIZE", 
+        alias = "cedarling_log_max_item_size", 
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default
+    )]
     pub log_max_item_size: Option<usize>,
 
     /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
-    #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    #[serde(
+        rename = "CEDARLING_DECISION_LOG_USER_CLAIMS", 
+        alias = "cedarling_decision_log_user_claims", 
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default
+    )]
     pub decision_log_user_claims: Vec<String>,
 
     /// List of claims to map from user entity, such as ["client_id", "rp_id", ...]
-    #[serde(rename = "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    #[serde(
+        rename = "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS", 
+        alias = "cedarling_decision_log_workload_claims", 
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default
+    )]
     pub decision_log_workload_claims: Vec<String>,
 
     /// Token claims that will be used for decision logging.
     /// Default is jti, but perhaps some other claim is needed.
     #[serde(
         rename = "CEDARLING_DECISION_LOG_DEFAULT_JWT_ID",
+        alias = "cedarling_decision_log_default_jwt_id",
         default = "default_jti"
     )]
     pub decision_log_default_jwt_id: String,
 
     /// When `enabled`, Cedar engine authorization is queried for a User principal.
-    #[serde(rename = "CEDARLING_USER_AUTHZ", default)]
+    #[serde(
+        rename = "CEDARLING_USER_AUTHZ", 
+        alias = "cedarling_user_authz", 
+        default,
+    )]
     pub user_authz: FeatureToggle,
 
     /// When `enabled`, Cedar engine authorization is queried for a Workload principal.
-    #[serde(rename = "CEDARLING_WORKLOAD_AUTHZ", default)]
+    #[serde(
+        rename = "CEDARLING_WORKLOAD_AUTHZ",
+        alias = "cedarling_workload_authz",
+        default
+    )]
     pub workload_authz: FeatureToggle,
 
     /// Specifies what boolean operation to use for the `USER` and `WORKLOAD` when
@@ -110,49 +152,79 @@ pub struct BootstrapConfigRaw {
     ///     ]
     /// }
     /// ```
-    #[serde(rename = "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    #[serde(
+        rename = "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION", 
+        alias = "cedarling_principal_boolean_operation", 
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default
+    )]
     pub principal_bool_operation: JsonRule,
 
     /// Mapping name of cedar schema TrustedIssuer entity
-    #[serde(rename = "CEDARLING_MAPPING_TRUSTED_ISSUER", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    #[serde(
+        rename = "CEDARLING_MAPPING_TRUSTED_ISSUER", 
+        alias = "cedarling_mapping_trusted_issuer", 
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default
+    )]
     pub mapping_iss: Option<String>,
 
     /// Mapping name of cedar schema User entity
-    #[serde(rename = "CEDARLING_MAPPING_USER", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    #[serde(
+        rename = "CEDARLING_MAPPING_USER", 
+        alias = "cedarling_mapping_user",
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default
+    )]
     pub mapping_user: Option<String>,
 
     /// Mapping name of cedar schema Workload entity.
-    #[serde(rename = "CEDARLING_MAPPING_WORKLOAD", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    #[serde(
+        rename = "CEDARLING_MAPPING_WORKLOAD", 
+        alias = "cedarling_mapping_workload", 
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default
+    )]
     pub mapping_workload: Option<String>,
 
     /// Mapping name of cedar schema Role entity.
-    #[serde(rename = "CEDARLING_MAPPING_ROLE", default)]
+    #[serde(
+        rename = "CEDARLING_MAPPING_ROLE", 
+        alias = "cedarling_mapping_role", 
+        default
+    )]
     pub mapping_role: Option<String>,
 
     /// Mapping name of cedar schema Role entity.
-    #[serde(rename = "CEDARLING_UNSIGNED_ROLE_ID_SRC", default)]
+    #[serde(
+        rename = "CEDARLING_UNSIGNED_ROLE_ID_SRC", 
+        alias = "cedarling_unsigned_role_id_src", 
+        default
+    )]
     pub unsigned_role_id_src: UnsignedRoleIdSrc,
 
     /// Path to a local file pointing containing a JWKS.
     #[serde(
         rename = "CEDARLING_LOCAL_JWKS",
-        default,
-        deserialize_with = "parse_option_string"
+        alias = "cedarling_local_jwks",
+        deserialize_with = "parse_option_string",
+        default
     )]
     pub local_jwks: Option<String>,
 
     /// JSON object with policy store
-    #[serde(rename = "CEDARLING_POLICY_STORE_LOCAL", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    #[serde(
+        rename = "CEDARLING_POLICY_STORE_LOCAL",
+        alias = "cedarling_policy_store_local",
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default
+    )]
     pub local_policy_store: Option<String>,
 
     /// Path to a Policy Store JSON file
     #[serde(
         rename = "CEDARLING_POLICY_STORE_LOCAL_FN",
+        alias = "cedarling_policy_store_local_fn",
         default,
         deserialize_with = "parse_option_string"
     )]
@@ -161,8 +233,12 @@ pub struct BootstrapConfigRaw {
     /// Whether to check the signature of all JWT tokens.
     ///
     /// This requires that an `iss` (Issuer) claim is present on each token.
-    #[serde(rename = "CEDARLING_JWT_SIG_VALIDATION", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    #[serde(
+        rename = "CEDARLING_JWT_SIG_VALIDATION",
+        alias = "cedarling_jwt_sig_validation",
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default
+    )]
     pub jwt_sig_validation: FeatureToggle,
 
     /// Whether to check the status of the JWT. On startup.
@@ -172,13 +248,21 @@ pub struct BootstrapConfigRaw {
     /// cache it. See the [`IETF Draft`] for more info.
     ///
     /// [`IETF Draft`]: https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/
-    #[serde(rename = "CEDARLING_JWT_STATUS_VALIDATION", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    #[serde(
+        rename = "CEDARLING_JWT_STATUS_VALIDATION",
+        alias = "cedarling_jwt_status_validation",
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default,
+    )]
     pub jwt_status_validation: FeatureToggle,
 
     /// Cedarling will only accept tokens signed with these algorithms.
-    #[serde(rename = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    #[serde(
+        rename = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED",
+        alias = "cedarling_jwt_signature_algorithms_supported",
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default
+    )]
     pub jwt_signature_algorithms_supported: HashSet<Algorithm>,
 
     /// Varying levels of validations based on the preference of the developer.
@@ -189,52 +273,85 @@ pub struct BootstrapConfigRaw {
     ///     1. id_token aud matches the access_token client_id;
     ///     2. if a Userinfo token is present, the sub matches the id_token, and that
     ///         the aud matches the access token client_id.
-    #[serde(rename = "CEDARLING_ID_TOKEN_TRUST_MODE", default)]
+    #[serde(
+        rename = "CEDARLING_ID_TOKEN_TRUST_MODE",
+        alias = "cedarling_id_token_trust_mode",
+        default
+    )]
     pub id_token_trust_mode: IdTokenTrustMode,
 
     /// If Enabled, the Cedarling will connect to the Lock Master for policies,
     /// and subscribe for SSE events.
-    #[serde(rename = "CEDARLING_LOCK", default)]
+    #[serde(
+        rename = "CEDARLING_LOCK",
+        alias = "cedarling_lock",
+        default
+    )]
     pub lock: FeatureToggle,
 
     /// URI where Cedarling can get JSON file with all required metadata about
     /// Lock Master, i.e. .well-known/lock-master-configuration.
     ///
     /// ***Required*** if `LOCK == enabled`.
-    #[serde(rename = "CEDARLING_LOCK_SERVER_CONFIGURATION_URI", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    #[serde(
+        rename = "CEDARLING_LOCK_SERVER_CONFIGURATION_URI", 
+        alias = "cedarling_lock_server_configuration_uri", 
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default
+    )]
     pub lock_server_configuration_uri: Option<String>,
 
     /// Controls whether Cedarling should listen for SSE config updates.
-    #[serde(rename = "CEDARLING_LOCK_DYNAMIC_CONFIGURATION", default)]
+    #[serde(
+        rename = "CEDARLING_LOCK_DYNAMIC_CONFIGURATION", 
+        alias = "cedarling_lock_dynamic_configuration", 
+        default
+    )]
     pub dynamic_configuration: FeatureToggle,
 
     /// SSA for DCR in a Lock Master deployment. The Cedarling will validate this
     /// SSA JWT prior to DCR.
     #[serde(
         rename = "CEDARLING_LOCK_SSA_JWT",
+        alias = "cedarling_lock_ssa_jwt",
+        deserialize_with = "parse_option_string",
         default,
-        deserialize_with = "parse_option_string"
     )]
     pub lock_ssa_jwt: Option<String>,
 
     /// How often to send log messages to Lock Master (0 to turn off trasmission).
-    #[serde(rename = "CEDARLING_LOCK_LOG_INTERVAL", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    #[serde(
+        rename = "CEDARLING_LOCK_LOG_INTERVAL",
+        alias = "cedarling_lock_log_interval",
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default,
+    )]
     pub audit_log_interval: u64,
 
     /// How often to send health messages to Lock Master (0 to turn off transmission).
-    #[serde(rename = "CEDARLING_LOCK_HEALTH_INTERVAL", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    #[serde(
+        rename = "CEDARLING_LOCK_HEALTH_INTERVAL",
+        alias = "cedarling_lock_health_interval",
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default
+    )]
     pub audit_health_interval: u64,
 
     /// How often to send telemetry messages to Lock Master (0 to turn off transmission).
-    #[serde(rename = "CEDARLING_LOCK_TELEMETRY_INTERVAL", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    #[serde(
+        rename = "CEDARLING_LOCK_TELEMETRY_INTERVAL",
+        alias = "cedarling_lock_telemetry_interval",
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default
+    )]
     pub audit_health_telemetry_interval: u64,
 
     /// Controls whether Cedarling should listen for updates from the Lock Server.
-    #[serde(rename = "CEDARLING_LOCK_LISTEN_SSE", default)]
+    #[serde(
+        rename = "CEDARLING_LOCK_LISTEN_SSE", 
+        alias = "cedarling_lock_listen_sse", 
+        default
+    )]
     pub listen_sse: FeatureToggle,
 }
 
