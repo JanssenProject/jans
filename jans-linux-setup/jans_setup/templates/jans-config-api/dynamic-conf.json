@@ -1,6 +1,7 @@
 {
   "serviceName": "jans-config-api",
   "configOauthEnabled": ${configOauthEnabled},
+  "cedarAuthEnabled": ${configOauthEnabled},
   "disableLoggerTimer": false,
   "disableAuditLogger": false,
   "customAttributeValidationEnabled": true,
@@ -74,6 +75,10 @@
     "ignoreHttpMethod": [
       "@jakarta.ws.rs.GET()"
     ]
+  },
+  "cedarAuthConfig": {
+    "applicationName": "jans-config-api",
+    "policyStoreFile": "/opt/jans/jetty/jans-config-api/custom/static/"
   },
   "assetMgtConfiguration": {
     "assetMgtEnabled": true,

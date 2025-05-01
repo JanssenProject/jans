@@ -16,6 +16,9 @@ public class ApiAppConfiguration implements Configuration {
 
     @Schema(description = "OAuth authentication enable/disable flag. Default value `true`.")
     private boolean configOauthEnabled;
+    
+    @Schema(description = "Cedar OAuth authentication enable/disable flag. Default value `true`.")
+    private boolean cedarAuthEnabled;
 
     @Schema(description = "Flag to enable/disable timer to dynamically reflect log configuration changes. Default value `true`Default value `false`.")
     private boolean disableLoggerTimer;
@@ -96,6 +99,9 @@ public class ApiAppConfiguration implements Configuration {
 
     @Schema(description = "Configuration for data-type converstion.")
     private DataFormatConversionConf dataFormatConversionConf;
+    
+    @Schema(description = "Cedar Configuration for authorization.")
+    private CedarConfig cedarConfig;
 
     @Schema(description = "Details of enabled plugins.")
     private List<PluginConf> plugins;
@@ -354,13 +360,30 @@ public class ApiAppConfiguration implements Configuration {
         this.assetMgtConfiguration = assetMgtConfiguration;
     }
 
+    public boolean isCedarAuthEnabled() {
+        return cedarAuthEnabled;
+    }
+
+    public void setCedarAuthEnabled(boolean cedarAuthEnabled) {
+        this.cedarAuthEnabled = cedarAuthEnabled;
+    }
+
+    public CedarConfig getCedarConfig() {
+        return cedarConfig;
+    }
+
+    public void setCedarConfig(CedarConfig cedarConfig) {
+        this.cedarConfig = cedarConfig;
+    }
+
     @Override
     public String toString() {
         return "ApiAppConfiguration [serviceName=" + serviceName + ", configOauthEnabled=" + configOauthEnabled
-                + ", disableLoggerTimer=" + disableLoggerTimer + ", disableAuditLogger=" + disableAuditLogger
-                + ", customAttributeValidationEnabled=" + customAttributeValidationEnabled + ", acrValidationEnabled="
-                + acrValidationEnabled + ", apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType="
-                + apiProtectionType + ", apiClientId=" + apiClientId 
+                + ", cedarAuthEnabled=" + cedarAuthEnabled + ", disableLoggerTimer=" + disableLoggerTimer
+                + ", disableAuditLogger=" + disableAuditLogger + ", customAttributeValidationEnabled="
+                + customAttributeValidationEnabled + ", acrValidationEnabled=" + acrValidationEnabled
+                + ", apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType=" + apiProtectionType
+                + ", apiClientId=" + apiClientId
                 + ", endpointInjectionEnabled=" + endpointInjectionEnabled + ", authIssuerUrl=" + authIssuerUrl
                 + ", authOpenidConfigurationUrl=" + authOpenidConfigurationUrl + ", authOpenidIntrospectionUrl="
                 + authOpenidIntrospectionUrl + ", authOpenidTokenUrl=" + authOpenidTokenUrl + ", authOpenidRevokeUrl="
@@ -370,8 +393,8 @@ public class ApiAppConfiguration implements Configuration {
                 + disableJdkLogger + ", maxCount=" + maxCount + ", acrExclusionList=" + acrExclusionList
                 + ", userExclusionAttributes=" + userExclusionAttributes + ", userMandatoryAttributes="
                 + userMandatoryAttributes + ", agamaConfiguration=" + agamaConfiguration + ", auditLogConf="
-                + auditLogConf + ", dataFormatConversionConf=" + dataFormatConversionConf + ", plugins=" + plugins
-                + ", assetMgtConfiguration=" + assetMgtConfiguration + "]";
-    }    
-    
+                + auditLogConf + ", dataFormatConversionConf=" + dataFormatConversionConf + ", cedarConfig="
+                + cedarConfig + ", plugins=" + plugins + ", assetMgtConfiguration=" + assetMgtConfiguration + "]";
+    }
+        
 }
