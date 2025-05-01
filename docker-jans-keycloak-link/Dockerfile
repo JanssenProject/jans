@@ -42,11 +42,11 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-04-30 11:49'
+ENV CN_BUILD_DATE='2025-05-01 08:39'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-keycloak-link-server/${CN_VERSION}/jans-keycloak-link-server-${CN_VERSION}.war
 
-# Install Link
+# Install KC Link
 RUN mkdir -p ${JETTY_BASE}/jans-keycloak-link/webapps \
     && wget -q ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-keycloak-link/webapps/jans-keycloak-link.war \
     && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-keycloak-link --add-modules=server,resources,http,forwarded,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate,jmx,logging-log4j2 --approve-all-licenses
