@@ -147,7 +147,7 @@ In `target/release`, you should find the `libmobile.dylib`, `libmobile.so`, or `
 cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language kotlin --out-dir ./bindings/cedarling_uniffi/javaApp/src/main/java/org/example
 ```
 
-3. Copy the generated `libmobile.dylib`, `libmobile.so`, or `libmobile.dll` file to resource directlory of the sample Java Maven project. Replace `{build_file}` in the below commad with `libmobile.dylib`, `libmobile.so`, or `libmobile.dll`, depending on which file is generated in `target/release`.
+3. Copy the generated `libmobile.dylib`, `libmobile.so`, or `libmobile.dll` file to resource directory of the sample Java Maven project. Replace `{build_file}` in the below commad with `libmobile.dylib`, `libmobile.so`, or `libmobile.dll`, depending on which file is generated in `target/release`.
 
 ```bash
 cp ./target/release/{build_file} ./bindings/cedarling_uniffi/javaApp/src/main/resources
@@ -159,4 +159,4 @@ cp ./target/release/{build_file} ./bindings/cedarling_uniffi/javaApp/src/main/re
  mvn exec:java -Dexec.mainClass="org.example.Main"
 ```
 
-The method will execute the steps for Cedarling initialization with a sample bootstrap configuration, run authorization with sample tokens, resource and context inputs and calling log interface to print logs on console. The sample `tokens`, `resource` and `context` input files are present at `./bindings/cedarling_uniffi/javaApp/src/main/resources/config`. 
+The method will execute the steps for Cedarling initialization with a sample bootstrap configuration, run authorization with sample tokens, resource and context inputs and call log interface to print authorization logs on console. The sample `tokens`, `resource` and `context` input files used by the sample application are present at `./bindings/cedarling_uniffi/javaApp/src/main/resources/config`. 
