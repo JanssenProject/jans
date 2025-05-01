@@ -6537,9 +6537,40 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Passwordless / Usernameless Login
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Passwordless / Usernameless Login
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#implementing-a-usernameless-flow-for-a-web-app-rp" class="md-nav__link">
+    Implementing a usernameless flow for a web-app (RP):
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -8821,6 +8852,21 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#implementing-a-usernameless-flow-for-a-web-app-rp" class="md-nav__link">
+    Implementing a usernameless flow for a web-app (RP):
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -8843,7 +8889,7 @@
 
 
 <h1 id="fido-passwordless-usernameless-login">FIDO Passwordless / Usernameless Login<a class="headerlink" href="#fido-passwordless-usernameless-login" title="Permanent link">#</a></h1>
-<p><em>Seamless Passwordless and Usernameless Login</em></p>
+<p><strong>Seamless Passwordless and Usernameless Login</strong></p>
 <ul>
 <li>Conditional UI eliminates the need for both passwords and usernames.</li>
 <li>Users don’t have to recall their registered email or username.</li>
@@ -8851,8 +8897,8 @@
 <li>Conditional UI allows websites to initiate a passkey/WebAuthn request alongside a standard password prompt.</li>
 <li>The effectiveness of Conditional UI depends on the compatibility of the user’s device and browser. Read more here(https://passkeys.dev/device-support/)</li>
 </ul>
-<p>Sequence diagram </p>
-<div class="highlight"><pre><span></span><code>User-&gt;RP: isConditionalMediationAvailable()
+<p><strong>Sequence diagram</strong></p>
+<p><div class="highlight"><pre><span></span><code>User-&gt;RP: isConditionalMediationAvailable()
 RP-&gt;FIDO Server: POST start Conditional UI
 FIDO Server-&gt;RP: PublicKeyCredentialRequestOptions
 User-&gt;RP: credentials.get(PublicKeyCredentialRequestOptions + mediation: conditional)
@@ -8861,17 +8907,22 @@ User-&gt;RP: select passkey from autofill &amp; authenticate (e.g. Face ID, Touc
 RP-&gt;FIDO Server: Authenticator response
 FIDO Server-&gt;RP: Logged in
 </code></pre></div>
-<p>Implementing a usernameless flow for a web-app (RP):</p>
-<p>Use the Person authentication script as a guideline: https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py</p>
+<img alt="image" src="https://github.com/user-attachments/assets/16ff6981-bf6b-4201-8146-b1949f274bf9" /></p>
+<h3 id="implementing-a-usernameless-flow-for-a-web-app-rp">Implementing a usernameless flow for a web-app (RP):<a class="headerlink" href="#implementing-a-usernameless-flow-for-a-web-app-rp" title="Permanent link">#</a></h3>
 <ol>
-<li>During Registraion: At the time of Credential registration, a cookie called 'allowList' should be added.
+<li>
+<p><strong>Guideline</strong> : Use the <a href="https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py">FIDO Person authentication script</a> as a guideline. </p>
+</li>
+<li>
+<p><strong>During Registraion</strong>: At the time of Credential registration, a cookie called 'allowList' should be added.
 Content of the allowList is as follows, note that we are not storing usernames or email ids:
  <div class="highlight"><pre><span></span><code>[{ id: ...., type: &#39;public-key&#39;, transports: [&#39;usb&#39;, &#39;ble&#39;, &#39;nfc&#39;]}]
-</code></pre></div></li>
+</code></pre></div></p>
+</li>
 </ol>
 <p>Python code for the same can be noted in the Person Authentication Script - https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py</p>
 <ol>
-<li>Authentication :</li>
+<li><strong>Authentication</strong> :</li>
 </ol>
 <p>In Assertion Request, set RP id and Allow credentials fetched from the cookie <code>allowList</code>
 <div class="highlight"><pre><span></span><code>assertionRequest = AssertionOptions()
@@ -8880,7 +8931,7 @@ assertionRequest.setAllowCredentials(Arrays.asList(allowList))
 assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
 </code></pre></div></p>
 <ol>
-<li>In the login web page, here is an .xhtml sample
+<li>In the <strong>login web page</strong>, here is an .xhtml sample
 <div class="highlight"><pre><span></span><code> &lt;h:inputText placeholder=&quot;#{msgs[&#39;login.username&#39;]}&quot; id=&quot;username&quot; name=&quot;username&quot; required=&quot;true&quot; value=&quot;#{credentials.username}&quot; &gt;
     &lt;f:passThroughAttribute name=&quot;autocomplete&quot; value=&quot;username webauthn&quot;/&gt;
  &lt;/h:inputText&gt;
@@ -8902,7 +8953,7 @@ javascript code :
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-03-28T10:27:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-03-28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-05-01T14:35:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-05-01</span>
       
         <br>
         Created:
