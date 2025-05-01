@@ -16,11 +16,16 @@ from pathlib import Path
 from itertools import cycle
 from requests.models import Response
 from logging.handlers import RotatingFileHandler
-from prompt_toolkit.shortcuts import clear
 
 tcols, trows = os.get_terminal_size()
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur_dir)
+
+pylib_dir = os.path.join(cur_dir, 'cli', 'pylib')
+if os.path.exists(pylib_dir):
+    sys.path.insert(0, pylib_dir)
+
+from prompt_toolkit.shortcuts import clear
 
 ### start splash logo
 with open(os.path.join(cur_dir, 'jans-logo.txt')) as f:
@@ -50,10 +55,6 @@ jans_logo = '\n'.join(jans_logo_list)
 clear()
 print(jans_logo)
 ### send plash logo
-
-pylib_dir = os.path.join(cur_dir, 'cli', 'pylib')
-if os.path.exists(pylib_dir):
-    sys.path.insert(0, pylib_dir)
 
 no_tui = False
 if '--no-tui' in sys.argv:

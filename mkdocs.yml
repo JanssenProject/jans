@@ -407,7 +407,9 @@ nav:
       - Using CLI/TUI: janssen-server/usermgmt/usermgmt-cli-tui.md
       - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
 - Cedarling:
-  - Getting Started: 'cedarling/cedarling-getting-started.md'
+  - Getting Started: 
+    - 'cedarling/cedarling-getting-started.md'
+    - Golang: 'cedarling/getting-started/go.md'
   - Overview: 'cedarling/cedarling-overview.md'
   - Quick Start:
     - Authorization Using Cedarling: 'cedarling/cedarling-quick-start-unsigned.md'
