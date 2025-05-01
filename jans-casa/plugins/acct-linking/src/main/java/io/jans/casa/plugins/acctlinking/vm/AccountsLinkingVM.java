@@ -52,6 +52,10 @@ public class AccountsLinkingVM {
         return pendingProvider;
     }
     
+    public boolean isUsePopup() {
+        return als.usePopup();
+    }
+    
     public AccountsLinkingVM() {
         als = AccountsLinkingService.getInstance();
     }

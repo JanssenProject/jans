@@ -190,7 +190,7 @@ Methods
 
 .. method:: from_dict(cls, value: dict) -> EntityData
     Initialize a new EntityData from a dictionary.
-    To pass `resource_type` you need to use `type` key.
+    To pass `entity_type` you need to use `type` key.
 ___
 
 PolicyEvaluationError

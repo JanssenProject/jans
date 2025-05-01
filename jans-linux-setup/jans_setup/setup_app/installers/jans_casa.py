@@ -52,7 +52,6 @@ class CasaInstaller(JettyInstaller):
     def install(self):
 
         self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
-        self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
 
         self.casa_scopes = self.create_scopes()
         self.add_plugins()

@@ -9334,19 +9334,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanAccess:
+        selected:
           type: boolean
         adminCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
         userCanEdit:
           type: boolean
+        adminCanAccess:
+          type: boolean
         userCanAccess:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        selected:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -9401,6 +9401,8 @@ components:
         parEndpoint:
           type: string
         requirePar:
+          type: boolean
+        parForbidPublicClient:
           type: boolean
         deviceAuthzEndpoint:
           type: string
@@ -9833,6 +9835,10 @@ components:
           type: boolean
         sessionIdPersistInCache:
           type: boolean
+        sessionIdUserClaimsInAttributes:
+          type: array
+          items:
+            type: string
         includeSidInResponse:
           type: boolean
         disablePromptLogin:
@@ -10391,6 +10397,12 @@ components:
         ssaExpirationInDays:
           type: integer
           format: int32
+        ssaMapSoftwareRolesToScopes:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
     SsaValidationConfig:
       type: object
       properties:
