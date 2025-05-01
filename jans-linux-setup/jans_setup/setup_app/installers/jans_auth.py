@@ -55,10 +55,8 @@ class JansAuthInstaller(JettyInstaller):
             Config.jwks_uri = base.argsp.jwks_uri
 
     def install(self):
-        self.logIt("Copying auth.war into jetty webapps folder...")
         self.make_pairwise_calculation_salt()
         self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
-        self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
         self.set_class_path([os.path.join(self.custom_lib_dir, '*')])
         self.external_libs()
         self.data_cleaner_crontab()

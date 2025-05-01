@@ -546,3 +546,120 @@ jobs:
         gpg --armor --detach-sign cedarling-krakend-arm64-"${{ env.KRAKEND_BUILDER_IMAGE }}"-"${{ env.TAG }}".so || echo "Failed to sign"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${{ env.VERSION }}" *.so *.sha256sum *.asc
+  build_cedarling_go:
+    if: github.repository == 'JanssenProject/jans'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        name: [ubuntu22, mac, windows]
+        include:
+          - name: ubuntu22
+            os: ubuntu-22.04
+          - name: mac
+            os: macos-15
+          - name: windows
+            os: windows-2025
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Import GPG key
+        id: import_gpg
+        continue-on-error: true
+        uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
+        with:
+          gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+      - name: Install Golang dependencies
+        uses: actions/setup-go@v5
+        with:
+            go-version: '1.24'
+      - name: Build rust artifacts linux
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
+        if: matrix.name == 'ubuntu22'
+        run: |
+          rustup update stable && rustup default stable
+          TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+          VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+          if [ "${TAG}" == "nightly" ]; then
+            VERSION=nightly
+            TAG="0.0.0"
+          fi
+          cargo build -r -p cedarling_go
+          cp ../../target/release/libcedarling_go.so libcedarling_go-${TAG}.so
+      - name: Build rust artifacts mac
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
+        if: matrix.name == 'mac'
+        run: |
+          brew install rustup
+          rustup update stable && rustup default stable
+          TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+          VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+          if [ "${TAG}" == "nightly" ]; then
+            VERSION=nightly
+            TAG="0.0.0"
+          fi
+          cargo build -r -p cedarling_go
+          cp ../../target/release/libcedarling_go.dylib libcedarling_go-${TAG}.dylib
+      - name: Build rust artifacts windows
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
+        if: matrix.name == 'windows'
+        shell: bash
+        run: |
+          choco install rustup.install
+          rustup update stable && rustup default stable
+          TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+          VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+          if [ "${TAG}" = "nightly" ]; then
+            VERSION=nightly
+            TAG="0.0.0"
+          fi
+          cargo build -r -p cedarling_go
+          cp ../../target/release/cedarling_go.dll cedarling_go-${TAG}.dll
+          cp ../../target/release/cedarling_go.dll.lib cedarling_go-${TAG}.lib
+
+      - name: Generate sha256sum and sign
+        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
+        shell: bash
+        run: |
+          TAG=$(echo ${{ github.event.ref }} | cut -d '/' -f 3 | sed 's/^v//')
+          VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
+          if [ "${TAG}" = "nightly" ]; then
+            VERSION=nightly
+            TAG="0.0.0"
+          fi
+          
+          case "${{ matrix.name }}" in
+            ubuntu22)
+              FILE="libcedarling_go-${TAG}.so"
+              ;;
+            mac)
+              FILE="libcedarling_go-${TAG}.dylib"
+              ;;
+            windows)
+              FILE="cedarling_go-${TAG}.dll"
+              FILE_LIB="cedarling_go-${TAG}.lib"
+              ;;
+          esac
+          
+          sha256sum $FILE >> $FILE.sha256sum
+          gpg --armor --detach-sign $FILE || echo "Failed to sign"
+          gpg --armor --detach-sign $FILE.sha256sum || echo "Failed to sign"
+          
+          if [ -n "$FILE_LIB" ]; then
+            sha256sum $FILE_LIB >> $FILE_LIB.sha256sum
+            gpg --armor --detach-sign $FILE_LIB || echo "Failed to sign"
+            gpg --armor --detach-sign $FILE_LIB.sha256sum || echo "Failed to sign"
+          fi
+          
+          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
+          gh release upload "${VERSION}" $FILE $FILE.sha256sum $FILE.asc
+          
+          if [ -n "$FILE_LIB" ]; then
+            gh release upload "${VERSION}" $FILE_LIB $FILE_LIB.sha256sum $FILE_LIB.asc
+          fi
