@@ -13,42 +13,52 @@ import java.util.Map;
 
 public class Main {
     public static void main(String[] args) {
-        String bootstrap = AppUtils.readFile("./src/main/resources/config/bootstrap.json");
         try {
-            Cedarling instance = Cedarling.Companion.loadFromJson(bootstrap);
+            // Load Cedarling bootstrap configuration from file
+            String bootstrapJson = AppUtils.readFile("./src/main/resources/config/bootstrap.json");
+            Cedarling cedarling = Cedarling.Companion.loadFromJson(bootstrapJson);
 
+            // Create a JWT creator with a secure secret (must be at least 32 bytes)
             JWTCreator jwtCreator = new JWTCreator("-very-strong-shared-secret-of-at-least-32-bytes!");
 
-            String accessTokenJson = AppUtils.readFile("./src/main/resources/config/access_token_payload.json");
-            String idTokenJson = AppUtils.readFile("./src/main/resources/config/id_token_payload.json");
-            String userInfoJson = AppUtils.readFile("./src/main/resources/config/user_info_payload.json");
+            // Read JWT payloads from files
+            String accessTokenPayload = AppUtils.readFile("./src/main/resources/config/access_token_payload.json");
+            String idTokenPayload = AppUtils.readFile("./src/main/resources/config/id_token_payload.json");
+            String userInfoPayload = AppUtils.readFile("./src/main/resources/config/user_info_payload.json");
+
+            // Generate signed JWTs from the payloads
             Map<String, String> tokens = Map.of(
-                    "access_token",
-                    jwtCreator.createJwtFromJson(accessTokenJson),
-                    "id_token",
-                    jwtCreator.createJwtFromJson(idTokenJson),
-                    "userinfo_token",
-                    jwtCreator.createJwtFromJson(userInfoJson)
+                    "access_token", jwtCreator.createJwtFromJson(accessTokenPayload),
+                    "id_token", jwtCreator.createJwtFromJson(idTokenPayload),
+                    "userinfo_token", jwtCreator.createJwtFromJson(userInfoPayload)
             );
 
-            AuthorizeResult result = instance.authorize(tokens,
-                    AppUtils.readFile("./src/main/resources/config/action.txt"),
-                    EntityData.Companion.fromJson(AppUtils.readFile("./src/main/resources/config/resource.json")),
-                    AppUtils.readFile("./src/main/resources/config/context.json"));
+            // Read input files for authorization
+            String action = AppUtils.readFile("./src/main/resources/config/action.txt");
+            String resourceJson = AppUtils.readFile("./src/main/resources/config/resource.json");
+            String contextJson = AppUtils.readFile("./src/main/resources/config/context.json");
 
-            System.out.println("Decision: " + JsonUtil.toPrettyJson(result.getDecision()));
-            System.out.println("Result: " + JsonUtil.toPrettyJson(result));
+            // Build EntityData from resource JSON
+            EntityData resource = EntityData.Companion.fromJson(resourceJson);
 
-            List<String> logs = instance.getLogsByRequestId(result.getRequestId());
+            // Perform authorization
+            AuthorizeResult result = cedarling.authorize(tokens, action, resource, contextJson);
 
-            System.out.println("============Logs=========");
+            // Print decision and full result as pretty-formatted JSON
+            System.out.println("Decision:\n" + JsonUtil.toPrettyJson(result.getDecision()));
+            System.out.println("Result:\n" + JsonUtil.toPrettyJson(result));
+
+            // Fetch and print logs associated with the request
+            List<String> logs = cedarling.getLogsByRequestId(result.getRequestId());
+            System.out.println("============ Logs ============");
             logs.forEach(System.out::println);
 
         } catch (CedarlingException e) {
-            throw new RuntimeException(e);
+            System.err.println("Authorization failed: " + e.getMessage());
+            e.printStackTrace();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            System.err.println("Unexpected error: " + e.getMessage());
+            e.printStackTrace();
         }
-
     }
 }
