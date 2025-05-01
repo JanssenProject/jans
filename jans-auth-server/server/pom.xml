@@ -826,7 +826,6 @@
                     <artifactId>jakarta.ejb-api</artifactId>
                 </dependency>
 
-
 				<!-- Test: Embedded Jetty -->
 				<dependency>
 					<groupId>org.jboss.arquillian.container</groupId>
