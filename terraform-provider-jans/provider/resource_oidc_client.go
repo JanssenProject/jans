@@ -565,6 +565,14 @@ func resourceOidcClient() *schema.Resource {
 								Type: schema.TypeString,
 							},
 						},
+						"token_exchange_scripts": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "List of token exchange scripts.",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
 						"consent_gathering_scripts": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -665,6 +673,11 @@ func resourceOidcClient() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: "Specifies whether to allow offline access without consent.",
+						},
+						"require_pcke": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Specifies whether to require PCKE (Proof Key for Code Exchange) for authorization code flow.",
 						},
 						"minimum_acr_level": {
 							Type:        schema.TypeInt,

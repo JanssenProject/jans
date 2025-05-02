@@ -14,25 +14,16 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
-import jakarta.ws.rs.Path;
-
 import org.apache.commons.lang3.StringUtils;
-
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
-import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.orm.model.SortOrder;
 import io.jans.scim.model.JansCustomPerson;
+import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.scim.model.exception.SCIMException;
 import io.jans.scim.model.scim2.BaseScimResource;
 import io.jans.scim.model.scim2.ErrorResponse;
@@ -43,10 +34,10 @@ import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.scim.model.scim2.patch.PatchOperation;
 import io.jans.scim.model.scim2.patch.PatchOperationType;
 import io.jans.scim.model.scim2.patch.PatchRequest;
+import io.jans.scim.model.scim2.util.DateUtil;
 import io.jans.scim.model.scim2.util.IntrospectUtil;
 import io.jans.scim.model.scim2.util.ResourceValidator;
 import io.jans.scim.model.scim2.util.ScimResourceUtil;
-import io.jans.scim.model.scim2.util.DateUtil;
 import io.jans.scim.service.PersonService;
 import io.jans.scim.service.antlr.scimFilter.util.FilterUtil;
 import io.jans.scim.service.scim2.ExtensionService;
@@ -54,6 +45,12 @@ import io.jans.scim.service.scim2.ExternalConstraintsService;
 import io.jans.scim.service.scim2.UserPersistenceHelper;
 import io.jans.scim.service.scim2.serialization.ListResponseJsonSerializer;
 import io.jans.scim.service.scim2.serialization.ScimResourceSerializer;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 /**
  * Base methods for SCIM web services
@@ -61,7 +58,6 @@ import io.jans.scim.service.scim2.serialization.ScimResourceSerializer;
  * @author Yuriy Movchan Date: 08/23/2013
  * Re-engineered by jgomer on 2017-09-14.
  */
-@Dependent
 public class BaseScimWebService {
 
     @Inject
