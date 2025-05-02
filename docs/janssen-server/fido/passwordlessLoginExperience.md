@@ -1,6 +1,6 @@
 # FIDO Passwordless / Usernameless Login
 
-*Seamless Passwordless and Usernameless Login*
+**Seamless Passwordless and Usernameless Login**
 
 - Conditional UI eliminates the need for both passwords and usernames.
 - Users don’t have to recall their registered email or username.
@@ -9,7 +9,7 @@
 - The effectiveness of Conditional UI depends on the compatibility of the user’s device and browser. Read more here(https://passkeys.dev/device-support/)
 
 
-Sequence diagram 
+**Sequence diagram**
 
 ```
 User->RP: isConditionalMediationAvailable()
@@ -22,12 +22,13 @@ RP->FIDO Server: Authenticator response
 FIDO Server->RP: Logged in
 
 ```
+![image](https://github.com/user-attachments/assets/16ff6981-bf6b-4201-8146-b1949f274bf9)
 
-Implementing a usernameless flow for a web-app (RP):
+### Implementing a usernameless flow for a web-app (RP):
 
-Use the Person authentication script as a guideline: https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py
+1. **Guideline** : Use the [FIDO Person authentication script](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) as a guideline. 
 
-1. During Registraion: At the time of Credential registration, a cookie called 'allowList' should be added.
+2. **During Registraion**: At the time of Credential registration, a cookie called 'allowList' should be added.
 Content of the allowList is as follows, note that we are not storing usernames or email ids:
  ```
  [{ id: ...., type: 'public-key', transports: ['usb', 'ble', 'nfc']}]
@@ -36,7 +37,7 @@ Content of the allowList is as follows, note that we are not storing usernames o
  
 Python code for the same can be noted in the Person Authentication Script - https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py
 
-2. Authentication :
+3. **Authentication** :
 
 In Assertion Request, set RP id and Allow credentials fetched from the cookie `allowList`
 ```
@@ -46,7 +47,7 @@ assertionRequest.setAllowCredentials(Arrays.asList(allowList))
 assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
 ```                
 				
-3. In the login web page, here is an .xhtml sample
+4. In the **login web page**, here is an .xhtml sample
 ```
  <h:inputText placeholder="#{msgs['login.username']}" id="username" name="username" required="true" value="#{credentials.username}" >
     <f:passThroughAttribute name="autocomplete" value="username webauthn"/>

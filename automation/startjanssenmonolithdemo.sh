@@ -19,6 +19,10 @@ if [[ -z $EXT_IP ]]; then
   EXT_IP=$(curl ipinfo.io/ip)
 fi
 
+if [[ -z $JANS_BUILD_COMMIT ]]; then
+  JANS_BUILD_COMMIT="main"
+fi
+
 wait_for_services() {
   code=404
   while [[ "$code" != "200" ]]; do
@@ -58,9 +62,7 @@ git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jan
 
 # -- Parse compose and docker file
 sudo apt-get update
-sudo python3 -m pip install --upgrade pip
-pip3 install setuptools --upgrade
-pip3 install dockerfile-parse ruamel.yaml
+PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install dockerfile-parse ruamel.yaml
 
 python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('/tmp/jans/docker-jans-monolith') ; dfparser.envs['CN_HOSTNAME'] = '$JANS_FQDN'"
 # switching to version defined by JANS_BUILD_COMMIT
