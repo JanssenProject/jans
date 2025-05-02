@@ -16,6 +16,7 @@ public class FlowStatus {
     private String templatePath;
     private long startedAt;
     private long finishBefore;
+    private boolean nativeClient;
     
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Object templateDataModel;
@@ -24,6 +25,7 @@ public class FlowStatus {
     private String externalRedirectUrl;
     private boolean allowCallbackResume;
     private String jsonInput;
+    private String startUrl;
     
     private FlowResult result;
 
@@ -57,6 +59,14 @@ public class FlowStatus {
 
     public void setFinishBefore(long finishBefore) {
         this.finishBefore = finishBefore;
+    }
+
+    public boolean isNativeClient() {
+        return nativeClient;
+    }
+
+    public void setNativeClient(boolean nativeClient) {
+        this.nativeClient = nativeClient;
     }
 
     public String getQname() {
@@ -105,6 +115,14 @@ public class FlowStatus {
 
     public void setJsonInput(String jsonInput) {
         this.jsonInput = jsonInput;
+    }
+
+    public String getStartUrl() {
+        return startUrl;
+    }
+
+    public void setStartUrl(String startUrl) {
+        this.startUrl = startUrl;
     }
 
 }

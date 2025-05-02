@@ -8,6 +8,7 @@ package io.jans.orm.model.base;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -55,7 +56,11 @@ public class CustomObjectAttribute implements Serializable, Comparable<CustomObj
 
     public void setValue(Object value) {
         this.values = new ArrayList<>();
-        this.values.add(value);
+    	if (value instanceof List) {
+            this.values.addAll((Collection<? extends Object>) value);
+    	} else {
+    		this.values.add(value);
+    	}
         this.multiValued = false;
     }
 

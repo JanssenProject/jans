@@ -9,7 +9,7 @@ import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-public class ExternalFido2Context extends io.jans.fido2.service.external.context.ExternalScriptContext {
+public class ExternalFido2Context extends ExternalScriptContext {
 
     private final JsonNode jsonNode;
     private CustomScriptConfiguration script;

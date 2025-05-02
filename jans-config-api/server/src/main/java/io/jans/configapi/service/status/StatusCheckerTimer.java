@@ -30,7 +30,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import jakarta.annotation.PostConstruct;
@@ -54,7 +53,12 @@ public class StatusCheckerTimer {
     public static final String PROGRAM_FACTER = "facter";
     public static final String PROGRAM_SHOW_VERSION = "/opt/jans/printVersion.py";
     public static final String SERVICE_STATUS = "/opt/jans/bin/jans_services_status.py";
-
+    public static final String GET_AGAMA_LAB_PROJECTS = "/opt/jans/bin/get_agama_lab_projects.py";
+    private static final String JSON_ARG = "--json"; 
+    private static final String PROG_EXEC_MSG = "Failed to execute program {} output";
+    private static final String PROG_PARSE_MSG = "Failed to parse program {} output";
+    private static final String RESULT_OUTPUT = "resultOutput:{}";
+    
     @Inject
     private Logger log;
 
@@ -160,7 +164,7 @@ public class StatusCheckerTimer {
             resultOutput = new String(bos.toByteArray(), UTF_8);
             facterData = mapper.readValue(resultOutput, FacterData.class);
         } catch (UnsupportedEncodingException uex) {
-            log.error("Failed to parse program {} output", PROGRAM_FACTER, uex);
+            log.error(PROG_PARSE_MSG, PROGRAM_FACTER, uex);
             return facterData;
         } catch (Exception ex) {
             log.error("Failed to execute program {} output:{}", PROGRAM_FACTER, ex);
@@ -183,7 +187,7 @@ public class StatusCheckerTimer {
         if(StringUtils.isNotBlank(artifact) && !artifact.equalsIgnoreCase(ApiConstants.ALL)) {
             commandLine.addArgument("-artifact="+artifact);
         }
-        commandLine.addArgument("--json");
+        commandLine.addArgument(JSON_ARG);
         log.debug("Getting application version for commandLine:{}", commandLine);
         
         String resultOutput;
@@ -195,17 +199,17 @@ public class StatusCheckerTimer {
             }
             
             resultOutput = new String(bos.toByteArray(), UTF_8);
-            log.debug("resultOutput:{}", resultOutput);
+            log.debug(RESULT_OUTPUT, resultOutput);
             
             if(StringUtils.isNotBlank(resultOutput)) {
                 appVersion = Jackson.asJsonNode(resultOutput);
             }
             
         } catch (UnsupportedEncodingException uex) {
-            log.debug("Failed to parse program {} output", PROGRAM_SHOW_VERSION, uex);
+            log.debug(PROG_PARSE_MSG, PROGRAM_SHOW_VERSION, uex);
             return appVersion;
         } catch (Exception ex) {
-            log.error("Failed to execute program {} output", PROGRAM_SHOW_VERSION, ex);
+            log.error(PROG_EXEC_MSG, PROGRAM_SHOW_VERSION, ex);
             return appVersion;
         }
         log.debug("Server application version - appVersion:{}", appVersion);
@@ -227,7 +231,7 @@ public class StatusCheckerTimer {
         if (StringUtils.isNotBlank(serviceName) && !serviceName.equalsIgnoreCase(ApiConstants.ALL)) {
             commandLine.addArgument(" " + serviceName);
         }
-        commandLine.addArgument("--json");
+        commandLine.addArgument(JSON_ARG);
         log.debug("Getting service status for commandLine:{}", commandLine);
 
         String resultOutput;
@@ -239,7 +243,7 @@ public class StatusCheckerTimer {
             }
 
             resultOutput = new String(bos.toByteArray(), UTF_8);
-            log.info("resultOutput:{}", resultOutput);
+            log.info(RESULT_OUTPUT, resultOutput);
 
             if (StringUtils.isNotBlank(resultOutput)) {
                 serviceStatus = mapper.readValue(resultOutput, JsonNode.class);
@@ -255,8 +259,49 @@ public class StatusCheckerTimer {
         log.debug("Service Status data - serviceStatus:{}", serviceStatus);
         return serviceStatus;
     }
+    
+    public JsonNode getAllAgamaRepositories() {
+        if (log.isInfoEnabled()) {
+            log.debug("Getting All Agama Lab Projects");
+        }
+       
+        JsonNode appVersion = null;
+        if (!isLinux()) {
+            return appVersion;
+        }
 
-    private void printDirectory() {
+        CommandLine commandLine = new CommandLine(GET_AGAMA_LAB_PROJECTS);
+       
+        commandLine.addArgument(JSON_ARG);
+        log.error("Getting Agama Lab Projects version for commandLine:{}", commandLine);
+        
+        String resultOutput;
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);) {
+            
+            boolean result = ProcessHelper.executeProgram(commandLine, false, 0, bos);
+            if (!result) {
+                return appVersion;
+            }
+            
+            resultOutput = new String(bos.toByteArray(), UTF_8);
+            log.error(RESULT_OUTPUT, resultOutput);
+            
+            if(StringUtils.isNotBlank(resultOutput)) {
+                appVersion = Jackson.asJsonNode(resultOutput);
+            }
+            
+        } catch (UnsupportedEncodingException uex) {
+            log.error(PROG_PARSE_MSG, PROGRAM_SHOW_VERSION, uex);
+            return appVersion;
+        } catch (Exception ex) {
+            log.error(PROG_EXEC_MSG, PROGRAM_SHOW_VERSION, ex);
+            return appVersion;
+        }
+        log.debug("Server application version - appVersion:{}", appVersion);
+        return appVersion;
+    }
+
+    public void printDirectory() {
         log.debug("printDirectory");
 
         if (!isLinux()) {
@@ -277,7 +322,7 @@ public class StatusCheckerTimer {
             log.debug("Failed to parse Directory program {} output", "Directory", uex);
             return;
         } catch (Exception ex) {
-            log.error("Failed to execute program {} output", PROGRAM_SHOW_VERSION, ex);
+            log.error(PROG_EXEC_MSG, PROGRAM_SHOW_VERSION, ex);
         }
         log.debug(" Server Directory:{}", resultOutput);
     }

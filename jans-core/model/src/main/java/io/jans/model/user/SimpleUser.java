@@ -231,7 +231,15 @@ public class SimpleUser extends BaseEntry implements Serializable {
     }
 
     public void setAttribute(String name, List<String> values, Boolean multiValued) {
-        CustomObjectAttribute attribute = new CustomObjectAttribute(name, values);
+    	List<Object> objectValues = null;
+    	if (values != null) {
+			objectValues = new ArrayList<Object>(values.size());
+    		for(String value : values) {
+    			objectValues.add(value);
+    		}
+    	}
+
+    	CustomObjectAttribute attribute = new CustomObjectAttribute(name, objectValues);
         if (multiValued != null) {
             attribute.setMultiValued(multiValued);
         }
@@ -245,6 +253,9 @@ public class SimpleUser extends BaseEntry implements Serializable {
         	CustomObjectAttribute customObjectAttribute = it.next();
             if (StringHelper.equalsIgnoreCase(name, customObjectAttribute.getName())) {
             	customObjectAttribute.setValue(null);
+                if (name.equalsIgnoreCase("jansExtUid")) {
+                	externalUid = null;
+                }
                 break;
             }
         }
@@ -256,6 +267,9 @@ public class SimpleUser extends BaseEntry implements Serializable {
                 it.remove();
                 break;
             }
+        }
+        if (name.equalsIgnoreCase("jansExtUid")) {
+        	externalUid = null;
         }
     }
 

@@ -137,6 +137,11 @@ public enum RegisterRequestParam {
     RPT_AS_JWT("rpt_as_jwt"),
 
     /**
+     * Whether to require PKCE
+     */
+    REQUIRE_PKCE("require_pkce"),
+
+    /**
      * Whether to return access token as signed JWT
      */
     ACCESS_TOKEN_AS_JWT("access_token_as_jwt"),
@@ -392,6 +397,11 @@ public enum RegisterRequestParam {
      * list of post authn script dns
      */
     POST_AUTHN_SCRIPT_DNS("post_authn_script_dns"),
+
+    /**
+     * list of token exchange script dns
+     */
+    TOKEN_EXCHANGE_SCRIPT_DNS("token_exchange_script_dns"),
 
     /**
      * list of consent gathering script dns

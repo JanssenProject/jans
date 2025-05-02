@@ -15,8 +15,6 @@ from cryptography.x509.oid import NameOID
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for
-from jans.pycloudlib.persistence.sql import sync_sql_password
-from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import get_sys_random_chars
 from jans.pycloudlib.utils import encode_text
@@ -478,6 +476,16 @@ def get_dump_file():
     return f"{DB_DIR}/configuration.out.json"
 
 
+def get_configuration_key_file():
+    path = os.environ.get("CN_CONFIGURATOR_CONFIGURATION_KEY_FILE", "/etc/jans/conf/configuration.key")
+
+    if os.path.isfile(path):
+        return path
+
+    # backward-compat
+    return f"{DB_DIR}/configuration.key"
+
+
 # ============
 # CLI commands
 # ============
@@ -503,18 +511,18 @@ def cli():
     default=get_dump_file(),
     show_default=True,
 )
-def load(configuration_file, dump_file):
+@click.option(
+    "--key-file",
+    type=click.Path(exists=False),
+    help="Absolute path to file contains key to decrypt configmaps and secrets (if applicable)",
+    default=get_configuration_key_file(),
+    show_default=True,
+)
+def load(configuration_file, dump_file, key_file):
     """Loads configmaps and secrets from JSON file (generate if not exist).
     """
     deps = ["config_conn", "secret_conn"]
     wait_for(manager, deps=deps)
-
-    mapper = PersistenceMapper()
-    backend_type = mapper.mapping["default"]
-
-    match backend_type:
-        case "sql":
-            sync_sql_password(manager)
 
     # check whether config and secret in backend have been initialized
     should_skip = as_boolean(os.environ.get("CN_CONFIGURATOR_SKIP_INITIALIZED", False))
@@ -523,10 +531,10 @@ def load(configuration_file, dump_file):
         logger.info("Configmaps and secrets have been initialized")
         return
 
-    with manager.lock.create_lock("configurator-load"):
+    with manager.create_lock("configurator-load"):
         logger.info(f"Loading configmaps and secrets from {configuration_file}")
 
-        params, err, code = load_schema_from_file(configuration_file)
+        params, err, code = load_schema_from_file(configuration_file, key_file=key_file)
         if code != 0:
             logger.error(f"Unable to load configmaps and secrets; reason={err}")
             raise click.Abort()
@@ -552,13 +560,6 @@ def dump(dump_file):
     """
     deps = ["config_conn", "secret_conn"]
     wait_for(manager, deps=deps)
-
-    mapper = PersistenceMapper()
-    backend_type = mapper.mapping["default"]
-
-    match backend_type:
-        case "sql":
-            sync_sql_password(manager)
 
     # dump all configuration from remote backend to file
     dump_to_file(manager, dump_file)

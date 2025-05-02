@@ -6,6 +6,9 @@ tags:
   - attestation
 ---
 
+# FIDO Vendor Metadata Management
+
+
 ### Metadata Service:
 
 The metadata service is a centralized, trusted database of FIDO authenticators. It is used by the Relying Party to validate authenticators i.e. attest the genuine-ness of a device. If implemented in organizations like government, federal agencies, banking and healthcare organizations for example) and/or organizations handling sensitive data (media companies, R&D institutions, corporations, etc), this information can help protect organizations against security vulnerabilities.
@@ -231,15 +234,15 @@ Janssen's FIDO2 server -
 ### 3. Skip metadata validation
 
 Metadata validation is recommended but not mandatory as per FIDO2 specifications.
-In FIDO2 we can disable this validation by setting the `skipValidateMdsInAttestationEnabled` parameter (default is
-false).
+In FIDO2 we can disable this validation by setting the `attestionMode` parameter (default is
+monitor).
 
 It should look something like this:
 
 ```
 "fido2Configuration": {
   ...,
-  "skipValidateMdsInAttestationEnabled": true,
+  "attestationMode": "disabled",
   ...
 }
 ```

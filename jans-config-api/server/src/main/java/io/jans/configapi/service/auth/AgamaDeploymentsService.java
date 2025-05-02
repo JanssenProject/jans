@@ -1,5 +1,6 @@
 package io.jans.configapi.service.auth;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.ads.model.Deployment;
 import io.jans.ads.model.DeploymentDetails;
 import io.jans.orm.model.PagedResult;
@@ -55,7 +56,9 @@ public class AgamaDeploymentsService {
     }
     
     public boolean createDeploymentTask(String name, byte[] gamaBinary, boolean autoconfigure) {
-        
+        if (logger.isInfoEnabled()) {
+            logger.info("AgamaDeploymentsService::createDeploymentTask() - name:{}, gamaBinary:{}, autoconfigure:{}", escapeLog(name), escapeLog(gamaBinary), escapeLog(autoconfigure));
+        }
         Deployment d = null;
         String id = idFromName(name);
         try {

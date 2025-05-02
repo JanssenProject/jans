@@ -6,6 +6,14 @@
 
 package io.jans.keycloak.link.service.config;
 
+import io.jans.config.GluuConfiguration;
+import io.jans.keycloak.link.server.service.ConfigurationService;
+import io.jans.service.document.store.conf.DocumentStoreConfiguration;
+import io.jans.service.document.store.conf.LocalDocumentStoreConfiguration;
+import io.jans.service.message.model.config.MessageConfiguration;
+import io.jans.service.message.model.config.MessageProviderType;
+import io.jans.service.message.model.config.NullMessageConfiguration;
+import jakarta.enterprise.inject.Produces;
 import org.slf4j.Logger;
 
 import io.jans.keycloak.link.model.config.AppConfiguration;
@@ -35,6 +43,9 @@ public class ApplicationFactory {
     @Inject
     private AppConfiguration appConfiguration;
 
+    @Inject
+    private ConfigurationService сonfigurationService;
+
     public static final String PERSISTENCE_ENTRY_MANAGER_FACTORY_NAME = "persistenceEntryManagerFactory";
 
     public static final String PERSISTENCE_ENTRY_MANAGER_NAME = "persistenceEntryManager";
@@ -57,4 +68,44 @@ public class ApplicationFactory {
         return persistanceFactoryService.getPersistenceEntryManagerFactory(persistenceEntryManagerFactoryClass);
     }
 
+    @Produces
+    @ApplicationScoped
+    public DocumentStoreConfiguration getDocumentStoreConfiguration() {
+        GluuConfiguration jansConf = сonfigurationService.getConfiguration();
+        DocumentStoreConfiguration documentStoreConfiguration = jansConf.getDocumentStoreConfiguration();
+        if ((documentStoreConfiguration == null) || (documentStoreConfiguration.getDocumentStoreType() == null)) {
+            log.error("Failed to read document store configuration from DB. Please check configuration jsDocStoreConf attribute " +
+                    "that must contain document store configuration JSON represented by DocumentStoreConfiguration.class. Appliance DN: {0}", jansConf.getDn());
+            log.info("Creating fallback LOCAL document store configuration ... ");
+
+            documentStoreConfiguration = new DocumentStoreConfiguration();
+            documentStoreConfiguration.setLocalConfiguration(new LocalDocumentStoreConfiguration());
+
+            log.info("LOCAL document store configuration is created.");
+        }
+
+        log.info("Document store configuration: {0}" , documentStoreConfiguration);
+        return documentStoreConfiguration;
+    }
+
+    @Produces
+    @ApplicationScoped
+    public MessageConfiguration getMessageConfiguration() {
+        GluuConfiguration jansConf = сonfigurationService.getConfiguration();
+        MessageConfiguration messageConfiguration = jansConf.getMessageConfiguration();
+        if (messageConfiguration == null || messageConfiguration.getMessageProviderType() == null) {
+            log.error("Failed to read message configuration from DB. Please check configuration jsMessageConf attribute " +
+                    "that must contain message configuration JSON represented by MessageConfiguration.class. Appliance DN: {0}" , jansConf.getDn());
+            log.info("Creating fallback Null message configuration ... ");
+
+            messageConfiguration = new MessageConfiguration();
+            messageConfiguration.setMessageProviderType(MessageProviderType.DISABLED);
+            messageConfiguration.setNullConfiguration(new NullMessageConfiguration());
+
+            log.info("NULL message configuration is created.");
+        }
+
+        log.info("Message configuration: {0}" , messageConfiguration);
+        return messageConfiguration;
+    }
 }

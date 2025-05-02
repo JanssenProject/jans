@@ -73,13 +73,13 @@
   "snapshotFolder": "%(snapshots_dir)s",
   "snapshotMaxCount": 10,
   "keycloakConfiguration": {
-    "serverUrl": "http://localhost:8180",
-    "realm": "master",
-    "clientId": "clientserviceaccount",
-    "clientSecret": "cbyFHt3MMU2vNluAmzXopl9SHx9CUmfC",
-    "grantType": "client_credentials",
-    "username": "admin",
-    "password": "keycloak"
+    "serverUrl": "",
+    "realm": "",
+    "clientId": "",
+    "clientSecret": "",
+    "grantType": "",
+    "username": "",
+    "password": ""
   },
   "baseDN": null,
   "personObjectClassTypes": null,

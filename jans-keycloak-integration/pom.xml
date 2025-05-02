@@ -36,6 +36,7 @@
       <commons-lang.version>3.13.0</commons-lang.version>
       <commons-collection.version>4.1</commons-collection.version>
       <commons-io.version>2.14.0</commons-io.version>
+      <commons-beanutils.version>1.9.4</commons-beanutils.version>
       <swagger.version>2.2.7</swagger.version>
       <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
       <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
@@ -168,13 +169,6 @@
           <version>${jakarta.annotation-api.version}</version>
           <scope>provided</scope>
         </dependency>
-        <!--
-        <dependency>
-          <groupId></groupId>
-          <artifactId></artifactId>
-          <version>${}</version>
-          <scope>runtime</scope>
-        </dependency> -->
         <!-- end jakarta dependencies -->
 
         <!-- smallrye dependencies -->
@@ -214,6 +208,11 @@
 			    <artifactId>commons-collections4</artifactId>
           <version>${commons-collection.version}</version>
 		    </dependency>
+        <dependency>
+          <groupId>commons-beanutils</groupId>
+          <artifactId>commons-beanutils</artifactId>
+          <version>${commons-beanutils.version}</version>
+        </dependency>
         <!-- end apache commons dependencies-->
 
         <!-- fasterxml dependencies -->

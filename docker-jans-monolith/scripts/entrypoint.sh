@@ -40,7 +40,6 @@ install_jans() {
   echo "install_jans_link=""$([[ ${CN_INSTALL_LINK} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "install_jans_lock=""$([[ ${CN_INSTALL_LOCK} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "install_jans_saml=""$([[ ${CN_INSTALL_SAML} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
-  echo "install_opa=""$([[ ${CN_INSTALL_OPA} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "test_client_id=${TEST_CLIENT_ID}"| tee -a setup.properties > /dev/null
   echo "test_client_pw=${TEST_CLIENT_SECRET}" | tee -a setup.properties > /dev/null1
   echo "test_client_trusted=""$([[ ${TEST_CLIENT_TRUSTED} == true ]] && echo True || echo True)" | tee -a setup.properties > /dev/null
@@ -177,13 +176,13 @@ prepare_java_tests() {
 
 start_services() {
   /etc/init.d/apache2 start
-  /opt/dist/scripts/jans-auth start
-  /opt/dist/scripts/jans-config-api start
-  /opt/dist/scripts/jans-scim start
-  /opt/dist/scripts/jans-fido2 start
-  /opt/dist/scripts/jans-casa start ||:  # no-op if script is missing
-  /opt/dist/scripts/jans-keycloak-link start ||:  # no-op if script is missing
-  /opt/dist/scripts/jans-link start ||:  # no-op if script is missing
+  /opt/jans/scripts/jans-auth start
+  /opt/jans/scripts/jans-config-api start
+  /opt/jans/scripts/jans-scim start
+  /opt/jans/scripts/jans-fido2 start
+  /opt/jans/scripts/jans-casa start ||:  # no-op if script is missing
+  /opt/jans/scripts/jans-keycloak-link start ||:  # no-op if script is missing
+  /opt/jans/scripts/jans-link start ||:  # no-op if script is missing
 }
 
 check_installed_jans

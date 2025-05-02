@@ -53,7 +53,7 @@ Installation depends on the set of environment variables shown below. These envi
 
 #### Loading users
 
-Edit the custom connection values and other envs for the file `load_users_<persistence_of_choice>_job.yaml` found in the [yaml](./yaml/load-users) folder and run :
+Edit the custom connection values and other envs for the [load_users_rdbms_job.yaml](./yaml/load-users/load_users_rdbms_job.yaml) file and run:
 
 ```bash
 kubectl apply -f load_users_<persistence_of_choice>_job.yaml
@@ -155,7 +155,7 @@ cat << EOF > ropc_client.json
 EOF
 ```
 
-Download or build [config-cli-tui](../../../jans-cli-tui) and run:
+Run the follwing:
 
 ```bash
 # add -noverify if your fqdn is not registered

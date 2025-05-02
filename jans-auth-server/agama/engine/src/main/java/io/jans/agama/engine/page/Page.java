@@ -6,9 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import io.jans.agama.engine.service.*;
 import io.jans.service.CacheService;
@@ -36,7 +34,6 @@ public class Page {
     
     private String templatePath;
     private Map<String, Object> dataModel;
-    private Object rawModel;
 
     public String getTemplatePath() {
         return templatePath;
@@ -47,42 +44,28 @@ public class Page {
     }
 
     public Object getDataModel() {
-        
-        if (rawModel == null) {
-            if (dataModel != null) {
-
-                dataModel.putIfAbsent(WEB_CTX_KEY, webContext);
-                dataModel.putIfAbsent(MessagesService.BUNDLE_ID, msgsService);
-                dataModel.putIfAbsent(LabelsService.METHOD_NAME, labelsService);
-                dataModel.putIfAbsent(CACHE_KEY, cache);
-                return dataModel;
-
-            } else return new Object();
-        } else return rawModel;
-        
+        return dataModel;
     }
-
-    /**
-     * This call is cheaper than setDataModel, but pages won't have access to any
-     * contextual data
-     * @param object 
-     */
-    public void setRawDataModel(Object object) {       
-        rawModel = object;
-        dataModel = null;
+    
+    public Object getAugmentedDataModel(boolean includeContextualData, Map<String, Object> extra) {
+        
+        Map<String, Object> model = new HashMap<>(dataModel);
+        
+        if (includeContextualData) {
+            model.putIfAbsent(WEB_CTX_KEY, webContext);
+            model.putIfAbsent(MessagesService.BUNDLE_ID, msgsService);
+            model.putIfAbsent(LabelsService.METHOD_NAME, labelsService);
+            model.putIfAbsent(CACHE_KEY, cache);
+        }
+        if (extra != null) {
+            extra.forEach((k, v) -> model.putIfAbsent(k, v));
+        }        
+        return model;
+        
     }
 
     public void setDataModel(Object object) {
-        rawModel = null;
-        dataModel = mapFromObject(object);
-    }
-    
-    public void appendToDataModel(Object object) {
-        if (rawModel != null) {
-            rawModel = null;
-            dataModel = new HashMap<>();
-        }
-        dataModel.putAll(mapFromObject(object));
+        dataModel = object == null ? Map.of() : mapFromObject(object);
     }
     
     private Map<String, Object> mapFromObject(Object object) {
@@ -91,7 +74,7 @@ public class Page {
 
     @PostConstruct
     private void init() {
-        dataModel = new HashMap<>();
+        dataModel = Map.of();
     }
     
 }

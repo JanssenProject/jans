@@ -78,7 +78,7 @@ public class PolicyConsumerFactory {
 	@Produces
 	@ApplicationScoped
 	public PolicyConsumer producePolicyConsumer() {
-		String policyConsumerType = appConfiguration.getPdpType();
+		String policyConsumerType = appConfiguration.getPolicyConsumerType();
 		PolicyConsumer policyConsumer = buildPolicyConsumer(policyConsumerType);
 		
 		return policyConsumer;

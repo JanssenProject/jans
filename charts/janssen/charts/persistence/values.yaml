@@ -58,3 +58,5 @@ additionalAnnotations: { }
 customScripts: [ ]
 # -- Add custom job's command. If passed, it will override the default conditional command.
 customCommand: []
+# -- Add tolerations for the pods
+tolerations: []

@@ -2,11 +2,11 @@
 tags:
   - administration
   - installation
+  - x-frame
+  - header
 ---
 
 # X-Frame-Options Header
-
-## Overview
 
 AS has `io.jans.as.server.filter.HeadersFilter` which is responsible for attaching headers to server responses.
 
@@ -21,7 +21,7 @@ AS has `io.jans.as.server.filter.HeadersFilter` which is responsible for attachi
 ## Configure X-Frame-Options Header
 
 The `X-Frame-Options` HTTP response header can be used to indicate whether a browser should be allowed
-to render a page in a <frame>, <iframe>, <embed> or <object>. 
+to render a page in a `<frame>`, `<iframe>`, `<embed>` or `<object>`. 
 Sites can use this to avoid click-jacking attacks, 
 by ensuring that their content is not embedded into other sites.
 

@@ -15,6 +15,7 @@ servers:
 tags:
 - name: Lock - Configuration
 - name: Lock - Audit
+- name: Lock - Statistics
 paths:
   /lock/audit/health/search:
     get:
@@ -468,6 +469,57 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock-config.write
+  /lock/lockStat:
+    get:
+      tags:
+      - Statistics
+      summary: Provides basic statistic
+      description: Provides basic statistic
+      operationId: get-lock-stat
+      parameters:
+      - name: Authorization
+        in: header
+        description: Authorization code
+        schema:
+          type: string
+      - name: month
+        in: query
+        description: Month for which the stat report is to be fetched. The parameter
+          is mandatory if start_month and end_month parameters are not present.
+        schema:
+          type: string
+      - name: start-month
+        in: query
+        description: Start-Month for which the stat report is to be fetched
+        schema:
+          type: string
+      - name: end-month
+        in: query
+        description: End-Month for which the stat report is to be fetched
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: Report format
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JsonNode'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/read-all
+        - jans_stat
 components:
   schemas:
     HealthEntry:
@@ -597,6 +649,13 @@ components:
         openIdIssuer:
           type: string
           description: OpenID issuer URL
+        statEnabled:
+          type: boolean
+          description: Active stat enabled
+        statTimerIntervalInSeconds:
+          type: integer
+          description: Statistical data capture time interval
+          format: int32
         tokenChannels:
           type: array
           description: List of token channel names
@@ -612,9 +671,6 @@ components:
         tokenUrl:
           type: string
           description: Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint
-        groupScopeEnabled:
-          type: boolean
-          description: Group scope enabled
         endpointGroups:
           type: object
           additionalProperties:
@@ -648,9 +704,6 @@ components:
         externalLoggerConfiguration:
           type: string
           description: The path to the external log4j2 logging configuration
-        metricChannel:
-          type: string
-          description: Channel for metric reports
         metricReporterInterval:
           type: integer
           description: The interval for metric reporter in seconds
@@ -666,11 +719,6 @@ components:
           type: integer
           description: Time interval for the Clean Service in seconds
           format: int32
-        opaConfiguration:
-          $ref: '#/components/schemas/OpaConfiguration'
-        pdpType:
-          type: string
-          description: PDP type
         policiesJsonUrisAuthorizationToken:
           type: string
           description: Authorization token to access Json Uris
@@ -689,17 +737,17 @@ components:
           items:
             type: string
             description: List of Zip Uris with policies
-    OpaConfiguration:
-      type: object
-      properties:
-        baseUrl:
+        messageConsumerType:
           type: string
-          description: Base OPA URL
-        accessToken:
+          description: PubSub consumer service
+        policyConsumerType:
           type: string
-          description: OPA access token
-      description: Opa Configuration
+          description: Policy consumer service
+        errorReasonEnabled:
+          type: boolean
     JsonPatch:
+      type: object
+    JsonNode:
       type: object
   securitySchemes:
     oauth2:

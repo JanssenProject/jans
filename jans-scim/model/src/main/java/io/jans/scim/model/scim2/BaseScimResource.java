@@ -8,7 +8,6 @@ package io.jans.scim.model.scim2;
 
 import io.jans.scim.model.scim2.annotations.*;
 import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
-import io.jans.scim.model.scim2.fido.FidoDeviceResource;
 import io.jans.scim.model.scim2.group.GroupResource;
 import io.jans.scim.model.scim2.user.UserResource;
 import io.jans.scim.model.scim2.util.IntrospectUtil;
@@ -45,8 +44,8 @@ public class BaseScimResource {
             mutability = AttributeDefinition.Mutability.READ_ONLY,
             returned = AttributeDefinition.Returned.ALWAYS,
             uniqueness = AttributeDefinition.Uniqueness.SERVER)
-    @StoreReference(resourceType = {UserResource.class, GroupResource.class, FidoDeviceResource.class, Fido2DeviceResource.class},
-            refs = {"inum", "inum", "jansId", "jansId"})
+    @StoreReference(resourceType = {UserResource.class, GroupResource.class, Fido2DeviceResource.class},
+            refs = {"inum", "inum", "jansId"})
     private String id;
 
     @Attribute(description = "A String that is an identifier for the resource as defined by the provisioning client",

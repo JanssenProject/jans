@@ -84,7 +84,6 @@
 
     <test name="Fido Devices Test" enabled="true">
         <classes>
-            <class name="io.jans.scim2.client.singleresource.FidoU2fDeviceTest" />
             <class name="io.jans.scim2.client.singleresource.Fido2DeviceTest" />
         </classes>
     </test>

@@ -15,7 +15,6 @@ from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import render_sql_properties
-from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.sql import override_simple_json_property
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.persistence.utils import render_base_properties
@@ -52,13 +51,10 @@ def main():
             render_hybrid_properties(hybrid_prop)
 
     if "sql" in persistence_groups:
-        sync_sql_password(manager)
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-        render_sql_properties(
-            manager,
-            f"/app/templates/jans-{db_dialect}.properties",
-            "/etc/jans/conf/jans-sql.properties",
-        )
+        sql_prop = "/etc/jans/conf/jans-sql.properties"
+        if not os.path.exists(sql_prop):
+            render_sql_properties(manager, f"/app/templates/jans-{db_dialect}.properties", sql_prop)
 
     wait_for_persistence(manager)
     override_simple_json_property("/etc/jans/conf/jans-sql.properties")
@@ -80,7 +76,7 @@ def main():
 
     configure_logging()
 
-    with manager.lock.create_lock("config-api-setup"):
+    with manager.create_lock("config-api-setup"):
         persistence_setup = PersistenceSetup(manager)
         persistence_setup.import_ldif_files()
 
@@ -366,8 +362,16 @@ class PersistenceSetup:
 
         # pre-populate config_api_dynamic_conf_base64
         with open("/app/templates/jans-config-api/dynamic-conf.json") as f:
-            tmpl = Template(f.read())
-            ctx["config_api_dynamic_conf_base64"] = generate_base64_contents(tmpl.substitute(**ctx))
+            tmpl = Template(f.read()).substitute(**ctx)
+            ctx["config_api_dynamic_conf_base64"] = generate_base64_contents(tmpl)
+
+        # extract necessary keys for upgrade process
+        with open("/tmp/config-api.dynamic-conf.json", "w") as f:  # nosec: B108
+            partial_dyn_conf = {
+                k: v for k, v in json.loads(tmpl).items()
+                if k in ("plugins", "assetMgtConfiguration")
+            }
+            f.write(json.dumps(partial_dyn_conf))
 
         # finalize ctx
         return ctx

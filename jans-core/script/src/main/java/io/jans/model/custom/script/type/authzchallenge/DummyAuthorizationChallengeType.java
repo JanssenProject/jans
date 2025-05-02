@@ -22,6 +22,10 @@ public class DummyAuthorizationChallengeType implements AuthorizationChallengeTy
     }
 
     @Override
+    public void prepareAuthzRequest(Object context) {
+    }
+
+    @Override
     public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
         return false;
     }

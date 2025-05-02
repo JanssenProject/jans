@@ -600,11 +600,9 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
 
         // Store current configuration
         int currentAuthorizationCodeLifetime = appConfiguration.getAuthorizationCodeLifetime();
-        int currentCleanServiceInterval = appConfiguration.getCleanServiceInterval();
 
         // We need to expire in test test code token faster than usual to avoid sleeping test for long time
         appConfiguration.setAuthorizationCodeLifetime(8);
-        appConfiguration.setCleanServiceInterval(6);
         try {
             final String state = UUID.randomUUID().toString();
 
@@ -656,7 +654,6 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
         } finally {
             // Restore configuration
             appConfiguration.setAuthorizationCodeLifetime(currentAuthorizationCodeLifetime);
-            appConfiguration.setCleanServiceInterval(currentCleanServiceInterval);
         }
     }
 

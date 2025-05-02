@@ -16,10 +16,32 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.function.Predicate;
 
+import javax.management.InvalidAttributeValueException;
+
+import org.apache.commons.lang3.StringUtils;
+
+import io.jans.orm.exception.operation.DuplicateEntryException;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
+import io.jans.scim.model.JansGroup;
+import io.jans.scim.model.exception.SCIMException;
+import io.jans.scim.model.scim2.BaseScimResource;
+import io.jans.scim.model.scim2.ErrorScimType;
+import io.jans.scim.model.scim2.SearchRequest;
+import io.jans.scim.model.scim2.group.GroupResource;
+import io.jans.scim.model.scim2.patch.PatchOperation;
+import io.jans.scim.model.scim2.patch.PatchRequest;
+import io.jans.scim.model.scim2.util.DateUtil;
+import io.jans.scim.model.scim2.util.ScimResourceUtil;
+import io.jans.scim.service.GroupService;
+import io.jans.scim.service.filter.ProtectedApi;
+import io.jans.scim.service.scim2.Scim2GroupService;
+import io.jans.scim.service.scim2.Scim2PatchService;
+import io.jans.scim.service.scim2.interceptor.RefAdjusted;
 import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import javax.management.InvalidAttributeValueException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
@@ -35,31 +57,11 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import org.apache.commons.lang3.StringUtils;
-
-import io.jans.orm.exception.operation.DuplicateEntryException;
-import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.SortOrder;
-import io.jans.scim.model.GluuGroup;
-import io.jans.scim.model.exception.SCIMException;
-import io.jans.scim.model.scim2.BaseScimResource;
-import io.jans.scim.model.scim2.ErrorScimType;
-import io.jans.scim.model.scim2.SearchRequest;
-import io.jans.scim.model.scim2.group.GroupResource;
-import io.jans.scim.model.scim2.patch.PatchOperation;
-import io.jans.scim.model.scim2.patch.PatchRequest;
-import io.jans.scim.model.scim2.util.DateUtil;
-import io.jans.scim.model.scim2.util.ScimResourceUtil;
-import io.jans.scim.service.GroupService;
-import io.jans.scim.service.filter.ProtectedApi;
-import io.jans.scim.service.scim2.Scim2GroupService;
-import io.jans.scim.service.scim2.Scim2PatchService;
-import io.jans.scim.service.scim2.interceptor.RefAdjusted;
-
 /**
  * Implementation of /Groups endpoint. Methods here are intercepted.
  * Filter io.jans.scim.service.filter.AuthorizationProcessingFilter secures invocations
  */
+@Dependent
 @Named("scim2GroupEndpoint")
 @Path("/v2/Groups")
 public class GroupWebService extends BaseScimWebService implements IGroupWebService {
@@ -99,10 +101,10 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
         // Validate if there is an attempt to supply a displayName already in use by a
         // group other than current
 
-        GluuGroup groupToFind = new GluuGroup();
+        JansGroup groupToFind = new JansGroup();
         groupToFind.setDisplayName(displayName);
 
-        List<GluuGroup> list = groupService.findGroups(groupToFind, 2);
+        List<JansGroup> list = groupService.findGroups(groupToFind, 2);
         if (list != null &&
             list.stream().anyMatch(g -> !g.getInum().equals(id))) {
             throw new DuplicateEntryException("Duplicate group displayName value: " + displayName);
@@ -170,7 +172,7 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
 
             boolean skipValidation = isMembersValidationSkipped();
             boolean displayExcluded = isDisplayExcluded(skipValidation, attrsList, excludedAttrsList);
-            GluuGroup gluuGroup = scim2GroupService.preCreateGroup(group, skipValidation,
+            JansGroup gluuGroup = scim2GroupService.preCreateGroup(group, skipValidation,
                     !displayExcluded, usersUrl);
 
             response = externalConstraintsService.applyEntityCheck(gluuGroup, group,
@@ -209,7 +211,7 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
         try {
             log.debug("Executing web service method. getGroupById");
 
-            GluuGroup gluuGroup = groupService.getGroupByInum(id);
+            JansGroup gluuGroup = groupService.getGroupByInum(id);
             if (gluuGroup == null) return notFoundResponse(id, groupResourceType);
             
             response = externalConstraintsService.applyEntityCheck(gluuGroup, null,
@@ -260,7 +262,7 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
             if (group.getId() != null && !group.getId().equals(id))
                 throw new SCIMException("Parameter id does not match with id attribute of Group");
 
-            GluuGroup gluuGroup = groupService.getGroupByInum(id);
+            JansGroup gluuGroup = groupService.getGroupByInum(id);
             if (gluuGroup == null) return notFoundResponse(id, groupResourceType);
 
             response = externalConstraintsService.applyEntityCheck(gluuGroup, group,
@@ -307,7 +309,7 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
         try {
             log.debug("Executing web service method. deleteGroup");
 
-            GluuGroup gluuGroup = groupService.getGroupByInum(id);
+            JansGroup gluuGroup = groupService.getGroupByInum(id);
             if (gluuGroup == null) return notFoundResponse(id, groupResourceType);
 
             response = externalConstraintsService.applyEntityCheck(gluuGroup, null,
@@ -393,7 +395,7 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
             response = inspectPatchRequest(request, GroupResource.class);
             if (response != null) return response;
             
-            GluuGroup gluuGroup = groupService.getGroupByInum(id);			
+            JansGroup gluuGroup = groupService.getGroupByInum(id);			
             if (gluuGroup == null) return notFoundResponse(id, groupResourceType);
 
             response = externalConstraintsService.applyEntityCheck(gluuGroup, request,

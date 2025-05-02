@@ -1,15 +1,19 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2024, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use crate::log::LogLevel;
 
 /// A set of properties used to configure logging in the `Cedarling` application.
 #[derive(Debug, Clone, PartialEq)]
 pub struct LogConfig {
     /// `CEDARLING_LOG_TYPE` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     pub log_type: LogTypeConfig,
+
+    /// Log level filter for logging. TRACE is lowest. FATAL is highest.
+    /// `CEDARLING_LOG_LEVEL` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
+    pub log_level: LogLevel,
 }
 
 ///  Log type configuration.
@@ -33,4 +37,12 @@ pub struct MemoryLogConfig {
     /// `CEDARLING_LOG_TTL` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     /// The maximum time to live (in seconds) of the log entries.
     pub log_ttl: u64,
+
+    /// `CEDARLING_LOG_MAX_ITEMS` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
+    /// The maximum number of log entries to keep in memory.
+    pub max_items: Option<usize>,
+
+    /// `CEDARLING_LOG_MAX_ITEM_SIZE` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
+    /// The maximum size of a log entry in bytes.
+    pub max_item_size: Option<usize>,
 }

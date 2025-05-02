@@ -5,12 +5,12 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-// use cedarling::ResourceData;
-use super::resource_data::ResourceData;
+use super::entity_data::EntityData;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use serde_pyobject::from_pyobject;
+use std::collections::HashMap;
 
 /// Request
 /// =======
@@ -20,11 +20,9 @@ use serde_pyobject::from_pyobject;
 ///
 /// Attributes
 /// ----------
-/// :param access_token: The access token string.
-/// :param id_token: The id token string.
-/// :param userinfo_token: The userinfo token string.
+/// :param tokens: A class containing the JWTs what will be used for the request.
 /// :param action: The action to be authorized.
-/// :param resource: Resource data (wrapped `ResourceData` object).
+/// :param resource: Resource data (wrapped `EntityData` object).
 /// :param context: Python dictionary with additional context.
 ///
 /// Example
@@ -35,16 +33,11 @@ use serde_pyobject::from_pyobject;
 /// ```
 #[pyclass(get_all, set_all)]
 pub struct Request {
-    /// Access token raw value
-    pub access_token: String,
-    /// Id token raw value
-    pub id_token: String,
-    /// Userinfo token raw value
-    pub userinfo_token: String,
+    pub tokens: Py<PyDict>,
     /// cedar_policy action
     pub action: String,
     /// cedar_policy resource data
-    pub resource: ResourceData,
+    pub resource: EntityData,
     /// context to be used in cedar_policy
     pub context: Py<PyDict>,
 }
@@ -52,18 +45,10 @@ pub struct Request {
 #[pymethods]
 impl Request {
     #[new]
-    fn new(
-        access_token: String,
-        id_token: String,
-        userinfo_token: String,
-        action: String,
-        resource: ResourceData,
-        context: Py<PyDict>,
-    ) -> Self {
+    #[pyo3(signature = (tokens, action, resource, context))]
+    fn new(tokens: Py<PyDict>, action: String, resource: EntityData, context: Py<PyDict>) -> Self {
         Self {
-            access_token,
-            id_token,
-            userinfo_token,
+            tokens,
             action,
             resource,
             context,
@@ -73,17 +58,22 @@ impl Request {
 
 impl Request {
     pub fn to_cedarling(&self) -> Result<cedarling::Request, PyErr> {
+        let tokens = Python::with_gil(|py| -> Result<HashMap<String, String>, PyErr> {
+            let tokens = self.tokens.clone_ref(py).into_bound(py);
+            from_pyobject(tokens).map_err(|err| {
+                PyRuntimeError::new_err(format!("Failed to convert tokens to json: {}", err))
+            })
+        })?;
+
         let context = Python::with_gil(|py| -> Result<serde_json::Value, PyErr> {
             let context = self.context.clone_ref(py).into_bound(py);
             from_pyobject(context).map_err(|err| {
-                PyRuntimeError::new_err(format!("Failed to convert context: {}", err))
+                PyRuntimeError::new_err(format!("Failed to convert context to json: {}", err))
             })
         })?;
 
         Ok(cedarling::Request {
-            access_token: self.access_token.clone(),
-            id_token: self.id_token.clone(),
-            userinfo_token: self.userinfo_token.clone(),
+            tokens,
             action: self.action.clone(),
             resource: self.resource.clone().into(),
             context,

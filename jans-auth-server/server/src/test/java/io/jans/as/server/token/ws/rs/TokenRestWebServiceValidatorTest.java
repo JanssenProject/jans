@@ -59,7 +59,7 @@ public class TokenRestWebServiceValidatorTest {
         grant.setCodeChallenge("E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM");
         grant.setCodeChallengeMethod("s256");
 
-        validator.validatePKCE(grant, "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk", AUDIT_LOG);
+        validator.validatePKCE(grant, "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk", AUDIT_LOG, new Client());
     }
 
     @Test(expectedExceptions = WebApplicationException.class)
@@ -68,7 +68,24 @@ public class TokenRestWebServiceValidatorTest {
         grant.setCodeChallenge("E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM");
         grant.setCodeChallengeMethod("s256");
 
-        validator.validatePKCE(grant, "invalid_verifier", AUDIT_LOG);
+        validator.validatePKCE(grant, "invalid_verifier", AUDIT_LOG, new Client());
+    }
+
+    @Test
+    public void validatePKCE_whenCodeVerifierIsBlankAndPkceIsNotRequired_shouldPass() {
+        AuthorizationCodeGrant grant = new AuthorizationCodeGrant();
+
+        validator.validatePKCE(grant, "", AUDIT_LOG, new Client());
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validatePKCE_whenCodeVerifierIsBlankAndPkceIsRequired_shouldFail() {
+        AuthorizationCodeGrant grant = new AuthorizationCodeGrant();
+
+        final Client client = new Client();
+        client.getAttributes().setRequirePkce(true);
+
+        validator.validatePKCE(grant, "", AUDIT_LOG, client);
     }
 
     @Test
@@ -172,7 +189,7 @@ public class TokenRestWebServiceValidatorTest {
     @Test
     public void validateParams_whenGrantTypeIsBlank_shouldRaiseError() {
         try {
-            validator.validateParams("", "some_code", "https://my.redirect", "refresh_token", AUDIT_LOG);
+            validator.validateParams("", "some_code", "refresh_token", AUDIT_LOG);
         } catch (WebApplicationException e) {
             assertBadRequest(e.getResponse());
             return;
@@ -183,7 +200,7 @@ public class TokenRestWebServiceValidatorTest {
     @Test
     public void validateParams_whenGrantTypeIsAuthorizationCodeAndCodeIsBlank_shouldRaiseError() {
         try {
-            validator.validateParams(GrantType.AUTHORIZATION_CODE.getValue(), "", "https://my.redirect", "refresh_token", AUDIT_LOG);
+            validator.validateParams(GrantType.AUTHORIZATION_CODE.getValue(), "", "refresh_token", AUDIT_LOG);
         } catch (WebApplicationException e) {
             assertBadRequest(e.getResponse());
             return;
@@ -191,22 +208,10 @@ public class TokenRestWebServiceValidatorTest {
         fail("No error for blank code for AUTHORIZATION_CODE grant type.");
     }
 
-
-    @Test
-    public void validateParams_whenGrantTypeIsAuthorizationCodeAndRedirectUriIsBlank_shouldRaiseError() {
-        try {
-            validator.validateParams(GrantType.AUTHORIZATION_CODE.getValue(), "some_code", "", "refresh_token", AUDIT_LOG);
-        } catch (WebApplicationException e) {
-            assertBadRequest(e.getResponse());
-            return;
-        }
-        fail("No error for blank redirect_uri for AUTHORIZATION_CODE grant type.");
-    }
-
     @Test
     public void validateParams_whenGrantTypeIsRefreshTokenAndRefreshTokenIsBlank_shouldRaiseError() {
         try {
-            validator.validateParams(GrantType.REFRESH_TOKEN.getValue(), "some_code", "https://my.redirect", "", AUDIT_LOG);
+            validator.validateParams(GrantType.REFRESH_TOKEN.getValue(), "some_code", "", AUDIT_LOG);
         } catch (WebApplicationException e) {
             assertBadRequest(e.getResponse());
             return;
@@ -217,7 +222,7 @@ public class TokenRestWebServiceValidatorTest {
     @Test
     public void validateParams_whenGrantTypeIsAuthorizationCodeAndCodeIsNotBlank_shouldNotRaiseError() {
         try {
-            validator.validateParams(GrantType.AUTHORIZATION_CODE.getValue(), "some_code", "https://my.redirect", "", AUDIT_LOG);
+            validator.validateParams(GrantType.AUTHORIZATION_CODE.getValue(), "some_code", "", AUDIT_LOG);
         } catch (WebApplicationException e) {
             fail("Error occurs. We should not get it.");
         }
@@ -226,7 +231,7 @@ public class TokenRestWebServiceValidatorTest {
     @Test
     public void validateParams_whenGrantTypeIsRefreshTokenAndRefreshTokenIsNotBlank_shouldNotRaiseError() {
         try {
-            validator.validateParams(GrantType.REFRESH_TOKEN.getValue(), "", "https://my.redirect", "refresh_token", AUDIT_LOG);
+            validator.validateParams(GrantType.REFRESH_TOKEN.getValue(), "", "refresh_token", AUDIT_LOG);
         } catch (WebApplicationException e) {
             fail("Error occurs. We should not get it.");
         }

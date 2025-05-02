@@ -357,6 +357,21 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: `URL for MTLS Device Authorization endpoint. Example: 'https://server.example.com/jans-auth/restv1/mtls/device_authorization'`,
 			},
+			"access_evaluation_allow_basic_client_authorization": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value true allows basic client authorization.",
+			},
+			"access_evaluation_script_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Name of the access evaluation script.",
+			},
+			"access_evaluation_discovery_cache_lifetime_in_minutes": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The cache lifetime in minutes of the access evaluation discovery.",
+			},
 			"require_request_object_encryption": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -989,11 +1004,6 @@ func resourceAppConfiguration() *schema.Resource {
 								service. Example: http://ox.gluu.org/doku.php?id=jans:tos`,
 				ValidateDiagFunc: validateURL,
 			},
-			"clean_up_inactive_client_after_hours_of_inactivity": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Description: `The time interval in hours after which the client is considered inactive.`,
-			},
 			"client_periodic_update_timer_interval": {
 				Type:        schema.TypeInt,
 				Optional:    true,
@@ -1039,15 +1049,10 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "The lifetime of the short-lived Access Token. Example: 3600",
 			},
-			"clean_service_interval": {
+			"user_info_lifetime": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "Time interval for the Clean Service in seconds. Example: 60",
-			},
-			"clean_service_batch_chunk_size": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Description: "Each clean up iteration fetches chunk of expired data per base dn and removes it from storage. Example: 10000",
+				Description: "The lifetime of the User Info Token. Example: 3600",
 			},
 			"key_regeneration_enabled": {
 				Type:        schema.TypeBool,
@@ -1220,6 +1225,22 @@ func resourceAppConfiguration() *schema.Resource {
 				Type:        schema.TypeMap,
 				Optional:    true,
 				Description: `A map of ACR mappings. Example: { "acr1": "script1", "acr2": "script2" }`,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"acr_to_consent_script_mapping": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: `A map of ACR to consent script mapping. Example: { "acr1": "script1", "acr2": "script2" }`,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"acr_to_agama_consent_flow_mapping": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: `A map of ACR to agama consent flow mapping. Example: { "acr1": "agama1", "acr2": "agama2" }`,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -1435,6 +1456,11 @@ func resourceAppConfiguration() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Share Subject ID between clients with same Sector ID.",
+			},
+			"use_openid_sub_attribute_value_for_pairwise_local_account_id": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Use OpenID sub attribute value for Pairwise Local Account ID.",
 			},
 			"web_keys_storage": {
 				Type:        schema.TypeString,
@@ -1661,10 +1687,25 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid.",
 			},
+			"authorize_challenge_session_lifetime_in_seconds": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The lifetime of the authorize challenge session in seconds.",
+			},
 			"disable_u2f_endpoint": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Enable/Disable U2F endpoints.",
+			},
+			"rate_limit_registration_request_count": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The number of registration requests allowed per interval.",
+			},
+			"rateLimitRegistrationPeriodInSeconds": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The time period in seconds for the rate limit.",
 			},
 			"rotate_device_secret": {
 				Type:        schema.TypeBool,
@@ -1742,7 +1783,7 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Boolean value specifying whether turn on FAPI compatibility mode. If true AS behaves in more strict mode.",
 			},
-			"force_id_token_hint_precense": {
+			"force_id_token_hint_presence": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Boolean value specifying whether force id_token_hint parameter presence.",
@@ -2130,6 +2171,8 @@ func resourceAppConfiguration() *schema.Resource {
 							"METRIC",
 							"STAT",
 							"PAR",
+							"ACCESS_EVALUATION",
+							"RATE_LIMIT",
 							"SSA",
 						}
 						return validateEnum(i, enums)
@@ -2197,9 +2240,12 @@ func resourceAppConfiguration() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"bridge_script_page": {
-							Type:     schema.TypeString,
+						"start_end_url_mapping": {
+							Type:     schema.TypeMap,
 							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
 						},
 						// TODO: The serialize rules currently don't work because terraform
 						// doesn't support nested lists in maps.
