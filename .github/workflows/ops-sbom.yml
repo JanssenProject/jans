@@ -46,9 +46,9 @@ jobs:
       run: |
         cat trimmed-sbom.json | \
         parlay ecosystems enrich - | \
-        parlay scorecard enrich - > jans-enriched-sbom.json
+        parlay scorecard enrich - > jans-sbom.json
         # debug
-        wc jans-enriched-sbom.json 
+        wc jans-sbom.json 
 
     # install sbomqs
     - name: Install sbomqs to generate compliance reports
@@ -67,22 +67,22 @@ jobs:
       run: |        
 
         # generate Framing Software Component Transparency (v3) compliance report
-        sbomqs compliance --fsct -j jans-enriched-sbom.json > jans-sbom-fsct-report.json
+        sbomqs compliance --fsct -j jans-sbom.json > jans-sbom-fsct-report.json
         # To confirm the file is generated
         wc jans-sbom-fsct-report.json 
 
         # generate BSI TR-03183-2 (v2.0.0) compliance report
-        sbomqs compliance --bsi-v2 -j jans-enriched-sbom.json > jans-sbom-bsi-v2-report.json
+        sbomqs compliance --bsi-v2 -j jans-sbom.json > jans-sbom-bsi-v2-report.json
         # To confirm the file is generated
         wc jans-sbom-bsi-TR0318-v2-report.json
 
         # generate NTIA minimum elements (July 12, 2021) compliance report
-        sbomqs compliance --ntia -j jans-enriched-sbom.json > jans-sbom-NTIA-report.json
+        sbomqs compliance --ntia -j jans-sbom.json > jans-sbom-NTIA-report.json
         # To confirm the file is generated
         wc jans-sbom-NTIA-report.json
 
         # generate OpenChain Telco SBOM (v1.0) compliance report
-        sbomqs compliance --oct -j jans-enriched-sbom.json > jans-sbom-openchain-report.json
+        sbomqs compliance --oct -j jans-sbom.json > jans-sbom-openchain-report.json
         # To confirm the file is generated
         wc jans-sbom-openchain-report.json
 
@@ -92,6 +92,6 @@ jobs:
       run: |
         VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload "${VERSION}" jans-enriched-sbom.json jans-sbom-fsct-report.json \
+        gh release upload "${VERSION}" jans-sbom.json jans-sbom-fsct-report.json \
         jans-sbom-bsi-TR0318-v2-report.json jans-sbom-NTIA-report.json \
         jans-sbom-openchain-report.json --clobber
